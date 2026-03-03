@@ -195,22 +195,27 @@ export const FinancialRepository = {
   },
   MetalReceiptVoucher: {
     set2: service + 'set2MRV',
+    unpost: service + 'unpostMRV',
     qry: service + 'qryMTI',
-    unpost: service + 'unpostMRV'
+    page: service + 'pageMRV',
+    get: service + 'getMRV',
+    post: service + 'postMRV',
+    del: service + 'delMRV',
+    snapshot: service + 'snapshotMRV',
+    get2: service + 'get2MRV'
   },
   MetalPaymentVoucher: {
     set2: service + 'set2MPV',
-    unpost: service + 'unpostMPV'
+    unpost: service + 'unpostMPV',
+    page: service + 'pageMPV',
+    get: service + 'getMPV',
+    post: service + 'postMPV',
+    del: service + 'delMPV',
+    snapshot: service + 'snapshotMPV',
+    get2: service + 'get2MPV'
   },
   MetalTrx: {
-    get: service + 'getMTX',
-    del: service + 'delMTX',
-    post: service + 'postMTX ',
-    unpost: service + 'unpostMTX',
-    qry: service + 'qryMTX',
-    page: service + 'pageMTX',
     verify: service + 'verifyMTX',
-    snapshot: service + 'snapshotMTX'
   },
   AgingDoc: {
     snapshot: service + 'snapshotAGD',

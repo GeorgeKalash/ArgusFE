@@ -1579,7 +1579,7 @@ export const PolarAreaChart = memo(({ id, labels, data, label }) => {
   return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
 })
 
-export const CompBarChart = memo(({ id, labels, datasets, collapsed }) => {
+export const CompBarChart = memo(({ id, labels, datasets}) => {
   useInjectChartsStyles()
 
   const ref = useRef(null)
@@ -1591,13 +1591,6 @@ export const CompBarChart = memo(({ id, labels, datasets, collapsed }) => {
   useEffect(() => {
     const canvas = ref.current
     if (!canvas) return
-
-    if (collapsed) {
-      inst.current?.destroy()
-      inst.current = null
-      return
-    }
-
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
@@ -1675,13 +1668,12 @@ export const CompBarChart = memo(({ id, labels, datasets, collapsed }) => {
       inst.current?.destroy()
       inst.current = null
     }
-  }, [collapsed])
+  }, [])
 
   useEffect(() => {
     const canvas = ref.current
     const chart = inst.current
     if (!canvas || !chart) return
-    if (collapsed) return
 
     const nextHasMeaningful = hasAnyLabel(labels) && hasAnyValue(datasets)
     if (!nextHasMeaningful && chartHasAnyValue(chart)) return
@@ -1704,7 +1696,7 @@ export const CompBarChart = memo(({ id, labels, datasets, collapsed }) => {
     chart.options.plugins.datalabels.color = datalabelColor
 
     chart.update('none')
-  }, [labels, datasets, collapsed])
+  }, [labels, datasets])
 
   return (
     <div className={styles.chartHeight}>
