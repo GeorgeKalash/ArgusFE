@@ -262,7 +262,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
     const modifiedList = await Promise.all(
       res?.record?.items?.map(async (item, index) => {
-        const isOpenMetalPurity = await getOpenMetalPurity(item.itemId)
+        const itemPhysical = await getItemPhysical(item.itemId)
+        const isOpenMetalPurity = itemPhysical?.isOpenMetalPurity
 
         return {
           ...item,
@@ -288,13 +289,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     })
   }
 
-  const getOpenMetalPurity = async itemId => {
+  const getItemPhysical = async itemId => {
     const res3 = await getRequest({
       extension: InventoryRepository.Physical.get,
       parameters: `_itemId=${itemId}`
     })
 
-    return res3?.record?.isOpenMetalPurity
+    return res3?.record
   }
 
   const columns = [
@@ -347,11 +348,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         return { ...props, store: filteredItems?.current }
       },
       onChange: async ({ row: { update, newRow } }) => {
-        const purityValue = newRow.purity || newRow.stdPurity
+        let purityValue = newRow.purity || newRow.stdPurity
         const itemId = newRow?.itemId || null
 
         if (!itemId) return
-        const isOpenMetalPurity = await getOpenMetalPurity(itemId)
+        const itemPhysical = await getItemPhysical(itemId)
+        const isOpenMetalPurity = itemPhysical?.isOpenMetalPurity
+        purityValue = itemPhysical?.metalPurity * 1000 || purityValue
 
         const res = await getRequest({
           extension: InventoryRepository.Items.get,
@@ -366,7 +369,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         if (!purityValue) return
         const totalCredit = newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity)
         update({
-          purity: purityValue === newRow.stdPurity ? purityValue : purityValue * 1000,
+          purity: purityValue === newRow.stdPurity ? purityValue : purityValue,
           totalCredit,
           trackBy: res.record.trackBy,
           purityFromItem: true,
