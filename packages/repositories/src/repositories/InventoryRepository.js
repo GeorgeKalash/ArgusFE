@@ -246,7 +246,7 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotCOS'
   },
   Availability: {
-    get: service + 'getAVA',
+    get: service + 'getAVA2',
     qry: service + 'qryAVA'
   },
   Parts: {
