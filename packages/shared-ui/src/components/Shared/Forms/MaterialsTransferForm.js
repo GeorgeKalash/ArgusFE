@@ -1163,6 +1163,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
             }}
             name='transfers'
             maxAccess={maxAccess}
+            showCounterColumn={true}
             value={formik?.values?.transfers}
             error={formik?.errors?.transfers}
             columns={columns}

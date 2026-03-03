@@ -33,7 +33,8 @@ export function DataGrid({
   bg,
   searchValue,
   onValidationRequired,
-  isDeleteDisabled
+  isDeleteDisabled,
+  showCounterColumn = false,
 }) {
   const gridApiRef = useRef(null)
   const { user } = useContext(AuthContext)
@@ -333,8 +334,23 @@ export function DataGrid({
       }
     }
   }
+  
+  const counterColumn = showCounterColumn
+    ? [
+        {
+          component: 'numberfield',
+          name: 'Count',
+          label: ' ',
+          flex: 0.7,
+          props: { disabled: true },
+          counterColumn: true
+        }
+      ]
+    : []
 
-  const allColumns = columns?.filter(
+  const mergedColumns = [...counterColumn, ...columns]
+
+  const allColumns = mergedColumns?.filter(
     ({ name: field, hidden }) =>
       (accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden) ||
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
@@ -347,6 +363,7 @@ export function DataGrid({
         (allColumns?.[i]?.props?.readOnly &&
           (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
             accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
+             !allColumns?.[i]?.props?.disabled && 
       (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
         !allColumns?.[i]?.props?.disableCondition(data)) &&
       (typeof allColumns?.[i]?.props?.onCondition !== 'function' ||
@@ -564,6 +581,14 @@ export function DataGrid({
         </Box>
       )
     }
+    
+    if (column.colDef?.counterColumn) {
+      return (
+        <Box sx={{ width: '100%', textAlign: 'center' }}>
+          {params.node.rowIndex + 1}
+        </Box>
+      )
+    }
 
     const Component =
       typeof column.colDef.component === 'string'
@@ -707,6 +732,7 @@ export function DataGrid({
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
 
+
   const columnDefs = [
     ...allColumns.map(column => {
       const mergedCellClass = [column.cellClass, 'wrapTextCell']
@@ -722,7 +748,7 @@ export function DataGrid({
         field: column.name,
         headerName: column.label || column.name,
         headerTooltip: column.label,
-        editable: column.component === 'checkbox' ? false : !_disabled,
+        editable: params => !_disabled && !params.colDef?.props?.disabled,
         flex: column.flex || (!column.width && 1),
         sortable: false,
         cellRenderer: CustomCellRenderer,
