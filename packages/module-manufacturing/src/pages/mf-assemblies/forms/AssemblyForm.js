@@ -764,7 +764,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                       { key: 'name', value: 'Name' }
                     ]}
                     onChange={async (_, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId)
+                      formik.setFieldValue('siteId', newValue?.recordId || null)
                     }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
