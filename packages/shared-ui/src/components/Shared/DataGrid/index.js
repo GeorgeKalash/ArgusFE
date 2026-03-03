@@ -79,7 +79,7 @@ export function DataGrid({
     stack({
       Component: ConfirmationDialog,
       props: {
-        DialogText: platformLabels?.duplicateItem,
+        DialogText: platformLabels?.DuplicationDisabled,
         okButtonAction: window => {
           deleteRow(params), window.close()
         },
