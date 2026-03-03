@@ -1610,7 +1610,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }, [])
 
   useEffect(() => {
-    setMetalPriceOperations(metalPriceVisibility)
+    setMetalPriceOperations()
   }, [metalPriceVisibility])
 
   useEffect(() => {
