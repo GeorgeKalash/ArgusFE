@@ -66,7 +66,7 @@ export default function BatchTransferDTDForm({ labels, maxAccess, recordId, wind
 
   return (
     <FormShell
-      resourceId={ResourceIds.BatchTransferDTD}
+      resourceId={ResourceIds.ProdSheetDocumentTypeDefault}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

@@ -383,7 +383,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                     onChange={async (_, newValue) => {
                       changeDT(newValue)
                       await onChangeDT(newValue?.recordId)
-                      formik.setFieldValue('header.dtId', newValue?.recordId)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
