@@ -990,6 +990,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         )
       : formik.initialValues.items
 
+    if (puTrxHeader.dtId) setmetalPriceVisibility(true)
     formik.setValues({
       ...formik.values,
       recordId: puTrxHeader.recordId || null,
@@ -1049,18 +1050,15 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   }
 
-  async function setMetalPriceOperations() {
+  async function setMetalPriceOperations(metalPriceVisibility) {
     const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
     const MCbaseCU = defaultMCbaseCU?.value ? parseInt(defaultMCbaseCU.value) : null
     if (MCbaseCU != null) {
       const kgMetalPriceValue = await fillMetalPrice(MCbaseCU)
-      if (kgMetalPriceValue != null) {
+      if (kgMetalPriceValue != null && metalPriceVisibility) {
         formik.setFieldValue('header.KGmetalPrice', kgMetalPriceValue)
         formik.setFieldValue('header.metalPrice', kgMetalPriceValue / 1000)
-      } else {
-        formik.setFieldValue('header.KGmetalPrice', 0)
-        formik.setFieldValue('header.metalPrice', 0)
-      }
+      } 
     }
   }
 
@@ -1156,9 +1154,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const metalPrice = formik?.values?.header?.KGmetalPrice ?? 0
     const basePrice = (metalPrice * metalPurity) / 1000
     const basePriceValue = postMetalToFinancials === false ? basePrice : 0
-
-    const unitPrice = !vendorPrice ? 0 : vendorPrice.priceList
-    const baseLaborPrice = !vendorPrice ? 0 : vendorPrice.baseLaborPrice
+    const hasMetalPrice = metalPriceVisibility && metalPrice != 0
+    const unitPrice = !vendorPrice || hasMetalPrice ? 0 : vendorPrice.priceList
+    const baseLaborPrice = !vendorPrice || hasMetalPrice ? 0 : vendorPrice.baseLaborPrice
     const TotPricePerG = basePriceValue + baseLaborPrice
 
     let rowTax = null
@@ -1523,8 +1521,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   async function onChangeDtId(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
-      setMetalPriceOperations()
       setmetalPriceVisibility(true)
+      setMetalPriceOperations(true)
     } else {
       formik.setFieldValue('header.metalPrice', 0)
       formik.setFieldValue('header.KGmetalPrice', 0)
@@ -1600,7 +1598,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
-      setMetalPriceOperations()
       await getDefaultsData()
       await getUserDefaultsData()
       if (!recordId) {
@@ -1609,6 +1606,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
     })()
   }, [])
+
 
   useEffect(() => {
     ;(async function () {
@@ -1843,6 +1841,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
                   if (newValue) {
                     formik.setFieldValue('header.dtId', recordId)
+                    setmetalPriceVisibility(true)
                   } else {
                     formik.setFieldValue('header.dtId', null)
                     formik.setFieldValue('header.metalPrice', 0)
