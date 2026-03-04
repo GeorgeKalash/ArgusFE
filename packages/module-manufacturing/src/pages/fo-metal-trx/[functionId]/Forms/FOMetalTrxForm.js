@@ -37,6 +37,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const [recalc, setRecalc] = useState(false)
   const filteredItems = useRef()
   const alloyMetalItems = useRef({})
+  const isMetalSmelting = Number(functionId) === SystemFunction.MetalSmelting
 
   const MetalRepositories = {
     [SystemFunction.MetalSmelting]: FoundryRepository.MetalSmelting,
@@ -108,7 +109,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
           qty: 0,
           seqNo: 1,
           trxId: recordId || 0,
-          type: functionId == SystemFunction.MetalSmelting ? 1 : null,
+          type: isMetalSmelting ? 1 : null,
           currentCost: 0,
           qtyAtPurity: 0,
           expectedAlloyQty: 0
@@ -193,7 +194,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
         trxId: obj?.recordId || 0,
         seqNo: index + 1,
         purity: item.purity / 1000,
-        type: functionId == SystemFunction.MetalSmelting ? 1 : item.type,
+        type: isMetalSmelting ? 1 : item.type,
       })),
       scraps: (obj?.scraps || [])
         .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
@@ -375,7 +376,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
       component: 'resourcecombobox',
       label: labels.type,
       name: 'type',
-      hidden: Number(functionId) === SystemFunction.MetalSmelting,
+      hidden: isMetalSmelting,
       props: {
         datasetId: DataSets.SMELTING_METAL_TYPE,
         displayField: 'value',
@@ -520,7 +521,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     {
       component: 'numberfield',
       name: 'expectedAlloyQty',
-      hidden: Number(functionId) === SystemFunction.MetalSmelting,
+      hidden: isMetalSmelting,
       label: labels.expectedAlloyQty,
       props: { readOnly: true, decimalScale: 2 }
     },
@@ -1024,24 +1025,30 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                     align='right'
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    label={labels.totalAlloy}
-                    value={totalAlloy}
-                    decimalScale={3}
-                    readOnly
-                    align='right'
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    label={labels.expectedAlloy}
-                    value={expectedAlloy}
-                    decimalScale={3}
-                    readOnly
-                    align='right'
-                  />
-                </Grid>
+                {
+                  !isMetalSmelting && 
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      label={labels.totalAlloy}
+                      value={totalAlloy}
+                      decimalScale={3}
+                      readOnly
+                      align='right'
+                    />
+                  </Grid>
+                }
+                { 
+                  !isMetalSmelting && 
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      label={labels.expectedAlloy}
+                      value={expectedAlloy}
+                      decimalScale={3}
+                      readOnly
+                      align='right'
+                    />
+                  </Grid>
+                }
                 <Grid item xs={12}>
                   <CustomNumberField label={labels.qtyIn} value={qtyIn} decimalScale={3} readOnly align='right' />
                 </Grid>
