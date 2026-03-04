@@ -24,12 +24,17 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { useOpenRecordWindow } from '@argus/shared-hooks/src/hooks/useOpenRecordWindow'
 
 export default function SketchForm({ recordId, invalidate, window }) {
+  const openDesigner = useOpenRecordWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const systemFunction = SystemFunction.Sketch
+  const { stack } = useWindow()
+
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.Sketch,
@@ -295,6 +300,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     ]}
                     displayFieldWidth={2}
                     readOnly={isClosed}
+                    onValueClick={(value) => openDesigner(ResourceIds.Designer, { props : { recordId: value.recordId } })}
                     maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(_, newValue) => {

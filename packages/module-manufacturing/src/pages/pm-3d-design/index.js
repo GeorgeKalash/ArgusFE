@@ -14,11 +14,13 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import ThreeDDesignForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm'
+import { useOpenRecordWindow } from '@argus/shared-hooks/src/hooks/useOpenRecordWindow'
 
 const ThreeDDesign = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const openSketch = useOpenRecordWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -82,6 +84,7 @@ const ThreeDDesign = () => {
     {
       field: 'sketchRef',
       headerName: labels.sketchRef,
+      onOpenPopup: (value) => openSketch(ResourceIds.Sketch, { props: { recordId: value.recordId }}),
       flex: 1
     },
     {

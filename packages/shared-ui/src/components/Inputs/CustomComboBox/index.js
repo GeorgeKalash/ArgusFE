@@ -44,6 +44,7 @@ const CustomComboBox = ({
   isLoading,
   onOpen,
   onBlur = () => {},
+  onValueClick,
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
@@ -57,6 +58,8 @@ const CustomComboBox = ({
   const [hover, setHover] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
   const [inputValue, setInputValue] = useState('')
+  const [open, setOpen] = useState(false)
+  const actionClickRef = useRef(false)
 
   const { platformLabels } = useContext(ControlContext)
 
@@ -79,6 +82,32 @@ const CustomComboBox = ({
     }
   }, [])
 
+
+  const clickedOnInputText = (e, inputEl) => {
+    const v = inputEl?.value || ''
+    if (!v) return false
+
+    const rect = inputEl.getBoundingClientRect()
+    const style = window.getComputedStyle(inputEl)
+    const paddingLeft = parseFloat(style.paddingLeft || '0')
+    const paddingRight = parseFloat(style.paddingRight || '0')
+
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    ctx.font = style.font || `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+
+    const textWidth = ctx.measureText(v).width
+    const clickX = e.clientX - rect.left
+    const textStart = paddingLeft
+    const maxVisible = rect.width - paddingLeft - paddingRight
+    const visibleTextWidth = Math.min(textWidth, maxVisible)
+    const textEnd = textStart + visibleTextWidth
+
+    return clickX >= textStart && clickX <= textEnd
+  }
+
+  const isLinkMode = !!value && typeof onValueClick === 'function'
+
   return _hidden ? (
     <></>
   ) : (
@@ -86,6 +115,13 @@ const CustomComboBox = ({
       ref={autocompleteRef}
       name={name}
       value={value}
+      open={open}
+      onOpen={(e) => {
+        if (actionClickRef.current) return
+        setOpen(true)
+        onOpen?.(e)
+      }}
+      onClose={() => setOpen(false)}
       inputValue={neverPopulate ? inputValue : undefined}
       onInputChange={(_, newInputValue) => {
         if (neverPopulate) setInputValue(newInputValue)
@@ -167,7 +203,6 @@ const CustomComboBox = ({
           else return ''
         }
       }}
-      onOpen={onOpen}
       loading={isLoading}
       loadingText={`${platformLabels.loading}...`}
       filterOptions={(options, { inputValue }) => {
@@ -326,50 +361,82 @@ const CustomComboBox = ({
             : null
 
         return (
-          <TextField
-            {...params}
-            inputProps={{
-              ...params.inputProps,
-              tabIndex: _readOnly ? -1 : 0
-            }}
-            type={type}
-            variant={variant}
-            label={label}
-            required={_required}
-            autoFocus={focus}
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
-            className={[styles.customComboTextField]}
-            error={error}
-            helperText={helperText}
-            onBlur={e => {
-              const allowSelect =
-                selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
-              onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
-            }}
-            InputProps={{
-              ...params.InputProps,
-              classes: {
-                root: inputs.outlinedRoot,
-                notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
-                input: inputs.inputBase
-              },
-              startAdornment: value?.icon ? (
-                <img src={value.icon} alt={value[displayField]} className={styles.comboStartIcon} />
-              ) : props?.startAdornment || (params.InputProps.startAdornment && (
-                <InputAdornment position='start' className={inputs.startAdornment}>
-                  {props?.startAdornment || params.InputProps.startAdornment}
-                </InputAdornment>
-              )),
-              endAdornment: mergedEndAdornment
-            }}
-            InputLabelProps={{
-              classes: {
-                root: inputs.inputLabel,
-                shrink: inputs.inputLabelShrink
+          <Box sx={{ position: 'relative' }}>
+            <TextField
+              {...params}
+              inputProps={{
+                ...params.inputProps,
+                tabIndex: _readOnly ? -1 : 0
+              }}
+              type={type}
+              variant={variant}
+              label={label}
+              required={_required}
+              autoFocus={focus}
+              onMouseEnter={() => setHover(true)}
+              onMouseLeave={() => setHover(false)}
+              className={[styles.customComboTextField]}
+              error={error}
+              helperText={helperText}
+              onBlur={e => {
+                const allowSelect =
+                  selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
+                onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
+              }}
+              InputProps={{
+                ...params.InputProps,
+                classes: {
+                  root: inputs.outlinedRoot,
+                  notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                  input: inputs.inputBase
+                },
+                startAdornment: value?.icon ? (
+                  <img src={value.icon} alt={value[displayField]} className={styles.comboStartIcon} />
+                ) : props?.startAdornment || (params.InputProps.startAdornment && (
+                  <InputAdornment position='start' className={inputs.startAdornment}>
+                    {props?.startAdornment || params.InputProps.startAdornment}
+                  </InputAdornment>
+                )),
+                endAdornment: mergedEndAdornment
+              }}
+              onMouseDownCapture={(e) => {
+                if (!isLinkMode) return
+                if (e.target.closest('button') || e.target.closest('[role="button"]')) return
+
+                const input = e.currentTarget.querySelector('input')
+                if (!input) return
+                if (!clickedOnInputText(e, input)) return
+
+                actionClickRef.current = true
+                setOpen(false)
+                e.preventDefault()
+                e.stopPropagation()
+                onValueClick(value)
+                setTimeout(() => {
+                  actionClickRef.current = false
+                }, 0)
+              }}
+              sx={
+                isLinkMode
+                  ? {
+                      '& .MuiInputBase-input': {
+                        color: '#1976d2',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none'
+                      }
+                    }
+                  : {}
               }
-            }}
-          />
+              InputLabelProps={{
+                classes: {
+                  root: inputs.inputLabel,
+                  shrink: inputs.inputLabelShrink
+                }
+              }}
+            />
+          </Box>
         )
       }}
       {...props}

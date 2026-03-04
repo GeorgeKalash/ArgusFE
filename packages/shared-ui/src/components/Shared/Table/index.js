@@ -83,11 +83,29 @@ const Table = ({
         }) !== HIDDEN
     )
     .map(col => {
+      const hyperlink = (params, displayContent) => {
+        if (!displayContent) return null;
+        if (!col.onOpenPopup) return displayContent;
+
+        return (
+          <a 
+            href="#" 
+            onClick={(e) => { 
+              e.preventDefault()
+              col.onOpenPopup(params.data)
+            }}
+            style={{ color: '#007bff', textDecoration: 'underline', cursor: 'pointer' }}
+          >
+            {displayContent}
+          </a>
+        )
+      }
+
       if (col.type === 'date') {
         return {
           ...col,
           valueGetter: ({ data }) => parseDateValue(data?.[col.field]),
-          cellRenderer: params => params?.value && formatDateDefault(`/Date(${params?.value})/`),
+          cellRenderer: params => params?.value && hyperlink(params, formatDateDefault(`/Date(${params?.value})/`)),
           comparator: dateComparator,
           sortable: !disableSorting
         }
@@ -96,7 +114,7 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => parseDateValue(data?.[col.field]),
-          cellRenderer: params => params?.value && formatDateTimeDefault(`/Date(${params?.value})/`, col?.dateFormat),
+          cellRenderer: params => params?.value && hyperlink(params, formatDateTimeDefault(`/Date(${params?.value})/`, col?.dateFormat)),
           comparator: dateComparator,
           sortable: !disableSorting
         }
@@ -106,6 +124,7 @@ const Table = ({
           ...col,
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
           cellClass: params => `${col?.isBold ? 'bold ' : ''}${languageId == 2 ? '' : 'right'}`,
+          cellRenderer: params => hyperlink(params, params.value),
           sortable: !disableSorting
         }
       }
@@ -157,8 +176,12 @@ const Table = ({
         sortable: !disableSorting,
         cellStyle: params => ({
           fontWeight: params.data?.isBold ? 'bold' : 'normal'
-        })
+        }),
+        ...(col.onOpenPopup && {
+          cellRenderer: params => hyperlink(params, params.value)
+        }),
       }
+
     })
 
   function dateComparator(date1, date2) {
