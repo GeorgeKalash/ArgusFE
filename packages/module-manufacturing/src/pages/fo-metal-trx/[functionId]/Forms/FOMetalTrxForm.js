@@ -690,15 +690,8 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     })()
   }, [baseSalesMetalId])
 
-  const qtyOutConverted = formik.values?.items?.reduce((sum, row) => {
-    const rmQty = parseFloat(row?.rmQty?.toString().replace(/,/g, '')) || 0
-    return sum + rmQty
-  }, 0)
-
-  const qtyInConverted = formik.values?.items?.reduce((sum, row) => {
-    const qtyAtPurity = parseFloat(row?.qtyAtPurity?.toString().replace(/,/g, '')) || 0
-    return sum + qtyAtPurity
-  }, 0)
+  const qtyOutConverted = formik.values?.items?.reduce((sum, row) => sum + (parseFloat(row.rmQty) || 0), 0) ?? 0
+  const qtyInConverted = formik.values?.items?.reduce((sum, row) => sum + (parseFloat(row.qtyAtPurity) || 0), 0) ?? 0
 
   const deltaQty = parseFloat(qtyInConverted) - parseFloat(qtyOutConverted)
 
