@@ -1,2 +1,0 @@
-// AUTO-GENERATED WRAPPER – uses code from @argus/module-ct/src/pages/commission-type
-export { default } from '@argus/module-ct/src/pages/commission-type';
