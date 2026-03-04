@@ -81,6 +81,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       lotCategoryId: null,
       labourId: null,
       shiftId: null,
+      onHand: null,
       items: []
     },
     maxAccess,
@@ -88,10 +89,10 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      dtId: yup.string().required(),
-      siteId: yup.string().required(),
+      dtId: yup.number().required(),
+      siteId: yup.number().required(),
       qty: yup.number().required(),
-      itemId: yup.string().required(),
+      itemId: yup.number().required(),
       items: yup
         .array()
         .of(
@@ -236,7 +237,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
           return
         }
         const currentCost = await getCost(newRow.itemId)
-        update({ cost: currentCost })
+        const ava = await getAvailability(newRow?.itemId, newRow?.siteId)
+        update({ cost: currentCost, onHand: ava?.record?.onhand || 0  })
       }
     },
     {
@@ -265,12 +267,24 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        const ava = await getAvailability(newRow?.itemId, newRow?.siteId)
+        update({ onHand: ava?.record?.onhand || 0 })
       }
     },
     {
       component: 'textfield',
       label: labels.siteName,
       name: 'siteName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.onHand,
+      name: 'onHand',
       props: {
         readOnly: true
       }
@@ -419,8 +433,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
   async function getBillItem() {
     const res = await getRequest({
-      extension: ManufacturingRepository.Component.qry,
-      parameters: `_bomId=${formik.values.bomId}`
+      extension: ManufacturingRepository.Component.preview,
+      parameters: `_bomId=${formik.values.bomId}&_siteId=${formik.values.siteId}`
     })
     const site = await getSiteInfo()
     const bomInfo = await getBomInfo()
@@ -429,13 +443,14 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       ...item,
       id: item.seqNo,
       cost: item.currentCost || 0,
+      onHand: item.onHand || 0,
       designQty: ((item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0)).toFixed(3),
       qty: ((item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0)).toFixed(3),
       diffQty: 0,
       baseQty: item.baseQty * (formik.values.qty || 0),
-      siteId: item.siteId || formik.values.siteId,
-      siteRef: item.siteId ? item.siteRef : site?.reference,
-      siteName: item.siteId ? item.siteName : site?.name
+      siteId: formik.values.siteId,
+      siteRef: site?.reference,
+      siteName: site?.name
     }))
 
     formik.setFieldValue('items', itemsList)
@@ -568,6 +583,17 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     if (recordId) refetchForm(recordId)
   }, [])
 
+  const getAvailability = async (itemId, siteId) => {
+    if (itemId) {
+      const res = await getRequest({
+        extension: InventoryRepository.Availability.get,
+        parameters: `_siteId=${siteId || 0}&_itemId=${itemId}&_seqNo=0`
+      })
+
+      return res
+    } 
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.Assemblies}
@@ -699,6 +725,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                       formik.setFieldValue('bomName', newValue?.name)
                       formik.setFieldValue('bomRef', newValue?.reference)
                       const item = await fillItem(newValue?.recordId)
+                      const res = await getAvailability(item?.itemId, 0)
+                      formik.setFieldValue('onHand', res?.record?.onhand || null)
                       formik.setFieldValue('itemName', item?.itemName)
                       formik.setFieldValue('sku', item?.sku)
                       formik.setFieldValue('itemId', item?.itemId)
@@ -737,8 +765,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                       { key: 'reference', value: 'reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId)
+                    onChange={async (_, newValue) => {
+                      formik.setFieldValue('siteId', newValue?.recordId || null)
                     }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
@@ -775,13 +803,22 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     disabled={isPosted || disablePreview}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='avgUnitCost'
                     label={labels.unitCost}
                     readOnly
                     value={avgUnitCost}
                     maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='onHand'
+                    label={labels.onhand}
+                    value={formik.values?.onHand}
+                    maxAccess={maxAccess}
+                    readOnly
                   />
                 </Grid>
               </Grid>
