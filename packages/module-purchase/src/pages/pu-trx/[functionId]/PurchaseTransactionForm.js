@@ -694,7 +694,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           Component: TaxDetails,
           props: {
             taxId: row?.taxId,
-            obj: row
+            obj: row,
+            taxes: formik?.values?.taxCodes.filter(tax => tax.seqNo === row.seqNo) || []
           }
         })
       }
