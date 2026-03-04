@@ -369,7 +369,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         if (!purityValue) return
         const totalCredit = newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity)
         update({
-          purity: purityValue === newRow.stdPurity ? purityValue : purityValue,
+          purity: purityValue,
           totalCredit,
           trackBy: res.record.trackBy,
           purityFromItem: true,
