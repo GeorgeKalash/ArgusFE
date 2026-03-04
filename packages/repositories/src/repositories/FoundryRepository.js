@@ -67,15 +67,23 @@ export const FoundryRepository = {
     qry: service + 'qryCAJ',
     set2: service + 'set2CAJ'
   },
-  FoundaryTransaction: {
-    get: service + 'getTRX',
-    get2: service + 'get2TRX',
-    del: service + 'delTRX',
-    set2: service + 'set2TRX',
-    page: service + 'pageTRX',
-    snapshot: service + 'snapshotTRX',
-    post: service + 'postTRX',
-    unpost: service + 'unpostTRX'
+  MetalSmelting: {
+    get2: service + 'get2SMT',
+    del: service + 'delSMT',
+    set2: service + 'set2SMT',
+    page: service + 'pageSMT',
+    snapshot: service + 'snapshotSMT',
+    post: service + 'postSMT',
+    unpost: service + 'unpostSMT'
+  },
+  MetalCalibration: {
+    get2: service + 'get2MCL',
+    del: service + 'delMCL',
+    set2: service + 'set2MCL',
+    page: service + 'pageMCL',
+    snapshot: service + 'snapshotMCL',
+    post: service + 'postMCL',
+    unpost: service + 'unpostMCL' 
   },
   AlloyMetals: {
     page: service + 'pageALM',
