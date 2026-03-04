@@ -125,7 +125,7 @@ const AuthProvider = ({ children }) => {
   const fetchData = async () => {
     setErrorMsg(null)
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
-    const isDeploy = !matchHostname || matchHostname?.[1]?.toLowerCase() == 'deploy'
+    const isDeploy = matchHostname?.[1]?.toLowerCase() == 'deploy'
     const accountOnPrem = config?.onPremCode
     const accountName = accountOnPrem ? accountOnPrem : isDeploy ? companyName : matchHostname?.[1]
     setDeployHost(isDeploy)
