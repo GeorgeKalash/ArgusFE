@@ -92,7 +92,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       header: yup.object({
         date: yup.string().required(),
         fromWCId: yup.number().required(),
-        toWCId: yup.number().required()
+        toWCId: yup.number().required(),
+        dtId: yup.number().required()
       }),
       items: yup.array().of(schema)
     }),
@@ -370,6 +371,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                       { key: 'name', value: 'Name' }
                     ]}
                     readOnly={editMode}
+                    required
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values.header}
