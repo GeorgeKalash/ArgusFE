@@ -669,7 +669,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         endpointId: FinancialRepository.TaxSchedules.qry,
         displayField: 'name',
         valueField: 'recordId',
-        readOnly: formik.values?.header?.taxId,
         mapping: [
           { from: 'recordId', to: 'taxId' },
           { from: 'name', to: 'taxName' }
@@ -701,6 +700,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             vatAmount: vatCalcRow?.vatAmount || 0 ,
             taxDetails
           })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: formik.values?.header?.taxId && row?.taxId }
       }
     },
     {
