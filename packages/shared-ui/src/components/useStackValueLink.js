@@ -1,33 +1,16 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useContext, useRef } from 'react'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { isClickOnText } from './linkTextUtils'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { ResourceRegistry } from './ResourceRegistry'
+import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 
-const getStackLoaderByResourceId = resourceId => {
-  switch (resourceId) {
-    case ResourceIds.Designer:
-      return () => import('@argus/shared-ui/src/components/Shared/DesignerForm')
-
-    case ResourceIds.Sketch:
-      return () => import('@argus/shared-ui/src/components/Shared/Forms/SketchForm')
-
-    case ResourceIds.Item:
-      return () => import('@argus/shared-ui/src/components/Shared/ItemDetails')
-
-    default:
-      return null
-  }
-}
-
-export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef }) => {
+export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheOnlyMode }) => {
   const { stack } = useWindow()
+  const { getAccess, platformLabels } = useContext(ControlContext)
 
-  // const { access } = useResourceParams({
-  //   datasetId: linkOpen?.resourceId
-  // })
-
-  // const canOpen = !!access?.record?.accessFlags?.edit
+  const inflightRef = useRef(false)
+  const noAccessInflightRef = useRef(false)
 
   const isValueLink = !!linkOpen
 
@@ -40,21 +23,102 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef }) => {
         opacity: 1
       }
 
-  const openStack = useCallback(async () => {
-    // if (!canOpen) return
+  const fetchAccess = useCallback(
+    resourceId =>
+      new Promise(resolve => {
+        let resolved = false
+        let lastValue
 
-    const loader = getStackLoaderByResourceId(linkOpen.resourceId)
-    if (!loader) return
+        const done = value => {
+          if (resolved) return
+          resolved = true
+          resolve(value)
+        }
 
-    const mod = await loader()
-    const Component = mod?.default
-    if (!Component) return
+        const onAccess = value => {
+          lastValue = value
+
+          const flags = value?.record?.accessFlags
+          const hasFlags = !!flags && typeof flags === 'object'
+          const hasRecord = !!value?.record
+
+          if (hasFlags || hasRecord) done(value)
+        }
+
+        const t = setTimeout(() => done(lastValue), 1500)
+
+        const wrappedOnAccess = value => {
+          onAccess(value)
+          if (resolved) clearTimeout(t)
+        }
+
+        getAccess(resourceId, wrappedOnAccess, cacheOnlyMode)
+      }),
+    [getAccess, cacheOnlyMode]
+  )
+
+  const openNoAccessPopup = useCallback(() => {
+    if (noAccessInflightRef.current) return
+    noAccessInflightRef.current = true
+
+    const closePopup = win => {
+      noAccessInflightRef.current = false
+      win?.close?.()
+    }
 
     stack({
-      Component,
-      props: { ...(linkOpen?.props || {}) }
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: "You don’t have permission to open this screen.",
+        okButtonAction: closePopup,
+        fullScreen: false,
+        close: true
+      },
+      width: 420,
+      height: 160,
+      title: platformLabels?.Confirmation || 'Confirmation'
     })
-  }, [linkOpen?.props])
+  }, [stack, platformLabels])
+
+  const openStack = useCallback(async () => {
+    const resourceId = linkOpen?.resourceId
+    if (!resourceId) return false
+
+    if (inflightRef.current) return false
+    inflightRef.current = true
+
+    try {
+      const access = await fetchAccess(resourceId)
+
+      const flags = access?.record?.accessFlags
+      const flagValues = flags && typeof flags === 'object' ? Object.values(flags) : null
+
+      const noAccess =
+        !flagValues || flagValues.length === 0 || flagValues.every(v => v === false)
+
+      if (noAccess) {
+        openNoAccessPopup()
+        return true
+      }
+
+      const entry = ResourceRegistry[resourceId]
+      const loader = entry?.loader
+      if (!loader) return false
+
+      const mod = await loader()
+      const Component = mod?.default
+      if (!Component) return false
+
+      stack({
+        Component,
+        props: { ...(linkOpen?.props || {}) }
+      })
+
+      return true
+    } finally {
+      inflightRef.current = false
+    }
+  }, [linkOpen])
 
   const shouldHandleMouseDown = useCallback(
     e => {
@@ -80,8 +144,7 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef }) => {
       e.preventDefault()
       e.stopPropagation()
 
-      const opened = await openStack()
-      return !!opened
+      return !!(await openStack())
     },
     [inputElRef, textMeasureRef, openStack]
   )
