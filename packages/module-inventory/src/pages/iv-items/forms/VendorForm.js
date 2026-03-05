@@ -126,6 +126,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
                   formik.setFieldValue('vendorRef', newValue.reference || '')
                 }}
                 maxAccess={maxAccess}
+                errorCheck={'vendorId'}
               />
             </Grid>
             <Grid item xs={12}>

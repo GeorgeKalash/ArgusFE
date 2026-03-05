@@ -36,10 +36,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const filteredItems = useRef()
   const { stack } = useWindow()
 
-  const getEndpoint = {
-    [SystemFunction.MetalReceiptVoucher]: FinancialRepository.MetalReceiptVoucher.set2,
-    [SystemFunction.MetalPaymentVoucher]: FinancialRepository.MetalPaymentVoucher.set2
-  }
+  const MetalRepositories = {
+    [SystemFunction.MetalReceiptVoucher]: FinancialRepository.MetalReceiptVoucher,
+    [SystemFunction.MetalPaymentVoucher]: FinancialRepository.MetalPaymentVoucher
+  };
+
+  const getEndpoint = (functionId) => MetalRepositories[Number(functionId)] ?? null;
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
@@ -48,7 +50,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   })
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.MetalTrx.page
+    endpointId: getEndpoint(functionId).page
   })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
@@ -123,7 +125,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       const payload = getPayload(obj)
 
       const response = await postRequest({
-        extension: getEndpoint[formik.values.functionId],
+        extension: getEndpoint(functionId).set2,
         record: JSON.stringify(payload)
       })
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
@@ -174,25 +176,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const totalLabor = calculateTotal('totalCredit')
   const totalMetal = calculateTotal('metalValue')
 
-  async function getData(recordId) {
-    if (!recordId || !functionId) return
-
-    const response = await getRequest({
-      extension: FinancialRepository.MetalTrx.get,
-      parameters: `_recordId=${recordId}&_functionId=${functionId}`
-    })
-
-    return {
-      ...response?.record,
-      date: formatDateFromApi(response?.record.date)
-    }
-  }
-
   const onPost = async () => {
     const { items, ...restValues } = formik.values
 
     await postRequest({
-      extension: FinancialRepository.MetalTrx.post,
+      extension: getEndpoint(functionId).post,
       record: JSON.stringify({
         ...restValues,
         qty: totalQty,
@@ -210,10 +198,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     const { items, ...restValues } = formik.values
 
     const res = await postRequest({
-      extension:
-        functionId === SystemFunction.MetalReceiptVoucher
-          ? FinancialRepository.MetalReceiptVoucher.unpost
-          : FinancialRepository.MetalPaymentVoucher.unpost,
+      extension: getEndpoint(functionId).unpost,
       record: JSON.stringify({
         ...restValues,
         qty: totalQty,
@@ -270,16 +255,15 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     setAllMetals(res?.list)
   }
   async function refetchForm(recordId, metalInfo) {
-    const headerRes = await getData(recordId)
-
-    const itemsRes = await getRequest({
-      extension: FinancialRepository.MetalReceiptVoucher.qry,
-      parameters: `_trxId=${recordId}&_functionId=${functionId}`
+    const res = await getRequest({
+      extension: getEndpoint(functionId).get2,
+      parameters: `_recordId=${recordId}`
     })
 
     const modifiedList = await Promise.all(
-      itemsRes?.list?.map(async (item, index) => {
-        const isOpenMetalPurity = await getOpenMetalPurity(item.itemId)
+      res?.record?.items?.map(async (item, index) => {
+        const itemPhysical = await getItemPhysical(item.itemId)
+        const isOpenMetalPurity = itemPhysical?.isOpenMetalPurity
 
         return {
           ...item,
@@ -299,18 +283,19 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     )
 
     formik.setValues({
-      ...headerRes,
+      ...res?.record?.header,
+      date: formatDateFromApi(res?.record?.header?.date),
       items: modifiedList?.length > 0 ? modifiedList : formik.values.items
     })
   }
 
-  const getOpenMetalPurity = async itemId => {
+  const getItemPhysical = async itemId => {
     const res3 = await getRequest({
       extension: InventoryRepository.Physical.get,
       parameters: `_itemId=${itemId}`
     })
 
-    return res3?.record?.isOpenMetalPurity
+    return res3?.record
   }
 
   const columns = [
@@ -363,11 +348,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         return { ...props, store: filteredItems?.current }
       },
       onChange: async ({ row: { update, newRow } }) => {
-        const purityValue = newRow.purity || newRow.stdPurity
+        let purityValue = newRow.purity || newRow.stdPurity
         const itemId = newRow?.itemId || null
 
         if (!itemId) return
-        const isOpenMetalPurity = await getOpenMetalPurity(itemId)
+        const itemPhysical = await getItemPhysical(itemId)
+        const isOpenMetalPurity = itemPhysical?.isOpenMetalPurity
+        purityValue = itemPhysical?.metalPurity * 1000 || purityValue
 
         const res = await getRequest({
           extension: InventoryRepository.Items.get,
@@ -382,7 +369,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         if (!purityValue) return
         const totalCredit = newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity)
         update({
-          purity: purityValue === newRow.stdPurity ? purityValue : purityValue * 1000,
+          purity: purityValue,
           totalCredit,
           trackBy: res.record.trackBy,
           purityFromItem: true,
@@ -561,12 +548,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     }
   ]
 
-  if (metal.reference) {
+  if (metal?.reference) {
     const qtyIndex = columns.findIndex(col => col.name === 'qty')
     if (qtyIndex !== -1) {
       columns.splice(qtyIndex + 1, 0, {
         component: 'numberfield',
-        label: metal.reference,
+        label: metal?.reference,
         name: 'metalValue',
         props: {
           decimalScale: 2,
@@ -876,7 +863,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 {metal?.reference && (
                   <Grid item xs={12}>
                     <CustomNumberField
-                      label={`${labels.total} ${metal.reference}`}
+                      label={`${labels?.total} ${metal?.reference}`}
                       value={totalMetal}
                       decimalScale={2}
                       readOnly
