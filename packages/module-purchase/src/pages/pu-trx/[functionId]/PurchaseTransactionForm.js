@@ -702,7 +702,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           })
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: formik.values?.header?.taxId && row?.taxId }
+        return { ...props, readOnly: formik.values?.header?.taxId || !row?.taxId }
       }
     },
     {
@@ -883,6 +883,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     refetchForm(formik.values.header.recordId)
     invalidate()
   }
+  console.log('items',formik.values.items)
 
   const onClickInstallments = () => {
     stack({
