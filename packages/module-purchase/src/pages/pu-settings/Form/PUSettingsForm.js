@@ -15,10 +15,12 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import toast from 'react-hot-toast'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const PUSettingsForm = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const { labels: _labels, access } = useResourceQuery({
     datasetId: ResourceIds.PUSettings
@@ -65,11 +67,7 @@ const PUSettingsForm = () => {
   useEffect(() => {
     ;(async function () {
       try {
-        const response = await getRequest({
-          extension: SystemRepository.Defaults.qry,
-          parameters: `_filter=`
-        })
-        response.list.forEach(obj => {
+        systemDefaults.list.forEach(obj => {
           if (arrayAllow.includes(obj.key)) {
             formik.setFieldValue(obj.key, parseInt(obj.value))
           }
