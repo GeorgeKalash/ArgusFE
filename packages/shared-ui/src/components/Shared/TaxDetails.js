@@ -13,11 +13,11 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const TaxDetails = props => {
-  const { taxId, obj, window } = props
+  const { taxId, obj, taxes, window } = props
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const useTaxes = Array.isArray(obj?.taxDetails) && obj?.taxDetails?.length > 0
+  const useTaxes = Array.isArray(taxes) && taxes?.length > 0
   useSetWindow({ title: platformLabels.TaxDetails, window })
 
   const vatAmount = (taxDetail, taxItem) => {
@@ -81,7 +81,7 @@ const TaxDetails = props => {
 
   const gridData = useTaxes
   ? {
-      list: obj?.taxDetails?.map(t => ({
+      list: taxes?.map(t => ({
         ...t,
         amount: t.taxScheduleAmount,
         vatAmount: t.amount?.toFixed(2)
