@@ -57,7 +57,7 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
     [getAccess, cacheOnlyMode]
   )
 
-  const openNoAccessPopup = useCallback(() => {
+  const openNoAccessPopup = () => {
     if (noAccessInflightRef.current) return
     noAccessInflightRef.current = true
 
@@ -69,16 +69,16 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
     stack({
       Component: ConfirmationDialog,
       props: {
-        DialogText: "You don’t have permission to open this screen.",
+        DialogText: platformLabels.DontHaveAccess,
         okButtonAction: closePopup,
         fullScreen: false,
         close: true
       },
       width: 420,
       height: 160,
-      title: platformLabels?.Confirmation || 'Confirmation'
+      title: platformLabels?.NoAccess
     })
-  }, [stack, platformLabels])
+  }
 
   const openStack = useCallback(async () => {
     const resourceId = linkOpen?.resourceId
