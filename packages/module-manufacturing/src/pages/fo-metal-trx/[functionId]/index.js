@@ -28,13 +28,13 @@ export default function FOMetalTrx() {
     [SystemFunction.MetalCalibration]: FoundryRepository.MetalCalibration
   }
   
-  const getEndpoint = (functionId) => MetalRepositories[Number(functionId)] ?? null;
+  const endpoint = MetalRepositories[Number(functionId)] ?? null
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: getEndpoint(functionId).page,
+      extension: endpoint.page,
       parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}`
     })
 
@@ -64,7 +64,7 @@ export default function FOMetalTrx() {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: getEndpoint(functionId).page,
+    endpointId: endpoint.page,
     datasetId: ResourceIds.MetalSmelting,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
@@ -75,7 +75,7 @@ export default function FOMetalTrx() {
   async function fetchWithSearch({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: getEndpoint(functionId).snapshot,
+        extension: endpoint.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     } else {
@@ -164,7 +164,7 @@ export default function FOMetalTrx() {
 
   const del = async obj => {
     await postRequest({
-      extension: getEndpoint(functionId).del,
+      extension: endpoint.del,
       record: JSON.stringify(obj)
     })
     invalidate()

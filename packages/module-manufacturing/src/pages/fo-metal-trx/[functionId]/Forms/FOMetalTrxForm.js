@@ -44,7 +44,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     [SystemFunction.MetalCalibration]: FoundryRepository.MetalCalibration
   };
 
-  const getEndpoint = (functionId) => MetalRepositories[Number(functionId)] ?? null;
+  const endpoint = MetalRepositories[Number(functionId)] ?? null
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
@@ -54,7 +54,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   })
 
   const invalidate = useInvalidate({
-    endpointId: getEndpoint(functionId).page
+    endpointId: endpoint.page
   })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
@@ -165,7 +165,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
       const payload = getPayload(obj)
 
       const response = await postRequest({
-        extension: getEndpoint(functionId).set2,
+        extension: endpoint.set2,
         record: JSON.stringify(payload)
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -227,8 +227,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const expectedAlloy = calculateTotal('expectedAlloyQty')
   const headerPurity = parseFloat(formik.values?.header?.purity)
   const totalRmQty = recalc ? calculateTotal('rmQty') : formik.values?.header?.sumRMQty
-
-  
   
   const avgPurity = recalc
     ? (((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (qtyOut || 0)).toFixed(2)
@@ -270,7 +268,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
 
   const onPost = async () => {
     await postRequest({
-      extension: getEndpoint(functionId).post,
+      extension: endpoint.post,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -281,7 +279,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: getEndpoint(functionId).unpost,
+      extension: endpoint.unpost,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -321,7 +319,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
 
   async function refetchForm(recordId) {
     const { record } = await getRequest({
-      extension: getEndpoint(functionId).get2,
+      extension: endpoint.get2,
       parameters: `_recordId=${recordId}`
     })
 
