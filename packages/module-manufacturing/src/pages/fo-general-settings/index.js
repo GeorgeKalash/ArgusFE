@@ -14,10 +14,12 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const FoGeneralSettings = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.GeneralSettings
@@ -25,11 +27,6 @@ const FoGeneralSettings = () => {
 
   useEffect(() => {
     ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: `_filter=`
-      })
-
       const keysToExtract = [
         'waxSiteId',
         'castingSiteId',
@@ -43,7 +40,7 @@ const FoGeneralSettings = () => {
 
       const myObject = {}
 
-      for (const { key, value } of res.list) {
+      for (const { key, value } of systemDefaults.list) {
         if (keysToExtract.includes(key)) {
           myObject[key] = value ? parseInt(value) : null
 
