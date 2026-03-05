@@ -293,7 +293,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
             Component: JTCheckoutForm,
             props: {
               recordId: row?.transferId
-            }
+            },
+            onClose: () => refetchForm(formik.values?.recordId)
           })
       },
       props: {

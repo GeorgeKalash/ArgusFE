@@ -59,11 +59,11 @@ export function DataGrid({
   const rowHeight =
     width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
 
-  const isEmptyMaxLines = maxLines === 0 || maxLines === '0' || maxLines === null || maxLines === ''
+  const isEmptyMaxLines = [0, '0', null, ''].includes(maxLines)
 
   const canAddNewLine = () => {
-    if (!allowAddNewLine || _disabled) return false
-    if (maxLines === null || maxLines === undefined) return true
+    if (isEmptyMaxLines || !allowAddNewLine || _disabled) return false
+    if ( maxLines === undefined) return true
 
     const limit = parseInt(maxLines)
     if (!Number.isFinite(limit)) return true
