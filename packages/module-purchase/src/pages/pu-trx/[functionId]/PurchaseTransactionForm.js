@@ -884,7 +884,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     refetchForm(formik.values.header.recordId)
     invalidate()
   }
-  console.log('items',formik.values.items)
 
   const onClickInstallments = () => {
     stack({
@@ -1220,6 +1219,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         : null
       : itemInfo.taxId ?? null
 
+    const effectiveTaxName = !formik.values.header.isVattable
+      ? ''
+      : formik.values.header.taxId
+      ? itemInfo.taxName
+        ? formik.values.header.taxName
+        : ''
+      : itemInfo.taxName ?? ''
 
     const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
     const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
@@ -1250,6 +1256,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       extendedPrice: 0,
       mdValue: 0,
       taxId: effectiveTaxId,
+      taxName: effectiveTaxName,
       taxDetails: null
     }
     let data = getItemPriceRow(updatedRowValues, DIRTYFIELD_QTY)
@@ -1265,6 +1272,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     if (effectiveTaxId) {
       const taxDetailsResponse = await getTaxDetails(effectiveTaxId)
       rowTax = effectiveTaxId
+      rowTaxName = effectiveTaxName
       rowTaxDetails = taxDetailsResponse.map(item => {
       const calculatedAmount = calcVatAmountPerTaxDetail(
         {
@@ -1293,6 +1301,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       
       return {
         taxId: effectiveTaxId,
+        taxName: effectiveTaxName,
         taxCodeId: item.taxCodeId,
         taxCodeName: item.taxCodeName,
         taxBaseName: item.taxBaseName,
@@ -1310,6 +1319,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     data = {
       ...data,
       taxId: rowTax,
+      taxName: rowTaxName,
       taxDetails: rowTaxDetails
     }
 
