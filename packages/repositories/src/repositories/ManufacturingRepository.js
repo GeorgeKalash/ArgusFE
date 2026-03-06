@@ -472,5 +472,5 @@ export const ManufacturingRepository = {
     get: service + 'getDCA',
     del: service + 'delDCA',
     snapshot: service + 'snapshotDCA'
-  }
+  },
 }

@@ -22,7 +22,8 @@ const MfSettingForm = ({ _labels, access }) => {
     RM_SITE_ID: 'mf_rm_siteId',
     JO_PIC_SOURCE: 'mf_jo_pic_source',
     PICO_DATASOURCE: 'mf_pico_dataSource',
-    MAX_ALLOW_QTY_VARIATION: 'mfMaxAllowQtyVariation'
+    MAX_ALLOW_QTY_VARIATION: 'mfMaxAllowQtyVariation',
+    MF_MAX_BTFR_LINES_ALLOWED: 'max_btfr_lines_allowed'
   }
 
   const DecimalFields = {
@@ -141,7 +142,7 @@ const MfSettingForm = ({ _labels, access }) => {
               error={formik.touched.mf_pico_dataSource && Boolean(formik.errors.mf_pico_dataSource)}
             />
           </Grid>
-           <Grid item xs={12}>
+            <Grid item xs={12}>
               <CustomNumberField
                 name='mfMaxAllowQtyVariation'
                 label={_labels.mfMaxAllowQtyVariation}
@@ -152,6 +153,17 @@ const MfSettingForm = ({ _labels, access }) => {
                 error={formik.touched.mfMaxAllowQtyVariation && Boolean(formik.errors.mfMaxAllowQtyVariation)}
               />
             </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='max_btfr_lines_allowed'
+                  label={_labels.max_btfr_lines_allowed}
+                  value={formik.values.max_btfr_lines_allowed}
+                  allowNegative={false}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('max_btfr_lines_allowed', null)}
+                  error={formik.touched.max_btfr_lines_allowed && Boolean(formik.errors.max_btfr_lines_allowed)}
+                />
+              </Grid>
         </Grid>
       </VertLayout>
     </Form>

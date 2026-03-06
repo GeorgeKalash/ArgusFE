@@ -28,12 +28,13 @@ import JTCheckoutForm from '@argus/shared-ui/src/components/Shared/Forms/JTCheck
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
 export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
 
   const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
+  const max_btfr_lines_allowed = parseInt(defaultsData?.list?.find(obj => obj.key === 'max_btfr_lines_allowed')?.value) || null
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BatchTransfer,
@@ -81,7 +82,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           transferRef: null,
           sku: '',
           itemName: '',
-          itemGroupId: null
+          transferStatusName: '',
+          transferWipName: ''
         }
       ]
     },
@@ -90,7 +92,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       header: yup.object({
         date: yup.string().required(),
         fromWCId: yup.number().required(),
-        toWCId: yup.number().required()
+        toWCId: yup.number().required(),
+        dtId: yup.number().required()
       }),
       items: yup.array().of(schema)
     }),
@@ -121,6 +124,17 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
 
   const editMode = !!formik.values?.recordId
   const isPosted = formik?.values?.header?.status === 3
+
+  async function onChangeDT(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: ManufacturingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+      formik.setFieldValue('header.fromWCId', res?.record?.workCenterId || workCenterId || null)
+      formik.setFieldValue('items', formik.initialValues.items)
+    }
+  }
 
   const onPost = async () => {
     await postRequest({
@@ -239,31 +253,22 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       }
     },
     {
-      component: 'textfield',
-      label: labels.itemGroup,
-      name: 'itemGroupName',
-      flex: 2,
-      props: {
-        readOnly: true
-      }
-    },
-    {
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      flex: 1
+      flex: 0.5
     },
     {
       component: 'numberfield',
       name: 'pcs',
       label: labels.pcs,
-      flex: 1
+      flex: 0.5
     },
     {
       component: 'numberfield',
       name: 'jobQty',
       label: labels.jobQty,
-      flex: 1,
+      flex: 0.7,
       props: {
         readOnly: true
       }
@@ -272,7 +277,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       component: 'numberfield',
       name: 'jobPcs',
       label: labels.jobPcs,
-      flex: 1,
+      flex: 0.7,
       props: {
         readOnly: true
       }
@@ -281,37 +286,38 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       component: 'textfield',
       label: labels.transferRef,
       name: 'transferRef',
+      flex: 1.5,
+      link: {
+        enabled: true,
+        popup: row =>
+          stack({
+            Component: JTCheckoutForm,
+            props: {
+              recordId: row?.transferId
+            },
+            onClose: () => refetchForm(formik.values?.recordId)
+          })
+      },
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      name: 'transferStatusName',
+      label: labels.statusName,
       flex: 1,
       props: {
         readOnly: true
       }
     },
     {
-      component: 'button',
-      name: 'jobTransfer',
-      label: labels.jobTransfer,
+      component: 'textfield',
+      name: 'transferWipName',
+      label: labels.wipName,
+      flex: 1,
       props: {
-        onCondition: row => {
-          if (row.transferRef) {
-            return {
-              imgSrc:  require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src,
-              hidden: false,
-            }
-          } else {
-            return {
-              imgSrc: '',
-              hidden: true
-            }
-          }
-        }
-      },
-      onClick: (e, row) => {
-        stack({
-          Component: JTCheckoutForm,
-          props: {
-            recordId: row?.transferId
-          }
-        })
+        readOnly: true
       }
     }
   ]
@@ -329,6 +335,10 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       disabled: !editMode || isPosted
     }
   ]
+
+  useEffect(() => {
+    if (!recordId && documentType?.dtId) onChangeDT(documentType.dtId)
+  }, [documentType?.dtId])
 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
@@ -363,13 +373,15 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                       { key: 'name', value: 'Name' }
                     ]}
                     readOnly={editMode}
+                    required
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
+                    onChange={async (_, newValue) => {
                       changeDT(newValue)
+                      await onChangeDT(newValue?.recordId)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
@@ -401,8 +413,9 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values.header}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('header.fromWCId', newValue?.recordId || null)
+                      formik.setFieldValue('items', formik.initialValues.items)
                     }}
                     error={formik.touched.header?.fromWCId && formik.errors.header?.fromWCId}
                     maxAccess={maxAccess}
@@ -423,8 +436,9 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values.header}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('header.toWCId', newValue?.recordId || null)
+                      formik.setFieldValue('items', formik.initialValues.items)
                     }}
                     error={formik.touched.header?.toWCId && formik.errors.header?.toWCId}
                     maxAccess={maxAccess}
@@ -476,6 +490,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            maxLines={max_btfr_lines_allowed}
           />
         </Grow>
         <Fixed>
