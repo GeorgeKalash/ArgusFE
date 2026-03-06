@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from 'react'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -26,6 +25,7 @@ const Properties = () => {
   const { systemDefaults } = useContext(DefaultsContext)
   const [dimNum, setDimNum] = useState(0)
   const { stack } = useWindow()
+  const [dimensionStore, setDimensionStore] = useState([])
 
   const fetchData = async () => {
     const dimensionNumber = formik.values?.dimValue?.match(/\d+$/)?.[0]
@@ -117,16 +117,24 @@ const Properties = () => {
   }, [formik.values.dimValue])
 
   useEffect(() => {
-    ;(async function () {
-      const myObject = {}
-      const filteredList = systemDefaults?.list?.filter(obj => obj.key.startsWith('ivtDimension'))
-      filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-      const firstValidKey = filteredList?.find(item => item.value !== '')?.key
-      if (firstValidKey) {
-        formik.setFieldValue('dimValue', firstValidKey)
-      }
-    })()
-  }, [])
+    if (!systemDefaults?.list) return
+
+    const filteredList = systemDefaults?.list?.filter(
+      item => item.key?.startsWith('ivtDimension') && item.value
+    )
+
+    const items = filteredList.map(item => ({
+      key: item.key,
+      value: item.value
+    }))
+
+    setDimensionStore(items)
+
+    const firstValidKey = filteredList?.find(item => item.value !== '')?.key
+    if (firstValidKey) {
+      formik.setFieldValue('dimValue', firstValidKey)
+    }
+  }, [systemDefaults])
 
   return (
     <VertLayout>
@@ -137,8 +145,7 @@ const Properties = () => {
           middleSection={
             <Grid item sx={{ display: 'flex', mr: 2 }}>
               <ResourceComboBox
-                endpointId={SystemRepository.Defaults.qry}
-                parameters={`_filter=ivtDimension`}
+                store={dimensionStore}
                 sx={{ width: 450 }}
                 name='dimValue'
                 label={_labels.properties}
