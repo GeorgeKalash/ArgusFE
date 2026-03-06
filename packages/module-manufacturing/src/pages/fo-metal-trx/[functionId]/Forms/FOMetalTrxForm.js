@@ -30,7 +30,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
-export default function MetalSmeltingForm({ labels, access, recordId, window }) {
+export default function FOMetalTrxForm({ labels, access, recordId, functionId, getResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
@@ -39,7 +39,14 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   const [recalc, setRecalc] = useState(false)
   const filteredItems = useRef()
   const alloyMetalItems = useRef({})
-  const functionId = SystemFunction.MetalSmelting
+  const isMetalSmelting = Number(functionId) === SystemFunction.MetalSmelting
+
+  const MetalRepositories = {
+    [SystemFunction.MetalSmelting]: FoundryRepository.MetalSmelting,
+    [SystemFunction.MetalCalibration]: FoundryRepository.MetalCalibration
+  };
+
+  const endpoint = MetalRepositories[Number(functionId)] ?? null
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
@@ -49,7 +56,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   })
 
   const invalidate = useInvalidate({
-    endpointId: FoundryRepository.FoundaryTransaction.page
+    endpointId: endpoint?.page
   })
 
   const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
@@ -70,7 +77,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       recordId: recordId || null,
       header: {
         recordId,
-        functionId: SystemFunction.MetalSmelting,
+        functionId,
         date: new Date(),
         dtId: null,
         plantId,
@@ -88,7 +95,10 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         notes: '',
         baseSalesMetalPurity: 0,
         baseSalesMetalRef: '',
-        avgPurity: 0
+        avgPurity: 0,
+        qtyIn: 0,
+        qtyOut: 0,
+        deltaQty: 0
       },
       items: [
         {
@@ -101,7 +111,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           qty: 0,
           seqNo: 1,
           trxId: recordId || 0,
-          type: null,
+          type: isMetalSmelting ? 1 : null,
           currentCost: 0,
           qtyAtPurity: 0,
           expectedAlloyQty: 0
@@ -153,7 +163,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       const payload = getPayload(obj)
 
       const response = await postRequest({
-        extension: FoundryRepository.FoundaryTransaction.set2,
+        extension: endpoint?.set2,
         record: JSON.stringify(payload)
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -162,6 +172,18 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     }
   })
 
+  const getGLResourceId = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.MetalSmelting:
+        return ResourceIds.GLTransactionItem
+      case SystemFunction.MetalCalibration:
+        return ResourceIds.GLMetalCalibration
+      default:
+        return null
+    }
+  }
+
   const getPayload = obj => {
     return {
       header: { ...obj.header, date: formatDateToApi(obj.header.date), qtyDiff, sumRMQty: totalRmQty, avgPurity},
@@ -169,7 +191,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         ...item,
         trxId: obj?.recordId || 0,
         seqNo: index + 1,
-        purity: item.purity / 1000
+        purity: item.purity / 1000,
+        type: isMetalSmelting ? 1 : item.type,
       })),
       scraps: (obj?.scraps || [])
         .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
@@ -183,40 +206,71 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   const editMode = !!formik.values?.header.recordId
   const isPosted = formik.values.header.status === 3
 
-  const calculateTotal = (key, typeFilter = null) =>
-    formik.values.items.reduce((sum, item) => {
-      if (typeFilter && item.type != typeFilter) return sum
-
-      return sum + (parseFloat(item[key]) || 0)
-    }, 0)
-
   const scrapQty = formik?.values?.scraps?.reduce((sum, item) => {
     return sum + (parseFloat(item.qty) || 0)
   }, 0)
 
+  
+  const calculateGridTotals = (items, headerPurity) => {
+    let qtyOut = 0
+    let totalAlloy = 0
+    let expectedAlloy = 0
+    let qtyOutConverted = 0
+    let qtyInConverted = 0
+    let totalRmQty = 0
+    let totalDesiredPurity = 0
+
+    items.forEach(item => {
+      const qty = parseFloat(item.qty) || 0
+      const rmQty = parseFloat(item.rmQty) || 0
+      const qtyAtPurity = parseFloat(item.qtyAtPurity) || 0
+      const expectedAlloyQty = parseFloat(item.expectedAlloyQty) || 0
+      const purity = parseFloat(item.purity) || 0
+
+      qtyOut += qty
+      qtyOutConverted += rmQty
+      qtyInConverted += qtyAtPurity
+      expectedAlloy += expectedAlloyQty
+      totalRmQty += rmQty
+
+      if (item.type == 2) {
+        totalAlloy += qty
+      }
+
+      if (headerPurity && item.type == 1) {
+        totalDesiredPurity += (qty * purity) / headerPurity
+      }
+
+    })
+
+    return {
+      qtyOut,
+      totalAlloy,
+      expectedAlloy,
+      qtyOutConverted,
+      qtyInConverted,
+      totalRmQty,
+      totalDesiredPurity
+    }
+  }
+
+
+  const headerPurity = parseFloat(formik.values?.header?.purity)
+  const totals = calculateGridTotals(formik.values?.items || [], headerPurity)
+  
   const qtyIn = parseFloat(formik.values?.header?.qty || 0) + parseFloat(scrapQty || 0)
-  const qtyOut = calculateTotal('qty')
+  const qtyOut = totals.qtyOut
 
   const qtyDiff = recalc ? parseFloat(qtyOut || 0) - parseFloat(qtyIn || 0) : formik.values?.header?.qtyDiff || 0
-  const totalAlloy = calculateTotal('qty', 2)
-  const expectedAlloy = calculateTotal('expectedAlloyQty')
-  const headerPurity = parseFloat(formik.values?.header?.purity)
-  const totalRmQty = recalc ? calculateTotal('rmQty') : formik.values?.header?.sumRMQty
+  const totalAlloy = totals.totalAlloy
+  const expectedAlloy = totals.expectedAlloy
+  const totalRmQty = recalc ? totals.totalRmQty : formik.values?.header?.sumRMQty
   
   const avgPurity = recalc
-    ? (((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (qtyOut || 0)).toFixed(2)
+    ? (((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (qtyOut || 1)).toFixed(2)
     : formik.values?.header?.avgPurity || 0
 
-  const totalDesiredPurity = headerPurity
-    ? formik.values.items.reduce((sum, item) => {
-        if (item.type != 1) return sum
-
-        const qty = parseFloat(item.qty) || 0
-        const purity = parseFloat(item.purity) || 0
-
-        return sum + (qty * purity) / headerPurity
-      }, 0)
-    : 0
+  const totalDesiredPurity = totals.totalDesiredPurity
 
   const expectedAlloyQtyPerRow = (qtyAtPurity, qty) => {
     return parseFloat(qtyAtPurity) - parseFloat(qty)
@@ -243,7 +297,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const onPost = async () => {
     await postRequest({
-      extension: FoundryRepository.FoundaryTransaction.post,
+      extension: endpoint?.post,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -254,7 +308,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: FoundryRepository.FoundaryTransaction.unpost,
+      extension: endpoint?.unpost,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -294,7 +348,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   async function refetchForm(recordId) {
     const { record } = await getRequest({
-      extension: FoundryRepository.FoundaryTransaction.get2,
+      extension: endpoint?.get2,
       parameters: `_recordId=${recordId}`
     })
 
@@ -324,6 +378,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       recordId: record?.header?.recordId,
       header: {
         ...(record?.header || {}),
+        qtyIn: record?.header?.qtyIn ?? 0,
+        qtyOut: record?.header?.qtyOut ?? 0,
+        deltaQty: record?.header?.deltaQty ?? 0,
         date: formatDateFromApi(record?.header?.date),
         smeltingMaxAllowedVariation: dtInfo?.smeltingMaxAllowedVariation || null,
         baseSalesMetalPurity: metalInfo?.purity * 1000 || 0,
@@ -346,6 +403,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'resourcecombobox',
       label: labels.type,
       name: 'type',
+      hidden: isMetalSmelting,
       props: {
         datasetId: DataSets.SMELTING_METAL_TYPE,
         displayField: 'value',
@@ -490,6 +548,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     {
       component: 'numberfield',
       name: 'expectedAlloyQty',
+      hidden: isMetalSmelting,
       label: labels.expectedAlloyQty,
       props: { readOnly: true, decimalScale: 2 }
     },
@@ -570,7 +629,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      datasetId: ResourceIds.GLTransactionItem,
+      datasetId: getGLResourceId(functionId),
       valuesPath: formik.values.header,
       disabled: !editMode
     }
@@ -658,9 +717,20 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     })()
   }, [baseSalesMetalId])
 
+  const qtyOutConverted = totals.qtyOutConverted
+  const qtyInConverted = totals.qtyInConverted
+
+  const deltaQty = parseFloat(qtyInConverted) - parseFloat(qtyOutConverted)
+
+  useEffect(() => {
+    formik.setFieldValue('header.qtyIn', qtyInConverted)
+    formik.setFieldValue('header.qtyOut', qtyOutConverted)
+    formik.setFieldValue('header.deltaQty', deltaQty)
+  }, [qtyInConverted, qtyOutConverted, deltaQty])
+
   return (
     <FormShell
-      resourceId={ResourceIds.MetalSmelting}
+      resourceId={getResourceId(Number(functionId))}
       form={formik}
       maxAccess={maxAccess}
       actions={actions}
@@ -919,19 +989,51 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
               />
             </Grid>
             <Grid item xs={4} sx={{ pl: 2, pt: 3 }}>
-              <CustomTextArea
-                name='header.notes'
-                label={labels.notes}
-                value={formik.values.header?.notes}
-                rows={4}
-                maxLength='200'
-                readOnly={isPosted}
-                maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('header.notes', e.target.value)}
-                onClear={() => formik.setFieldValue('header.notes', '')}
-                error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                      name='header.notes'
+                      label={labels.notes}
+                      value={formik.values.header?.notes}
+                      rows={4}
+                      maxLength='200'
+                      readOnly={isPosted}
+                      maxAccess={maxAccess}
+                      onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                      onClear={() => formik.setFieldValue('header.notes', '')}
+                      error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.qtyIn'
+                    label={labels.qtyInConverted}
+                    value={formik.values.header.qtyIn}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.qtyOut'
+                    label={labels.qtyOutConverted}
+                    value={formik.values.header.qtyOut}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                    <CustomNumberField
+                      name='header.deltaQty'
+                      label={labels.deltaQty}
+                      value={formik.values.header.deltaQty}
+                      maxAccess={maxAccess}
+                      readOnly
+                    />
+                </Grid>
+              </Grid>
             </Grid>
+            
             <Grid container xs={2} justifyContent={'flex-end'} sx={{ pl: 2, pt: 3 }}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
@@ -943,24 +1045,30 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     align='right'
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    label={labels.totalAlloy}
-                    value={totalAlloy}
-                    decimalScale={3}
-                    readOnly
-                    align='right'
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    label={labels.expectedAlloy}
-                    value={expectedAlloy}
-                    decimalScale={3}
-                    readOnly
-                    align='right'
-                  />
-                </Grid>
+                {
+                  !isMetalSmelting && 
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      label={labels.totalAlloy}
+                      value={totalAlloy}
+                      decimalScale={3}
+                      readOnly
+                      align='right'
+                    />
+                  </Grid>
+                }
+                { 
+                  !isMetalSmelting && 
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      label={labels.expectedAlloy}
+                      value={expectedAlloy}
+                      decimalScale={3}
+                      readOnly
+                      align='right'
+                    />
+                  </Grid>
+                }
                 <Grid item xs={12}>
                   <CustomNumberField label={labels.qtyIn} value={qtyIn} decimalScale={3} readOnly align='right' />
                 </Grid>
