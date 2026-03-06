@@ -98,18 +98,13 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
   }
 
   const onPost = async () => {
-    const { ...rest } = formik.values
-    const copy = { ...rest }
-    copy.date = formatDateToApi(copy.date)
-
-    const res = await postRequest({
+    await postRequest({
       extension: GeneralLedgerRepository.JournalVoucher.post,
-      record: JSON.stringify(copy)
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
     })
 
     getData(formik.values.recordId)
-    toast.success(platformLabels.Added)
-
+    toast.success(platformLabels.Posted)
     invalidate()
   }
 
