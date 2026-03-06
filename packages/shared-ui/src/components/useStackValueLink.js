@@ -12,9 +12,7 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
   const inflightRef = useRef(false)
   const noAccessInflightRef = useRef(false)
 
-  const isValueLink = !!linkOpen
-
-  const linkStyle = !isValueLink
+  const linkStyle = !linkOpen
     ? {}
     : {
         color: '#1976d2',
@@ -72,8 +70,8 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
         DialogText: platformLabels.DontHaveAccess,
         okButtonAction: closePopup,
         fullScreen: false,
-        close: true
       },
+      refresh: false,
       width: 420,
       height: 160,
       title: platformLabels?.NoAccess

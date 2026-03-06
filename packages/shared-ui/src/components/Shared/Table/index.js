@@ -26,7 +26,7 @@ import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
-import { useStackValueLink } from '../../useStackValueLink'
+import { useStackValueLink } from '@argus/shared-ui/src/components/useStackValueLink'
 
 const Table = ({
   name,

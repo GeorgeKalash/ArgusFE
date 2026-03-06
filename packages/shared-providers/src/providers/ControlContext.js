@@ -11,7 +11,6 @@ import { debounce } from 'lodash'
 import { commonResourceIds } from '@argus/shared-domain/src/resources/commonResourceIds'
 import { useLabelsAccessContext } from './LabelsAccessContext'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { ControlAccessLevel } from '@argus/shared-domain/src/resources/AccessLevels'
 
 const ControlContext = createContext()
 
