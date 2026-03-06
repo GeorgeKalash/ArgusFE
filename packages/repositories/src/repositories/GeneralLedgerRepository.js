@@ -57,7 +57,8 @@ export const GeneralLedgerRepository = {
     get: service + 'getJV',
     set: service + 'setJV',
     post: service + 'postJV',
-    del: service + 'delJV'
+    del: service + 'delJV',
+    unpost: service + 'unpostJV',
   },
   GeneralLedger: {
     qry: service + 'qryTRX',
