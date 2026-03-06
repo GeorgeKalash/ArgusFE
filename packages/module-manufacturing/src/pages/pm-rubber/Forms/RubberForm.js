@@ -21,16 +21,13 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
-import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDPrintForm'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 export default function RubberForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Rubber,
@@ -171,19 +168,6 @@ export default function RubberForm({ labels, access, recordId }) {
         confirmation(platformLabels.StartRecord, platformLabels.Confirmation, onStart)
       },
       disabled: !editMode || isReleased || isPosted
-    },
-    {
-      key: 'threeDPrinting',
-      condition: true,
-      onClick: () => {
-        stack({
-          Component: ThreeDPrintForm,
-          props: {
-            recordId: formik.values?.threeDPId
-          }
-        })
-      },
-      disabled: !formik.values.threeDPId
     }
   ]
 
@@ -296,6 +280,12 @@ export default function RubberForm({ labels, access, recordId }) {
                   _productionLineId: formik.values.productionLineId || 0
                 }}
                 valueField='reference'
+                valueLink={{
+                  resourceId: ResourceIds.ThreeDPrint,
+                  props: {
+                    recordId: formik.values.modelId
+                  }
+                }}
                 name='modelId'
                 label={labels.model}
                 form={formik}

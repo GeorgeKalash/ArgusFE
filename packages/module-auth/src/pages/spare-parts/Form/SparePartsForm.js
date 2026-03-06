@@ -218,7 +218,7 @@ export default function SparePartsForm({ labels, maxAccess, recordId, window }) 
                   { key: 'sku', value: 'SKU' },
                   { key: 'name', value: 'Name' }
                 ]}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('itemName', newValue?.name || '')
                   formik.setFieldValue('sku', newValue?.sku || '')
                   formik.setFieldValue('itemId', newValue?.recordId || null)

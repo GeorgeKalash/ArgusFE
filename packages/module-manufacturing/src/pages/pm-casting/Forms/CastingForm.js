@@ -22,8 +22,6 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDPrintForm'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
@@ -31,7 +29,6 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 export default function CastingForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
   const systemFunction = SystemFunction.ModellingCasting
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -134,19 +131,6 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted
-    },
-    {
-      key: 'threeDPrinting',
-      condition: true,
-      onClick: async () => {
-        stack({
-          Component: ThreeDPrintForm,
-          props: {
-            recordId: formik.values?.threeDPId
-          }
-        })
-      },
-      disabled: !formik.values.threeDPId
     }
   ]
 
@@ -257,6 +241,12 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
               <ResourceLookup
                 endpointId={ProductModelingRepository.Printing.snapshot2}
                 parameters={{ _productionLineId: formik.values.productionLineId || 0 }}
+                valueLink={{
+                  resourceId: ResourceIds.ThreeDPrint,
+                  props: {
+                    recordId: formik.values.threeDPId
+                  }
+                }}
                 valueField='reference'
                 name='threeDPId'
                 label={labels.threeDP}

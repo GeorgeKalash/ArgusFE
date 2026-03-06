@@ -91,7 +91,13 @@ const Rubber = () => {
     {
       field: 'modelRef',
       headerName: labels.model,
-      flex: 1
+      flex: 1,
+      valueLink: {
+        resourceId: ResourceIds.ThreeDPrint,
+        props: row => ({
+          recordId: row.modelId,
+        })
+      }
     },
     {
       field: 'laborName',

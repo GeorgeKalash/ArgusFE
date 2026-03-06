@@ -72,7 +72,13 @@ const Casting = () => {
     {
       field: 'threeDPRef',
       headerName: labels.threeDP,
-      flex: 1
+      flex: 1,
+      valueLink: {
+        resourceId: ResourceIds.ThreeDPrint,
+        props: row => ({
+          recordId: row.threeDPId,
+        })
+      }
     },
     {
       field: 'setPcs',

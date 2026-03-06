@@ -23,8 +23,6 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
-import SketchForm from '@argus/shared-ui/src/components/Shared/Forms/SketchForm'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
@@ -34,7 +32,6 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 const ThreeDDesignForm = ({ recordId, window }) => {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const functionId = SystemFunction.ThreeDDesign
   const imageUploadRef = useRef(null)
 
@@ -192,17 +189,6 @@ const ThreeDDesignForm = ({ recordId, window }) => {
     })
   }
 
-  async function onSketch() {
-    stack({
-      Component: SketchForm,
-      props: {
-        labels: labels,
-        recordId: formik?.values?.sketchId,
-        maxAccess: access
-      }
-    })
-  }
-
   const actions = [
     {
       key: 'Close',
@@ -233,12 +219,6 @@ const ThreeDDesignForm = ({ recordId, window }) => {
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
-    },
-    {
-      key: 'Sketch',
-      condition: true,
-      onClick: onSketch,
-      disabled: !formik?.values?.sketchId
     }
   ]
 
@@ -368,6 +348,12 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                   <ResourceLookup
                     endpointId={ProductModelingRepository.Sketch.snapshot3}
                     parameters={{ _productionLineId: formik.values.productionLineId || 0 }}
+                    valueLink={{
+                      resourceId: ResourceIds.Sketch,
+                      props: {
+                        recordId: formik.values.sketchId
+                      }
+                    }}
                     name='sketchId'
                     required
                     label={labels.sketchRef}

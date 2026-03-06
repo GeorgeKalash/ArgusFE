@@ -22,15 +22,12 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDPrintForm'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 export default function ModellingForm({ labels, access, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
 
   const { recordId } = store
 
@@ -188,19 +185,6 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed || !editMode || isPosted
-    },
-    {
-      key: 'threeDPrinting',
-      condition: true,
-      onClick: async () => {
-        stack({
-          Component: ThreeDPrintForm,
-          props: {
-            recordId: formik.values?.threeDPId
-          }
-        })
-      },
-      disabled: !formik.values.threeDPId
     }
   ]
   useEffect(() => {
@@ -376,6 +360,12 @@ export default function ModellingForm({ labels, access, setStore, store }) {
               <ResourceLookup
                 endpointId={ProductModelingRepository.Printing.snapshot2}
                 parameters={{ _productionLineId: formik.values.productionLineId || 0 }}
+                valueLink={{
+                  resourceId: ResourceIds.ThreeDPrint,
+                  props: {
+                    recordId: formik.values.threeDPId
+                  }
+                }}
                 valueField='reference'
                 displayField='reference'
                 name='threeDPId'

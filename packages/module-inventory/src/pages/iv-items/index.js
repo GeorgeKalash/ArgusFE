@@ -16,7 +16,6 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [params, setParams] = useState('')
 
   const { stack } = useWindow()
 

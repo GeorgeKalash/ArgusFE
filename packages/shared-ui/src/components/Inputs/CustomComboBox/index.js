@@ -10,6 +10,7 @@ import dropdownStyles from '../SharedDropdown.module.css'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import inputs from '../Inputs.module.css'
 import ClearIcon from '@mui/icons-material/Clear'
+import { useOpenResource } from "@argus/shared-hooks/src/hooks/useOpenResource";
 
 const CustomComboBox = ({
   type = 'text',
@@ -44,6 +45,7 @@ const CustomComboBox = ({
   isLoading,
   onOpen,
   onBlur = () => {},
+  valueLink,
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
@@ -65,6 +67,8 @@ const CustomComboBox = ({
   const selectFirstValue = useRef(null)
   const filterOptions = useRef(null)
 
+  const openResource = useOpenResource();
+
   useEffect(() => {
     function handleBlur(event) {
       if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
@@ -78,6 +82,43 @@ const CustomComboBox = ({
       document.removeEventListener('mousedown', handleBlur)
     }
   }, [])
+
+  function measureTextWidth(text, inputEl) {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    const style = window.getComputedStyle(inputEl);
+
+    context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+
+    return context.measureText(text).width;
+  }
+
+  function isClickOnText(e) {
+    if (!isValueLink) return false;
+
+    const input = e.currentTarget.querySelector("input");
+    if (!input) return false;
+
+    const valueText = input.value?.toString();
+    if (!valueText) return false;
+
+    const rect = input.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+
+    const style = window.getComputedStyle(input);
+    const paddingLeft = parseFloat(style.paddingLeft || "0");
+    const paddingRight = parseFloat(style.paddingRight || "0");
+
+    const textWidth = measureTextWidth(valueText, input);
+
+    const textStart = paddingLeft;
+    const textEnd = rect.width - paddingRight;
+    const effectiveTextEnd = Math.min(textStart + textWidth, textEnd);
+
+    return clickX >= textStart && clickX <= effectiveTextEnd;
+  }
+
+  const isValueLink = valueLink?.resourceId && value && value[valueField];
 
   return _hidden ? (
     <></>
@@ -332,6 +373,24 @@ const CustomComboBox = ({
               ...params.inputProps,
               tabIndex: _readOnly ? -1 : 0
             }}
+            onMouseDownCapture={(e) => {
+              if (!isClickOnText(e)) return;
+
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              if (!isClickOnText(e)) return;
+
+              const resolvedProps =
+                typeof valueLink.props === "function"
+                  ? valueLink.props(value)
+                  : valueLink.props;
+
+              openResource(valueLink.resourceId, {
+                props: resolvedProps,
+              });
+            }}
             type={type}
             variant={variant}
             label={label}
@@ -339,7 +398,9 @@ const CustomComboBox = ({
             autoFocus={focus}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
-            className={[styles.customComboTextField]}
+            className={`${styles.customComboTextField} ${
+              isValueLink ? styles.linkField : ""
+            }`}
             error={error}
             helperText={helperText}
             onBlur={e => {

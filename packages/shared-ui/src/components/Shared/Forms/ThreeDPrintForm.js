@@ -24,9 +24,6 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
-import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
-import ThreeDDesignForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
@@ -35,7 +32,6 @@ export default function ThreeDPrintForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const systemFunction = SystemFunction.ThreeDPrint
-  const { stack } = useWindow()
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.Printing,
@@ -163,40 +159,12 @@ export default function ThreeDPrintForm({ recordId, window }) {
     invalidate()
   }
 
-  async function getLabels(datasetId) {
-    const res = await getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: `_dataset=${datasetId}`
-    })
-
-    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
-  }
-
   const actions = [
     {
       key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted || !isReleased
-    },
-    {
-      key: 'threeDDesign',
-      condition: true,
-      onClick: async () => {
-        const threeDFormLabels = await getLabels(ResourceIds.ThreeDDesign)
-
-        stack({
-          Component: ThreeDDesignForm,
-          props: {
-            recordId: formik.values?.threeDDId,
-            labels: threeDFormLabels
-          },
-          width: 1200,
-          height: 700,
-          title: threeDFormLabels.ThreeDDesign
-        })
-      },
-      disabled: !formik.values.threeDDId
     },
     {
       key: 'Start',
@@ -312,6 +280,12 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     endpointId={ProductModelingRepository.ThreeDDrawing.snapshot3DD2}
                     parameters={{
                       _productionLineId: formik.values.productionLineId || 0
+                    }}
+                    valueLink={{
+                      resourceId: ResourceIds.ThreeDDesign,
+                      props: {
+                        recordId: formik.values.threeDDId
+                      }
                     }}
                     valueField='reference'
                     displayField='reference'
