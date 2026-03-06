@@ -44,7 +44,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     [SystemFunction.MetalCalibration]: FoundryRepository.MetalCalibration
   };
 
-  const getEndpoint = (functionId) => MetalRepositories[Number(functionId)] ?? null;
+  const endpoint = MetalRepositories[Number(functionId)] ?? null
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
@@ -54,7 +54,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   })
 
   const invalidate = useInvalidate({
-    endpointId: getEndpoint(functionId).page
+    endpointId: endpoint?.page
   })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
@@ -131,11 +131,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
         .array()
         .of(
           yup.object().shape({
-            type: yup.number().when([], {
-              is: () => Number(functionId) != SystemFunction.MetalSmelting,
-              then: () => yup.number().required(),
-              otherwise: () => yup.number().nullable()
-            }),
+            type: yup.number().required(),
             metalId: yup.number().test(function (value) {
               if (this.parent.type == 1) {
                 return !!value
@@ -165,7 +161,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
       const payload = getPayload(obj)
 
       const response = await postRequest({
-        extension: getEndpoint(functionId).set2,
+        extension: endpoint?.set2,
         record: JSON.stringify(payload)
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -208,42 +204,71 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const editMode = !!formik.values?.header.recordId
   const isPosted = formik.values.header.status === 3
 
-  const calculateTotal = (key, typeFilter = null) =>
-    formik.values.items.reduce((sum, item) => {
-      if (typeFilter && item.type != typeFilter) return sum
-
-      return sum + (parseFloat(item[key]) || 0)
-    }, 0)
-
   const scrapQty = formik?.values?.scraps?.reduce((sum, item) => {
     return sum + (parseFloat(item.qty) || 0)
   }, 0)
 
+  
+  const calculateGridTotals = (items, headerPurity) => {
+    let qtyOut = 0
+    let totalAlloy = 0
+    let expectedAlloy = 0
+    let qtyOutConverted = 0
+    let qtyInConverted = 0
+    let totalRmQty = 0
+    let totalDesiredPurity = 0
+
+    items.forEach(item => {
+      const qty = parseFloat(item.qty) || 0
+      const rmQty = parseFloat(item.rmQty) || 0
+      const qtyAtPurity = parseFloat(item.qtyAtPurity) || 0
+      const expectedAlloyQty = parseFloat(item.expectedAlloyQty) || 0
+      const purity = parseFloat(item.purity) || 0
+
+      qtyOut += qty
+      qtyOutConverted += rmQty
+      qtyInConverted += qtyAtPurity
+      expectedAlloy += expectedAlloyQty
+      totalRmQty += rmQty
+
+      if (item.type == 2) {
+        totalAlloy += qty
+      }
+
+      if (headerPurity && item.type == 1) {
+        totalDesiredPurity += (qty * purity) / headerPurity
+      }
+
+    })
+
+    return {
+      qtyOut,
+      totalAlloy,
+      expectedAlloy,
+      qtyOutConverted,
+      qtyInConverted,
+      totalRmQty,
+      totalDesiredPurity
+    }
+  }
+
+
+  const headerPurity = parseFloat(formik.values?.header?.purity)
+  const totals = calculateGridTotals(formik.values?.items || [], headerPurity)
+  
   const qtyIn = parseFloat(formik.values?.header?.qty || 0) + parseFloat(scrapQty || 0)
-  const qtyOut = calculateTotal('qty')
+  const qtyOut = totals.qtyOut
 
   const qtyDiff = recalc ? parseFloat(qtyOut || 0) - parseFloat(qtyIn || 0) : formik.values?.header?.qtyDiff || 0
-  const totalAlloy = calculateTotal('qty', 2)
-  const expectedAlloy = calculateTotal('expectedAlloyQty')
-  const headerPurity = parseFloat(formik.values?.header?.purity)
-  const totalRmQty = recalc ? calculateTotal('rmQty') : formik.values?.header?.sumRMQty
-
-  
+  const totalAlloy = totals.totalAlloy
+  const expectedAlloy = totals.expectedAlloy
+  const totalRmQty = recalc ? totals.totalRmQty : formik.values?.header?.sumRMQty
   
   const avgPurity = recalc
-    ? (((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (qtyOut || 0)).toFixed(2)
+    ? (((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (qtyOut || 1)).toFixed(2)
     : formik.values?.header?.avgPurity || 0
 
-  const totalDesiredPurity = headerPurity
-    ? formik.values.items.reduce((sum, item) => {
-        if (item.type != 1) return sum
-
-        const qty = parseFloat(item.qty) || 0
-        const purity = parseFloat(item.purity) || 0
-
-        return sum + (qty * purity) / headerPurity
-      }, 0)
-    : 0
+  const totalDesiredPurity = totals.totalDesiredPurity
 
   const expectedAlloyQtyPerRow = (qtyAtPurity, qty) => {
     return parseFloat(qtyAtPurity) - parseFloat(qty)
@@ -270,7 +295,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
 
   const onPost = async () => {
     await postRequest({
-      extension: getEndpoint(functionId).post,
+      extension: endpoint?.post,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -281,7 +306,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: getEndpoint(functionId).unpost,
+      extension: endpoint?.unpost,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -321,7 +346,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
 
   async function refetchForm(recordId) {
     const { record } = await getRequest({
-      extension: getEndpoint(functionId).get2,
+      extension: endpoint?.get2,
       parameters: `_recordId=${recordId}`
     })
 
@@ -690,8 +715,8 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     })()
   }, [baseSalesMetalId])
 
-  const qtyOutConverted = formik.values?.items?.reduce((sum, row) => sum + (parseFloat(row.rmQty) || 0), 0) ?? 0
-  const qtyInConverted = formik.values?.items?.reduce((sum, row) => sum + (parseFloat(row.qtyAtPurity) || 0), 0) ?? 0
+  const qtyOutConverted = totals.qtyOutConverted
+  const qtyInConverted = totals.qtyInConverted
 
   const deltaQty = parseFloat(qtyInConverted) - parseFloat(qtyOutConverted)
 
