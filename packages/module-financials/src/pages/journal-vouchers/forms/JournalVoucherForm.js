@@ -75,6 +75,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
   })
 
   const isRaw = formik.values.status == 1
+  const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -113,6 +114,17 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     invalidate()
   }
 
+  const onUnpost = async () => {
+    await postRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.unpost,
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
+    })
+
+    toast.success(platformLabels.Unposted)
+    getData(formik.values.recordId)
+    invalidate()
+  }
+
   const actions = [
     {
       key: 'GL',
@@ -123,9 +135,16 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     },
     {
       key: 'Locked',
-      condition: true,
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !isRaw || !editMode
+      disabled: !editMode
     }
   ]
 
