@@ -313,16 +313,21 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         }),
         items: updatedRows,
         serials: serialsValues,
-        taxCodes: [
-          ...[
-            ...obj.items
-              .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
-              .map(({ taxDetails, id }) => ({
-                seqNo: id,
-                ...taxDetails[0]
-              }))
-          ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
-        ],
+       taxCodes: obj?.items.reduce((acc, item) => {
+          if (item.taxDetails?.length) {
+            item.taxDetails.forEach(td => {
+              const { seqNo, ...rest } = td
+
+              acc.push({
+                seqNo: item.id,
+                taxSeqNo: seqNo,
+                ...rest
+              })
+            })
+          }
+
+          return acc
+        }, []),
         ...(({ header, items, taxCodes, serials, ...rest }) => rest)(obj)
       }
 
@@ -677,29 +682,66 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 4
+        displayFieldWidth: 4,
+        allowClear: false
       },
-      async onChange({ row: { update, newRow } }) {
-          setReCal(true)
-          const taxDetails = newRow?.taxId ? await getTaxDetails(newRow?.taxId) : null
-
-          const vatCalcRow = getVatCalc({
-            priceType: newRow?.priceType,
-            basePrice: newRow?.basePrice,
-            unitPrice: newRow?.unitPrice,
-            qty: newRow?.qty,
-            weight: newRow?.weight,
-            extendedPrice: newRow?.extendedPrice,
-            baseLaborPrice: newRow?.baseLaborPrice,
-            vatAmount: newRow?.vatAmount || 0,
-            tdPct: formik?.values?.header?.tdPct,
-            taxDetails: formik.values.header.isVattable? taxDetails : null
-          })
-
+     async onChange({ row: { update, newRow, oldRow } }) {
+        if (!newRow?.taxId && oldRow?.taxId) {
           update({
-            vatAmount: vatCalcRow?.vatAmount || 0 ,
-            taxDetails
+            taxId: oldRow.taxId,
+            taxName: oldRow.taxName
           })
+          return
+        }
+        setReCal(true)
+
+        const { header, recordId } = formik.values
+        const isVattable = header?.isVattable
+
+        const baseRow = {
+          priceType: newRow?.priceType,
+          basePrice: newRow?.basePrice,
+          unitPrice: newRow?.unitPrice,
+          qty: newRow?.qty,
+          weight: newRow?.weight,
+          extendedPrice: newRow?.extendedPrice,
+          baseLaborPrice: newRow?.baseLaborPrice,
+          vatAmount: newRow?.vatAmount || 0,
+          tdPct: header?.tdPct || 0
+        }
+
+        const taxDetailsList = newRow?.taxId
+          ? await getTaxDetails(newRow.taxId)
+          : []
+
+        const vatCalcRow = getVatCalc({
+          ...baseRow,
+          taxDetails: isVattable ? taxDetailsList : null
+        })
+
+        const taxDetails = (taxDetailsList || []).map(item => {
+          const singleTaxDetail = isVattable
+            ? { ...item, taxScheduleAmount: item.amount || 0 }
+            : null
+
+          const calculatedAmount = calcVatAmountPerTaxDetail(
+            { ...baseRow, taxDetails: singleTaxDetail },
+            singleTaxDetail
+          )
+
+          return {
+            ...item,
+            taxScheduleAmount: item?.amount || 0,
+            invoiceId: recordId || 0,
+            taxSeqNo: item?.seqNo,
+            amount: parseFloat(calculatedAmount)
+          }
+        })
+  
+        update({
+          vatAmount: vatCalcRow?.vatAmount || 0,
+          taxDetails
+        })
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: formik.values?.header?.taxId || !row?.taxId }
