@@ -10,7 +10,7 @@ import dropdownStyles from '../SharedDropdown.module.css'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import inputs from '../Inputs.module.css'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useStackValueLink } from '@argus/shared-ui/src/components/useStackValueLink'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 const CustomComboBox = ({
   type = 'text',

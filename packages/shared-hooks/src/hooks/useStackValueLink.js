@@ -1,16 +1,17 @@
-import React, { useCallback, useContext, useRef } from 'react'
+import React, { useCallback, useRef } from 'react'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { isClickOnText } from './linkTextUtils'
-import { ResourceRegistry } from './ResourceRegistry'
-import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
+import { useValueLinkAccess } from './useValueLinkAccess'
+import { isClickOnText } from '@argus/shared-ui/src/components/linkTextUtils'
+import { ResourceRegistry } from '@argus/shared-ui/src/components/ResourceRegistry'
 
 export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheOnlyMode }) => {
   const { stack } = useWindow()
-  const { getAccess, platformLabels } = useContext(ControlContext)
+
+  const { fetchAccess, hasNoAccess, openNoAccessPopup } = useValueLinkAccess({
+    cacheOnlyMode
+  })
 
   const inflightRef = useRef(false)
-  const noAccessInflightRef = useRef(false)
 
   const linkStyle = !linkOpen
     ? {}
@@ -20,63 +21,6 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
         cursor: 'pointer',
         opacity: 1
       }
-
-  const fetchAccess = useCallback(
-    resourceId =>
-      new Promise(resolve => {
-        let resolved = false
-        let lastValue
-
-        const done = value => {
-          if (resolved) return
-          resolved = true
-          resolve(value)
-        }
-
-        const onAccess = value => {
-          lastValue = value
-
-          const flags = value?.record?.accessFlags
-          const hasFlags = !!flags && typeof flags === 'object'
-          const hasRecord = !!value?.record
-
-          if (hasFlags || hasRecord) done(value)
-        }
-
-        const t = setTimeout(() => done(lastValue), 1500)
-
-        const wrappedOnAccess = value => {
-          onAccess(value)
-          if (resolved) clearTimeout(t)
-        }
-
-        getAccess(resourceId, wrappedOnAccess, cacheOnlyMode)
-      }),
-    [getAccess, cacheOnlyMode]
-  )
-
-  const openNoAccessPopup = () => {
-    if (noAccessInflightRef.current) return
-    noAccessInflightRef.current = true
-
-    const closePopup = win => {
-      noAccessInflightRef.current = false
-      win?.close?.()
-    }
-
-    stack({
-      Component: ConfirmationDialog,
-      props: {
-        DialogText: platformLabels.DontHaveAccess,
-        okButtonAction: closePopup,
-        fullScreen: false,
-      },
-      refresh: false,
-      width: 420,
-      height: 160,
-      title: platformLabels?.NoAccess
-    })
-  }
 
   const openStack = useCallback(async () => {
     const resourceId = linkOpen?.resourceId
@@ -88,11 +32,7 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
     try {
       const access = await fetchAccess(resourceId)
 
-      const flags = access?.record?.accessFlags
-      const flagValues = flags && typeof flags === 'object' ? Object.values(flags) : null
-
-      const noAccess =
-        !flagValues || flagValues.length === 0 || flagValues.every(v => v === false)
+      const noAccess = hasNoAccess(access)
 
       if (noAccess) {
         openNoAccessPopup()
@@ -116,7 +56,7 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
     } finally {
       inflightRef.current = false
     }
-  }, [linkOpen])
+  }, [linkOpen, fetchAccess, hasNoAccess, openNoAccessPopup])
 
   const shouldHandleMouseDown = useCallback(
     e => {
@@ -131,7 +71,6 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
 
   const handleClick = useCallback(
     async e => {
-
       const inputEl = inputElRef.current
       const textMeasureEl = textMeasureRef.current
       if (!inputEl || !textMeasureEl) return false
