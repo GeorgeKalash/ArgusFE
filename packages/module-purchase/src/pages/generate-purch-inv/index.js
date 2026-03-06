@@ -12,7 +12,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import PurchaseTransactionForm from '../pu-trx/[functionId]/PurchaseTransactionForm'
+import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/PurchaseTransactionForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
@@ -31,10 +31,6 @@ const GeneratePurchaseInvoice = () => {
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GeneratePUInvoices
-  })
-
-  const { labels: _labels, access: maxAccess } = useResourceQuery({
-    datasetId: ResourceIds.PurchaseInvoice
   })
 
   const defCurrencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'PUCurrencyId')?.value)
@@ -96,14 +92,9 @@ const GeneratePurchaseInvoice = () => {
     stack({
       Component: PurchaseTransactionForm,
       props: {
-        labels: _labels,
         recordId,
-        maxAccess,
         functionId: SystemFunction.PurchaseInvoice
-      },
-      width: 1330,
-      height: 720,
-      title: _labels.purchaseInvoice
+      }
     })
   }
 
@@ -248,7 +239,7 @@ const GeneratePurchaseInvoice = () => {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={5}>
+            <Grid item xs={6}>
               <ResourceLookup
                 endpointId={PurchaseRepository.Vendor.snapshot}
                 valueField='reference'
@@ -261,7 +252,7 @@ const GeneratePurchaseInvoice = () => {
                 displayFieldWidth={2}
                 valueShow='vendorRef'
                 secondValueShow='vendorName'
-                maxAccess={maxAccess}
+                maxAccess={access}
                 secondFieldName={'vendorName'}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -279,7 +270,7 @@ const GeneratePurchaseInvoice = () => {
                 error={formik.touched.vendorId && Boolean(formik.errors.vendorId)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
@@ -292,15 +283,14 @@ const GeneratePurchaseInvoice = () => {
                 ]}
                 required
                 values={formik.values}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
             </Grid>
-            <Grid item xs={0.5}></Grid>
-            <Grid item xs={1}>
+            <Grid item xs={2}>
               <CustomButton
                 onClick={onPreviewShipments}
                 tooltipText={platformLabels.Preview}
@@ -327,7 +317,7 @@ const GeneratePurchaseInvoice = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={3}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseInvoice}`}
@@ -341,7 +331,7 @@ const GeneratePurchaseInvoice = () => {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 values={formik.values}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
                   await onChangeDtId(newValue?.recordId)
@@ -349,7 +339,7 @@ const GeneratePurchaseInvoice = () => {
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
             </Grid>
-            <Grid item xs={2.5}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
@@ -362,18 +352,17 @@ const GeneratePurchaseInvoice = () => {
                 values={formik.values}
                 valueField='recordId'
                 displayField={['reference', 'name']}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={0.25}></Grid>
-            <Grid item>
+            <Grid item xs={0.5}>
               <CustomButton onClick={openPUDetailsForm} label={labels.edit} color='#231f20' image={'notes.png'} />
             </Grid>
-            <Grid item>
+            <Grid item xs={0.5}>
               <CustomButton
                 onClick={onGeneratePI}
                 label={platformLabels.Generate}
@@ -382,8 +371,7 @@ const GeneratePurchaseInvoice = () => {
                 image={'generate.png'}
               />
             </Grid>
-            <Grid item xs={1}></Grid>
-            <Grid item xs={1.5}>
+            <Grid item xs={3} p={2}>
               <CustomNumberField name='amount' label='' value={formik?.values?.amount} readOnly align='right' />
             </Grid>
           </Grid>
