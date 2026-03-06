@@ -26,14 +26,16 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { useError } from '@argus/shared-providers/src/providers/error'
 import JTCheckoutForm from '@argus/shared-ui/src/components/Shared/Forms/JTCheckoutForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
 
-  const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
+  const workCenterId = parseInt(userDefaults?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BatchTransfer,

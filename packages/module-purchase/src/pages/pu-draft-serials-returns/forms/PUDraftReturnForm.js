@@ -36,12 +36,14 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function PUDraftReturnForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -61,8 +63,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     }
   }, [documentType?.dtId])
 
-  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
     maxAccess,

@@ -20,15 +20,17 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function TRXForm({ labels, access, setStore, store }) {
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const functionId = SystemFunction.CostAllocation
 
   async function getDefaultPlant() {
-    const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')
+    const defaultPlant = userDefaults?.list?.find(({ key }) => key === 'plantId')
 
     return defaultPlant?.value ? parseInt(defaultPlant.value) : null
   }

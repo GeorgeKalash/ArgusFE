@@ -10,10 +10,12 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function AUDefaultsForm({ _labels, access }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const { formik } = useForm({
     initialValues: {
@@ -38,14 +40,9 @@ export default function AUDefaultsForm({ _labels, access }) {
 
   useEffect(() => {
     ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: `_filter=`
-      })
-
       const keysToExtract = ['au_PlantSupervisorSG', 'au_GlobalSupervisorSG']
 
-      const myObject = res.list.reduce((acc, { key, value }) => {
+      const myObject = systemDefaults.list.reduce((acc, { key, value }) => {
         if (keysToExtract.includes(key)) {
           acc[key] = value ? parseInt(value) : null
         }

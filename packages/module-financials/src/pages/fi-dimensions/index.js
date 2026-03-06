@@ -11,11 +11,13 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const FiDimensions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [stagingDimCount, setStagingDimCount] = useState(null)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const { formik } = useForm({
     initialValues: {
@@ -71,24 +73,20 @@ const FiDimensions = () => {
 
   const getDataResult = () => {
     const fetchedValues = {}
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: parameters
-    }).then(res => {
-      const filteredList = res.list.filter(obj => {
-        return Object.keys(formik.values).includes(obj.key)
-      })
 
-      filteredList.forEach(obj => {
-        if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
-          fetchedValues[obj.key] = parseInt(obj.value)
-        } else {
-          fetchedValues[obj.key] = obj.value
-        }
-      })
-      formik.setValues(fetchedValues)
+    const filteredList = systemDefaults.list.filter(obj => {
+      return Object.keys(formik.values).includes(obj.key)
     })
+
+    filteredList.forEach(obj => {
+      if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
+        fetchedValues[obj.key] = parseInt(obj.value)
+      } else {
+        fetchedValues[obj.key] = obj.value
+      }
+    })
+    formik.setValues(fetchedValues)
+
   }
 
   const { labels, access } = useResourceQuery({

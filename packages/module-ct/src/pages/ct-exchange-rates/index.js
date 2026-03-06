@@ -24,15 +24,17 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ClearDialog from '@argus/shared-ui/src/components/Shared/ClearDialog'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const [plantStore, setPlantsStore] = useState([])
   const clearButton = getButtons(platformLabels)?.find(({ key }) => key === 'Clear') || null
   const { stack } = useWindow()
 
-  const raCurrencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value) || null
+  const raCurrencyId = parseInt(systemDefaults?.list?.find(({ key }) => key === 'baseCurrencyId')?.value) || null
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.CtExchangeRates

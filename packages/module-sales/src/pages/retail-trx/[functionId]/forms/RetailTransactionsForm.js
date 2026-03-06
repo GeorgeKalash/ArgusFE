@@ -51,6 +51,7 @@ import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function RetailTransactionsForm({
   labels,
@@ -66,7 +67,8 @@ export default function RetailTransactionsForm({
   const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  const { platformLabels, defaultsData, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, systemChecks } = useContext(DefaultsContext)
   const [address, setAddress] = useState({})
   const [reCal, setReCal] = useState(false)
   const [addressModified, setAddressModified] = useState(false)
@@ -573,7 +575,7 @@ export default function RetailTransactionsForm({
         }
       })
     )
-    const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const countryId = systemDefaults?.list?.find(({ key }) => key === 'countryId')
 
     formik.setValues({
       recordId: retailTrxHeader.recordId || null,
@@ -1084,8 +1086,8 @@ export default function RetailTransactionsForm({
   }
 
   async function setMetalPriceOperations() {
-    const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
-    const defaultRateType = defaultsData?.list?.find(({ key }) => key === 'mc_defaultRTSA')
+    const defaultMCbaseCU = systemDefaults?.list?.find(({ key }) => key === 'baseMetalCuId')
+    const defaultRateType = systemDefaults?.list?.find(({ key }) => key === 'mc_defaultRTSA')
     formik.setFieldValue('baseMetalCuId', parseInt(defaultMCbaseCU?.value))
     if (!defaultRateType?.value) {
       stackError({
@@ -1165,7 +1167,7 @@ export default function RetailTransactionsForm({
     }
 
     const hasSingleCashPos = checkSingleCashPos?.record?.value
-    const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const countryId = systemDefaults?.list?.find(({ key }) => key === 'countryId')
     const posDtId = level2CacheRef?.current?.documentTypes?.some(x => x.recordId == posInfo?.dtId) || false
     formik.setFieldValue('singleCashPos', hasSingleCashPos)
     formik.setFieldValue('header.isVatable', isVat)

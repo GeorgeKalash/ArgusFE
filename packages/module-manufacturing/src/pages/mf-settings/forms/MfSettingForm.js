@@ -11,10 +11,12 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const MfSettingForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const DefaultFields = {
     AVA_SITE_ID: 'mf_ava_siteId',
@@ -41,7 +43,7 @@ const MfSettingForm = ({ _labels, access }) => {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-      updateDefaults(data)
+      updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })
@@ -53,13 +55,13 @@ const MfSettingForm = ({ _labels, access }) => {
   }
 
   useEffect(() => {
-    if (!defaultsData?.list?.length) return
+    if (!systemDefaults?.list?.length) return
 
-    defaultsData.list.forEach(({ key, value }) => {
+    systemDefaults.list.forEach(({ key, value }) => {
       if (!Object.values(DefaultFields).includes(key)) return
       formik.setFieldValue(key, parseDefaultValue(key, value))
     })
-  }, [defaultsData])
+  }, [systemDefaults])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={access}>

@@ -23,10 +23,12 @@ import PuDetailsForm from './forms/PuDetailsForm'
 import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import toast from 'react-hot-toast'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { labels, access } = useResourceQuery({
@@ -37,7 +39,7 @@ const GeneratePurchaseInvoice = () => {
     datasetId: ResourceIds.PurchaseInvoice
   })
 
-  const defCurrencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'PUCurrencyId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(({ key }) => key === 'PUCurrencyId')?.value)
 
   const basicValidation = yup.object({
     vendorId: yup.number().required(),

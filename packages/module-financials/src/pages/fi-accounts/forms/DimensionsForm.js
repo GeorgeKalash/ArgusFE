@@ -9,10 +9,12 @@ import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function DimensionsForm({ store, maxAccess }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { recordId: accountId } = store
 
   const toSafeFieldKey = value => {
@@ -23,7 +25,7 @@ export default function DimensionsForm({ store, maxAccess }) {
 
   const dimensionFields = useMemo(() => {
     const dimCount = parseInt(
-      defaultsData?.list?.find(obj => obj.key === 'DimCount')?.value,
+      systemDefaults?.list?.find(obj => obj.key === 'DimCount')?.value,
       10
     )
 
@@ -34,7 +36,7 @@ export default function DimensionsForm({ store, maxAccess }) {
       return m ? parseInt(m[1], 10) : null
     }
 
-    const filteredList = (defaultsData?.list || [])
+    const filteredList = (systemDefaults?.list || [])
       .map(obj => ({
         ...obj,
         dimensionNumber: getDimNumberFromKey(obj.key)
@@ -63,7 +65,7 @@ export default function DimensionsForm({ store, maxAccess }) {
       seen.add(k)
       return { ...f, fieldKey: k }
     })
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const { formik } = useForm({
     initialValues: { accountId: accountId ?? '' },

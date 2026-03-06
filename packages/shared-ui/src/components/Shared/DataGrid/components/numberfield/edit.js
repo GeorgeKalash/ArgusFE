@@ -1,11 +1,11 @@
 import { useContext, useRef } from 'react'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import styles from './numberfield.module.css'   
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function NumberfieldEdit({ id, column: { props, field }, value, data, update, updateRow }) {
-  const { systemChecks } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
   const checkCondition = props?.onCondition && props?.onCondition(data)
   const decimalScale = checkCondition?.decimalScale ?? props?.decimalScale;
   const readOnly = checkCondition?.readOnly ?? props?.readOnly

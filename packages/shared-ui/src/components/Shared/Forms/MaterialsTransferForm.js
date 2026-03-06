@@ -31,10 +31,12 @@ import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const filteredMeasurements = useRef([])
@@ -53,8 +55,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
     access,
     enabled: !recordId
   })
-  const siteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = userDefaults?.list?.find(({ key }) => key === 'siteId')
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const initialValues = {
     recordId: null,
