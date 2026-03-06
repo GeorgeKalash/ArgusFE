@@ -313,7 +313,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         }),
         items: updatedRows,
         serials: serialsValues,
-       taxCodes: obj?.items.reduce((acc, item) => {
+        taxCodes: obj?.items.reduce((acc, item) => {
           if (item.taxDetails?.length) {
             item.taxDetails.forEach(td => {
               const { seqNo, ...rest } = td
@@ -685,7 +685,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         displayFieldWidth: 4,
         allowClear: false
       },
-     async onChange({ row: { update, newRow, oldRow } }) {
+      async onChange({ row: { update, newRow, oldRow } }) {
         if (!newRow?.taxId && oldRow?.taxId) {
           update({
             taxId: oldRow.taxId,
@@ -737,7 +737,24 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             amount: parseFloat(calculatedAmount)
           }
         })
-  
+
+        const taxCodes = (formik?.values?.items || []).reduce((acc, item) => {
+          const details = item?.id === newRow?.id
+            ? taxDetails
+            : item?.taxDetails || []
+
+          details.forEach(td => {
+            const { seqNo, ...rest } = td
+            acc.push({
+              seqNo: item?.id,
+              ...rest
+            })
+          })
+
+          return acc
+        }, [])
+
+        formik.setFieldValue('taxCodes',taxCodes)
         update({
           vatAmount: vatCalcRow?.vatAmount || 0,
           taxDetails
