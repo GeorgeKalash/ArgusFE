@@ -42,30 +42,25 @@ const IomProperties = () => {
   })
 
   useEffect(() => {
-    ;(async function () {
-      const dimensions = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: `_filter=ivtDimension`
+    if (!systemDefaults?.list) return
+
+    const items = systemDefaults.list
+      .filter(item => item.key?.startsWith('ivtDimension') && item.value)
+      .map(item => {
+        const match = item.key?.match(/^ivtDimension(\d{1,2})$/)
+        if (match) {
+          return {
+            ...item,
+            recordId: parseInt(match[1]),
+            name: item.value
+          }
+        }
+
+        return item
       })
 
-      const items = (dimensions?.list || [])
-        .filter(item => item.value !== '')
-        .map(item => {
-          const match = item.key?.match(/^ivtDimension(\d{1,2})$/)
-          if (match) {
-            return {
-              ...item,
-              recordId: parseInt(match[1]),
-              name: item.value
-            }
-          }
-
-          return item
-        })
-
-      setPropertyStore(items || [])
-    })()
-  }, [])
+    setPropertyStore(items || [])
+  }, [systemDefaults])
 
   useEffect(() => {
     const keys = ['mfimd1', 'mfimd2']
