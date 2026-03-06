@@ -17,10 +17,12 @@ import { PurchaseRepository } from '@argus/repositories/src/repositories/Purchas
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
 export default function SparePartsForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const invalidate = useInvalidate({
     endpointId: RepairAndServiceRepository.SpareParts.page
@@ -218,7 +220,11 @@ export default function SparePartsForm({ labels, maxAccess, recordId, window }) 
                   { key: 'sku', value: 'SKU' },
                   { key: 'name', value: 'Name' }
                 ]}
-                onChange={(event, newValue) => {
+                linkOpen={{
+                  resourceId: ResourceIds.Item,
+                  props: { recordId: formik.values.itemId },
+                }}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('itemName', newValue?.name || '')
                   formik.setFieldValue('sku', newValue?.sku || '')
                   formik.setFieldValue('itemId', newValue?.recordId || null)

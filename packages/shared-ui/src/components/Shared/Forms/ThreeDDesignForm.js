@@ -23,7 +23,6 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
-import SketchForm from '@argus/shared-ui/src/components/Shared/Forms/SketchForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
@@ -192,17 +191,6 @@ const ThreeDDesignForm = ({ recordId, window }) => {
     })
   }
 
-  async function onSketch() {
-    stack({
-      Component: SketchForm,
-      props: {
-        labels: labels,
-        recordId: formik?.values?.sketchId,
-        maxAccess: access
-      }
-    })
-  }
-
   const actions = [
     {
       key: 'Close',
@@ -233,12 +221,6 @@ const ThreeDDesignForm = ({ recordId, window }) => {
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
-    },
-    {
-      key: 'Sketch',
-      condition: true,
-      onClick: onSketch,
-      disabled: !formik?.values?.sketchId
     }
   ]
 
@@ -369,6 +351,10 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     endpointId={ProductModelingRepository.Sketch.snapshot3}
                     parameters={{ _productionLineId: formik.values.productionLineId || 0 }}
                     name='sketchId'
+                    linkOpen={{
+                      props: { recordId: formik.values.sketchId },
+                      resourceId: ResourceIds.Sketch
+                    }}
                     required
                     label={labels.sketchRef}
                     secondDisplayField={false}
