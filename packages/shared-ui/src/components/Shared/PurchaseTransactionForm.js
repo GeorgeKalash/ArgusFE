@@ -87,8 +87,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     value: 2
   })
 
-console.log(functionId)
-
   const getResourceId = functionId => {
     switch (functionId) {
       case SystemFunction.PurchaseInvoice:
