@@ -738,23 +738,26 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           }
         })
 
-        const taxCodes = (formik?.values?.items || []).reduce((acc, item) => {
-          const details = item?.id === newRow?.id
-            ? taxDetails
-            : item?.taxDetails || []
+        if (editMode) {
+          const taxCodes = (formik?.values?.items || []).reduce((acc, item) => {
+            const details = item?.id === newRow?.id
+              ? taxDetails
+              : item?.taxDetails || []
 
-          details.forEach(td => {
-            const { seqNo, ...rest } = td
-            acc.push({
-              seqNo: item?.id,
-              ...rest
+            details.forEach(td => {
+              const { seqNo, ...rest } = td
+              acc.push({
+                seqNo: item?.id,
+                ...rest
+              })
             })
-          })
 
-          return acc
-        }, [])
+            return acc
+          }, [])
 
-        formik.setFieldValue('taxCodes',taxCodes)
+          formik.setFieldValue('taxCodes', taxCodes)
+        }
+
         update({
           vatAmount: vatCalcRow?.vatAmount || 0,
           taxDetails
