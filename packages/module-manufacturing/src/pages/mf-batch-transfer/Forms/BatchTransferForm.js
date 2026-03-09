@@ -32,7 +32,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
+  
   const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
   const max_btfr_lines_allowed = parseInt(defaultsData?.list?.find(obj => obj.key === 'max_btfr_lines_allowed')?.value) || null
 
@@ -289,9 +290,9 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           stack({
             Component: JTCheckoutForm,
             props: {
-              recordId: row?.transferId
+              recordId: row?.transferId,
+              refetch: () => refetchForm(formik.values?.recordId)
             },
-            onClose: () => refetchForm(formik.values?.recordId)
           })
       },
       props: {

@@ -28,7 +28,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { useError } from '@argus/shared-providers/src/providers/error'
 
-export default function JTCheckoutForm({ recordId, window }) {
+export default function JTCheckoutForm({ recordId, window, refetch }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   
@@ -184,6 +184,10 @@ export default function JTCheckoutForm({ recordId, window }) {
     }).then(async () => {
       await getData(formik?.values?.transfer?.recordId)
       invalidate()
+      
+        if (refetch) {
+          refetch()
+        }
       toast.success(platformLabels.Posted)
       window.close()
     })
@@ -198,6 +202,10 @@ export default function JTCheckoutForm({ recordId, window }) {
       })
     }).then(async () => {
       await getData(formik?.values?.transfer?.recordId)
+      
+        if (refetch) {
+          refetch()
+        }
       toast.success(platformLabels.Closed)
       invalidate()
     })
@@ -212,6 +220,10 @@ export default function JTCheckoutForm({ recordId, window }) {
       })
     }).then(async () => {
       await getData(formik?.values?.recordId)
+      
+        if (refetch) {
+          refetch()
+        }
       toast.success(platformLabels.Reopened)
       invalidate()
     })
