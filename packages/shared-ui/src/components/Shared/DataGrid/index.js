@@ -315,9 +315,11 @@ export function DataGrid({
         const rowNode = gridApiRef.current.getRowNode(newRowNode.data.id)
         if (rowNode) {
           const rowIndex = rowNode.rowIndex
+          const { columnIndex } = findNextEditableColumn(-1, rowIndex, 1, gridApiRef.current)
+
           gridApiRef.current.startEditingCell({
             rowIndex: rowIndex,
-            colKey: allColumns[0].name
+            colKey: allColumns[columnIndex]?.name
           })
         }
         if (typeof onValidationRequired === 'function') onValidationRequired()
