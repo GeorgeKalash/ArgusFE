@@ -286,7 +286,8 @@ export const ManufacturingRepository = {
     qry: service + 'qryBMI',
     del: service + 'delBMI',
     set: service + 'setBMI',
-    set2: service + 'set2BMI'
+    set2: service + 'set2BMI',
+    preview: service + 'previewBMI'
   },
   Assembly: {
     get: service + 'getASM',

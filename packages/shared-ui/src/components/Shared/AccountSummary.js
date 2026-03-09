@@ -28,7 +28,14 @@ export default function AccountSummary({ accountId, date, window }) {
     datasetId: ResourceIds.AccountSummary
   })
 
-  const baseColumns = [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }]
+  const baseColumns = [
+    {
+      field: 'days',
+      headerName: labels.days,
+      width: 5,
+      cellClass: params => params.value === labels.grandTotal ? '' : 'right'
+    }
+  ]
 
   const { formik } = useForm({
     maxAccess: access,
@@ -117,7 +124,7 @@ export default function AccountSummary({ accountId, date, window }) {
       dynamicColumns.push({
         field: `column${index + 1}`,
         headerName: cur,
-        flex: 1,
+        width: 110,
         type: 'number'
       })
     })
@@ -129,7 +136,7 @@ export default function AccountSummary({ accountId, date, window }) {
     )
 
     const rows = agingRows.map(row => {
-      const rowObject = { days: row.seqDays }
+      const rowObject = { days: Number(row.seqDays).toLocaleString() }
 
       currencies.forEach((cur, index) => {
         const value = agingProfiles
@@ -142,7 +149,9 @@ export default function AccountSummary({ accountId, date, window }) {
       return rowObject
     })
 
-    const totalRow = {}
+    const totalRow = {
+      days: labels.grandTotal
+    }
 
     currencies.forEach((cur, index) => {
       const total = agingProfiles.some(i => i.seqDays === -1 && i.currencyRef === cur)
@@ -267,10 +276,10 @@ export default function AccountSummary({ accountId, date, window }) {
         </Grid>
       </Fixed>
       <Grid container spacing={1} sx={{ flex: 1 }}>
-        <Grid item xs={4} sx={{ display: 'flex' }}>
+        <Grid item xs={5} sx={{ display: 'flex' }}>
           <Table name='summaryTable' columns={formik.values.summaryColumns} gridData={formik.values.summaryData} pagination={false} />
         </Grid>
-        <Grid item xs={8} sx={{ display: 'flex' }}>
+        <Grid item xs={7} sx={{ display: 'flex' }}>
           <Table name='agingProfilesTable' columns={formik.values.columns} gridData={formik.values.gridData} pagination={false} />
         </Grid>
       </Grid>
@@ -278,5 +287,5 @@ export default function AccountSummary({ accountId, date, window }) {
   )
 }
 
-AccountSummary.width = 1000
+AccountSummary.width = 1200
 AccountSummary.height = 500

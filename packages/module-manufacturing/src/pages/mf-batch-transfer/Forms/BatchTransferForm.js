@@ -186,7 +186,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
     {
       component: 'resourcelookup',
       label: labels.jobOrder,
-      name: 'jobId',
+      name: 'jobRef',
+      disableDuplicate: true,
       flex: 1,
       props: {
         endpointId: ManufacturingRepository.MFJobOrder.snapshot4,
@@ -482,6 +483,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
             error={formik.errors.items}
             allowDelete={!isPosted}
             disabled={isPosted || formik.values.header?.toWCId === null || formik.values.header?.fromWCId === null}
+            showCounterColumn={true}
             name='items'
             columns={columns}
             maxAccess={maxAccess}

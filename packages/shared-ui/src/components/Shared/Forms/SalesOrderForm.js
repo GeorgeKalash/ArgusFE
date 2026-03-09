@@ -389,7 +389,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           msId: itemInfo?.msId,
           muRef: defaultMu?.reference || '',
           muId: defaultMu?.recordId || null,
-          muQty: 0,
+          muQty: defaultMu?.qty || 0,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
@@ -483,7 +483,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const muQty = newRow?.muQty ?? filteredItems?.qty
 
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update({ ...data, baseQty: newRow?.qty * muQty })
+        update({ ...data, baseQty: parseFloat(newRow?.qty) * muQty })
       }
     },
     {
@@ -980,7 +980,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       weight: newRow?.weight,
       unitPrice: newRow?.unitPrice || 0,
       upo: parseFloat(newRow?.upo) || 0,
-      qty: newRow?.qty,
+      qty: parseFloat(newRow?.qty),
       extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,
       mdType: newRow?.mdType,

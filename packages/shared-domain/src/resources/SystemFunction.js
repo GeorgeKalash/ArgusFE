@@ -128,6 +128,7 @@ export const SystemFunction = {
   EarnedLeaves: Module.LeaveReq * 100 + 3,
   Samples: Module.ProductModeling * 100 + 7,
   MetalSmelting: Module.Foundry * 100 + 5,
+  MetalCalibration: Module.Foundry * 100 + 7,
   BatchTransfer: Module.Manufacturing * 100 + 16,
   ItemDisposal: Module.Manufacturing * 100 + 17,
   PayrollList: Module.Payroll * 100 + 1,
