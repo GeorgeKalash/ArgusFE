@@ -98,7 +98,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     }
   }
 
-  const { labels, maxAccess: resourceMaxAccess } = useResourceParams({
+  const { labels, access: resourceMaxAccess } = useResourceParams({
     datasetId: ResourceIds.PurchaseInvoice,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
     editMode: !!recordId,
