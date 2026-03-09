@@ -345,7 +345,7 @@ export function DataGrid({
           label: ' ',
           flex: 0.7,
           props: { disabled: true },
-          counterColumn: true
+          valueGetter: params => params?.node?.rowIndex + 1
         }
       ]
     : []
@@ -584,13 +584,6 @@ export function DataGrid({
       )
     }
     
-    if (column.colDef?.counterColumn) {
-      return (
-        <Box sx={{ width: '100%', textAlign: 'center' }}>
-          {params.node.rowIndex + 1}
-        </Box>
-      )
-    }
 
     const Component =
       typeof column.colDef.component === 'string'
