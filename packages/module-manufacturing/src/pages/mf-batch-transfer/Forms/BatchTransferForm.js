@@ -172,7 +172,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
     {
       component: 'resourcelookup',
       label: labels.jobOrder,
-      name: 'jobId',
+      name: 'jobRef',
+      disableDuplicate: true,
       flex: 1,
       props: {
         endpointId: ManufacturingRepository.JobWorkCenter.snapshot,

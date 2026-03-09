@@ -499,7 +499,7 @@ export default function SamplesForm({ recordId, window }) {
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ManufacturingRepository.MFJobOrder.snapshot3}
-                    parameters={{ _status: 1 }}
+                    parameters={{ _status: 4 }}
                     valueField='reference'
                     displayField='reference'
                     secondDisplayField={false}
@@ -511,6 +511,7 @@ export default function SamplesForm({ recordId, window }) {
                     required
                     valueShow='jobRef'
                     maxAccess={access}
+                    displayFieldWidth={2}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'itemName', value: 'Item Name' },
@@ -562,6 +563,7 @@ export default function SamplesForm({ recordId, window }) {
                     formObject={formik.values.header}
                     form={formik}
                     required
+                    displayFieldWidth={2}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'date', value: 'Date', type: 'date' },
