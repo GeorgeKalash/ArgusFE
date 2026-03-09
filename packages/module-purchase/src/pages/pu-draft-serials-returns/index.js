@@ -124,8 +124,8 @@ const PUDraftSerialsReturns = () => {
         access,
         recordId
       },
-      width: 1400,
-      height: 800,
+      width: 1300,
+      height: 750,
       title: labels.draftSerReturn
     })
   }

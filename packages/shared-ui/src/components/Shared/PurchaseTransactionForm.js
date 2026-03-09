@@ -65,8 +65,10 @@ import Installments from '@argus/shared-ui/src/components/Shared/Installments'
 import { PUSerialsForm } from '@argus/shared-ui/src/components/Shared/PUSerialsForm'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import useSetWindow from "@argus/shared-hooks/src/hooks/useSetWindow";
+import useResourceParams from "@argus/shared-hooks/src/hooks/useResourceParams";
 
-export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
+export default function PurchaseTransactionForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -87,12 +89,40 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     value: 2
   })
 
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.PurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.PurchaseReturn
+      default:
+        return null
+    }
+  }
+
+  const { labels, access: resourceMaxAccess } = useResourceParams({
+    datasetId: ResourceIds.PurchaseInvoice,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
+    editMode: !!recordId,
+  });
+
+
+  const getCorrectLabel = functionId => {
+    if (parseFloat(functionId) === SystemFunction.PurchaseInvoice) {
+      return labels.purchaseInvoice
+    } else if (parseFloat(functionId) === SystemFunction.PurchaseReturn) {
+      return labels.purchaseReturn
+    }
+  }
+
+  useSetWindow({ title: getCorrectLabel(functionId), window });
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
-    access: access,
+    access: resourceMaxAccess,
     enabled: !recordId,
     objectName: 'header'
-  })
+  });
 
   const conditions = {
     sku: row => row?.sku,
@@ -315,16 +345,21 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         }),
         items: updatedRows,
         serials: serialsValues,
-        taxCodes: [
-          ...[
-            ...obj.items
-              .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
-              .map(({ taxDetails, id }) => ({
-                seqNo: id,
-                ...taxDetails[0]
-              }))
-          ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
-        ],
+        taxCodes: obj?.items.reduce((acc, item) => {
+          if (item.taxDetails?.length) {
+            item.taxDetails.forEach(td => {
+              const { seqNo, ...rest } = td
+
+              acc.push({
+                seqNo: item.id,
+                taxSeqNo: seqNo,
+                ...rest
+              })
+            })
+          }
+
+          return acc
+        }, []),
         ...(({ header, items, taxCodes, serials, ...rest }) => rest)(obj)
       }
 
@@ -679,29 +714,86 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 4
+        displayFieldWidth: 4,
+        allowClear: false
       },
-      async onChange({ row: { update, newRow } }) {
-          setReCal(true)
-          const taxDetails = newRow?.taxId ? await getTaxDetails(newRow?.taxId) : null
-
-          const vatCalcRow = getVatCalc({
-            priceType: newRow?.priceType,
-            basePrice: newRow?.basePrice,
-            unitPrice: newRow?.unitPrice,
-            qty: newRow?.qty,
-            weight: newRow?.weight,
-            extendedPrice: newRow?.extendedPrice,
-            baseLaborPrice: newRow?.baseLaborPrice,
-            vatAmount: newRow?.vatAmount || 0,
-            tdPct: formik?.values?.header?.tdPct,
-            taxDetails: formik.values.header.isVattable? taxDetails : null
-          })
-
+      async onChange({ row: { update, newRow, oldRow } }) {
+        if (!newRow?.taxId && oldRow?.taxId) {
           update({
-            vatAmount: vatCalcRow?.vatAmount || 0 ,
-            taxDetails
+            taxId: oldRow.taxId,
+            taxName: oldRow.taxName
           })
+          return
+        }
+        setReCal(true)
+
+        const { header, recordId } = formik.values
+        const isVattable = header?.isVattable
+
+        const baseRow = {
+          priceType: newRow?.priceType,
+          basePrice: newRow?.basePrice,
+          unitPrice: newRow?.unitPrice,
+          qty: newRow?.qty,
+          weight: newRow?.weight,
+          extendedPrice: newRow?.extendedPrice,
+          baseLaborPrice: newRow?.baseLaborPrice,
+          vatAmount: newRow?.vatAmount || 0,
+          tdPct: header?.tdPct || 0
+        }
+
+        const taxDetailsList = newRow?.taxId
+          ? await getTaxDetails(newRow.taxId)
+          : []
+
+        const vatCalcRow = getVatCalc({
+          ...baseRow,
+          taxDetails: isVattable ? taxDetailsList : null
+        })
+
+        const taxDetails = (taxDetailsList || []).map(item => {
+          const singleTaxDetail = isVattable
+            ? { ...item, taxScheduleAmount: item.amount || 0 }
+            : null
+
+          const calculatedAmount = calcVatAmountPerTaxDetail(
+            { ...baseRow, taxDetails: singleTaxDetail },
+            singleTaxDetail
+          )
+
+          return {
+            ...item,
+            taxScheduleAmount: item?.amount || 0,
+            invoiceId: recordId || 0,
+            taxSeqNo: item?.seqNo,
+            amount: parseFloat(calculatedAmount)
+          }
+        })
+
+        if (editMode) {
+          const taxCodes = (formik?.values?.items || []).reduce((acc, item) => {
+            const details = item?.id === newRow?.id
+              ? taxDetails
+              : item?.taxDetails || []
+
+            details.forEach(td => {
+              const { seqNo, ...rest } = td
+              acc.push({
+                seqNo: item?.id,
+                ...rest
+              })
+            })
+
+            return acc
+          }, [])
+
+          formik.setFieldValue('taxCodes', taxCodes)
+        }
+
+        update({
+          vatAmount: vatCalcRow?.vatAmount || 0,
+          taxDetails
+        })
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: formik.values?.header?.taxId || !row?.taxId }
@@ -1832,16 +1924,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
   }
 
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.PurchaseInvoice:
-        return ResourceIds.PurchaseInvoice
-      case SystemFunction.PurchaseReturn:
-        return ResourceIds.PurchaseReturn
-      default:
-        return null
-    }
-  }
 
   return (
     <FormShell
@@ -2270,3 +2352,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     </FormShell>
   )
 }
+
+PurchaseTransactionForm.width = 1330
+PurchaseTransactionForm.height = 720
