@@ -392,12 +392,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
 
   const columns = [
     {
-      component: 'numberfield',
-      name: 'id',
-      label: labels.count,
-      props: { readOnly: true }
-    },
-    {
       component: 'resourcecombobox',
       label: labels.type,
       name: 'type',
@@ -960,6 +954,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
             error={formik.errors?.items}
             name='items'
             columns={columns}
+            showCounterColumn={true}
             initialValues={formik?.initialValues?.items?.[0]}
             maxAccess={maxAccess}
             disabled={isPosted}
