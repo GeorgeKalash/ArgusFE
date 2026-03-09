@@ -36,8 +36,9 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
+import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/PurchaseTransactionForm'
 
-export default function PUDraftReturnForm({ labels, access, recordId }) {
+export default function PUDraftReturnForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -580,10 +581,21 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
         date: formatDateToApi(date),
         wip: 2
       })
-    }).then(async () => {
+    }).then(async res => {
       toast.success(platformLabels.Posted)
+      window.close();
       invalidate()
-      await refetchForm(formik?.values?.recordId)
+      openPurchaseReturn(res?.recordId)
+    })
+  }
+
+  async function openPurchaseReturn(recordId) {
+    stack({
+      Component: PurchaseTransactionForm,
+      props: {
+        recordId,
+        functionId: SystemFunction.PurchaseReturn
+      }
     })
   }
 
@@ -1081,7 +1093,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 form={formik}
                 required
                 readOnly={isPosted}
-                displayFieldWidth={2}
+                displayFieldWidth={3}
                 firstFieldWidth={3}
                 secondFieldName={'header.vendorName'}
                 valueShow='vendorRef'
@@ -1203,36 +1215,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           />
         </Grow>
         <Grid container spacing={2}>
-          <Grid item xs={5} height={'13vh'} sx={{ display: 'flex', flex: 1 }}>
-            <Table
-              name='metal'
-              gridData={{ count: 1, list: formik?.values?.metalGridData }}
-              maxAccess={access}
-              columns={[
-                { field: 'metal', headerName: labels.metal, flex: 1 },
-                { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
-                { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
-              ]}
-              rowId={['metal']}
-              pagination={false}
-            />
-          </Grid>
-          <Grid item xs={0.5}></Grid>
-          <Grid item xs={2}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} height={20}></Grid>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='header.weight'
-                  maxAccess={maxAccess}
-                  label={labels.totalWeight}
-                  value={weight}
-                  readOnly
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={8} height={'13vh'} sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={6.5} height={'20vh'} sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='item'
               columns={[
@@ -1248,7 +1231,31 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
               pagination={false}
             />
           </Grid>
-        </Grid>
+          <Grid item xs={3.5} height={'20vh'} sx={{ display: 'flex', flex: 1 }}>
+            <Table
+              name='metal'
+              gridData={{ count: 1, list: formik?.values?.metalGridData }}
+              maxAccess={access}
+              columns={[
+                { field: 'metal', headerName: labels.metal, flex: 1 },
+                { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
+                { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
+              ]}
+              rowId={['metal']}
+              pagination={false}
+            />
+          </Grid>
+          <Grid item xs={2}> 
+            <Grid item xs={12} height={20}></Grid>
+              <CustomNumberField
+                name='header.weight'
+                maxAccess={maxAccess}
+                label={labels.totalWeight}
+                value={weight}
+                readOnly
+              />
+            </Grid>
+        </Grid> 
       </VertLayout>
     </FormShell>
   )
