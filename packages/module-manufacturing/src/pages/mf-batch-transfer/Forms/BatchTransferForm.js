@@ -189,26 +189,22 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       name: 'jobId',
       flex: 1,
       props: {
-        endpointId: ManufacturingRepository.JobWorkCenter.snapshot,
+        endpointId: ManufacturingRepository.MFJobOrder.snapshot4,
         parameters: {
           _workCenterId: formik.values?.header?.fromWCId
         },
-        displayField: 'jobRef',
-        valueField: 'jobRef',
+        displayField: 'reference',
+        valueField: 'reference',
         mapping: [
-          { from: 'jobId', to: 'jobId' },
-          { from: 'jobRef', to: 'jobRef' }
+          { from: 'recordId', to: 'jobId' },
+          { from: 'reference', to: 'jobRef' },
+          { from: 'itemName', to: 'itemName' }
         ],
         displayFieldWidth: 4,
         readOnly: !formik.values?.header?.fromWCId
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.jobId) return
-
-        const res = await getRequest({
-          extension: ManufacturingRepository.MFJobOrder.get,
-          parameters: `_recordId=${newRow?.jobId}`
-        })
 
         const res2 = await getRequest({
           extension: ManufacturingRepository.JobWorkCenter.verify,
@@ -223,7 +219,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
         update({
           jobId: newRow?.jobId || null,
           jobRef: newRow?.jobRef || '',
-          itemName: res.record?.itemName || '',
+          itemName: newRow?.itemName || '',
           itemId: res2.record?.itemId || null,
           sku: res2.record?.sku || '',
           itemGroupName: res2.record?.itemGroupName || '',
