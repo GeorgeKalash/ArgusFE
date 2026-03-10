@@ -750,10 +750,18 @@ export function DataGrid({
     ...allColumns.map(column => {
       const mergedCellClass = [column.cellClass, 'wrapTextCell']
 
+      const component = column.component === 'checkbox' || column.component === 'button' || column.component === 'icon'
+
       const centered =
-        column.component === 'checkbox' || column.component === 'button' || column.component === 'icon'
+        component
           ? 'cellBoxCentered'
           : 'noCenterCell'
+
+      const filterMap = {
+        date: 'agDateColumnFilter',
+        textfield: 'agTextColumnFilter',
+        numberfield: 'agNumberColumnFilter'
+      }
 
       return {
         ...column,
@@ -764,6 +772,8 @@ export function DataGrid({
         editable: params => !_disabled && !params.colDef?.props?.disabled,
         flex: column.flex || (!column.width && 1),
         sortable: false,
+        floatingFilter: !component,
+        filter: filterMap[column.component] || 'agTextColumnFilter',     
         cellRenderer: CustomCellRenderer,
         cellEditor: CustomCellEditor,
         wrapText: true,
@@ -1009,10 +1019,6 @@ export function DataGrid({
                 gridApiRef.current = params.api
                 onChange(value)
                 setReady(true)
-              }}
-              defaultColDef={{
-                filter: true,
-                floatingFilter: true
               }}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
