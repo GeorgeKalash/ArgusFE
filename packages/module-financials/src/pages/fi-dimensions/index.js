@@ -81,7 +81,7 @@ const FiDimensions = () => {
     })
 
     filteredList.forEach(obj => {
-      if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
+      if (typeof obj.value === 'string' && !isNaN(obj.value) && obj.value.trim() !== '') {
         fetchedValues[obj.key] = parseInt(obj.value)
       } else {
         fetchedValues[obj.key] = obj.value
