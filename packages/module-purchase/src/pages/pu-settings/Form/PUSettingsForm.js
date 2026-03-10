@@ -20,7 +20,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 const PUSettingsForm = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { systemDefaults } = useContext(DefaultsContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { labels: _labels, access } = useResourceQuery({
     datasetId: ResourceIds.PUSettings
@@ -56,6 +56,8 @@ const PUSettingsForm = () => {
           extension: SystemRepository.Defaults.set,
           record: JSON.stringify({ sysDefaults: data })
         })
+
+        updateSystemDefaults(data)
 
         if (response) {
           toast.success(platformLabels.Added)

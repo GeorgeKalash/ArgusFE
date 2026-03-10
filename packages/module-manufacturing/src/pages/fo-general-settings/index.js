@@ -19,7 +19,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 const FoGeneralSettings = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { systemDefaults } = useContext(DefaultsContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.GeneralSettings
@@ -85,6 +85,8 @@ const FoGeneralSettings = () => {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
+
+      updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })

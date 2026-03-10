@@ -20,7 +20,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 const EmpSettings = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { systemDefaults } = useContext(DefaultsContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.EmpSettings
@@ -98,6 +98,8 @@ const EmpSettings = () => {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
+      
+      updateSystemDefaults(data)
 
       if (obj.nameFormat !== obj.firstNameFormat) {
         await postRequest({

@@ -12,12 +12,14 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const FiDimensions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [stagingDimCount, setStagingDimCount] = useState(null)
-  const { systemDefaults } = useContext(DefaultsContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { formik } = useForm({
     initialValues: {
@@ -105,7 +107,8 @@ const FiDimensions = () => {
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: dataToPost })
     }).then(() => {
-      toast.success('Record Successfully Updated')
+      updateSystemDefaults(dataToPost)
+      toast.success(platformLabels.Updated)
     })
   }
 

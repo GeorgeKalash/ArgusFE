@@ -15,7 +15,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 export default function AUDefaultsForm({ _labels, access }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { systemDefaults } = useContext(DefaultsContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { formik } = useForm({
     initialValues: {
@@ -34,6 +34,8 @@ export default function AUDefaultsForm({ _labels, access }) {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
+
+      updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })
