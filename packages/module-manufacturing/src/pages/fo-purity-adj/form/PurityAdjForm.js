@@ -204,6 +204,8 @@ const calculateTotal = key =>
   }
 
   const getOpenMetalPurity = async itemId => {
+    if (!itemId) return
+    
     const res = await getRequest({
       extension: InventoryRepository.Physical.get,
       parameters: `_itemId=${itemId}`
@@ -253,12 +255,6 @@ const calculateTotal = key =>
   }
 
   const columns = [
-    {
-      component: 'numberfield',
-      name: 'id',
-      label: labels.count,
-      props: { readOnly: true }
-    },
     {
       component: 'textfield',
       label: labels.batchRef,
@@ -656,6 +652,7 @@ const calculateTotal = key =>
             error={formik.errors?.items}
             name='items'
             columns={columns}
+            showCounterColumn={true}
             initialValues={formik?.initialValues?.items?.[0]}
             maxAccess={maxAccess}
             disabled={isPosted}
