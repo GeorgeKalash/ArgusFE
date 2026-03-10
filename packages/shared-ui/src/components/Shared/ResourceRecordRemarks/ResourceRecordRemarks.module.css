@@ -1,0 +1,163 @@
+.container {
+ padding: 5px !important;
+}
+
+.TableContainer {
+    margin-top: 16px; 
+    padding-left: 40px; 
+    padding-right: 40px;
+  }
+  
+  .expanded {
+    height: calc(100vh - 250px);
+  }
+  
+  .collapsed {
+    height: 280px;
+  }
+
+  .flexStart {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .form {
+    padding-inline: 20px;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+    padding: 0px !important;
+    font-size: 14px;
+    gap: 4px;
+
+  }
+
+  .username {
+    padding-top: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start; 
+    font-size: 14px;
+    gap: 4px;
+  }
+
+  .textareaContent {
+    padding-top: 16px;       
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .customButton{
+    margin-top: -35px;
+  }
+
+  .customButton:dir(ltr){
+    margin-right: -3px;
+  }
+  .customButton:dir(rtl){
+    margin-left: -3px;
+  }
+
+  
+  .text { padding-top: 2px; font-size: 14px;}
+  .icon {font-size: 18px;}
+
+
+  @media (max-width: 1600px) {
+    .row {
+      font-size: 12px;
+    }
+  
+      .TableContainer {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .collapsed {
+          height: 220px;
+      }
+      .expanded {
+        height: calc(100vh - 230px);
+      }
+
+      .username {
+        font-size: 12px;
+      }
+
+      .text {
+        font-size: 12px !important;
+    
+      }
+
+      .textareaContent {
+        padding-top: 12px;           
+      }
+      .customButton{
+        margin-top: -30px;
+      }
+
+      .customButton:dir(ltr){
+        margin-right: -3px;
+      }
+      .customButton:dir(rtl){
+        margin-left: -3px;
+      }
+
+      .text { padding-top: 2px; font-size: 12px;}
+      .icon {font-size: 14px;}
+
+      .tableRow :global(.MuiTableCell-body:not(.MuiTableCell-sizeSmall):not(.MuiTableCell-paddingCheckbox):not(.MuiTableCell-paddingNone)) {
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+      }
+    }
+     
+  
+  @media (max-width: 1280px) {
+
+  .row {
+    font-size: 10px;
+  }
+  .text {
+    font-size: 10px !important;
+
+  }
+  .username {
+    font-size: 12px;
+  }
+    .TableContainer {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+    .collapsed {
+        height: 200px;
+    }
+    .expanded {
+      height: calc(100vh - 200px);
+    }
+  }
+
+  @media (max-width: 1024px) {
+
+    .row {
+      font-size: 10px;
+    }
+    .text {
+      font-size: 10px !important;
+  
+    }
+    .username {
+      font-size: 10px;
+    } 
+
+    .customButton{
+      margin-top: -28px;
+    }
+
+    .icon {font-size: 13px;}
+    }
+  
+ 
+  

@@ -1,0 +1,17 @@
+{
+  "name": "@argus/module-fa",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "private": false,
+  "dependencies": {
+    "@argus/repositories": "file:../repositories",
+    "@argus/shared-configs": "file:../shared-configs",
+    "@argus/shared-core": "file:../shared-core",
+    "@argus/shared-domain": "file:../shared-domain",
+    "@argus/shared-hooks": "file:../shared-hooks",
+    "@argus/shared-layouts": "file:../shared-layouts",
+    "@argus/shared-providers": "file:../shared-providers",
+    "@argus/shared-ui": "file:../shared-ui",
+    "@argus/shared-utils": "file:../shared-utils"
+  }
+}

@@ -1,0 +1,210 @@
+import { useContext } from 'react'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import cancelIcon from '@argus/shared-ui/src/components/images/TableIcons/cancel.png'
+import Image from 'next/image'
+import { Box, Grid, IconButton } from '@mui/material'
+import toast from 'react-hot-toast'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import CancelDialog from '@argus/shared-ui/src/components/Shared/CancelDialog'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+
+const GateKeeper = () => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
+  const {
+    query: { data },
+    labels,
+    refetch,
+    access,
+    filterBy,
+    filters,
+    clearFilter
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
+    datasetId: ResourceIds.GateKeeper,
+    filter: {
+      endpointId: ManufacturingRepository.LeanProductionPlanning.snapshot,
+      filterFn: fetchWithFilter
+    }
+  })
+
+  async function fetchGridData() {
+    const response = await getRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.preview,
+      parameters: `_status=2`
+    })
+
+    response.list = response?.list?.map(item => ({
+      ...item,
+      balance: item.qty - (item.qtyProduced ?? 0)
+    }))
+
+    return response
+  }
+
+  async function fetchWithFilter({ filters }) {
+    const res = await getRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.snapshot,
+      parameters: `_filter=${filters.qry ?? ''}&_status=${filters.status ?? 2}`
+    })
+    res.list = res?.list?.map(item => ({
+      ...item,
+      balance: item.qty - (item.qtyProduced ?? 0)
+    }))
+
+    return res
+  }
+
+  const columns = [
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 2
+    },
+    {
+      field: 'functionName',
+      headerName: labels.function,
+      flex: 2
+    },
+    {
+      field: 'sku',
+      headerName: labels.sku,
+      flex: 2
+    },
+    {
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'qtyProduced',
+      headerName: labels.produced,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'balance',
+      headerName: labels.balance,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'itemName',
+      headerName: labels.itemName,
+      flex: 2
+    },
+    {
+      field: 'date',
+      label: labels[6],
+      flex: 2,
+      type: 'date'
+    },
+    (!filters?.status || filters?.status == 2) && {
+      flex: 0.5,
+      field: 'Cancel',
+      headerName: 'Cancel',
+      cellRenderer: row => {
+        const { data } = row
+
+        if (data.qty == data.producedQty) return
+
+        return (
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <IconButton size='small' onClick={() => openCancel(data)}>
+              <Image src={cancelIcon} width={18} height={18} alt={labels.cancel} />
+            </IconButton>
+          </Box>
+        )
+      }
+    }
+  ].filter(Boolean)
+
+  const onCancel = async data => {
+    await postRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.cancel,
+      record: JSON.stringify(data)
+    })
+    refetch()
+    toast.success(platformLabels.Cancelled)
+  }
+
+  function openCancel(data) {
+    stack({
+      Component: CancelDialog,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => onCancel(data)
+      },
+      title: platformLabels.Cancel
+    })
+  }
+
+  const onChange = value => {
+    if (value) filterBy('status', value)
+    else clearFilter('status')
+  }
+
+  return (
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value?.replace(/\+/g, '%2B'))
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={labels}
+          inputSearch={true}
+          leftSection={
+            <Grid item xs={2.5}>
+              <ResourceComboBox
+                datasetId={DataSets.LEAN_STATUS}
+                name='status'
+                label={labels.status}
+                valueField='key'
+                displayField='value'
+                values={{
+                  status: filters?.status || 2
+                }}
+                onChange={(event, newValue) => {
+                  onChange(newValue?.key)
+                }}
+              />
+            </Grid>
+          }
+        />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          isLoading={false}
+          pageSize={2000}
+          paginationType='client'
+          refetch={refetch}
+          maxAccess={access}
+        />
+      </Grow>
+    </VertLayout>
+  )
+}
+
+export default GateKeeper

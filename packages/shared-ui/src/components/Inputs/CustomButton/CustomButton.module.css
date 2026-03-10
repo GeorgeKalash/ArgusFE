@@ -1,0 +1,227 @@
+.buttonContainer {
+  font-size: 22px !important;
+  display: flex;
+  align-items: center;
+}
+
+.responsiveButton {
+  min-width: 0px !important;
+  width: auto !important;
+  height: 34px !important;
+  padding: 4px 7px !important;
+}
+
+.responsiveButtonFullWidth {
+  min-width: 0px !important;
+  width: 100% !important;
+  height: 34px !important;
+  padding: 4px 7px !important;
+}
+
+.labelOnly span {
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+
+.buttonImage {
+  height: 20px !important;
+  width: 20px !important;
+  object-fit: contain;
+}
+
+.toast {
+  position: fixed;
+  background-color: #333333ad;
+  color: white;
+  padding: 3px 7px;
+  border-radius: 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 9999;
+}
+
+@media (min-width: 2049px) and (max-width: 2566px) {
+   .buttonImage {
+    height: 18px !important;
+    width: 18px !important; 
+  }
+  .responsiveButton,
+  .responsiveButtonFullWidth {
+    width: auto !important;
+    height: auto !important;
+    font-size: 18px !important;
+    padding: 9px 14px !important;
+  }
+  .responsiveButtonFullWidth {
+    width: 100% !important;
+  }
+  .toast {
+    font-size: 16px;
+  }
+  .labelOnly span {
+    font-size: 16px !important;
+  }
+}
+
+@media (min-width: 1601px) and (max-width: 2048px) {
+  .labelOnly span {
+    font-size: 14px !important;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .buttonImage {
+    height: 18px !important;
+    width: 18px !important; 
+  }
+  .responsiveButton,
+  .responsiveButtonFullWidth {
+    height: 30px !important;
+    border-radius: 5px !important;
+    padding: 5px 5px !important;
+  }
+  .toast {
+    font-size: 14px;
+  }
+  .labelOnly span {
+    font-size: 12px !important;
+  }
+}
+
+@media (min-width: 1281px) and (max-width: 1366px) {
+  .buttonImage {
+    height: 16px !important;
+    width: 16px !important;
+  }
+
+  .responsiveButton,
+  .responsiveButtonFullWidth {
+    height: 28px !important;
+    padding: 3px 6px !important;
+    border-radius: 5px !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  .responsiveButtonFullWidth {
+    width: 100% !important;
+  }
+
+  .labelOnly span {
+    font-size: 10.5px !important;
+    line-height: 1.1 !important;
+  }
+
+  .toast {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .buttonImage {
+    height: 15px !important;
+    width: 15px !important;
+  }
+
+  .responsiveButton,
+  .responsiveButtonFullWidth {
+    height: 26px !important;
+    padding: 2px 5px !important;
+    border-radius: 5px !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  .responsiveButtonFullWidth {
+    width: 100% !important;
+  }
+
+  .labelOnly span {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+  }
+
+  .toast {
+    font-size: 11.5px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .labelOnly span {
+    font-size: 10px !important;
+  }
+  .buttonImage {
+    height: 15px !important;
+    width: 15px !important; 
+  }
+  .responsiveButton,
+  .responsiveButtonFullWidth {
+    height: 28px !important;
+    font-size: 10px !important;
+    border-radius: 5px !important;
+    width: auto !important;
+    padding: 4px 7px !important;
+  }
+  .responsiveButtonFullWidth {
+    width: 100% !important;
+  }
+  .toast {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .labelOnly span {
+    font-size: 9px !important;
+  }
+  .buttonImage {
+    height: 14px !important;
+    width: 14px !important; 
+  }
+  .responsiveButton,
+  .responsiveButtonFullWidth {
+    height: 24px !important;
+  }
+  .toast {
+    font-size: 11px;
+    padding: 2px 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .labelOnly span {
+    font-size: 8px !important;
+  }
+  .buttonImage {
+    height: 12px !important;
+    width: 12px !important; 
+  }
+  .responsiveButton,
+  .responsiveButtonFullWidth {
+    height: 20px !important;
+  }
+  .toast {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+}
+
+@media (max-width: 360px) {
+  .labelOnly span {
+    font-size: 7px !important;
+  }
+  .buttonImage {
+    height: 11px !important;
+    width: 11px !important; 
+  }
+  .responsiveButton,
+  .responsiveButtonFullWidth {
+    height: 18px !important;
+  }
+  .toast {
+    font-size: 9px;
+    padding: 1px 3px;
+  }
+}

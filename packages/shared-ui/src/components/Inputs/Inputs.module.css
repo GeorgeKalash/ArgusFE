@@ -1,0 +1,406 @@
+.outlinedRoot {
+  width: 100% !important;
+  height: 33px !important;
+  line-height: 1px !important
+}
+
+.startAdornment:dir(ltr){
+  padding-left: 5px;
+  padding-right: 0px;
+}
+
+.startAdornment:dir(rtl){
+  padding-left: 0px;
+  padding-right: 5px;
+}
+
+.fieldLabel {
+  white-space: normal !important;   
+}
+
+.outlinedNoBorder {
+  border: none !important;
+}
+
+.inputLabel {
+  font-size: 14px !important;
+}
+
+.inputAdornment {
+  display: flex
+}
+
+.inputBase::placeholder {
+  font-size: 14px !important;
+}
+
+.iconButton {
+  padding: 0px !important;
+}
+
+.icon {
+  font-size: 17px !important;
+  padding: 3px !important;
+}
+
+.outlinedRoot:dir(ltr) .inputAdornment {
+  margin-right: 5px !important;
+}
+
+.outlinedRoot:dir(rtl) .inputAdornment {
+  margin-left: 5px !important;
+}
+
+.outlinedFieldset {
+  border-radius: 4px !important;
+}
+
+.iconImage {
+  height: 16px !important;
+  width: 16px !important;
+  margin-left: 8px;
+  margin-right: 8px
+}
+
+.searchRoot .inputBase {
+  padding: 6px 10px !important;
+  font-size: 14px !important;
+}
+
+@media (min-width: 1281px)  {
+  .outlinedRoot {
+    height: 30px !important;
+    padding: 0px !important;
+  }
+
+  .inputLabel {
+    font-size: 12px !important;
+    top: -3px;
+  }
+
+  .inputLabel:global(.MuiInputLabel-shrink.MuiInputLabel-outlined) {
+    top: 0px !important;   
+    font-size: 14px !important;  
+  }
+
+  .inputLabelShrink {
+    font-size: 14px !important;
+    top: 0px;
+  }
+
+  .inputBase {
+    font-size: 12px !important ;
+  }
+
+  .inputBase::placeholder {
+    font-size: 12px !important;
+  }
+  .outlinedRoot:dir(ltr) .inputAdornment {
+    margin-right: 5px !important;
+  }
+  
+  .outlinedRoot:dir(rtl) .inputAdornment {
+    margin-left: 5px !important;
+  }
+
+  .icon {
+    font-size: 18px !important;
+    padding: 1px !important; 
+  }
+
+  .iconImage {
+    height: 18px !important;
+    width: 18px !important;
+    margin-left: 8px;
+    margin-right: 8px;
+    margin-top: 5px;
+  }
+
+}
+
+@media (max-width: 1280px) {
+  .inputLabel {
+    font-size: 11px !important;
+    padding: 0px !important;
+    margin: 0px !important;
+  
+  }
+
+  .inputLabel:global(.MuiInputLabel-shrink.MuiInputLabel-outlined) {
+    top: 3px !important;   
+    font-size: 10px !important;  
+  }
+
+  .inputBase {
+    font-size: 11px !important ;
+  }
+
+  .inputBase::placeholder {
+    font-size: 11px !important;
+  }
+
+  .icon {
+   font-size: 15px !important;
+   padding: 1px !important; 
+  }
+  
+  .iconImage {
+    height: 16px !important;
+    width: 16px !important;
+    margin-left: 8px;
+    margin-right: 8px
+  }
+
+  .inputLabelShrink{
+    font-size: 10px !important;
+    top: 3px !important;
+   }
+
+  .outlinedRoot {
+    height: 28px !important;
+  }
+
+  .outlinedRoot:dir(ltr) .inputAdornment {
+    margin-right: -5px !important;
+  }
+  
+  .outlinedRoot:dir(rtl) .inputAdornment {
+    margin-left: -5px !important;
+  }
+  
+  .startAdornment{
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+}
+
+@media (max-width: 1024px) {
+
+ .searchRoot .inputBase {
+    font-size: 12.5px !important;
+    padding: 5px 8px !important;
+  }
+
+  .outlinedRoot  {
+    height: 26px !important;
+  }
+  
+  .inputLabel {
+    line-height: 1rem !important;
+    font-size: 9px !important;
+    top: -2px !important;
+  }
+
+  .inputLabel:global(.MuiInputLabel-shrink.MuiInputLabel-outlined) {
+    top: 2px !important;   
+    font-size: 10px !important;  
+  }
+  
+  .inputBase::placeholder {
+    font-size: 9px !important;
+  }
+  
+   .inputLabelShrink{
+    font-size: 10px !important;
+    top: 3px !important;
+   }
+
+   .inputBase {
+    font-size: 10px !important;
+
+  }
+
+  .inputBase:dir(ltr) {
+    padding-left: 7px !important;
+    padding-right: 0px !important;
+  }
+
+  .inputBase:dir(rtl) {
+    padding-left: 0px !important;
+    padding-right: 7px !important;
+  }
+  
+  .outlinedRoot:dir(ltr) .inputAdornment {
+    margin-right: -5px !important;
+  }
+  .outlinedRoot:dir(rtl) .inputAdornment {
+    margin-left: -5px !important;
+  }
+ 
+  .icon {
+    font-size: 15px !important;
+   padding: 1px !important; 
+  }
+  .iconImage {
+    height: 15px !important;
+    width: 15px !important;
+    margin-left: 0px;
+    margin-right: 0px
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .searchRoot .inputBase {
+    font-size: 12px !important;
+    padding: 4px 7px !important;
+  }
+
+  .outlinedRoot {
+    height: 24px !important;
+  }
+
+  .inputLabel {
+    font-size: 9px !important;
+  }
+
+  .inputLabelShrink {
+    font-size: 9px !important;
+  }
+
+  .inputBase {
+    font-size: 9px !important;
+  }
+
+  .inputBase::placeholder {
+    font-size: 9px !important;
+  }
+  .iconButton {
+    padding: 0px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .searchRoot .inputBase {
+    font-size: 11px !important;
+    padding: 3px 5px !important;
+  }
+
+  .outlinedRoot {
+    height: 22px !important;
+  }
+
+  .outlinedFieldset {
+    border-radius: 2px !important;
+  }
+
+  .inputLabel {
+    font-size: 8px !important;
+  }
+
+  .inputLabelShrink {
+    font-size: 8px !important;
+  }
+
+  .inputBase {
+    font-size: 8px !important;
+  }
+
+  .inputBase::placeholder {
+    font-size: 8px !important;
+  }
+
+
+}
+
+@media (max-width: 360px) {
+  .searchRoot .inputBase {
+    font-size: 10px !important;
+    padding: 2px 3px !important;
+  }
+
+  .outlinedRoot {
+    height: 20px !important;
+  }
+
+  .outlinedFieldset {
+    border-radius: 2px !important;
+  }
+
+  .inputLabel {
+    font-size: 7px !important;
+  }
+
+  .inputLabelShrink {
+    font-size: 7px !important;
+  }
+
+  .inputBase {
+    font-size: 7px !important;
+  }
+
+  .inputBase::placeholder {
+    font-size: 7px !important;
+  }
+
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .outlinedRoot {
+    height: 26px !important;
+  }
+
+  .searchRoot .inputBase {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+  }
+
+  .inputLabel {
+    font-size: 10px !important;
+    top: -2px !important;
+  }
+
+  .inputLabel:global(.MuiInputLabel-shrink.MuiInputLabel-outlined) {
+    top: 2px !important;
+    font-size: 9.5px !important;
+  }
+
+  .inputBase {
+    font-size: 11px !important;
+  }
+
+  .inputBase::placeholder {
+    font-size: 11px !important;
+  }
+
+  .icon {
+    font-size: 13px !important;
+    padding: 1px !important;
+  }
+
+  .iconImage {
+    height: 14px !important;
+    width: 14px !important;
+  }
+
+  .outlinedRoot:dir(ltr) .inputAdornment {
+    margin-right: -4px !important;
+  }
+
+  .outlinedRoot:dir(rtl) .inputAdornment {
+    margin-left: -4px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .searchRoot .inputBase {
+    font-size: 11.5px !important;
+    padding: 4px 6px !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .searchRoot .inputBase {
+    font-size: 10.5px !important;
+    padding: 3px 4px !important;
+  }
+}
+
+@media (max-width: 320px) {
+  .searchRoot .inputBase {
+    font-size: 9.5px !important;
+    padding: 2px 2px !important;
+  }
+}

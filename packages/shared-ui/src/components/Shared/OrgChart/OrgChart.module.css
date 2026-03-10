@@ -1,0 +1,55 @@
+.orgChartRoot{
+    transform: scale(0.86);
+    padding: 0px !important;
+    padding: 0px !important;
+    margin-top: -35px !important;
+  }
+
+  .orgChartRoot:dir(rtl){
+    margin-right: -90px !important;
+  }
+
+  .orgChartRoot:dir(ltr){
+    margin-left: -90px !important;
+  }
+
+@media (max-width: 1280px) {
+  .orgChartRoot  {
+    transform: scale(0.80);
+    padding: 0px !important;
+    margin-top:  -115px !important;
+  }
+
+  .orgChartRoot{
+    transform: scale(0.7);
+    padding: 0px !important;
+    padding: 0px !important;
+    margin-top: -60px !important;
+  }
+
+  .orgChartRoot:dir(rtl){
+    margin-right: -150px !important;
+  }
+
+  .orgChartRoot:dir(ltr){
+    margin-left: -150px !important;
+  }
+
+}
+
+@media (max-width: 1024px) {
+    .orgChartRoot{
+        transform: scale(0.69);
+        padding: 0px !important;
+        padding: 0px !important;
+        margin-top: -80px !important;
+      }
+    .orgChartRoot:dir(rtl){
+        margin-right: -148px !important;
+      }
+    
+      .orgChartRoot:dir(ltr){
+        margin-left: -148px !important;
+      }
+    
+}
