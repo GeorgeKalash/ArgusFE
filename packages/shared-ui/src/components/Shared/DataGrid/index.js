@@ -1010,6 +1010,10 @@ export function DataGrid({
                 onChange(value)
                 setReady(true)
               }}
+              defaultColDef={{
+                filter: true,
+                floatingFilter: true
+              }}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
               onColumnResized={onColumnResized}
@@ -1045,12 +1049,17 @@ export function DataGrid({
         .agContainer :global(.ag-header-cell),
         .agContainer :global(.ag-header-row) {
           height: 40px !important;
-          min-height: 40px !important;
           background: var(--ag-header-bg, #f5f5f5);
         }
 
         .agContainer :global(.ag-header-cell-text) {
           font-size: 0.9rem;
+        }
+
+        .agContainer :global(.ag-floating-filter) {
+          display: flex;
+          align-items: center;
+          padding: 0 4px;
         }
 
         .agContainer :global(.agHeaderCheckboxCell.ag-header-cell) {
@@ -1214,7 +1223,6 @@ export function DataGrid({
           .agContainer :global(.ag-header),
           .agContainer :global(.ag-header-cell),
           .agContainer :global(.ag-header-row) {
-            min-height: 33px !important;
             height: 33px !important;
           }
 
@@ -1245,7 +1253,6 @@ export function DataGrid({
           .agContainer :global(.ag-header),
           .agContainer :global(.ag-header-cell) {
             height: 29px !important;
-            min-height: 29px !important;
           }
 
           .agContainer :global(.ag-header-cell-text),
@@ -1269,7 +1276,6 @@ export function DataGrid({
           .agContainer :global(.ag-header),
           .agContainer :global(.ag-header-cell) {
             height: 29px !important;
-            min-height: 28px !important;
           }
 
           .agContainer :global(.ag-header-cell-text),
@@ -1287,7 +1293,6 @@ export function DataGrid({
           .agContainer :global(.ag-header),
           .agContainer :global(.ag-header-cell) {
             height: 26px !important;
-            min-height: 26px !important;
           }
 
           .agContainer :global(.ag-header-cell-text),
