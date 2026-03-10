@@ -44,12 +44,14 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
     enabled: !recordId,
     objectName: 'transfer'
   })
-  
+
+  const hookInvalidate = useInvalidate({
+    endpointId: ManufacturingRepository.JobTransfer.page
+  });
+
   useSetWindow({ title: labels.jobTransfer, window })
 
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.JobTransfer.page
-  })
+  const invalidate = refetch ?? hookInvalidate;
 
   const { formik } = useForm({
     documentType: { key: 'transfer.dtId', value: documentType?.dtId },
@@ -185,9 +187,6 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
       await getData(formik?.values?.transfer?.recordId)
       invalidate()
       
-        if (refetch) {
-          refetch()
-        }
       toast.success(platformLabels.Posted)
       window.close()
     })
@@ -203,9 +202,6 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
     }).then(async () => {
       await getData(formik?.values?.transfer?.recordId)
       
-        if (refetch) {
-          refetch()
-        }
       toast.success(platformLabels.Closed)
       invalidate()
     })
@@ -221,10 +217,7 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
     }).then(async () => {
       await getData(formik?.values?.recordId)
       
-        if (refetch) {
-          refetch()
-        }
-      toast.success(platformLabels.Reopened)
+        toast.success(platformLabels.Reopened)
       invalidate()
     })
   }
