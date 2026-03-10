@@ -13,6 +13,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import FilterAltIcon from '@mui/icons-material/FilterAlt'
 
 export function DataGrid({
   name,
@@ -47,6 +48,7 @@ export function DataGrid({
   const [columnState, setColumnState] = useState()
   const skip = allowDelete ? 1 : 0
   const gridContainerRef = useRef(null)
+  const [showFilters, setShowFilters] = useState(false)
 
   const generalMaxAccess = maxAccess && maxAccess?.record?.accessFlags
   const isAccessDenied = maxAccess?.editMode
@@ -772,8 +774,8 @@ export function DataGrid({
         editable: params => !_disabled && !params.colDef?.props?.disabled,
         flex: column.flex || (!column.width && 1),
         sortable: false,
-        floatingFilter: !component,
-        filter: filterMap[column.component] || 'agTextColumnFilter',     
+        floatingFilter: showFilters && !component,
+        filter: filterMap[column.component] || 'agTextColumnFilter',
         cellRenderer: CustomCellRenderer,
         cellEditor: CustomCellEditor,
         wrapText: true,
@@ -1003,7 +1005,16 @@ export function DataGrid({
   return (
     <Box className={'root'} sx={{ height: height || 'auto' }}>
       <CacheStoreProvider>
-        <Box className={`ag-theme-alpine agContainer`} ref={gridContainerRef} style={{ '--ag-header-bg': bg }}>
+        <Box 
+          className={`ag-theme-alpine agContainer`} 
+          ref={gridContainerRef} 
+          style={{ '--ag-header-bg': bg }}
+        >
+          <Box className={'hoverFilter'}>
+            <IconButton size='small' onClick={() => setShowFilters(v => !v)}>
+              <FilterAltIcon fontSize='small' />
+            </IconButton>
+          </Box>
           {value && (
             <AgGridReact
               gridApiRef={gridApiRef}
@@ -1039,11 +1050,26 @@ export function DataGrid({
         .root {
           flex: 1;
         }
+        .hoverFilter {
+          position: absolute;
+          top: 6px;
+          right: 6px;
+          z-index: 10;
+          background: #fff;
+          border-radius: 4px;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+
+        .agContainer:hover .hoverFilter {
+          opacity: 1;
+        }
 
         .agContainer {
           width: 100%;
           height: 100%;
           flex: 1;
+          position: relative;
         }
 
         .agContainer.ag-theme-alpine {
