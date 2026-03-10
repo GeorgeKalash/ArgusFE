@@ -462,6 +462,7 @@ export const ResourceIds = {
   SManagement: 41213,
   OpenPOs: 50312,
   OpenPRs: 50310,
+  PuDashboard: 50311,
   NotificationLabels: 23106,
   ClientPriceLists: 51208,
   Assemblies: 42301,
