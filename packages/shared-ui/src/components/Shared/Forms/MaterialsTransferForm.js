@@ -411,6 +411,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
             unitCost,
             totalCost,
             msId: itemInfo?.msId,
+            categoryName: itemInfo?.categoryName,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
             metalId,
@@ -423,6 +424,14 @@ export default function MaterialsTransferForm({ recordId, window }) {
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.categoryName,
+      name: 'categoryName',
       props: {
         readOnly: true
       }
