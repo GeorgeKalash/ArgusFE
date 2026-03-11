@@ -297,6 +297,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
               srlNo: res?.record?.srlNo || '',
               sku: res?.record?.sku || '',
               itemName: res?.record?.itemName || '',
+              categoryName: res?.record?.categoryName || '',
               weight: res?.record?.weight || 0,
               itemId: res?.record?.itemId || null,
               metalId: res?.record?.metalId || null,
@@ -352,6 +353,15 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.categoryName,
+      name: 'categoryName',
       flex: 2,
       props: {
         readOnly: true
@@ -523,11 +533,11 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
       var seqNo = 0
 
-      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight }) => {
+      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
         if (itemId) {
           if (!acc[itemId]) {
             seqNo++
-            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo }
+            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, categoryName: categoryName, seqNo: seqNo }
           }
           acc[itemId].pcs += 1
           acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
@@ -814,9 +824,10 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                 <Table
                   name='item'
                   columns={[
-                    { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 0.5 },
+                    { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 1 },
                     { field: 'sku', headerName: labels.sku, flex: 1 },
                     { field: 'itemName', headerName: labels.itemName, flex: 2 },
+                    { field: 'categoryName', headerName: labels.categoryName, flex: 2 },
                     { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
                     { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
                   ]}
