@@ -762,8 +762,7 @@ export function DataGrid({
 
       const filterMap = {
         date: 'agDateColumnFilter',
-        textfield: 'agTextColumnFilter',
-        numberfield: 'agNumberColumnFilter'
+        textfield: 'agTextColumnFilter'
       }
 
       return {
@@ -1026,6 +1025,7 @@ export function DataGrid({
           )}
           {value && (
             <AgGridReact
+              popupParent={document.body}
               gridApiRef={gridApiRef}
               rowData={isEmptyMaxLines ? [] : value}
               columnDefs={finalColumns}
@@ -1061,6 +1061,15 @@ export function DataGrid({
         }
         .agContainer :global(.ag-floating-filter-button) {
           display: none !important;
+        }
+        .ag-menu,
+        .ag-popup,
+        .ag-popup-child {
+          z-index: 20 !important;
+        }
+        .ag-select-list {
+          max-height: none !important;
+          overflow: visible !important;
         }
         .hoverFilter {
           position: absolute;
