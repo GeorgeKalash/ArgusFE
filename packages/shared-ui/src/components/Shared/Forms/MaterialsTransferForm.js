@@ -1161,6 +1161,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
+            enableFilters
             name='transfers'
             maxAccess={maxAccess}
             showCounterColumn={true}

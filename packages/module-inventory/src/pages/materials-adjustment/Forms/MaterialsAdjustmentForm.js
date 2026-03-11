@@ -897,6 +897,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
+            enableFilters
             showCounterColumn={true}
             columns={columns}
             allowAddNewLine={!isPosted}

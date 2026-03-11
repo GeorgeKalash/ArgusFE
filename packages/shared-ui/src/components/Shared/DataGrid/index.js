@@ -37,6 +37,7 @@ export function DataGrid({
   isDeleteDisabled,
   maxLines,
   showCounterColumn = false,
+  enableFilters = false
 }) {
   const gridApiRef = useRef(null)
   const { user } = useContext(AuthContext)
@@ -774,8 +775,8 @@ export function DataGrid({
         editable: params => !_disabled && !params.colDef?.props?.disabled,
         flex: column.flex || (!column.width && 1),
         sortable: false,
-        floatingFilter: showFilters && !component,
-        filter: filterMap[column.component] || 'agTextColumnFilter',
+        floatingFilter: enableFilters && showFilters && !component,
+        filter: enableFilters && (filterMap[column.component] || 'agTextColumnFilter'),
         cellRenderer: CustomCellRenderer,
         cellEditor: CustomCellEditor,
         wrapText: true,
@@ -983,6 +984,12 @@ export function DataGrid({
     gridApiRef.current?.setQuickFilter(searchValue)
   }, [searchValue])
 
+  useEffect(() => {
+    if (!showFilters && gridApiRef.current) {
+      gridApiRef.current.setFilterModel(null)
+    }
+  }, [showFilters])
+
   const onColumnResized = params => {
     if (params?.source === 'uiColumnResized') {
       const columnState = params.columnApi.getColumnState()
@@ -1010,11 +1017,13 @@ export function DataGrid({
           ref={gridContainerRef} 
           style={{ '--ag-header-bg': bg }}
         >
-          <Box className={'hoverFilter'}>
-            <IconButton size='small' onClick={() => setShowFilters(v => !v)}>
-              <FilterAltIcon fontSize='small' />
-            </IconButton>
-          </Box>
+          {enableFilters && (
+            <Box className={'hoverFilter'}>
+              <IconButton size='small' onClick={() => setShowFilters(v => !v)}>
+                <FilterAltIcon fontSize='small' />
+              </IconButton>
+            </Box>
+          )}
           {value && (
             <AgGridReact
               gridApiRef={gridApiRef}
@@ -1049,6 +1058,9 @@ export function DataGrid({
       <style jsx global>{`
         .root {
           flex: 1;
+        }
+        .agContainer :global(.ag-floating-filter-button) {
+          display: none !important;
         }
         .hoverFilter {
           position: absolute;

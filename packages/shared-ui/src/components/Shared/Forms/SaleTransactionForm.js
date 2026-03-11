@@ -2313,6 +2313,7 @@ export default function SaleTransactionForm({
                 setReCal(true)
               }
             }}
+            enableFilters
             value={filteredData}
             error={formik.errors.items}
             initialValues={formik?.initialValues?.items[0]}
