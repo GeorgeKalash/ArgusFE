@@ -23,19 +23,21 @@ import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function MaterialsForm({ labels, access, recordId, wsId, values, isPosted }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const functionId = SystemFunction.IssueOfMaterial
   const resourceId = ResourceIds.IssueOfMaterials
 
   const getValueFromDefaultsData = key => {
-    return defaultsData.list.find(item => item.key === key)?.value || 0
+    return systemDefaults.list.find(item => item.key === key)?.value || 0
   }
 
   const getLabelFromDefaultsData = key => {
-    return getValueFromDefaultsData(`ivtDimension${defaultsData.list.find(item => item.key === key)?.value}`)
+    return getValueFromDefaultsData(`ivtDimension${systemDefaults.list.find(item => item.key === key)?.value}`)
   }
 
   const dimensionKeys = ['mfimd1', 'mfimd2']

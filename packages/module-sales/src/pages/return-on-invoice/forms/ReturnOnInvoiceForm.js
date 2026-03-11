@@ -51,12 +51,14 @@ import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 import InvoiceForm from './InvoiceForm'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function ReturnOnInvoiceForm({ labels, access, recordId, currency }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const [measurements, setMeasurements] = useState([])
   const filteredMeasurements = useRef([])
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
@@ -72,8 +74,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     endpointId: SaleRepository.ReturnOnInvoice.page
   })
 
-  const systemSales = defaultsData?.list?.find(({ key }) => key === 'salesTD')?.value
-  const systemPriceLevel = defaultsData?.list?.find(({ key }) => key === 'plId')?.value
+  const systemSales = systemDefaults?.list?.find(({ key }) => key === 'salesTD')?.value
+  const systemPriceLevel = systemDefaults?.list?.find(({ key }) => key === 'plId')?.value
 
   async function validateSalesPerson(spId) {
     if (!spId) return null
@@ -92,7 +94,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return spId
   }
 
-  const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
+  const defaultMCbaseCU = parseInt(systemDefaults?.list?.find(({ key }) => key === 'baseMetalCuId')?.value)
 
   const initialValues = {
     dtId: null,
@@ -135,7 +137,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     KGmetalPrice: 0,
     clientDiscount: 0,
     currentDiscount: 0,
-    baseMetalCuId: parseInt(defaultMCbaseCU?.value),
+    baseMetalCuId: defaultMCbaseCU,
     items: [
       {
         id: 1,
@@ -1406,8 +1408,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }
 
   async function setMetalPriceOperations() {
-    const defaultRateType = defaultsData?.list?.find(({ key }) => key === 'mc_defaultRTSA')
-    formik.setFieldValue('baseMetalCuId', parseInt(defaultMCbaseCU?.value))
+    const defaultRateType = systemDefaults?.list?.find(({ key }) => key === 'mc_defaultRTSA')
+    formik.setFieldValue('baseMetalCuId', defaultMCbaseCU)
     if (!defaultRateType.value) {
       stackError({
         message: labels.RTSANoteDefined
@@ -1415,7 +1417,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
       return
     }
-    const kgMetalPriceValue = await fillMetalPrice(defaultMCbaseCU?.value)
+    const kgMetalPriceValue = await fillMetalPrice(defaultMCbaseCU)
     formik.setFieldValue('KGmetalPrice', kgMetalPriceValue != null ? kgMetalPriceValue : 0)
     formik.setFieldValue('metalPrice', kgMetalPriceValue != null ? kgMetalPriceValue / 1000 : 0)
   }

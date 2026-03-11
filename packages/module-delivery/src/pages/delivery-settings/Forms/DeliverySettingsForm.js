@@ -2,6 +2,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -13,7 +14,8 @@ import toast from 'react-hot-toast'
 
 export default function DeliverySettingsForm({ _labels, access }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults} = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const [store, setStore] = useState([]) 
 
   const defaultKeys = ['smsInvoiceReportLayout']
@@ -28,7 +30,7 @@ export default function DeliverySettingsForm({ _labels, access }) {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-      updateDefaults(data)
+      updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })
@@ -64,13 +66,13 @@ export default function DeliverySettingsForm({ _labels, access }) {
   
   useEffect(() => {
     const updated = {}
-    defaultsData.list?.forEach(obj => {
+    systemDefaults.list?.forEach(obj => {
      if (defaultKeys.includes(obj.key)) {
       updated[obj.key] = obj.value ? parseFloat(obj.value) : null
       formik.setFieldValue(obj.key, updated[obj.key])
      }
     })
-  }, [defaultsData])
+  }, [systemDefaults])
   
 
   useEffect(() => { 

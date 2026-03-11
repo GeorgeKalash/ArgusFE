@@ -42,16 +42,18 @@ import CustomSwitch from '@argus/shared-ui/src/components/Inputs/CustomSwitch'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const userData = getStorageData('userData')
 
-  const vatPctValue = parseInt(defaultsData?.list?.find(obj => obj.key === 'vatPct')?.value) || 0
+  const vatPctValue = parseInt(systemDefaults?.list?.find(obj => obj.key === 'vatPct')?.value) || 0
 
   const [sysDefault, setDefault] = useState({ countryRef: '', currencyRef: '' })
 
@@ -792,7 +794,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
   }
 
   async function getDefaultCountry() {
-    const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')?.value
+    const countryId = systemDefaults?.list?.find(({ key }) => key === 'countryId')?.value
 
     const countryRef = await getRequest({
       extension: SystemRepository.Country.get,
@@ -803,7 +805,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
   }
 
   async function getDefaultCurrency() {
-    const currencyId = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
+    const currencyId = systemDefaults?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
 
     const currencyRef = await getRequest({
       extension: SystemRepository.Currency.get,

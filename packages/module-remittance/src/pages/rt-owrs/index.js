@@ -15,17 +15,19 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import OutwardReturnSettlementForm from './Forms/OutwardReturnSettlementForm'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function RtOutwardReturnSettlement() {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
   async function getDefaultData() {
     const userKeys = ['cashAccountId', 'plantId']
 
-    const userDefault = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+    const userDefault = (userDefaults?.list || []).reduce((acc, { key, value }) => {
       if (userKeys.includes(key)) {
         acc[key] = value ? parseInt(value) : null
       }

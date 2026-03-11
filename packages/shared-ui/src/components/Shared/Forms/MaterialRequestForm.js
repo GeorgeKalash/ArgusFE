@@ -31,10 +31,12 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function MaterialRequestForm({ recordId, window: titleWindow }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -62,7 +64,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
     if (editMode || documentType?.dtId) {
       return
     } else {
-      const defaultFromSiteId = defaultsData?.list?.find(({ key }) => key === 'de_siteId')
+      const defaultFromSiteId = systemDefaults?.list?.find(({ key }) => key === 'de_siteId')
 
       if (defaultFromSiteId?.value) formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value))
     }
