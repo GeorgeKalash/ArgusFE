@@ -5,5 +5,14 @@
       "src": "apps/main/package.json",
       "use": "@vercel/next"
     }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "apps/main"
+    }
   ]
 }
