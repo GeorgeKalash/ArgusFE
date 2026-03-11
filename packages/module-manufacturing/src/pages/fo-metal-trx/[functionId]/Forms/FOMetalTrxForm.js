@@ -28,10 +28,12 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function FOMetalTrxForm({ labels, access, recordId, functionId, getResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
   const [allMetals, setAllMetals] = useState([])
   const [recalc, setRecalc] = useState(false)
@@ -57,9 +59,9 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     endpointId: endpoint?.page
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
-  const baseSalesMetalId = parseInt(defaultsData?.list?.find(obj => obj.key === 'baseSalesMetalId')?.value) || null
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
+  const baseSalesMetalId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'baseSalesMetalId')?.value) || null
 
   const scrapsConditions = {
     sku: row => row?.sku,

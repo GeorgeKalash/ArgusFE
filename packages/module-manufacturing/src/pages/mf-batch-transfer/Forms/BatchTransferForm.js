@@ -26,15 +26,17 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { useError } from '@argus/shared-providers/src/providers/error'
 import JTCheckoutForm from '@argus/shared-ui/src/components/Shared/Forms/JTCheckoutForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
-  const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults, systemDefaults } = useContext(DefaultsContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  
-  const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
-  const max_btfr_lines_allowed = parseInt(defaultsData?.list?.find(obj => obj.key === 'max_btfr_lines_allowed')?.value) || null
+
+  const workCenterId = parseInt(userDefaults?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
+  const max_btfr_lines_allowed = parseInt(systemDefaults?.list?.find(obj => obj.key === 'max_btfr_lines_allowed')?.value) || null
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BatchTransfer,

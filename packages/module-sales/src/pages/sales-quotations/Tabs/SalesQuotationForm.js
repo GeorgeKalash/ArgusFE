@@ -50,19 +50,21 @@ import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
   const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
-  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+  const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesQuotation,
@@ -1111,7 +1113,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     const systemKeys = ['siteId', 'salesTD', 'plId']
     const userKeys = ['plantId', 'siteId', 'spId']
 
-    const systemObject = (defaultsData?.list || []).reduce((acc, { key, value }) => {
+    const systemObject = (systemDefaults?.list || []).reduce((acc, { key, value }) => {
       if (systemKeys.includes(key)) {
         acc[key] = value === 'True' || value === 'False' ? value : value ? parseInt(value) : null
       }
@@ -1119,7 +1121,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       return acc
     }, {})
 
-    const userObject = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+    const userObject = (userDefaults?.list || []).reduce((acc, { key, value }) => {
       if (userKeys.includes(key)) {
         acc[key] = value ? parseInt(value) : null
       }

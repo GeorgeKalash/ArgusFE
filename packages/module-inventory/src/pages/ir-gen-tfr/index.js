@@ -24,17 +24,19 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialsTransferForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function IRGenerateTransfer() {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateTransfers
   })
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const conditions = {
     transferNow: row => row?.transferNow > 0,

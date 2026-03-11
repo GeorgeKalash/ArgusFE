@@ -6,7 +6,7 @@ import { HorizontalBarChartDark } from '@argus/shared-ui/src/components/Shared/d
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { debounce } from 'lodash'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const Frame = styled.div`
   display: flex;
@@ -42,7 +42,7 @@ const Title = styled.h2`
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
-  const { defaultsData } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const [chartsData, setChartsData] = useState([])
   const [loading, setLoading] = useState(true)
   const { labels } = useResourceParams({ datasetId: ResourceIds.UserDashboard })
@@ -71,7 +71,7 @@ const DashboardLayout = () => {
     })
 
     const allChartsData = await Promise.all(volumeRequests)
-    const minZoneVolumeDBObj = defaultsData?.list?.find(item => item.key === 'minZoneVolumeDB')
+    const minZoneVolumeDBObj = systemDefaults?.list?.find(item => item.key === 'minZoneVolumeDB')
 
     const minZoneVolumeDB =
       minZoneVolumeDBObj && minZoneVolumeDBObj.value !== undefined
@@ -92,7 +92,7 @@ const DashboardLayout = () => {
     const interval = setInterval(fetchData, 300000)
 
     return () => clearInterval(interval)
-  }, [defaultsData])
+  }, [systemDefaults])
 
   if (loading) return <LoadingOverlay />
 
