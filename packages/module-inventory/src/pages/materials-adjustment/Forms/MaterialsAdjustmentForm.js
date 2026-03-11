@@ -899,6 +899,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
+            initialValues={formik?.initialValues?.rows[0]}
             enableFilters
             showCounterColumn={true}
             columns={columns}

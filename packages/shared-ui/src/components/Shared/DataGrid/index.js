@@ -748,6 +748,14 @@ export function DataGrid({
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
 
+      
+  const isRowEmpty = (row, initialValues) => {
+    if (!initialValues) return true
+
+    return JSON.stringify(row) === JSON.stringify({ ...initialValues, id: row.id })
+  }
+
+  const hasRows = value?.some(row => !isRowEmpty(row, initialValues))
 
   const columnDefs = [
     ...allColumns.map(column => {
@@ -775,7 +783,7 @@ export function DataGrid({
         flex: column.flex || (!column.width && 1),
         sortable: false,
         floatingFilter: enableFilters && showFilters && !component,
-        filter: enableFilters && !component && (filterMap[column.component] || 'agTextColumnFilter'),
+        filter: enableFilters && !component && hasRows && (filterMap[column.component] || 'agTextColumnFilter'),
         cellRenderer: CustomCellRenderer,
         cellEditor: CustomCellEditor,
         wrapText: true,
@@ -1016,7 +1024,7 @@ export function DataGrid({
           ref={gridContainerRef} 
           style={{ '--ag-header-bg': bg }}
         >
-          {enableFilters && (
+          {enableFilters && hasRows && value.length > 0 && (
             <Box className={'hoverFilter'}>
               <IconButton size='small' onClick={() => setShowFilters(v => !v)}>
                 <FilterAltIcon fontSize='small' />
