@@ -776,7 +776,7 @@ export function DataGrid({
         flex: column.flex || (!column.width && 1),
         sortable: false,
         floatingFilter: enableFilters && showFilters && !component,
-        filter: enableFilters && (filterMap[column.component] || 'agTextColumnFilter'),
+        filter: enableFilters && !component && (filterMap[column.component] || 'agTextColumnFilter'),
         cellRenderer: CustomCellRenderer,
         cellEditor: CustomCellEditor,
         wrapText: true,
