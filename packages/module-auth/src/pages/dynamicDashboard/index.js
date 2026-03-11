@@ -587,7 +587,6 @@ const DashboardLayout = () => {
           min-width: 0;
           align-items: stretch;
         }
-
         .chartCard {
           background: rgb(255, 255, 255);
           border-radius: 10px;
