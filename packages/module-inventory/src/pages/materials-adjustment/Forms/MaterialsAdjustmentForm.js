@@ -347,6 +347,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         totalCost,
         details: true,
         msId: itemInfo?.msId,
+        categoryName: itemInfo?.categoryName,
         decimals: measurementSchedule?.decimals,
         muRef: filteredMeasurements?.[0]?.reference,
         muId: filteredMeasurements?.[0]?.recordId,
@@ -452,6 +453,15 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.categoryName,
+      name: 'categoryName',
       flex: 2,
       props: {
         readOnly: true
