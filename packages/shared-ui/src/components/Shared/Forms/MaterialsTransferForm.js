@@ -1227,5 +1227,5 @@ export default function MaterialsTransferForm({ recordId, window }) {
   )
 }
 
-MaterialsTransferForm.width = 1000
+MaterialsTransferForm.width = 1200
 MaterialsTransferForm.height = 680
