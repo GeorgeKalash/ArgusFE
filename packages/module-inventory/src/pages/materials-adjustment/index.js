@@ -66,6 +66,10 @@ const MaterialsAdjustment = () => {
 
   const columns = [
     {
+      field: 'dtName',
+      headerName: labels.documentType,
+      flex: 1
+    },{
       field: 'reference',
       headerName: labels.refernce,
       flex: 1
