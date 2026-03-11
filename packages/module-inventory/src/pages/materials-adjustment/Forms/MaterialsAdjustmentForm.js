@@ -366,6 +366,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       label: labels.sku,
       name: 'sku',
       jumpToNextLine,
+      flex: 2,
       ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
         ...(!formik.values.disableSKULookup && {
