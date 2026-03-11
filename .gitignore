@@ -1,1 +1,4 @@
 node_modules
+
+apps/main/deploy/
+apps/main/deploy.zip
