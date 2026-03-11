@@ -28,8 +28,9 @@ import ImportSerials from '@argus/shared-ui/src/components/Shared/ImportSerials'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialsTransferForm'
 
-export default function DraftTransfer({ labels, access, recordId }) {
+export default function DraftTransfer({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -369,17 +370,26 @@ export default function DraftTransfer({ labels, access, recordId }) {
   async function onPost() {
     const { serials, ...restValues } = formik.values
 
-    await postRequest({
+    const res = await postRequest({
       extension: InventoryRepository.DraftTransfer.post,
       record: JSON.stringify({
         ...restValues,
         date: formatDateToApi(formik.values.date)
       })
-    }).then(() => {
-      toast.success(platformLabels.Posted)
-      invalidate()
-      refetchForm(formik?.values?.recordId)
     })
+    toast.success(platformLabels.Posted)
+    invalidate()
+    window.close()
+
+    if(res?.recordId){
+      stack({
+        Component: MaterialsTransferForm,
+        props: {
+          recordId: res?.recordId
+        }
+      })
+    }
+      
   }
 
   async function onWorkFlowClick() {
@@ -800,25 +810,11 @@ export default function DraftTransfer({ labels, access, recordId }) {
         </Grow>
         <Grid container spacing={2}>
           <Grid item xs={8}>
-              <Grid item xs={12} height={105} sx={{ display: 'flex', flex: 1 }}>
-                <Table
-                  name='metal'
-                  gridData={{ count: 1, list: formik?.values?.metalGridData }}
-                  maxAccess={access}
-                  columns={[
-                    { field: 'metal', headerName: labels.metal, flex: 1 },
-                    { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
-                    { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
-                  ]}
-                  rowId={['metal']}
-                  pagination={false}
-                />
-              </Grid>
-              <Grid item xs={12} height={95} sx={{ display: 'flex', flex: 1 }}>
+              <Grid item xs={12} height={140} sx={{ display: 'flex', flex: 1 }}>
                 <Table
                   name='item'
                   columns={[
-                    { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 1 },
+                    { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 0.5 },
                     { field: 'sku', headerName: labels.sku, flex: 1 },
                     { field: 'itemName', headerName: labels.itemName, flex: 2 },
                     { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
@@ -834,8 +830,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
           <Grid item xs={4}>
             <Grid container spacing={2}>
               <Grid item xs={12}></Grid>
-              <Grid item xs={12}></Grid>
-              <Grid item xs={12}></Grid>
               <Grid item xs={12}>
                 <CustomNumberField
                   name='totalWeight'
@@ -843,6 +837,20 @@ export default function DraftTransfer({ labels, access, recordId }) {
                   label={labels.totalWeight}
                   value={formik.values.totalWeight}
                   readOnly
+                />
+              </Grid>
+              <Grid item xs={12} height={105} sx={{ display: 'flex', flex: 1 }}>
+                <Table
+                  name='metal'
+                  gridData={{ count: 1, list: formik?.values?.metalGridData }}
+                  maxAccess={access}
+                  columns={[
+                    { field: 'metal', headerName: labels.metal, flex: 1 },
+                    { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
+                    { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
+                  ]}
+                  rowId={['metal']}
+                  pagination={false}
                 />
               </Grid>
             </Grid>
