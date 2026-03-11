@@ -554,26 +554,48 @@ const DashboardLayout = () => {
           display: flex;
           justify-content: flex-start;
           align-items: flex-start;
+          width: 100%;
+          min-width: 0;
         }
 
         .container {
           width: 100%;
-          height: 100%;
+          min-width: 0;
+          min-height: 100vh;
           padding: 10px;
           background: rgb(204, 204, 204);
           display: flex;
           flex-direction: column;
+          box-sizing: border-box;
+          gap: 10px;
         }
 
         .topRow {
           display: grid;
-          margin-bottom: 10px;
+          grid-template-columns: minmax(0, 1fr);
+          gap: 10px;
+          margin-bottom: 0;
+          min-width: 0;
         }
 
-        .title {
-          font-size: 17px;
-          margin-bottom: 10px;
-          text-align: center;
+        .middleRow {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 10px;
+          margin-bottom: 0;
+          margin-right: 0;
+          min-width: 0;
+          align-items: stretch;
+        }
+        .chartCard {
+          background: rgb(255, 255, 255);
+          border-radius: 10px;
+          display: flex;
+          flex-direction: column;
+          padding: 10px 12px;
+          min-width: 0;
+          overflow: hidden;
+          box-sizing: border-box;
         }
 
         .summaryCard {
@@ -583,15 +605,35 @@ const DashboardLayout = () => {
           flex-direction: row;
           justify-content: space-between;
           align-items: center;
+          gap: 12px;
+          margin-bottom: 8px;
+          min-width: 0;
+          flex-wrap: wrap;
+        }
+
+        .title {
+          font-size: 17px;
+          margin: 0;
+          text-align: center;
+          flex: 1;
+          line-height: 1.25;
+          color: #2b3b57;
+        }
+
+        .strong {
+          font-size: 18px;
+          white-space: nowrap;
+          color: #000;
         }
         .summaryGrid {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 10px;
-          margin-bottom: 10px;
+          margin-bottom: 0;
           text-align: center;
           color: #000;
           font-size: 16px;
+          min-width: 0;
         }
 
         .summaryItem {
@@ -602,76 +644,78 @@ const DashboardLayout = () => {
           flex-direction: column;
           justify-content: center;
           align-items: center;
-        }
-
-        .middleRow {
-          display: grid;
-          grid-template-columns: 50% 50%;
-          gap: 10px;
-          margin-bottom: 10px;
-          margin-right: 10px;
+          min-width: 0;
+          box-sizing: border-box;
         }
 
         .innerGrid {
           display: grid;
-          grid-template-columns: auto auto;
-          gap: 5px 20px;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 6px 20px;
           align-items: center;
           text-align: left;
-        }
-
-        .chartCard {
-          background: rgb(255, 255, 255);
-          border-radius: 10px;
-          display: flex;
-          padding: 5px 8px;
-          flex-direction: column;
+          width: 100%;
         }
 
         .redCenter {
           text-align: center;
           color: red;
           font-size: 18px;
-          margin-bottom: 5px;
+          margin-bottom: 8px;
+          line-height: 1.25;
         }
         .label {
           justify-self: start;
           color: #000;
           font-size: 16px;
+          min-width: 0;
         }
         .value {
           justify-self: end;
           color: #000;
           font-size: 16px;
+          white-space: nowrap;
         }
 
         @media (max-width: 1400px) {
           .title {
-            font-size: 20px
+            font-size: 18px;
           }
         }
 
         @media (min-width: 1025px) and (max-width: 1280px) {
           .strong {
-            font-size: 12px;
-          }
-          .redCenter {
             font-size: 13px;
           }
-          .label {
-            font-size: 11px;
+
+          .redCenter {
+            font-size: 14px;
           }
+
+          .label,
           .value {
-            font-size: 11px;
+            font-size: 12px;
           }
           .title {
-            font-size: 14px;
+            font-size: 15px;
+          }
+
+          .chartCard {
+            padding: 8px 10px;
           }
         }
 
         @media (max-width: 1024px) {
+          .middleRow {
+            grid-template-columns: 1fr;
+          }
+
+          .summaryGrid {
+            grid-template-columns: 1fr;
+          }
+
           .chartCard {
-            padding: 5px 8px;
+            padding: 8px 10px;
           }
           .strong {
             font-size: 12px;
@@ -679,9 +723,8 @@ const DashboardLayout = () => {
           .redCenter {
             font-size: 12px;
           }
-          .label {
-            font-size: 11px;
-          }
+
+          .label,
           .value {
             font-size: 11px;
           }
