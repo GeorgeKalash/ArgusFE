@@ -15,16 +15,18 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function BalanceTransferDTDForm({ labels, maxAccess, recordId, functionId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FIDocTypeDefaults.page
   })
 
-  const spId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'spId')?.value)
+  const spId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
 
   const { formik } = useForm({
     initialValues: {

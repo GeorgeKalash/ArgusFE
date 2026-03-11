@@ -37,16 +37,18 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const CreditOrderForm = ({ recordId, window }) => {
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CurrencyCreditOrderPurchase)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const { stack } = useWindow()
   const userData = getStorageData('userData').userId
-  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.CreditOrder,

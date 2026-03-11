@@ -10,12 +10,14 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { AdministrationRepository } from '@argus/repositories/src/repositories/AdministrationRepository'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const DrDefault = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
-  const drApprovalTemplateId = parseInt(defaultsData?.list?.find(({ key }) => key === 'drApprovalTemplateId')?.value) || null
+  const drApprovalTemplateId = parseInt(systemDefaults?.list?.find(({ key }) => key === 'drApprovalTemplateId')?.value) || null
 
   const { formik } = useForm({
     maxAccess: access,
@@ -30,7 +32,7 @@ const DrDefault = ({ _labels, access }) => {
         record: JSON.stringify({ sysDefaults })
       })
 
-      updateDefaults(sysDefaults)
+      updateSystemDefaults(sysDefaults)
       toast.success(platformLabels.Edited)
     }
   })
