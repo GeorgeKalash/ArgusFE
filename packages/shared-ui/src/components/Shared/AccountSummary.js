@@ -131,17 +131,18 @@ export default function AccountSummary({ accountId, date, window }) {
 
     formik.setFieldValue('columns', dynamicColumns)
 
-    const agingRows = [...new Map(agingProfiles.filter(i => i.seqDays !== -1).map(i => [i.seqDays, i])).values()].sort(
-      (a, b) => a.seqDays - b.seqDays
-    )
+    const agingLegs = res?.record?.agingLegs || []
 
+    const agingRows = agingLegs.sort((a, b) => a.days - b.days)
     const rows = agingRows.map(row => {
-      const rowObject = { days: Number(row.seqDays).toLocaleString() }
+      const rowObject = { days: Number(row.days).toLocaleString() }
 
       currencies.forEach((cur, index) => {
-        const value = agingProfiles
-          .filter(i => i.seqDays === row.seqDays && i.currencyRef === cur)
-          .reduce((sum, i) => sum + Number(i.amount || 0), 0)
+        const profile = agingProfiles.find(
+          p => p.seqDays === row.days && p.currencyRef === cur
+        )
+
+        const value = profile ? Number(profile.amount || 0) : 0
 
         rowObject[`column${index + 1}`] = value.toFixed(2)
       })
