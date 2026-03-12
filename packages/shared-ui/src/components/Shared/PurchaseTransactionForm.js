@@ -1340,7 +1340,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       TotPricePerG: TotPricePerG,
       unitPrice: unitPrice,
       priceType: itemInfo?.priceType || 1,
-      qty: 1,
+      qty: jumpToNextLine ? 1 : 0,
       msId: itemInfo?.msId,
       muRef: filteredMeasurements?.[0]?.reference,
       muId: filteredMeasurements?.[0]?.recordId,
