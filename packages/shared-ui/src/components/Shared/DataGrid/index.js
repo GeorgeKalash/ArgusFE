@@ -770,7 +770,8 @@ export function DataGrid({
 
       const filterMap = {
         date: 'agDateColumnFilter',
-        textfield: 'agTextColumnFilter'
+        textfield: 'agTextColumnFilter',
+        numberfield: 'agNumberColumnFilter'
       }
 
       return {
