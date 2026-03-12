@@ -411,6 +411,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
             unitCost,
             totalCost,
             msId: itemInfo?.msId,
+            caName: itemInfo?.categoryName,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
             metalId,
@@ -423,6 +424,14 @@ export default function MaterialsTransferForm({ recordId, window }) {
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.categoryName,
+      name: 'caName',
       props: {
         readOnly: true
       }
@@ -1227,5 +1236,5 @@ export default function MaterialsTransferForm({ recordId, window }) {
   )
 }
 
-MaterialsTransferForm.width = 1000
+MaterialsTransferForm.width = 1200
 MaterialsTransferForm.height = 680
