@@ -66,7 +66,7 @@ export function DataGrid({
   const isEmptyMaxLines = [0, '0', null, ''].includes(maxLines)
 
   const canAddNewLine = () => {
-    if (isEmptyMaxLines || !allowAddNewLine || _disabled) return false
+    if (showFilters || isEmptyMaxLines || !allowAddNewLine || _disabled) return false
     if ( maxLines === undefined) return true
 
     const limit = parseInt(maxLines)
@@ -785,6 +785,9 @@ export function DataGrid({
         sortable: false,
         floatingFilter: enableFilters && showFilters && !component,
         filter: enableFilters && !component && hasRows && (filterMap[column.component] || 'agTextColumnFilter'),
+        filterParams: {
+          buttons: ["reset"],
+        },
         cellRenderer: CustomCellRenderer,
         cellEditor: CustomCellEditor,
         wrapText: true,
