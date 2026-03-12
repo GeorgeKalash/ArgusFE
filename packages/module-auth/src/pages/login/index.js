@@ -224,7 +224,7 @@ const LoginPage = () => {
 
             {validCompanyName && (
               <>
-                <LinkStyled href='/forget-password/reset' className={styles.linksRow}>
+                <LinkStyled href='/forget-password' className={styles.linksRow}>
                   {platformLabels?.ForgotPass}
                 </LinkStyled>
 
