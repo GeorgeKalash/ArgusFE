@@ -556,6 +556,8 @@ const DashboardLayout = () => {
           align-items: flex-start;
           width: 100%;
           min-width: 0;
+          width: 100%;
+          min-width: 0;
         }
 
         .container {
@@ -587,7 +589,6 @@ const DashboardLayout = () => {
           min-width: 0;
           align-items: stretch;
         }
-
         .chartCard {
           background: rgb(255, 255, 255);
           border-radius: 10px;
