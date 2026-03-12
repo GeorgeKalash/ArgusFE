@@ -916,7 +916,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
             allowDelete={false}
             allowAddNewLine={false}
             onSelectionChange={(row, update, field) => {
-              if (field == 'sku') currentItemId.current = row?.itemId
+              if (field == 'itemName') currentItemId.current = row?.itemId
             }}
           />
         </Grow>
