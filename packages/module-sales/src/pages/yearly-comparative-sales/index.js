@@ -285,6 +285,7 @@ const YearlyComparativeSales = () => {
           maxAccess={access}
           pagination={false}
           height={'250px'}
+          domLayout='autoHeight'
         />
       </Fixed>
       <Grow>
@@ -313,6 +314,7 @@ const YearlyComparativeSales = () => {
                       fiscalYears.filter(yearObj => yearObj.checked).map(yearObj => yearObj.year).length == 0
                     )
                   }
+                  domLayout='autoHeight'
                 />
               </Grid>
               <Grid item xs={4}>
