@@ -1130,16 +1130,12 @@ export function DataGrid({
           position: relative;
         }
 
-        .agContainer.ag-theme-alpine {
-          --ag-header-height: 20px !important;
-          --ag-font-size: 0.9rem;
-        }
-
-        .agContainer :global(.ag-header),
-        .agContainer :global(.ag-header-cell),
-        .agContainer :global(.ag-header-row) {
-          height: 40px !important;
-          background: var(--ag-header-bg, #f5f5f5);
+        .ag-theme-alpine .ag-filter-apply-panel button,
+        .ag-theme-alpine .ag-filter-apply-panel .ag-button {
+          font-size: 10px !important;
+          padding: 2px 6px !important;
+          height: 22px !important;
+          min-height: 22px !important;
         }
 
         .agContainer :global(.ag-header-cell-text) {
