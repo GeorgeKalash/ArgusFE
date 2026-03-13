@@ -1331,9 +1331,25 @@ export function DataGrid({
         }
 
         @media (max-width: 1280px) {
-          .agContainer :global(.ag-header-cell .ag-header-icon) { 
-            opacity: 1 !important; 
-            pointer-events: auto !important; 
+          .agContainer :global(.ag-header-cell .ag-header-cell-menu-button) {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            width: 14px !important;
+            min-width: 14px !important;
+            height: 14px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+
+          .agContainer :global(.ag-header-cell .ag-header-cell-menu-button .ag-icon) {
+            font-size: 10px !important;
+            line-height: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
           }
           .agContainer.ag-theme-alpine {
             --ag-header-height: 26px;
