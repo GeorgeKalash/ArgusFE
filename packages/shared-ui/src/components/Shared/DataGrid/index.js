@@ -774,6 +774,8 @@ export function DataGrid({
         numberfield: 'agNumberColumnFilter'
       }
 
+      const isDateColumn = column.component === 'date'
+      const isNumberColumn = column.component === 'numberfield'
       return {
         ...column,
         ...{ width: column.width + additionalWidth },
@@ -785,9 +787,32 @@ export function DataGrid({
         sortable: false,
         floatingFilter: enableFilters && showFilters && !component,
         filter: enableFilters && !component && hasRows && (filterMap[column.component] || 'agTextColumnFilter'),
-        filterParams: {
-          buttons: ["reset"],
-        },
+        filterParams: isDateColumn
+          ? {
+              buttons: ['reset'],
+              comparator: (filterLocalDateAtMidnight, cellValue) => {
+                if (!cellValue) return -1
+
+                const cellDate = new Date(cellValue)
+                const normalizedCellDate = new Date(
+                  cellDate.getFullYear(),
+                  cellDate.getMonth(),
+                  cellDate.getDate()
+                )
+
+                if (normalizedCellDate < filterLocalDateAtMidnight) return -1
+                if (normalizedCellDate > filterLocalDateAtMidnight) return 1
+                return 0
+              }
+            }
+          : isNumberColumn
+            ? {
+                buttons: ['reset'],
+                numberParser: value => value
+              }
+            : {
+                buttons: ['reset']
+              },
         cellRenderer: CustomCellRenderer,
         cellEditor: CustomCellEditor,
         wrapText: true,
