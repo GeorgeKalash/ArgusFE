@@ -1119,6 +1119,18 @@ export function DataGrid({
           transition: opacity 0.2s ease;
         }
 
+        .agContainer :global(.ag-header-cell .ag-header-icon) {
+          position: absolute;
+          right: 4px;
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .agContainer :global(.ag-header-cell:hover .ag-header-icon) {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
         .agContainer:hover .hoverFilter {
           opacity: 1;
         }
@@ -1319,6 +1331,10 @@ export function DataGrid({
         }
 
         @media (max-width: 1280px) {
+          .agContainer :global(.ag-header-cell .ag-header-icon) { 
+            opacity: 1 !important; 
+            pointer-events: auto !important; 
+          }
           .agContainer.ag-theme-alpine {
             --ag-header-height: 26px;
             --ag-font-size: 10px;
