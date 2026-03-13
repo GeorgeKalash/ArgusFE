@@ -1171,6 +1171,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
+            initialValues={formik?.initialValues?.transfers[0]}
+            enableFilters
             name='transfers'
             maxAccess={maxAccess}
             showCounterColumn={true}

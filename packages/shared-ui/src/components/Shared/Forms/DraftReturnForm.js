@@ -1296,6 +1296,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             columns={serialsColumns}
             showCounterColumn={true}
             name='serials'
+            enableFilters
             maxAccess={maxAccess}
             disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isClosed}

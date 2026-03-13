@@ -13,6 +13,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import FilterAltIcon from '@mui/icons-material/FilterAlt'
 
 export function DataGrid({
   name,
@@ -36,6 +37,7 @@ export function DataGrid({
   isDeleteDisabled,
   maxLines,
   showCounterColumn = false,
+  enableFilters = false
 }) {
   const gridApiRef = useRef(null)
   const { user } = useContext(AuthContext)
@@ -47,6 +49,7 @@ export function DataGrid({
   const [columnState, setColumnState] = useState()
   const skip = allowDelete ? 1 : 0
   const gridContainerRef = useRef(null)
+  const [showFilters, setShowFilters] = useState(false)
 
   const generalMaxAccess = maxAccess && maxAccess?.record?.accessFlags
   const isAccessDenied = maxAccess?.editMode
@@ -63,7 +66,7 @@ export function DataGrid({
   const isEmptyMaxLines = [0, '0', null, ''].includes(maxLines)
 
   const canAddNewLine = () => {
-    if (isEmptyMaxLines || !allowAddNewLine || _disabled) return false
+    if (showFilters || isEmptyMaxLines || !allowAddNewLine || _disabled) return false
     if ( maxLines === undefined) return true
 
     const limit = parseInt(maxLines)
@@ -745,16 +748,34 @@ export function DataGrid({
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
 
+      
+  const isRowEmpty = (row, initialValues) => {
+    if (!initialValues) return true
+
+    return JSON.stringify(row) === JSON.stringify({ ...initialValues, id: row.id })
+  }
+
+  const hasRows = value?.some(row => !isRowEmpty(row, initialValues))
 
   const columnDefs = [
     ...allColumns.map(column => {
       const mergedCellClass = [column.cellClass, 'wrapTextCell']
 
+      const component = column.component === 'checkbox' || column.component === 'button' || column.component === 'icon'
+
       const centered =
-        column.component === 'checkbox' || column.component === 'button' || column.component === 'icon'
+        component
           ? 'cellBoxCentered'
           : 'noCenterCell'
 
+      const filterMap = {
+        date: 'agDateColumnFilter',
+        textfield: 'agTextColumnFilter',
+        numberfield: 'agNumberColumnFilter'
+      }
+
+      const isDateColumn = column.component === 'date'
+      const isNumberColumn = column.component === 'numberfield'
       return {
         ...column,
         ...{ width: column.width + additionalWidth },
@@ -764,6 +785,34 @@ export function DataGrid({
         editable: params => !_disabled && !params.colDef?.props?.disabled,
         flex: column.flex || (!column.width && 1),
         sortable: false,
+        floatingFilter: enableFilters && showFilters && !component,
+        filter: enableFilters && !component && hasRows && (filterMap[column.component] || 'agTextColumnFilter'),
+        filterParams: isDateColumn
+          ? {
+              buttons: ['reset'],
+              comparator: (filterLocalDateAtMidnight, cellValue) => {
+                if (!cellValue) return -1
+
+                const cellDate = new Date(cellValue)
+                const normalizedCellDate = new Date(
+                  cellDate.getFullYear(),
+                  cellDate.getMonth(),
+                  cellDate.getDate()
+                )
+
+                if (normalizedCellDate < filterLocalDateAtMidnight) return -1
+                if (normalizedCellDate > filterLocalDateAtMidnight) return 1
+                return 0
+              }
+            }
+          : isNumberColumn
+            ? {
+                buttons: ['reset'],
+                numberParser: value => value
+              }
+            : {
+                buttons: ['reset']
+              },
         cellRenderer: CustomCellRenderer,
         cellEditor: CustomCellEditor,
         wrapText: true,
@@ -971,6 +1020,12 @@ export function DataGrid({
     gridApiRef.current?.setQuickFilter(searchValue)
   }, [searchValue])
 
+  useEffect(() => {
+    if (!showFilters && gridApiRef.current) {
+      gridApiRef.current.setFilterModel(null)
+    }
+  }, [showFilters])
+
   const onColumnResized = params => {
     if (params?.source === 'uiColumnResized') {
       const columnState = params.columnApi.getColumnState()
@@ -993,9 +1048,21 @@ export function DataGrid({
   return (
     <Box className={'root'} sx={{ height: height || 'auto' }}>
       <CacheStoreProvider>
-        <Box className={`ag-theme-alpine agContainer`} ref={gridContainerRef} style={{ '--ag-header-bg': bg }}>
+        <Box 
+          className={`ag-theme-alpine agContainer`} 
+          ref={gridContainerRef} 
+          style={{ '--ag-header-bg': bg }}
+        >
+          {enableFilters && hasRows && value.length > 0 && (
+            <Box className={'hoverFilter'}>
+              <IconButton size='small' onClick={() => setShowFilters(v => !v)}>
+                <FilterAltIcon fontSize='small' />
+              </IconButton>
+            </Box>
+          )}
           {value && (
             <AgGridReact
+              popupParent={document.body}
               gridApiRef={gridApiRef}
               rowData={isEmptyMaxLines ? [] : value}
               columnDefs={finalColumns}
@@ -1029,28 +1096,68 @@ export function DataGrid({
         .root {
           flex: 1;
         }
+        .agContainer :global(.ag-floating-filter-button) {
+          display: none !important;
+        }
+        .ag-menu,
+        .ag-popup,
+        .ag-popup-child {
+          z-index: 20 !important;
+        }
+        .ag-select-list {
+          max-height: none !important;
+          overflow: visible !important;
+        }
+        .hoverFilter {
+          position: absolute;
+          top: 6px;
+          right: 6px;
+          z-index: 10;
+          background: #fff;
+          border-radius: 4px;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+
+        .agContainer :global(.ag-header-cell .ag-header-icon) {
+          position: absolute;
+          right: 4px;
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .agContainer :global(.ag-header-cell:hover .ag-header-icon) {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        .agContainer:hover .hoverFilter {
+          opacity: 1;
+        }
 
         .agContainer {
           width: 100%;
           height: 100%;
           flex: 1;
+          position: relative;
         }
 
-        .agContainer.ag-theme-alpine {
-          --ag-header-height: 20px !important;
-          --ag-font-size: 0.9rem;
-        }
-
-        .agContainer :global(.ag-header),
-        .agContainer :global(.ag-header-cell),
-        .agContainer :global(.ag-header-row) {
-          height: 40px !important;
-          min-height: 40px !important;
-          background: var(--ag-header-bg, #f5f5f5);
+        .ag-theme-alpine .ag-filter-apply-panel button,
+        .ag-theme-alpine .ag-filter-apply-panel .ag-button {
+          font-size: 10px !important;
+          padding: 2px 6px !important;
+          height: 22px !important;
+          min-height: 22px !important;
         }
 
         .agContainer :global(.ag-header-cell-text) {
           font-size: 0.9rem;
+        }
+
+        .agContainer :global(.ag-floating-filter) {
+          display: flex;
+          align-items: center;
+          padding: 0 4px;
         }
 
         .agContainer :global(.agHeaderCheckboxCell.ag-header-cell) {
@@ -1214,7 +1321,6 @@ export function DataGrid({
           .agContainer :global(.ag-header),
           .agContainer :global(.ag-header-cell),
           .agContainer :global(.ag-header-row) {
-            min-height: 33px !important;
             height: 33px !important;
           }
 
@@ -1225,6 +1331,26 @@ export function DataGrid({
         }
 
         @media (max-width: 1280px) {
+          .agContainer :global(.ag-header-cell .ag-header-cell-menu-button) {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            width: 14px !important;
+            min-width: 14px !important;
+            height: 14px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+
+          .agContainer :global(.ag-header-cell .ag-header-cell-menu-button .ag-icon) {
+            font-size: 10px !important;
+            line-height: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
           .agContainer.ag-theme-alpine {
             --ag-header-height: 26px;
             --ag-font-size: 10px;
@@ -1245,7 +1371,6 @@ export function DataGrid({
           .agContainer :global(.ag-header),
           .agContainer :global(.ag-header-cell) {
             height: 29px !important;
-            min-height: 29px !important;
           }
 
           .agContainer :global(.ag-header-cell-text),
@@ -1269,7 +1394,6 @@ export function DataGrid({
           .agContainer :global(.ag-header),
           .agContainer :global(.ag-header-cell) {
             height: 29px !important;
-            min-height: 28px !important;
           }
 
           .agContainer :global(.ag-header-cell-text),
@@ -1287,7 +1411,6 @@ export function DataGrid({
           .agContainer :global(.ag-header),
           .agContainer :global(.ag-header-cell) {
             height: 26px !important;
-            min-height: 26px !important;
           }
 
           .agContainer :global(.ag-header-cell-text),

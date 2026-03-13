@@ -807,6 +807,8 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
             columns={serialsColumns}
             showCounterColumn={true}
             name='serials'
+            initialValues={formik?.initialValues?.serials[0]}
+            enableFilters
             maxAccess={maxAccess}
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isPosted}
