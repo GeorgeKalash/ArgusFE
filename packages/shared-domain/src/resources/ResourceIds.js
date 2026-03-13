@@ -625,6 +625,7 @@ export const ResourceIds = {
   ItemDetails: 41607,
   PaymentOrderDTD: 31622,
   PurchaseOrderDTD: 50109,
+  AccountReconciliations: 40315,
 
   // GL
   GLSalesInvoice: 51604,
