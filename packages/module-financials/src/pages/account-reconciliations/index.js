@@ -343,6 +343,7 @@ export default function AccountReconciliations(){
             pagination={false}
             showCheckboxColumn={true}
             handleCheckboxChange={onRowCheck}
+            highlightRow={(row)=> row.checked}
           />
         </Grow>
       </VertLayout>

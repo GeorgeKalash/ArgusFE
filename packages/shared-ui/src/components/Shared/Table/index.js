@@ -46,6 +46,7 @@ const Table = ({
   onRowDragEnd = false,
   collabsable = true,
   domLayout = 'normal',
+  highlightRow,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -787,8 +788,12 @@ const Table = ({
 
   const gridOptions = {
     rowClassRules: {
-      'even-row': params => params.node.rowIndex % 2 === 0
+      'even-row': params => params.node.rowIndex % 2 === 0,
+      'highlight-row': params => {
+      if (!highlightRow) return false
+      return params.data?.[highlightRow.field] === highlightRow.value
     }
+  }
   }
 
   const tableName =
@@ -931,6 +936,14 @@ const Table = ({
       )}
 
       <style jsx global>{`
+        .highlight-row {
+          background-color: #fff3cd !important;
+        }
+
+        .even-row {
+          background-color: #fafafa;
+        }
+
         .agGridContainer {
           position: relative;
           width: 100%;
