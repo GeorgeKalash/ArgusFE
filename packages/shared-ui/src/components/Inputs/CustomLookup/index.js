@@ -6,6 +6,7 @@ import PopperComponent from '../../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 import styles from './CustomLookup.module.css'
 import dropdownStyles from '../SharedDropdown.module.css'
 import inputs from '../Inputs.module.css'
@@ -46,6 +47,7 @@ const CustomLookup = ({
   minChars,
   onBlur = () => {},
   onFocus = () => {},
+  linkOpen,
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(
@@ -63,6 +65,9 @@ const CustomLookup = ({
   const selectFirstValue = useRef(null)
   const autocompleteRef = useRef(null)
 
+  const inputElRef = useRef(null)
+  const textMeasureRef = useRef(null)
+
   const [inputValue, setInputValue] = useState(firstValue || '')
 
   useEffect(() => {
@@ -79,11 +84,22 @@ const CustomLookup = ({
   useEffect(() => {
     if (!firstValue) setInputValue('')
   }, [firstValue])
+  
+  const link = linkOpen
+    ? useStackValueLink({
+        linkOpen,
+        inputElRef,
+        textMeasureRef
+      })
+    : null
+
+  const linkStyle = link?.linkStyle
+  const TextMeasure = link?.TextMeasure
 
   if (_hidden) return <></>
 
   return (
-    <Grid container spacing={0} className={styles.lookupContainer}>
+    <Grid container spacing={0} className={styles.lookupContainer} style={{ position: 'relative' }}>
       <Grid item xs={firstFieldWidth}>
         <Autocomplete
           fullWidth
@@ -146,11 +162,7 @@ const CustomLookup = ({
             valueHighlightedOption.current = newValue
           }}
           PaperComponent={({ children }) =>
-            props.renderOption && (
-              <Paper style={{ width: 'max-content' }}>
-                {children}
-              </Paper>
-            )
+            props.renderOption && <Paper style={{ width: 'max-content' }}>{children}</Paper>
           }
           renderOption={(propsOption, option) => {
             if (columnsInDropDown?.length > 0) {
@@ -232,105 +244,126 @@ const CustomLookup = ({
               </Box>
             )
           }}
-          renderInput={params => (
-            <TextField
-              {...params}
-              fullWidth
-              className={`${secondDisplayField && styles.firstField} ${styles.root}`}
-              onChange={e => {
-                const v = e.target.value
-                setInputValue(v)
+          renderInput={params => {
+            const hasSelectedValue = !!(firstValue || inputValue)
 
-                if (v) {
-                  if (!minChars || v.length >= minChars) {
-                    onLookup(v)
+            return (
+              <TextField
+                {...params}
+                fullWidth
+                className={`${secondDisplayField && styles.firstField} ${styles.root}`}
+                onChange={e => {
+                  const v = e.target.value
+                  setInputValue(v)
+
+                  if (v) {
+                    if (!minChars || v.length >= minChars) {
+                      onLookup(v)
+                      setFreeSolo(true)
+                    }
+                  } else {
+                    setStore([])
+                    setFreeSolo(false)
+                  }
+                }}
+                onKeyDown={onKeyDown}
+                onBlur={e => {
+                  if (
+                    !store.some(item => item?.[valueField] === inputValue) &&
+                    e.target.value !== firstValue
+                  ) {
+                    setInputValue('')
                     setFreeSolo(true)
                   }
-                } else {
+
+                  if (selectFirstValue.current !== 'click') {
+                    onBlur(e, valueHighlightedOption.current)
+                  }
+
+                  valueHighlightedOption.current = null
+                }}
+                onFocus={e => {
                   setStore([])
-                  setFreeSolo(false)
-                }
-              }}
-              onKeyDown={onKeyDown}
-              onBlur={e => {
-                if (
-                  !store.some(item => item?.[valueField] === inputValue) &&
-                  e.target.value !== firstValue
-                ) {
-                  setInputValue('')
                   setFreeSolo(true)
-                }
+                  selectFirstValue.current = ''
+                  onFocus(e)
+                }}
+                type={type}
+                variant={variant}
+                label={label}
+                required={_required}
+                onKeyUp={e => {
+                  onKeyUp(e, valueHighlightedOption.current)
+                  if (e.key !== 'Enter') setFreeSolo(false)
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  ref: node => {
+                    if (typeof params.inputProps.ref === 'function') params.inputProps.ref(node)
+                    else if (params.inputProps.ref) params.inputProps.ref.current = node
 
-                if (selectFirstValue.current !== 'click') {
-                  onBlur(e, valueHighlightedOption.current)
-                }
+                    inputElRef.current = node
+                  },
+                  tabIndex: _readOnly ? -1 : 0,
+                  style: {
+                    ...(params.inputProps?.style || {}),
+                    ...(linkOpen && hasSelectedValue ? linkStyle : {})
+                  },
+                  onMouseDown: e => {
+                    params.inputProps?.onMouseDown?.(e)
+                  },
+                  onClick: e => {
+                    params.inputProps?.onClick?.(e)
+                    if (linkOpen && link?.handleClick) link.handleClick(e)
+                  }
+                }}
+                autoFocus={focus}
+                error={error}
+                helperText={helperText}
+                InputProps={{
+                  ...params.InputProps,
+                  classes: {
+                    root: inputs.outlinedRoot,
+                    notchedOutline: hasBorder
+                      ? !secondDisplayField && inputs.outlinedFieldset
+                      : inputs.outlinedNoBorder,
+                    input: inputs.inputBase
+                  },
+                  endAdornment: !_readOnly && (
+                    <InputAdornment position="end" className={inputs.inputAdornment}>
+                      {!isLoading ? (
+                        <IconButton edge="start" className={inputs.iconButton} tabIndex={-1}>
+                          <SearchIcon className={inputs.icon} />
+                        </IconButton>
+                      ) : (
+                        <CircularProgress size={15} className={inputs.icon} />
+                      )}
 
-                valueHighlightedOption.current = null
-              }}
-              onFocus={e => {
-                setStore([])
-                setFreeSolo(true)
-                selectFirstValue.current = ''
-                onFocus(e)
-              }}
-              type={type}
-              variant={variant}
-              label={label}
-              required={_required}
-              onKeyUp={e => {
-                onKeyUp(e, valueHighlightedOption.current)
-                if (e.key !== 'Enter') setFreeSolo(false)
-              }}
-              inputProps={{
-                ...params.inputProps,
-                tabIndex: _readOnly ? -1 : 0
-              }}
-              autoFocus={focus}
-              error={error}
-              helperText={helperText}
-              InputProps={{
-                ...params.InputProps,
-                classes: {
-                  root: inputs.outlinedRoot,
-                  notchedOutline: hasBorder
-                    ? !secondDisplayField && inputs.outlinedFieldset
-                    : inputs.outlinedNoBorder,
-                  input: inputs.inputBase
-                },
-                endAdornment: !_readOnly && (
-                  <InputAdornment position="end" className={inputs.inputAdornment}>
-                    {!isLoading ? (
-                      <IconButton edge="start" className={inputs.iconButton} tabIndex={-1}>
-                        <SearchIcon className={inputs.icon} />
+                      <IconButton
+                        className={inputs.iconButton}
+                        tabIndex={-1}
+                        onClick={() => {
+                          setInputValue('')
+                          onChange(name, '')
+                          setStore([])
+                          setFreeSolo(true)
+                        }}
+                        aria-label="clear input"
+                      >
+                        <ClearIcon className={inputs.icon} />
                       </IconButton>
-                    ) : (
-                      <CircularProgress size={15} className={inputs.icon} />
-                    )}
-
-                    <IconButton
-                      className={inputs.iconButton}
-                      tabIndex={-1}
-                      onClick={() => {
-                        setInputValue('')
-                        onChange(name, '')
-                        setStore([])
-                        setFreeSolo(true)
-                      }}
-                      aria-label="clear input"
-                    >
-                      <ClearIcon className={inputs.icon} />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-              InputLabelProps={{
-                classes: {
-                  root: inputs.inputLabel,
-                  shrink: inputs.inputLabelShrink
-                }
-              }}
-            />
-          )}
+                    </InputAdornment>
+                  )
+                }}
+                InputLabelProps={{
+                  classes: {
+                    root: inputs.inputLabel,
+                    shrink: inputs.inputLabelShrink
+                  }
+                }}
+              />
+            )
+          }}
           readOnly={_readOnly}
           freeSolo={_readOnly || freeSolo}
           disabled={disabled}
@@ -343,9 +376,7 @@ const CustomLookup = ({
             size={size}
             variant={variant}
             placeholder={
-              secondFieldLabel === ''
-                ? displayField.toUpperCase()
-                : secondFieldLabel.toUpperCase()
+              secondFieldLabel === '' ? displayField.toUpperCase() : secondFieldLabel.toUpperCase()
             }
             value={secondValue || ''}
             required={_required}
@@ -371,6 +402,8 @@ const CustomLookup = ({
           />
         </Grid>
       )}
+
+      {TextMeasure && <TextMeasure />}
     </Grid>
   )
 }
