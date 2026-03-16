@@ -790,10 +790,10 @@ const Table = ({
     rowClassRules: {
       'even-row': params => params.node.rowIndex % 2 === 0,
       'highlight-row': params => {
-      if (!highlightRow) return false
-      return params.data?.[highlightRow.field] === highlightRow.value
+        if (!highlightRow) return false
+        return params.data?.[highlightRow.field] === highlightRow.value
+      }
     }
-  }
   }
 
   const tableName =
@@ -936,14 +936,6 @@ const Table = ({
       )}
 
       <style jsx global>{`
-        .highlight-row {
-          background-color: #fff3cd !important;
-        }
-
-        .even-row {
-          background-color: #fafafa;
-        }
-
         .agGridContainer {
           position: relative;
           width: 100%;
@@ -1162,6 +1154,13 @@ const Table = ({
 
         .agGridContainer :global(.ag-cell .MuiBox-root) {
           padding: 0 !important;
+        }
+
+        .agGridContainer :global(.ag-row.highlight-row),
+        .agGridContainer :global(.ag-row.highlight-row:hover),
+        .agGridContainer :global(.ag-row.highlight-row.ag-row-hover),
+        .agGridContainer :global(.ag-row.highlight-row .ag-cell) {
+          background-color: #fff3cd !important;
         }
 
         .paginationBar :global(.MuiIconButton-root) {
