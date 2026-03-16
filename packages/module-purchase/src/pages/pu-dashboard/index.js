@@ -82,7 +82,7 @@ export default function PuDashboard() {
       type: "square",
       position: { x: 100, y: 200 },
       data: {
-        label: labels.pr,
+        label: labels?.pr ?? "",
         color: "#f4ea2a",
         path: "/purchase-requisition/",
       },
@@ -91,14 +91,16 @@ export default function PuDashboard() {
       id: "mrp",
       type: "square",
       position: { x: 50, y: 400 },
-      data: { label: labels.mrp, color: "#f4ea2a", path: "/ir-mat-planning/" },
+      data: { label: labels?.mrp ?? '', color: "#f4ea2a", path: "/ir-mat-planning/" },
     },
     {
       id: "generatemrp",
       type: "circle",
       position: { x: 70, y: 600 },
+      width: 140,
+      height: 140,
       data: {
-        label: labels.genMrp,
+        label: labels?.genMrp ?? "",
         color: "#6cc04a",
         path: "/ir-gen-mat-planning/",
       },
@@ -108,7 +110,7 @@ export default function PuDashboard() {
       type: "square",
       position: { x: 600, y: 350 },
       data: {
-        label: labels.po,
+        label: labels?.po ?? "",
         color: "#ff3c2f",
         textColor: "#fff",
         path: "/pu-ord/",
@@ -118,14 +120,14 @@ export default function PuDashboard() {
       id: "potracker",
       type: "circle",
       position: { x: 620, y: 600 },
-      data: { label: labels.poTracker, color: "#6cc04a", path: "/po-tracking/" },
+      data: { label: labels?.poTracker ?? '', color: "#6cc04a", path: "/po-tracking/" },
     },
     {
       id: "quotations",
       type: "square",
       position: { x: 600, y: 100 },
       data: {
-        label: labels.qtn,
+        label: labels?.qtn ?? '',
         color: "#ff3c2f",
         textColor: "#fff",
         path: "/pu-qtn/",
@@ -136,7 +138,7 @@ export default function PuDashboard() {
       type: "square",
       position: { x: 1000, y: 200 },
       data: {
-        label: labels.shp,
+        label: labels?.shp ?? '',
         color: "#2e86c1",
         textColor: "#fff",
         path: "/shipments/",
@@ -147,7 +149,7 @@ export default function PuDashboard() {
       type: "square",
       position: { x: 900, y: 600 },
       data: {
-        label: labels.pi,
+        label: labels?.pi ?? '',
         color: "#2e86c1",
         textColor: "#fff",
         path: "/pu-trx/5004/",
@@ -157,8 +159,10 @@ export default function PuDashboard() {
       id: "generateinvoice",
       type: "circle",
       position: { x: 1150, y: 306 },
+      width: 140,
+      height: 140,
       data: {
-        label: labels.genIvc,
+        label: labels?.genIvc ?? '',
         color: "#6cc04a",
         path: "/generate-purch-inv/",
       },
@@ -167,13 +171,13 @@ export default function PuDashboard() {
       id: "openpo",
       type: "hex",
       position: { x: 800, y: 200 },
-      data: { label: labels.openPo, color: "#f5f5f5", path: "/pu-open-po/" },
+      data: { label: labels?.openPo ?? '', color: "#f5f5f5", path: "/pu-open-po/" },
     },
     {
       id: "openpr",
       type: "hex",
       position: { x: 400, y: 200 },
-      data: { label: labels.openPr, color: "#f5f5f5", path: "/pu-open-pr/" },
+      data: { label: labels?.openPr ?? '', color: "#f5f5f5", path: "/pu-open-pr/" },
     }
   ];
 
