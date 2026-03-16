@@ -43,8 +43,6 @@ export default function AccountReconciliations(){
       tCredits: 0,
       tBalance: 0,
       rows: []
-    },
-    onSubmit: async obj => {
     }
   })
 
@@ -103,6 +101,14 @@ export default function AccountReconciliations(){
     formik.setFieldValue('balance', totalBalance)
   }
 
+  async function applyReconciliation(){
+
+  }
+
+  async function unApplyReconciliation(){
+    
+  }
+
   const columns = [
     {
       field: 'reference',
@@ -144,7 +150,6 @@ export default function AccountReconciliations(){
     }
   ]
 
-
   const actions = [
     {
       key: 'PR',
@@ -161,11 +166,13 @@ export default function AccountReconciliations(){
       key: 'Apply',
       condition: true,
       onClick: () => formik.handleSubmit('apply'),
+      disabled: !(formik?.values?.debits === formik?.values?.credits && formik?.values?.rows?.some(row => row.checked))
     },
     {
       key: 'Unapply',
       condition: true,
       onClick: () => formik.handleSubmit('unapply'),
+      disabled: true
     }
   ]
 
