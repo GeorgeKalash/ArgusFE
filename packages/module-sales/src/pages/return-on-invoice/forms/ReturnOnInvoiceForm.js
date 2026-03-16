@@ -1517,7 +1517,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.SalesReturn}`}
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.ReturnOnInvoice}`}
                     name='dtId'
                     label={labels.docType}
                     columnsInDropDown={[
