@@ -785,7 +785,7 @@ export function DataGrid({
         editable: params => !_disabled && !params.colDef?.props?.disabled,
         flex: column.flex || (!column.width && 1),
         sortable: false,
-        floatingFilter: enableFilters && showFilters && !component,
+        floatingFilter: enableFilters && hasRows && showFilters && !component,
         filter: enableFilters && !component && hasRows && (filterMap[column.component] || 'agTextColumnFilter'),
         ...(isNumberColumn
           ? {
@@ -817,13 +817,9 @@ export function DataGrid({
                 return 0
               }
             }
-          : isNumberColumn
-            ? {
-                buttons: ['reset'],
-              }
-            : {
-                buttons: ['reset']
-              },
+          : {
+              buttons: ['reset']
+            },
         cellRenderer: CustomCellRenderer,
         cellEditor: CustomCellEditor,
         wrapText: true,
