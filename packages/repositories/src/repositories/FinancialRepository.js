@@ -291,6 +291,8 @@ export const FinancialRepository = {
     qry: service + 'qryAPLM'
   },
   AccountReconciliations: {
-    qry: service + 'qryRCL'
+    qry: service + 'qryRCL',
+    set: service + 'setRCL',
+    del: service + 'delRCL'
   }
 }

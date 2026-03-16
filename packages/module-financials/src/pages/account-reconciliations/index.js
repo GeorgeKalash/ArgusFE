@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -23,6 +23,7 @@ import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 export default function AccountReconciliations(){
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [selectedRow, setRow] = useState(null)
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.AccountReconciliations
@@ -76,6 +77,9 @@ export default function AccountReconciliations(){
 
     formik.setValues({
         ...formik.values,
+        debits: 0,
+        credits: 0,
+        balance: 0,
         tCredits: totalCredit,
         tDebits: totalDebit,
         tBalance: totalBalance,
@@ -85,28 +89,55 @@ export default function AccountReconciliations(){
 
   function onRowCheck() {
     const { totalDebit, totalCredit, totalBalance } = (formik?.values?.rows || [])
-        .filter(row => row.checked)
-        .reduce(
+      .filter(row => row.checked)
+      .reduce(
         (acc, row) => {
-            acc.totalDebit += row.debits || 0
-            acc.totalCredit += row.credits || 0
-            acc.totalBalance += row.balance || 0
-            return acc
+          acc.totalDebit += row.debits || 0
+          acc.totalCredit += row.credits || 0
+          acc.totalBalance += row.balance || 0
+          return acc
         },
         { totalDebit: 0, totalCredit: 0, totalBalance: 0 }
-        )
+      )
 
-    formik.setFieldValue('debits', totalDebit)
-    formik.setFieldValue('credits', totalCredit)
-    formik.setFieldValue('balance', totalBalance)
+      formik.setValues({
+        ...formik.values,
+        debits: totalDebit,
+        credits: totalCredit,
+        balance: totalBalance
+      })
   }
 
   async function applyReconciliation(){
+    const payload = {
+      accountId: formik?.values?.accountId,
+      transactions: formik?.values?.rows?.filter(row => row.checked)
+    }
 
+    await postRequest({
+      extension: FinancialRepository.AccountReconciliations.set,
+      record: JSON.stringify(payload)
+    })
+
+    toast.success(platformLabels.Applied)
+    PreviewGrid()
   }
 
   async function unApplyReconciliation(){
-    
+    const payload = {
+      accountId: formik?.values?.accountId,
+      code: selectedRow,
+      rclCode: selectedRow
+    }
+
+    await postRequest({
+      extension: FinancialRepository.AccountReconciliations.del,
+      record: JSON.stringify(payload)
+    })
+
+    toast.success(platformLabels.Unapplied)
+    PreviewGrid()
+    setRow(null)
   }
 
   const columns = [
@@ -165,14 +196,14 @@ export default function AccountReconciliations(){
     {
       key: 'Apply',
       condition: true,
-      onClick: () => formik.handleSubmit('apply'),
+      onClick: applyReconciliation,
       disabled: !(formik?.values?.debits === formik?.values?.credits && formik?.values?.rows?.some(row => row.checked))
     },
     {
       key: 'Unapply',
       condition: true,
-      onClick: () => formik.handleSubmit('unapply'),
-      disabled: true
+      onClick: unApplyReconciliation,
+      disabled: !selectedRow
     }
   ]
 
@@ -243,6 +274,7 @@ export default function AccountReconciliations(){
                             valueField='key'
                             displayField='value'
                             values={formik.values}
+                            maxAccess={access}
                             onClear={() => formik.setFieldValue('rclStatus', null)}
                             onChange={(_, newValue) => formik.setFieldValue('rclStatus', newValue?.key || null) }
                             error={formik.touched.rclStatus && Boolean(formik.errors.rclStatus)}
@@ -351,6 +383,8 @@ export default function AccountReconciliations(){
             showCheckboxColumn={true}
             handleCheckboxChange={onRowCheck}
             highlightRow={{ field: 'checked', value: true }}
+            disable={(row) => row.rclCode}
+            onSelectionChange={row => setRow(row?.rclCode || null)}
           />
         </Grow>
       </VertLayout>
