@@ -787,6 +787,18 @@ export function DataGrid({
         sortable: false,
         floatingFilter: enableFilters && showFilters && !component,
         filter: enableFilters && !component && hasRows && (filterMap[column.component] || 'agTextColumnFilter'),
+        ...(isNumberColumn
+          ? {
+              filterValueGetter: params => {
+                const num = Number(params.data?.[column.name])
+                return Number.isNaN(num)
+                  ? null
+                  : column?.props?.decimalScale != null
+                    ? Number(num.toFixed(column.props.decimalScale))
+                    : num
+              }
+            }
+          : {}),
         filterParams: isDateColumn
           ? {
               buttons: ['reset'],
@@ -808,7 +820,6 @@ export function DataGrid({
           : isNumberColumn
             ? {
                 buttons: ['reset'],
-                numberParser: value => value
               }
             : {
                 buttons: ['reset']
@@ -1148,6 +1159,18 @@ export function DataGrid({
           padding: 2px 6px !important;
           height: 22px !important;
           min-height: 22px !important;
+        }
+
+        .agContainer.ag-theme-alpine {
+          --ag-header-height: 20px !important;
+          --ag-font-size: 0.9rem;
+        }
+
+        .agContainer :global(.ag-header),
+        .agContainer :global(.ag-header-cell),
+        .agContainer :global(.ag-header-row) {
+          height: 40px !important;
+          background: var(--ag-header-bg, #f5f5f5);
         }
 
         .agContainer :global(.ag-header-cell-text) {
