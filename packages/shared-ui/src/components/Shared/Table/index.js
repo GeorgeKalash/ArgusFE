@@ -789,7 +789,7 @@ const Table = ({
   const gridOptions = {
     rowClassRules: {
       'even-row': params => params.node.rowIndex % 2 === 0,
-      'highlight-row': params => {
+      'highlighted-row': params => {
         if (!highlightRow) return false
         return params.data?.[highlightRow.field] === highlightRow.value
       }
@@ -891,10 +891,10 @@ const Table = ({
           sx={{
             height: props?.height || '100%',
             maxHeight: props?.maxHeight || 'none',
-            minHeight: 0
+            minHeight: 0,
+            '--highlight-bg': highlightRow?.color || 'transparent',
           }}
-        
-        >
+            >
           {hoveredTable && !pagination && (
             <Box className={'hoverReset'}>
               <IconButton size='small' onClick={onReset}>
@@ -1155,12 +1155,15 @@ const Table = ({
         .agGridContainer :global(.ag-cell .MuiBox-root) {
           padding: 0 !important;
         }
+          
+        .agGridContainer :global(.highlighted-row),
+        .agGridContainer :global(.highlighted-row.ag-row-hover),
+        .agGridContainer :global(.highlighted-row .ag-cell) {
+          background-color: var(--highlight-bg) !important;
+        }
 
-        .agGridContainer :global(.ag-row.highlight-row),
-        .agGridContainer :global(.ag-row.highlight-row:hover),
-        .agGridContainer :global(.ag-row.highlight-row.ag-row-hover),
-        .agGridContainer :global(.ag-row.highlight-row .ag-cell) {
-          background-color: #fff3cd !important;
+        .agGridContainer :global(.highlighted-row.ag-row-hover) {
+          filter: brightness(95%);
         }
 
         .paginationBar :global(.MuiIconButton-root) {

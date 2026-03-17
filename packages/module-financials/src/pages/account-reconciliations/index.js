@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -48,11 +48,13 @@ export default function AccountReconciliations(){
   })
 
   async function PreviewGrid() {
+    const startDate = formatDateToISO(new Date(formik?.values?.startDate)).trim()
+    const endDate = formatDateToISO(new Date(formik?.values?.endDate)).trim()
+    const currencyId = String(formik?.values?.currencyId).trim()
+
     const result = await getRequest({
       extension: FinancialRepository.AccountReconciliations.qry,
-      parameters: `_startDate=${formatDateToISO(new Date(formik?.values?.startDate))}&_endDate=${formatDateToISO(new Date(formik?.values?.endDate))}
-        &_accountId=${formik?.values?.accountId}&_currencyId=${formik?.values?.currencyId}
-        &_rclStatus=${formik?.values?.rclStatus}`
+      parameters: `_startDate=${startDate}&_endDate=${endDate}&_accountId=${formik?.values?.accountId}&_currencyId=${currencyId}&_rclStatus=${formik?.values?.rclStatus}`
     })
 
     let totalCredit = 0
@@ -87,7 +89,8 @@ export default function AccountReconciliations(){
     })
   }
 
-  function onRowCheck() {
+  function onRowCheck(row) {
+    setRow(row?.rclCode || null)
     const { totalDebit, totalCredit, totalBalance } = (formik?.values?.rows || [])
       .filter(row => row.checked)
       .reduce(
@@ -207,13 +210,25 @@ export default function AccountReconciliations(){
     }
   ]
 
+  useEffect(() => {
+    formik.setValues({
+      ...formik.values,
+      debits: 0,
+      credits: 0,
+      balance: 0,
+      tDebits: 0,
+      tCredits: 0,
+      tBalance: 0,
+      rows: []
+    })
+  },[formik?.values?.startDate, formik?.values?.endDate, formik?.values?.accountId, formik?.values?.currencyId, formik?.values?.rclStatus])
+
   return (
     <FormShell
       resourceId={ResourceIds.AccountReconciliations}
       form={formik}
       maxAccess={access}
       actions={actions}
-      isSavedClear={false}
       isSaved={false}
       editMode={true}
     >
@@ -382,7 +397,7 @@ export default function AccountReconciliations(){
             pagination={false}
             showCheckboxColumn={true}
             handleCheckboxChange={onRowCheck}
-            highlightRow={{ field: 'checked', value: true }}
+            highlightRow={{ field: 'checked', value: true , color: formik?.values?.balance == 0 ? '#78d580' : '#efc65e'}}
             disable={(row) => row.rclCode}
             onSelectionChange={row => setRow(row?.rclCode || null)}
           />

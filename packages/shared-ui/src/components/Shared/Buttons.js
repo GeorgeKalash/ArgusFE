@@ -326,7 +326,7 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'Unapply',
-    label: platformLabels.Apply,
+    label: platformLabels.Unapply,
     color: '#A02F13',
     image: 'cancelWhite.png',
     main: false
