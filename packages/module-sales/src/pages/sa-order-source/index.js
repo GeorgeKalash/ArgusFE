@@ -40,7 +40,7 @@ const SalesOrderSource = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesOrderSource.qryORS,
+    endpointId: SaleRepository.SalesOrderSource.page,
     datasetId: ResourceIds.SalesOrderSource
   })
 

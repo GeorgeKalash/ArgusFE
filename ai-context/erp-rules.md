@@ -238,7 +238,7 @@ Endpoints:
 - qry: qryORS
 
 Result:
-SalesRepository.SalesOrderSource.qryORS
+SalesRepository.SalesOrderSource.qry
 
 ## Repository Ownership
 
