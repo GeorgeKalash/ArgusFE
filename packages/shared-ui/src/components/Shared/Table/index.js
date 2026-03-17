@@ -26,7 +26,7 @@ import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
-import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
+import LinkCellRenderer from './LinkCellRenderer'
 
 const Table = ({
   name,
@@ -535,21 +535,6 @@ const Table = ({
   const FieldWrapper = params => {
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
-    const inputElRef = useRef(null)
-    const textMeasureRef = useRef(null)
-    const linkOpen = params?.colDef?.linkOpen
-
-    const link = linkOpen
-      ? useStackValueLink({
-          linkOpen: linkOpen(params?.data, params),
-          inputElRef,
-          textMeasureRef
-        })
-      : null
-
-    const linkStyle = link?.linkStyle
-    const TextMeasure = link?.TextMeasure
-
     const handleSelectText = event => {
       if (selectionMode === 'row' && onSelectionChange) {
         onSelectionChange(params.data, params.rowIndex)
@@ -572,11 +557,6 @@ const Table = ({
     }
 
     const handleClick = event => {
-      if (link?.handleClick) {
-        link.handleClick(event)
-        if (event.defaultPrevented) return
-      }
-
       handleSelectText(event)
     }
 
@@ -597,18 +577,8 @@ const Table = ({
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
           className={`fieldWrapper ${!params.colDef?.wrapText ? 'nowrap' : ''}`}
-          ref={node => {
-            inputElRef.current = node
-            if (node) {
-              node.value = node.innerText ?? ''
-            }
-          }}
-          style={{
-            ...(linkOpen && hasValue ? linkStyle : {})
-          }}
         >
           {displayValue}
-          {TextMeasure && <TextMeasure />}
         </Box>
       </>
     )
@@ -732,20 +702,36 @@ const Table = ({
           }
         ]
       : []),
-    ...filteredColumns.map(column => ({
-      ...column,
-      width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
-      flex: column.flex,
-      sort: column.sort || '',
-      cellRenderer:
-        column.type === 'image'
-          ? imageRenderer(column)
-          : column.isTree
-          ? IndentedCellRenderer
-          : column.cellRenderer
-          ? column.cellRenderer
-          : FieldWrapper
-    }))
+    ...filteredColumns.map(column => {
+      const isLinkedColumn = column.type === 'link' || !!column.linkOpen
+
+      return {
+        ...column,
+        width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
+        flex: column.flex,
+        sort: column.sort || '',
+        cellRenderer:
+          column.type === 'image'
+            ? imageRenderer(column)
+            : isLinkedColumn
+            ? params => (
+                <LinkCellRenderer
+                  data={params.data}
+                  field={column.field}
+                  value={params.value}
+                  params={params}
+                  wrapText={column.wrapText}
+                  onClick={column.onClick}
+                  linkOpen={column.linkOpen}
+                />
+              )
+            : column.isTree
+            ? IndentedCellRenderer
+            : column.cellRenderer
+            ? column.cellRenderer
+            : FieldWrapper
+      }
+    })
   ]
 
   if (props?.onEdit || props?.onDelete) {
@@ -926,7 +912,6 @@ const Table = ({
             maxHeight: props?.maxHeight || 'none',
             minHeight: 0
           }}
-        
         >
           {hoveredTable && !pagination && (
             <Box className={'hoverReset'}>
@@ -1142,33 +1127,6 @@ const Table = ({
         .agGridContainer :global(img.agImg--real) {
           object-fit: contain !important;
         }
-
-        .agGridContainer :global(.agImgCell) {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          overflow: hidden;
-        }
-
-        .agGridContainer :global(img.agImg) {
-          display: block !important;
-          max-width: 100% !important;
-          max-height: 100% !important;
-          object-fit: contain !important;
-          width: auto !important;
-          height: auto !important;
-        }
-
-        .agGridContainer :global(img.agImg--real) {
-          width: auto !important;
-          height: auto !important;
-          max-width: 100% !important;
-          max-height: 100% !important;
-          object-fit: contain !important;
-        }
-
 
         .agGridContainer :global(.ag-header),
         .agGridContainer :global(.ag-header-cell) {
