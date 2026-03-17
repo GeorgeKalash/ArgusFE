@@ -134,19 +134,6 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted
-    },
-    {
-      key: 'threeDPrinting',
-      condition: true,
-      onClick: async () => {
-        stack({
-          Component: ThreeDPrintForm,
-          props: {
-            recordId: formik.values?.threeDPId
-          }
-        })
-      },
-      disabled: !formik.values.threeDPId
     }
   ]
 
@@ -258,6 +245,10 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 endpointId={ProductModelingRepository.Printing.snapshot2}
                 parameters={{ _productionLineId: formik.values.productionLineId || 0 }}
                 valueField='reference'
+                linkOpen={{
+                  props: { recordId: formik.values.threeDPId },
+                  resourceId: ResourceIds.ThreeDPrint
+                }}
                 name='threeDPId'
                 label={labels.threeDP}
                 form={formik}

@@ -188,19 +188,6 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed || !editMode || isPosted
-    },
-    {
-      key: 'threeDPrinting',
-      condition: true,
-      onClick: async () => {
-        stack({
-          Component: ThreeDPrintForm,
-          props: {
-            recordId: formik.values?.threeDPId
-          }
-        })
-      },
-      disabled: !formik.values.threeDPId
     }
   ]
   useEffect(() => {
@@ -379,6 +366,10 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 valueField='reference'
                 displayField='reference'
                 name='threeDPId'
+                linkOpen={{
+                  props: { recordId: formik.values.threeDPId },
+                  resourceId: ResourceIds.ThreeDPrint
+                }}
                 label={labels.print}
                 form={formik}
                 readOnly={isClosed}

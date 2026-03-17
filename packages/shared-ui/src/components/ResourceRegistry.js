@@ -18,11 +18,11 @@ export const ResourceRegistry = {
     import('@argus/shared-ui/src/components/Shared/Forms/SketchForm')
   ),
 
-  [ResourceIds.Item]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/ItemDetails')
-  ),
-
   [ResourceIds.ThreeDDesign]: createResource(() =>
     import('@argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm')
+  ),
+
+  [ResourceIds.ThreeDPrint]: createResource(() =>
+    import('@argus/shared-ui/src/components/Shared/Forms/ThreeDPrintForm')
   )
 }

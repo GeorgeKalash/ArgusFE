@@ -171,19 +171,6 @@ export default function RubberForm({ labels, access, recordId }) {
         confirmation(platformLabels.StartRecord, platformLabels.Confirmation, onStart)
       },
       disabled: !editMode || isReleased || isPosted
-    },
-    {
-      key: 'threeDPrinting',
-      condition: true,
-      onClick: () => {
-        stack({
-          Component: ThreeDPrintForm,
-          props: {
-            recordId: formik.values?.threeDPId
-          }
-        })
-      },
-      disabled: !formik.values.threeDPId
     }
   ]
 
@@ -297,6 +284,10 @@ export default function RubberForm({ labels, access, recordId }) {
                 }}
                 valueField='reference'
                 name='modelId'
+                linkOpen={{
+                  props: { recordId: formik.values.threeDPId },
+                  resourceId: ResourceIds.ThreeDPrint
+                }}
                 label={labels.model}
                 form={formik}
                 required
