@@ -11,16 +11,17 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import DimValuesForm from './form/DimValuesForm'
 import { Grid } from '@mui/material'
 import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const DimensionsValues = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [tpaValues, setTpaValues] = useState([])
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const {
     query: { data },
@@ -98,20 +99,15 @@ const DimensionsValues = () => {
   }
 
   useEffect(() => {
-    ;(async () => {
-      const data = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: `_filter=tpaDimension`
-      })
+    if (!systemDefaults?.list) return
 
-      if (data) {
-        const result = data.list.filter(item => item.value)
-        setTpaValues(result)
+    const result = systemDefaults.list.filter(
+      item => item.key?.startsWith('tpaDimension') && item.value
+    )
 
-        filterBy('qry', result[0]?.key)
-      }
-    })()
-  }, [])
+    setTpaValues(result)
+    filterBy('qry', result[0]?.key)
+  }, [systemDefaults])
 
   return (
     <VertLayout>

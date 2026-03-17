@@ -118,7 +118,7 @@ const BatchTransfer = () => {
         recordId,
         maxAccess: access
       },
-      width: 1000,
+      width: 1350,
       height: 750,
       title: labels.batchTransfer
     })

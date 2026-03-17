@@ -13,10 +13,11 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const TaxDetails = props => {
-  const { taxId, obj, window } = props
+  const { taxId, obj, taxes, window } = props
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const useTaxes = Array.isArray(taxes) && taxes?.length > 0
   useSetWindow({ title: platformLabels.TaxDetails, window })
 
   const vatAmount = (taxDetail, taxItem) => {
@@ -41,6 +42,7 @@ const TaxDetails = props => {
     labels: _labels,
     access
   } = useResourceQuery({
+    enabled: !useTaxes,
     queryFn: fetchGridData,
     endpointId: FinancialRepository.TaxDetailPack.qry,
     datasetId: ResourceIds.TaxDetails
@@ -77,6 +79,16 @@ const TaxDetails = props => {
     }
   ]
 
+  const gridData = useTaxes
+  ? {
+      list: taxes?.map(t => ({
+        ...t,
+        amount: t.taxScheduleAmount,
+        vatAmount: t.amount?.toFixed(2)
+      }))
+    }
+  : data
+
   async function fetchGridData() {
     const res = await getRequest({
       extension: FinancialRepository.TaxDetailPack.qry,
@@ -109,7 +121,7 @@ const TaxDetails = props => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={gridData}
           rowId={['recordId']}
           isLoading={false}
           maxAccess={access}

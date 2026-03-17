@@ -28,7 +28,14 @@ export default function AccountSummary({ accountId, date, window }) {
     datasetId: ResourceIds.AccountSummary
   })
 
-  const baseColumns = [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }]
+  const baseColumns = [
+    {
+      field: 'days',
+      headerName: labels.days,
+      width: 5,
+      cellClass: params => params.value === labels.grandTotal ? '' : 'right'
+    }
+  ]
 
   const { formik } = useForm({
     maxAccess: access,
@@ -109,32 +116,33 @@ export default function AccountSummary({ accountId, date, window }) {
       return 
     }
 
-    const currencies = [...new Set(agingProfiles.map(i => i.currencyRef).filter(Boolean))]
+    const currencies = res?.record?.currencies || []
 
     const dynamicColumns = [...baseColumns]
 
     currencies.forEach((cur, index) => {
       dynamicColumns.push({
         field: `column${index + 1}`,
-        headerName: cur,
-        flex: 1,
+        headerName: cur.reference,
+        width: 110,
         type: 'number'
       })
     })
 
     formik.setFieldValue('columns', dynamicColumns)
 
-    const agingRows = [...new Map(agingProfiles.filter(i => i.seqDays !== -1).map(i => [i.seqDays, i])).values()].sort(
-      (a, b) => a.seqDays - b.seqDays
-    )
+    const agingLegs = res?.record?.agingLegs || []
 
+    const agingRows = agingLegs.sort((a, b) => a.days - b.days)
     const rows = agingRows.map(row => {
-      const rowObject = { days: row.seqDays }
+      const rowObject = { days: Number(row.days).toLocaleString() }
 
       currencies.forEach((cur, index) => {
-        const value = agingProfiles
-          .filter(i => i.seqDays === row.seqDays && i.currencyRef === cur)
-          .reduce((sum, i) => sum + Number(i.amount || 0), 0)
+        const profile = agingProfiles.find(
+          p => p.seqDays === row.days && p.currencyRef === cur.reference
+        )
+
+        const value = profile ? Number(profile.amount || 0) : 0
 
         rowObject[`column${index + 1}`] = value.toFixed(2)
       })
@@ -142,15 +150,17 @@ export default function AccountSummary({ accountId, date, window }) {
       return rowObject
     })
 
-    const totalRow = {}
+    const totalRow = {
+      days: labels.grandTotal
+    }
 
     currencies.forEach((cur, index) => {
-      const total = agingProfiles.some(i => i.seqDays === -1 && i.currencyRef === cur)
+      const total = agingProfiles.some(i => i.seqDays === -1 && i.currencyRef === cur.reference)
         ? agingProfiles
-            .filter(i => i.seqDays === -1 && i.currencyRef === cur)
+            .filter(i => i.seqDays === -1 && i.currencyRef === cur.reference)
             .reduce((s, i) => s + Number(i.amount || 0), 0)
         : agingProfiles
-            .filter(i => i.seqDays !== -1 && i.currencyRef === cur)
+            .filter(i => i.seqDays !== -1 && i.currencyRef === cur.reference)
             .reduce((s, i) => s + Number(i.amount || 0), 0)
 
       totalRow[`column${index + 1}`] = total.toFixed(2)
@@ -267,10 +277,10 @@ export default function AccountSummary({ accountId, date, window }) {
         </Grid>
       </Fixed>
       <Grid container spacing={1} sx={{ flex: 1 }}>
-        <Grid item xs={4} sx={{ display: 'flex' }}>
+        <Grid item xs={5} sx={{ display: 'flex' }}>
           <Table name='summaryTable' columns={formik.values.summaryColumns} gridData={formik.values.summaryData} pagination={false} />
         </Grid>
-        <Grid item xs={8} sx={{ display: 'flex' }}>
+        <Grid item xs={7} sx={{ display: 'flex' }}>
           <Table name='agingProfilesTable' columns={formik.values.columns} gridData={formik.values.gridData} pagination={false} />
         </Grid>
       </Grid>
@@ -278,5 +288,5 @@ export default function AccountSummary({ accountId, date, window }) {
   )
 }
 
-AccountSummary.width = 1000
+AccountSummary.width = 1200
 AccountSummary.height = 500

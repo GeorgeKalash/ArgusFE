@@ -33,11 +33,13 @@ import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const userId = getStorageData('userData').userId
   const [mismatchedFields, setMismatchedFields] = useState([])
 
@@ -224,7 +226,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
   }
 
   async function getDefaultVAT() {
-    const defaultVAT = defaultsData?.list?.find(({ key }) => key === 'vatPct')
+    const defaultVAT = systemDefaults?.list?.find(({ key }) => key === 'vatPct')
 
     return parseInt(defaultVAT?.value)
   }
@@ -545,7 +547,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
   }, [])
 
   async function getDefaultCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'baseCurrencyId')
 
     formik.setFieldValue('currencyId', parseInt(defaultCurrency?.value))
   }

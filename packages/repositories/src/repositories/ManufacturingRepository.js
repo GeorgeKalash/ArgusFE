@@ -145,6 +145,7 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotJOB',
     snapshot2: service + 'snapshotJOB2',
     snapshot3: service + 'snapshotJOB3',
+    snapshot4: service + 'snapshotJOB4',
     cancel: service + 'cancelJOB',
     post: service + 'postJOB',
     start: service + 'startJOB',
@@ -285,7 +286,8 @@ export const ManufacturingRepository = {
     qry: service + 'qryBMI',
     del: service + 'delBMI',
     set: service + 'setBMI',
-    set2: service + 'set2BMI'
+    set2: service + 'set2BMI',
+    preview: service + 'previewBMI'
   },
   Assembly: {
     get: service + 'getASM',
@@ -471,5 +473,5 @@ export const ManufacturingRepository = {
     get: service + 'getDCA',
     del: service + 'delDCA',
     snapshot: service + 'snapshotDCA'
-  }
+  },
 }

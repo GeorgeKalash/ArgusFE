@@ -270,13 +270,12 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                   <ResourceLookup
                     endpointId={ManufacturingRepository.Routing.snapshot2}
                     parameters={{
-                      _lineId: formik.values.lineId || 0
+                      _lineId: 0
                     }}
                     valueField='reference'
                     displayField='name'
                     name='routingId'
                     label={labels.routing}
-                    readOnly={!formik.values.lineId}
                     form={formik}
                     minChars={2}
                     firstValue={formik.values.routingRef}
