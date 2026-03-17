@@ -121,6 +121,13 @@ export const SaleRepository = {
     del: service + 'delCCS',
     page: service + 'pageCCS'
   },
+  SalesOrderSource: {
+    qry: service + 'qryORS',
+    get: service + 'getORS',
+    set: service + 'setORS',
+    del: service + 'delORS',
+    page: service + 'pageORS'
+  },
   Price: {
     qry: service + 'qryCC',
     get: service + 'getCC',
