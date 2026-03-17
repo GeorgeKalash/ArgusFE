@@ -1056,7 +1056,7 @@ export function DataGrid({
     <Box className={'root'} sx={{ height: height || 'auto' }}>
       <CacheStoreProvider>
         <Box 
-          className={`ag-theme-alpine agContainer`} 
+          className={`ag-theme-alpine agContainer ${showFilters ? 'filters-open' : 'filters-closed'}`}
           ref={gridContainerRef} 
           style={{ '--ag-header-bg': bg }}
         >
@@ -1126,14 +1126,26 @@ export function DataGrid({
           transition: opacity 0.2s ease;
         }
 
-        .agContainer :global(.ag-header-cell .ag-header-icon) {
+        .agContainer :global(.ag-header-cell .ag-header-cell-menu-button) {
+          display: none !important;
+        }
+
+        .agContainer.filters-open :global(.ag-header-cell .ag-header-cell-menu-button) {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        .agContainer.filters-open :global(.ag-header-cell .ag-header-icon) {
           position: absolute;
           right: 4px;
           opacity: 0;
           pointer-events: none;
         }
 
-        .agContainer :global(.ag-header-cell:hover .ag-header-icon) {
+        .agContainer.filters-open :global(.ag-header-cell:hover .ag-header-icon) {
           opacity: 1;
           pointer-events: auto;
         }
@@ -1350,7 +1362,7 @@ export function DataGrid({
         }
 
         @media (max-width: 1280px) {
-          .agContainer :global(.ag-header-cell .ag-header-cell-menu-button) {
+          .agContainer.filters-open :global(.ag-header-cell .ag-header-cell-menu-button) {
             opacity: 1 !important;
             pointer-events: auto !important;
             width: 14px !important;
@@ -1358,17 +1370,12 @@ export function DataGrid({
             height: 14px !important;
             margin: 0 !important;
             padding: 0 !important;
-            display: flex !important;
             align-items: center !important;
             justify-content: center !important;
           }
 
-          .agContainer :global(.ag-header-cell .ag-header-cell-menu-button .ag-icon) {
-            font-size: 10px !important;
-            line-height: 1 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
+          .agContainer.filters-closed :global(.ag-header-cell .ag-header-cell-menu-button) {
+            display: none !important;
           }
           .agContainer.ag-theme-alpine {
             --ag-header-height: 26px;
