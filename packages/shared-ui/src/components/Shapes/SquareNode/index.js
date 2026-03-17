@@ -1,16 +1,12 @@
 import { Handle, Position } from "reactflow";
+import styles from "./SquareNode.module.css";
 
 export const SquareNode = ({ data }) => (
   <div
+    className={styles.squareNode}
     style={{
-      padding: 14,
-      borderRadius: 6,
-      minWidth: 180,
-      textAlign: "center",
-      fontWeight: 600,
       background: data.color,
       color: data.textColor || "#000",
-      position: "relative",
     }}
   >
     <Handle
@@ -65,6 +61,6 @@ export const SquareNode = ({ data }) => (
       style={{ opacity: 0 }}
     />
 
-    {data.label}
+    <span className={styles.label}>{data.label}</span>
   </div>
 );
