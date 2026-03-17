@@ -1128,6 +1128,32 @@ const Table = ({
           object-fit: contain !important;
         }
 
+        .agGridContainer :global(.agImgCell) {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+        }
+
+        .agGridContainer :global(img.agImg) {
+          display: block !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+          width: auto !important;
+          height: auto !important;
+        }
+
+        .agGridContainer :global(img.agImg--real) {
+          width: auto !important;
+          height: auto !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+        }
+
         .agGridContainer :global(.ag-header),
         .agGridContainer :global(.ag-header-cell) {
           height: 32px !important;
