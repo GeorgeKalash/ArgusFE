@@ -11,7 +11,6 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -28,14 +27,15 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import ImportSerials from '@argus/shared-ui/src/components/Shared/ImportSerials'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useError } from '@argus/shared-providers/src/providers/error'
-import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
-import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialsTransferForm'
 
-export default function DraftTransfer({ labels, access, recordId }) {
+export default function DraftTransfer({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -54,8 +54,8 @@ export default function DraftTransfer({ labels, access, recordId }) {
     }
   }, [documentType?.dtId])
 
-  const defUserSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
-  const defSiteId = parseInt(defaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defUserSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defSiteId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
     maxAccess,
@@ -297,6 +297,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
               srlNo: res?.record?.srlNo || '',
               sku: res?.record?.sku || '',
               itemName: res?.record?.itemName || '',
+              categoryName: res?.record?.categoryName || '',
               weight: res?.record?.weight || 0,
               itemId: res?.record?.itemId || null,
               metalId: res?.record?.metalId || null,
@@ -359,6 +360,15 @@ export default function DraftTransfer({ labels, access, recordId }) {
     },
     {
       component: 'textfield',
+      label: labels.categoryName,
+      name: 'categoryName',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
       label: labels.metal,
       name: 'metalRef',
       props: {
@@ -370,17 +380,26 @@ export default function DraftTransfer({ labels, access, recordId }) {
   async function onPost() {
     const { serials, ...restValues } = formik.values
 
-    await postRequest({
+    const res = await postRequest({
       extension: InventoryRepository.DraftTransfer.post,
       record: JSON.stringify({
         ...restValues,
         date: formatDateToApi(formik.values.date)
       })
-    }).then(() => {
-      toast.success(platformLabels.Posted)
-      invalidate()
-      refetchForm(formik?.values?.recordId)
     })
+    toast.success(platformLabels.Posted)
+    invalidate()
+    window.close()
+
+    if(res?.recordId){
+      stack({
+        Component: MaterialsTransferForm,
+        props: {
+          recordId: res?.recordId
+        }
+      })
+    }
+      
   }
 
   async function onWorkFlowClick() {
@@ -514,11 +533,11 @@ export default function DraftTransfer({ labels, access, recordId }) {
 
       var seqNo = 0
 
-      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight }) => {
+      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
         if (itemId) {
           if (!acc[itemId]) {
             seqNo++
-            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo }
+            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, categoryName: categoryName, seqNo: seqNo }
           }
           acc[itemId].pcs += 1
           acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
@@ -786,6 +805,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
             value={formik.values.serials || []}
             error={formik.errors.serials}
             columns={serialsColumns}
+            showCounterColumn={true}
             name='serials'
             maxAccess={maxAccess}
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
@@ -800,27 +820,14 @@ export default function DraftTransfer({ labels, access, recordId }) {
         </Grow>
         <Grid container spacing={2}>
           <Grid item xs={8}>
-              <Grid item xs={12} height={105} sx={{ display: 'flex', flex: 1 }}>
-                <Table
-                  name='metal'
-                  gridData={{ count: 1, list: formik?.values?.metalGridData }}
-                  maxAccess={access}
-                  columns={[
-                    { field: 'metal', headerName: labels.metal, flex: 1 },
-                    { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
-                    { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
-                  ]}
-                  rowId={['metal']}
-                  pagination={false}
-                />
-              </Grid>
-              <Grid item xs={12} height={95} sx={{ display: 'flex', flex: 1 }}>
+              <Grid item xs={12} height={140} sx={{ display: 'flex', flex: 1 }}>
                 <Table
                   name='item'
                   columns={[
                     { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 1 },
                     { field: 'sku', headerName: labels.sku, flex: 1 },
                     { field: 'itemName', headerName: labels.itemName, flex: 2 },
+                    { field: 'categoryName', headerName: labels.categoryName, flex: 2 },
                     { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
                     { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
                   ]}
@@ -834,8 +841,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
           <Grid item xs={4}>
             <Grid container spacing={2}>
               <Grid item xs={12}></Grid>
-              <Grid item xs={12}></Grid>
-              <Grid item xs={12}></Grid>
               <Grid item xs={12}>
                 <CustomNumberField
                   name='totalWeight'
@@ -843,6 +848,20 @@ export default function DraftTransfer({ labels, access, recordId }) {
                   label={labels.totalWeight}
                   value={formik.values.totalWeight}
                   readOnly
+                />
+              </Grid>
+              <Grid item xs={12} height={105} sx={{ display: 'flex', flex: 1 }}>
+                <Table
+                  name='metal'
+                  gridData={{ count: 1, list: formik?.values?.metalGridData }}
+                  maxAccess={access}
+                  columns={[
+                    { field: 'metal', headerName: labels.metal, flex: 1 },
+                    { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
+                    { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
+                  ]}
+                  rowId={['metal']}
+                  pagination={false}
                 />
               </Grid>
             </Grid>

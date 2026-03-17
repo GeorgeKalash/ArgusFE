@@ -11,10 +11,12 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import toast from 'react-hot-toast'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const PropertiesForm = ({ store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const { platformLabels } = useContext(ControlContext)
 
@@ -24,17 +26,12 @@ const PropertiesForm = ({ store, maxAccess }) => {
   useEffect(() => {
     if (recordId) {
       const fetchDimension = async () => {
-        const response = await getRequest({
-          extension: SystemRepository.Defaults.qry,
-          parameters: `_filter=`
-        })
-
-        const filteredDimensions = response?.list?.filter(
+        const filteredDimensions = systemDefaults?.list?.filter(
           item => item.key.includes('ivtDimension') && item?.value?.length > 0
         )
         setDimensions(filteredDimensions)
 
-        const filteredDimensions2 = response?.list?.filter(
+        const filteredDimensions2 = systemDefaults?.list?.filter(
           item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item?.value?.length > 0
         )
         setDimensionsUDT(filteredDimensions2)

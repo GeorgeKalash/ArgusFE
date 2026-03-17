@@ -23,11 +23,27 @@ export default function MetalTrxFinancial() {
 
   const { functionId } = Router()
 
+  const MetalTrxEndpoints = {
+    [SystemFunction.MetalReceiptVoucher]: {
+      page: FinancialRepository.MetalReceiptVoucher.page,
+      snapshot: FinancialRepository.MetalReceiptVoucher.snapshot,
+      del: FinancialRepository.MetalReceiptVoucher.del
+    },
+
+    [SystemFunction.MetalPaymentVoucher]: {
+      page: FinancialRepository.MetalPaymentVoucher.page,
+      snapshot: FinancialRepository.MetalPaymentVoucher.snapshot,
+      del: FinancialRepository.MetalPaymentVoucher.del
+    }
+  }
+
+  const getMetalTrxApi = (functionId) => MetalTrxEndpoints[Number(functionId)]
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.MetalTrx.page,
+      extension: getMetalTrxApi(functionId).page,
       parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_sortBy=reference&_functionId=${functionId}`
     })
 
@@ -67,7 +83,7 @@ export default function MetalTrxFinancial() {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.MetalTrx.page,
+    endpointId: getMetalTrxApi(functionId).page,
     datasetId: ResourceIds.MetalReceiptVoucher,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
@@ -79,7 +95,7 @@ export default function MetalTrxFinancial() {
   async function fetchWithSearch({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.MetalTrx.snapshot,
+        extension: getMetalTrxApi(functionId).snapshot,
         parameters: `_filter=${filters.qry}&_functionId=${functionId}`
       })
     } else {
@@ -202,7 +218,7 @@ export default function MetalTrxFinancial() {
 
   const del = async obj => {
     await postRequest({
-      extension: FinancialRepository.MetalTrx.del,
+      extension: getMetalTrxApi(functionId).del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -216,13 +232,13 @@ export default function MetalTrxFinancial() {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           refetch={refetch}

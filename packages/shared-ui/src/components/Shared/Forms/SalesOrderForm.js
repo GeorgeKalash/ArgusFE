@@ -49,14 +49,15 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
   const filteredMeasurements = useRef([])
@@ -72,7 +73,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   useSetWindow({ title: labels.salesOrder, window })
 
-  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+  const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesOrder,
@@ -389,7 +390,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           msId: itemInfo?.msId,
           muRef: defaultMu?.reference || '',
           muId: defaultMu?.recordId || null,
-          muQty: 0,
+          muQty: defaultMu?.qty || 0,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
@@ -483,7 +484,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const muQty = newRow?.muQty ?? filteredItems?.qty
 
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update({ ...data, baseQty: newRow?.qty * muQty })
+        update({ ...data, baseQty: parseFloat(newRow?.qty) * muQty })
       }
     },
     {
@@ -980,7 +981,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       weight: newRow?.weight,
       unitPrice: newRow?.unitPrice || 0,
       upo: parseFloat(newRow?.upo) || 0,
-      qty: newRow?.qty,
+      qty: parseFloat(newRow?.qty),
       extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,
       mdType: newRow?.mdType,
@@ -1208,7 +1209,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     const systemKeys = ['siteId', 'salesTD', 'plId']
     const userKeys = ['plantId', 'siteId', 'spId']
 
-    const systemObject = (defaultsData?.list || []).reduce((acc, { key, value }) => {
+    const systemObject = (systemDefaults?.list || []).reduce((acc, { key, value }) => {
       if (systemKeys.includes(key)) {
         acc[key] = value === 'True' || value === 'False' ? value : value ? parseInt(value) : null
       }
@@ -1216,7 +1217,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       return acc
     }, {})
 
-    const userObject = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+    const userObject = (userDefaults?.list || []).reduce((acc, { key, value }) => {
       if (userKeys.includes(key)) {
         acc[key] = value ? parseInt(value) : null
       }

@@ -283,6 +283,7 @@ export const ResourceIds = {
   GovernmentOrganizationFilter: 70106,
   NotificationTransaction: 23301, // Notification center
   MFJobOrders: 42302,
+  BatchTransferDTD: 42609,
   IVDimension: 41106,
   FIDimValues: 31111,
   CorrespondentGroup: 36125,
@@ -558,6 +559,7 @@ export const ResourceIds = {
   EmployeeChart: 71201,
   Catalogue: 41218,
   MetalSmelting: 47314,
+  MetalCalibration: 47316,
   PurityAdjustment: 47315,
   MasterDataDTD: 35120,
   AUDefaults: 23104,
@@ -666,6 +668,7 @@ export const ResourceIds = {
   GLReturnOnInvoice: 51606,
   GLMaterialAdjustment: 41606,
   GLTransactionItem: 47600,
+  GLMetalCalibration: 47601,
   GLWorkOrder: 45600,
   GLPayrollList: 75600,
 

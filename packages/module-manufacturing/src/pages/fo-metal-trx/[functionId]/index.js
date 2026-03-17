@@ -13,23 +13,46 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
-import MetalSmeltingForm from './form/MetalSmeltingForm'
+import { Router } from '@argus/shared-domain/src/lib/useRouter'
+import FOMetalTrxForm from './Forms/FOMetalTrxForm'
 
-export default function MetalSmelting() {
+export default function FOMetalTrx() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const { functionId } = Router()
+
+  const MetalRepositories = {
+    [SystemFunction.MetalSmelting]: FoundryRepository.MetalSmelting,
+    [SystemFunction.MetalCalibration]: FoundryRepository.MetalCalibration
+  }
+  
+  const endpoint = MetalRepositories[Number(functionId)] ?? null
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: FoundryRepository.FoundaryTransaction.page,
-      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_functionId=${SystemFunction.MetalSmelting}`
+      extension: endpoint?.page,
+      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
   }
+
+   const getResourceId = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.MetalSmelting:
+        return ResourceIds.MetalSmelting
+      case SystemFunction.MetalCalibration:
+        return ResourceIds.MetalCalibration
+      default:
+        return null
+    }
+  }
+
 
   const {
     query: { data },
@@ -41,8 +64,9 @@ export default function MetalSmelting() {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FoundryRepository.FoundaryTransaction.page,
+    endpointId: endpoint?.page,
     datasetId: ResourceIds.MetalSmelting,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
       filterFn: fetchWithSearch
     }
@@ -51,8 +75,8 @@ export default function MetalSmelting() {
   async function fetchWithSearch({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FoundryRepository.FoundaryTransaction.snapshot,
-        parameters: `_filter=${filters.qry}&_functionId=${SystemFunction.MetalSmelting}`
+        extension: endpoint?.snapshot,
+        parameters: `_filter=${filters.qry}`
       })
     } else {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -103,22 +127,34 @@ export default function MetalSmelting() {
     openForm(obj?.recordId)
   }
 
+  const getcorrectLabel = functionId => {
+    if (functionId === SystemFunction.MetalSmelting) {
+      return labels.metalSmelting
+    } else if (functionId === SystemFunction.MetalCalibration) {
+      return labels.metalCalibration
+    } else {
+      return null
+    }
+  }
+
   function openForm(recordId) {
     stack({
-      Component: MetalSmeltingForm,
+      Component: FOMetalTrxForm,
       props: {
         labels,
         recordId,
-        access
+        functionId,
+        access,
+        getResourceId
       },
       width: 1100,
       height: 730,
-      title: labels.metalSmelting
+      title: getcorrectLabel(parseInt(functionId))
     })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.MetalSmelting,
+    functionId,
     action: openForm
   })
 
@@ -128,7 +164,7 @@ export default function MetalSmelting() {
 
   const del = async obj => {
     await postRequest({
-      extension: FoundryRepository.FoundaryTransaction.del,
+      extension: endpoint?.del,
       record: JSON.stringify(obj)
     })
     invalidate()

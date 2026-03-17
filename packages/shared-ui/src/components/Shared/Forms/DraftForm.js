@@ -31,12 +31,14 @@ import { getIPR, DIRTYFIELD_UNIT_PRICE } from '@argus/shared-utils/src/utils/Ite
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const DraftForm = ({ labels, access, recordId, invalidate }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const [reCal, setReCal] = useState(false)
   const taxDetailsCacheRef = useRef(null)
 
@@ -52,10 +54,10 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   }, [documentType?.dtId])
 
-  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const defplId = parseInt(defaultsData?.list?.find(obj => obj.key === 'plId')?.value)
-  const defspId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'spId')?.value)
-  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defplId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'plId')?.value)
+  const defspId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
+  const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
     maxAccess,
@@ -1077,6 +1079,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             initialValues={formik?.initialValues?.serials?.[0]}
             columns={serialsColumns}
             name='serials'
+            showCounterColumn={true}
             maxAccess={maxAccess}
             disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isClosed}
@@ -1134,7 +1137,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                   readOnly
                 />
               </Grid>
-              <Grid item xs={12}></Grid>
               <Grid item xs={12}>
                 <CustomNumberField
                   name='subtotal'

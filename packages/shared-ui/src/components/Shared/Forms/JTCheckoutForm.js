@@ -28,7 +28,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { useError } from '@argus/shared-providers/src/providers/error'
 
-export default function JTCheckoutForm({ recordId, window }) {
+export default function JTCheckoutForm({ recordId, window, refetch }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   
@@ -44,12 +44,14 @@ export default function JTCheckoutForm({ recordId, window }) {
     enabled: !recordId,
     objectName: 'transfer'
   })
-  
+
+  const hookInvalidate = useInvalidate({
+    endpointId: ManufacturingRepository.JobTransfer.page
+  });
+
   useSetWindow({ title: labels.jobTransfer, window })
 
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.JobTransfer.page
-  })
+  const invalidate = refetch ?? hookInvalidate;
 
   const { formik } = useForm({
     documentType: { key: 'transfer.dtId', value: documentType?.dtId },
@@ -184,6 +186,7 @@ export default function JTCheckoutForm({ recordId, window }) {
     }).then(async () => {
       await getData(formik?.values?.transfer?.recordId)
       invalidate()
+      
       toast.success(platformLabels.Posted)
       window.close()
     })
@@ -198,6 +201,7 @@ export default function JTCheckoutForm({ recordId, window }) {
       })
     }).then(async () => {
       await getData(formik?.values?.transfer?.recordId)
+      
       toast.success(platformLabels.Closed)
       invalidate()
     })
@@ -212,7 +216,8 @@ export default function JTCheckoutForm({ recordId, window }) {
       })
     }).then(async () => {
       await getData(formik?.values?.recordId)
-      toast.success(platformLabels.Reopened)
+      
+        toast.success(platformLabels.Reopened)
       invalidate()
     })
   }

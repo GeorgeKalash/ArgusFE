@@ -74,7 +74,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     }
   })
 
-  const isRaw = formik.values.status == 1
+  const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -98,18 +98,24 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
   }
 
   const onPost = async () => {
-    const { ...rest } = formik.values
-    const copy = { ...rest }
-    copy.date = formatDateToApi(copy.date)
-
-    const res = await postRequest({
+    await postRequest({
       extension: GeneralLedgerRepository.JournalVoucher.post,
-      record: JSON.stringify(copy)
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
     })
 
     getData(formik.values.recordId)
-    toast.success(platformLabels.Added)
+    toast.success(platformLabels.Posted)
+    invalidate()
+  }
 
+  const onUnpost = async () => {
+    await postRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.unpost,
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
+    })
+
+    toast.success(platformLabels.Unposted)
+    getData(formik.values.recordId)
     invalidate()
   }
 
@@ -123,9 +129,16 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     },
     {
       key: 'Locked',
-      condition: true,
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !isRaw || !editMode
+      disabled: !editMode
     }
   ]
 
@@ -137,8 +150,8 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       functionId={SystemFunction.JournalVoucher}
       maxAccess={maxAccess}
       editMode={editMode}
-      disabledSubmit={!isRaw}
-      disabledSavedClear={!isRaw}
+      disabledSubmit={isPosted}
+      disabledSavedClear={isPosted}
     >
       <VertLayout>
         <Grow>
@@ -150,7 +163,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
-                readOnly={editMode || !isRaw}
+                readOnly={editMode}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
@@ -167,7 +180,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                readOnly={editMode || !isRaw}
+                readOnly={editMode}
                 maxAccess={!editMode && maxAccess}
                 maxLength='30'
                 onChange={formik.handleChange}
@@ -179,7 +192,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
               <CustomDatePicker
                 name='date'
                 label={labels.date}
-                readOnly={!isRaw}
+                readOnly={isPosted}
                 onChange={formik.setFieldValue}
                 value={formik.values.date}
                 maxAccess={maxAccess}
@@ -192,7 +205,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 name='notes'
                 label={labels.notes}
                 value={formik.values.notes}
-                readOnly={!isRaw}
+                readOnly={isPosted}
                 maxLength='100'
                 rows={3}
                 maxAccess={maxAccess}

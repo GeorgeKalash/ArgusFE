@@ -31,10 +31,12 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function ProductionOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { labels, access } = useResourceParams({
@@ -49,7 +51,7 @@ export default function ProductionOrderForm({ recordId, window }) {
 
   useSetWindow({ title: labels.ProductionOrder, window })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionOrder.page
