@@ -1666,6 +1666,43 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     maxAccess={access}
                   />
                 </Grid>
+                <Grid item container spacing={2}>
+                  <Grid item xs={6}>
+                    <ResourceComboBox
+                      endpointId={SaleRepository.SalesOrder.pack}
+                      reducer={response => response?.record?.sources}
+                      name='sourceId'
+                      label={labels.source}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      readOnly={isClosed}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      value={formik.values.sourceId}
+                      values={formik.values}
+                      displayFieldWidth={1.5}
+                      maxAccess={maxAccess}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('sourceId', newValue ? newValue.recordId : null)
+                      }}
+                      error={formik.touched.sourceId && Boolean(formik.errors.sourceId)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomTextField
+                      name='sourceNo'
+                      label={labels.sourceNo}
+                      value={formik.values.sourceNo}
+                      maxLength={20}
+                      onChange={formik.handleChange}
+                      readOnly={isClosed}
+                      maxAccess={maxAccess}
+                      error={formik.touched.sourceNo && Boolean(formik.errors.sourceNo)}
+                    />
+                  </Grid>
+                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={3}>
