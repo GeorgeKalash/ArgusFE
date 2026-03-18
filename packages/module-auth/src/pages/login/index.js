@@ -20,7 +20,8 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { useLabelsAccessContext } from '@argus/shared-providers/src/providers/LabelsAccessContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.7rem',
@@ -29,14 +30,16 @@ const LinkStyled = styled(Link)(({ theme }) => ({
 }))
 
 const LoginPage = () => {
+  const { getRequest } = useContext(RequestsContext)
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const { apiPlatformLabels } = useLabelsAccessContext()
-  const [loginLanguage, setLanguage] = useState(null)
   const theme = useTheme()
   const auth = useAuth()
   const { companyName, setCompanyName, deployHost, validCompanyName } = useContext(AuthContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
+  const [loginLanguage, setLanguage] = useState(null)
+  const translatedLabels = loginLanguage || platformLabels
   const Languages = {
     ENGLISH: 1,
     ARABIC: 2,
@@ -100,7 +103,7 @@ const LoginPage = () => {
         reopenLogin: true,
         username,
         loggedUser,
-        _labels: loginLanguage,
+        _labels: translatedLabels,
         onClose: () => onClose()
       },
       expandable: false,
@@ -140,24 +143,13 @@ const LoginPage = () => {
 
   const mapKeyValueListToObject = (list = []) => Object.fromEntries(list.map(({ key, value }) => [key, value]))
 
-  function getLanguage(language = 1){
-    axios({
-      method: 'GET',
-      url: `${apiUrl}${KVSRepository.getPlatformLabels}?_dataset=${ResourceIds.Common}&_language=${language}`,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        LanguageId: languageId
-      }
+  async function getLanguage(language){
+     const res = await getRequest({
+      extension: KVSRepository.getPlatformLabels,
+      parameters: `_dataset=${ResourceIds.Common}&_language=${language}`
     })
-      .then(res => {
-        setLanguage(mapKeyValueListToObject(res?.data?.list))
-      })
-      .catch(error => console.error('Error Fetching Labels: ', error))
+    setLanguage(mapKeyValueListToObject(res?.list))
   }
-      
-  useEffect(() => {
-    if(apiPlatformLabels && !loginLanguage) setLanguage(mapKeyValueListToObject(apiPlatformLabels))
-  }, [apiPlatformLabels])
 
   useEffect(() => {
     validation.setFieldValue('companyName', companyName || '')
@@ -190,7 +182,7 @@ const LoginPage = () => {
                   value={validation.values.companyName}
                   readOnly={!deployHost ? true : validCompanyName}
                   allowClear={deployHost}
-                  label={loginLanguage?.CompanyName || 'Company Name'}
+                  label={translatedLabels?.CompanyName || 'Company Name'}
                   onChange={validation.handleChange}
                   onKeyDown={e => {
                     if (e.key == 'Enter') e.target.blur()
@@ -217,7 +209,7 @@ const LoginPage = () => {
                       name='username'
                       size='small'
                       fullWidth
-                      label={loginLanguage?.Username}
+                      label={translatedLabels?.Username}
                       value={validation.values.username}
                       type='text'
                       onChange={validation.handleChange}
@@ -232,7 +224,7 @@ const LoginPage = () => {
                       name='password'
                       size='small'
                       fullWidth
-                      label={loginLanguage?.password}
+                      label={translatedLabels?.password}
                       type={showPassword ? 'text' : 'password'}
                       value={validation.values.password}
                       onChange={validation.handleChange}
@@ -255,7 +247,7 @@ const LoginPage = () => {
             {validCompanyName && (
               <>
                 <LinkStyled href='/forget-password' className={styles.linksRow}>
-                  {loginLanguage?.ForgotPass}
+                  {translatedLabels?.ForgotPass}
                 </LinkStyled>
 
                 <CustomButton
@@ -264,7 +256,7 @@ const LoginPage = () => {
                   variant='contained'
                   onClick={validation.handleSubmit}
                   disabled={!validCompanyName}
-                  label={loginLanguage?.Login}
+                  label={translatedLabels?.Login}
                 />
               </>
             )}
@@ -275,7 +267,7 @@ const LoginPage = () => {
       <Box className={styles.middleZone}>
         <Box className={styles.languageRow}>
           <Typography variant='body2' className={styles.offered}>
-            {loginLanguage?.ArgusOfferedIn}
+            {translatedLabels?.ArgusOfferedIn}
           </Typography>
           <Box className={styles.languageLinks}>
             <span className={styles.language} onClick={() => getLanguage(Languages.ENGLISH)}>
