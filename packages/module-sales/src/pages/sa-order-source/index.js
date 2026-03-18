@@ -24,7 +24,7 @@ const SalesOrderSource = () => {
     try {
       const response = await getRequest({
         extension: SaleRepository.SalesOrderSource.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
       })
 
       return { ...response, _startAt: _startAt }
