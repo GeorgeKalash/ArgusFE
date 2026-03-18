@@ -8,6 +8,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { Grid } from '@mui/material'
+import * as yup from 'yup'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
@@ -32,6 +33,7 @@ export default function AccountReconciliations(){
   const { formik } = useForm({
     maxAccess: access,
     initialValues: {
+      recordId: null,
       startDate: null,
       endDate: null,
       currencyId: null,
@@ -44,6 +46,16 @@ export default function AccountReconciliations(){
       tCredits: 0,
       tBalance: 0,
       rows: []
+    },
+    validationSchema: yup.object({
+      startDate: yup.date().required(),
+      endDate: yup.date().required(),
+      currencyId: yup.string().required(),
+      accountId: yup.string().required(),
+      rclStatus: yup.string().required(),
+    }),
+    onSubmit: () => {
+      PreviewGrid()
     }
   })
 
@@ -188,13 +200,7 @@ export default function AccountReconciliations(){
     {
       key: 'PR',
       condition: true,
-      onClick: PreviewGrid,
-      disabled:
-        !formik?.values?.startDate ||
-        !formik?.values?.endDate ||
-        !formik?.values?.accountId ||
-        !formik?.values?.rclStatus ||
-        !formik?.values?.currencyId
+      onClick: formik.handleSubmit
     },
     {
       key: 'Apply',
@@ -230,7 +236,7 @@ export default function AccountReconciliations(){
       maxAccess={access}
       actions={actions}
       isSaved={false}
-      editMode={true}
+      editMode={formik?.values?.recordId}
     >
       <VertLayout>
         <Fixed>
@@ -311,10 +317,11 @@ export default function AccountReconciliations(){
                             { key: 'reference', value: 'Reference' },
                             { key: 'name', value: 'Name' }
                             ]}
-                            onChange={(event, newValue) => {
-                            formik.setFieldValue('accountId', newValue?.recordId || null)
-                            formik.setFieldValue('accountRef', newValue?.reference || '')
-                            formik.setFieldValue('accountName', newValue?.name || '')
+                            onChange={(_, newValue) => {
+                              formik.setFieldValue('recordId', newValue?.recordId || null)
+                              formik.setFieldValue('accountId', newValue?.recordId || null)
+                              formik.setFieldValue('accountRef', newValue?.reference || '')
+                              formik.setFieldValue('accountName', newValue?.name || '')
                             }}
                             displayFieldWidth={2}
                             errorCheck={'accountId'}
