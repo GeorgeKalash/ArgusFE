@@ -25,7 +25,7 @@ import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 
 export default function ItemDisposalForm({ recordId, access, labels }) {
