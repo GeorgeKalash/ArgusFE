@@ -20,6 +20,16 @@ const CHARTS_CSS = String.raw`
   position: relative;
   height: clamp(220px, 30vw, 420px);
   min-height: clamp(220px, 30vw, 420px);
+}
+
+.chartCanvasBase {
+  box-sizing: border-box;
+  width: 100% !important;
+  display: block;
+  position: relative;
+}
+
+.chartCanvasVars {
   --chart-bar-1-bg: rgb(88, 2, 1);
   --chart-bar-1-hover-bg: rgb(113, 27, 26);
   --chart-bar-2-bg: rgb(5, 28, 104);
@@ -522,7 +532,7 @@ export const MixedBarChart = memo(({ id, labels, data1, data2, label1, label2, r
 
   return (
     <div className={styles.chartHeight}>
-      <canvas id={id} ref={canvasRef} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`} />
+      <canvas id={id} ref={canvasRef} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`} />
     </div>
   )
 })
@@ -530,7 +540,7 @@ export const MixedBarChart = memo(({ id, labels, data1, data2, label1, label2, r
 export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, hoverColor }) => {
   useInjectChartsStyles()
 
-  const chartRef = useRef(null)
+  const canvasRef = useRef(null)
   const chartInstanceRef = useRef(null)
 
   const getChart = useCallback(() => chartInstanceRef.current, [])
@@ -539,11 +549,15 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
   const { width } = useWindowDimensions()
   const chartSize = width >= 1280 ? sizes[1280] : sizes[1024]
 
+  const itemCount = labels?.length || 0
+  const shouldScroll = width <= 1024 && itemCount > 10
   const rowHeight = width >= 1280 ? 22 : 18
-  const computedHeight = Math.max(320, (labels?.length || 0) * rowHeight + 80)
+
+  const fullChartHeight = Math.max(320, itemCount * rowHeight + 80)
+  const visibleHeight = shouldScroll ? 260 : fullChartHeight
 
   useEffect(() => {
-    const canvas = chartRef.current
+    const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
@@ -587,7 +601,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
         scales: {
           x: {
             beginAtZero: true,
-            max: Math.max(...(data || [0])) * 1.15,
+            max: Math.max(...(data || [0]), 0) * 1.15 || 1,
             ticks: {
               font: { size: chartSize.ticksSize },
               callback: function (value) {
@@ -668,7 +682,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
   }, [])
 
   useEffect(() => {
-    const canvas = chartRef.current
+    const canvas = canvasRef.current
     const chart = chartInstanceRef.current
     if (!canvas || !chart) return
 
@@ -702,7 +716,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
       return barWidth >= 90 ? datalabelInsideColor : datalabelOutsideColor
     }
 
-    chart.options.scales.x.max = Math.max(...(data || [0])) * 1.15
+    chart.options.scales.x.max = Math.max(...(data || [0]), 0) * 1.15 || 1
     chart.options.scales.x.ticks.font.size = chartSize.ticksSize
     chart.options.scales.y.ticks.font.size = chartSize.ticksSize
     chart.options.scales.y.ticks.autoSkip = false
@@ -712,13 +726,35 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
   }, [id, labels, data, label, color, hoverColor, chartSize, rowHeight])
 
   return (
-    <div className={styles.chartHeightHorizontal} style={{ height: `${computedHeight}px` }}>
-      <canvas
-        id={id}
-        ref={chartRef}
-        className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
-        style={{ height: `${computedHeight}px` }}
-      />
+    <div
+      className={`${styles.chartHeightHorizontal} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}
+      style={{
+        height: `${visibleHeight}px`,
+        minHeight: `${visibleHeight}px`,
+        maxHeight: `${visibleHeight}px`,
+        overflowY: shouldScroll ? 'auto' : 'hidden',
+        overflowX: 'hidden'
+      }}
+    >
+      <div
+        style={{
+          height: `${fullChartHeight}px`,
+          minHeight: `${fullChartHeight}px`,
+          position: 'relative'
+        }}
+      >
+        <canvas
+          id={id}
+          ref={canvasRef}
+          className={`${styles.chartCanvasVars} ${styles.chartCanvasBase} ${styles.chartCanvasDark}`}
+          height={fullChartHeight}
+          style={{
+            width: '100%',
+            height: `${fullChartHeight}px`,
+            display: 'block'
+          }}
+        />
+      </div>
     </div>
   )
 })
@@ -863,7 +899,7 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
 
   return (
     <div className={styles.chartHeight}>
-      <canvas id={id} ref={canvasRef} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`} />
+      <canvas id={id} ref={canvasRef} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`} />
     </div>
   )
 })
@@ -1007,7 +1043,7 @@ export const MixedColorsBarChartDark = memo(({ id, labels, data, label, ratio = 
 
   return (
     <div className={styles.chartHeight}>
-      <canvas id={id} ref={canvasRef} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`} />
+      <canvas id={id} ref={canvasRef} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`} />
     </div>
   )
 })
@@ -1085,7 +1121,7 @@ export const CompositeBarChart = memo(({ labels, data, label }) => {
     chart.update('none')
   }, [labels, data, label])
 
-  return <canvas ref={canvasRef} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`} />
+  return <canvas ref={canvasRef} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`} />
 })
 
 export const LineChart = memo(({ id, labels, data, label }) => {
@@ -1241,7 +1277,7 @@ export const LineChart = memo(({ id, labels, data, label }) => {
 
   return (
     <div className={styles.chartHeight}>
-      <canvas id={id} ref={chartRef} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
+      <canvas id={id} ref={chartRef} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}></canvas>
     </div>
   )
 })
@@ -1320,7 +1356,7 @@ export const LineChartDark = memo(({ labels, datasets, datasetLabels }) => {
 
   return (
     <div className={styles.chartHeight}>
-      <canvas ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`} />
+      <canvas ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`} />
     </div>
   )
 })
@@ -1402,7 +1438,7 @@ export const PieChart = memo(({ id, labels, data, label }) => {
     chart.update('none')
   }, [labels, data, label])
 
-  return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
+  return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}></canvas>
 })
 
 export const DoughnutChart = memo(({ id, labels, data, label }) => {
@@ -1469,7 +1505,7 @@ export const DoughnutChart = memo(({ id, labels, data, label }) => {
     chart.update('none')
   }, [labels, data, label])
 
-  return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
+  return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}></canvas>
 })
 
 export const RadarChart = memo(({ id, labels, data, label }) => {
@@ -1538,7 +1574,7 @@ export const RadarChart = memo(({ id, labels, data, label }) => {
     chart.update('none')
   }, [labels, data, label])
 
-  return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
+  return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}></canvas>
 })
 
 export const PolarAreaChart = memo(({ id, labels, data, label }) => {
@@ -1605,10 +1641,10 @@ export const PolarAreaChart = memo(({ id, labels, data, label }) => {
     chart.update('none')
   }, [labels, data, label])
 
-  return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
+  return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}></canvas>
 })
 
-export const CompBarChart = memo(({ id, labels, datasets}) => {
+export const CompBarChart = memo(({ id, labels, datasets }) => {
   useInjectChartsStyles()
 
   const ref = useRef(null)
@@ -1729,7 +1765,7 @@ export const CompBarChart = memo(({ id, labels, datasets}) => {
 
   return (
     <div className={styles.chartHeight}>
-      <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
+      <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}></canvas>
     </div>
   )
 })
