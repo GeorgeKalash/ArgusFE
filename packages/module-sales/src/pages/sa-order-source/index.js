@@ -75,8 +75,8 @@ const SalesOrderSource = () => {
         recordId: recordId,
         maxAccess: access
       },
-      width: 700,
-      height: 470,
+      width: 600,
+      height: 300,
       title: _labels.salesOrderSource
     })
   }

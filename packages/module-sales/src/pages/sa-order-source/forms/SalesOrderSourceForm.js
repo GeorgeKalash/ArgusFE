@@ -76,6 +76,7 @@ export default function SalesOrderSourceForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
+                maxLength='15'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -88,7 +89,7 @@ export default function SalesOrderSourceForm({ labels, maxAccess, recordId }) {
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
