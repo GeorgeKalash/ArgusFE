@@ -33,11 +33,13 @@ const BatchTransfer = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({ qry }) {
-    return await getRequest({
-      extension: ManufacturingRepository.BatchTransfer.snapshot,
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: ManufacturingRepository.BatchTransfer.snapshot,
       parameters: `_filter=${qry}`
-    })
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -52,8 +54,8 @@ const BatchTransfer = () => {
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.BatchTransfer.page,
     datasetId: ResourceIds.BatchTransfer,
-    search: {
-      searchFn: fetchWithSearch
+    filter: {
+     filterFn: fetchWithFilter
     }
   })
 
@@ -135,7 +137,7 @@ const BatchTransfer = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={''} filterBy={filterBy} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'MFBTFR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
