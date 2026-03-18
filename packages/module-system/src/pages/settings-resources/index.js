@@ -83,8 +83,8 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
-      width: 800,
-      height: 480,
+      width: 1200,
+      height: 600,
       title: labels.printTemplates
     })
   }

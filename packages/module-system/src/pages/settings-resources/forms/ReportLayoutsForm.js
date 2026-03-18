@@ -74,6 +74,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
       })
 
       toast.success(platformLabels.Updated)
+      fetchData()
     }
   })
 

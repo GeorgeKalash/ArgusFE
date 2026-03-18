@@ -562,10 +562,8 @@ export function DataGrid({
         </Box>
       )
     }
-
     if (column.colDef?.link?.enabled) {
-      const { getHref, target, popup, onClick } = column.colDef.link
-      const linkHref = typeof getHref === 'function' ? getHref(params.data) : '#'
+      const { popup, onClick } = column.colDef.link
 
       return (
         <Box
@@ -578,13 +576,10 @@ export function DataGrid({
           }}
         >
           <Link
-            href={popup ? '#' : linkHref}
-            target={!popup ? target || '_self' : undefined}
-            rel={!popup && target === '_blank' ? 'noopener noreferrer' : undefined}
+            component="button"
             onClick={e => {
               e.stopPropagation()
               if (popup) {
-                e.preventDefault()
                 popup(params.data)
                 return
               }
@@ -593,7 +588,11 @@ export function DataGrid({
             style={{
               color: '#1976d2',
               textDecoration: 'underline',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              font: 'inherit'
             }}
           >
             {params.value}
@@ -1361,3 +1360,4 @@ export function DataGrid({
     </Box>
   )
 }
+
