@@ -18,7 +18,8 @@ const ReportGenerator = ({
   form,
   resourceId,
   previewBtnClicked,
-  reportSize = 3
+  reportSize = 3,
+  defaultLayoutId
 }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -55,12 +56,16 @@ const ReportGenerator = ({
 
   useEffect(() => {
     if (reportStore.length > 0) {
+      const defaultReport = reportStore.find(
+        item => item.id === defaultLayoutId
+      )
+  
       setReport(prev => ({
         ...prev,
-        selectedReport: reportStore[0]
+        selectedReport: defaultReport || reportStore[0]
       }))
     }
-  }, [reportStore])
+  }, [reportStore, defaultLayoutId])
 
   const cycleFormat = () => {
     const nextIndex = (formatIndex + 1) % exportFormat.length
