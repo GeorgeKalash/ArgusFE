@@ -24,23 +24,19 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
 
   const openStack = useCallback(async () => {
     const resourceId = linkOpen?.resourceId
-    if (!resourceId) return false
 
-    if (inflightRef.current) return false
+    if (!resourceId || inflightRef.current) return false
     inflightRef.current = true
 
     try {
       const access = await fetchAccess(resourceId)
 
-      const noAccess = hasNoAccess(access)
-
-      if (noAccess) {
+      if (hasNoAccess(access)) {
         openNoAccessPopup()
         return true
       }
 
-      const entry = ResourceRegistry[resourceId]
-      const loader = entry?.loader
+      const loader = ResourceRegistry[resourceId]?.loader
       if (!loader) return false
 
       const mod = await loader()

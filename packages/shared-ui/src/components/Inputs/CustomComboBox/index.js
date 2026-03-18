@@ -371,8 +371,7 @@ const CustomComboBox = ({
 
                 if (!linkOpen || !hasSelectedValue || !link?.shouldHandleMouseDown) return
 
-                const shouldHandle = link.shouldHandleMouseDown(e)
-                if (!shouldHandle) return
+                if (!link.shouldHandleMouseDown(e)) return
 
                 linkMouseDownHandledRef.current = true
                 suppressNextOpenRef.current = true
