@@ -253,9 +253,12 @@ const RetailCompFigures = () => {
                 setChartInfo(prevState => ({
                   ...prevState,
                   categories: firstColumnValues,
-                  displayedGraph: Object.entries(lineData?.filter((_, index) => index !== 0))
-                    .filter(([key]) => !isNaN(key))
-                    .map(([, value]) => value)
+                  displayedGraph: Array.isArray(lineData)
+                    ? lineData
+                    : Object.entries(lineData)
+                        .filter(([key]) => !isNaN(key))
+                        .map(([, value]) => value)
+                    .filter((_, index) => index !== 0)
                     .sort((a, b) => b - a)
                 }))
                 setPrevCol(columnField)
@@ -266,9 +269,11 @@ const RetailCompFigures = () => {
                 setChartInfo(prevState => ({
                   ...prevState,
                   categories: monthsHeaders,
-                  displayedGraph: Object.entries(lineData)
-                    .filter(([key]) => !isNaN(key))
-                    .map(([, value]) => value)
+                  displayedGraph: Array.isArray(lineData)
+                    ? lineData
+                    : Object.entries(lineData)
+                        .filter(([key]) => !isNaN(key))
+                        .map(([, value]) => value)
                 }))
                 setPrevRow(columnField)
               }
