@@ -21,14 +21,12 @@ const SalesOrderSource = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: SaleRepository.SalesOrderSource.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
-      })
+    const response = await getRequest({
+      extension: SaleRepository.SalesOrderSource.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -82,14 +80,12 @@ const SalesOrderSource = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SaleRepository.SalesOrderSource.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: SaleRepository.SalesOrderSource.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
