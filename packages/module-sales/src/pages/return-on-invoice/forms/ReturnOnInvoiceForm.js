@@ -65,7 +65,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.ReturnOnInvoice,
+    functionId: SystemFunction.SalesReturn,
     access,
     enabled: !recordId
   })
@@ -856,7 +856,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     stack({
       Component: WorkFlow,
       props: {
-        functionId: SystemFunction.ReturnOnInvoice,
+        functionId: SystemFunction.SalesReturn,
         recordId: formik.values.recordId
       }
     })
