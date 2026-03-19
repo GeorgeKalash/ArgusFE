@@ -252,46 +252,46 @@ const TabsProvider = ({ children }) => {
     [openTabs, navigateTo, setOpenTabs, setCurrentTabIndex]
   )
 
-const closeTab = useCallback(
-  async tabRoute => {
-    setOpenTabs(prevTabs => {
-      const index = prevTabs.findIndex(tab => tab.route === tabRoute)
-      if (index === -1) return prevTabs
+  const closeTab = useCallback(
+    async tabRoute => {
+      setOpenTabs(prevTabs => {
+        const index = prevTabs.findIndex(tab => tab.route === tabRoute)
+        if (index === -1) return prevTabs
 
-      if (prevTabs.length === 2) {
-        return prevTabs
-      }
-
-      const nextTabs = prevTabs.filter(tab => tab.route !== tabRoute)
-
-      if (index < currentTabIndex) {
-        setCurrentTabIndex(v => Math.max(0, v - 1))
-        return nextTabs
-      }
-
-      if (index === currentTabIndex) {
-        const newIndex = index >= nextTabs.length ? nextTabs.length - 1 : index
-        setCurrentTabIndex(newIndex)
-
-        const nextRoute = nextTabs?.[newIndex]?.route
-        if (nextRoute) {
-          queueMicrotask(() => {
-            navigateTo(nextRoute).finally(() => {
-              if (typeof window !== 'undefined') window.history.replaceState(null, '', nextRoute)
-            })
-          })
+        if (prevTabs.length === 2) {
+          return prevTabs
         }
+
+        const nextTabs = prevTabs.filter(tab => tab.route !== tabRoute)
+
+        if (index < currentTabIndex) {
+          setCurrentTabIndex(v => Math.max(0, v - 1))
+          return nextTabs
+        }
+
+        if (index === currentTabIndex) {
+          const newIndex = index >= nextTabs.length ? nextTabs.length - 1 : index
+          setCurrentTabIndex(newIndex)
+
+          const nextRoute = nextTabs?.[newIndex]?.route
+          if (nextRoute) {
+            queueMicrotask(() => {
+              navigateTo(nextRoute).finally(() => {
+                if (typeof window !== 'undefined') window.history.replaceState(null, '', nextRoute)
+              })
+            })
+          }
+        }
+
+        return nextTabs
+      })
+
+      if (openTabs.length === 2) {
+        await handleCloseAllTabs()
       }
-
-      return nextTabs
-    })
-
-    if (openTabs.length === 2) {
-      await handleCloseAllTabs()
-    }
-  },
-  [currentTabIndex, navigateTo, setCurrentTabIndex, setOpenTabs, openTabs.length, handleCloseAllTabs]
-)
+    },
+    [currentTabIndex, navigateTo, setCurrentTabIndex, setOpenTabs, openTabs.length, handleCloseAllTabs]
+  )
 
   const reopenTab = useCallback(
     async tabRoute => {
@@ -310,13 +310,20 @@ const closeTab = useCallback(
       const isTabOpen = openTabs.some(tab => tab.route === router.asPath || !window?.history?.state?.as)
 
       if (!isTabOpen) {
+        const normalizedRoute = router.asPath.replace(/\/$/, '')
+        const menuLabel = findNode(menu, normalizedRoute)
+        const gearLabel = findNode(gear, normalizedRoute)
+
+        if (!menuLabel && !gearLabel && normalizedRoute !== '/default' && normalizedRoute !== '/no-access') {
+          navigateTo('/no-access/')
+          return
+        }
+
         const newValueState = openTabs.length
 
-        const label = lastOpenedPage
-          ? lastOpenedPage.name
-          : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+        const label = lastOpenedPage ? lastOpenedPage.name : menuLabel || gearLabel
 
-        const resourceId = findResourceId(menu, router.asPath.replace(/\/$/, ''))
+        const resourceId = findResourceId(menu, normalizedRoute)
 
         const cachedPage = pagesCacheRef.current.get(router.asPath) || children
 
@@ -363,16 +370,23 @@ const closeTab = useCallback(
       ]
 
       if (router.asPath !== homeRoute) {
+        const normalizedRoute = router.asPath.replace(/\/$/, '')
+        const menuLabel = findNode(menu, normalizedRoute)
+        const gearLabel = findNode(gear, normalizedRoute)
+
+        if (!menuLabel && !gearLabel && normalizedRoute !== '/no-access') {
+          navigateTo('/no-access/')
+          return
+        }
+
         const currentPage = pagesCacheRef.current.get(router.asPath) || children
 
         newTabs.push({
           page: currentPage,
           id: uuidv4(),
           route: router.asPath,
-          label: lastOpenedPage
-            ? lastOpenedPage.name
-            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
-          resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
+          label: lastOpenedPage ? lastOpenedPage.name : menuLabel || gearLabel,
+          resourceId: findResourceId(menu, normalizedRoute)
         })
         setCurrentTabIndex(newTabs.findIndex(tab => tab.route === router.asPath))
       }
