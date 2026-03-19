@@ -48,7 +48,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
-    access: access,
+    access,
     enabled: !recordId,
     objectName: 'header'
   })
