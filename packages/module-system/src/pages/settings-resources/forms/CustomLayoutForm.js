@@ -181,13 +181,15 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
     },
     {
       component: 'textfield',
-      valueGetter: () => labels.default,
+      valueGetter: (params) =>
+        params?.data?.originalInactive !== true && params?.data?.savedIndex != null
+          ? labels.default
+          : '',
       flex: 0.5,
       props: { disabled: true },
-      link: {
-        enabled: row => row?.originalInactive === true,
-        
-        onClick: async (row, event) => {
+      link: {   
+        enabled: true,     
+        onClick: async (row) => {
           await postRequest({
             extension: SystemRepository.DefaultLayout.setDefaultLayout,
             record: JSON.stringify({
