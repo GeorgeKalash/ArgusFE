@@ -170,8 +170,8 @@ const GlobalAuthorization = () => {
           },
           {
             field: 'defaultLayoutId',
-            headerName: labels.defaultLayoutId,
-            flex: 2
+            headerName: labels.default,
+            flex: 1
           },
           {
             field: 'Report Layout',

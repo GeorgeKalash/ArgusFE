@@ -93,6 +93,11 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
 
   const columns = [
     {
+      field: 'id',
+      headerName: labels.id,
+      flex: 0.5
+    },
+    {
       field: 'api',
       headerName: labels.api,
       flex: 1

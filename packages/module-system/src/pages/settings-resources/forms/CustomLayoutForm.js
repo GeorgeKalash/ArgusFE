@@ -145,6 +145,12 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
   const columns = [
     {
       component: 'textfield',
+      label: labels.id,
+      name: 'savedIndex',
+      props: { disabled: true },
+    },
+    {
+      component: 'textfield',
       label: labels.api,
       name: 'wsName'
     },
@@ -176,7 +182,6 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
     {
       component: 'textfield',
       valueGetter: () => labels.default,
-      name: 'defaultLink',
       flex: 0.5,
       props: { disabled: true },
       link: {
