@@ -924,6 +924,7 @@ const Table = ({
             onSortChanged={onSortChanged}
             enableRtl={languageId === 2}
             onRowClicked={params => {
+               if (selectionMode === 'column') return
                if (onSelectionChange) onSelectionChange(params.data, params.rowIndex)
             }}
           />

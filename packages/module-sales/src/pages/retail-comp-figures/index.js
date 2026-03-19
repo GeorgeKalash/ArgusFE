@@ -244,51 +244,44 @@ const RetailCompFigures = () => {
           name='compFigTable'
           selectionMode={formik?.values?.posAnalysis == 1 ? 'row' : 'column'}
           onSelectionChange={(lineData, columnField) => {
-            console.log('lineData',lineData)
             if (lineData) {
               if (formik?.values?.posAnalysis == 2) {
                 if (columnField === 'plantName' || columnField === 'posRef' || columnField === prevCol) {
                   return
                 }
                 const firstColumnValues = data?.list?.filter((_, index) => index !== 0).map(item => item.posRef)
+                const values = Array.isArray(lineData)
+                  ? lineData
+                  : Object.entries(lineData)
+                      .filter(([key]) => !isNaN(key))
+                      .map(([, value]) => value)
+
+                const displayedGraph = values
+                  .slice(1) 
+                  .sort((a, b) => b - a)
+
                 setChartInfo(prevState => ({
                   ...prevState,
                   categories: firstColumnValues,
-                  displayedGraph: Array.isArray(lineData)
-                    ? lineData
-                    : Object.entries(lineData)
-                        .filter(([key]) => !isNaN(key))
-                        .map(([, value]) => value)
-                    .filter((_, index) => index !== 0)
-                    .sort((a, b) => b - a)
+                  displayedGraph
                 }))
                 setPrevCol(columnField)
-                console.log('first block',Array.isArray(lineData)
-                    ? lineData
-                    : Object.entries(lineData)
-                        .filter(([key]) => !isNaN(key))
-                        .map(([, value]) => value)
-                    .filter((_, index) => index !== 0)
-                    .sort((a, b) => b - a))
               } else {
                 if (columnField === prevRow) {
                   return
                 }
+                const values = Array.isArray(lineData)
+                  ? lineData
+                  : Object.entries(lineData)
+                      .filter(([key]) => !isNaN(key))
+                      .map(([, value]) => value)
+
                 setChartInfo(prevState => ({
                   ...prevState,
                   categories: monthsHeaders,
-                  displayedGraph: Array.isArray(lineData)
-                    ? lineData
-                    : Object.entries(lineData)
-                        .filter(([key]) => !isNaN(key))
-                        .map(([, value]) => value)
+                  displayedGraph: values.slice(1)
                 }))
                 setPrevRow(columnField)
-                console.log('2nd block ', Array.isArray(lineData)
-                    ? lineData
-                    : Object.entries(lineData)
-                        .filter(([key]) => !isNaN(key))
-                        .map(([, value]) => value))
               }
             }
           }}
