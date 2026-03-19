@@ -22,7 +22,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
+import { getVatCalc, calcVatAmountPerTaxDetail } from '@argus/shared-utils/src/utils/VatCalculator'
 import {
   getFooterTotals,
   getSubtotal,
@@ -150,7 +150,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       )
     }),
     onSubmit: async obj => {
-      const { items, header, } = obj
+      const { items, header } = obj
 
       const updatedRows = formik.values.items
         .filter(row => row.srlNo)
@@ -279,13 +279,81 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       
       toast.success(platformLabels.Saved)
       invalidate()
+      refetchForm(draftId)
 
       return true
     }
   }
 
+  function buildCalculatedTaxDetails(row, taxDetailsList = []) {
+    return (taxDetailsList || []).map(td => {
+      const singleTaxDetail = {
+        ...td,
+        taxScheduleAmount: td.amount || 0
+      }
+
+
+      const calculatedAmount = calcVatAmountPerTaxDetail(
+        {
+          priceType: row?.priceType || 3,
+          basePrice: 0,
+          unitPrice: parseFloat(row?.baseLaborPrice || 0),
+          qty: parseFloat(row?.weight || 0),
+          weight: parseFloat(row?.weight || 0),
+          extendedPrice: parseFloat(row?.unitPrice || 0),
+          baseLaborPrice: 0,
+          vatAmount: parseFloat(row?.vatAmount || 0),
+          tdPct: 0,
+          taxDetails: singleTaxDetail
+        },
+        singleTaxDetail
+      )
+
+      return {
+        ...td,
+        invoiceId: formik.values?.header?.recordId || 0,
+        taxSeqNo: td.seqNo,
+        taxScheduleAmount: td.amount || 0,
+        amount: parseFloat(calculatedAmount || 0)
+      }
+    })
+  }
+
+    function calculateDraftTotals(items = []) {
+      const parsedItems = items
+        .filter(item => item?.itemId !== undefined)
+        .map(item => ({
+          ...item,
+          qty: 1,
+          vatAmount: parseFloat(item.vatAmount) || 0,
+          extendedPrice: parseFloat(item.extendedPrice ?? item.unitPrice) || 0
+        }))
+
+      const subtotal = parseFloat(getSubtotal(parsedItems) || 0)
+
+      const footer = getFooterTotals(parsedItems, {
+        totalQty: 0,
+        totalWeight: 0,
+        totalVolume: 0,
+        totalUpo: 0,
+        sumVat: 0,
+        sumExtended: subtotal,
+        tdAmount: 0,
+        net: 0,
+        miscAmount: 0
+      })
+
+      return {
+        subtotal,
+        vatAmount: parseFloat(footer?.sumVat || 0),
+        weight: parseFloat(footer?.totalWeight || 0),
+        amount: parseFloat(footer?.net || 0)
+      }
+    }
+
   async function saveHeader(lastLine) {
     const serialsForCalc = [lastLine]
+    const totals = calculateDraftTotals(serialsForCalc)
 
     const { date, ...rest } = formik.values.header
 
@@ -293,6 +361,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       header: {
         ...rest,
         pcs: serialsForCalc.length,
+        ...totals,
         date: formatDateToApi(date)
       },
       items: [lastLine]
@@ -350,6 +419,15 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           parameters: `_currencyId=${formik?.values?.header?.currencyId}&_plId=${formik?.values?.header?.plId}&_srlNo=${newRow?.srlNo}&_siteId=${formik?.values?.header?.siteId}`
         })
 
+
+        const effectiveTaxId = !formik.values.header.isVattable
+          ? null
+          : formik.values.header.taxId
+          ? res?.record?.taxId
+            ? formik.values.header.taxId
+            : null
+          : res?.record?.taxId ?? null
+
         let lineObj = {
           fieldName: 'srlNo',
           changes: {
@@ -373,13 +451,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
             vatPct: res?.record?.vatPct || 0,
             vatAmount: parseFloat(res?.record?.vatAmount).toFixed(2) || 0,
-
-            ...(res?.record?.taxId && {
-              taxId: formik.values?.header?.taxId || res?.record?.taxId,
-              taxDetails: await getTaxDetails(
-                formik.values?.header?.taxId || res?.record?.taxId
-              )
-            })
+            taxId: effectiveTaxId
           }
         }
 
@@ -387,12 +459,16 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
         lineObj.changes.unitPrice = unitPrice
         lineObj.changes.baseLaborPrice = baseLaborPrice
+        lineObj.changes.extendedPrice = unitPrice
 
         if (lineObj.changes.taxId != null) {
-          ;(lineObj.changes.extendedPrice = unitPrice),
-            (lineObj.changes.taxDetails = await getTaxDetails(
-              lineObj.changes.taxId
-            ))
+          const rawTaxDetails = await getTaxDetails(lineObj.changes.taxId)
+          lineObj.changes.taxDetails = buildCalculatedTaxDetails(
+            lineObj.changes,
+            rawTaxDetails
+          )
+        } else {
+          lineObj.changes.taxDetails = []
         }
 
         setReCal(true)
@@ -491,7 +567,8 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           Component: TaxDetails,
           props: {
             taxId: row?.taxId,
-            obj: row
+            obj: row,
+            taxes: row?.taxDetails || []
           }
         })
       }
@@ -620,9 +697,17 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
     const modifiedList = await Promise.all(
       (pack.items || []).map(async (item, index) => {
+        let calculatedTaxDetails = []
+
+        if (item?.taxId) {
+          const rawTaxDetails = pack.taxDetails.filter(tax => tax.taxId === item?.taxId)
+          calculatedTaxDetails = buildCalculatedTaxDetails(item, rawTaxDetails)
+        }
+
         return {
           ...item,
           id: index + 1,
+          taxDetails: calculatedTaxDetails
         }
       })
     )
@@ -647,7 +732,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   }
 
   const filteredData = formik.values.header?.search
-    ? formik.values.header?.items.filter(
+    ? formik.values?.items.filter(
         item =>
           item.srlNo?.toString()?.includes(formik.values.header?.search) ||
           item.sku?.toString()?.toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
@@ -658,7 +743,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
   const handleSearchChange = event => {
     const { value } = event.target
-    formik.setFieldValue('search', value)
+    formik.setFieldValue('header.search', value)
   }
 
   const handleGridChange = (value, action, row) => {
@@ -680,38 +765,21 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         parameters: `_dtId=${recordId}`
       })
 
-      formik.setFieldValue('plantId', dtd?.record?.plantId || null)
-      formik.setFieldValue('spId', dtd?.record?.spId || defspId || null)
-      formik.setFieldValue('siteId', dtd?.record?.siteId || defSiteId || null)
+      formik.setFieldValue('header.plantId', dtd?.record?.plantId || null)
+      formik.setFieldValue('header.spId', dtd?.record?.spId || defspId || null)
+      formik.setFieldValue('header.siteId', dtd?.record?.siteId || defSiteId || null)
     }
   }
 
   
-    const parsedItemsArray = formik.values.items
-      ?.filter(item => item.itemId !== undefined)
-      .map(item => ({
-        ...item,
-        qty: 1
-    }))
-    
-    const subTotal = getSubtotal(parsedItemsArray)
 
-    const _footerSummary = getFooterTotals(parsedItemsArray, {
-      totalQty: 0,
-      totalWeight: 0,
-      totalVolume: 0,
-      totalUpo: 0,
-      sumVat: 0,
-      sumExtended: parseFloat(subTotal),
-      tdAmount: 0,
-      net: 0,
-      miscAmount: 0
-    })
 
-    const amount = reCal ? parseFloat(_footerSummary?.net) : formik.values?.header.amount || 0
-    const weight = reCal ? _footerSummary?.totalWeight : formik.values?.header.weight || 0
-    const subtotal = reCal ? subTotal.toFixed(2) : formik.values?.header.subtotal || 0
-    const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.header.vatAmount || 0
+    const calculatedTotals = calculateDraftTotals(formik.values.items)
+
+    const amount = reCal ? calculatedTotals.amount : formik.values?.header.amount || 0
+    const weight = reCal ? calculatedTotals.weight : formik.values?.header.weight || 0
+    const subtotal = reCal ? calculatedTotals.subtotal.toFixed(2) : formik.values?.header.subtotal || 0
+    const vatAmount = reCal ? calculatedTotals.vatAmount : formik.values?.header.vatAmount || 0
   
 
   useEffect(() => {
@@ -758,14 +826,13 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   }, [formik?.values?.items])
 
-    useEffect(() => {
-      formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
-      formik.setFieldValue('header.weight', parseFloat(weight).toFixed(2))
-      formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
-      formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
-    }, [amount, weight, subtotal, vatAmount])
+  useEffect(() => {
+    formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
+    formik.setFieldValue('header.weight', parseFloat(weight).toFixed(2))
+    formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
+    formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
+  }, [amount, weight, subtotal, vatAmount])
 
-    console.log(amount, weight, subtotal, vatAmount)
   useEffect(() => {
     ;(async function () {
       if (!defplId)
@@ -832,11 +899,12 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  formik.setFieldValue('header.dtId', newValue?.recordId)
                   await onChangeDtId(newValue?.recordId)
                   changeDT(newValue)
+                  
+                  formik.setFieldValue('header.dtId', newValue?.recordId || null)
                 }}
-                error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
+                error={formik?.touched?.header?.dtId && Boolean(formik?.errors?.header?.dtId)}
               />
             </Grid>
             <Grid item xs={4}>
@@ -865,7 +933,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                     })
                   }
                 }}
-                error={formik.touched.header?.siteId && Boolean(formik.errors.header?.siteId)}
+                error={formik?.touched?.header?.siteId && Boolean(formik?.errors?.header?.siteId)}
               />
             </Grid>
             <Grid item xs={2}>
@@ -894,7 +962,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             <Grid item xs={2}>
               <CustomTextField
                 name='header.search'
-                value={formik.values.search}
+                value={formik.values.header.search}
                 label={platformLabels.Search}
                 onClear={() => {
                   formik.setFieldValue('header.search', '')
