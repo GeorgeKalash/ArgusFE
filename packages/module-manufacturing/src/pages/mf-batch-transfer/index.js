@@ -37,7 +37,7 @@ const BatchTransfer = () => {
     if (filters.qry)
       return await getRequest({
         extension: ManufacturingRepository.BatchTransfer.snapshot,
-      parameters: `_filter=${qry}`
+      parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
