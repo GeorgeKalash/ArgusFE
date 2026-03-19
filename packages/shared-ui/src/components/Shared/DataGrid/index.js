@@ -50,6 +50,8 @@ export function DataGrid({
   const skip = allowDelete ? 1 : 0
   const gridContainerRef = useRef(null)
   const [showFilters, setShowFilters] = useState(false)
+  const { width } = useWindowDimensions()
+  const hoverFilterRef = useRef(null)
 
   const generalMaxAccess = maxAccess && maxAccess?.record?.accessFlags
   const isAccessDenied = maxAccess?.editMode
@@ -58,7 +60,6 @@ export function DataGrid({
 
   const _disabled = isAccessDenied || disabled
 
-  const { width } = useWindowDimensions()
 
   const rowHeight =
     width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
@@ -1028,9 +1029,11 @@ export function DataGrid({
   }, [searchValue])
 
   useEffect(() => {
-    if (!showFilters && gridApiRef.current) {
-      gridApiRef.current.setFilterModel(null)
-    }
+    if (!gridApiRef.current || showFilters) return
+
+    gridApiRef.current.setFilterModel(null)
+    gridApiRef.current.hidePopupMenu?.()
+    document.activeElement?.blur?.()
   }, [showFilters])
 
   const onColumnResized = params => {
@@ -1052,6 +1055,56 @@ export function DataGrid({
     }
   })
 
+  
+  const handleDragStart = e => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const container = gridContainerRef.current
+    const button = hoverFilterRef.current
+    const header = container?.querySelector('.ag-header-row.ag-header-row-column')
+
+    if (!container || !button || !header) return
+
+    const c = container.getBoundingClientRect()
+    const h = header.getBoundingClientRect()
+    const b = button.getBoundingClientRect()
+
+    const startX = e.clientX
+    const startY = e.clientY
+    const startLeft = b.left - c.left
+    const startTop = b.top - c.top
+
+    const onMove = ev => {
+      let left = startLeft + (ev.clientX - startX)
+      let top = startTop + (ev.clientY - startY)
+
+      left = Math.max(0, Math.min(left, c.width - b.width))
+      top = Math.max(0, Math.min(top, h.height - b.height))
+
+      button.style.left = `${left}px`
+      button.style.top = `${top}px`
+      button.style.right = 'auto'
+    }
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }
+
+  useEffect(() => {
+    const button = hoverFilterRef.current
+    if (!button) return
+
+    button.style.left = 'auto'
+    button.style.right = '6px'
+    button.style.top = '6px'
+  }, [width])
+
   return (
     <Box className={'root'} sx={{ height: height || 'auto' }}>
       <CacheStoreProvider>
@@ -1061,7 +1114,12 @@ export function DataGrid({
           style={{ '--ag-header-bg': bg }}
         >
           {enableFilters && hasRows && value.length > 0 && (
-            <Box className={'hoverFilter'}>
+            <Box
+              ref={hoverFilterRef}
+              className='hoverFilter'
+              onPointerDown={handleDragStart}
+              style={{ right: 6, top: 6 }}
+            >
               <IconButton size='small' onClick={() => setShowFilters(v => !v)}>
                 <FilterAltIcon fontSize='small' />
               </IconButton>
@@ -1117,13 +1175,16 @@ export function DataGrid({
         }
         .hoverFilter {
           position: absolute;
-          top: 6px;
-          right: -20px;
           z-index: 10;
           background: #fff;
           border-radius: 4px;
-          opacity: 0;
-          transition: opacity 0.2s ease;
+          cursor: grab;
+          user-select: none;
+          touch-action: none;
+        }
+
+        .hoverFilter:active {
+          cursor: grabbing;
         }
 
         .agContainer :global(.ag-header-cell .ag-header-cell-menu-button) {
