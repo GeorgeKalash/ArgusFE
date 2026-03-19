@@ -231,7 +231,7 @@ export default function AccountReconciliations(){
 
   return (
     <FormShell
-      resourceId={ResourceIds.AccountReconciliations}
+      resourceId={ResourceIds.Reconciliation}
       form={formik}
       maxAccess={access}
       actions={actions}
