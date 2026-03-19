@@ -1118,7 +1118,7 @@ export function DataGrid({
         .hoverFilter {
           position: absolute;
           top: 6px;
-          right: 6px;
+          right: -20px;
           z-index: 10;
           background: #fff;
           border-radius: 4px;
@@ -1148,6 +1148,14 @@ export function DataGrid({
         .agContainer.filters-open :global(.ag-header-cell:hover .ag-header-icon) {
           opacity: 1;
           pointer-events: auto;
+        }
+
+        .agContainer :global(.ag-header-icon.ag-header-label-icon.ag-filter-icon) {
+          display: none !important;
+        }
+
+        .agContainer :global(.ag-filter-icon) {
+          display: none !important;
         }
 
         .agContainer:hover .hoverFilter {
