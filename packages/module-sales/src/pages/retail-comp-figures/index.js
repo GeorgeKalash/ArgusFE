@@ -244,6 +244,7 @@ const RetailCompFigures = () => {
           name='compFigTable'
           selectionMode={formik?.values?.posAnalysis == 1 ? 'row' : 'column'}
           onSelectionChange={(lineData, columnField) => {
+            console.log('lineData',lineData)
             if (lineData) {
               if (formik?.values?.posAnalysis == 2) {
                 if (columnField === 'plantName' || columnField === 'posRef' || columnField === prevCol) {
@@ -262,6 +263,13 @@ const RetailCompFigures = () => {
                     .sort((a, b) => b - a)
                 }))
                 setPrevCol(columnField)
+                console.log('first block',Array.isArray(lineData)
+                    ? lineData
+                    : Object.entries(lineData)
+                        .filter(([key]) => !isNaN(key))
+                        .map(([, value]) => value)
+                    .filter((_, index) => index !== 0)
+                    .sort((a, b) => b - a))
               } else {
                 if (columnField === prevRow) {
                   return
@@ -276,6 +284,11 @@ const RetailCompFigures = () => {
                         .map(([, value]) => value)
                 }))
                 setPrevRow(columnField)
+                console.log('2nd block ', Array.isArray(lineData)
+                    ? lineData
+                    : Object.entries(lineData)
+                        .filter(([key]) => !isNaN(key))
+                        .map(([, value]) => value))
               }
             }
           }}
