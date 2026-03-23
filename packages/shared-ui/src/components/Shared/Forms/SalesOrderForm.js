@@ -201,6 +201,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
+      sourceNo: yup.string().test(
+        'sourceNo-required',
+        'Source No is required',
+        function (value) {
+          const { sourceId } = this.parent
+          if (sourceId && !value) return false
+          return true
+        }
+      ),
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
@@ -1686,6 +1695,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                       maxAccess={maxAccess}
                       onChange={(_, newValue) => {
                         formik.setFieldValue('sourceId', newValue ? newValue.recordId : null)
+                        formik.setFieldValue('sourceNo', '')
                       }}
                       error={formik.touched.sourceId && Boolean(formik.errors.sourceId)}
                     />
@@ -1697,7 +1707,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                       value={formik.values.sourceNo}
                       maxLength={20}
                       onChange={formik.handleChange}
-                      readOnly={isClosed}
+                      readOnly={!formik.values.sourceId || isClosed}
+                      required={formik.values.sourceId}
                       maxAccess={maxAccess}
                       error={formik.touched.sourceNo && Boolean(formik.errors.sourceNo)}
                     />

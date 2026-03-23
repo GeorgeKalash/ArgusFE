@@ -31,7 +31,7 @@ const SalesOrderSource = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     access,
     paginationParameters,
     invalidate,
@@ -47,12 +47,12 @@ const SalesOrderSource = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
@@ -69,13 +69,13 @@ const SalesOrderSource = () => {
     stack({
       Component: SalesOrderSourceForm,
       props: {
-        labels: _labels,
-        recordId: recordId,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 600,
       height: 300,
-      title: _labels.salesOrderSource
+      title: labels.salesOrderSource
     })
   }
 
@@ -100,7 +100,6 @@ const SalesOrderSource = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           refetch={refetch}
           pageSize={50}
           paginationParameters={paginationParameters}
