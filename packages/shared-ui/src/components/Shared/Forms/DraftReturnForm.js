@@ -90,7 +90,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       invoiceId: null,
       invoiceRef: '',
       returnReasonId: null,
-      search: '',
       serials: [
         {
           id: 1,
@@ -148,7 +147,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       )
     }),
     onSubmit: async obj => {
-      const { taxDetailsStore, itemGridData, metalGridData, search, disSkuLookup, serials, date, ...rest } = obj
+      const { taxDetailsStore, itemGridData, metalGridData, disSkuLookup, serials, date, ...rest } = obj
 
       const header = {
         ...rest,
@@ -343,7 +342,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   }
 
   async function saveHeader(lastLine, type) {
-    const { taxDetailsStore, itemGridData, metalGridData, search, disSkuLookup, serials, date, ...rest } =
+    const { taxDetailsStore, itemGridData, metalGridData, disSkuLookup, serials, date, ...rest } =
       formik?.values
 
     const DraftReturnPack = {
@@ -745,21 +744,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     return res?.list
   }
 
-  const filteredData = formik.values.search
-    ? formik.values.serials.filter(
-        item =>
-          item.srlNo?.toString()?.includes(formik.values.search.toLowerCase()) ||
-          item.sku?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
-          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
-          item.weight?.toString()?.includes(formik.values.search)
-      )
-    : formik.values.serials
-
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('search', value)
-  }
-
   const handleGridChange = (value, action, row) => {
     if (action === 'delete') {
       let updatedSerials = formik.values.serials
@@ -1026,7 +1010,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
@@ -1048,19 +1032,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
-            </Grid>
-            <Grid item xs={2}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('search', e)}
-                search={true}
               />
             </Grid>
             <Grid item xs={12}>
@@ -1290,7 +1261,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         <Grow>
           <DataGrid
             onChange={(value, action, row) => handleGridChange(value, action, row)}
-            value={filteredData || []}
+            value={formik.values.serials || []}
             error={formik.errors.serials}
             initialValues={formik?.initialValues?.serials?.[0]}
             columns={serialsColumns}
@@ -1301,7 +1272,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isClosed}
             allowAddNewLine={
-              !formik?.values?.search &&
               (formik.values?.serials?.length === 0 ||
                 !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo)
             }
