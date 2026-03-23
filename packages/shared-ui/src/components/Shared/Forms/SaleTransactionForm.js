@@ -136,7 +136,6 @@ export default function SaleTransactionForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || null,
-      search: '',
       header: {
         dgId: functionId,
         recordId: null,
@@ -1754,27 +1753,6 @@ export default function SaleTransactionForm({
     return res
   }
 
-  const filteredData = useMemo(() => {
-    if (formik?.values?.search) {
-      const filtered = formik.values.items.filter(
-        item =>
-          item.barcode?.toString()?.includes(formik.values.search) ||
-          item.sku?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
-          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
-          item.qty?.toString()?.includes(formik.values.search)
-      )
-
-      return filtered.length > 0 ? filtered : []
-    }
-
-    return formik.values.items
-  }, [formik.values.search, formik.values.items])
-
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('search', value)
-  }
-
   async function getSiteInfo(siteId) {
     if (!siteId) return
 
@@ -2265,17 +2243,6 @@ export default function SaleTransactionForm({
                 error={formik?.touched?.header?.contactId && Boolean(formik?.errors?.header?.contactId)}
               />
             </Grid>
-            <Grid item xs={2}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                onChange={handleSearchChange}
-              />
-            </Grid>
             <Grid item xs={3}>
               {metalPriceVisibility && (
                 <CustomNumberField
@@ -2292,31 +2259,17 @@ export default function SaleTransactionForm({
         <Grow>
           <DataGrid
             onChange={(value, action, row) => {
-              let updatedValue = value
-
-              if (formik.values.search) {
-                const updatedItems = formik.values.items.map(item => {
-                  const updated = updatedValue.find(newItem => newItem.id === item.id)
-
-                  return updated ? { ...item, ...updated } : item
-                })
-
-                formik.setFieldValue('items', updatedItems)
-                itemsUpdate.current = updatedItems
-              } else {
-                formik.setFieldValue('items', updatedValue)
-                itemsUpdate.current = updatedValue
-              }
+              formik.setFieldValue('items', value)
+              itemsUpdate.current = value
               if (action === 'delete') {
                 const filteredItems = formik.values.items.filter(item => item.id !== row.id)
-                updatedValue = value.filter(item => item.id !== row.id)
 
                 formik.setFieldValue('items', filteredItems)
                 setReCal(true)
               }
             }}
             enableFilters
-            value={filteredData}
+            value={formik.values.items}
             error={formik.errors.items}
             initialValues={formik?.initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
@@ -2327,7 +2280,7 @@ export default function SaleTransactionForm({
             columns={columns}
             maxAccess={maxAccess}
             allowDelete={!isPosted}
-            allowAddNewLine={!formik.values.search}
+            allowAddNewLine={!isPosted}
             disabled={
               isPosted ||
               !formik.values?.header?.currencyId ||
