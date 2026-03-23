@@ -750,13 +750,19 @@ export function DataGrid({
       : 0
 
       
-  const isRowEmpty = (row, initialValues) => {
-    if (!initialValues) return true
+  const isRowEmpty = row => {
+    if (!row) return true
 
-    return JSON.stringify(row) === JSON.stringify({ ...initialValues, id: row.id })
+    if (initialValues) {
+      return JSON.stringify(row) === JSON.stringify({ ...initialValues, id: row.id })
+    }
+
+    return false
   }
 
-  const hasRows = value?.some(row => !isRowEmpty(row, initialValues))
+  const hasRealRows = Array.isArray(value) && value.length > 0
+  const hasOnlyInitialRow = hasRealRows && value.every(row => isRowEmpty(row))
+  const hasRows = hasRealRows && !hasOnlyInitialRow
 
   const columnDefs = [
     ...allColumns.map(column => {
@@ -1113,7 +1119,7 @@ export function DataGrid({
           ref={gridContainerRef} 
           style={{ '--ag-header-bg': bg }}
         >
-          {enableFilters && hasRows && value.length > 0 && (
+          {enableFilters && hasRows && (
             <Box
               ref={hoverFilterRef}
               className='hoverFilter'
