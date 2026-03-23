@@ -124,7 +124,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       itemGridData: [],
       taxDetails: []
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
         date: yup.string().required(),
@@ -445,7 +444,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             metalRef: res?.record?.metalRef || '',
             designId: res?.record?.designId || null,
             designRef: res?.record?.designRef || null,
-            categoryName: res?.record?.categoryName,
             volume: res?.record?.volume || 0,
             baseLaborPrice: res?.record?.baseLaborPrice || 0,
             unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
@@ -599,7 +597,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     await postRequest({
       extension: SaleRepository.DraftInvoice.close,
       record: JSON.stringify({
-        ...restValues,
+        ...restValues.header,
         date: formatDateToApi(formik.values.header?.date)
       })
     }).then(() => {
@@ -615,7 +613,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     await postRequest({
       extension: SaleRepository.DraftInvoice.reopen,
       record: JSON.stringify({
-        ...restValues,
+        ...restValues.header,
         date: formatDateToApi(formik.values.header?.date)
       })
     }).then(() => {
@@ -925,7 +923,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                   if (!newValue?.isInactive) {
-                    formik.setFieldValue('header.siteId', newValue?.recordId)
+                    formik.setFieldValue('header.siteId', newValue?.recordId || null)
                   } else {
                     formik.setFieldValue('header.siteId', null)
                     stackError({
@@ -1000,7 +998,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('header.plantId', newValue?.recordId)
+                  formik.setFieldValue('header.plantId', newValue?.recordId || null)
                 }}
                 error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
               />
@@ -1036,7 +1034,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 editMode={editMode}
                 readOnly={isClosed}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('header.date', '')}
+                onClear={() => formik.setFieldValue('header.date', null)}
                 error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
               />
             </Grid>
@@ -1110,11 +1108,11 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                     { key: 'cgName', value: 'Client Group' }
                   ]}
                   onChange={async (_, newValue) => {
-                    formik.setFieldValue('header.clientName', newValue?.name)
-                    formik.setFieldValue('header.clientRef', newValue?.reference)
-                    formik.setFieldValue('header.accountId', newValue?.accountId)
+                    formik.setFieldValue('header.clientName', newValue?.name || '')
+                    formik.setFieldValue('header.clientRef', newValue?.reference || '')
+                    formik.setFieldValue('header.accountId', newValue?.accountId || null)
                     formik.setFieldValue('header.isVattable', newValue?.isSubjectToVAT || false)
-                    formik.setFieldValue('header.taxId', newValue?.taxId)
+                    formik.setFieldValue('header.taxId', newValue?.taxId || null)
                     formik.setFieldValue('header.clientId', newValue?.recordId || null)
                   }}
                   errorCheck={'header.clientId'}
