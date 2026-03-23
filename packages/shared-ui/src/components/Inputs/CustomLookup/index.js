@@ -99,7 +99,7 @@ const CustomLookup = ({
   if (_hidden) return <></>
 
   return (
-    <Grid container spacing={0} className={styles.lookupContainer} style={{ position: 'relative' }}>
+    <Grid container spacing={0} className={styles.lookupContainer}>
       <Grid item xs={firstFieldWidth}>
         <Autocomplete
           fullWidth
