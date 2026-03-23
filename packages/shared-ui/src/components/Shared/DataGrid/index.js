@@ -1181,6 +1181,8 @@ export function DataGrid({
           cursor: grab;
           user-select: none;
           touch-action: none;
+          opacity: 0;
+          transition: opacity 0.2s ease;
         }
 
         .hoverFilter:active {
