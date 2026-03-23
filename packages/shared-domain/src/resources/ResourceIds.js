@@ -611,6 +611,7 @@ export const ResourceIds = {
   AlloyMetals: 47103,
   SmeltingScrapItems: 47106,
   MetalSmeltingDTD: 47104,
+  MetalCalibrationDTD: 47602,
   ItemDisposal: 42349,
   PayrollHeader: 75301,
   GeneratePayroll: 75501,
