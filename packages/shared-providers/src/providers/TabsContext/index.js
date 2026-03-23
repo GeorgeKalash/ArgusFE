@@ -90,8 +90,8 @@ const TabsProvider = ({ children }) => {
   const [initialLoadDone, setInitialLoadDone] = useState(false)
 
   const tabsWrapperRef = useRef(null)
-
   const pagesCacheRef = useRef(new Map())
+  const redirectingRef = useRef(false)
 
   const userDataParsed = useMemo(() => {
     if (typeof window === 'undefined') return {}
@@ -119,6 +119,64 @@ const TabsProvider = ({ children }) => {
       }
     },
     [router]
+  )
+
+  const normalizeRoute = useCallback(route => {
+    if (!route) return ''
+    return route.replace(/\/+$/, '') || '/'
+  }, [])
+
+  const findNode = useCallback((nodes, targetRouter) => {
+    for (const node of nodes || []) {
+      if (node.children) {
+        const result = findNode(node.children, targetRouter)
+        if (result) return result
+      } else if (node.path && normalizeRoute(node.path) === normalizeRoute(targetRouter)) {
+        return node.name
+      }
+    }
+    return null
+  }, [normalizeRoute])
+
+  const findResourceId = useCallback((nodes, targetRouter) => {
+    for (const node of nodes || []) {
+      if (node.children) {
+        const result = findResourceId(node.children, targetRouter)
+        if (result) return result
+      } else if (node.path && normalizeRoute(node.path) === normalizeRoute(targetRouter)) {
+        return node.resourceId
+      }
+    }
+    return null
+  }, [normalizeRoute])
+
+  const routeExistsInTree = useCallback((nodes, targetRouter) => {
+    for (const node of nodes || []) {
+      if (node.children) {
+        const result = routeExistsInTree(node.children, targetRouter)
+        if (result) return true
+      } else if (node.path && normalizeRoute(node.path) === normalizeRoute(targetRouter)) {
+        return true
+      }
+    }
+    return false
+  }, [normalizeRoute])
+
+  const isAllowedRoute = useCallback(
+    route => {
+      const normalizedRoute = normalizeRoute(route)
+
+      if (
+        normalizedRoute === '/default' ||
+        normalizedRoute === '/no-access' ||
+        normalizedRoute === '/404'
+      ) {
+        return true
+      }
+
+      return routeExistsInTree(menu, normalizedRoute) || routeExistsInTree(gear, normalizedRoute)
+    },
+    [menu, gear, routeExistsInTree, normalizeRoute]
   )
 
   useEffect(() => {
@@ -159,30 +217,6 @@ const TabsProvider = ({ children }) => {
     setTabsIndex(null)
   }, [])
 
-  const findNode = useCallback((nodes, targetRouter) => {
-    for (const node of nodes) {
-      if (node.children) {
-        const result = findNode(node.children, targetRouter)
-        if (result) return result
-      } else if (node.path && node.path === targetRouter) {
-        return node.name
-      }
-    }
-    return null
-  }, [])
-
-  const findResourceId = useCallback((nodes, targetRouter) => {
-    for (const node of nodes) {
-      if (node.children) {
-        const result = findResourceId(node.children, targetRouter)
-        if (result) return result
-      } else if (node.path && node.path === targetRouter) {
-        return node.resourceId
-      }
-    }
-    return null
-  }, [])
-
   useEffect(() => {
     if (typeof window === 'undefined') return
     const route = router.asPath
@@ -192,6 +226,29 @@ const TabsProvider = ({ children }) => {
     }
   }, [router.asPath, children])
 
+  useEffect(() => {
+    if (!router.asPath || menu.length === 0 && gear.length === 0) return
+
+    const normalizedRoute = normalizeRoute(router.asPath)
+
+    if (
+      normalizedRoute === '/default' ||
+      normalizedRoute === '/no-access' ||
+      normalizedRoute === '/404'
+    ) {
+      redirectingRef.current = false
+      return
+    }
+
+    if (!isAllowedRoute(normalizedRoute) && !redirectingRef.current) {
+      redirectingRef.current = true
+      navigateTo('/no-access/')
+      return
+    }
+
+    redirectingRef.current = false
+  }, [router.asPath, menu, gear, isAllowedRoute, navigateTo, normalizeRoute])
+
   const handleChange = useCallback(
     async (_, newValue) => {
       if (newValue === currentTabIndex) return
@@ -200,7 +257,7 @@ const TabsProvider = ({ children }) => {
       if (!nextRoute) return
       if (nextRoute === router.asPath) return
 
-      const needsPage = newValue === 0 ? !openTabs?.[newValue]?.page : !openTabs?.[newValue]?.page
+      const needsPage = !openTabs?.[newValue]?.page
 
       if (needsPage) {
         await navigateTo(nextRoute)
@@ -298,7 +355,9 @@ const TabsProvider = ({ children }) => {
       if (tabRoute === router.asPath) {
         setOpenTabs(openTabs => openTabs.map(tab => (tab.route === tabRoute ? { ...tab, id: uuidv4() } : tab)))
         setReloadOpenedPage([])
-      } else await navigateTo(tabRoute)
+      } else {
+        await navigateTo(tabRoute)
+      }
     },
     [router.asPath, navigateTo, setOpenTabs, setReloadOpenedPage]
   )
@@ -306,55 +365,75 @@ const TabsProvider = ({ children }) => {
   const historyAs = typeof window !== 'undefined' ? window.history?.state?.as : undefined
 
   useEffect(() => {
-    if (initialLoadDone) {
-      const isTabOpen = openTabs.some(tab => tab.route === router.asPath || !window?.history?.state?.as)
+    if (!initialLoadDone) return
+    if (!router.asPath) return
 
-      if (!isTabOpen) {
-        const normalizedRoute = router.asPath.replace(/\/$/, '')
-        const menuLabel = findNode(menu, normalizedRoute)
-        const gearLabel = findNode(gear, normalizedRoute)
+    const normalizedRoute = normalizeRoute(router.asPath)
 
-        if (!menuLabel && !gearLabel && normalizedRoute !== '/default' && normalizedRoute !== '/no-access') {
-          navigateTo('/no-access/')
-          return
-        }
-
-        const newValueState = openTabs.length
-
-        const label = lastOpenedPage ? lastOpenedPage.name : menuLabel || gearLabel
-
-        const resourceId = findResourceId(menu, normalizedRoute)
-
-        const cachedPage = pagesCacheRef.current.get(router.asPath) || children
-
-        setOpenTabs(prevState => [
-          ...prevState,
-          {
-            page: cachedPage,
-            id: uuidv4(),
-            route: router.asPath,
-            label,
-            resourceId
-          }
-        ])
-        setCurrentTabIndex(newValueState)
-      } else {
-        setOpenTabs(prevState =>
-          prevState.map(tab => {
-            if (tab.route !== router.asPath) return tab
-
-            if (tab.page) return tab
-
-            const cachedPage = pagesCacheRef.current.get(router.asPath) || children
-            return { ...tab, page: cachedPage }
-          })
-        )
-      }
+    if (!isAllowedRoute(normalizedRoute) && normalizedRoute !== '/no-access' && normalizedRoute !== '/404') {
+      return
     }
-  }, [router.asPath, historyAs])
+
+    const isTabOpen = openTabs.some(tab => normalizeRoute(tab.route) === normalizedRoute || !window?.history?.state?.as)
+
+    if (!isTabOpen) {
+      const newValueState = openTabs.length
+
+      const label =
+        normalizedRoute === '/no-access'
+          ? 'No Access'
+          : normalizedRoute === '/404'
+            ? '404'
+            : lastOpenedPage
+              ? lastOpenedPage.name
+              : findNode(menu, normalizedRoute) || findNode(gear, normalizedRoute)
+
+      const resourceId = findResourceId(menu, normalizedRoute) || findResourceId(gear, normalizedRoute)
+      const cachedPage = pagesCacheRef.current.get(router.asPath) || children
+
+      setOpenTabs(prevState => [
+        ...prevState,
+        {
+          page: cachedPage,
+          id: uuidv4(),
+          route: router.asPath,
+          label,
+          resourceId
+        }
+      ])
+      setCurrentTabIndex(newValueState)
+    } else {
+      setOpenTabs(prevState =>
+        prevState.map(tab => {
+          if (normalizeRoute(tab.route) !== normalizedRoute) return tab
+          if (tab.page) return tab
+
+          const cachedPage = pagesCacheRef.current.get(router.asPath) || children
+          return { ...tab, page: cachedPage }
+        })
+      )
+    }
+  }, [
+    router.asPath,
+    historyAs,
+    initialLoadDone,
+    openTabs,
+    children,
+    lastOpenedPage,
+    menu,
+    gear,
+    setOpenTabs,
+    setCurrentTabIndex,
+    findNode,
+    findResourceId,
+    isAllowedRoute,
+    normalizeRoute
+  ])
 
   useEffect(() => {
-    if (openTabs?.[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
+    if (openTabs?.[currentTabIndex]?.route === reloadOpenedPage?.path + '/') {
+      reopenTab(reloadOpenedPage?.path + '/')
+    }
 
     if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
       const homeRoute = '/default/'
@@ -369,32 +448,57 @@ const TabsProvider = ({ children }) => {
         }
       ]
 
-      if (router.asPath !== homeRoute) {
-        const normalizedRoute = router.asPath.replace(/\/$/, '')
-        const menuLabel = findNode(menu, normalizedRoute)
-        const gearLabel = findNode(gear, normalizedRoute)
+      const normalizedRoute = normalizeRoute(router.asPath)
 
-        if (!menuLabel && !gearLabel && normalizedRoute !== '/no-access') {
-          navigateTo('/no-access/')
-          return
+      if (normalizedRoute !== '/default') {
+        if (
+          normalizedRoute === '/no-access' ||
+          normalizedRoute === '/404' ||
+          isAllowedRoute(normalizedRoute)
+        ) {
+          const currentPage = pagesCacheRef.current.get(router.asPath) || children
+
+          newTabs.push({
+            page: currentPage,
+            id: uuidv4(),
+            route: router.asPath,
+            label:
+              normalizedRoute === '/no-access'
+                ? 'No Access'
+                : normalizedRoute === '/404'
+                  ? '404'
+                  : lastOpenedPage
+                    ? lastOpenedPage.name
+                    : findNode(menu, normalizedRoute) || findNode(gear, normalizedRoute),
+            resourceId: findResourceId(menu, normalizedRoute) || findResourceId(gear, normalizedRoute)
+          })
+
+          setCurrentTabIndex(newTabs.findIndex(tab => tab.route === router.asPath))
         }
-
-        const currentPage = pagesCacheRef.current.get(router.asPath) || children
-
-        newTabs.push({
-          page: currentPage,
-          id: uuidv4(),
-          route: router.asPath,
-          label: lastOpenedPage ? lastOpenedPage.name : menuLabel || gearLabel,
-          resourceId: findResourceId(menu, normalizedRoute)
-        })
-        setCurrentTabIndex(newTabs.findIndex(tab => tab.route === router.asPath))
       }
 
       setOpenTabs(newTabs)
-      menu.length > 0 && setInitialLoadDone(true)
+      if (menu.length > 0 || gear.length > 0) setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
+  }, [
+    router.asPath,
+    menu,
+    gear,
+    children,
+    lastOpenedPage,
+    initialLoadDone,
+    reloadOpenedPage,
+    dashboardId,
+    openTabs,
+    currentTabIndex,
+    reopenTab,
+    setCurrentTabIndex,
+    setOpenTabs,
+    isAllowedRoute,
+    normalizeRoute,
+    findNode,
+    findResourceId
+  ])
 
   function unlockRecord(resourceId) {
     const body = {
@@ -404,6 +508,7 @@ const TabsProvider = ({ children }) => {
       userId,
       clockStamp: new Date()
     }
+
     postRequest({
       extension: AccessControlRepository.unlockRecord,
       record: JSON.stringify(body)
