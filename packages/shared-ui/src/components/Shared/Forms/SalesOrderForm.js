@@ -201,13 +201,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
-      sourceNo: yup.string().test(
-        'sourceNo-required',
-        'Source No is required',
-        function (value) {
-          const { sourceId } = this.parent
-          if (sourceId && !value) return false
-          return true
+       sourceNo: yup.string().test( function (value) {
+        const { sourceId } = this.parent
+        return !(sourceId && !value)
         }
       ),
       items: yup.array().of(schema)
