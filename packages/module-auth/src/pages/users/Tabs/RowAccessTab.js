@@ -19,6 +19,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { PointofSaleRepository } from '@argus/repositories/src/repositories/PointofSaleRepository'
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
@@ -119,6 +120,13 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         parameters: '_params=&_startAt=0&_pageSize=1000'
       })
 
+    const workCenterRequestPromise =
+      classId == ResourceIds.WorkCenters &&
+      getRequest({
+      extension: ManufacturingRepository.WorkCenter.qry,
+      parameters: `_filter=`
+      })
+
     const rowAccessUserPromise = getRequest({
       extension: AccessControlRepository.RowAccessUserView.qry,
       parameters: `_resourceId=${classId}&_userId=${storeRecordId}`
@@ -133,7 +141,8 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
       salesPersonRequestPromise,
       rowAccessUserPromise,
       costCenterRequestPromise,
-      costCenterGroupRequestPromise
+      costCenterGroupRequestPromise,
+      workCenterRequestPromise
     ]).then(
       ([
         cashAccountRequest,
@@ -142,7 +151,8 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         salesPersonRequest,
         rowAccessUser,
         costCenterRequest,
-        costCenterGroupRequest
+        costCenterGroupRequest,
+        workCenterRequest
       ]) => {
         if (classId == ResourceIds.Plants || classId === 'undefined') {
           rar = plantRequest.list?.map(item => {
@@ -191,6 +201,15 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
           })
         } else if (classId == ResourceIds.CostCenterGroup) {
           rar = costCenterGroupRequest.list?.map(item => {
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              reference: item.reference,
+              hasAccess: false
+            }
+          })
+        } else if (classId == ResourceIds.WorkCenters) {
+          rar = workCenterRequest.list?.map(item => {
             return {
               recordId: item.recordId,
               name: item.name,

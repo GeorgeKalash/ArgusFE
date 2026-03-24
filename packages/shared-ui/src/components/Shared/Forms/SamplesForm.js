@@ -56,7 +56,7 @@ export default function SamplesForm({ recordId, window }) {
     sku: row => row?.sku,
     stonePct: row => row?.stonePct != null,
     weight: row => row?.weight != null,
-    pcs: row => row?.pcs != null,
+    pcs: row => row?.pcs != null && row?.pcs <= 32767,
     itemName: row => row?.itemName
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
@@ -199,9 +199,6 @@ export default function SamplesForm({ recordId, window }) {
       name: 'pcs',
       label: labels.pcs,
       width: 100,
-      props: {
-        maxLength: 4
-      }
     },
     {
       component: 'numberfield',

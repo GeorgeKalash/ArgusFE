@@ -554,6 +554,10 @@ const DashboardLayout = () => {
           display: flex;
           justify-content: flex-start;
           align-items: flex-start;
+          width: 100%;
+          min-width: 0;
+          width: 100%;
+          min-width: 0;
         }
 
         .container {
