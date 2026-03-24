@@ -87,7 +87,7 @@ const MetalTrxDTD = () => {
   }
   
 
-  const getcorrectLabel = functionId => {
+  const getCorrectLabel = functionId => {
     if (functionId === SystemFunction.MetalSmelting) {
         return labels.MetalSmeltingDTD
     } else if (functionId === SystemFunction.MetalCalibration) {
@@ -108,7 +108,7 @@ const MetalTrxDTD = () => {
       },
       width: 600,
       height: 350,
-      title: getcorrectLabel(parseInt(functionId))
+      title: getCorrectLabel(parseInt(functionId))
     })
   }
 
