@@ -126,11 +126,11 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     },
     validationSchema: yup.object({
       header: yup.object({
-        date: yup.string().required(),
-        currencyId: yup.string().required(),
-        clientId: yup.string().required(),
-        spId: yup.string().required(),
-        siteId: yup.string().required(),
+        date: yup.date().required(),
+        currencyId: yup.number().required(),
+        clientId: yup.number().required(),
+        spId: yup.number().required(),
+        siteId: yup.number().required(),
       }),
       items: yup.array().of(
         yup.object().shape({
@@ -711,6 +711,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     )
     
     await formik.setValues({
+      recordId: pack.header.recordId || null,
       header: {
         ...pack.header,
         plId: defplId,
