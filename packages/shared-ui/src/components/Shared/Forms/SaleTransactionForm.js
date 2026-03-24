@@ -37,7 +37,7 @@ import {
   MDTYPE_PCT,
   MDTYPE_AMOUNT
 } from '@argus/shared-utils/src/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
+import { calcVatAmountPerTaxDetail, getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
 import {
   getDiscValues,
   getFooterTotals,
@@ -306,24 +306,21 @@ export default function SaleTransactionForm({
         },
         items: updatedRows,
         serials: serialsValues,
-        taxes: Object.values(
-          [
-            ...obj.taxes,
-            ...obj.items
-              .filter(({ taxDetails }) => taxDetails && taxDetails.length > 0)
-              .map(({ taxDetails, id }) => ({
-                seqNo: id,
-                ...taxDetails[0]
-              }))
-          ].reduce((acc, tax) => {
-            if (obj.items.some(item => item.id === tax.seqNo)) {
-              acc[tax.seqNo] = tax
-            }
+        taxes: obj?.items.reduce((acc, item) => {
+          if (item.taxDetails?.length) {
+            item.taxDetails.forEach(td => {
+              const { seqNo, ...rest } = td
 
-            return acc
-          }, {})
-        ),
+              acc.push({
+                seqNo: item.id,
+                taxSeqNo: seqNo,
+                ...rest
+              })
+            })
+          }
 
+          return acc
+        }, []),
         ...(({ header, items, taxes, serials, ...rest }) => rest)(obj)
       }
 
@@ -375,6 +372,39 @@ export default function SaleTransactionForm({
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
+  function buildCalculatedTaxDetails(row, taxDetailsList = []) {
+    return (taxDetailsList || []).map(td => {
+      const singleTaxDetail = {
+        ...td,
+        taxScheduleAmount: td.amount || td.taxScheduleAmount || 0
+      }
+
+      const calculatedAmount = calcVatAmountPerTaxDetail(
+        {
+          priceType: row?.priceType,
+          basePrice: parseFloat(row?.basePrice || 0),
+          unitPrice: parseFloat(row?.unitPrice || 0),
+          qty: parseFloat(row?.qty || 0),
+          weight: parseFloat(row?.weight || 0),
+          extendedPrice: parseFloat(row?.extendedPrice || 0),
+          baseLaborPrice: parseFloat(row?.baseLaborPrice || 0),
+          vatAmount: parseFloat(row?.vatAmount || 0),
+          tdPct: parseFloat(formik.values?.header?.tdPct || 0),
+          taxDetails: singleTaxDetail
+        },
+        singleTaxDetail
+      )
+
+      return {
+        ...td,
+        invoiceId: formik.values?.header?.recordId || 0,
+        taxSeqNo: td.seqNo,
+        taxScheduleAmount: td.amount || 0,
+        amount: parseFloat(calculatedAmount || 0)
+      }
+    })
+  }
+
   async function barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, setItemInfo, defaultMu) {
     let result = {}
     const weight = itemPhysProp?.weight || 0
@@ -402,18 +432,6 @@ export default function SaleTransactionForm({
         : null
       : itemInfo.taxId ?? null
 
-    if (effectiveTaxId) {
-      const taxDetailsResponse = await getTaxDetails(effectiveTaxId)
-      rowTax = effectiveTaxId
-      rowTaxDetails = taxDetailsResponse.map(item => ({
-        taxId: effectiveTaxId,
-        taxCodeId: item.taxCodeId,
-        taxBase: item.taxBase,
-        amount: item.amount ?? 0,
-        invoiceId: formik.values.recordId || 0,
-        taxSeqNo: item.seqNo,
-      }))
-    }
 
     if (parseFloat(unitPrice) < parseFloat(minPrice)) {
       ShowMinPriceValueErrorMessage(minPrice, unitPrice)
@@ -468,11 +486,11 @@ export default function SaleTransactionForm({
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
       mdValue: 0,
-      taxId: rowTax,
+      taxId: effectiveTaxId,
       minPrice,
       siteId: formik.values?.header?.siteId || null,
       siteRef: formik.values?.header?.siteRef || null,
-      taxDetails: rowTaxDetails,
+      taxDetails: null,
       taxDetailsButton: true
     }
 
@@ -484,6 +502,18 @@ export default function SaleTransactionForm({
       ? DIRTYFIELD_UNIT_PRICE
       : null
     if (dirtyField) data = getItemPriceRow(data, dirtyField)
+
+    if (effectiveTaxId) {
+      const taxDetailsResponse = await getTaxDetails(effectiveTaxId)
+      rowTax = effectiveTaxId
+      rowTaxDetails = buildCalculatedTaxDetails(data, taxDetailsResponse)
+    }
+
+    data = {
+      ...data,
+      taxId: rowTax,
+      taxDetails: rowTaxDetails
+    }
 
     update({ ...data, priceWithVAT: calculatePrice(data, rowTaxDetails?.[0], DIRTYFIELD_BASE_PRICE) })
   }
@@ -861,7 +891,8 @@ export default function SaleTransactionForm({
           Component: TaxDetails,
           props: {
             taxId: row?.taxId,
-            obj: row
+            obj: row,
+            taxes: editMode ? row?.taxDetails : []
           }
         })
       }
@@ -1166,10 +1197,10 @@ export default function SaleTransactionForm({
     return res?.record
   }
 
-  async function fillForm(saTrxPack, dtInfo, taxDetails) {
+  async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
-    const saTrxTaxes = saTrxPack?.taxes
+    const saTrxTaxes = saTrxPack?.taxDetails || []
     const balance = saTrxPack?.accountBalance?.balance
     const accountId = saTrxPack?.client?.accountId
     const maxDiscount = saTrxPack?.client?.maxDiscount
@@ -1178,13 +1209,16 @@ export default function SaleTransactionForm({
     saTrxHeader?.tdType === 1 || saTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
-      
-    const taxDetailsMap = saTrxHeader.isVattable
-    ? taxDetails
-    : []
+
 
     const modifiedList = await Promise.all(
-      saTrxItems?.map(async (item, index) => {
+      (saTrxItems || []).map(async (item, index) => {
+        let calculatedTaxDetails = []
+
+        if (item?.taxId) {
+          const rawTaxDetails = saTrxTaxes.filter(td => td.taxId === item.taxId)
+          calculatedTaxDetails = buildCalculatedTaxDetails(item, rawTaxDetails)
+        }
 
         return {
           ...item,
@@ -1203,9 +1237,9 @@ export default function SaleTransactionForm({
                 id: index
               }
             }),
-          priceWithVAT: calculatePrice(item, taxDetailsMap?.[0], DIRTYFIELD_BASE_PRICE),
+          priceWithVAT: calculatePrice(item, calculatedTaxDetails?.[0], DIRTYFIELD_BASE_PRICE),
           totalWeightPerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
-          taxDetails: taxDetailsMap?.filter(td => td.taxId === item.taxId && td.seqNo === item.seqNo) || []
+          taxDetails: calculatedTaxDetails
         }
       })
     )
@@ -1230,7 +1264,7 @@ export default function SaleTransactionForm({
         balance
       },
       items: modifiedList,
-      taxes: [...saTrxTaxes]
+      taxes: saTrxTaxes
     })
 
     !formik.values.recordId &&
@@ -1479,7 +1513,12 @@ export default function SaleTransactionForm({
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: itemPriceRow?.vatAmount || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
-      taxDetails: formik.values.header?.isVattable ? newRow.taxDetails : null
+      taxDetails: formik.values.header.isVattable === true && newRow.taxDetails
+        ? newRow.taxDetails.map(td => ({
+            ...td,
+            amount: td.taxScheduleAmount
+          }))
+        : null
     })
 
     let commonData = {
@@ -1627,7 +1666,12 @@ export default function SaleTransactionForm({
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: item?.vatAmount,
         tdPct: tdPct,
-        taxDetails: formik.values.header?.isVattable ? item.taxDetails : null
+        taxDetails: formik.values.header.isVattable === true && item?.taxDetails
+          ? item.taxDetails.map(td => ({
+              ...td,
+              amount: td.taxScheduleAmount
+            }))
+          : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, vatCalcRow?.vatAmount)
     })
@@ -1692,10 +1736,9 @@ export default function SaleTransactionForm({
 
   async function refetchForm(recordId, callDt) {
     let dtInfo = {}
-    const res = await getPackData()
     const saTrxpack = await getSalesTransactionPack(recordId)
     if (callDt) dtInfo = await getDTD(saTrxpack.header.dtId)
-    await fillForm(saTrxpack, dtInfo, res?.taxDetails)
+    await fillForm(saTrxpack, dtInfo)
   }
 
   function setAddressValues(obj) {
