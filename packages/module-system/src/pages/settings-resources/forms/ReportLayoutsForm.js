@@ -35,7 +35,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
 
       return {
         ...item,
-        isInactive: isInactive,
+        isInactive,
         originalInactive: isInactive
       }
     })
