@@ -93,7 +93,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         weight: 0,
         accountId: null,
         disSkuLookup: false,
-        search: '',
       },
       items: [
         {
@@ -730,21 +729,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     return taxDetails ? taxDetails?.filter(td => td.taxId === taxId) : []
   }
 
-  const filteredData = formik.values.header?.search
-    ? formik.values?.items.filter(
-        item =>
-          item.srlNo?.toString()?.includes(formik.values.header?.search) ||
-          item.sku?.toString()?.toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.weight?.toString()?.includes(formik.values.header?.search)
-      )
-    : formik.values.items
-
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('header.search', value)
-  }
-
   const handleGridChange = (value, action, row) => {
     if (action === 'delete') {
       let updatedSerials = formik.values.items
@@ -935,7 +919,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 error={formik?.touched?.header?.siteId && Boolean(formik?.errors?.header?.siteId)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SaleRepository.DraftInvoice.pack}
                 reducer={response => response?.record?.currencies}
@@ -956,19 +940,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                   formik.setFieldValue('header.currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.header?.currencyId && Boolean(formik.errors.header?.currencyId)}
-              />
-            </Grid>
-            <Grid item xs={2}>
-              <CustomTextField
-                name='header.search'
-                value={formik.values.header.search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  formik.setFieldValue('header.search', '')
-                }}
-                onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('header.search', e)}
-                search={true}
               />
             </Grid>
             <Grid item xs={4}>
@@ -1140,17 +1111,17 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         <Grow>
           <DataGrid
             onChange={(value, action, row) => handleGridChange(value, action, row)}
-            value={filteredData || []}
+            value={formik.values.items || []}
             error={formik.errors.items}
             initialValues={formik?.initialValues?.items?.[0]}
             columns={serialsColumns}
             name='serials'
             showCounterColumn={true}
+            enableFilters
             maxAccess={maxAccess}
             disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'items').length > 0}
             allowDelete={!isClosed}
             allowAddNewLine={
-              !formik?.values?.header?.search &&
               (formik.values?.items?.length === 0 ||
                 !!formik.values?.items?.[formik.values?.items?.length - 1]?.srlNo)
             }

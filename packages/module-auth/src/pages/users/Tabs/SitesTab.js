@@ -7,8 +7,6 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -22,7 +20,6 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
     maxAccess,
     validateOnChange: true,
     initialValues: {
-      search: '',
       rows: [
         {
           id: 1,
@@ -146,7 +143,7 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
     },
     {
       component: 'resourcecombobox',
-      name: 'accessLevelCombo',
+      name: 'accessLevelName',
       label: labels.accessLevel,
       flex: 3,
       props: {
@@ -163,19 +160,6 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
       }
     }
   ]
-
-  const filteredData = formik.values.search
-    ? formik.values.rows.filter(
-        item =>
-          (item.siteReference && item.siteReference.toString().includes(formik.values.search.toLowerCase())) ||
-          (item.siteName && item.siteName.toLowerCase().includes(formik.values.search.toLowerCase()))
-      )
-    : formik.values.rows
-
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('search', value)
-  }
 
   function handleRowsChange(newValues) {
     const updatedRows = formik.values.rows.map(row => {
@@ -197,24 +181,13 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
-        <Fixed>
-          <CustomTextField
-            name='search'
-            value={formik.values.search}
-            label={labels.search}
-            onClear={() => {
-              formik.setFieldValue('search', '')
-              fetchGridData()
-            }}
-            sx={{ width: '30%' }}
-            onChange={handleSearchChange}
-          />
-        </Fixed>
         <Grow>
           <DataGrid
             onChange={value => handleRowsChange(value)}
-            value={filteredData}
+            value={formik.values.rows}
             error={formik.errors.rows}
+            enableFilters
+            initialValues={formik?.initialValues?.rows?.[0]}
             columns={columns}
             allowAddNewLine={false}
             allowDelete={false}
