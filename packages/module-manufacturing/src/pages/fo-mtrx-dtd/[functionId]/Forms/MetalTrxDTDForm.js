@@ -19,7 +19,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
-export default function MetalTrxDTDForm({ labels, maxAccess, recordId, functionId, getResourceId, window }) {
+export default function MetalTrxDTDForm({ labels, maxAccess, recordId, functionId, window }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -75,7 +75,7 @@ export default function MetalTrxDTDForm({ labels, maxAccess, recordId, functionI
   }, [])
 
   return (
-    <FormShell resourceId={getResourceId(Number(functionId))} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.MetalSmeltingDTD} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

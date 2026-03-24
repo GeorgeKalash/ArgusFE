@@ -36,9 +36,9 @@ const MetalTrxDTD = () => {
     const fn = Number(functionId)
     switch (fn) {
         case SystemFunction.MetalSmelting:
-            return ResourceIds.MetalSmelting
+            return ResourceIds.MetalSmeltingDTD
         case SystemFunction.MetalCalibration:
-            return ResourceIds.MetalCalibration
+            return ResourceIds.MetalCalibrationDTD
         default:
             return null
     }
@@ -104,7 +104,6 @@ const MetalTrxDTD = () => {
         labels,
         recordId: record?.dtId,
         functionId: Number(functionId),
-        getResourceId,
         maxAccess: access
       },
       width: 600,
