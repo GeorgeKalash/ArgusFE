@@ -58,7 +58,6 @@ export const SystemFunction = {
   DraftSerialsIn: Module.Sales * 100 + 8,
   DraftInvoiceReturn: Module.Sales * 100 + 9, //draft serial return
   Clients: Module.Sales * 100 + 40,
-  ReturnOnInvoice: Module.Sales * 100 + 41,
   DeliveryOrder: Module.Delivery * 100 + 0,
   DeliveryReturn: Module.Delivery * 100 + 1,
   DeliveryTrip: Module.Delivery * 100 + 2,
