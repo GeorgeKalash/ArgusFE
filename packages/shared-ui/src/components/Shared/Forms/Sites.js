@@ -20,7 +20,6 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
     maxAccess,
     validateOnChange: true,
     initialValues: {
-      search: '',
       rows: []
     },
     onSubmit: async () => {
@@ -124,11 +123,6 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
     }
   ]
 
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('search', value)
-  }
-
   function handleRowsChange(newValues) {
     const updatedRows = formik.values.rows.map(row => {
       const newValue = newValues.find(newRow => newRow.id === row.id)
@@ -151,26 +145,13 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={isClosed}>
       <VertLayout>
         <Grow>
-          <Fixed>
-            <CustomTextField
-              name='search'
-              value={formik.values.search}
-              label={labels.search}
-              readOnly={isPosted || isClosed}
-              onClear={() => {
-                formik.setFieldValue('search', '')
-                fetchGridData()
-              }}
-              sx={{ width: '30%' }}
-              onChange={handleSearchChange}
-            />
-          </Fixed>
           <Grow>
             <DataGrid
               onChange={value => handleRowsChange(value)}
-              value={filteredData}
+              value={formik.values.rows}
               error={formik.errors.rows}
               columns={columns}
+              enableFilters
               allowAddNewLine={false}
               allowDelete={false}
             />

@@ -15,6 +15,7 @@ const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { exportFormat } = useContext(DefaultsContext)
   const [reportStore, setReportStore] = useState([])
+  const [defaultLayoutId, setDefaultLayoutId] = useState(null)
   const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
   const [pdf, setPDF] = useState(null)
   const [formatIndex, setFormatIndex] = useState(0)
@@ -62,6 +63,7 @@ const ReportViewer = ({ resourceId }) => {
       const templatesPack = (pack?.reportTemplates || [])
         .filter(item => !item.isInactive)
         .map(item => ({
+          id: item.id,
           api_url: item.wsName,
           reportClass: item.reportName,
           parameters: item.parameters,
@@ -71,6 +73,8 @@ const ReportViewer = ({ resourceId }) => {
 
       return [...prev, ...layoutsPack, ...templatesPack]
     })
+
+    setDefaultLayoutId(pack?.defaultLayoutId)
   }
 
   useEffect(() => {
@@ -82,12 +86,17 @@ const ReportViewer = ({ resourceId }) => {
   }, [exportFormat])
 
   useEffect(() => {
-    if (reportStore.length > 0 && !report.selectedReport)
+    if (reportStore.length > 0 && !report.selectedReport) {
+      const defaultReport = reportStore.find(
+        item => item.id === defaultLayoutId
+      )
+  
       setReport(prevState => ({
         ...prevState,
-        selectedReport: reportStore[0]
+        selectedReport: defaultReport || reportStore[0]
       }))
-  }, [reportStore])
+    }
+  }, [reportStore, defaultLayoutId])
 
   const onApply = async ({ rpbParams, paramsDict }) => {
     const result = await generateReport({
@@ -138,7 +147,6 @@ const ReportViewer = ({ resourceId }) => {
                   displayField='layoutName'
                   values={report}
                   required
-                  defaultIndex={0}
                   fullWidth
                   onChange={(e, newValue) =>
                     setReport(prevState => ({
