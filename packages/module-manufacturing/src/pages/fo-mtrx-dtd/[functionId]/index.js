@@ -1,6 +1,5 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
-import MetalSmeltingDTDForm from './Forms/MetalSmeltingDTDForm'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -12,22 +11,39 @@ import { VertLayout } from "@argus/shared-ui/src/components/Layouts/VertLayout"
 import { Grow } from "@argus/shared-ui/src/components/Layouts/Grow"
 import Table from "@argus/shared-ui/src/components/Shared/Table"
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import MetalTrxDTDForm from './Forms/MetalTrxDTDForm'
+import { Router } from '@argus/shared-domain/src/lib/useRouter'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
-const MetalSmeltingDTD = () => {
+const MetalTrxDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
       extension: FoundryRepository.DocumentTypeDefault.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${SystemFunction.MetalSmelting}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${Number(functionId)}`
     })
 
     return { ...response, _startAt: _startAt }
   }
+
+   const getResourceId = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+        case SystemFunction.MetalSmelting:
+            return ResourceIds.MetalSmeltingDTD
+        case SystemFunction.MetalCalibration:
+            return ResourceIds.MetalCalibrationDTD
+        default:
+            return null
+    }
+   }
+  
 
   const {
     query: { data },
@@ -39,7 +55,12 @@ const MetalSmeltingDTD = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FoundryRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.MetalSmeltingDTD
+    datasetId: ResourceIds.MetalSmeltingDTD,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
   })
 
   const columns = [
@@ -68,18 +89,30 @@ const MetalSmeltingDTD = () => {
     invalidate()
     toast.success(platformLabels.Deleted)
   }
+  
+
+  const getCorrectLabel = functionId => {
+    if (functionId === SystemFunction.MetalSmelting) {
+        return labels.MetalSmeltingDTD
+    } else if (functionId === SystemFunction.MetalCalibration) {
+        return labels.MetalCalibrationDTD
+    } else {
+        return null
+    }
+   }
 
   function openForm(record) {
     stack({
-      Component: MetalSmeltingDTDForm,
+      Component: MetalTrxDTDForm,
       props: {
         labels,
         recordId: record?.dtId,
+        functionId: Number(functionId),
         maxAccess: access
       },
       width: 600,
       height: 350,
-      title: labels.MetalSmeltingDTD
+      title: getCorrectLabel(parseInt(functionId))
     })
   }
 
@@ -111,4 +144,4 @@ const MetalSmeltingDTD = () => {
   )
 }
 
-export default MetalSmeltingDTD
+export default MetalTrxDTD
