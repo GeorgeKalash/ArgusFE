@@ -71,6 +71,7 @@ export const SettingsContext = createContext({
 export const SettingsProvider = ({ children, pageSettings }) => {
   // ** State
   const [settings, setSettings] = useState({ ...initialSettings })
+  const [loginLanguageId, setLoginLanguageId] = useState(null)
   const { i18n } = useTranslation()
 
   const auth = useAuth()
@@ -97,7 +98,7 @@ export const SettingsProvider = ({ children, pageSettings }) => {
   }, [settings.layout])
 
   useEffect(() => {
-    switch (auth?.user?.languageId) {
+    switch (loginLanguageId || auth?.user?.languageId) {
       case 1:
         i18n.changeLanguage('en')
         saveSettings({ ...settings, direction: 'ltr' })
@@ -114,14 +115,15 @@ export const SettingsProvider = ({ children, pageSettings }) => {
       default:
         break
     }
-  }, [auth.user])
+  }, [loginLanguageId, auth?.user?.languageId])
 
   const saveSettings = updatedSettings => {
     storeSettings(updatedSettings)
     setSettings(updatedSettings)
   }
+  console.log('loginLanguageId',loginLanguageId)
 
-  return <SettingsContext.Provider value={{ settings, saveSettings }}>{children}</SettingsContext.Provider>
+  return <SettingsContext.Provider value={{ settings, saveSettings, setLoginLanguageId }}>{children}</SettingsContext.Provider>
 }
 
 export const SettingsConsumer = SettingsContext.Consumer

@@ -22,6 +22,7 @@ import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepositor
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.7rem',
@@ -36,6 +37,7 @@ const LoginPage = () => {
   const theme = useTheme()
   const auth = useAuth()
   const { companyName, setCompanyName, deployHost, validCompanyName } = useContext(AuthContext)
+  const { setLoginLanguageId } = useSettings()
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const [loginLanguage, setLanguage] = useState(null)
@@ -45,7 +47,7 @@ const LoginPage = () => {
     ARABIC: 2,
     FRENCH: 3
   }
-
+console.log('loginLanguage',loginLanguage)
   const validation = useFormik({
     initialValues: {
       username: '',
@@ -60,6 +62,7 @@ const LoginPage = () => {
       rememberMe: yup.boolean()
     }),
     onSubmit: values => {
+      setLoginLanguageId(null)
       auth.login({ ...values }, error => {
         const { loggedUser } = error
         if (error?.signIn3?.forcePasswordReset) {
@@ -144,11 +147,13 @@ const LoginPage = () => {
   const mapKeyValueListToObject = (list = []) => Object.fromEntries(list.map(({ key, value }) => [key, value]))
 
   async function getLanguage(language){
+    console.log('check debug')
      const res = await getRequest({
       extension: KVSRepository.getPlatformLabels,
       parameters: `_dataset=${ResourceIds.Common}&_language=${language}`
     })
     setLanguage(mapKeyValueListToObject(res?.list))
+    setLoginLanguageId(language)
   }
 
   useEffect(() => {
