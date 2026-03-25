@@ -236,8 +236,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       parameters: `_recordId=${res?.record?.header?.clientId}`
     })
 
-    res.record.date = formatDateFromApi(res?.record?.date)
-    res.record.accountId = clientRes.record.accountId
+    res.record.header.date = res?.record?.header?.date
+    res.record.header.accountId = clientRes.record.accountId
 
     return res?.record || {}
   }
@@ -708,7 +708,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         }
         return {
           ...item,
-          id: item.seqNo || index + 1,
+          id: item.seqNo,
           baseLaborPrice: parseFloat(item.baseLaborPrice).toFixed(2),
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
@@ -819,12 +819,12 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     (acc, row) => {
       const subTot = parseFloat(row?.unitPrice) || 0
       const vatAmountTot = parseFloat(row?.vatAmount) || 0
-      const rowWeight = parseFloat(row?.weight) || 0
+      const weight = parseFloat(row?.weight) || 0
 
       return {
         subTotal: reCal ? parseFloat((acc?.subTotal + subTot).toFixed(2)) : formik.values?.header?.subTotal || 0,
         vatAmount: reCal ? parseFloat((acc?.vatAmount + vatAmountTot).toFixed(2)) : formik.values?.header?.vatAmount || 0,
-        weight: reCal ? acc?.weight + rowWeight : formik.values?.header?.weight || 0,
+        weight: reCal ? acc?.weight + weight : formik.values?.header?.weight || 0,
         amount: reCal
           ? parseFloat((acc?.subTotal + subTot + acc?.vatAmount + vatAmountTot).toFixed(2))
           : formik.values?.header?.amount || 0
@@ -889,8 +889,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           categoryName: x.categoryName,
           seqNo: lId + 1,
           id: lId + 1,
-          ...(x?.taxId && {
-            taxId: formik.values?.header?.taxId || x?.taxId
+          ...(res?.record?.taxId && {
+            taxId: formik.values?.header?.taxId || res?.record?.taxId
           })
         }
 
@@ -1051,8 +1051,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.DraftInvoice.pack}
-                    reducer={response => response?.record?.plants}
+                    endpointId={SystemRepository.Plant.qry}
                     name='header.plantId'
                     label={labels.plant}
                     readOnly
@@ -1098,7 +1097,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                     label={labels.postingDate}
                     value={formik?.values?.header?.date}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('header.date', newValue)
+                      formik.setFieldValue('header.date', newValue || null)
                       formik.setFieldValue('header.invoiceId', null)
                       formik.setFieldValue('header.invoiceRef', '')
                     }}
