@@ -89,6 +89,7 @@ const TabsProvider = ({ children }) => {
 
   const [anchorEl, setAnchorEl] = useState(null)
   const [tabsIndex, setTabsIndex] = useState(null)
+  const [menuPosition, setMenuPosition] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
 
   const tabsWrapperRef = useRef(null)
@@ -109,7 +110,7 @@ const TabsProvider = ({ children }) => {
 
   const { dashboardId } = userDataParsed
   const userId = userDataParsed?.userId
-  const open = Boolean(anchorEl)
+  const open = Boolean(menuPosition)
 
   const normalizeRoute = useCallback(route => {
     if (!route) return ''
@@ -171,7 +172,8 @@ const TabsProvider = ({ children }) => {
       return null
   }, [normalizeRoute])
 
-  const routeExistsInTree = useCallback((nodes, targetRouter) => {
+  const routeExistsInTree = useCallback(
+    (nodes, targetRouter) => {
       for (const node of nodes || []) {
         if (node.children) {
           const result = routeExistsInTree(node.children, targetRouter)
@@ -189,8 +191,7 @@ const TabsProvider = ({ children }) => {
 
       if (
         normalizedRoute === '/default' ||
-        normalizedRoute === '/no-access' ||
-        normalizedRoute === '/404'
+        normalizedRoute === '/no-access'
       ) {
         return true
       }
@@ -228,13 +229,22 @@ const TabsProvider = ({ children }) => {
   }, [shouldManageTabs])
 
   const OpenItems = useCallback((event, i) => {
-    setTabsIndex(i)
     event.preventDefault()
-    setAnchorEl(event.currentTarget)
+    event.stopPropagation()
+
+    const rect = event.currentTarget.getBoundingClientRect()
+
+    setTabsIndex(i)
+    setAnchorEl(null)
+    setMenuPosition({
+      top: Math.round(rect.bottom),
+      left: Math.round(rect.left)
+    })
   }, [])
 
   const handleClose = useCallback(() => {
     setAnchorEl(null)
+    setMenuPosition(null)
     setTabsIndex(null)
   }, [])
 
@@ -243,7 +253,7 @@ const TabsProvider = ({ children }) => {
 
     const normalizedRoute = normalizeRoute(router.asPath)
 
-    if (normalizedRoute === '/no-access' || normalizedRoute === '/404') {
+    if (normalizedRoute === '/no-access') {
       pagesCacheRef.current.set(router.asPath, children)
       return
     }
@@ -261,8 +271,7 @@ const TabsProvider = ({ children }) => {
 
     if (
       normalizedRoute === '/default' ||
-      normalizedRoute === '/no-access' ||
-      normalizedRoute === '/404'
+      normalizedRoute === '/no-access'
     ) {
       redirectingRef.current = false
       return
@@ -436,7 +445,7 @@ const TabsProvider = ({ children }) => {
 
     if (closingRouteRef.current === normalizedRoute) return
 
-    if (!isAllowedRoute(normalizedRoute) && normalizedRoute !== '/no-access' && normalizedRoute !== '/404') {
+    if (!isAllowedRoute(normalizedRoute) && normalizedRoute !== '/no-access') {
       return
     }
 
@@ -446,15 +455,13 @@ const TabsProvider = ({ children }) => {
       const label =
         normalizedRoute === '/no-access'
           ? 'No Access'
-          : normalizedRoute === '/404'
-            ? '404'
-            : lastOpenedPage
-              ? lastOpenedPage.name
-              : findNode(menu, normalizedRoute) || findNode(gear, normalizedRoute)
+          : lastOpenedPage
+            ? lastOpenedPage.name
+            : findNode(menu, normalizedRoute) || findNode(gear, normalizedRoute)
 
       const resourceId = findResourceId(menu, normalizedRoute) || findResourceId(gear, normalizedRoute)
       const cachedPage =
-        normalizedRoute === '/no-access' || normalizedRoute === '/404'
+        normalizedRoute === '/no-access'
           ? children || null
           : pagesCacheRef.current.get(router.asPath) || children || null
 
@@ -505,7 +512,7 @@ const TabsProvider = ({ children }) => {
 
     const normalizedRoute = normalizeRoute(router.asPath)
 
-    if (!isAllowedRoute(normalizedRoute) && normalizedRoute !== '/no-access' && normalizedRoute !== '/404') {
+    if (!isAllowedRoute(normalizedRoute) && normalizedRoute !== '/no-access') {
       return
     }
 
@@ -523,13 +530,12 @@ const TabsProvider = ({ children }) => {
 
     if (normalizedRoute !== '/default') {
       const currentPage =
-        normalizedRoute === '/no-access' || normalizedRoute === '/404'
+        normalizedRoute === '/no-access'
           ? children || null
           : pagesCacheRef.current.get(router.asPath) || children || null
 
       if (
         normalizedRoute === '/no-access' ||
-        normalizedRoute === '/404' ||
         isAllowedRoute(normalizedRoute)
       ) {
         newTabs.push({
@@ -539,11 +545,9 @@ const TabsProvider = ({ children }) => {
           label:
             normalizedRoute === '/no-access'
               ? 'No Access'
-              : normalizedRoute === '/404'
-                ? '404'
-                : lastOpenedPage
-                  ? lastOpenedPage.name
-                  : findNode(menu, normalizedRoute) || findNode(gear, normalizedRoute),
+              : lastOpenedPage
+                ? lastOpenedPage.name
+                : findNode(menu, normalizedRoute) || findNode(gear, normalizedRoute),
           resourceId: findResourceId(menu, normalizedRoute) || findResourceId(gear, normalizedRoute)
         })
       }
@@ -618,7 +622,7 @@ const TabsProvider = ({ children }) => {
               label={
                 <Box display='flex' alignItems='center'>
                   <span>{activeTab.label}</span>
-                  {i === currentTabIndex && (
+                  {i === currentTabIndex && activeTab.route !== '/no-access/'&& (
                     <IconButton
                       size='small'
                       className={styles.svgIcon}
@@ -683,8 +687,14 @@ const TabsProvider = ({ children }) => {
         open={open}
         onClose={handleClose}
         onClick={handleClose}
+        anchorReference='anchorPosition'
+        anchorPosition={menuPosition || undefined}
+        keepMounted
+        transitionDuration={0}
+        disableAutoFocus
+        disableEnforceFocus
+        disableRestoreFocus
         transformOrigin={{ horizontal: 'left', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
         className={styles.dropdownMenu}
       >
         <MenuItem
