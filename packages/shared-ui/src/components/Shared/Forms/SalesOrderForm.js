@@ -201,6 +201,11 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
+       sourceNo: yup.string().test( function (value) {
+        const { sourceId } = this.parent
+        return !(sourceId && !value)
+        }
+      ),
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
@@ -1665,6 +1670,45 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     label={labels.overdraft}
                     maxAccess={access}
                   />
+                </Grid>
+                <Grid item container spacing={2}>
+                  <Grid item xs={6}>
+                    <ResourceComboBox
+                      endpointId={SaleRepository.SalesOrder.pack}
+                      reducer={response => response?.record?.sources}
+                      name='sourceId'
+                      label={labels.source}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      readOnly={isClosed}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      value={formik.values.sourceId}
+                      values={formik.values}
+                      displayFieldWidth={1.5}
+                      maxAccess={maxAccess}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('sourceId', newValue ? newValue.recordId : null)
+                        formik.setFieldValue('sourceNo', '')
+                      }}
+                      error={formik.touched.sourceId && Boolean(formik.errors.sourceId)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomTextField
+                      name='sourceNo'
+                      label={labels.sourceNo}
+                      value={formik.values.sourceNo}
+                      maxLength={20}
+                      onChange={formik.handleChange}
+                      readOnly={!formik.values.sourceId || isClosed}
+                      required={formik.values.sourceId}
+                      maxAccess={maxAccess}
+                      error={formik.touched.sourceNo && Boolean(formik.errors.sourceNo)}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>

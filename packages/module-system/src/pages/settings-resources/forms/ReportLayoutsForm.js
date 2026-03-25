@@ -13,7 +13,7 @@ import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepositor
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
+const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -29,9 +29,14 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
     const response2Map = new Map((pack?.reportLayoutOverrides || []).map(item => [item.id, item.isInactive]))
 
     const updatedList = (pack?.layouts || []).map(item => {
+      const isInactive = response2Map.has(item.id)
+        ? response2Map.get(item.id)
+        : false
+
       return {
         ...item,
-        isInactive: response2Map.has(item.id) ? response2Map.get(item.id) : false
+        isInactive,
+        originalInactive: isInactive
       }
     })
 
@@ -69,8 +74,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
       })
 
       toast.success(platformLabels.Updated)
-
-      w.close()
+      fetchData()
     }
   })
 
@@ -89,6 +93,11 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
 
   const columns = [
     {
+      field: 'id',
+      headerName: labels.id,
+      flex: 0.5
+    },
+    {
       field: 'api',
       headerName: labels.api,
       flex: 1
@@ -98,7 +107,6 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
       headerName: labels.instanceName,
       flex: 2
     },
-
     {
       field: 'parameters',
       headerName: labels.params,
@@ -111,7 +119,6 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
     },
     {
       flex: 0.5,
-      field: 'post',
       cellRenderer: row => {
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
@@ -131,7 +138,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
                 fontSize: '14px'
               }}
             >
-              preview
+              {labels.preview}
             </Typography>
           </Box>
         )
@@ -142,6 +149,40 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
       headerName: labels.isInactive,
       type: 'checkbox',
       editable: true
+    },
+    {
+      flex: 0.5,
+      cellRenderer: row => {
+        if (row.data.originalInactive) return null
+        return (
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <Typography
+              variant='body2'
+              component='a'
+              onClick={async () => {
+                await postRequest({
+                  extension: SystemRepository.DefaultLayout.setDefaultLayout,
+                  record: JSON.stringify({
+                    resourceId: formik.values.resourceId,
+                    defaultLayoutId: row.data.id
+                  })
+                })
+                toast.success(platformLabels.Updated)
+                invalidate() 
+                w.close()
+              }}
+              sx={{
+                color: 'green',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              {labels.default} 
+            </Typography>
+          </Box>
+        )
+      }
     }
   ]
 

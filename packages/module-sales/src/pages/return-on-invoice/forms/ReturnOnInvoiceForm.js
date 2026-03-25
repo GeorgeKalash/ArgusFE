@@ -65,7 +65,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.ReturnOnInvoice,
+    functionId: SystemFunction.SalesReturn,
     access,
     enabled: !recordId
   })
@@ -856,7 +856,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     stack({
       Component: WorkFlow,
       props: {
-        functionId: SystemFunction.ReturnOnInvoice,
+        functionId: SystemFunction.SalesReturn,
         recordId: formik.values.recordId
       }
     })
@@ -1931,10 +1931,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
               rowsUpdate.current = value
               action === 'delete' && setReCal(true)
             }}
+            enableFilters
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
             name='items'
+            initialValues={formik?.initialValues?.items[0]}
             showCounterColumn={true}
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)

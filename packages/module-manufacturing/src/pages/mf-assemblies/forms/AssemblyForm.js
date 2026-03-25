@@ -169,7 +169,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
   const totalRawMaterial = designQuantity + diffQuantity
 
-  const disablePreview = !formik.values.bomId || !formik.values.siteId || !Number(formik.values.qty)
+  const disablePreview = !formik.values.bomId || !formik.values.siteId || !Number(formik.values.qty) || isPosted
 
   const fetchLookup = async searchQry => {
     if (!searchQry) return
@@ -214,7 +214,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     {
       component: 'resourcelookup',
       label: labels.componentItem,
-      name: 'sku',
+      name: 'itemName',
       props: {
         onLookup: fetchLookup,
         valueField: 'itemName',
@@ -800,7 +800,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     }}
                     image={'preview.png'}
                     tooltipText={platformLabels.Preview}
-                    disabled={isPosted || disablePreview}
+                    disabled={disablePreview}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -839,7 +839,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     name='qty'
                     label={labels.qty}
                     allowNegative={false}
-                    readOnly={isPosted || editMode || formik.values.items?.some(item => !!item.sku)}
+                    readOnly={isPosted || formik.values.items?.some(item => !!item.itemId)}
                     onChange={formik.handleChange}
                     value={formik?.values?.qty}
                     maxAccess={maxAccess}
@@ -918,7 +918,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
             allowDelete={false}
             allowAddNewLine={false}
             onSelectionChange={(row, update, field) => {
-              if (field == 'sku') currentItemId.current = row?.itemId
+              if (field == 'itemName') currentItemId.current = row?.itemId
             }}
           />
         </Grow>

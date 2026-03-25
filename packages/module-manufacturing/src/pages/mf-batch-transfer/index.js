@@ -12,8 +12,8 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import BatchTransferForm from './Forms/BatchTransferForm'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const BatchTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,28 +33,29 @@ const BatchTransfer = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({ qry }) {
-    return await getRequest({
-      extension: ManufacturingRepository.BatchTransfer.snapshot,
-      parameters: `_filter=${qry}`
-    })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: ManufacturingRepository.BatchTransfer.snapshot,
+      parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
     query: { data },
-    labels: labels,
-    search,
-    clear,
-    paginationParameters,
+    filterBy,
     refetch,
+    labels,
     access,
+    paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.BatchTransfer.page,
     datasetId: ResourceIds.BatchTransfer,
-    search: {
-      searchFn: fetchWithSearch
+    filter: {
+     filterFn: fetchWithFilter
     }
   })
 
@@ -136,14 +137,7 @@ const BatchTransfer = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={labels}
-          inputSearch={true}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'MFBTFR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
