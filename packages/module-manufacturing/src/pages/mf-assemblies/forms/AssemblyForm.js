@@ -169,7 +169,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
   const totalRawMaterial = designQuantity + diffQuantity
 
-  const disablePreview = !formik.values.bomId || !formik.values.siteId || !Number(formik.values.qty)
+  const disablePreview = !formik.values.bomId || !formik.values.siteId || !Number(formik.values.qty) || isPosted
 
   const fetchLookup = async searchQry => {
     if (!searchQry) return
@@ -800,7 +800,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     }}
                     image={'preview.png'}
                     tooltipText={platformLabels.Preview}
-                    disabled={isPosted || disablePreview}
+                    disabled={disablePreview}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -839,7 +839,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     name='qty'
                     label={labels.qty}
                     allowNegative={false}
-                    readOnly={isPosted || editMode || formik.values.items?.some(item => !!item.sku)}
+                    readOnly={isPosted || formik.values.items?.some(item => !!item.itemId)}
                     onChange={formik.handleChange}
                     value={formik?.values?.qty}
                     maxAccess={maxAccess}
