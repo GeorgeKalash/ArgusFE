@@ -102,9 +102,26 @@ export default function AccountReconciliations(){
   }
 
   function onRowCheck(row) {
-    setRow(row?.rclCode || null)
+    const hasCheckedRcl = (formik.values.rows || []).filter(r => r.rclCode && r.checked).length
+    setRow(prev => {
+      if (row?.rclCode) return row.rclCode
+      if (hasCheckedRcl) return prev
+
+      return null
+    })
+
+    const updatedItems = (formik.values.rows || []).map(item => {
+      if (!item.rclCode) return { ...item, disableRow: false }
+      if (!hasCheckedRcl)  return { ...item, disableRow: false }
+      
+      return {
+        ...item,
+        disableRow: !item.checked
+      }
+    })
+    
     const { totalDebit, totalCredit, totalBalance } = (formik?.values?.rows || [])
-      .filter(row => row.checked)
+      .filter(row => row.checked && !row.rclCode)
       .reduce(
         (acc, row) => {
           acc.totalDebit += row.debits || 0
@@ -117,6 +134,7 @@ export default function AccountReconciliations(){
 
       formik.setValues({
         ...formik.values,
+        rows: updatedItems,
         debits: totalDebit,
         credits: totalCredit,
         balance: totalBalance
@@ -126,7 +144,7 @@ export default function AccountReconciliations(){
   async function applyReconciliation(){
     const payload = {
       accountId: formik?.values?.accountId,
-      transactions: formik?.values?.rows?.filter(row => row.checked)
+      transactions: formik?.values?.rows?.filter(row => row.checked && !row.rclCode)
     }
 
     await postRequest({
@@ -206,13 +224,16 @@ export default function AccountReconciliations(){
       key: 'Apply',
       condition: true,
       onClick: applyReconciliation,
-      disabled: !(formik?.values?.debits === formik?.values?.credits && formik?.values?.rows?.some(row => row.checked))
+      disabled: !(
+        formik?.values?.debits === formik?.values?.credits &&
+        formik?.values?.rows?.some(row => row.checked && !row?.rclCode)
+      )
     },
     {
       key: 'Unapply',
       condition: true,
       onClick: unApplyReconciliation,
-      disabled: !selectedRow
+      disabled: !(formik.values.rows || []).filter(r => r.rclCode && r.checked).length
     }
   ]
 
@@ -404,9 +425,14 @@ export default function AccountReconciliations(){
             pagination={false}
             showCheckboxColumn={true}
             handleCheckboxChange={onRowCheck}
-            highlightRow={{ field: 'checked', value: true , color: formik?.values?.balance == 0 ? '#78d580' : '#efc65e'}}
-            disable={(row) => row.rclCode}
-            onSelectionChange={row => setRow(row?.rclCode || null)}
+            highlightRow={{
+              condition: row => row?.checked && !row?.rclCode,
+              color: row => {
+                if (row?.rclCode) return 'transparent'
+                return formik?.values?.balance == 0 ? '#78d580' : '#efc65e'
+              }
+            }}
+            disable={(row) => row.disableRow}
           />
         </Grow>
       </VertLayout>

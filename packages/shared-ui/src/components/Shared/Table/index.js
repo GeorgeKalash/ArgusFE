@@ -536,7 +536,10 @@ const Table = ({
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
     const handleClick = event => {
-      if (selectionMode === 'column' && onSelectionChange) {
+      if (selectionMode === 'row' && onSelectionChange) {
+        onSelectionChange(params.data, params.rowIndex)
+      }
+      else if (selectionMode === 'column' && onSelectionChange) {
         const columnValues = params.api.getDisplayedRowCount()
           ? Array.from(
               { length: params.api.getDisplayedRowCount() },
@@ -789,7 +792,7 @@ const Table = ({
       'even-row': params => params.node.rowIndex % 2 === 0,
       'highlighted-row': params => {
         if (!highlightRow) return false
-        return params.data?.[highlightRow.field] === highlightRow.value
+        return highlightRow.condition?.(params.data)
       }
     }
   }
@@ -923,10 +926,6 @@ const Table = ({
             onColumnResized={onColumnResized}
             onSortChanged={onSortChanged}
             enableRtl={languageId === 2}
-            onRowClicked={params => {
-               if (selectionMode === 'column') return
-               if (onSelectionChange) onSelectionChange(params.data, params.rowIndex)
-            }}
           />
         </Box>
       </Grow>
