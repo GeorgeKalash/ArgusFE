@@ -57,6 +57,10 @@ const MetalTrxDTD = () => {
     endpointId: FoundryRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.MetalSmeltingDTD,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
   })
 
   const columns = [
