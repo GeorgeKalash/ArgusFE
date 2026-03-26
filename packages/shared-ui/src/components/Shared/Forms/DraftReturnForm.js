@@ -192,10 +192,9 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         taxScheduleAmount: td.amount || 0
       }
 
-
       const calculatedAmount = calcVatAmountPerTaxDetail(
         {
-          priceType: row?.priceType || 3,
+          priceType: row?.priceType,
           basePrice: 0,
           unitPrice: parseFloat(row?.baseLaborPrice || 0),
           qty: parseFloat(row?.weight || 0),
@@ -235,7 +234,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       parameters: `_recordId=${res?.record?.header?.clientId}`
     })
 
-    res.record.header.date = res?.record?.header?.date
     res.record.header.accountId = clientRes.record.accountId
 
     return res?.record || {}
