@@ -201,7 +201,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
         mapping: [
           { from: 'recordId', to: 'jobId' },
           { from: 'reference', to: 'jobRef' },
-          { from: 'itemName', to: 'itemName' }
+          { from: 'itemName', to: 'itemName' },
+          { from: 'itemCategoryName', to: 'itemCategoryName' }
         ],
         displayFieldWidth: 4,
         readOnly: !formik.values?.header?.fromWCId
@@ -213,6 +214,31 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           extension: ManufacturingRepository.JobWorkCenter.verify,
           parameters: `_jobOrderId=${newRow?.jobId}&_toWcId=${formik.values?.header?.toWCId}`
         })
+
+        const canTransfer =
+          res2?.record &&
+          (res2.record.valid == true ||
+            res2.record.allowed == true ||
+            res2.record.canTransfer == true ||
+            !!res2.record.itemId)
+
+        if (!canTransfer) {
+          update({
+            jobId: null,
+            jobRef: '',
+            itemName: '',
+            itemId: null,
+            sku: '',
+            itemGroupName: '',
+            itemCategoryName: '',
+            pcs: 0,
+            qty: 0,
+            jobPcs: 0,
+            jobQty: 0
+          })
+
+          return
+        }
 
         const res3 = await getRequest({
           extension: ManufacturingRepository.JobWorkCenter.get,
@@ -226,6 +252,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           itemId: res2.record?.itemId || null,
           sku: res2.record?.sku || '',
           itemGroupName: res2.record?.itemGroupName || '',
+          itemCategoryName: newRow?.itemCategoryName || '',
           pcs: res3.record?.pcs || 0,
           qty: res3.record?.qty || 0,
           jobPcs: res3.record?.pcs || 0,
@@ -245,6 +272,15 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.itemCategoryName,
+      name: 'itemCategoryName',
       flex: 2,
       props: {
         readOnly: true
