@@ -64,6 +64,7 @@ export default function DamageForm({ recordId, lockRecord }) {
         date: new Date(),
         plantId: null,
         laborId: null,
+        reasonId: null,
         notes: '',
         status: 1,
         jobId: null,
@@ -777,7 +778,7 @@ export default function DamageForm({ recordId, lockRecord }) {
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.reasonId', newValue?.recordId || null)
                     }}
-                    error={formik?.touched?.header?.reasonId && formik?.errors?.header?.reasonId}
+                    error={formik?.touched?.header?.reasonId && Boolean(formik?.errors?.header?.reasonId)}
                   />
                 </Grid>
 
@@ -798,7 +799,7 @@ export default function DamageForm({ recordId, lockRecord }) {
                     onChange={(_, newValue) => {
                       formik.setFieldValue('header.categoryId', newValue?.recordId || null)
                     }}
-                    error={formik?.touched?.header?.categoryId && formik?.errors?.header?.categoryId}
+                    error={formik?.touched?.header?.categoryId && Boolean(formik?.errors?.header?.categoryId)}
                   />
                 </Grid>
               </Grid>
