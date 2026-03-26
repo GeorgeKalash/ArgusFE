@@ -199,7 +199,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     validationSchema: yup.object({
       header: yup.object({
         currencyId: yup.number().required(),
-        date: yup.string().required(),
+        date: yup.date().required(),
         clientId: yup.number().required(),
         siteId: yup
           .number()
@@ -1652,14 +1652,14 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     ]}
                     onChange={async (_, newValue) => {
                       formik.setFieldValue('header.clientId', newValue?.recordId || null)
-                      formik.setFieldValue('header.clientName', newValue?.name)
-                      formik.setFieldValue('header.clientRef', newValue?.reference)
+                      formik.setFieldValue('header.clientName', newValue?.name || '')
+                      formik.setFieldValue('header.clientRef', newValue?.reference || '')
                       formik.setFieldValue('header.isVattable', newValue?.isSubjectToVAT || false)
-                      formik.setFieldValue('header.taxId', newValue?.taxId)
-                      formik.setFieldValue('header.maxDiscount', newValue?.maxDiscount)
-                      formik.setFieldValue('header.clientDiscount', newValue?.tdPct)
-                      formik.setFieldValue('header.plId', newValue?.plId)
-                      formik.setFieldValue('header.currencyId', newValue?.currencyId)
+                      formik.setFieldValue('header.taxId', newValue?.taxId || null)
+                      formik.setFieldValue('header.maxDiscount', newValue?.maxDiscount || null)
+                      formik.setFieldValue('header.clientDiscount', newValue?.tdPct || null)
+                      formik.setFieldValue('header.plId', newValue?.plId || null)
+                      formik.setFieldValue('header.currencyId', newValue?.currencyId || null)
                       formik.setFieldValue('header.billAddId', newValue?.billAddressId || '')
                       const billAdd = await getAddress(newValue?.billAddressId || '')
                       formik.setFieldValue('header.billAddress', billAdd || '')
@@ -1695,16 +1695,16 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                         formik.setFieldValue('header.invoiceDate', newValue?.date || null)
                         formik.setFieldValue('header.contactId', newValue?.contactId || null)
                         formik.setFieldValue('header.currencyId', newValue?.currencyId || null)
-                        formik.setFieldValue('header.exRate', newValue?.exRate)
-                        formik.setFieldValue('header.rateCalcMethod', newValue?.rateCalcMethod)
+                        formik.setFieldValue('header.exRate', newValue?.exRate || null)
+                        formik.setFieldValue('header.rateCalcMethod', newValue?.rateCalcMethod || null)
                         formik.setFieldValue('header.plantId', newValue?.plantId || null)
                         const validSpId = await validateSalesPerson(newValue?.spId)
                         formik.setFieldValue('header.spId', validSpId)
 
                         formik.setFieldValue('header.szId', newValue?.szId || null)
-                        formik.setFieldValue('header.isVattable', newValue?.isVattable)
+                        formik.setFieldValue('header.isVattable', newValue?.isVattable || false)
                         formik.setFieldValue('header.tdType', newValue?.tdType || 1)
-                        formik.setFieldValue('header.tdAmount', newValue?.tdAmount)
+                        formik.setFieldValue('header.tdAmount', newValue?.tdAmount || null)
                       }}
                       error={formik.touched.header?.invoiceId && Boolean(formik.errors.header?.invoiceId)}
                     />
