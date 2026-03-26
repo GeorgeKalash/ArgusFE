@@ -29,14 +29,16 @@ export default function MetalSettingsForm({ labels, maxAccess, record, recordId 
       metalId: null,
       metalColorId: null,
       damageNonMetalItemId: null,
-      damageMetalItemId: null
+      damageMetalItemId: null,
+      sfItemId: null
     },
     maxAccess,
     validationSchema: yup.object({
       damageNonMetalItemId: yup.number().required(),
       damageMetalItemId: yup.number().required(),
       metalId: yup.number().required(),
-      metalColorId: yup.number().required()
+      metalColorId: yup.number().required(),
+      sfItemId: yup.number().required(),
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -156,6 +158,30 @@ export default function MetalSettingsForm({ labels, maxAccess, record, recordId 
                   formik.setFieldValue('damageNonMetalItemId', newValue?.recordId || null)
                 }}
                 error={formik.touched.damageNonMetalItemId && Boolean(formik.errors.damageNonMetalItemId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={InventoryRepository.Item.snapshot}
+                name='sfItemId'
+                label={labels.sfItem}
+                valueField='sku'
+                displayField='name'
+                valueShow='sfItemSku'
+                secondValueShow='sfItemName'
+                form={formik}
+                columnsInDropDown={[
+                  { key: 'sku', value: 'SKU' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('sfItemName', newValue?.name || '')
+                  formik.setFieldValue('sfItemSku', newValue?.sku || '')
+                  formik.setFieldValue('sfItemId', newValue?.recordId || null)
+                }}
+                displayFieldWidth={2}
+                errorCheck={'sfItemId'}
                 maxAccess={maxAccess}
               />
             </Grid>
