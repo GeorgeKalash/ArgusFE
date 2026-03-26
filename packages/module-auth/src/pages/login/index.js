@@ -41,8 +41,7 @@ const LoginPage = () => {
   const { stack } = useWindow()
   const { setTempLanguageId } = useSettings()
   const { platformLabels } = useContext(ControlContext)
-  const [loginLanguage, setLanguage] = useState(tempLabels)
-  const translatedLabels = loginLanguage || platformLabels
+  const translatedLabels = tempLabels || platformLabels
   const Languages = {
     ENGLISH: 1,
     ARABIC: 2,
@@ -76,7 +75,6 @@ const LoginPage = () => {
           viewOTP(loggedUser)
         } else setErrorMessage(error)
       })
-      setLanguage(null)
       tempLabels = null
     }
   })
@@ -152,9 +150,7 @@ const LoginPage = () => {
       extension: KVSRepository.getPlatformLabels,
       parameters: `_dataset=${ResourceIds.Common}&_language=${language}`
     })
-    const mapped = mapKeyValueListToObject(res?.list)
-    tempLabels = mapped
-    setLanguage(mapped)
+    tempLabels = mapKeyValueListToObject(res?.list)
     setTempLanguageId(language)
   }
 
