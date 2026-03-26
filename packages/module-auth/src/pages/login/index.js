@@ -77,7 +77,7 @@ const LoginPage = () => {
         } else setErrorMessage(error)
       })
       setLanguage(null)
-      setTempLanguageId(null)
+      tempLabels = null
     }
   })
 
@@ -152,7 +152,9 @@ const LoginPage = () => {
       extension: KVSRepository.getPlatformLabels,
       parameters: `_dataset=${ResourceIds.Common}&_language=${language}`
     })
-    setLanguage(mapKeyValueListToObject(res?.list))
+    const mapped = mapKeyValueListToObject(res?.list)
+    tempLabels = mapped
+    setLanguage(mapped)
     setTempLanguageId(language)
   }
 
