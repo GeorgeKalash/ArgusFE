@@ -220,7 +220,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   }
 
   async function refetchForm(recordId) {
-    console.log(recordId)
     const pack = await getDraftReturn(recordId)
     await fillForm(pack)
   }
@@ -367,7 +366,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     formik.setFieldValue('recordId', pack.header.recordId)
     formik.setFieldValue('header.recordId', pack.header.recordId)
     formik.setFieldValue('header.reference', pack.header?.reference)
-    formik.setFieldValue('header.date', pack.header?.date)
+    formik.setFieldValue('header.date', formatDateFromApi(pack.header?.date))
 
     const success =
       type === 'import' ? await autoSaveImport(pack.header, lastLine) : await autoSave(pack.header, lastLine)
@@ -415,8 +414,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               ? formik.values.header.taxId
               : null
             : res?.record?.taxId ?? null
-
-          console.log(res.record, 'ressssssssssss')
 
           let lineObj = {
             fieldName: 'srlNo',
@@ -719,8 +716,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       }) || []
     )
 
-    console.log(modifiedList)
-
     await formik.setValues({
       recordId: pack.header?.recordId || null,
       header: {
@@ -729,8 +724,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         date: formatDateFromApi(pack.header?.date)
       },
       items: modifiedList.length ? modifiedList : formik?.initialValues?.items,
-      metalGridData: formik.values.metalGridData,
-      itemGridData: formik.values.itemGridData,
       taxDetails: pack.taxDetails
     })
 
@@ -870,6 +863,14 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       updatedItems = updatedItems.filter(s => s.srlNo)
 
       for (const x of res.list) {
+        const effectiveTaxId = !formik?.values?.header.isVattable
+          ? null
+          : formik?.values?.header.taxId
+          ? x.taxId
+            ? formik?.values?.header.taxId
+            : null
+          : x.taxId ?? null
+
         const draft = {
           srlNo: x.srlNo,
           itemId: x.itemId,
@@ -889,8 +890,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           categoryName: x.categoryName,
           seqNo: lId + 1,
           id: lId + 1,
-          ...(res?.record?.taxId && {
-            taxId: formik.values?.header?.taxId || res?.record?.taxId
+          ...(x?.taxId && {
+            taxId: effectiveTaxId
           })
         }
 
@@ -898,6 +899,13 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
 
         draft.unitPrice = unitPrice
         draft.baseLaborPrice = baseLaborPrice
+
+        
+        if (effectiveTaxId) {
+          const taxDetailsResponse = await getTaxDetails(effectiveTaxId)
+          draft.taxId = effectiveTaxId
+          draft.taxDetails = buildCalculatedTaxDetails(draft, taxDetailsResponse)
+        }
 
         if (draft.taxId != null) {
           draft.extendedPrice = unitPrice
