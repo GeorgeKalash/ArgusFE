@@ -285,6 +285,10 @@ export default function SketchForm({ recordId, invalidate, window }) {
                   <ResourceComboBox
                     endpointId={ProductModelingRepository.Designer.qry}
                     name='designerId'
+                    linkOpen={{
+                      props: { recordId: formik.values.designerId },
+                      resourceId: ResourceIds.Designer
+                    }}
                     label={labels.designer}
                     valueField='recordId'
                     displayField={['reference', 'name']}
