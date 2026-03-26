@@ -30,6 +30,7 @@ const LinkStyled = styled(Link)(({ theme }) => ({
   color: theme.palette.primary.main
 }))
 
+let tempLabels = null
 const LoginPage = () => {
   const { getRequest } = useContext(RequestsContext)
   const [showPassword, setShowPassword] = useState(false)
@@ -37,17 +38,16 @@ const LoginPage = () => {
   const theme = useTheme()
   const auth = useAuth()
   const { companyName, setCompanyName, deployHost, validCompanyName } = useContext(AuthContext)
-  const { setLoginLanguageId } = useSettings()
   const { stack } = useWindow()
+  const { setTempLanguageId } = useSettings()
   const { platformLabels } = useContext(ControlContext)
-  const [loginLanguage, setLanguage] = useState(null)
+  const [loginLanguage, setLanguage] = useState(tempLabels)
   const translatedLabels = loginLanguage || platformLabels
   const Languages = {
     ENGLISH: 1,
     ARABIC: 2,
     FRENCH: 3
   }
-console.log('loginLanguage',loginLanguage)
   const validation = useFormik({
     initialValues: {
       username: '',
@@ -62,7 +62,6 @@ console.log('loginLanguage',loginLanguage)
       rememberMe: yup.boolean()
     }),
     onSubmit: values => {
-      setLoginLanguageId(null)
       auth.login({ ...values }, error => {
         const { loggedUser } = error
         if (error?.signIn3?.forcePasswordReset) {
@@ -77,6 +76,8 @@ console.log('loginLanguage',loginLanguage)
           viewOTP(loggedUser)
         } else setErrorMessage(error)
       })
+      setLanguage(null)
+      setTempLanguageId(null)
     }
   })
 
@@ -147,13 +148,12 @@ console.log('loginLanguage',loginLanguage)
   const mapKeyValueListToObject = (list = []) => Object.fromEntries(list.map(({ key, value }) => [key, value]))
 
   async function getLanguage(language){
-    console.log('check debug')
      const res = await getRequest({
       extension: KVSRepository.getPlatformLabels,
       parameters: `_dataset=${ResourceIds.Common}&_language=${language}`
     })
     setLanguage(mapKeyValueListToObject(res?.list))
-    setLoginLanguageId(language)
+    setTempLanguageId(language)
   }
 
   useEffect(() => {
