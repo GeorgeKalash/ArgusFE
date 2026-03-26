@@ -1,8 +1,8 @@
 import React, { useCallback, useRef } from 'react'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useValueLinkAccess } from './useValueLinkAccess'
-import { isClickOnText } from '@argus/shared-ui/src/components/linkTextUtils'
-import { ResourceRegistry } from '@argus/shared-ui/src/components/ResourceRegistry'
+import { isClickOnText } from '@argus/shared-utils/src/utils/linkTextUtils'
+import { ResourceRegistry } from '@argus/shared-domain/src/resources/ResourceRegistry'
 
 export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheOnlyMode }) => {
   const { stack } = useWindow()
