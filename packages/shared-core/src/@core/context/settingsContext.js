@@ -72,7 +72,7 @@ export const SettingsContext = createContext({
 export const SettingsProvider = ({ children, pageSettings }) => {
   // ** State
   const [settings, setSettings] = useState({ ...initialSettings })
-  const [tempLanguageId, setTempLanguageId] = useState(null)
+  const [tempLanguageId, setTempLanguageId] = useState(1)
   const { i18n } = useTranslation()
 
   const auth = useAuth()
