@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton, Link } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
@@ -1110,6 +1110,21 @@ export function DataGrid({
     button.style.top = '6px'
   }, [width])
 
+  const handleGridReady = useCallback((params) => {
+    gridApiRef.current = params.api
+    setReady(true)
+  }, [])
+  
+  const getRowId = useCallback((params) => params?.data?.id, [])
+  const tabToNextCell = useCallback(() => true, [])
+  const tabToPreviousCell = useCallback(() => true, [])
+
+  const rowDataMemo = useMemo(() => {
+    return isEmptyMaxLines ? [] : value
+  }, [isEmptyMaxLines, value])
+
+  const columnDefsMemo = useMemo(() => finalColumns, [finalColumns])
+
   return (
     <Box className={'root'} sx={{ height: height || 'auto' }}>
       <CacheStoreProvider>
@@ -1134,25 +1149,21 @@ export function DataGrid({
             <AgGridReact
               popupParent={document.body}
               gridApiRef={gridApiRef}
-              rowData={isEmptyMaxLines ? [] : value}
-              columnDefs={finalColumns}
+              rowData={rowDataMemo}
+              columnDefs={columnDefsMemo}
               rowHeight={rowHeight}
               suppressRowClickSelection={false}
               stopEditingWhenCellsLoseFocus={false}
               rowSelection='single'
               editType='cell'
               singleClickEdit={false}
-              onGridReady={params => {
-                gridApiRef.current = params.api
-                onChange(value)
-                setReady(true)
-              }}
+              onGridReady={handleGridReady}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
               onColumnResized={onColumnResized}
-              getRowId={params => params?.data?.id}
-              tabToNextCell={() => true}
-              tabToPreviousCell={() => true}
+              getRowId={getRowId}
+              tabToNextCell={tabToNextCell}
+              tabToPreviousCell={tabToPreviousCell}
               onCellEditingStopped={onCellEditingStopped}
               enableBrowserTooltips={true}
               enableRtl={user?.languageId === 2}
