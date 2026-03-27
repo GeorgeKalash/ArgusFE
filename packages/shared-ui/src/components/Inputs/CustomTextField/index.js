@@ -1,7 +1,7 @@
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import SearchIcon from '@mui/icons-material/Search'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import inputs from '../Inputs.module.css'
 
@@ -217,15 +217,28 @@ const CustomTextField = ({
               </IconButton>
             )}
 
-            {endIcons.map((iconBtn, _) => (
-              <>
-                {iconBtn && (
-                  <IconButton className={inputs.iconButton} tabIndex={-1}>
-                    {iconBtn}
-                  </IconButton>
-                )}
-              </>
-            ))}
+            {endIcons.map((iconBtn, index) => {
+              if (!iconBtn) return null
+
+              const handleClick = iconBtn.props?.onClick
+
+              return (
+                <IconButton
+                  key={index}
+                  className={inputs.iconButton}
+                  tabIndex={-1}
+                  onClick={handleClick}
+                  onMouseDown={iconBtn.props?.onMouseDown}
+                >
+                  {React.isValidElement(iconBtn)
+                    ? React.cloneElement(iconBtn, {
+                        onClick: undefined,
+                        onMouseDown: undefined
+                      })
+                    : iconBtn}
+                </IconButton>
+              )
+            })}
           </InputAdornment>
         )
       }}
