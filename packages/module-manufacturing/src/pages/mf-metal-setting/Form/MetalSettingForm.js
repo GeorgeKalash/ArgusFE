@@ -37,8 +37,7 @@ export default function MetalSettingsForm({ labels, maxAccess, record, recordId 
       damageNonMetalItemId: yup.number().required(),
       damageMetalItemId: yup.number().required(),
       metalId: yup.number().required(),
-      metalColorId: yup.number().required(),
-      sfItemId: yup.number().required(),
+      metalColorId: yup.number().required()
     }),
     onSubmit: async obj => {
       await postRequest({
