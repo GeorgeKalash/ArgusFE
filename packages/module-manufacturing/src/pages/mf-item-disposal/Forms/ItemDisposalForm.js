@@ -28,7 +28,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 
-export default function ItemDisposalForm({ recordId, access, labels }) {
+export default function ItemDisposalForm({ recordId, access, labels, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -124,6 +124,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
   })
 
   const editMode = !!formik.values.recordId
+  const isPosted = formik?.values?.header?.status === 3
 
   const totals = reCal
     ? (formik?.values?.items || []).reduce(
@@ -241,6 +242,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 2,
       props: {
         readOnly: true
       }
@@ -257,6 +259,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       component: 'textfield',
       label: labels.itemGroup,
       name: 'itemGroupName',
+      flex: 2,
       props: {
         readOnly: true
       }
@@ -320,6 +323,17 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
 
   const triggerReCal = () => setReCal(true)
 
+  const onPost = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.Disposal.post,
+      record: JSON.stringify(formik.values.header)
+    })
+
+    toast.success(platformLabels.Posted)
+    window.close()
+    invalidate()
+  }
+
   const actions = [
     {
       key: 'GL',
@@ -348,7 +362,20 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
           title: labels.importFromTransfer
         })
       },
-    }
+      disabled: isPosted
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode
+    },
   ]
 
   async function getDisposal(recordId) {
@@ -435,6 +462,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       editMode={editMode}
       previewReport={editMode}
       actions={actions}
+      disabledSubmit={isPosted}
     >
       <VertLayout>
         <Fixed>
@@ -488,6 +516,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                     value={formik?.values?.header?.date}
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
+                    readOnly={isPosted}
                     onClear={() => formik.setFieldValue('header.date', null)}
                     error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
                   />
@@ -507,6 +536,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                     maxAccess={maxAccess}
                     displayFieldWidth={1.5}
                     required
+                    readOnly={isPosted}
                     onChange={(_, newValue) => formik.setFieldValue('header.siteId', newValue?.recordId || null)}
                     error={formik.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
                   />
@@ -522,6 +552,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                     value={formik.values?.header?.notes}
                     maxLength='100'
                     rows={2}
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.notes', '')}
@@ -544,6 +575,9 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
             error={formik?.errors?.items}
             showCounterColumn={true}
             columns={columns}
+            allowAddNewLine={!isPosted}
+            allowDelete={!isPosted}
+            disabled={isPosted}
           />
         </Grow>
         <Fixed>
