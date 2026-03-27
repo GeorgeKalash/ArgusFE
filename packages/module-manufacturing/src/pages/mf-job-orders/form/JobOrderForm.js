@@ -1,5 +1,5 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateToISO } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
@@ -125,7 +125,7 @@ export default function JobOrderForm({
           date: obj?.date ? formatDateToApi(obj?.date) : null,
           endingDT: obj?.endingDT ? formatDateToApi(obj?.endingDT) : null,
           startingDT: obj?.startingDT ? formatDateToApi(obj?.startingDT) : null,
-          deliveryDate: obj?.deliveryDate ? formatDateToApi(obj?.deliveryDate) : null
+          deliveryDate: obj?.deliveryDate ? formatDateToISO(new Date(obj?.deliveryDate)) : null
         })
       })
 

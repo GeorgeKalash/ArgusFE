@@ -5,24 +5,24 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
-import DesignerForm from '@argus/shared-ui/src/components/Shared/DesignerForm'
+import SalesOrderSourceForm from './forms/SalesOrderSourceForm'
 
-const Designer = () => {
+const SalesOrderSource = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: ProductModelingRepository.Designer.page,
+      extension: SaleRepository.SalesOrderSource.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
@@ -32,29 +32,17 @@ const Designer = () => {
   const {
     query: { data },
     labels,
-    paginationParameters,
-    search,
-    clear,
-    refetch,
     access,
-    invalidate
+    paginationParameters,
+    invalidate,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ProductModelingRepository.Designer.page,
-    datasetId: ResourceIds.Designer,
-    search: {
-      searchFn: fetchWithSearch
-    }
+    endpointId: SaleRepository.SalesOrderSource.page,
+    datasetId: ResourceIds.SalesOrderSource
   })
 
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: ProductModelingRepository.Designer.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -79,16 +67,21 @@ const Designer = () => {
 
   function openForm(recordId) {
     stack({
-      Component: DesignerForm,
+      Component: SalesOrderSourceForm,
       props: {
+        labels,
         recordId,
+        maxAccess: access
       },
+      width: 600,
+      height: 300,
+      title: labels.salesOrderSource
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: ProductModelingRepository.Designer.del,
+      extension: SaleRepository.SalesOrderSource.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -98,20 +91,19 @@ const Designer = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
-          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          pageSize={50}
-          paginationType='api'
-          paginationParameters={paginationParameters}
           refetch={refetch}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
@@ -119,4 +111,5 @@ const Designer = () => {
   )
 }
 
-export default Designer
+export default SalesOrderSource
+

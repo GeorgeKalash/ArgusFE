@@ -13,6 +13,9 @@ export const SystemRepository = {
     qry: service + 'qryUDB',
     set2: service + 'set2UDB'
   },
+  DefaultLayout: {
+    setDefaultLayout: service + 'setDefaultLayout'
+  },
   ReportLayoutObject: {
     set2: service + 'set2RLO'
   },
@@ -164,6 +167,7 @@ export const SystemRepository = {
   },
   ModuleClassRES: {
     qry: service + 'qryRES',
+    qry2: service + 'qryRES2',
     snapshot: service + 'snapshotRES'
   },
   ResourceControl: {

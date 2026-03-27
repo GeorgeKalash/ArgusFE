@@ -19,7 +19,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
-export default function MetalSmeltingDTDForm({ labels, maxAccess, recordId, window }) {
+export default function MetalTrxDTDForm({ labels, maxAccess, recordId, functionId, window }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,7 +31,7 @@ export default function MetalSmeltingDTDForm({ labels, maxAccess, recordId, wind
   const { formik } = useForm({
     initialValues: {
       recordId,
-      functionId: SystemFunction.MetalSmelting,
+      functionId,
       dtId: null,
       smeltingMaxAllowedVariation: null,
       workCenterId: null,
@@ -82,7 +82,7 @@ export default function MetalSmeltingDTDForm({ labels, maxAccess, recordId, wind
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MetalSmelting}`}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
                 name='dtId'
                 required
                 label={labels.documentType}
