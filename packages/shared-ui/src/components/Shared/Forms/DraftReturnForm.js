@@ -1,7 +1,7 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -10,8 +10,6 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -20,7 +18,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
-import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -44,7 +41,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   const { platformLabels} = useContext(ControlContext)
   const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const [reCal, setReCal] = useState(false)
-
+  const taxDetailsCacheRef = useRef(null)
+  
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftInvoiceReturn,
     access,
@@ -728,14 +726,10 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   }
 
   async function getTaxDetails(taxId) {
-    if (!taxId) return
+    if (!taxId) return []
 
-    const res = await getRequest({
-      extension: FinancialRepository.TaxDetailPack.qry,
-      parameters: `_taxId=${taxId}`
-    })
-
-    return res?.list
+    const taxDetails = taxDetailsCacheRef.current
+    return taxDetails ? taxDetails?.filter(td => td.taxId === taxId) : []
   }
 
   const handleGridChange = (value, action, row) => {
@@ -831,12 +825,29 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     formik.setFieldValue('header.amount', amount)
   }, [weight, subTotal, vatAmount, amount])
 
+  async function loadTaxDetails() {
+    if (taxDetailsCacheRef.current) {
+      return
+    }
+
+    const res = await getRequest({
+      extension: SaleRepository.DraftReturn.pack,
+      parameters: ''
+    })
+
+    const taxDetails = res?.record?.taxDetails || []
+
+    taxDetailsCacheRef.current = taxDetails
+  }
+
   useEffect(() => {
     ;(async function () {
       if (!defplId)
         stackError({
           message: labels.noSelectedplId
         })
+
+      await loadTaxDetails()
 
       if (formik?.values?.recordId) {
         await refetchForm(formik?.values?.recordId)
@@ -967,8 +978,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           <Grid container spacing={2}>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.DraftInvoiceReturn}`}
+                endpointId={SaleRepository.DraftReturn.pack}
+                reducer={response => response?.record?.documentTypes}
                 name='header.dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -991,7 +1002,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Site.qry}
+                endpointId={SaleRepository.DraftReturn.pack}
+                reducer={response => response?.record?.sites}
                 name='header.siteId'
                 readOnly={isClosed}
                 label={labels.site}
@@ -1019,7 +1031,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
+                endpointId={SaleRepository.DraftReturn.pack}
+                reducer={response => response?.record?.currencies}
                 filter={item => item.currencyType === 1}
                 name='header.currencyId'
                 label={labels.currency}
@@ -1057,7 +1070,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
+                    endpointId={SaleRepository.DraftReturn.pack}
+                    reducer={response => response?.record?.plants}
                     name='header.plantId'
                     label={labels.plant}
                     readOnly
@@ -1116,7 +1130,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesPerson.qry}
+                    endpointId={SaleRepository.DraftReturn.pack}
+                    reducer={response => response?.record?.salesPeople}
                     name='header.spId'
                     required
                     label={labels.salesPerson}
@@ -1136,7 +1151,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={FinancialRepository.TaxSchedules.qry}
+                    endpointId={SaleRepository.DraftReturn.pack}
+                    reducer={response => response?.record?.taxes}
                     name='header.taxId'
                     label={labels.tax}
                     valueField='recordId'
@@ -1237,7 +1253,8 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 </Grid>
                 <Grid item xs={5.8}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.ReturnReasons.qry}
+                    endpointId={SaleRepository.DraftReturn.pack}
+                    reducer={response => response?.record?.returnReasons}
                     name='header.returnReasonId'
                     label={labels.reason}
                     valueField='recordId'

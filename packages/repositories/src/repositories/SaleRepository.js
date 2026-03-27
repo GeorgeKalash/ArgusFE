@@ -256,7 +256,8 @@ export const SaleRepository = {
     del: service + 'delDRE',
     close: service + 'closeDRE',
     reopen: service + 'reopenDRE',
-    post: service + 'postDRE'
+    post: service + 'postDRE',
+    pack: service + 'getPackDRE'
   },
   DraftReturnSerial: {
     qry: service + 'qryDRS',
