@@ -171,7 +171,7 @@ const CustomTextField = ({
         pattern: numberField ? '[0-9]*' : undefined,
         style: {
           textAlign: numberField ? 'right' : undefined,
-          '-moz-appearance': 'textfield',
+          MozAppearance: 'textfield',
           textTransform: forceUpperCase ? 'uppercase' : 'none'
         },
         tabIndex: _readOnly ? -1 : 0,
