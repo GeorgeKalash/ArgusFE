@@ -52,7 +52,7 @@ const ConfirmationDialog = ({
   return (
     <Dialog
       className={styles.dialog}
-      open={openCondition}
+      open={Boolean(openCondition)}
       onClose={closeCondition}
       fullWidth
       maxWidth="xs"
