@@ -125,19 +125,23 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
 
   const editMode = !!formik.values.recordId
 
-  const calculateTotal = key => formik?.values?.items?.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
-
-  const totalQty = reCal
-    ? calculateTotal('qty')
-    : parseFloat(formik?.values?.header?.totalQty) || 0
-
-  const totalPcs = reCal
-    ? calculateTotal('serialCount')
-    : parseFloat(formik?.values?.header?.totalPcs) || 0
-
-  const totalCost = reCal
-    ? calculateTotal('totalCost')
-    : parseFloat(formik?.values?.header?.totalCost) || 0
+  const totals = reCal
+    ? (formik?.values?.items || []).reduce(
+        (acc, item) => {
+          acc.totalCost += parseFloat(item.totalCost || 0)
+          acc.totalQty += parseFloat(item.qty || 0)
+          acc.totalPcs += parseFloat(item.serialCount || 0)
+          return acc
+        },
+        { totalCost: 0, totalQty: 0, totalPcs: 0 }
+      )
+    : {
+        totalCost: formik?.values?.header?.totalCost || 0,
+        totalQty: formik?.values?.header?.totalQty || 0,
+        totalPcs: formik?.values?.header?.totalPcs || 0
+      }
+    
+  const { totalCost, totalQty, totalPcs } = totals
 
   const onCondition = row => {
     if (row.trackBy === 1) {
@@ -314,6 +318,8 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
     formik.setFieldValue('header.totalPcs', totalPcs)
   }, [totalCost, totalQty, totalPcs])
 
+  const triggerReCal = () => setReCal(true)
+
   const actions = [
     {
       key: 'GL',
@@ -335,7 +341,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       onClick: () => {
         stack({
           Component: ImportTransfer,
-          props: { maxAccess, labels, form: formik, setReCal },
+          props: { maxAccess, labels, form: formik, triggerReCal },
           width: 400,
           height: 150,
           refresh: false,
@@ -531,7 +537,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
             name='disposalItem'
             onChange={value => {
               formik?.setFieldValue('items', value)
-              setReCal(true)
+              triggerReCal()
             }}
             maxAccess={maxAccess}
             value={formik?.values?.items}
@@ -543,13 +549,13 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
         <Fixed>
           <Grid container spacing={2} justifyContent='flex-end'>
             <Grid item xs={3}>
-              <CustomNumberField name='totalCost' value={totalCost} label={labels.totalCost} readOnly />
+              <CustomNumberField name='totalPcs' value={totalPcs} label={labels.totalPcs} readOnly />
             </Grid>
             <Grid item xs={3}>
               <CustomNumberField name='totalQty' value={totalQty} label={labels.totalQty} readOnly />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='totalPcs' value={totalPcs} label={labels.totalPcs} readOnly />
+              <CustomNumberField name='totalCost' value={totalCost} label={labels.totalCost} readOnly />
             </Grid>
           </Grid>
         </Fixed>

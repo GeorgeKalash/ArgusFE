@@ -10,7 +10,7 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
-export default function ImportTransfer({ maxAccess, labels, form, window, setReCal }) {
+export default function ImportTransfer({ maxAccess, labels, form, window, triggerReCal }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
 
@@ -40,7 +40,7 @@ export default function ImportTransfer({ maxAccess, labels, form, window, setReC
 
         form.setFieldValue('items', appendedItems)
 
-        if (typeof setReCal === 'function') setReCal(true)
+        if (typeof triggerReCal === 'function') triggerReCal()
 
         window.close()
       } else formik.setFieldValue('materialsTfr', '')

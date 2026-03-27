@@ -82,17 +82,20 @@ export default function ItemDisposal() {
     {
       field: 'totalCost',
       headerName: labels.totalCost,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'totalQty',
       headerName: labels.totalQty,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'totalPcs',
       headerName: labels.totalPcs,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'statusName',
