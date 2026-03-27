@@ -82,7 +82,11 @@ const Sketch = () => {
     {
       field: 'designerName',
       headerName: labels.designer,
-      flex: 1
+      flex: 1,
+      linkOpen: data => ({
+        resourceId: ResourceIds.Designer,
+        props: { recordId: data?.designerId }
+      })
     },
     {
       field: 'itemGroupName',

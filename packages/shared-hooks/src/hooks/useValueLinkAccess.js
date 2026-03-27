@@ -45,9 +45,21 @@ export const useValueLinkAccess = ({ cacheOnlyMode }) => {
 
   const hasNoAccess = useCallback(access => {
     const flags = access?.record?.accessFlags
-    const flagValues = flags && typeof flags === 'object' ? Object.values(flags) : null
 
-    return !flagValues || flagValues.length === 0 || flagValues.every(v => v === false)
+    if (!flags || typeof flags !== 'object') return true
+
+    const entries = Object.entries(flags)
+    if (entries.length === 0) return true
+
+    const trueEntries = entries.filter(([, value]) => value === true)
+    if (trueEntries.length === 0) return true
+
+    const nonDeleteTrueEntries = trueEntries.filter(([key]) => {
+      const normalizedKey = String(key).toLowerCase()
+      return normalizedKey !== 'del'
+    })
+
+    return nonDeleteTrueEntries.length === 0
   }, [])
 
   const openNoAccessPopup = useCallback(() => {
