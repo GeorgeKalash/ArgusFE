@@ -673,6 +673,7 @@ export const ResourceIds = {
   GLMetalCalibration: 47601,
   GLWorkOrder: 45600,
   GLPayrollList: 75600,
+  GLItemDisposal: 42610,
 
   //MCR
   MCRSalesInvoice: 51607,

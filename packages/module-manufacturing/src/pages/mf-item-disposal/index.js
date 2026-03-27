@@ -9,11 +9,11 @@ import toast from 'react-hot-toast'
 import ItemDisposalForm from './Forms/ItemDisposalForm'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 export default function ItemDisposal() {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -22,8 +22,7 @@ export default function ItemDisposal() {
 
   const {
     query: { data },
-    search,
-    clear,
+    filterBy,
     refetch,
     labels,
     access,
@@ -33,27 +32,29 @@ export default function ItemDisposal() {
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Disposal.page,
     datasetId: ResourceIds.ItemDisposal,
-    search: {
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: ManufacturingRepository.Disposal.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({ qry }) {
-    return await getRequest({
-      extension: ManufacturingRepository.Disposal.snapshot,
-      parameters: `_filter=${qry}`
-    })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: ManufacturingRepository.Disposal.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const columns = [
@@ -74,13 +75,23 @@ export default function ItemDisposal() {
       type: 'date'
     },
     {
-      field: 'wcRef',
-      headerName: labels.workCenter,
+      field: 'siteRef',
+      headerName: labels.site,
       flex: 1
     },
     {
-      field: 'siteRef',
-      headerName: labels.site,
+      field: 'totalCost',
+      headerName: labels.totalCost,
+      flex: 1
+    },
+    {
+      field: 'totalQty',
+      headerName: labels.totalQty,
+      flex: 1
+    },
+    {
+      field: 'totalPcs',
+      headerName: labels.totalPcs,
       flex: 1
     },
     {
@@ -116,7 +127,7 @@ export default function ItemDisposal() {
         recordId,
         access
       },
-      width: 900,
+      width: 1100,
       height: 650,
       title: labels.itemDisposal
     })
@@ -134,7 +145,7 @@ export default function ItemDisposal() {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MFDIS'} />
       </Fixed>
       <Grow>
         <Table
