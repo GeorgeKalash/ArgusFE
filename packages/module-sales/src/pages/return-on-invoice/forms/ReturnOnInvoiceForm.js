@@ -224,7 +224,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     onSubmit: async values => {
       const copy = {
         ...values.header,
-        recordId: values.header.recordId,
         date: formatDateToApi(values.header.date),
         miscAmount: values.header.miscAmount || 0
       }
@@ -249,7 +248,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           seqNo: itemSeqNo,
           qty: itemDetails.sku ? itemDetails.returnNowQty || itemDetails.qty : itemDetails.qty,
           applyVat: values.header.isVattable || false,
-          invoiceDate: formatDateToApi(itemDetails.invoiceDate)
+          invoiceDate: itemDetails.invoiceDate ? formatDateToApi(itemDetails.invoiceDate) : null
         }
       })
 
@@ -385,7 +384,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           update({
             invoiceId: null,
             invoiceRef: null,
-            invoiceName: null
+            invoiceName: null,
+            invoiceDate: null
           })
 
           stackError({
@@ -396,7 +396,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         }
 
         update({
-          invoiceDate: formatDateFromApi(newRow.date)
+          invoiceDate: newRow.date ? formatDateFromApi(newRow.date) : null
         })
       },
       propsReducer({ row, props }) {
@@ -1111,7 +1111,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
     rowsUpdate.current = modifiedList
     formik.setValues({
-      record: pack.header.recordId,
+      recordId: pack.header.recordId || null,
       header: {
         ...pack.header,
         currentDiscount:
@@ -1260,7 +1260,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount),
       tdPct: formik?.values?.header?.tdPct,
-      taxDetails: formik.values.header.isVattable === true && newRow.taxDetails
+      taxDetails: formik.values.header.isVattable && newRow.taxDetails
         ? newRow.taxDetails.map(td => ({
             ...td,
             amount: td.taxScheduleAmount
@@ -1355,7 +1355,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
         tdPct,
-        taxDetails: formik.values.header.isVattable === true && item?.taxDetails
+        taxDetails: formik.values.header.isVattable && item?.taxDetails
           ? item.taxDetails.map(td => ({
               ...td,
               amount: td.taxScheduleAmount
@@ -1421,7 +1421,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
-      formik.setFieldValue(key, value)
+      formik.setFieldValue(`header.${key}`, value)
     })
   }
 
@@ -1531,7 +1531,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
   async function updateValues(fields) {
     Object.entries(fields).forEach(([key, val]) => {
-      formik.setFieldValue(key, val)
+      formik.setFieldValue(`header.${key}`, val)
     })
   }
 
@@ -1654,7 +1654,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       formik.setFieldValue('header.clientId', newValue?.recordId || null)
                       formik.setFieldValue('header.clientName', newValue?.name || '')
                       formik.setFieldValue('header.clientRef', newValue?.reference || '')
-                      formik.setFieldValue('header.isVattable', newValue?.isSubjectToVAT || false)
+                      formik.setFieldValue('header.isVattable', newValue?.isSubjectToVAT)
                       formik.setFieldValue('header.taxId', newValue?.taxId || null)
                       formik.setFieldValue('header.maxDiscount', newValue?.maxDiscount || null)
                       formik.setFieldValue('header.clientDiscount', newValue?.tdPct || null)

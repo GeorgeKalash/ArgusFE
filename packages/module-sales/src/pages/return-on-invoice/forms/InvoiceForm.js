@@ -55,7 +55,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, buildCa
             returnNow,
             invoiceId: form.values.header.invoiceId,
             invoiceSeqNo: item.item.seqNo,
-            invoiceDate: formatDateFromApi(form.values.header.invoiceDate),
+            invoiceDate: form.values.header.invoiceDate ? formatDateFromApi(form.values.header.invoiceDate) : null,
             itemCategoryName: item?.categoryName || '',
             extendedPrice:
               item.item.extendedPrice != 0
@@ -114,7 +114,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, buildCa
           baseLaborPrice: itemPriceRow.baseLaborPrice || 0,
           vatAmount: 0,
           tdPct: form.values.header.tdPct,
-          taxDetails: form.values.header.isVattable === true && rowTaxDetails
+          taxDetails: form.values.header.isVattable && rowTaxDetails
             ? rowTaxDetails.map(td => ({
                 ...td,
                 amount: td.taxScheduleAmount
@@ -138,14 +138,14 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, buildCa
           balanceQty,
           returnNowQty: (itemPriceRow?.qty || 0).toFixed(item?.decimals || 0),
           totalWeight: (itemPriceRow.weight || 0) * (itemPriceRow.qty || 0),
-          taxDetails: form.values.header.isVattable === true && rowTaxDetails
+          taxDetails: form.values.header.isVattable && rowTaxDetails
             ? rowTaxDetails.map(td => ({
                 ...td,
                 amount: td.taxScheduleAmount
               }))
             : null,
           invoiceId: form.values.header.invoiceId,
-          invoiceDate: formatDateFromApi(form.values.header.invoiceDate),
+          invoiceDate: form.values.header.invoiceDate ? formatDateFromApi(form.values.header.invoiceDate) : null,
           itemCategoryName: item.categoryName,
           baseQty: (itemPriceRow?.qty || 0).toFixed(item?.decimals || 0) * item?.muQty
         }
@@ -329,7 +329,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, buildCa
         updatedItem.returnNow = 0
         updatedItem.item.invoiceId = form?.values?.header?.invoiceId ? parseInt(form.values.header?.invoiceId) : 0
         updatedItem.item.invoiceRef = form?.values?.header?.invoiceRef || null
-        updatedItem.item.invoiceDate = formatDateFromApi(form?.values?.header?.invoiceDate) || null
+        updatedItem.item.invoiceDate = form?.values?.header?.invoiceDate ? formatDateFromApi(form?.values?.header?.invoiceDate) : null
       }
 
       updatedItem.balanceQty = qty - (updatedItem.returnedQty || 0)
