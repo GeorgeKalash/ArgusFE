@@ -1989,7 +1989,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                   <CustomTextArea
                     name='header.billAddress'
                     label={labels.billTo}
-                    value={formik?.values?.header.billAddress}
+                    value={formik?.values?.header.billAddress ?? ''}
                     rows={3}
                     maxLength='100'
                     readOnly={!formik?.values?.header.clientId || isPosted}
