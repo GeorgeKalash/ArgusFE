@@ -46,11 +46,12 @@ const CustomComboBox = ({
   onOpen,
   onBlur = () => {},
   linkOpen,
+  maxAccess,
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
     fullName,
-    props.maxAccess,
+    maxAccess,
     required,
     readOnly,
     hidden,
@@ -395,7 +396,7 @@ const CustomComboBox = ({
             autoFocus={focus}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
-            className={[styles.customComboTextField]}
+            className={styles.customComboTextField}
             error={error}
             helperText={helperText}
             onBlur={e => {

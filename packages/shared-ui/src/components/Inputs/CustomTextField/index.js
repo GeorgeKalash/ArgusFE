@@ -152,7 +152,6 @@ const CustomTextField = ({
       inputRef={inputRef}
       type={type}
       variant={variant}
-      defaultValue={value}
       value={value ?? ''}
       size={size}
       fullWidth={fullWidth}
@@ -168,15 +167,15 @@ const CustomTextField = ({
         readOnly: _readOnly,
         maxLength: maxLength,
         ...(dir ? { dir } : {}),
-        inputMode: numberField && 'numeric',
-        pattern: numberField && '[0-9]*',
+        inputMode: numberField ? 'numeric' : undefined,
+        pattern: numberField ? '[0-9]*' : undefined,
         style: {
-          textAlign: numberField && 'right',
+          textAlign: numberField ? 'right' : undefined,
           '-moz-appearance': 'textfield',
           textTransform: forceUpperCase ? 'uppercase' : 'none'
         },
         tabIndex: _readOnly ? -1 : 0,
-        'data-search': search ? 'true' : 'false'
+        'data-search': search || undefined
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
