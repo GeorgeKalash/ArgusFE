@@ -69,9 +69,9 @@ const CustomTextArea = ({
         readOnly: _readOnly,
         maxLength: maxLength,
         inputMode: 'numeric',
-        pattern: numberField && '[0-9]*',
+        pattern: numberField ? '[0-9]*' : undefined,
         style: {
-          textAlign: numberField && 'right',
+          textAlign: numberField ? 'right' : undefined,
           paddingRight: paddingRight
         }
       }}
