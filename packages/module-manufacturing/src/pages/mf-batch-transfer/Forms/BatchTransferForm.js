@@ -215,14 +215,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           parameters: `_jobOrderId=${newRow?.jobId}&_toWcId=${formik.values?.header?.toWCId}`
         })
 
-        const canTransfer =
-          res2?.record &&
-          (res2.record.valid == true ||
-            res2.record.allowed == true ||
-            res2.record.canTransfer == true ||
-            !!res2.record.itemId)
-
-        if (!canTransfer) {
+        if (res2?.error) {
           update({
             jobId: null,
             jobRef: '',
