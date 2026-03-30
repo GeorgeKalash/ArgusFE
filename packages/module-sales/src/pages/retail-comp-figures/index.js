@@ -255,9 +255,9 @@ const RetailCompFigures = () => {
                   ...prevState,
                   categories: firstColumnValues,
                   displayedGraph: Object.entries(lineData?.filter((_, index) => index !== 0))
-                  .filter(([key]) => !isNaN(key))
-                  .map(([, value]) => value)
-                  .sort((a, b) => b - a)
+                    .filter(([key]) => !isNaN(key))
+                    .map(([, value]) => value)
+                    .sort((a, b) => b - a)
                 }))
                 setPrevCol(columnField)
               } else {
