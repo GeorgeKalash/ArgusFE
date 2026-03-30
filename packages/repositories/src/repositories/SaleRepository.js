@@ -251,12 +251,13 @@ export const SaleRepository = {
     page: service + 'pageDRE',
     page2: service + 'page2DRE',
     snapshot: service + 'snapshotDRE',
-    get: service + 'getDRE',
+    get2: service + 'get2DRE',
     set2: service + 'set2DRE',
     del: service + 'delDRE',
     close: service + 'closeDRE',
     reopen: service + 'reopenDRE',
-    post: service + 'postDRE'
+    post: service + 'postDRE',
+    pack: service + 'getPackDRE'
   },
   DraftReturnSerial: {
     qry: service + 'qryDRS',
