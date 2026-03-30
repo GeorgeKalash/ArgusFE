@@ -130,7 +130,6 @@ const CustomTextField = ({
   }, [autoFocus, value, focus])
 
   const hasStartAdornment = Boolean(props.InputProps?.startAdornment || startIcons.length > 0)
-  const isRtl = dir === 'rtl'
 
   const labelOffset = useMemo(() => {
     if (!hasStartAdornment) return 14
@@ -244,7 +243,7 @@ const CustomTextField = ({
           ...(hasStartAdornment && {
             transform: isFocused || hasValue || InputLabelProps?.shrink
               ? undefined
-              : isRtl
+              : dir === 'rtl'
                 ? `translate(calc(100% - ${labelOffset}px), ${size === 'small' ? '9px' : '16px'}) scale(1)`
                 : `translate(${labelOffset}px, ${size === 'small' ? '9px' : '16px'}) scale(1)`
           })

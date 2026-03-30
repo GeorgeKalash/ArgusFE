@@ -20,7 +20,7 @@ function getWindowDimensions(width, height, spacing = true) {
     }
   }
 
-  if (spacing === false) {
+  if (!spacing) {
     const computedWidth =
       width ||
       Math.max(400, window.innerWidth - CLOSED_MENU_WIDTH - DEFAULT_WINDOW_MARGIN)
@@ -42,6 +42,7 @@ function getWindowDimensions(width, height, spacing = true) {
 }
 
 export function WindowProvider({ children }) {
+  console.log('render window')
   const [stack, setStack] = useState([])
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [rerenderFlag, setRerenderFlag] = useState(false)

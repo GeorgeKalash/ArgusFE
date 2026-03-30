@@ -213,7 +213,7 @@ const Window = React.memo(
             handle="#draggable-dialog-title"
             cancel=".no-drag"
             bounds="parent"
-            position={minimized || expanded ? { x: 0, y: 0 } : dragPos}
+            position={minimized || expanded ? { x: 0, y: 0 } : dragPos} //it seems the problem here
             disabled={minimized || expanded || !draggable}
             onStop={(_, data) => {
               if (!expanded && !minimized) setDragPos({ x: data.x, y: data.y })
