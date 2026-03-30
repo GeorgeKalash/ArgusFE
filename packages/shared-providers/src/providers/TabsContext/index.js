@@ -411,52 +411,57 @@ const closeTab = useCallback(
           value={currentTabIndex}
           onChange={handleChange}
           variant='scrollable'
-          scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
+          scrollButtons={openTabs.length > 3 ? 'auto' : false}
           aria-label='scrollable auto tabs example'
           classes={{ indicator: styles.tabsIndicator }}
           className={styles.tabs}
         >
           {openTabs.map((activeTab, i) => (
-            <Tab
-              key={activeTab?.id}
-              className={styles.tabName}
-              label={
-                <Box display='flex' alignItems='center'>
-                  <span>{activeTab.label}</span>
-                  {i === currentTabIndex && (
-                    <IconButton
-                      size='small'
-                      className={styles.svgIcon}
-                      onClick={e => {
-                        e.stopPropagation()
-                        setReloadOpenedPage({ path: openTabs[i].route.replace(/\/$/, ''), name: openTabs[i].label })
-                      }}
-                    >
-                      <RefreshIcon className={styles.svgIcon} />
-                    </IconButton>
-                  )}
-                  {activeTab.route !== '/default/' && (
-                    <IconButton
-                      size='small'
-                      className={styles.svgIcon}
-                      onClick={async event => {
-                        event.stopPropagation()
-                        if (activeTab) unlockIfLocked(activeTab)
-                        await closeTab(activeTab.route)
-                      }}
-                    >
-                      <CloseIcon className={styles.svgIcon} />
-                    </IconButton>
-                  )}
-                </Box>
-              }
-              onContextMenu={event => OpenItems(event, i)}
-              classes={{
-                root: styles.tabRoot,
-                selected: styles.selectedTab
-              }}
-            />
-          ))}
+          <Tab
+            key={activeTab?.id}
+            className={styles.tabName}
+            label={
+              <Box display='flex' alignItems='center'>
+                <span>{activeTab.label}</span>
+
+                {i === currentTabIndex && (
+                  <span
+                    className={styles.svgIcon}
+                    onClick={e => {
+                      e.stopPropagation()
+                      setReloadOpenedPage({
+                        path: openTabs[i].route.replace(/\/$/, ''),
+                        name: openTabs[i].label
+                      })
+                    }}
+                    style={{ display: 'flex', cursor: 'pointer' }}
+                  >
+                    <RefreshIcon className={styles.svgIcon} />
+                  </span>
+                )}
+
+                {activeTab.route !== '/default/' && (
+                  <span
+                    className={styles.svgIcon}
+                    onClick={async event => {
+                      event.stopPropagation()
+                      if (activeTab) unlockIfLocked(activeTab)
+                      await closeTab(activeTab.route)
+                    }}
+                    style={{ display: 'flex', cursor: 'pointer' }}
+                  >
+                    <CloseIcon className={styles.svgIcon} />
+                  </span>
+                )}
+              </Box>
+            }
+            onContextMenu={event => OpenItems(event, i)}
+            classes={{
+              root: styles.tabRoot,
+              selected: styles.selectedTab
+            }}
+          />
+        ))}
         </Tabs>
       </Box>
 
