@@ -223,7 +223,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
             itemId: null,
             sku: '',
             itemGroupName: '',
-            itemCategoryName: '',
+            categoryName: '',
             pcs: 0,
             qty: 0,
             jobPcs: 0,
@@ -245,7 +245,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           itemId: res2.record?.itemId || null,
           sku: res2.record?.sku || '',
           itemGroupName: res2.record?.itemGroupName || '',
-          itemCategoryName: newRow?.itemCategoryName || '',
+          categoryName: newRow?.itemCategoryName || '',
           pcs: res3.record?.pcs || 0,
           qty: res3.record?.qty || 0,
           jobPcs: res3.record?.pcs || 0,
@@ -273,7 +273,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
     {
       component: 'textfield',
       label: labels.itemCategoryName,
-      name: 'itemCategoryName',
+      name: 'categoryName',
       flex: 2,
       props: {
         readOnly: true
