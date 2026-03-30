@@ -81,6 +81,7 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
 
           const role = target.getAttribute('role') || ''
           const isSearchField = target.getAttribute('data-search') === 'true'
+          const isFilterField = target.closest('.ag-floating-filter')
 
           if (
             (e.ctrlKey || e.metaKey) &&
@@ -107,7 +108,7 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
           if (role === 'textbox' && aria === 'rdw-editor') return
 
           if (e.key === 'Enter') {
-            if (isSearchField || props.disabledSubmit) {
+            if (isSearchField || isFilterField || props.disabledSubmit) {
               return
             }
             const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
