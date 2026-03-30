@@ -153,6 +153,9 @@ export const ManufacturingRepository = {
     wip: service + 'wipJOB',
     sync: service + 'syncJOB'
   },
+  GenerateAMC:{
+    generate: service + 'generateAMC'
+  },
   ProductionSheet: {
     page: service + 'pagePST',
     qry: service + 'qryPST',
