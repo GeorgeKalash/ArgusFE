@@ -489,6 +489,7 @@ export const ResourceIds = {
   FIBalanceTfr: 31317,
   CorrespondentDispersalRate: 36138,
   SyncMFTrx: 42316,
+  GenerateAMC: 42711,
   AccountSummary: 31600,
   PhysicalCountSerialDetail: 44203,
   PhysicalCountSerialDetail: 44203,
