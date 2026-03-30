@@ -444,7 +444,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotDIS',
     get: service + 'getDIS',
     set2: service + 'set2DIS',
-    del: service + 'delDIS'
+    del: service + 'delDIS',
+    post: service + 'postDIS'
   },
   DisposalItem: {
     qry: service + 'qryDII'
