@@ -573,6 +573,7 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
             maxAccess={maxAccess}
             value={formik?.values?.items}
             error={formik?.errors?.items}
+            enableFilters
             showCounterColumn={true}
             columns={columns}
             allowAddNewLine={!isPosted}
