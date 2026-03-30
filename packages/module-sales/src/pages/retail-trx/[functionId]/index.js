@@ -1,4 +1,4 @@
-import { Grow } from '@mui/material'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import React, { useContext, useEffect, useRef } from 'react'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
