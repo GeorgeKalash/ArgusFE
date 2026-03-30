@@ -38,11 +38,12 @@ const CustomNumberField = ({
   handleButtonClick,
   cycleButtonLabel = '',
   iconMapIndex = 0,
+  maxAccess,
   ...props
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
-  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
+  const { _readOnly, _required, _hidden } = checkAccess(name, maxAccess, props.required, readOnly, hidden)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/

@@ -32,13 +32,14 @@ const CustomTextField = ({
   startIcons = [],
   endIcons = [],
   InputLabelProps,
+  maxAccess,
   ...props
 }) => {
   const name = props.name
 
   const { _readOnly, _required, _hidden } = checkAccess(
     name,
-    props.maxAccess,
+    maxAccess,
     props.required,
     readOnly,
     hidden
