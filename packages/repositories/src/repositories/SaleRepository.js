@@ -300,8 +300,8 @@ export const SaleRepository = {
   ReturnOnInvoice: {
     snapshot: service + 'snapshotRET',
     page: service + 'pageRET',
-    get: service + 'getRET',
     set2: service + 'set2RET',
+    get2: service + 'get2RET',
     del: service + 'delRET',
     verify: service + 'verifyRET',
     post: service + 'postRET',
