@@ -31,11 +31,12 @@ const CustomTextArea = ({
   position,
   rows = 4,
   hidden = false,
+  maxAccess,
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
     name,
-    props.maxAccess,
+    maxAccess,
     props.required,
     readOnly,
     hidden,
