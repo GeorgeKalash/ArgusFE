@@ -45,7 +45,8 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
       designId: null,
       metalRef: null,
       metalPurity: null,
-      mfrSrlNo: null
+      mfrSrlNo: null,
+      nonMetalWeight: null
     },
     maxAccess,
     validateOnChange: true,
@@ -197,6 +198,15 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('weight', 0)}
                     error={formik.touched.weight && Boolean(formik.errors.weight)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='nonMetalWeight'
+                    label={labels.nonMetalWeight}
+                    value={formik.values.nonMetalWeight}
+                    maxAccess={maxAccess}
+                    readOnly
                   />
                 </Grid>
                 <Grid item xs={12}>

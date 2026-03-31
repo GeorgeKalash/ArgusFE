@@ -103,7 +103,7 @@ const IvSerials = () => {
         maxAccess: access
       },
       width: 850,
-      height: 470,
+      height: 490,
       title: labels.Serials
     })
   }
