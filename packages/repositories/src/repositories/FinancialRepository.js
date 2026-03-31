@@ -289,5 +289,10 @@ export const FinancialRepository = {
   ApplyManual: {
     set2: service + 'set2APLM',
     qry: service + 'qryAPLM'
+  },
+  AccountReconciliations: {
+    qry: service + 'qryRCL',
+    set: service + 'setRCL',
+    del: service + 'delRCL'
   }
 }

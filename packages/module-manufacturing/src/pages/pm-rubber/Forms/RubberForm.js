@@ -23,7 +23,6 @@ import { ProductModelingRepository } from '@argus/repositories/src/repositories/
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
-import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDPrintForm'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
@@ -171,19 +170,6 @@ export default function RubberForm({ labels, access, recordId }) {
         confirmation(platformLabels.StartRecord, platformLabels.Confirmation, onStart)
       },
       disabled: !editMode || isReleased || isPosted
-    },
-    {
-      key: 'threeDPrinting',
-      condition: true,
-      onClick: () => {
-        stack({
-          Component: ThreeDPrintForm,
-          props: {
-            recordId: formik.values?.threeDPId
-          }
-        })
-      },
-      disabled: !formik.values.threeDPId
     }
   ]
 
@@ -297,6 +283,10 @@ export default function RubberForm({ labels, access, recordId }) {
                 }}
                 valueField='reference'
                 name='modelId'
+                linkOpen={{
+                  props: { recordId: formik.values.modelId },
+                  resourceId: ResourceIds.ThreeDPrint
+                }}
                 label={labels.model}
                 form={formik}
                 required

@@ -7,39 +7,35 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
-import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 
-export default function DesignerForm({ labels, maxAccess, recordId }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+export default function SalesOrderSourceForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
   const invalidate = useInvalidate({
-    endpointId: ProductModelingRepository.Designer.page
+    endpointId: SaleRepository.SalesOrderSource.page
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: recordId || null,
       reference: '',
-      name: '',
-      type: ''
+      name: ''
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
       reference: yup.string().required(),
-      type: yup.string().required()
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: ProductModelingRepository.Designer.set,
+        extension: SaleRepository.SalesOrderSource.set,
         record: JSON.stringify(obj)
       })
 
@@ -58,7 +54,7 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: ProductModelingRepository.Designer.get,
+          extension: SaleRepository.SalesOrderSource.get,
           parameters: `_recordId=${recordId}`
         })
 
@@ -68,7 +64,7 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.Designer} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.SalesOrderSource} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -79,7 +75,7 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='10'
+                maxLength='15'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -91,27 +87,11 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                maxLength='60'
                 maxAccess={maxAccess}
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.DESIGNER_TYPE}
-                name='type'
-                label={labels.type}
-                values={formik.values}
-                required
-                valueField='key'
-                displayField='value'
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('type', newValue?.key || null)
-                }}
-                error={formik.touched.type && Boolean(formik.errors.type)}
               />
             </Grid>
           </Grid>
@@ -120,3 +100,4 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
     </FormShell>
   )
 }
+

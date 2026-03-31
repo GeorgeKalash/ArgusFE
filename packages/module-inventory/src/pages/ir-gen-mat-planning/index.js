@@ -1,5 +1,4 @@
-import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
@@ -9,7 +8,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import toast from 'react-hot-toast'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
@@ -21,8 +19,6 @@ const GenerateMaterialPlaning = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
-
-  const [searchValue, setSearchValue] = useState('')
 
   async function fetchGridData(options = {}) {
     const response = await getRequest({
@@ -56,8 +52,6 @@ const GenerateMaterialPlaning = () => {
   const { formik } = useForm({
     maxAccess: access,
     initialValues: {
-      searchValue: '',
-      search: false,
       mrpId: '',
       items: []
     },
@@ -84,9 +78,6 @@ const GenerateMaterialPlaning = () => {
 
   const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)
 
-  useEffect(() => {
-    formik.values.search && setSearchValue(formik.values.searchValue)
-  }, [formik.values.search, formik.values.searchValue])
 
   const columns = [
     {
@@ -313,26 +304,6 @@ const GenerateMaterialPlaning = () => {
             reportName={'previewMRP'}
             filterBy={filterBy}
             hasSearch={false}
-            middleSection={
-              <Grid item xs={3}>
-                <CustomTextField
-                  name='search'
-                  label={platformLabels.Search}
-                  value={formik.values.searchValue}
-                  search
-                  onChange={e => {
-                    formik.setFieldValue('searchValue', e.target.value)
-                    formik.setFieldValue('search', e.target.value?.length > 0 ? false : true)
-                  }}
-                  onSearch={value => formik.setFieldValue('search', true)}
-                  onClear={() => {
-                    formik.setFieldValue('searchValue', '')
-                    formik.setFieldValue('search', true)
-                  }}
-                  maxAccess={access}
-                />
-              </Grid>
-            }
             rightSection={
               <ResourceComboBox
                 endpointId={IVReplenishementRepository.MatPlanning.qry}
@@ -353,14 +324,13 @@ const GenerateMaterialPlaning = () => {
         </Fixed>
         <Grow>
           <DataGrid
-            searchValue={searchValue}
             onChange={value => {
-              console.log(value)
               formik.setFieldValue('items', value)
             }}
             value={formik.values?.items}
             error={formik.errors.items}
             columns={columns}
+            enableFilters
             name='items'
             allowDelete={false}
             allowAddNewLine={false}

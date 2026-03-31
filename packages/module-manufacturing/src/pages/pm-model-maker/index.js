@@ -69,7 +69,11 @@ const ModelMaker = () => {
     {
       field: 'threeDPRef',
       headerName: labels.print,
-      flex: 1
+      flex: 1,
+      linkOpen: data => ({
+        resourceId: ResourceIds.ThreeDPrint,
+        props: { recordId: data?.threeDPId }
+      })
     },
     {
       field: 'laborRef',
