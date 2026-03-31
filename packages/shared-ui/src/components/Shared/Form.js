@@ -107,6 +107,11 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
           const aria = target.getAttribute('aria-label') || ''
           if (role === 'textbox' && aria === 'rdw-editor') return
 
+          if (e.key === 'Escape' && isFilterField) {
+            e.preventDefault()
+            e.stopPropagation()
+            return
+          }
           if (e.key === 'Enter') {
             if (isSearchField || isFilterField || props.disabledSubmit) {
               return
