@@ -587,7 +587,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
       ...res.record,
       recordId,
       transfers: updatedTransfers,
-      notificationGroupId: formik.values.notificationGroupId
+      notificationGroupId: formik.values.notificationGroupId,
+      serials: serials?.current?.list
     })
   }
 
@@ -928,7 +929,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
         formik.setValues({
           ...res.record,
           transfers: updatedTransfers,
-          notificationGroupId: resNotification?.record?.notificationGroupId
+          notificationGroupId: resNotification?.record?.notificationGroupId,
+          serials: serials?.current?.list
         })
       }
     })()
