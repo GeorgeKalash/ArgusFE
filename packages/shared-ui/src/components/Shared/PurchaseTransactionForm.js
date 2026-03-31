@@ -2281,7 +2281,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                   readOnly={isPosted}
                   iconKey={cycleButtonState.text}
                   handleButtonClick={handleButtonClick}
-                  ShowDiscountIcons={true}
                   onChange={e => {
                     let discount = Number(e.target.value.replace(/,/g, ''))
                     if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {

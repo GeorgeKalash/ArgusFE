@@ -2390,7 +2390,6 @@ export default function SaleTransactionForm({
                     readOnly={isPosted}
                     handleButtonClick={handleButtonClick}
                     iconKey={cycleButtonState.text}
-                    ShowDiscountIcons={true}
                     onChange={e => {
                       let discount = Number(e.target.value.replace(/,/g, ''))
                       if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
