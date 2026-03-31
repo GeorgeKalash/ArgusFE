@@ -48,11 +48,12 @@ const CustomLookup = ({
   onBlur = () => {},
   onFocus = () => {},
   linkOpen,
+  maxAccess,
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(
     fullName,
-    props.maxAccess,
+    maxAccess,
     required,
     readOnly,
     hidden
@@ -69,6 +70,8 @@ const CustomLookup = ({
   const textMeasureRef = useRef(null)
 
   const [inputValue, setInputValue] = useState(firstValue || '')
+
+  const isReadOnly = !!_readOnly
 
   useEffect(() => {
     function handleBlur(event) {
@@ -304,7 +307,7 @@ const CustomLookup = ({
 
                     inputElRef.current = node
                   },
-                  tabIndex: _readOnly ? -1 : 0,
+                  tabIndex: isReadOnly ? -1 : 0,
                   style: {
                     ...(params.inputProps?.style || {}),
                     ...(linkOpen && hasSelectedValue ? linkStyle : {})
@@ -329,7 +332,7 @@ const CustomLookup = ({
                       : inputs.outlinedNoBorder,
                     input: inputs.inputBase
                   },
-                  endAdornment: !_readOnly && (
+                  endAdornment: !isReadOnly && (
                     <InputAdornment position="end" className={inputs.inputAdornment}>
                       {!isLoading ? (
                         <IconButton edge="start" className={inputs.iconButton} tabIndex={-1}>
@@ -364,8 +367,8 @@ const CustomLookup = ({
               />
             )
           }}
-          readOnly={_readOnly}
-          freeSolo={_readOnly || freeSolo}
+          readOnly={isReadOnly}
+          freeSolo={isReadOnly || freeSolo}
           disabled={disabled}
         />
       </Grid>
@@ -392,9 +395,9 @@ const CustomLookup = ({
                 input: inputs.inputBase
               },
               inputProps: {
-                tabIndex: _readOnly || secondField?.editable === '' ? -1 : 0
+                tabIndex: isReadOnly || secondField?.editable === '' ? -1 : 0
               },
-              readOnly: secondField ? !secondField.editable : _readOnly
+              readOnly: secondField ? !secondField.editable : isReadOnly
             }}
             className={secondDisplayField && styles.secondField}
             error={error}
