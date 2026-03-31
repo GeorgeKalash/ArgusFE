@@ -5,7 +5,7 @@ import styles from './PageError.module.css'
 import CustomButton from '../../Inputs/CustomButton'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
-const PageError = ({ onClose, message, height = '', spacing }) => {
+const PageError = ({ onClose, message, height = '', spacing ,centerToScreen}) => {
   const { width } = useWindowDimensions()
 
   const scaleFactor = (() => {
@@ -46,6 +46,7 @@ const PageError = ({ onClose, message, height = '', spacing }) => {
       controlled={true}
       isLoading={false}
       refresh={false}
+      centerToScreen={centerToScreen}
     >
       <DialogContent className={styles.dialogContent} style={{ '--sf': scaleFactor }}>
         <p className={styles.errorMessageText}>{errorMessage}</p>

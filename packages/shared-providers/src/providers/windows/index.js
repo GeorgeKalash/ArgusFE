@@ -42,7 +42,6 @@ function getWindowDimensions(width, height, spacing = true) {
 }
 
 export function WindowProvider({ children }) {
-  console.log('render window')
   const [stack, setStack] = useState([])
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [rerenderFlag, setRerenderFlag] = useState(false)

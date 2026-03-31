@@ -67,12 +67,12 @@ const Window = React.memo(
     disabledApply,
     isLoading = true,
     spacing = true,
+    centerToScreen = false,
     ...props
   }) => {
     const { settings } = useSettings()
     const { navCollapsed } = settings
     const { loading } = useContext(RequestsContext)
-
     const paperRef = useRef(null)
     const [dragPos, setDragPos] = useState({ x: 0, y: 0 })
     const [restoreState, setRestoreState] = useState({
@@ -147,6 +147,12 @@ const Window = React.memo(
     const scaledHeight = expanded
       ? containerHeight
       : Math.max(120, height * scaleFactor)
+      
+    const baseWidth = centerToScreen ? screenWidth : availableWidth
+    const baseHeight = centerToScreen ? screenHeight : availableHeight
+
+    const x = (baseWidth - scaledWidth) / 2
+    const y = (baseHeight - scaledHeight) / 2
 
     useEffect(() => {
       if (paperRef.current) paperRef.current.focus()
@@ -163,6 +169,15 @@ const Window = React.memo(
       document.body.style.overflow = minimized || expanded ? 'hidden' : ''
       return () => (document.body.style.overflow = '')
     }, [minimized, expanded])
+
+    useEffect(() => {
+      if (centerToScreen && !expanded && !minimized) {
+        setDragPos({
+          x: Math.max(0, x),
+          y: Math.max(0, y)
+        })
+      }
+    }, [centerToScreen, x, y, expanded, minimized])
 
     const handleExpandToggle = () => {
       if (!expanded) {
@@ -203,17 +218,30 @@ const Window = React.memo(
         <Box
           className={styles.parentBox}
           style={{
-            width: spacing ? containerWidth : '100vw',
-            height: spacing ? containerHeight : '100vh',
-            alignItems: minimized ? 'flex-end' : 'center'
+            width: centerToScreen ? '100vw' : (spacing ? containerWidth : '100vw'),
+            height: centerToScreen ? '100vh' : (spacing ? containerHeight : '100vh'),
+            alignItems: minimized
+              ? 'flex-end'
+              : centerToScreen
+              ? 'flex-start'
+              : 'center',
+            ...(centerToScreen && {
+              position: 'fixed',
+              justifyContent: 'flex-start',
+              zIndex: 1300,
+            }),
           }}
           onKeyDown={e => e.key === 'Escape' && closable && onClose()}
         >
           <Draggable
             handle="#draggable-dialog-title"
             cancel=".no-drag"
-            bounds="parent"
-            position={minimized || expanded ? { x: 0, y: 0 } : dragPos} //it seems the problem here
+            bounds={centerToScreen ? false : 'parent'}
+            position={
+              centerToScreen
+                ? dragPos
+                : (minimized || expanded ? { x: 0, y: 0 } : dragPos)
+            }
             disabled={minimized || expanded || !draggable}
             onStop={(_, data) => {
               if (!expanded && !minimized) setDragPos({ x: data.x, y: data.y })
