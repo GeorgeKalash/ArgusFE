@@ -76,6 +76,18 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
                 }
               })
         }}
+        onKeyDownCapture={e => {
+          const activeEl = document.activeElement
+          const isFocusedFilterInput =
+            activeEl?.classList?.contains('ag-text-field-input') &&
+            activeEl?.closest?.('.ag-floating-filter')
+
+          if (e.key === 'Escape' && isFocusedFilterInput) {
+            e.preventDefault()
+            e.stopPropagation()
+            e.nativeEvent?.stopImmediatePropagation?.()
+          }
+        }}
         onKeyDown={e => {
           const target = e.target
 
@@ -90,6 +102,12 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
             !props.isClosed &&
             !props.disabledSubmit
           ) {
+            if (isFilterField) {
+              e.preventDefault()
+              e.stopPropagation()
+              return
+            }
+            
             e.preventDefault()
             if (props?.onSave) {
               props.onSave()
@@ -107,11 +125,6 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
           const aria = target.getAttribute('aria-label') || ''
           if (role === 'textbox' && aria === 'rdw-editor') return
 
-          if (e.key === 'Escape' && isFilterField) {
-            e.preventDefault()
-            e.stopPropagation()
-            return
-          }
           if (e.key === 'Enter') {
             if (isSearchField || isFilterField || props.disabledSubmit) {
               return
