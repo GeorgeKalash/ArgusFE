@@ -26,15 +26,17 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { useError } from '@argus/shared-providers/src/providers/error'
 import JTCheckoutForm from '@argus/shared-ui/src/components/Shared/Forms/JTCheckoutForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
-  const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults, systemDefaults } = useContext(DefaultsContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  
-  const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
-  const max_btfr_lines_allowed = parseInt(defaultsData?.list?.find(obj => obj.key === 'max_btfr_lines_allowed')?.value) || null
+
+  const workCenterId = parseInt(userDefaults?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
+  const max_btfr_lines_allowed = parseInt(systemDefaults?.list?.find(obj => obj.key === 'max_btfr_lines_allowed')?.value) || null
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BatchTransfer,
@@ -199,7 +201,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
         mapping: [
           { from: 'recordId', to: 'jobId' },
           { from: 'reference', to: 'jobRef' },
-          { from: 'itemName', to: 'itemName' }
+          { from: 'itemName', to: 'itemName' },
+          { from: 'itemCategoryName', to: 'itemCategoryName' }
         ],
         displayFieldWidth: 4,
         readOnly: !formik.values?.header?.fromWCId
@@ -211,6 +214,24 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           extension: ManufacturingRepository.JobWorkCenter.verify,
           parameters: `_jobOrderId=${newRow?.jobId}&_toWcId=${formik.values?.header?.toWCId}`
         })
+
+        if (res2?.error) {
+          update({
+            jobId: null,
+            jobRef: '',
+            itemName: '',
+            itemId: null,
+            sku: '',
+            itemGroupName: '',
+            categoryName: '',
+            pcs: 0,
+            qty: 0,
+            jobPcs: 0,
+            jobQty: 0
+          })
+
+          return
+        }
 
         const res3 = await getRequest({
           extension: ManufacturingRepository.JobWorkCenter.get,
@@ -224,6 +245,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           itemId: res2.record?.itemId || null,
           sku: res2.record?.sku || '',
           itemGroupName: res2.record?.itemGroupName || '',
+          categoryName: newRow?.itemCategoryName || '',
           pcs: res3.record?.pcs || 0,
           qty: res3.record?.qty || 0,
           jobPcs: res3.record?.pcs || 0,
@@ -243,6 +265,15 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.itemCategoryName,
+      name: 'categoryName',
       flex: 2,
       props: {
         readOnly: true

@@ -49,14 +49,15 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
   const filteredMeasurements = useRef([])
@@ -72,7 +73,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   useSetWindow({ title: labels.salesOrder, window })
 
-  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+  const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesOrder,
@@ -200,6 +201,11 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
+       sourceNo: yup.string().nullable().test( function (value) {
+        const { sourceId } = this.parent
+        return !(sourceId && !value)
+        }
+      ),
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
@@ -1208,7 +1214,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     const systemKeys = ['siteId', 'salesTD', 'plId']
     const userKeys = ['plantId', 'siteId', 'spId']
 
-    const systemObject = (defaultsData?.list || []).reduce((acc, { key, value }) => {
+    const systemObject = (systemDefaults?.list || []).reduce((acc, { key, value }) => {
       if (systemKeys.includes(key)) {
         acc[key] = value === 'True' || value === 'False' ? value : value ? parseInt(value) : null
       }
@@ -1216,7 +1222,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       return acc
     }, {})
 
-    const userObject = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+    const userObject = (userDefaults?.list || []).reduce((acc, { key, value }) => {
       if (userKeys.includes(key)) {
         acc[key] = value ? parseInt(value) : null
       }
@@ -1664,6 +1670,45 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     label={labels.overdraft}
                     maxAccess={access}
                   />
+                </Grid>
+                <Grid item container spacing={2}>
+                  <Grid item xs={6}>
+                    <ResourceComboBox
+                      endpointId={SaleRepository.SalesOrder.pack}
+                      reducer={response => response?.record?.sources}
+                      name='sourceId'
+                      label={labels.source}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      readOnly={isClosed}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      value={formik.values.sourceId}
+                      values={formik.values}
+                      displayFieldWidth={1.5}
+                      maxAccess={maxAccess}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('sourceNo', null)
+                        formik.setFieldValue('sourceId', newValue?.recordId || null)
+                      }}
+                      error={formik.touched.sourceId && Boolean(formik.errors.sourceId)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomTextField
+                      name='sourceNo'
+                      label={labels.sourceNo}
+                      value={formik.values.sourceNo}
+                      maxLength={20}
+                      onChange={formik.handleChange}
+                      readOnly={!formik.values.sourceId || isClosed}
+                      required={formik.values.sourceId}
+                      maxAccess={maxAccess}
+                      error={formik.touched.sourceNo && Boolean(formik.errors.sourceNo)}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>

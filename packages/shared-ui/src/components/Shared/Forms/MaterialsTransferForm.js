@@ -31,10 +31,12 @@ import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const filteredMeasurements = useRef([])
@@ -53,8 +55,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
     access,
     enabled: !recordId
   })
-  const siteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = userDefaults?.list?.find(({ key }) => key === 'siteId')
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const initialValues = {
     recordId: null,
@@ -409,6 +411,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
             unitCost,
             totalCost,
             msId: itemInfo?.msId,
+            caName: itemInfo?.categoryName,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
             metalId,
@@ -421,6 +424,14 @@ export default function MaterialsTransferForm({ recordId, window }) {
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.categoryName,
+      name: 'caName',
       props: {
         readOnly: true
       }
@@ -1160,6 +1171,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
+            initialValues={formik?.initialValues?.transfers[0]}
+            enableFilters
             name='transfers'
             maxAccess={maxAccess}
             showCounterColumn={true}
@@ -1225,5 +1238,5 @@ export default function MaterialsTransferForm({ recordId, window }) {
   )
 }
 
-MaterialsTransferForm.width = 1000
+MaterialsTransferForm.width = 1200
 MaterialsTransferForm.height = 680

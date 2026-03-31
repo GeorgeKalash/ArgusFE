@@ -116,14 +116,14 @@ export default function AccountSummary({ accountId, date, window }) {
       return 
     }
 
-    const currencies = [...new Set(agingProfiles.map(i => i.currencyRef).filter(Boolean))]
+    const currencies = res?.record?.currencies || []
 
     const dynamicColumns = [...baseColumns]
 
     currencies.forEach((cur, index) => {
       dynamicColumns.push({
         field: `column${index + 1}`,
-        headerName: cur,
+        headerName: cur.reference,
         width: 110,
         type: 'number'
       })
@@ -131,17 +131,18 @@ export default function AccountSummary({ accountId, date, window }) {
 
     formik.setFieldValue('columns', dynamicColumns)
 
-    const agingRows = [...new Map(agingProfiles.filter(i => i.seqDays !== -1).map(i => [i.seqDays, i])).values()].sort(
-      (a, b) => a.seqDays - b.seqDays
-    )
+    const agingLegs = res?.record?.agingLegs || []
 
+    const agingRows = agingLegs.sort((a, b) => a.days - b.days)
     const rows = agingRows.map(row => {
-      const rowObject = { days: Number(row.seqDays).toLocaleString() }
+      const rowObject = { days: Number(row.days).toLocaleString() }
 
       currencies.forEach((cur, index) => {
-        const value = agingProfiles
-          .filter(i => i.seqDays === row.seqDays && i.currencyRef === cur)
-          .reduce((sum, i) => sum + Number(i.amount || 0), 0)
+        const profile = agingProfiles.find(
+          p => p.seqDays === row.days && p.currencyRef === cur.reference
+        )
+
+        const value = profile ? Number(profile.amount || 0) : 0
 
         rowObject[`column${index + 1}`] = value.toFixed(2)
       })
@@ -154,12 +155,12 @@ export default function AccountSummary({ accountId, date, window }) {
     }
 
     currencies.forEach((cur, index) => {
-      const total = agingProfiles.some(i => i.seqDays === -1 && i.currencyRef === cur)
+      const total = agingProfiles.some(i => i.seqDays === -1 && i.currencyRef === cur.reference)
         ? agingProfiles
-            .filter(i => i.seqDays === -1 && i.currencyRef === cur)
+            .filter(i => i.seqDays === -1 && i.currencyRef === cur.reference)
             .reduce((s, i) => s + Number(i.amount || 0), 0)
         : agingProfiles
-            .filter(i => i.seqDays !== -1 && i.currencyRef === cur)
+            .filter(i => i.seqDays !== -1 && i.currencyRef === cur.reference)
             .reduce((s, i) => s + Number(i.amount || 0), 0)
 
       totalRow[`column${index + 1}`] = total.toFixed(2)

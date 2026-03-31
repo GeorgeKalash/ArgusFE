@@ -153,6 +153,9 @@ export const ManufacturingRepository = {
     wip: service + 'wipJOB',
     sync: service + 'syncJOB'
   },
+  GenerateAMC:{
+    generate: service + 'generateAMC'
+  },
   ProductionSheet: {
     page: service + 'pagePST',
     qry: service + 'qryPST',
@@ -444,7 +447,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotDIS',
     get: service + 'getDIS',
     set2: service + 'set2DIS',
-    del: service + 'delDIS'
+    del: service + 'delDIS',
+    post: service + 'postDIS'
   },
   DisposalItem: {
     qry: service + 'qryDII'

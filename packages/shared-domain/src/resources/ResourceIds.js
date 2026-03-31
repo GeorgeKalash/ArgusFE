@@ -271,6 +271,7 @@ export const ResourceIds = {
   SalesZoneLevels: 51111,
   Client: 51202,
   SalesOrder: 51302,
+  SalesOrderSource: 51120,
   Drivers: 52201,
   Vehicle: 52202,
   SecurityGroupsFilter: 90101,
@@ -488,6 +489,7 @@ export const ResourceIds = {
   FIBalanceTfr: 31317,
   CorrespondentDispersalRate: 36138,
   SyncMFTrx: 42316,
+  GenerateAMC: 42711,
   AccountSummary: 31600,
   PhysicalCountSerialDetail: 44203,
   PhysicalCountSerialDetail: 44203,
@@ -611,6 +613,7 @@ export const ResourceIds = {
   AlloyMetals: 47103,
   SmeltingScrapItems: 47106,
   MetalSmeltingDTD: 47104,
+  MetalCalibrationDTD: 47602,
   ItemDisposal: 42349,
   PayrollHeader: 75301,
   GeneratePayroll: 75501,
@@ -625,6 +628,8 @@ export const ResourceIds = {
   ItemDetails: 41607,
   PaymentOrderDTD: 31622,
   PurchaseOrderDTD: 50109,
+  AccountReconciliations: 40315,
+  Reconciliation: 31332,
 
   // GL
   GLSalesInvoice: 51604,
@@ -671,6 +676,7 @@ export const ResourceIds = {
   GLMetalCalibration: 47601,
   GLWorkOrder: 45600,
   GLPayrollList: 75600,
+  GLItemDisposal: 42610,
 
   //MCR
   MCRSalesInvoice: 51607,

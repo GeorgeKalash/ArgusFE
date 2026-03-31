@@ -13,10 +13,10 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { Grid } from '@mui/material'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import SegmentForm from './form/SegmentForm'
 import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const Segments = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -24,6 +24,7 @@ const Segments = () => {
   const [data, setData] = useState([])
   const [store, setStore] = useState([])
   const { stack: stackError } = useError()
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const { stack } = useWindow()
 
@@ -115,38 +116,31 @@ const Segments = () => {
   }
 
   useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: '_filter=GLACSeg'
-      })
+    if (!systemDefaults?.list) return
 
-      if (res && res.list) {
-        const filteredList = res.list
-          .filter(item => item.key.startsWith('GLACSegName') && item.value !== null)
-          .map(item => {
-            const segKey = item.key.replace('Name', '')
-            const matchingSeg = res.list.find(seg => seg.key === segKey && seg.value !== null)
-            if (matchingSeg) {
-              return {
-                key: item.value,
-                value: item.key.split('GLACSegName')[1]
-              }
-            }
-
-            return null
-          })
-          .filter(Boolean)
-
-        setStore(filteredList)
-
-        if (filteredList.length > 0) {
-          formik.setFieldValue('segmentName', filteredList[0].key)
-          formik.setFieldValue('segmentId', filteredList[0].value)
+    const filteredList = systemDefaults.list
+      .filter(item => item.key.startsWith('GLACSegName') && item.value)
+      .map(item => {
+        const segKey = item.key.replace('Name', '')
+        const matchingSeg = systemDefaults.list.find(seg => seg.key === segKey && seg.value !== null)
+        if (matchingSeg) {
+          return {
+            key: item.value,
+            value: item.key.split('GLACSegName')[1]
+          }
         }
-      }
-    })()
-  }, [])
+
+        return null
+      })
+      .filter(Boolean)
+
+    setStore(filteredList)
+
+    if (filteredList.length > 0) {
+      formik.setFieldValue('segmentName', filteredList[0].key)
+      formik.setFieldValue('segmentId', filteredList[0].value)
+    }
+  }, [systemDefaults])
 
   return (
     <VertLayout>
@@ -158,14 +152,12 @@ const Segments = () => {
           middleSection={
             <Grid item sx={{ display: 'flex', mr: 2 }}>
               <CustomComboBox
-                endpointId={SystemRepository.Defaults.qry}
-                parameters={`_filter=GLACSeg`}
+                store={store}
                 sx={{ width: 450 }}
                 name='segmentName'
                 label={_labels.segment}
                 valueField='key'
                 displayField='key'
-                store={store}
                 value={formik.values.segmentName}
                 required
                 onChange={(event, newValue) => {

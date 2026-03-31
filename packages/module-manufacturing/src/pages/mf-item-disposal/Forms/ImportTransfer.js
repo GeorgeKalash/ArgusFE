@@ -10,14 +10,13 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
-export default function ImportTransfer({ maxAccess, labels, form, window }) {
+export default function ImportTransfer({ maxAccess, labels, form, window, triggerReCal }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
 
   const { formik } = useForm({
     initialValues: {
-      materialsTfr: '',
-      wcSiteId: parseInt(form?.values?.header?.wcSiteId) || null
+      materialsTfr: ''
     },
     maxAccess,
     validationSchema: yup.object({
@@ -25,9 +24,24 @@ export default function ImportTransfer({ maxAccess, labels, form, window }) {
     }),
     onSubmit: async obj => {
       if (!obj.materialsTfr) return
+
       const importedItems = await isValidTfr(obj?.materialsTfr)
+
       if (importedItems.some(item => item?.itemId)) {
-        form.setFieldValue('items', importedItems)
+        const currentItems = form?.values?.items || []
+
+        const validCurrentItems = currentItems.filter(item => item?.itemId)
+        const validImportedItems = importedItems.filter(item => item?.itemId)
+
+        const appendedItems = [...validCurrentItems, ...validImportedItems].map((item, index) => ({
+          ...item,
+          id: index + 1
+        }))
+
+        form.setFieldValue('items', appendedItems)
+
+        if (typeof triggerReCal === 'function') triggerReCal()
+
         window.close()
       } else formik.setFieldValue('materialsTfr', '')
     }
@@ -67,10 +81,6 @@ export default function ImportTransfer({ maxAccess, labels, form, window }) {
     const errors = [
       { condition: record?.header?.status != 3, message: labels.postedError },
       { condition: !record?.header?.toSiteId, message: labels.mandatorySite },
-      {
-        condition: !formik?.values?.wcSiteId || record?.header?.toSiteId != formik?.values?.wcSiteId,
-        message: labels.siteMismatch
-      }
     ]
 
     for (const err of errors) {
@@ -100,7 +110,8 @@ export default function ImportTransfer({ maxAccess, labels, form, window }) {
             ...item,
             id: index + 1,
             serials: list,
-            serialCount: list.length
+            serialCount: list.length,
+            totalCost: parseFloat(parseFloat(item.qty) * item.unitCost).toFixed(2),
           }
         })
       : form?.values?.items || []

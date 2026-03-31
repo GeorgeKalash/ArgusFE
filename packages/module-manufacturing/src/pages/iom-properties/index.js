@@ -11,10 +11,12 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
 import toast from 'react-hot-toast'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const IomProperties = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const [propertyStore, setPropertyStore] = useState([])
 
   const { labels, access } = useResourceQuery({
@@ -35,41 +37,36 @@ const IomProperties = () => {
       })
 
       toast.success(platformLabels.Edited)
-      updateDefaults(data)
+      updateSystemDefaults(data)
     }
   })
 
   useEffect(() => {
-    ;(async function () {
-      const dimensions = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: `_filter=ivtDimension`
+    if (!systemDefaults?.list) return
+
+    const items = systemDefaults.list
+      .filter(item => item.key?.startsWith('ivtDimension') && item.value)
+      .map(item => {
+        const match = item.key?.match(/^ivtDimension(\d{1,2})$/)
+        if (match) {
+          return {
+            ...item,
+            recordId: parseInt(match[1]),
+            name: item.value
+          }
+        }
+
+        return item
       })
 
-      const items = (dimensions?.list || [])
-        .filter(item => item.value !== '')
-        .map(item => {
-          const match = item.key?.match(/^ivtDimension(\d{1,2})$/)
-          if (match) {
-            return {
-              ...item,
-              recordId: parseInt(match[1]),
-              name: item.value
-            }
-          }
-
-          return item
-        })
-
-      setPropertyStore(items || [])
-    })()
-  }, [])
+    setPropertyStore(items || [])
+  }, [systemDefaults])
 
   useEffect(() => {
     const keys = ['mfimd1', 'mfimd2']
 
     const myObject =
-      defaultsData?.list?.reduce((acc, obj) => {
+      systemDefaults?.list?.reduce((acc, obj) => {
         if (keys.includes(obj.key)) {
           acc[obj.key] = obj.value ? parseInt(obj.value) : null
         }
