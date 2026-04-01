@@ -297,14 +297,7 @@ const FinancialStatements = () => {
               display: 'flex',
               alignItems: 'center',
               gap: 2,
-              px: 1,
-              py: 1,
-              '& .MuiFormControlLabel-root': {
-                flex: '0 0 auto',
-                width: 'auto',
-                margin: 0,
-                whiteSpace: 'nowrap'
-              }
+              p: 1
             }}
           >
             {toggleableColumns.map(col => (
