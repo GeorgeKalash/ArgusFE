@@ -47,6 +47,7 @@ const CustomComboBox = ({
   onBlur = () => {},
   linkOpen,
   maxAccess,
+  onClear,
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
