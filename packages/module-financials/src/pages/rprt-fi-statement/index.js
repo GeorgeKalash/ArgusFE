@@ -17,6 +17,7 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 const FinancialStatements = () => {
   const { getRequest } = useContext(RequestsContext)
   const [columnVisibility, setColumnVisibility] = useState({})
+  const [availableCheckboxes, setAvailableCheckboxes] = useState({})
   const { stack } = useWindow()
 
   const [columnLabels, setColumnLabels] = useState({
@@ -157,12 +158,15 @@ const FinancialStatements = () => {
       })
 
       if (res?.record) {
-        setColumnVisibility({
+        const visibilityFromFS = {
           baseAmount: !!res.record.showBaseAmount,
           baseFiatAmount: !!res.record.showFiatCurrencyAmount,
           reportingMetalAmount: !!res.record.showMetalCurrencyAmount,
           currentRateBaseAmount: !!res.record.showCurrentRateBaseAmount
-        })
+        }
+
+        setColumnVisibility(visibilityFromFS)
+        setAvailableCheckboxes(visibilityFromFS)
       }
     }
 
@@ -231,22 +235,22 @@ const FinancialStatements = () => {
 
   const toggleableColumns = [
     {
-      field: 'currentRateBaseAmount',
-      label: columnLabels.currentRateBaseAmount 
+      field: 'baseAmount',
+      label: columnLabels.baseAmount 
     },
     {
       field: 'baseFiatAmount',
       label: columnLabels.baseFiatAmount 
     },
     {
-      field: 'baseAmount',
-      label: columnLabels.baseAmount 
-    },
-    {
       field: 'reportingMetalAmount',
       label: columnLabels.reportingMetalAmount 
+    },
+    {
+      field: 'currentRateBaseAmount',
+      label: columnLabels.currentRateBaseAmount 
     }
-  ]
+  ].filter(col => availableCheckboxes[col.field] !== false)
 
   const hasCheckboxes =
     data?.length > 0 &&
