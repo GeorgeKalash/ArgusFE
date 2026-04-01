@@ -323,7 +323,7 @@ export const ResourceIds = {
   SalaryChangeReasonFilter: 71105,
   EmploymentStatusFilter: 71107,
   SponsorFilter: 71108,
-  AttendanceScheduleFilter: 72105,
+  AttendanceSchedule: 72105,
   IndemnityAccuralsFilter: 73101,
   LeaveScheduleFilter: 73103,
   PayrollFilter: 75201,
