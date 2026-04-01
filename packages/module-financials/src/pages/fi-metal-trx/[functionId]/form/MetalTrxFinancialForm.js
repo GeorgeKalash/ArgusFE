@@ -547,6 +547,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: true,
       onClick: 'onInventoryTransaction',
       disabled: !editMode || !isPosted
+    },
+    {
+      key: 'FI Trx',
+      condition: true,
+      onClick: 'onClickIT',
+      disabled: !editMode
     }
   ]
 
