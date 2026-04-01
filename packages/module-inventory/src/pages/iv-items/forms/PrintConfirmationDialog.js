@@ -11,7 +11,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 
-const PrintConfirmationDialog = forwardRef(({ window, Print, barcode }) => {
+const PrintConfirmationDialog = forwardRef(({ window, Print, barcode }, ref) => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
@@ -54,23 +54,29 @@ const PrintConfirmationDialog = forwardRef(({ window, Print, barcode }) => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Typography padding={4}>{platformLabels.printConfirmation}</Typography>
-          </Grid>
-          <div style={{ display: 'none' }}>
-            <div ref={printRef} style={{ padding: '20px' }}>
-              <p>{barcode}</p>
+    <div ref={ref}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography padding={4}>
+                {platformLabels.printConfirmation}
+              </Typography>
+            </Grid>
+
+            <div style={{ display: 'none' }}>
+              <div ref={printRef} style={{ padding: '20px' }}>
+                <p>{barcode}</p>
+              </div>
             </div>
-          </div>
-        </Grid>
-      </Grow>
-      <Fixed>
-        <WindowToolbar actions={actions} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+          </Grid>
+        </Grow>
+
+        <Fixed>
+          <WindowToolbar actions={actions} smallBox={true} />
+        </Fixed>
+      </VertLayout>
+    </div>
   )
 })
 
