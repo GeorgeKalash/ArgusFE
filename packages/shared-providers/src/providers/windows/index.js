@@ -110,7 +110,7 @@ export function WindowProvider({ children }) {
           minimizable
         }) => (
           <ClearContext.Provider
-            key={rerenderFlag}
+            key={id}
             value={{
               open: () => openWindow(id),
               clear() {
@@ -148,7 +148,6 @@ export function WindowProvider({ children }) {
             }}
           >
             <Window
-              key={id}
               Title={title}
               nextToTitle={nextToTitle}
               controlled
