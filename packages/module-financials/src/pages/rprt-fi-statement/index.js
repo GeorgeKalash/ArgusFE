@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react'
+import { Box } from '@mui/material'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -11,6 +12,7 @@ import { RGGeneralRepository } from '@argus/repositories/src/repositories/RGGene
 import { FinancialStatementRepository } from '@argus/repositories/src/repositories/FinancialStatementRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import PrintForm from './Form/PrintForm'
+import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 const FinancialStatements = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -23,6 +25,13 @@ const FinancialStatements = () => {
     reportingMetalAmount: '',
     currentRateBaseAmount: ''
   })
+
+  const handleColumnToggle = field => event => {
+    setColumnVisibility(prev => ({
+      ...prev,
+      [field]: event.target.checked
+    }))
+  }
 
   function formatFinancialData(groups) {
     const listSorted = []
@@ -220,6 +229,32 @@ const FinancialStatements = () => {
     hide: columnVisibility[col.field] === false
   }))
 
+  const toggleableColumns = [
+    {
+      field: 'currentRateBaseAmount',
+      label: columnLabels.currentRateBaseAmount 
+    },
+    {
+      field: 'baseFiatAmount',
+      label: columnLabels.baseFiatAmount 
+    },
+    {
+      field: 'baseAmount',
+      label: columnLabels.baseAmount 
+    },
+    {
+      field: 'reportingMetalAmount',
+      label: columnLabels.reportingMetalAmount 
+    }
+  ]
+
+  const hasCheckboxes =
+    data?.length > 0 &&
+    !!columnLabels.currentRateBaseAmount &&
+    !!columnLabels.baseFiatAmount &&
+    !!columnLabels.baseAmount &&
+    !!columnLabels.reportingMetalAmount
+
   const Print = rpbParams => {
     if (!data?.length) return
 
@@ -250,6 +285,38 @@ const FinancialStatements = () => {
           disablePrint={!data?.length}
         />
       </Fixed>
+
+      {hasCheckboxes && (
+        <Fixed>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              px: 1,
+              py: 1,
+              '& .MuiFormControlLabel-root': {
+                flex: '0 0 auto',
+                width: 'auto',
+                margin: 0,
+                whiteSpace: 'nowrap'
+              }
+            }}
+          >
+            {toggleableColumns.map(col => (
+              <Box key={col.field} sx={{ flex: '0 0 auto' }}>
+                <CustomCheckBox
+                  name={col.field}
+                  label={col.label}
+                  value={columnVisibility[col.field] !== false}
+                  onChange={handleColumnToggle(col.field)}
+                />
+              </Box>
+            ))}
+          </Box>
+        </Fixed>
+      )}
+
       {data?.length > 0 && (
         <Grow>
           <Table
