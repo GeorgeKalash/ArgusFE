@@ -111,6 +111,7 @@ const TabsProvider = ({ children }) => {
   const { dashboardId } = userDataParsed
   const userId = userDataParsed?.userId
   const open = Boolean(menuPosition)
+  const hasHomeTab = Boolean(dashboardId)
 
   const normalizeRoute = useCallback(route => {
     if (!route) return ''
@@ -189,16 +190,17 @@ const TabsProvider = ({ children }) => {
     route => {
       const normalizedRoute = normalizeRoute(route)
 
-      if (
-        normalizedRoute === '/default' ||
-        normalizedRoute === '/no-access'
-      ) {
+      if (normalizedRoute === '/no-access') {
         return true
+      }
+
+      if (normalizedRoute === '/default') {
+        return hasHomeTab
       }
 
       return routeExistsInTree(menu, normalizedRoute) || routeExistsInTree(gear, normalizedRoute)
     },
-    [menu, gear, routeExistsInTree, normalizeRoute]
+    [menu, gear, routeExistsInTree, normalizeRoute, hasHomeTab]
   )
 
   useEffect(() => {
@@ -269,11 +271,14 @@ const TabsProvider = ({ children }) => {
 
     const normalizedRoute = normalizeRoute(router.asPath)
 
-    if (
-      normalizedRoute === '/default' ||
-      normalizedRoute === '/no-access'
-    ) {
+    if (normalizedRoute === '/no-access') {
       redirectingRef.current = false
+      return
+    }
+
+    if (normalizedRoute === '/default' && !hasHomeTab) {
+      if (redirectingRef.current) return
+      redirectingRef.current = true
       return
     }
 
@@ -285,7 +290,7 @@ const TabsProvider = ({ children }) => {
     }
 
     redirectingRef.current = false
-  }, [router.asPath, menu, gear, isAllowedRoute, navigateTo, normalizeRoute, shouldManageTabs])
+  }, [router.asPath, menu, gear, isAllowedRoute, navigateTo, normalizeRoute, shouldManageTabs, hasHomeTab])
 
   const handleChange = useCallback(
     async (_, newValue) => {
@@ -317,32 +322,54 @@ const TabsProvider = ({ children }) => {
   )
 
   const handleCloseAllTabs = useCallback(async () => {
-    const firstTab = openTabs?.[0]
-    if (!firstTab) return
-
     closingRouteRef.current = normalizeRoute(router.asPath)
 
-    setOpenTabs([firstTab])
-    setCurrentTabIndex(0)
+    if (hasHomeTab) {
+      const homeTab = openTabs?.find(tab => normalizeRoute(tab.route) === '/default')
+      if (!homeTab) return
 
-    if (normalizeRoute(router.asPath) !== normalizeRoute(firstTab.route)) {
-      await navigateTo(firstTab.route)
+      setOpenTabs([homeTab])
+      setCurrentTabIndex(0)
+
+      if (normalizeRoute(router.asPath) !== normalizeRoute(homeTab.route)) {
+        await navigateTo(homeTab.route)
+      }
+    } else {
+      setOpenTabs([])
+      setCurrentTabIndex(0)
+
+      if (normalizeRoute(router.asPath) !== '/') {
+        await navigateTo('/')
+      }
     }
 
     queueMicrotask(() => {
       closingRouteRef.current = null
     })
-  }, [openTabs, navigateTo, normalizeRoute, router.asPath, setOpenTabs, setCurrentTabIndex])
+  }, [openTabs, hasHomeTab, navigateTo, normalizeRoute, router.asPath, setOpenTabs, setCurrentTabIndex])
 
   const handleCloseOtherTab = useCallback(
     async tabIndex => {
-      const homeTab = openTabs?.[0]
       const selectedTab = openTabs?.[tabIndex]
-      if (!homeTab || !selectedTab) return
+      if (!selectedTab) return
 
-      const isHomeTabSelected = normalizeRoute(selectedTab.route) === normalizeRoute(homeTab.route)
-      const newOpenTabs = openTabs.filter((tab, index) => index === 0 || index === tabIndex)
-      const newIndex = isHomeTabSelected ? 0 : newOpenTabs.length - 1
+      let newOpenTabs
+      let newIndex
+
+      if (hasHomeTab) {
+        const homeTab = openTabs.find(tab => normalizeRoute(tab.route) === '/default')
+        if (!homeTab) return
+
+        const isHomeTabSelected = normalizeRoute(selectedTab.route) === normalizeRoute(homeTab.route)
+        newOpenTabs = openTabs.filter(tab => {
+          const normalized = normalizeRoute(tab.route)
+          return normalized === '/default' || normalized === normalizeRoute(selectedTab.route)
+        })
+        newIndex = isHomeTabSelected ? 0 : newOpenTabs.findIndex(tab => normalizeRoute(tab.route) === normalizeRoute(selectedTab.route))
+      } else {
+        newOpenTabs = [selectedTab]
+        newIndex = 0
+      }
 
       closingRouteRef.current = normalizeRoute(router.asPath)
 
@@ -357,7 +384,7 @@ const TabsProvider = ({ children }) => {
         closingRouteRef.current = null
       })
     },
-    [openTabs, navigateTo, normalizeRoute, router.asPath, setOpenTabs, setCurrentTabIndex]
+    [openTabs, hasHomeTab, navigateTo, normalizeRoute, router.asPath, setOpenTabs, setCurrentTabIndex]
   )
 
   const closeTab = useCallback(
@@ -369,23 +396,20 @@ const TabsProvider = ({ children }) => {
       const index = currentTabs.findIndex(tab => normalizeRoute(tab.route) === normalizedTabRoute)
 
       if (index === -1) return
-      if (currentTabs.length <= 1) return
 
       const nextTabs = currentTabs.filter(tab => normalizeRoute(tab.route) !== normalizedTabRoute)
-      const homeTab = nextTabs.find(tab => normalizeRoute(tab.route) === '/default') || null
       const isClosingCurrentTab = normalizeRoute(router.asPath) === normalizedTabRoute
-      const isOnlyHomeLeft = nextTabs.length === 1 && homeTab !== null
 
       if (isClosingCurrentTab) {
         closingRouteRef.current = normalizedTabRoute
       }
 
-      if (isOnlyHomeLeft) {
-        setOpenTabs(nextTabs)
+      if (nextTabs.length === 0) {
+        setOpenTabs([])
         setCurrentTabIndex(0)
 
-        if (homeTab && normalizeRoute(router.asPath) !== normalizeRoute(homeTab.route)) {
-          await navigateTo(homeTab.route)
+        if (normalizeRoute(router.asPath) !== '/') {
+          await navigateTo('/')
         }
 
         if (isClosingCurrentTab) {
@@ -508,7 +532,7 @@ const TabsProvider = ({ children }) => {
   }, [openTabs, currentTabIndex, reloadOpenedPage, reopenTab, shouldManageTabs])
 
   useEffect(() => {
-    if (!shouldManageTabs || initialLoadDone || !router.asPath || !(menu.length > 0 || dashboardId)) return
+    if (!shouldManageTabs || initialLoadDone || !router.asPath) return
 
     const normalizedRoute = normalizeRoute(router.asPath)
 
@@ -516,40 +540,58 @@ const TabsProvider = ({ children }) => {
       return
     }
 
-    const homeRoute = '/default/'
-    const homePage = pagesCacheRef.current.get(homeRoute) || (router.asPath === homeRoute ? children : null)
+    if (!dashboardId && normalizedRoute === '/default') {
+      setOpenTabs([])
+      setCurrentTabIndex(0)
+      setInitialLoadDone(true)
+      return
+    }
 
-    const newTabs = [
-      {
+    const newTabs = []
+
+    if (dashboardId) {
+      const homeRoute = '/default/'
+      const homePage = pagesCacheRef.current.get(homeRoute) || (router.asPath === homeRoute ? children : null)
+
+      newTabs.push({
         page: homePage,
         id: uuidv4(),
         route: homeRoute,
         label: 'Home'
-      }
-    ]
+      })
+    }
 
-    if (normalizedRoute !== '/default') {
+    if (
+      normalizedRoute !== '/default' ||
+      (normalizedRoute === '/default' && dashboardId)
+    ) {
       const currentPage =
         normalizedRoute === '/no-access'
           ? children || null
           : pagesCacheRef.current.get(router.asPath) || children || null
 
       if (
-        normalizedRoute === '/no-access' ||
-        isAllowedRoute(normalizedRoute)
-      ) {
-        newTabs.push({
-          page: currentPage,
-          id: uuidv4(),
-          route: router.asPath,
-          label:
-            normalizedRoute === '/no-access'
-              ? 'No Access'
-              : lastOpenedPage
-                ? lastOpenedPage.name
-                : findNode(menu, normalizedRoute) || findNode(gear, normalizedRoute),
-          resourceId: findResourceId(menu, normalizedRoute) || findResourceId(gear, normalizedRoute)
-        })
+          normalizedRoute === '/no-access' ||
+           isAllowedRoute(normalizedRoute)
+          ) {
+        const alreadyExists = newTabs.some(tab => normalizeRoute(tab.route) === normalizedRoute)
+
+        if (!alreadyExists) {
+          newTabs.push({
+            page: currentPage,
+            id: uuidv4(),
+            route: router.asPath,
+            label:
+              normalizedRoute === '/default'
+                ? 'Home'
+                : normalizedRoute === '/no-access'
+                  ? 'No Access'
+                  : lastOpenedPage
+                    ? lastOpenedPage.name
+                    : findNode(menu, normalizedRoute) || findNode(gear, normalizedRoute),
+            resourceId: findResourceId(menu, normalizedRoute) || findResourceId(gear, normalizedRoute)
+          })
+        }
       }
     }
 
@@ -573,7 +615,8 @@ const TabsProvider = ({ children }) => {
     normalizeRoute,
     findNode,
     findResourceId,
-    shouldManageTabs
+    shouldManageTabs,
+    navigateTo
   ])
 
   function unlockRecord(resourceId) {
