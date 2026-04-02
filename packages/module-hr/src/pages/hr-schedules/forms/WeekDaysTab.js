@@ -28,6 +28,16 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
     })
   }
 
+  function formatDuration(duration, firstIn, lastOut) {
+    let durationMins = parseInt(duration, 10)
+    let hours = Math.floor(durationMins / 60)
+    let mins = durationMins % 60
+
+    if (durationMins < 1440 && firstIn !== lastOut) return String(hours).padStart(2, '0') + ':' + String(mins).padStart(2, '0')
+    else if (firstIn === lastOut && firstIn !== '00:00') return '24:00'
+    else return '00:00'
+}
+
   const fetchGridData = async () => {
     const [weekDays, response] = await Promise.all([
         getWeekDays(),
@@ -43,7 +53,8 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
 
     const modifiedList = (response?.list || []).map(item => ({
         ...item,
-        dowName: weekDaysMap[item.dow] ||  null
+        dowName: weekDaysMap[item.dow] ||  null,
+        duration: formatDuration(item.duration, item.firstIn, item.lastOut)
     }))
 
     return {list: modifiedList || []}
@@ -83,7 +94,7 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
   ]
 
   const edit = (obj) => {
-    openForm(obj?.recordId)
+    openForm(obj?.dow)
   }
 
   const openForm = id => {
@@ -96,8 +107,8 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
         dayId: id,
         invalidate
       },
-      width: 500,
-      height: 400,
+      width: 600,
+      height: 450,
       title: labels.breakOfDay
     })
   }

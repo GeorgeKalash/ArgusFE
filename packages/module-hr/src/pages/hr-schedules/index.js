@@ -76,7 +76,7 @@ export default function Schedules(){
         recordId,
         maxAccess: access
       },
-      width: 600,
+      width: 800,
       height: 500,
       title: labels.schedule
     })
