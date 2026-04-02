@@ -46,6 +46,7 @@ import { LockedScreensProvider } from '@argus/shared-providers/src/providers/Loc
 import GlobalErrorHandlers from '@argus/shared-providers/src/providers/GlobalErrorHandlers'
 import RootBoundary from '@argus/shared-ui/src/components/Shared/RootBoundary'
 import { DefaultsProvider } from '@argus/shared-providers/src/providers/DefaultsContext'
+import 'mathlive'
 
 const clientSideEmotionCache = createEmotionCache()
 
