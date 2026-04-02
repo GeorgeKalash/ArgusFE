@@ -37,7 +37,7 @@ export default function DimensionsForm({ labels, maxAccess, id }) {
         record: JSON.stringify(obj)
       })
 
-      toast.success(!obj.id ? platformLabels.Added : platformLabels.Edited)
+      toast.success(!formik.values.recordId ? platformLabels.Added : platformLabels.Edited)
       formik.setFieldValue('recordId', obj.id)
 
       invalidate()
@@ -62,7 +62,7 @@ export default function DimensionsForm({ labels, maxAccess, id }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.Dimensions} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.Dimensions} form={formik} maxAccess={maxAccess} editMode={editMode} isCleared={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
