@@ -91,7 +91,7 @@ const Dimensions = () => {
           name='table'
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['id']}
           onEdit={edit}
           onDelete={del}
           pageSize={50}
