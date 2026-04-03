@@ -1,4 +1,4 @@
-import { getBottomNavigationActionUtilityClass, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -33,11 +33,13 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
     maxAccess,
     conditionSchema: ['items'],
     initialValues: {
-      scId: scheduleId,
-      dow: dayId,
-      dayTypeId: null,
-      firstIn: null,
-      lastOut: null,
+      header:{
+        scId: scheduleId,
+        dow: dayId,
+        dayTypeId: null,
+        firstIn: null,
+        lastOut: null
+      },
       items:[{
         scId: scheduleId,
         dow: dayId,
@@ -48,12 +50,14 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
       }]
     },
     validationSchema: yup.object({
-      dayTypeId: yup.string().required(),
-      firstIn: yup.string().required(),
-      lastOut: yup.string().required(),
-      items: yup.array().of(schema)
+      header: yup.object({
+        dayTypeId: yup.string().required(),
+        firstIn: yup.string().required(),
+        lastOut: yup.string().required(),
+        items: yup.array().of(schema)
+      })
     }),
-    onSubmit: async values => {
+    onSubmit: async values => {  
         const modifiedItems = values?.items
         .map((item, index) => {
             return {
@@ -61,12 +65,21 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
             seqNo: index + 1,
             scId: scheduleId,
             dow: dayId,
-            break: item?.break ? formatTimeToApi(item.break) : null,
             start: item?.start ? formatTimeToApi(item.start) : null,
             end: item?.end ? formatTimeToApi(item?.end) : null
             }
         })
         .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+
+        await postRequest({
+          extension: TimeAttendanceRepository.ScheduleDay.set,
+          record: JSON.stringify(
+            {
+              ...values?.header, 
+              firstIn: values?.header?.firstIn ? formatTimeToApi(values.header.firstIn) : null,
+              lastOut: values?.header?.lastOut ? formatTimeToApi(values.header.lastOut) : null
+            })
+        })
 
         await postRequest({
           extension: TimeAttendanceRepository.AttendanceBreakPack.set2,
@@ -89,25 +102,30 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
       parameters: `_scId=${scheduleId}&_dow=${dayId}`
     })
 
-    formik.setValues({...res?.record,
-      firstIn: res?.record?.firstIn ? dayjs(res.record.firstIn, 'HH:mm') : null,
-      lastOut: res?.record?.lastOut ? dayjs(res.record.lastOut, 'HH:mm') : null,
+    formik.setValues({
+      header: {
+        ...res?.record,
+        firstIn: res?.record?.firstIn ? dayjs(res.record.firstIn, 'HH:mm') : null,
+        lastOut: res?.record?.lastOut ? dayjs(res.record.lastOut, 'HH:mm') : null
+      },
       items: (periods?.list || []).map((item, index) => {
         return {
            ...item,
-           id: index++
+           id: index++,
+           start: item?.start ? dayjs(item.start, 'HH:mm') : null,
+           end: item?.end ? dayjs(item.end, 'HH:mm') : null
           }
         }
       )
     })
   }
+  console.log('formik',formik)
   
   const columns = [
     {
-      component: 'timepicker',
+      component: 'textfield',
       label: labels.break,
-      name: 'name',
-      props:{ use24Hour: true }
+      name: 'name'
     },
     {
       component: 'timepicker',
@@ -142,7 +160,7 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={TimeAttendanceRepository.DayTypes.qry}
-                name='dayTypeId'
+                name='header.dayTypeId'
                 label={labels.dayType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -150,40 +168,42 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
                 ]}
                 valueField='recordId'
                 displayField='name'
-                values={formik.values}
+                values={formik.values.header}
                 maxAccess={maxAccess}
                 required
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('dayTypeId', newValue?.recordId || '')
-                  formik.setFieldValue('isWorkingDay', newValue?.isWorkingDay || false)
+                  formik.setFieldValue('header.dayTypeId', newValue?.recordId || '')
+                  formik.setFieldValue('header.isWorkingDay', newValue?.isWorkingDay || false)
                 }}
-                error={formik.touched.dayTypeId && Boolean(formik.errors.dayTypeId)}
+                error={formik.touched?.header?.dayTypeId && Boolean(formik.errors?.header?.dayTypeId)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTimePicker
                 label={labels.firstIn}
-                name='firstIn'
+                name='header.firstIn'
                 required
-                value={formik.values.firstIn}
+                readOnly={!formik.values?.header?.isWorkingDay}
+                value={formik.values.header.firstIn}
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('firstIn', '')}
+                onClear={() => formik.setFieldValue('header.firstIn', '')}
                 use24Hour
                 maxAccess={maxAccess}
-                error={formik.touched.firstIn && Boolean(formik.errors.firstIn)}
+                error={formik.touched?.header?.firstIn && Boolean(formik.errors?.header?.firstIn)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTimePicker
                 label={labels.lastOut}
-                name='lastOut'
+                name='header.lastOut'
                 required
-                value={formik.values.lastOut}
+                readOnly={!formik.values?.header?.isWorkingDay}
+                value={formik.values.header.lastOut}
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('lastOut', '')}
+                onClear={() => formik.setFieldValue('header.lastOut', '')}
                 use24Hour
                 maxAccess={maxAccess}
-                error={formik.touched.lastOut && Boolean(formik.errors.lastOut)}
+                error={formik.touched?.header?.lastOut && Boolean(formik.errors?.header?.lastOut)}
               />
             </Grid>
           </Grid>
@@ -197,6 +217,8 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
             value={formik.values.items}
             error={formik.errors.items}
             maxAccess={maxAccess}
+            disabled={!formik.values?.header?.isWorkingDay}
+            allowDelete={formik.values?.header?.isWorkingDay}
          />
         </Grow>
       </VertLayout>

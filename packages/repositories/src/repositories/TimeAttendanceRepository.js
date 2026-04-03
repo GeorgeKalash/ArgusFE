@@ -87,7 +87,8 @@ export const TimeAttendanceRepository = {
   },
   ScheduleDay: {
     qry: service + 'qrySD',
-    get: service + 'getSD'
+    get: service + 'getSD',
+    set: service + 'setSD'
   },
   AttendanceBreakPack: {
     qry: service + 'qrySB',

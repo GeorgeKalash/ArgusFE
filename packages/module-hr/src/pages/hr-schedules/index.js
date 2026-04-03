@@ -12,6 +12,9 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import ScheduleWindow from './window/ScheduleWindow'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { Grid } from '@mui/material'
+import Employees from './forms/EmployeesForm'
 
 export default function Schedules(){
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -21,7 +24,6 @@ export default function Schedules(){
   const {
     query: { data },
     labels,
-    paginationParameters,
     invalidate,
     refetch,
     access
@@ -89,14 +91,30 @@ export default function Schedules(){
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access}  leftSection={
+            <Grid item xs={3}>
+               <CustomButton
+                  label={labels.employee}
+                  // onClick={  
+                  //   stack({
+                  //     Component: Employees,
+                  //     props: {
+                  //       labels,
+                  //       maxAccess: access
+                  //     },
+                  //     width: 800,
+                  //     height: 500,
+                  //     title: labels.schedule
+                  //   })}
+                />
+            </Grid>
+          }/>
       </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          paginationParameters={paginationParameters}
           paginationType='api'
           refetch={refetch}
           onEdit={edit}

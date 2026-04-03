@@ -94,22 +94,23 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
   ]
 
   const edit = (obj) => {
-    openForm(obj?.dow)
+    openForm(obj)
   }
 
-  const openForm = id => {
+  const openForm = obj => {
     stack({
       Component: WeekDaysForm,
       props: {
         labels,
         maxAccess,
         scheduleId: recordId,
-        dayId: id,
+        dayId: obj?.dow,
         invalidate
       },
       width: 600,
       height: 450,
-      title: labels.breakOfDay
+      title: labels.breakOfDay,
+      nextToTitle:` - ${obj?.dowName}`
     })
   }
 

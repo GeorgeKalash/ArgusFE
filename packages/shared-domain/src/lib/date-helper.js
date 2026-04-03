@@ -182,7 +182,7 @@ const formatDayId = dayId => {
 }
 
 const formatTimeToApi = time => {
-  return new Date('2026-04-01T22:00:00.000Z').toLocaleTimeString([], {
+  return new Date(time).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false
