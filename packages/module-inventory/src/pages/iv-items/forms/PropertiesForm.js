@@ -7,7 +7,6 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form.js'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { Grid } from '@mui/material'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import toast from 'react-hot-toast'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
@@ -15,7 +14,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 
 const PropertiesForm = ({ store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId } = store
+  const { recordId, dmgId, dmgName } = store
   const { systemDefaults } = useContext(DefaultsContext)
 
   const { platformLabels } = useContext(ControlContext)
@@ -24,72 +23,63 @@ const PropertiesForm = ({ store, maxAccess }) => {
   const [dimensionsUDT, setDimensionsUDT] = useState([])
 
   useEffect(() => {
-    if (recordId) {
-      const fetchDimension = async () => {
-        const filteredDimensions = systemDefaults?.list?.filter(
-          item => item.key.includes('ivtDimension') && item?.value?.length > 0
-        )
-        setDimensions(filteredDimensions)
-
-        const filteredDimensions2 = systemDefaults?.list?.filter(
-          item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item?.value?.length > 0
-        )
-        setDimensionsUDT(filteredDimensions2)
-      }
-
-      fetchDimension()
+    if (recordId && dmgId) {
+      const fetchDimension = getRequest({
+        extension: InventoryRepository.DimensionGroupElement.qry,
+        parameters: `_groupId=${dmgId}`
+      })
     }
-  }, [recordId])
+  }, [recordId, dmgId])
 
-  useEffect(() => {
-    const fetchDimensionsData = async () => {
-      if (recordId && dimensions?.length > 0) {
-        const dimensionRequests = dimensions.map(dimension => {
-          const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
+  // useEffect(() => {
+  //   const fetchDimensionsData = async () => {
+  //     if (recordId && dimensions?.length > 0) {
+  //       const dimensionRequests = dimensions.map(dimension => {
+  //         const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
 
-          return getRequest({
-            extension: InventoryRepository.DimensionId.get,
-            parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
-          })
-        })
+  //         return getRequest({
+  //           extension: InventoryRepository.DimensionId.get,
+  //           parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
+  //         })
+  //       })
 
-        const dimensionResponses = await Promise.all(dimensionRequests)
+  //       const dimensionResponses = await Promise.all(dimensionRequests)
 
-        const newDimensionValues = dimensionResponses.reduce((acc, res, index) => {
-          const dimensionKey = dimensions[index].key
-          acc[dimensionKey] = res.record?.id || ''
+  //       const newDimensionValues = dimensionResponses.reduce((acc, res, index) => {
+  //         const dimensionKey = dimensions[index].key
+  //         acc[dimensionKey] = res.record?.id || ''
 
-          return acc
-        }, {})
+  //         return acc
+  //       }, {})
 
-        const udtRequests = dimensionsUDT.map(dimension => {
-          const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
+  //       const udtRequests = dimensionsUDT.map(dimension => {
+  //         const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
 
-          return getRequest({
-            extension: InventoryRepository.DimensionUDT.get,
-            parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
-          })
-        })
+  //         return getRequest({
+  //           extension: InventoryRepository.DimensionUDT.get,
+  //           parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
+  //         })
+  //       })
 
-        const udtResponses = await Promise.all(udtRequests)
+  //       const udtResponses = await Promise.all(udtRequests)
 
-        const newUDTValues = udtResponses.reduce((acc, res, index) => {
-          const udtKey = dimensionsUDT[index]?.key
-          acc[udtKey] = res.record?.value || ''
+  //       const newUDTValues = udtResponses.reduce((acc, res, index) => {
+  //         const udtKey = dimensionsUDT[index]?.key
+  //         acc[udtKey] = res.record?.value || ''
 
-          return acc
-        }, {})
+  //         return acc
+  //       }, {})
 
-        formik.setValues(prevValues => ({
-          ...prevValues,
-          ...newDimensionValues,
-          ...newUDTValues
-        }))
-      }
-    }
+  //       formik.setValues(prevValues => ({
+  //         ...prevValues,
+  //         ...newDimensionValues,
+  //         ...newUDTValues
+  //       }))
+  //     }
+  //   }
 
-    fetchDimensionsData()
-  }, [recordId, dimensionsUDT, dimensions])
+  //   fetchDimensionsData()
+  // }, [recordId, dimensionsUDT, dimensions])
 
   const { formik } = useForm({
     initialValues: {},
@@ -150,6 +140,12 @@ const PropertiesForm = ({ store, maxAccess }) => {
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
+            <CustomTextField
+              name='dmgName'
+              label={'dmgName'}
+              value={dmgName}
+              readOnly
+            />
             <Grid item xs={6}>
               {dimensions.map((dimension, index) => {
                 const dimensionNumber = dimension.key.match(/\d+$/)?.[0] || ''

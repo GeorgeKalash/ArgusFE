@@ -77,6 +77,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       kitItem: false,
       taxId: '',
       lotCategoryId: null,
+      dmgId: null,
       spfId: '',
       categoryName: '',
       defSaleMUId: '',
@@ -149,7 +150,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
       setStore(prevStore => ({
         ...prevStore,
-        _reference: res.record.sku
+        _reference: res.record.sku,
+        _dmgId: res.record.dmgId,
+        _dmgName: res.record.dmgName
       }))
 
       formik.setFieldValue('sku', res.record.sku)
@@ -207,7 +210,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       priceGroupId: res.record.pgId,
       returnPolicy: res.record.returnPolicyId,
       _name: res.record.name,
-      _reference: res.record.sku
+      _reference: res.record.sku,
+      _dmgId: res.record.dmgId,
+      _dmgName: res.record.dmgName
     }))
   }
   useEffect(() => {

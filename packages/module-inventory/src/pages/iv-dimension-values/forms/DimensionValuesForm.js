@@ -11,10 +11,15 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 
-export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, fetchData }) {
+export default function DimensionValuesForm({ labels, maxAccess, dimNum, id, window, refetch }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: InventoryRepository.Dimension.qry
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -35,7 +40,7 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
       })
 
       toast.success(platformLabels.Updated)
-      fetchData()
+      invalidate()
       window.close()
     }
   })
