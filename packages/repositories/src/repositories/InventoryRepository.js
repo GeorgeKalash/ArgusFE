@@ -367,5 +367,17 @@ export const InventoryRepository = {
   QtyOpeningSerials: {
     qry: service + 'qryOQS',
     set2: service + 'set2OQS'
+  },
+  DimensionGroup: {
+    set2: service + 'set2DIG',
+    del: service + 'delDIG',
+    page: service + 'pageDIG',
+    get2: service + 'get2DIG'
+  },
+  DimensionGroupElement: {
+    qry: service + 'qryDIGE',
+  },
+  Dimensions: {
+    qry: service + 'qryDIM',
   }
 }
