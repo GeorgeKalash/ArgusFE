@@ -368,6 +368,9 @@ export const InventoryRepository = {
     qry: service + 'qryOQS',
     set2: service + 'set2OQS'
   },
+  DimensionGroup: {
+    qry: service + 'qryDIG',
+  },
   Dimensions: {
     set: service + 'setDIM',
     get: service + 'getDIM',
