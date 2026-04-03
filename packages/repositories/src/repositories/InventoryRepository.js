@@ -374,10 +374,11 @@ export const InventoryRepository = {
     page: service + 'pageDIG',
     get2: service + 'get2DIG'
   },
-  DimensionGroupElement: {
-    qry: service + 'qryDIGE',
-  },
   Dimensions: {
     qry: service + 'qryDIM',
+    set: service + 'setDIM',
+    get: service + 'getDIM',
+    del: service + 'delDIM',
+    page: service + 'pageDIM'
   }
 }

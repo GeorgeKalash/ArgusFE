@@ -631,6 +631,7 @@ export const ResourceIds = {
   AccountReconciliations: 40315,
   Reconciliation: 31332,
   DimensionGroup: 41120,
+  Dimensions: 41121,
 
   // GL
   GLSalesInvoice: 51604,
