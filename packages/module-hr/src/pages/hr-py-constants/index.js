@@ -69,12 +69,12 @@ const HRPayrollConstant = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(recordId) {
+  function openForm(reference) {
     stack({
       Component: HRPayrollConstantForm,
       props: {
         labels,
-        recordId,
+        recordId: reference,
         maxAccess: access
       },
       width: 500,
@@ -97,7 +97,7 @@ const HRPayrollConstant = () => {
           name='table'
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['reference']}
           onEdit={edit}
           onDelete={del}
           pageSize={50}

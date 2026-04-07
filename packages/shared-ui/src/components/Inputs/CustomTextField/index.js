@@ -180,7 +180,10 @@ const CustomTextField = ({
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
-      onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
+      onKeyDown={e => {
+        if (props?.preventSpace && e.key === ' ') return e.preventDefault()
+        e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true)
+      }}
       InputProps={{
         ...props.InputProps,
         classes: {

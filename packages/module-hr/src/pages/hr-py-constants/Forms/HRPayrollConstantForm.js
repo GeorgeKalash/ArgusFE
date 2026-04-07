@@ -77,6 +77,7 @@ export default function HRPayrollConstantForm({ labels, maxAccess, recordId, win
                 required
                 readOnly={editMode}
                 maxAccess={maxAccess}
+                preventSpace
                 maxLength='15'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
