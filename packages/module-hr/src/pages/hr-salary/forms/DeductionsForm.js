@@ -14,6 +14,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { calculateFixed } from '@argus/shared-utils/src/utils/Payroll'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 
 export default function DeductionsForm({
   labels,
@@ -44,20 +45,48 @@ export default function DeductionsForm({
       pct: 0,
       comments: '',
       isTaxable: false,
-      edCalcType: null
+      edCalcType: null,
+      isFormula: false,
+      formulaId: null
     },
     validationSchema: yup.object({
-      edId: yup.number().required(),
-      fixedAmount: yup.number().min(0).required(),
-      edCalcType: yup.number().required(),
+      formulaId: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { isFormula } = this.parent
+          return isFormula ? !!value : true
+        }),
+      edId: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { isFormula } = this.parent
+          return isFormula ? true : !!value
+        }),
+      fixedAmount: yup
+        .number()
+        .min(0)
+        .nullable()
+        .test(function (value) {
+          const { isPct, isFormula } = this.parent
+          return isFormula || isPct ? true : value !== null && value !== undefined
+        }),
+      edCalcType: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { isFormula } = this.parent
+          return isFormula ? true : !!value
+        }),
       pct: yup
         .number()
         .min(0)
         .max(100)
+        .nullable()
         .test(function (value) {
-          const { isPct } = this.parent
-
-          return isPct ? !!value : true
+          const { isPct, isFormula } = this.parent
+          return isFormula || !isPct ? true : value !== null && value !== undefined
         })
     }),
     onSubmit: async obj => {
@@ -104,6 +133,30 @@ export default function DeductionsForm({
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item xs={12}>
+            <CustomCheckBox
+              name='isFormula'
+              value={formik.values?.isFormula}
+              onChange={e => formik.setFieldValue('isFormula', e.target.checked)}
+              label={labels.isFormula}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={PayrollRepository.Formula.qry}
+              name='formulaId'
+              label={labels.formula}
+              displayField='name'
+              valueField='recordId'
+              values={formik.values}
+              readOnly={!formik.values?.isFormula}
+              required={formik.values?.isFormula}
+              onChange={(_, newValue) => formik.setFieldValue('formulaId', newValue?.recordId || null)}
+              maxAccess={maxAccess}
+              error={formik.touched.formulaId && Boolean(formik.errors.formulaId)}
+            />
+          </Grid>
+          <Grid item xs={12}>
             <ResourceComboBox
               endpointId={EmployeeRepository.EmployeeDeduction.qry}
               name='edId'
@@ -112,6 +165,7 @@ export default function DeductionsForm({
               displayField='name'
               values={formik.values}
               filter={item => item.type == 2}
+              readOnly={formik.values?.isFormula}
               onChange={(event, newValue) => formik.setFieldValue('edId', newValue?.recordId || null)}
               maxAccess={maxAccess}
               required
@@ -124,6 +178,7 @@ export default function DeductionsForm({
               value={formik.values?.includeInTotal}
               onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
               label={labels.includeInTotal}
+              readOnly={formik.values?.isFormula}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -138,6 +193,7 @@ export default function DeductionsForm({
                 formik.setFieldValue('isPct', event.target.checked)
               }}
               label={labels.isPct}
+              readOnly={formik.values?.isFormula}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -150,7 +206,7 @@ export default function DeductionsForm({
               displayField='value'
               values={formik.values}
               maxAccess={maxAccess}
-              readOnly={!formik.values.isPct}
+              readOnly={!formik.values.isPct || formik.values?.isFormula}
               onChange={(_, newValue) => formik.setFieldValue('pctOf', newValue?.key || null)}
               error={formik.touched.pctOf && Boolean(formik.errors.pctOf)}
             />
@@ -160,7 +216,7 @@ export default function DeductionsForm({
               name='pct'
               label={labels.pct}
               value={formik.values.pct}
-              readOnly={!formik.values.isPct}
+              readOnly={!formik.values.isPct || formik.values?.isFormula}
               required={formik.values.isPct}
               onBlur={e => {
                 let pctValue = Number(e.target.value)
@@ -183,7 +239,7 @@ export default function DeductionsForm({
               required
               allowNegative={false}
               maxAccess={maxAccess}
-              readOnly={formik.values.isPct}
+              readOnly={formik.values.isPct || formik.values?.isFormula}
               onClear={() => formik.setFieldValue('fixedAmount', null)}
               error={formik.touched.fixedAmount && Boolean(formik.errors.fixedAmount)}
             />
@@ -194,6 +250,7 @@ export default function DeductionsForm({
               value={formik.values?.isTaxable}
               onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
               label={labels.isTaxable}
+              readOnly={formik.values?.isFormula}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -207,6 +264,7 @@ export default function DeductionsForm({
               values={formik.values}
               maxAccess={maxAccess}
               required
+              readOnly={formik.values?.isFormula}
               onChange={(_, newValue) => formik.setFieldValue('edCalcType', newValue?.key || null)}
               error={formik.touched.edCalcType && Boolean(formik.errors.edCalcType)}
             />
