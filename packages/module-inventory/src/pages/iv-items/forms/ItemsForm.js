@@ -513,7 +513,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     ]}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('groupId', newValue?.recordId || '')
+                      formik.setFieldValue('groupId', newValue?.recordId || null)
+                      formik.setFieldValue('dmgId', newValue?.dmgId || null)
+                      formik.setFieldValue('dmgName', newValue?.dmgName || null)
                     }}
                     error={formik.touched.groupId && formik.errors.groupId}
                   />

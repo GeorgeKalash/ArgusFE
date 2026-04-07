@@ -13,7 +13,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 
-export default function DimensionValuesForm({ labels, maxAccess, dimNum, id, window, refetch }) {
+export default function DimensionValuesForm({ labels, maxAccess, dimNum, id, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react'
+import { useContext } from 'react'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
@@ -22,22 +22,9 @@ const DimensionValues = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchData(dim) {
-    const id = dim || formik.values.dimValue
-    if(id){
-      const response = await getRequest({
-        extension: InventoryRepository.Dimension.qry,
-        parameters: `_dimension=${id}`
-      })
-    return {...response}
-    } else {
-        return []
-    }
-  }
-
   const {
     query: { data },
-    labels: labels,
+    labels,
     access,
     refetch,
     invalidate
@@ -51,14 +38,28 @@ const DimensionValues = () => {
     initialValues: {
       dimValue: null
     },
-    access,
+    maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
       dimValue: yup.string().required()
     })
   })
 
-  const Columns = [
+  async function fetchData() {
+    const id = formik.values.dimValue
+
+    if (id) {
+      const response = await getRequest({
+        extension: InventoryRepository.Dimension.qry,
+        parameters: `_dimension=${id}`
+      })
+      return response
+    }
+
+    return []
+  }
+
+  const columns = [
     {
       field: 'id',
       headerName: labels.id,
@@ -78,7 +79,7 @@ const DimensionValues = () => {
         labels,
         id: id,
         maxAccess: access,
-        dimNum: formik.values?.dimValue,
+        dimNum: formik.values?.dimValue
       },
       width: 500,
       height: 270,
@@ -105,7 +106,6 @@ const DimensionValues = () => {
     toast.success(platformLabels.Deleted)
   }
 
-
   return (
     <VertLayout>
       <Fixed>
@@ -121,9 +121,9 @@ const DimensionValues = () => {
                 valueField='id'
                 displayField='name'
                 values={formik.values}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('dimValue', newValue ? newValue.id : null)
-                  fetchData(newValue.id)
+                onChange={async (_, newValue) => {
+                  await formik.setFieldValue('dimValue', newValue?.id || null)
+                  refetch()
                 }}
                 required
                 maxAccess={access}
@@ -135,7 +135,7 @@ const DimensionValues = () => {
       </Fixed>
       <Grow>
         <Table
-          columns={Columns}
+          columns={columns}
           gridData={data}
           rowId={['id']}
           pageSize={50}
