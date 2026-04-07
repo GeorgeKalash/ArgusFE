@@ -695,6 +695,7 @@ export const ResourceIds = {
   MCRCashTransfers: 33605,
   MCRIncreaseDecreaseAdj: 33606,
   SalaryBatch: 75115,
+  PayrollFormulas: 75119,
 
   // Address
   ADDBPMasterData: 21600,

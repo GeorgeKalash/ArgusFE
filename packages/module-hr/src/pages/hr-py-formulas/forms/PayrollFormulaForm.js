@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -20,34 +20,27 @@ export default function PayrollFormulaForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const [variables, setVariables] = useState([])
+  const [constants, setConstants] = useState([])
 
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.Formula.page
   })
 
-  const variables = [
-      { "key": "baseSalary", "label": "Base Salary" },
-      { "key": "overtimeHours", "label": "Overtime Hours" },
-      { "key": "leaveDays", "label": "Leave Days" },
-      { "key": "lateHours", "label": "Late Hours" }
-  ];
-
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
-      reference: '',
       name: '',
       formula: ''
     },
     maxAccess,
     validationSchema: yup.object({
-      reference: yup.string().required(),
       name: yup.string().required(),
       formula: yup
         .string()
-        .required('Formula is required')
+        .required()
         .test('valid-formula', function (value) {
-          const error = validateFormula(value, variables);  
+          const error = validateFormula(value, variables, constants);  
 
           if (error) {
             return this.createError({ message: error });
@@ -70,7 +63,7 @@ export default function PayrollFormulaForm({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
-console.log(formik.values)
+
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -83,27 +76,21 @@ console.log(formik.values)
 
         formik.setValues(res.record)
       }
+      const res2 = await getRequest({
+        extension: PayrollRepository.Formula.getPack,
+        parameters: ``
+      })
+
+      setVariables(res2.record.variables);
+      setConstants(res2.record.constants);
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.SalesOrderSource} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.PayrollFormulas} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik.values.reference}
-                required
-                maxAccess={maxAccess}
-                maxLength='15'
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-              />
-            </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
@@ -118,16 +105,17 @@ console.log(formik.values)
               />
             </Grid>
             <Grid item xs={12}>
-              <FieldSet title={labels.name}>
-              <FormulaEditor
-                name="formula"
-                value={formik.values.formula}
-                onChange={formik.setFieldValue}
-                onBlur={formik.setFieldTouched}
-                variables={variables}
-                error={formik.errors.formula}
-                touched={formik.touched.formula}
-              />
+              <FieldSet title={labels.formula}>
+                <FormulaEditor
+                  name='formula'
+                  value={formik.values.formula}
+                  onChange={formik.setFieldValue}
+                  onBlur={formik.setFieldTouched}
+                  variables={variables}
+                  constants={constants}
+                  error={formik.errors.formula}
+                  touched={formik.touched.formula}
+                />
               </FieldSet>
             </Grid>
           </Grid>

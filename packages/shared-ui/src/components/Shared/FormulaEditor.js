@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react';
 import 'mathlive';
 import { cleanFormula } from '@argus/shared-utils/src/utils/ValidateFormula';
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { validateFormula } from '@argus/shared-utils/src/utils/ValidateFormula'
 
 export default function FormulaEditor({
   name,
@@ -9,10 +10,13 @@ export default function FormulaEditor({
   onChange,
   onBlur,
   variables = [],
+  constants = [],
   error,
   touched
 }) {
   const mathRef = useRef(null);
+
+  const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (mathRef.current && value !== mathRef.current.getValue('ascii-math')) {
@@ -26,13 +30,18 @@ export default function FormulaEditor({
   };
 
   const handleInput = () => {
-    let val = mathRef.current.value;
-
+    let val = mathRef.current.getValue();
     val = cleanFormula(val);
 
     onChange(name, val);
 
-    if (onBlur) onBlur(name, true);
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      const error = validateFormula(val, variables, constants);
+    }, 300);
   };
 
   const insert = (text) => {
@@ -57,7 +66,7 @@ export default function FormulaEditor({
       `}
     </style>
 
-    <div>
+    <div style={{ width: '100%' }}>
       <math-field
         ref={mathRef}
         onInput={handleInput}
@@ -65,6 +74,8 @@ export default function FormulaEditor({
         smart-fence="false" 
         smart-mode="false"
         style={{
+          width: '100%',
+          boxSizing: 'border-box',
           border: isInvalid ? '1px solid red' : '1px solid #000000',
           borderRadius: 8,
           padding: 12,
@@ -90,9 +101,28 @@ export default function FormulaEditor({
         >
           {variables.map(v => (
             <CustomButton
-              key={v.key}
-              label={v.key}
-              onClick={() => insert(v.key)}
+              key={v}
+              label={v}
+              onClick={() => insert(v)}
+            >
+              {v.label}
+            </CustomButton>
+          ))}
+        </div>
+      </div>
+      <div style={{ marginTop: 12 }}>
+        <strong>Constants:</strong>
+        <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px'
+          }}
+        >
+          {constants.map(v => (
+            <CustomButton
+              key={v.value}
+              label={v.reference}
+              onClick={() => insert(v.reference)}
             >
               {v.label}
             </CustomButton>

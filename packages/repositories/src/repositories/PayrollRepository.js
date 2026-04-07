@@ -103,10 +103,10 @@ export const PayrollRepository = {
     qry: service + 'qryPE'
   },
   Formula: {
-    page: service + 'pageFM',
-    qry: service + 'qryFM',
-    get: service + 'getFM',
-    set: service + 'setFM',
-    del: service + 'delFM'
+    page: service + 'pageFLA',
+    get: service + 'getFLA',
+    getPack: service + 'getPackFLA',
+    set: service + 'setFLA',
+    del: service + 'delFLA'
   }
 }

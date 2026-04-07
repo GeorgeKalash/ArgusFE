@@ -1,7 +1,9 @@
 import { parse } from 'mathjs';
 
-const validateFormula = (value, variables) => {
-  const allowedKeys = variables.map(v => v.key);
+const validateFormula = (value, variables = [], constants = []) => {
+  const constantKeys = constants.map(c => c.reference);
+
+  const allowedKeys = [...variables, ...constantKeys];
 
   if (!value || value.trim() === '') {
     return 'Formula is required';

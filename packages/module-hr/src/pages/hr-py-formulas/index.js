@@ -39,17 +39,12 @@ const PayrollFormulas = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: PayrollRepository.Formula.page,
-    datasetId: ResourceIds.SalesOrderSource
+    datasetId: ResourceIds.PayrollFormulas
   })
 
   const { platformLabels } = useContext(ControlContext)
 
   const columns = [
-    {
-      field: 'reference',
-      headerName: labels.reference,
-      flex: 1
-    },
     {
       field: 'name',
       headerName: labels.name,
@@ -80,7 +75,7 @@ const PayrollFormulas = () => {
       },
       width: 600,
       height: 500,
-      title: labels.salesOrderSource
+      title: labels.formula
     })
   }
 
