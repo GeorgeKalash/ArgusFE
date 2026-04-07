@@ -32,7 +32,7 @@ const validateFormula = (value, variables = [], constants = []) => {
     const invalid = usedVars.filter(v => !allowedKeys.includes(v));
 
     if (invalid.length > 0) {
-      return `Unknown variables: ${invalid.join(', ')}`;
+      return `Unknown variables/constants: ${invalid.join(', ')}`;
     }
 
     return undefined;
