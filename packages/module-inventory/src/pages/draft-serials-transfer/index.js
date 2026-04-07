@@ -37,6 +37,11 @@ const DraftSerialsTranfer = () => {
     }
   })
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.DraftTransfer,
+    action: openForm
+  })
+
   const columns = [
     {
       field: 'reference',
@@ -118,11 +123,6 @@ const DraftSerialsTranfer = () => {
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.DraftTransfer,
-    action: openForm
-  })
-
   const add = async () => {
     await proxyAction()
   }
@@ -168,7 +168,6 @@ const DraftSerialsTranfer = () => {
           refetch={refetch}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

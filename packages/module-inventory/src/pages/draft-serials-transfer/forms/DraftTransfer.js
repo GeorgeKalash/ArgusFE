@@ -48,18 +48,13 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     endpointId: InventoryRepository.DraftTransfer.page
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
-  const defUserSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
-  const defSiteId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defUserSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value) || null
+  const defSiteId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'siteId')?.value) || null
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId,
       dtId: null,
@@ -70,11 +65,10 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       notes: '',
       status: 1,
       totalWeight: 0,
-      autoSrlNo: true,
       serials: [
         {
           id: 1,
-          draftTransferId: recordId || 0,
+          draftTransferId: recordId || null,
           srlNo: '',
           metalId: null,
           designId: null,
@@ -90,7 +84,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       metalGridData: [],
       itemGridData: []
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
       fromSiteId: yup.string().required(),
@@ -114,13 +107,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     onSubmit: async obj => {
       const { serials, date, ...rest } = obj
 
-      const header = {
-        ...rest,
-        pcs: serials.length,
-        date: formatDateToApi(date)
-      }
-
-      if (header.fromSiteId === header.toSiteId) {
+      if (obj.fromSiteId === obj.toSiteId) {
         toast.error(labels.SameSiteError)
 
         return
@@ -131,11 +118,15 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
         .map(({ recordId, ...rest }, index) => ({
           ...rest,
           seqNo: index + 1,
-          draftTransferId: recordId || 0
+          draftTransferId: recordId || null
         }))
 
       const DraftTransferPack = {
-        header,
+        header: {
+          ...rest,
+          pcs: serials.length,
+          date: formatDateToApi(date)
+        },
         items: updatedRows
       }
 
@@ -143,7 +134,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
         extension: InventoryRepository.DraftTransfer.set2,
         record: JSON.stringify(DraftTransferPack)
       }).then(async diRes => {
-        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
+        toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
         await refetchForm(diRes.recordId)
         invalidate()
       })
@@ -163,9 +154,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       parameters: `_recordId=${recordId}`
     })
 
-    if (res?.record?.header?.date) {
-      res.record.header.date = formatDateFromApi(res.record.header.date)
-    }
+    res.record.header.date = res?.record?.header?.date ? formatDateFromApi(res.record.header.date) : null
 
     return res?.record || null
   }
@@ -174,7 +163,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     if (!pack) return
 
     const { header, items } = pack
-
     const serials = (items || []).map((item, index) => ({
       ...item,
       id: index + 1
@@ -187,52 +175,45 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     })
   }
 
-  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
-
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
   const autoDelete = async row => {
     if (!row?.draftTransferId) return true
 
-    const LastSerPack = {
-      draftId: formik?.values?.recordId,
-      lineItem: row
-    }
-
     await postRequest({
       extension: InventoryRepository.DraftTransferSerial.del,
-      record: JSON.stringify(LastSerPack)
+      record: JSON.stringify({
+        draftId: formik?.values?.recordId,
+        lineItem: row
+      })
     })
 
     return true
   }
 
   async function autoSave(header, lastLine) {
-    if (lastLine?.srlNo) {
-      lastLine.draftTransferId = header?.recordId
-
-      const LastSerPack = {
+    if (!lastLine?.srlNo) return
+    lastLine.draftTransferId = header?.recordId
+    const response = await postRequest({
+      extension: InventoryRepository.DraftTransferSerial.append,
+      record: JSON.stringify({
         header: header,
         lineItem: lastLine
-      }
+      }),
+      noHandleError: true
+    })
 
-      const response = await postRequest({
-        extension: InventoryRepository.DraftTransferSerial.append,
-        record: JSON.stringify(LastSerPack),
-        noHandleError: true
+    if (response?.error) {
+      stackError({
+        message: response?.error
       })
-      if (response?.error) {
-        stackError({
-          message: response?.error
-        })
 
-        return false
-      }
-      toast.success(platformLabels.Saved)
-
-      return true
+      return false
     }
+    toast.success(platformLabels.Saved)
+
+    return true
   }
 
   async function saveHeader(lastLine) {
@@ -256,7 +237,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
     if (diRes.recordId) {
       toast.success(platformLabels.Saved)
-
       await refetchForm(diRes.recordId)
 
       return true
@@ -278,9 +258,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
         return { ...props, readOnly: row?.srlNo }
       },
       async onChange({ row: { update, newRow, oldRow, addRow } }) {
-        if (!newRow?.srlNo) {
-          return
-        }
+        if (!newRow?.srlNo) return
 
         if (newRow?.srlNo && newRow.srlNo !== oldRow?.srlNo) {
           const res = await getRequest({
@@ -313,15 +291,13 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
             ? await autoSave(formik?.values, lineObj.changes)
             : await saveHeader(lineObj.changes)
 
-          if (!successSave) {
+          if (!successSave) 
             update({
               ...formik?.initialValues?.serials,
               id: newRow?.id,
               srlNo: ''
             })
-          } else {
-            await addRow(lineObj)
-          }
+          else  await addRow(lineObj)       
         }
       }
     },
@@ -391,15 +367,13 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     invalidate()
     window.close()
 
-    if(res?.recordId){
+    if(!res?.recordId)
       stack({
         Component: MaterialsTransferForm,
         props: {
           recordId: res?.recordId
         }
       })
-    }
-      
   }
 
   async function onWorkFlowClick() {
@@ -423,7 +397,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
         onCloseimport: async () => {
           await refetchForm(formik.values.recordId)
         },
-        maxAccess: maxAccess
+        maxAccess
       }
     })
   }
@@ -431,13 +405,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   async function onCopy(obj) {
     const { serials, date, ...rest } = obj
 
-    const header = {
-      ...rest,
-      pcs: serials.length,
-      date: formatDateToApi(date)
-    }
-
-    if (header.fromSiteId === header.toSiteId) {
+    if (obj.fromSiteId === obj.toSiteId) {
       toast.error(labels.SameSiteError)
 
       return
@@ -448,11 +416,15 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       .map(({ recordId, ...rest }, index) => ({
         ...rest,
         seqNo: index + 1,
-        draftTransferId: recordId || 0
+        draftTransferId: recordId || null
       }))
 
     const CloneDraftTransferPack = {
-      header,
+      header: {
+        ...rest,
+        pcs: serials.length,
+        date: formatDateToApi(date)
+      },
       items: updatedRows
     }
 
@@ -569,25 +541,19 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     if (!formik.values.serials?.length) return
     const totals = calculateTotalWeightFromSerials(formik.values.serials)
 
-    formik.setFieldValue('totalWeight', totals.totalWeight)
+    formik.setFieldValue('totalWeight', totals.totalWeight || 0)
 
   }, [formik.values.serials])
 
   useEffect(() => {
     ;(async function () {
-      if (formik?.values?.recordId) {
-        await refetchForm(formik?.values?.recordId)
-      } else {
-        const defaultSiteId = defUserSiteId || defSiteId || null
-        formik.setFieldValue('fromSiteId', defaultSiteId)
-      }
+      if (formik?.values?.recordId) await refetchForm(formik?.values?.recordId)
+      else formik.setFieldValue('fromSiteId', defUserSiteId || defSiteId || null)    
     })()
   }, [])
 
   useEffect(() => {
-    if (formik?.values?.dtId) {
-      onChangeDtId(formik?.values?.dtId)
-    }
+    if (formik?.values?.dtId) onChangeDtId(formik?.values?.dtId)
   }, [formik?.values?.dtId])
 
   async function onValidationRequired() {
@@ -602,9 +568,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
         return acc
       }, {})
 
-      if (Object.keys(touchedFields).length) {
-        formik.setTouched(touchedFields, true)
-      }
+      if (Object.keys(touchedFields).length) formik.setTouched(touchedFields, true)
     }
   }
 
@@ -615,12 +579,10 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
-      isPosted={isPosted}
       actions={actions}
       editMode={editMode}
       isParentWindow={false}
       disabledSubmit={isPosted}
-      disabledSavedClear={isPosted}
     >
       <VertLayout>
         <Fixed>
@@ -642,8 +604,8 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId)
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -665,15 +627,12 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      if (!newValue?.isInactive) {
-                        formik.setFieldValue('fromSiteId', newValue?.recordId)
-                      } else {
-                        formik.setFieldValue('fromSiteId', null)
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('fromSiteId', !newValue?.isInactive ? newValue?.recordId : null)
+                      if (newValue?.isInactive)
                         stackError({
                           message: labels.inactiveSite
                         })
-                      }
                     }}
                     error={formik.touched.fromSiteId && Boolean(formik.errors.fromSiteId)}
                   />
@@ -706,20 +665,16 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      if (!newValue?.isInactive) {
-                        formik.setFieldValue('toSiteId', newValue?.recordId)
-                      } else {
-                        formik.setFieldValue('toSiteId', null)
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('toSiteId', !newValue?.isInactive ? newValue?.recordId : null)
+                      if (newValue?.isInactive) 
                         stackError({
                           message: labels.inactiveSite
                         })
-                      }
                     }}
                     error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
                   />
                 </Grid>
-
                 <Grid item xs={6}>
                   <CustomDatePicker
                     name='date'
@@ -727,14 +682,12 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     label={labels.postingDate}
                     value={formik?.values?.date}
                     onChange={formik.setFieldValue}
-                    editMode={editMode}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', '')}
+                    onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                   />
                 </Grid>
-
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.DraftTransfer.pack}
@@ -750,9 +703,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     readOnly={isPosted}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('notificationGroupId', newValue?.recordId)
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('notificationGroupId', newValue?.recordId || null)}
                     error={formik.touched.notificationGroupId && Boolean(formik.errors.notificationGroupId)}
                   />
                 </Grid>
@@ -772,9 +723,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     required
                     readOnly={editMode}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('carrierId', newValue?.recordId)
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('carrierId', newValue?.recordId || null)}
                     error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
                   />
                 </Grid>
@@ -786,7 +735,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                 label={labels.description}
                 value={formik.values.notes}
                 rows={4}
-                editMode={editMode}
                 readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
@@ -842,8 +790,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
           </Grid>
           <Grid item xs={4}>
             <Grid container spacing={2}>
-              <Grid item xs={12}></Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ mt: 2 }}>
                 <CustomNumberField
                   name='totalWeight'
                   maxAccess={maxAccess}
