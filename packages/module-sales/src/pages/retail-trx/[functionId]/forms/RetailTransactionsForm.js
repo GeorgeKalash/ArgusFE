@@ -1235,9 +1235,6 @@ export default function RetailTransactionsForm({
         return {
           ...item,
           id: index + 1,
-          qty: parseFloat(item.qty).toFixed(2),
-          unitPrice: parseFloat(item.unitPrice).toFixed(2),
-          extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
           taxDetails
         }
