@@ -12,9 +12,10 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import ScheduleWindow from './window/ScheduleWindow'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
-import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { Grid } from '@mui/material'
 import Employees from './forms/EmployeesForm'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+
 
 export default function Schedules(){
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -88,25 +89,29 @@ export default function Schedules(){
     openForm(obj?.recordId)
   }
 
+  function openEmployeesSchedule() {
+      stack({
+        Component: Employees,
+        props: {
+          labels,
+          maxAccess: access
+        },
+        width: 800,
+        height: 500,
+        title: labels.employee
+      })
+    }
+  
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar onAdd={add} maxAccess={access}  leftSection={
             <Grid item xs={3}>
-               <CustomButton
-                  label={labels.employee}
-                  // onClick={  
-                  //   stack({
-                  //     Component: Employees,
-                  //     props: {
-                  //       labels,
-                  //       maxAccess: access
-                  //     },
-                  //     width: 800,
-                  //     height: 500,
-                  //     title: labels.schedule
-                  //   })}
-                />
+                  <CustomButton
+                    label={labels.employee}
+                    onClick={openEmployeesSchedule}
+                    tooltipText={labels.employee}
+                  />
             </Grid>
           }/>
       </Fixed>
