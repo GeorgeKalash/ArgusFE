@@ -41,7 +41,8 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftTransfer,
     access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const invalidate = useInvalidate({
@@ -54,21 +55,24 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId,
-      dtId: null,
-      reference: '',
-      date: new Date(),
-      fromSiteId: defUserSiteId || defSiteId || null,
-      toSiteId: null,
-      notes: '',
-      status: 1,
-      totalWeight: 0,
-      serials: [
+      header: {
+        recordId,
+        dtId: null,
+        reference: '',
+        date: new Date(),
+        fromSiteId: defUserSiteId || defSiteId || null,
+        toSiteId: null,
+        notes: '',
+        status: 1,
+        totalWeight: 0
+      },
+      items: [
         {
           id: 1,
-          draftTransferId: recordId || null,
+          draftTransferId: recordId || 0,
           srlNo: '',
           metalId: null,
           designId: null,
@@ -85,10 +89,12 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       itemGridData: []
     },
     validationSchema: yup.object({
-      date: yup.string().required(),
-      fromSiteId: yup.string().required(),
-      toSiteId: yup.string().required(),
-      serials: yup.array().of(
+      header: yup.object({
+        date: yup.string().required(),
+        fromSiteId: yup.string().required(),
+        toSiteId: yup.string().required()
+      }),
+      items: yup.array().of(
         yup.object().shape({
           srlNo: yup.string().test({
             name: 'srlNo-first-row-check',
@@ -105,27 +111,26 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       )
     }),
     onSubmit: async obj => {
-      const { serials, date, ...rest } = obj
 
-      if (obj.fromSiteId === obj.toSiteId) {
+      if (obj?.header?.fromSiteId === obj?.header?.toSiteId) {
         toast.error(labels.SameSiteError)
 
         return
       }
 
-      const updatedRows = formik?.values?.serials
+      const updatedRows = formik?.values?.items
         .filter(row => row.srlNo)
         .map(({ recordId, ...rest }, index) => ({
           ...rest,
           seqNo: index + 1,
-          draftTransferId: recordId || null
+          draftTransferId: recordId || 0
         }))
 
       const DraftTransferPack = {
         header: {
-          ...rest,
-          pcs: serials.length,
-          date: formatDateToApi(date)
+          ...formik.values?.header,
+          pcs: formik.values.items.length,
+          date: formatDateToApi(formik.values?.header?.date)
         },
         items: updatedRows
       }
@@ -163,20 +168,24 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     if (!pack) return
 
     const { header, items } = pack
-    const serials = (items || []).map((item, index) => ({
+    const itemsList = (items || []).map((item, index) => ({
       ...item,
       id: index + 1
     }))
 
     formik.setValues({
       ...formik.values,
-      ...header,
-      serials: serials.length ? serials : formik.initialValues.serials
+      recordId: header?.recordId || null,
+      header: {
+        ...formik.values.header,
+        ...header
+      },
+      items: itemsList.length ? itemsList : formik.initialValues.items
     })
   }
 
   const editMode = !!formik.values.recordId
-  const isPosted = formik.values.status === 3
+  const isPosted = formik.values?.header?.status === 3
 
   const autoDelete = async row => {
     if (!row?.draftTransferId) return true
@@ -194,12 +203,12 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
   async function autoSave(header, lastLine) {
     if (!lastLine?.srlNo) return
-    lastLine.draftTransferId = header?.recordId
+
     const response = await postRequest({
       extension: InventoryRepository.DraftTransferSerial.append,
       record: JSON.stringify({
-        header: header,
-        lineItem: lastLine
+        header,
+        lineItem: { ...lastLine, draftTransferId: header?.recordId}
       }),
       noHandleError: true
     })
@@ -220,15 +229,15 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     const totals = calculateTotalWeightFromSerials([lastLine])
     const DraftTransferPack = {
       header: {
-        ...formik?.values,
+        ...formik?.values?.header,
         pcs: 1,
         ...totals,
-        date: formatDateToApi(formik.values.date)
+        date: formatDateToApi(formik.values?.header?.date)
       },
       items: [lastLine]
     }
 
-    delete DraftTransferPack.header.serials
+    delete DraftTransferPack.header.items
 
     const diRes = await postRequest({
       extension: InventoryRepository.DraftTransfer.set2,
@@ -245,7 +254,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     }
   }
 
-  const serialsColumns = [
+  const itemColumns = [
     {
       component: 'textfield',
       label: labels.srlNo,
@@ -263,7 +272,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
         if (newRow?.srlNo && newRow.srlNo !== oldRow?.srlNo) {
           const res = await getRequest({
             extension: InventoryRepository.Serial.get2,
-            parameters: `_srlNo=${newRow?.srlNo}&_siteId=${formik?.values?.fromSiteId}`
+            parameters: `_srlNo=${newRow?.srlNo}&_siteId=${formik?.values?.header?.fromSiteId}`
           })
 
           let lineObj = {
@@ -271,7 +280,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
             changes: {
               id: newRow.id,
               seqNo: newRow.id,
-              draftTransferId: formik?.values?.recordId,
+              draftTransferId: formik?.values?.recordId || 0,
               srlNo: res?.record?.srlNo || '',
               sku: res?.record?.sku || '',
               itemName: res?.record?.itemName || '',
@@ -288,12 +297,12 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
           !reCal && setReCal(true)
 
           const successSave = formik?.values?.recordId
-            ? await autoSave(formik?.values, lineObj.changes)
+            ? await autoSave(formik?.values?.header, lineObj.changes)
             : await saveHeader(lineObj.changes)
 
           if (!successSave) 
             update({
-              ...formik?.initialValues?.serials,
+              ...formik?.initialValues?.items,
               id: newRow?.id,
               srlNo: ''
             })
@@ -354,13 +363,11 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   ]
 
   async function onPost() {
-    const { serials, ...restValues } = formik.values
-
     const res = await postRequest({
       extension: InventoryRepository.DraftTransfer.post,
       record: JSON.stringify({
-        ...restValues,
-        date: formatDateToApi(formik.values.date)
+        ...formik.values?.header,
+        date: formatDateToApi(formik.values?.header?.date)
       })
     })
     toast.success(platformLabels.Posted)
@@ -402,28 +409,26 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     })
   }
 
-  async function onCopy(obj) {
-    const { serials, date, ...rest } = obj
-
-    if (obj.fromSiteId === obj.toSiteId) {
+  async function onCopy() {
+    if (formik.values?.header?.fromSiteId === formik.values?.header?.toSiteId) {
       toast.error(labels.SameSiteError)
 
       return
     }
 
-    const updatedRows = formik?.values?.serials
+    const updatedRows = formik?.values?.items
       .filter(row => row.srlNo)
       .map(({ recordId, ...rest }, index) => ({
         ...rest,
         seqNo: index + 1,
-        draftTransferId: recordId || null
+        draftTransferId: recordId || 0
       }))
 
     const CloneDraftTransferPack = {
       header: {
-        ...rest,
-        pcs: serials.length,
-        date: formatDateToApi(date)
+        ...formik?.values?.header,
+        pcs: formik.values?.items.length,
+        date: formatDateToApi(formik?.values?.header?.date)
       },
       items: updatedRows
     }
@@ -442,13 +447,13 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     {
       key: 'Locked',
       condition: isPosted,
-      disabled: !editMode || isPosted
+      disabled: isPosted
     },
     {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || isPosted
+      disabled: !editMode 
     },
     {
       key: 'WorkFlow',
@@ -465,7 +470,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     {
       key: 'Copy',
       condition: true,
-      onClick: () => onCopy(formik?.values),
+      onClick: onCopy,
       disabled: !isPosted
     }
   ]
@@ -476,16 +481,16 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       parameters: `_dtId=${recordId}`
     })
 
-    formik.setFieldValue('carrierId', dtd?.record?.carrierId || null)
-    formik.setFieldValue('fromSiteId', dtd?.record?.siteId || formik?.values?.fromSiteId || null)
-    formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || formik?.values?.toSiteId || null)
+    formik.setFieldValue('header.carrierId', dtd?.record?.carrierId || null)
+    formik.setFieldValue('header.fromSiteId', dtd?.record?.siteId || formik?.values?.header?.fromSiteId || null)
+    formik.setFieldValue('header.toSiteId', dtd?.record?.toSiteId || formik?.values?.header?.toSiteId || null)
   }
 
   useEffect(() => {
-    if (formik?.values?.serials?.length) {
-      const serials = formik?.values?.serials
+    if (formik?.values?.items?.length) {
+      const itemsList = formik?.values?.items
 
-      const metalMap = serials.reduce((acc, { metalId, weight, metalRef }) => {
+      const metalMap = itemsList.reduce((acc, { metalId, weight, metalRef }) => {
         if (metalId) {
           if (!acc[metalId]) {
             acc[metalId] = { metal: metalRef, pcs: 0, totalWeight: 0 }
@@ -505,7 +510,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
       var seqNo = 0
 
-      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
+      const itemMap = itemsList.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
         if (itemId) {
           if (!acc[itemId]) {
             seqNo++
@@ -523,10 +528,10 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
         Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo)
       )
     }
-  }, [formik?.values?.serials])
+  }, [formik?.values?.items])
 
-  function calculateTotalWeightFromSerials(serials) {
-    return serials.reduce(
+  function calculateTotalWeightFromSerials(items) {
+    return items.reduce(
       (acc, row) => {
         const weight = parseFloat(row.weight) || 0
         acc.totalWeight += weight
@@ -538,37 +543,39 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   }
 
     useEffect(() => {
-    if (!formik.values.serials?.length) return
-    const totals = calculateTotalWeightFromSerials(formik.values.serials)
+    if (!formik.values.items?.length) return
+    const totals = calculateTotalWeightFromSerials(formik.values.items)
 
-    formik.setFieldValue('totalWeight', totals.totalWeight || 0)
+    formik.setFieldValue('header.totalWeight', totals.totalWeight || 0)
 
-  }, [formik.values.serials])
+  }, [formik.values.items])
 
   useEffect(() => {
     ;(async function () {
       if (formik?.values?.recordId) await refetchForm(formik?.values?.recordId)
-      else formik.setFieldValue('fromSiteId', defUserSiteId || defSiteId || null)    
+      else formik.setFieldValue('header.fromSiteId', defUserSiteId || defSiteId || null)    
     })()
   }, [])
 
   useEffect(() => {
-    if (formik?.values?.dtId) onChangeDtId(formik?.values?.dtId)
-  }, [formik?.values?.dtId])
+    if (!recordId && formik?.values?.header?.dtId) onChangeDtId(formik?.values?.header?.dtId)
+  }, [formik?.values?.header?.dtId])
 
   async function onValidationRequired() {
-    if (Object.keys(await formik.validateForm()).length) {
-      const errors = await formik.validateForm()
+    const errors = await formik.validateForm()
 
-      const touchedFields = Object.keys(errors).reduce((acc, key) => {
-        if (!formik.touched[key]) {
-          acc[key] = true
+    if (errors.header && Object.keys(errors.header).length) {
+      const touchedFields = {
+        header: { ...formik.touched.header }
+      }
+
+      Object.keys(errors.header).forEach(key => {
+        if (!formik.touched.header || !formik.touched.header[key]) {
+          touchedFields.header[key] = true
         }
+      })
 
-        return acc
-      }, {})
-
-      if (Object.keys(touchedFields).length) formik.setTouched(touchedFields, true)
+      formik.setTouched(touchedFields, true)
     }
   }
 
@@ -593,7 +600,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                   <ResourceComboBox
                     endpointId={InventoryRepository.DraftTransfer.pack}
                     reducer={response => response?.record?.documentTypes}
-                    name='dtId'
+                    name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -602,97 +609,98 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    values={formik.values}
+                    values={formik.values?.header}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.DraftTransfer.pack}
                     reducer={response => response?.record?.sites}
-                    name='fromSiteId'
-                    readOnly={isPosted || formik?.values?.serials?.some(serial => serial.srlNo)}
+                    name='header.fromSiteId'
+                    readOnly={isPosted || formik?.values?.items?.some(serial => serial.srlNo)}
                     label={labels.fromSite}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    values={formik.values}
+                    values={formik.values.header}
                     required
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('fromSiteId', !newValue?.isInactive ? newValue?.recordId : null)
+                      formik.setFieldValue('header.fromSiteId', !newValue?.isInactive ? newValue?.recordId : null)
                       if (newValue?.isInactive)
                         stackError({
                           message: labels.inactiveSite
                         })
                     }}
-                    error={formik.touched.fromSiteId && Boolean(formik.errors.fromSiteId)}
+                    error={formik.touched?.header?.fromSiteId && Boolean(formik.errors?.header?.fromSiteId)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.reference}
-                    value={formik?.values?.reference}
+                    value={formik?.values?.header?.reference}
                     maxAccess={!editMode && maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    onClear={() => formik.setFieldValue('header.reference', '')}
+                    error={formik.touched?.header?.reference && Boolean(formik.errors?.header?.reference)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.DraftTransfer.pack}
                     reducer={response => response?.record?.sites}
-                    name='toSiteId'
+                    name='header.toSiteId'
                     readOnly={isPosted}
                     label={labels.toSite}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    values={formik.values}
+                    values={formik.values.header}
                     required
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('toSiteId', !newValue?.isInactive ? newValue?.recordId : null)
+                      formik.setFieldValue('header.toSiteId', !newValue?.isInactive ? newValue?.recordId : null)
                       if (newValue?.isInactive) 
                         stackError({
                           message: labels.inactiveSite
                         })
                     }}
-                    error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
+                    error={formik.touched?.header?.toSiteId && Boolean(formik.errors?.header?.toSiteId)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     required
                     label={labels.postingDate}
-                    value={formik?.values?.date}
+                    value={formik?.values?.header?.date}
                     onChange={formik.setFieldValue}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', null)}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    max={new Date()}
+                    onClear={() => formik.setFieldValue('header.date', null)}
+                    error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.DraftTransfer.pack}
                     reducer={response => response?.record?.notificationGroups}
-                    name='notificationGroupId'
+                    name='header.notificationGroupId'
                     label={labels.notificationGroup}
                     valueField='recordId'
                     displayField='name'
@@ -701,45 +709,44 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     readOnly={isPosted}
-                    values={formik.values}
+                    values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={(_, newValue) => formik.setFieldValue('notificationGroupId', newValue?.recordId || null)}
-                    error={formik.touched.notificationGroupId && Boolean(formik.errors.notificationGroupId)}
+                    onChange={(_, newValue) => formik.setFieldValue('header.notificationGroupId', newValue?.recordId || null)}
+                    error={formik.touched?.header?.notificationGroupId && Boolean(formik.errors?.header?.notificationGroupId)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.DraftTransfer.pack}
                     reducer={response => response?.record?.carriers}
-                    name='carrierId'
+                    name='header.carrierId'
                     label={labels.carrier}
-                    values={formik.values}
+                    values={formik.values.header}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    required
                     readOnly={editMode}
                     maxAccess={maxAccess}
-                    onChange={(_, newValue) => formik.setFieldValue('carrierId', newValue?.recordId || null)}
-                    error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
+                    onChange={(_, newValue) => formik.setFieldValue('header.carrierId', newValue?.recordId || null)}
+                    error={formik.touched?.header?.carrierId && Boolean(formik.errors?.header?.carrierId)}
                   />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={4}>
               <CustomTextArea
-                name='notes'
+                name='header.notes'
                 label={labels.description}
-                value={formik.values.notes}
+                value={formik.values.header.notes}
                 rows={4}
                 readOnly={isPosted}
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('notes', e.target.value)}
-                onClear={() => formik.setFieldValue('notes', '')}
-                error={formik.touched.notes && Boolean(formik.errors.notes)}
+                onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                onClear={() => formik.setFieldValue('header.notes', '')}
+                error={formik.touched?.header?.notes && Boolean(formik.errors?.header?.notes)}
               />
             </Grid>
           </Grid>
@@ -747,22 +754,22 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
         <Grow>
           <DataGrid
             onChange={(value, action) => {
-              formik.setFieldValue('serials', value)
+              formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
             }}
-            value={formik.values.serials || []}
-            error={formik.errors.serials}
-            columns={serialsColumns}
+            value={formik.values.items || []}
+            error={formik.errors.items}
+            columns={itemColumns}
             showCounterColumn={true}
-            name='serials'
-            initialValues={formik?.initialValues?.serials[0]}
+            name='items'
+            initialValues={formik?.initialValues?.items[0]}
             enableFilters
             maxAccess={maxAccess}
-            disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
+            disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'items').length > 0}
             allowDelete={!isPosted}
             allowAddNewLine={
-              formik.values?.serials?.length === 0 ||
-              !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo
+              formik.values?.items?.length === 0 ||
+              !!formik.values?.items?.[formik.values?.items?.length - 1]?.srlNo
             }
             autoDelete={autoDelete}
             onValidationRequired={onValidationRequired}
@@ -789,13 +796,13 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
             </Grid>
           </Grid>
           <Grid item xs={4}>
-            <Grid container spacing={2}>
+            <Grid container>
               <Grid item xs={12} sx={{ mt: 2 }}>
                 <CustomNumberField
-                  name='totalWeight'
+                  name='header.totalWeight'
                   maxAccess={maxAccess}
                   label={labels.totalWeight}
-                  value={formik.values.totalWeight}
+                  value={formik.values.header.totalWeight}
                   readOnly
                 />
               </Grid>
