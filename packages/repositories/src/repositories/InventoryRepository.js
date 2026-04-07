@@ -377,5 +377,5 @@ export const InventoryRepository = {
   },
   DimensionGroupElement: {
     qry: service + 'qryDIGE',
-  },
+  }
 }
