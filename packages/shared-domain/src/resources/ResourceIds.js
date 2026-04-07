@@ -630,6 +630,7 @@ export const ResourceIds = {
   PurchaseOrderDTD: 50109,
   AccountReconciliations: 40315,
   Reconciliation: 31332,
+  DimensionGroup: 41120,
   Dimensions: 41121,
 
   // GL
