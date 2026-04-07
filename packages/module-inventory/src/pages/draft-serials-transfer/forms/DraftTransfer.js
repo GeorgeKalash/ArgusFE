@@ -763,7 +763,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    required
                     readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
