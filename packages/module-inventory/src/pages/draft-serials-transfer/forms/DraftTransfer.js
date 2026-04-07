@@ -48,12 +48,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     endpointId: InventoryRepository.DraftTransfer.page
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
   const defUserSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
   const defSiteId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
@@ -90,7 +84,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       metalGridData: [],
       itemGridData: []
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
       fromSiteId: yup.string().required(),
@@ -585,7 +578,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   }, [])
 
   useEffect(() => {
-    if (formik?.values?.dtId) {
+    if (!recordId && formik?.values?.dtId) {
       onChangeDtId(formik?.values?.dtId)
     }
   }, [formik?.values?.dtId])
@@ -730,6 +723,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     editMode={editMode}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
+                    max={new Date()}
                     onClear={() => formik.setFieldValue('date', '')}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                   />
@@ -769,7 +763,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    required
                     readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {

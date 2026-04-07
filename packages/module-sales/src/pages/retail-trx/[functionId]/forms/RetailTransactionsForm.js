@@ -1232,20 +1232,12 @@ export default function RetailTransactionsForm({
       retailTrxItems?.items?.map(async (item, index) => {
         const taxDetails = await getTaxDetails(item?.taxId)
 
-        const getItems = getItemPriceRow(
-          {
-            ...item,
-            id: index + 1,
-            qty: parseFloat(item.qty).toFixed(2),
-            unitPrice: parseFloat(item.unitPrice).toFixed(2),
-            extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-            priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
-            taxDetails
-          },
-          DIRTYFIELD_BASE_PRICE
-        )
-
-        return getItems
+        return {
+          ...item,
+          id: index + 1,
+          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
+          taxDetails
+        }
       })
     )
     formik.setFieldValue('items', modifiedItemsList)
