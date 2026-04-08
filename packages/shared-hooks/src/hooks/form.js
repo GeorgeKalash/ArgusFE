@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from '@argus/shared-utils/src/utils/maxAccess'
 import * as yup from 'yup'
 
@@ -45,6 +45,9 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
 
     return yup.object().shape(updatedSchema)
   }
+
+  
+  const { key, value, reference } = documentType
 
   const formik = useFormik({
     ...formikProps,
@@ -120,11 +123,13 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 
-  const { key, value, reference } = documentType
+  console.log(key , value , formik.values[key] , value)
+    useLayoutEffect(() => {
+    if (!key || value == null) return
+    if (formik.values[key] === value) return
 
-  useEffect(() => {
-    if (key && value && formik.values[key] !== value) formik.setFieldValue(key, value)
-  }, [value])
+    formik.setFieldValue(key, value, false)
+  }, [key, value])
 
   useEffect(() => {
     if (reference?.isEmpty) {

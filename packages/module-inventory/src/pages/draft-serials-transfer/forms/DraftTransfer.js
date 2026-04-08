@@ -56,7 +56,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId,
-      dtId: null,
+      dtId: documentType?.dtId,
       reference: '',
       date: new Date(),
       fromSiteId: defUserSiteId || defSiteId || null,
@@ -582,11 +582,12 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   }, [])
 
   useEffect(() => {
-    if (!recordId && formik?.values?.dtId) {
+    console.log(!recordId , formik.values.dtId)
+    if (!recordId && formik.values.dtId) {
       console.log(formik?.values?.dtId, 'formik?.values?.dtId')
       onChangeDtId(formik?.values?.dtId)
     }
-  }, [formik?.values?.dtId])
+  }, [formik.values.dtId])
 
   async function onValidationRequired() {
     if (Object.keys(await formik.validateForm()).length) {
@@ -809,7 +810,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
             columns={serialsColumns}
             showCounterColumn={true}
             name='serials'
-            initialValues={formik?.initialValues?.serials[0]}
+            initialValues={formik?.initialValues?.serials?.[0]}
             enableFilters
             maxAccess={maxAccess}
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
