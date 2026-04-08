@@ -94,6 +94,11 @@ const CustomTextField = ({
   const handleInput = e => {
     const inputValue = e.target.value
 
+    if (props?.preventSpace) {
+      e.target.value = inputValue.replace(/\s/g, '')
+      props?.onChange(e)
+    }
+
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
       const truncatedValue = inputValue.slice(0, maxLength)
       e.target.value = truncatedValue
@@ -158,18 +163,6 @@ const CustomTextField = ({
       fullWidth={fullWidth}
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
-      onPaste={e => {
-        if (props?.preventSpace) {
-          e.preventDefault()
-          const text = e.clipboardData.getData('text').replace(/\s/g, '')
-          props?.onChange({
-            target: {
-              name: props.name,
-              value: `${e.target.value}${text}`
-            }
-          })
-        }
-      }}
       onBlur={() => {
         setIsFocused(false)
         setFocus(false)
@@ -193,7 +186,6 @@ const CustomTextField = ({
       autoComplete={autoComplete}
       onInput={handleInput}
       onKeyDown={e => {
-        if (props?.preventSpace && e.key === ' ') return e.preventDefault()
         e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true)
       }}
       InputProps={{
