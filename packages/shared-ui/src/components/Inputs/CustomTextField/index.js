@@ -158,6 +158,18 @@ const CustomTextField = ({
       fullWidth={fullWidth}
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
+      onPaste={e => {
+        if (props?.preventSpace) {
+          e.preventDefault()
+          const text = e.clipboardData.getData('text').replace(/\s/g, '')
+          props?.onChange({
+            target: {
+              name: props.name,
+              value: `${e.target.value}${text}`
+            }
+          })
+        }
+      }}
       onBlur={() => {
         setIsFocused(false)
         setFocus(false)
