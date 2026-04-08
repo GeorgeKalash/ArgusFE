@@ -713,7 +713,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       recordId: pack.header.recordId || null,
       header: {
         ...pack.header,
-        plId: defplId,
         date : formatDateFromApi(pack.header?.date)
       },
       items: modifiedList,
@@ -818,16 +817,14 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (!defplId)
-        stackError({
-          message: labels.noSelectedplId
-        })
-
-      await loadTaxDetails()
-
-      if (recordId) {
-        await refetchForm(recordId)
+      if (recordId) await refetchForm(recordId)
+      else{
+        if (!defplId)
+            stackError({
+              message: labels.noSelectedplId
+            })
       }
+      await loadTaxDetails()
     })()
   }, [])
 
@@ -1086,6 +1083,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                     formik.setFieldValue('header.isVattable', newValue?.isSubjectToVAT || false)
                     formik.setFieldValue('header.taxId', newValue?.taxId || null)
                     formik.setFieldValue('header.clientId', newValue?.recordId || null)
+                    formik.setFieldValue('header.plId', newValue?.plId || defplId || null)
                   }}
                   errorCheck={'header.clientId'}
                   secondFieldName={'header.clientName'}
