@@ -14,7 +14,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
-import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function DimensionGroupForm({ recordId, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,7 +25,7 @@ export default function DimensionGroupForm({ recordId, labels, maxAccess }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId,
+      recordId: null,
       header: {
         name: '',
       },
@@ -51,7 +50,6 @@ export default function DimensionGroupForm({ recordId, labels, maxAccess }) {
         header: obj.header,
         items: obj.items.map((item) => ({
           ...item,
-          groupId: obj.header.id,
         }))
       }
 
@@ -74,12 +72,14 @@ export default function DimensionGroupForm({ recordId, labels, maxAccess }) {
       if (recordId) {
         const res = await getRequest({
           extension: InventoryRepository.DimensionGroup.get2,
-          parameters: `_id=${recordId}`
+          parameters: `_recordId=${recordId}`
         })
 
         formik.setValues({
-          recordId: res.record.header.id,
-          ...res?.record,
+          recordId: res?.record?.header?.recordId,
+          header: {
+            ...res?.record.header,
+          },
           items: res.record.items.map((item, index) => ({
             ...item,
             id: index
@@ -117,20 +117,6 @@ export default function DimensionGroupForm({ recordId, labels, maxAccess }) {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='header.id'
-                label={labels.id}
-                value={formik.values.header.id}
-                onChange={formik.handleChange}
-                maxLength='3'
-                required
-                decimalScale={0}
-                readOnly={editMode}
-                onClear={() => formik.setFieldValue('header.id', null)}
-                error={formik.touched.header?.id && Boolean(formik.errors.header?.id)}
-              />
-            </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='header.name'

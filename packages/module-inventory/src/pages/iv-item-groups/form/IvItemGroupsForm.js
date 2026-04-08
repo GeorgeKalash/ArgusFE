@@ -171,11 +171,11 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
                 name='dmgId'
                 label={labels.dimensionGroup}
                 values={formik.values}
-                valueField='id'
+                valueField='recordId'
                 displayField='name'
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('dmgId', newValue?.id || null)
+                  formik.setFieldValue('dmgId', newValue?.recordId || null)
                 }}
                 error={formik.touched.dmgId && Boolean(formik.errors.dmgId)}
               />

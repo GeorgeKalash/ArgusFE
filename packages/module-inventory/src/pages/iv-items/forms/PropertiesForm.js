@@ -124,25 +124,23 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
         item => item.value !== '' && item.value !== undefined && item.value !== null
       )
 
-      if (filteredData?.length > 0) {
-        await postRequest({
-          extension: InventoryRepository.DimensionId.set,
-          record: JSON.stringify({
-            itemId: recordId,
-            data: filteredData
-          })
+      await postRequest({
+        extension: InventoryRepository.DimensionId.set,
+        record: JSON.stringify({
+          itemId: recordId,
+          data: filteredData
         })
-      }
+      })
+    
 
-      if (filteredUdtData?.length > 0) {
-        await postRequest({
-          extension: InventoryRepository.DimensionUDT.set,
-          record: JSON.stringify({
-            itemId: recordId,
-            data: filteredUdtData
-          })
+      await postRequest({
+        extension: InventoryRepository.DimensionUDT.set,
+        record: JSON.stringify({
+          itemId: recordId,
+          data: filteredUdtData
         })
-      }
+      })
+      
       toast.success(platformLabels.Edited)
     }
   })

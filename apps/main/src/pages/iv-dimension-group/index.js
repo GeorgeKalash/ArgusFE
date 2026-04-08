@@ -65,7 +65,7 @@ const DimensionGroup = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.id)
+    openForm(obj?.recordId)
   }
 
   const add = () => {
