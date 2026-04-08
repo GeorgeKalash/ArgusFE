@@ -18,7 +18,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import dayjs from 'dayjs'
 import { formatTimeToApi } from '@argus/shared-domain/src/lib/date-helper'
 
-export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, invalidate }) {
+export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayId, mode, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -119,7 +119,6 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
       )
     })
   }
-  console.log('formik',formik)
   
   const columns = [
     {
@@ -142,7 +141,7 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
   ]
    
   useEffect(() => {
-    fetchForm()
+    if (mode != 'newMode') fetchForm()
   }, [])
 
   return (
