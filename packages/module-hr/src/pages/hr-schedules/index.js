@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useRef } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
@@ -21,6 +21,7 @@ export default function Schedules(){
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const scheduleId = useRef(null)
 
   const {
     query: { data },
@@ -94,7 +95,8 @@ export default function Schedules(){
         Component: Employees,
         props: {
           labels,
-          maxAccess: access
+          maxAccess: access,
+          scheduleId: scheduleId.current
         },
         width: 850,
         height: 650,
@@ -126,6 +128,7 @@ export default function Schedules(){
           onDelete={del}
           pageSize={50}
           maxAccess={access}
+          onSelectionChange={row => scheduleId.current = row?.recordId}
         />
       </Grow>
     </VertLayout>

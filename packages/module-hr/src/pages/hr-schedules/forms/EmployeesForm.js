@@ -6,39 +6,35 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 
 export default function Employees({labels, scheduleId, maxAccess}){
   const { getRequest } = useContext(RequestsContext)
-
-//   const {
-//     query: { data },
-//     paginationParameters,
-//     refetch,
-//   } = useResourceQuery({
-//     queryFn: fetchGridData,
-//     endpointId: EmployeeRepository.Employee.qry,
-//     datasetId: ResourceIds.AttendanceSchedule
-//   })
+  const {
+    query: { data },
+    refetch,
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: EmployeeRepository.Employee.page,
+    datasetId: ResourceIds.AttendanceSchedule,
+    enabled: Boolean(scheduleId),
+  })
 
   async function fetchGridData(options = {}) {
-    // const { _startAt = 0, _pageSize = 50 } = options
-    // const response = await getRequest({
-    //   extension: EmployeeRepository.Employee.qry,
-    //   parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    // })
+    const { _startAt = 0, _pageSize = 50 } = options
+    const response = await getRequest({
+      extension: EmployeeRepository.Employee.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=8|${scheduleId}`
+    })
 
-    // return { ...response, _startAt: _startAt }
-    return {list:[]}
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
     {
-      field: 'name.fullName',
+      field: 'fullName',
       headerName: labels.name,
       flex: 1
     },
@@ -67,10 +63,10 @@ export default function Employees({labels, scheduleId, maxAccess}){
       <Grow>
         <Table
           columns={columns}
-          gridData={{list:[]}}
+          gridData={data}
           rowId={['recordId']}
           paginationType='api'
-         // refetch={refetch}
+          refetch={refetch}
           pageSize={50}
           maxAccess={maxAccess}
         />
