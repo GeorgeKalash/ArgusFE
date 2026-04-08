@@ -818,12 +818,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   useEffect(() => {
     ;(async function () {
       if (recordId) await refetchForm(recordId)
-      else{
-        if (!defplId)
-            stackError({
-              message: labels.noSelectedplId
-            })
-      }
       await loadTaxDetails()
     })()
   }, [])
@@ -1077,13 +1071,19 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                     { key: 'cgName', value: 'Client Group' }
                   ]}
                   onChange={async (_, newValue) => {
-                    formik.setFieldValue('header.clientName', newValue?.name || '')
-                    formik.setFieldValue('header.clientRef', newValue?.reference || '')
-                    formik.setFieldValue('header.accountId', newValue?.accountId || null)
-                    formik.setFieldValue('header.isVattable', newValue?.isSubjectToVAT || false)
-                    formik.setFieldValue('header.taxId', newValue?.taxId || null)
-                    formik.setFieldValue('header.clientId', newValue?.recordId || null)
-                    formik.setFieldValue('header.plId', newValue?.plId || defplId || null)
+                    const noPriceLevelDefined = !newValue?.plId && !defplId
+                    formik.setFieldValue('header.clientName', noPriceLevelDefined ? '' : newValue?.name || '')
+                    formik.setFieldValue('header.clientRef', noPriceLevelDefined ? null : newValue?.reference || '')
+                    formik.setFieldValue('header.accountId', noPriceLevelDefined ? null : newValue?.accountId || null)
+                    formik.setFieldValue('header.isVattable', noPriceLevelDefined ? false : newValue?.isSubjectToVAT || false)
+                    formik.setFieldValue('header.taxId', noPriceLevelDefined ? null : newValue?.taxId || null)
+                    formik.setFieldValue('header.plId', noPriceLevelDefined ? null : newValue?.plId || defplId || null)
+                    formik.setFieldValue('header.clientId', noPriceLevelDefined ? null : newValue?.recordId || null)
+
+                    if(noPriceLevelDefined && newValue?.recordId)
+                      stackError({
+                      message: labels.noPriceLevelDefined
+                    })
                   }}
                   errorCheck={'header.clientId'}
                   secondFieldName={'header.clientName'}
