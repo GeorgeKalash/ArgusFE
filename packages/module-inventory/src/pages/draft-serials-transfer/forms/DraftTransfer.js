@@ -56,7 +56,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId,
-      dtId: documentType?.dtId,
+      dtId: null,
       reference: '',
       date: new Date(),
       fromSiteId: defUserSiteId || defSiteId || null,
@@ -498,8 +498,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       parameters: `_dtId=${recordId}`
     })
 
-    console.log(dtd?.record?.carrierId, 'dtd?.record?.carrierId')
-
     formik.setFieldValue('carrierId', dtd?.record?.carrierId || null)
     formik.setFieldValue('fromSiteId', dtd?.record?.siteId || formik?.values?.fromSiteId || null)
     formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || formik?.values?.toSiteId || null)
@@ -582,9 +580,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   }, [])
 
   useEffect(() => {
-    console.log(!recordId , formik.values.dtId)
     if (!recordId && formik.values.dtId) {
-      console.log(formik?.values?.dtId, 'formik?.values?.dtId')
       onChangeDtId(formik?.values?.dtId)
     }
   }, [formik.values.dtId])
@@ -606,10 +602,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       }
     }
   }
-
-  
-
-  console.log(formik, 'formik')
 
   return (
     <FormShell
