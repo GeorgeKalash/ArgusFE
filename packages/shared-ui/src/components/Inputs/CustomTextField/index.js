@@ -94,6 +94,11 @@ const CustomTextField = ({
   const handleInput = e => {
     const inputValue = e.target.value
 
+    if (props?.preventSpace) {
+      e.target.value = inputValue.replace(/\s/g, '')
+      props?.onChange(e)
+    }
+
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
       const truncatedValue = inputValue.slice(0, maxLength)
       e.target.value = truncatedValue
