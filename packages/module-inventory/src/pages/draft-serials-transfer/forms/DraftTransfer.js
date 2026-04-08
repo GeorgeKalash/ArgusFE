@@ -498,10 +498,13 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       parameters: `_dtId=${recordId}`
     })
 
+    console.log(dtd?.record?.carrierId, 'dtd?.record?.carrierId')
+
     formik.setFieldValue('carrierId', dtd?.record?.carrierId || null)
     formik.setFieldValue('fromSiteId', dtd?.record?.siteId || formik?.values?.fromSiteId || null)
     formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || formik?.values?.toSiteId || null)
   }
+
 
   useEffect(() => {
     if (formik?.values?.serials?.length) {
@@ -580,6 +583,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
   useEffect(() => {
     if (!recordId && formik?.values?.dtId) {
+      console.log(formik?.values?.dtId, 'formik?.values?.dtId')
       onChangeDtId(formik?.values?.dtId)
     }
   }, [formik?.values?.dtId])
@@ -601,6 +605,10 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       }
     }
   }
+
+  
+
+  console.log(formik, 'formik')
 
   return (
     <FormShell
