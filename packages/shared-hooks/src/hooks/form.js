@@ -123,8 +123,11 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 
-  useEffect(() => {
-    if (key && value && formik.values[key] !== value) formik.setFieldValue(key, value, false)
+  useLayoutEffect(() => {
+    if (!key || value == null) return
+    if (formik.values[key] === value) return
+
+    formik.setFieldValue(key, value, false)
   }, [key, value])
 
   useEffect(() => {
