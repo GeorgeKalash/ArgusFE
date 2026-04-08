@@ -46,16 +46,9 @@ export default function DimensionGroupForm({ recordId, labels, maxAccess }) {
         .required()
     }),
     onSubmit: async obj => {
-      const payload = {
-        header: obj.header,
-        items: obj.items.map((item) => ({
-          ...item,
-        }))
-      }
-
       const response = await postRequest({
         extension: InventoryRepository.DimensionGroup.set2,
-        record: JSON.stringify(payload)
+        record: JSON.stringify(obj)
       })
 
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
@@ -77,12 +70,10 @@ export default function DimensionGroupForm({ recordId, labels, maxAccess }) {
 
         formik.setValues({
           recordId: res?.record?.header?.recordId,
-          header: {
-            ...res?.record.header,
-          },
+          header: res?.record.header,
           items: res.record.items.map((item, index) => ({
             ...item,
-            id: index
+            id: index + 1
           })) || []
         })
       }
