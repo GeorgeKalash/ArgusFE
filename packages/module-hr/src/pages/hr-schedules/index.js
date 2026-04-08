@@ -96,8 +96,8 @@ export default function Schedules(){
           labels,
           maxAccess: access
         },
-        width: 800,
-        height: 500,
+        width: 850,
+        height: 650,
         title: labels.employee
       })
     }
