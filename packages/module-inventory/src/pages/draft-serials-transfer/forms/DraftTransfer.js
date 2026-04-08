@@ -61,6 +61,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       date: new Date(),
       fromSiteId: defUserSiteId || defSiteId || null,
       toSiteId: null,
+      carrierId: null,
       notes: '',
       status: 1,
       totalWeight: 0,
@@ -766,7 +767,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('carrierId', newValue?.recordId)
+                      formik.setFieldValue('carrierId', newValue?.recordId || null)
                     }}
                     error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
                   />
