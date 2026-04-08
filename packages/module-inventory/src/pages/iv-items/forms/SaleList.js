@@ -79,7 +79,8 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
             .map(item => ({
               ...item,
-              itemId: recordId
+              itemId: recordId,
+              muId: item.muId || 0
             }))
         })
       })
