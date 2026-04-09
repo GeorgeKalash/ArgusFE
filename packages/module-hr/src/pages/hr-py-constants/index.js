@@ -10,10 +10,10 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
-import DimensionsForm from './Forms/DimensionsForm'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
+import HRPayrollConstantForm from './Forms/HRPayrollConstantForm'
 
-const Dimensions = () => {
+const HRPayrollConstant = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,7 +22,7 @@ const Dimensions = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.Dimensions.page,
+      extension: PayrollRepository.PayrollConstant.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
@@ -38,20 +38,21 @@ const Dimensions = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Dimensions.page,
-    datasetId: ResourceIds.Dimensions
+    endpointId: PayrollRepository.PayrollConstant.page,
+    datasetId: ResourceIds.PayrollConstant
   })
 
   const columns = [
     {
-      field: 'id',
-      headerName: labels.id,
-      flex: 1
+        field: 'reference',
+        headerName: labels.reference,
+        flex: 1
     },
     {
-      field: 'name',
-      headerName: labels.name,
-      flex: 2
+      field: 'value',
+      headerName: labels.value,
+      flex: 1,
+      type: 'number'
     }
   ]
 
@@ -61,29 +62,29 @@ const Dimensions = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: InventoryRepository.Dimensions.del,
+      extension: PayrollRepository.PayrollConstant.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(id) {
+  function openForm(reference) {
     stack({
-      Component: DimensionsForm,
+      Component: HRPayrollConstantForm,
       props: {
         labels,
-        id,
+        recordId: reference,
         maxAccess: access
       },
       width: 500,
-      height: 200,
-      title: labels.Dimensions
+      height: 250,
+      title: labels.PayrollConstant
     })
   }
 
   const edit = obj => {
-    openForm(obj?.id)
+    openForm(obj?.reference)
   }
 
   return (
@@ -96,7 +97,7 @@ const Dimensions = () => {
           name='table'
           columns={columns}
           gridData={data}
-          rowId={['id']}
+          rowId={['reference']}
           onEdit={edit}
           onDelete={del}
           pageSize={50}
@@ -110,4 +111,4 @@ const Dimensions = () => {
   )
 }
 
-export default Dimensions
+export default HRPayrollConstant

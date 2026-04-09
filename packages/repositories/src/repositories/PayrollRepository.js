@@ -104,5 +104,11 @@ export const PayrollRepository = {
   },
   Formula: {
     qry: service + 'qryFLA'
+  },
+  PayrollConstant: {
+    set: service + 'setCON',
+    del: service + 'delCON',
+    get: service + 'getCON',
+    page: service + 'pageCON'
   }
 }
