@@ -15,12 +15,13 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import { Grid } from '@mui/material'
 import Employees from './forms/EmployeesForm'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
-
+import { useError } from '@argus/shared-providers/src/providers/error'
 
 export default function Schedules(){
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
   const scheduleId = useRef(null)
 
   const {
@@ -39,7 +40,7 @@ export default function Schedules(){
     const { _startAt = 0, _pageSize = 50 } = options
     const response = await getRequest({
       extension: TimeAttendanceRepository.Schedule.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -91,18 +92,24 @@ export default function Schedules(){
   }
 
   function openEmployeesSchedule() {
-      stack({
-        Component: Employees,
-        props: {
-          labels,
-          maxAccess: access,
-          scheduleId: scheduleId.current
-        },
-        width: 850,
-        height: 650,
-        title: labels.employee
-      })
+    if (!scheduleId.current){
+      stackError({ message: labels.noSchedule })
+
+      return
     }
+
+    stack({
+      Component: Employees,
+      props: {
+        labels,
+        maxAccess: access,
+        scheduleId: scheduleId.current
+      },
+      width: 850,
+      height: 650,
+      title: labels.employee
+    })
+  }
   
   return (
     <VertLayout>
@@ -119,6 +126,7 @@ export default function Schedules(){
       </Fixed>
       <Grow>
         <Table
+          name='scheduleTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

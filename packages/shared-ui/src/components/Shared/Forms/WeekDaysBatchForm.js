@@ -41,9 +41,10 @@ export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayI
         lastOut: null
       },
       items:[{
+        id: 1,
         scId: scheduleId,
         dow: dayId,
-        seqNo: 0,
+        seqNo: 1,
         name: '',
         start: null,
         end: null
@@ -75,7 +76,9 @@ export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayI
           extension: TimeAttendanceRepository.ScheduleDay.set,
           record: JSON.stringify(
             {
-              ...values?.header, 
+              ...values?.header,
+              scId: scheduleId,
+              dow: dayId,  
               firstIn: values?.header?.firstIn ? formatTimeToApi(values.header.firstIn) : null,
               lastOut: values?.header?.lastOut ? formatTimeToApi(values.header.lastOut) : null
             })

@@ -13,7 +13,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 
-export default function ScheduleForm({ labels, maxAccess, recordId }) {
+export default function ScheduleForm({ labels, maxAccess, recordId, setUpdatedRecordId}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -40,6 +40,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId }) {
       if (!obj.recordId) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', response.recordId)
+        setUpdatedRecordId(response.recordId)
       } else toast.success(platformLabels.Edited)
 
       invalidate()
@@ -60,7 +61,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.AttendanceSchedule} form={formik} maxAccess={maxAccess} editMode={formik.values.recordId}>
+    <FormShell resourceId={ResourceIds.AttendanceSchedule} form={formik} maxAccess={maxAccess} editMode={formik.values.recordId} isCleared={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

@@ -1,12 +1,9 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 
@@ -57,11 +54,9 @@ export default function Employees({labels, scheduleId, maxAccess}){
 
   return (
     <VertLayout>
-      <Fixed>
-        <GridToolbar maxAccess={maxAccess} />
-      </Fixed>
       <Grow>
         <Table
+          name='employeesTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

@@ -10,14 +10,14 @@ export default function SalaryWindow({ labels, maxAccess, recordId}) {
 
   const tabs = [
     { label: labels.schedule },
-    { label: labels.days, disabled: !updatedRecordId },
+    { label: labels.days, disabled: !updatedRecordId }
   ]
 
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
       <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
-        <ScheduleForm recordId={updatedRecordId} maxAccess={maxAccess} labels={labels}/>
+        <ScheduleForm recordId={updatedRecordId} setUpdatedRecordId={setUpdatedRecordId} maxAccess={maxAccess} labels={labels}/>
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <WeekDaysTab recordId={updatedRecordId}  maxAccess={maxAccess} labels={labels}/>

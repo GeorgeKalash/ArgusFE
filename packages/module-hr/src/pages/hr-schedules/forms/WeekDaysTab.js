@@ -42,24 +42,28 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
 
   const fetchGridData = async () => {
     const [weekDays, response] = await Promise.all([
-        getWeekDays(),
-        getRequest({
+      getWeekDays(),
+      getRequest({
         extension: TimeAttendanceRepository.ScheduleDay.qry,
         parameters: `_scId=${recordId}`
-        })
+      })
     ])
 
-     const weekDaysMap = Object.fromEntries(
-        weekDays.map(day => [Number(day?.key), day?.value])
-    )
+    const modifiedList = weekDays.map(day => {
+      const matched = (response?.list || []).find(item => Number(item.dow) === Number(day.key))
 
-    const modifiedList = (response?.list || []).map(item => ({
-        ...item,
-        dowName: weekDaysMap[item.dow] ||  null,
-        duration: formatDuration(item.duration, item.firstIn, item.lastOut)
-    }))
+      return {
+        dow: Number(day.key),
+        dowName: day.value,
+        duration: matched
+          ? formatDuration(matched.duration, matched.firstIn, matched.lastOut)
+          : null,
+        firstIn: matched?.firstIn || null,
+        lastOut: matched?.lastOut || null
+      }
+    })
 
-    return {list: modifiedList || []}
+    return { list: modifiedList }
   }
 
   const {
@@ -133,6 +137,7 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
     <VertLayout>
       <Grow>
         <Table
+          name='weekDaysTable'
           columns={columns}
           gridData={data ? data : { list: [] }}
           rowId={['recordId']}
