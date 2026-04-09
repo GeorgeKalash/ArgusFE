@@ -67,7 +67,8 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
         toSiteId: null,
         notes: '',
         status: 1,
-        totalWeight: 0
+        totalWeight: 0,
+        carrierId: null
       },
       items: [
         {
