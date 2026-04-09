@@ -46,8 +46,6 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     return yup.object().shape(updatedSchema)
   }
 
-  
-  const { key, value, reference } = documentType
 
   const formik = useFormik({
     ...formikProps,
@@ -123,12 +121,13 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 
-  useLayoutEffect(() => {
-    if (!key || value == null) return
-    if (formik.values[key] === value) return
+  const { key, value, reference } = documentType
 
-    formik.setFieldValue(key, value, false)
-  }, [key, value])
+  useLayoutEffect(() => {
+    if (!key || value == null || formik.values[key] === value) return
+
+    formik.setFieldValue(key, value)
+  }, [value])
 
   useEffect(() => {
     if (reference?.isEmpty) {

@@ -503,7 +503,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || formik?.values?.toSiteId || null)
   }
 
-
   useEffect(() => {
     if (formik?.values?.serials?.length) {
       const serials = formik?.values?.serials
@@ -580,10 +579,10 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   }, [])
 
   useEffect(() => {
-    if (!recordId && formik.values.dtId) {
+    if (!recordId && formik?.values?.dtId) {
       onChangeDtId(formik?.values?.dtId)
     }
-  }, [formik.values.dtId])
+  }, [formik?.values?.dtId])
 
   async function onValidationRequired() {
     if (Object.keys(await formik.validateForm()).length) {
