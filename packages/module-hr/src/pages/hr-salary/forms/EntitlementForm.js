@@ -141,6 +141,52 @@ export default function EntitlementForm({
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={EmployeeRepository.EmployeeDeduction.qry}
+              name='edId'
+              label={labels.entitlement}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              filter={item => item.type == 1}
+              onChange={(_, newValue) => formik.setFieldValue('edId', newValue?.recordId || null)}
+              required
+              maxAccess={maxAccess}
+              error={formik.touched.edId && Boolean(formik.errors.edId)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='includeInTotal'
+              value={formik.values?.includeInTotal}
+              onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
+              label={labels.includeInTotal}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='isTaxable'
+              value={formik.values?.isTaxable}
+              onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
+              label={labels.isTaxable}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextArea
+              name='comments'
+              label={labels.comments}
+              value={formik.values.comments}
+              maxLength='100'
+              rows={2}
+              maxAccess={maxAccess}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('comments', '')}
+              error={formik.touched.comments && Boolean(formik.errors.comments)}
+            />
+          </Grid>
+          <Grid item xs={12}>
             <CustomCheckBox
               name='isFormula'
               value={formik.values?.isFormula}
@@ -162,32 +208,6 @@ export default function EntitlementForm({
               onChange={(_, newValue) => formik.setFieldValue('formulaId', newValue?.recordId || null)}
               maxAccess={maxAccess}
               error={formik.touched.formulaId && Boolean(formik.errors.formulaId)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={EmployeeRepository.EmployeeDeduction.qry}
-              name='edId'
-              label={labels.entitlement}
-              valueField='recordId'
-              displayField='name'
-              readOnly={formik.values?.isFormula}
-              values={formik.values}
-              filter={item => item.type == 1}
-              onChange={(_, newValue) => formik.setFieldValue('edId', newValue?.recordId || null)}
-              required
-              maxAccess={maxAccess}
-              error={formik.touched.edId && Boolean(formik.errors.edId)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomCheckBox
-              name='includeInTotal'
-              value={formik.values?.includeInTotal}
-              onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
-              label={labels.includeInTotal}
-              readOnly={formik.values?.isFormula}
-              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -229,36 +249,12 @@ export default function EntitlementForm({
               label={labels.amount}
               value={formik.values.fixedAmount}
               onBlur={e => formik.setFieldValue('fixedAmount', parseFloat(e?.target?.value || 0).toFixed(2))}
-              required
+              required={!formik.values?.isFormula}
               allowNegative={false}
               maxAccess={maxAccess}
               readOnly={formik.values.isPct || formik.values?.isFormula}
               onClear={() => formik.setFieldValue('fixedAmount', null)}
               error={formik.touched.fixedAmount && Boolean(formik.errors.fixedAmount)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextArea
-              name='comments'
-              label={labels.comments}
-              value={formik.values.comments}
-              maxLength='100'
-              rows={2}
-              readOnly={formik.values?.isFormula}
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('comments', '')}
-              error={formik.touched.comments && Boolean(formik.errors.comments)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomCheckBox
-              name='isTaxable'
-              value={formik.values?.isTaxable}
-              onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
-              label={labels.isTaxable}
-              maxAccess={maxAccess}
-              readOnly={formik.values?.isFormula}
             />
           </Grid>
           <Grid item xs={12}>
@@ -270,7 +266,7 @@ export default function EntitlementForm({
               displayField='value'
               values={formik.values}
               maxAccess={maxAccess}
-              required
+              required={!formik.values?.isFormula}
               readOnly={formik.values?.isFormula}
               onChange={(_, newValue) => {
                 formik.setFieldValue('dayTypeId', null)

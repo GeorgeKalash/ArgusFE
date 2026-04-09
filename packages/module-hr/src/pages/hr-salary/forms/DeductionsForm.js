@@ -133,6 +133,39 @@ export default function DeductionsForm({
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={EmployeeRepository.EmployeeDeduction.qry}
+              name='edId'
+              label={labels.deduction}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              filter={item => item.type == 2}
+              onChange={(event, newValue) => formik.setFieldValue('edId', newValue?.recordId || null)}
+              maxAccess={maxAccess}
+              required
+              error={formik.touched.edId && Boolean(formik.errors.edId)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='includeInTotal'
+              value={formik.values?.includeInTotal}
+              onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
+              label={labels.includeInTotal}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='isTaxable'
+              value={formik.values?.isTaxable}
+              onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
+              label={labels.isTaxable}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
             <CustomCheckBox
               name='isFormula'
               value={formik.values?.isFormula}
@@ -154,32 +187,6 @@ export default function DeductionsForm({
               onChange={(_, newValue) => formik.setFieldValue('formulaId', newValue?.recordId || null)}
               maxAccess={maxAccess}
               error={formik.touched.formulaId && Boolean(formik.errors.formulaId)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={EmployeeRepository.EmployeeDeduction.qry}
-              name='edId'
-              label={labels.deduction}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              filter={item => item.type == 2}
-              readOnly={formik.values?.isFormula}
-              onChange={(event, newValue) => formik.setFieldValue('edId', newValue?.recordId || null)}
-              maxAccess={maxAccess}
-              required
-              error={formik.touched.edId && Boolean(formik.errors.edId)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomCheckBox
-              name='includeInTotal'
-              value={formik.values?.includeInTotal}
-              onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
-              label={labels.includeInTotal}
-              readOnly={formik.values?.isFormula}
-              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -217,7 +224,7 @@ export default function DeductionsForm({
               label={labels.pct}
               value={formik.values.pct}
               readOnly={!formik.values.isPct || formik.values?.isFormula}
-              required={formik.values.isPct}
+              required={formik.values.isPct || !formik.values?.isFormula}
               onBlur={e => {
                 let pctValue = Number(e.target.value)
                 const amount = calculateFixed(pctValue, 1, salaryInfo.header.basicAmount, salaryInfo.header.eAmount)
@@ -236,22 +243,12 @@ export default function DeductionsForm({
               label={labels.amount}
               value={formik.values.fixedAmount}
               onBlur={e => formik.setFieldValue('fixedAmount', parseFloat(e?.target?.value || 0).toFixed(2))}
-              required
+              required={!formik.values?.isFormula}
               allowNegative={false}
               maxAccess={maxAccess}
               readOnly={formik.values.isPct || formik.values?.isFormula}
               onClear={() => formik.setFieldValue('fixedAmount', null)}
               error={formik.touched.fixedAmount && Boolean(formik.errors.fixedAmount)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomCheckBox
-              name='isTaxable'
-              value={formik.values?.isTaxable}
-              onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
-              label={labels.isTaxable}
-              readOnly={formik.values?.isFormula}
-              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -263,7 +260,7 @@ export default function DeductionsForm({
               displayField='value'
               values={formik.values}
               maxAccess={maxAccess}
-              required
+              required={!formik.values?.isFormula}
               readOnly={formik.values?.isFormula}
               onChange={(_, newValue) => formik.setFieldValue('edCalcType', newValue?.key || null)}
               error={formik.touched.edCalcType && Boolean(formik.errors.edCalcType)}
