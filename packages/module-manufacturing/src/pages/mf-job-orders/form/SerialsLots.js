@@ -33,6 +33,12 @@ export default function SerialsLots({ labels, maxAccess, api, parameters, window
       flex: 1,
       headerName: labels.weight,
       type: 'number'
+    },
+    {
+      field: 'nonMetalWeight',
+      flex: 1,
+      headerName: labels.nonMetalWeight,
+      type: 'number'
     }
   ]
 
