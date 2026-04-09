@@ -758,10 +758,10 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
     const calculatedTotals = calculateDraftTotals(formik.values.items)
 
-    const amount = reCal ? calculatedTotals.amount : formik.values?.header.amount || 0
-    const weight = reCal ? calculatedTotals.weight : formik.values?.header.weight || 0
-    const subtotal = reCal ? calculatedTotals.subtotal.toFixed(2) : formik.values?.header.subtotal || 0
-    const vatAmount = reCal ? calculatedTotals.vatAmount : formik.values?.header.vatAmount || 0
+    const amount = reCal ? calculatedTotals.amount : formik.values?.header?.amount || 0
+    const weight = reCal ? calculatedTotals.weight : formik.values?.header?.weight || 0
+    const subtotal = reCal ? calculatedTotals.subtotal.toFixed(2) : formik.values?.header?.subtotal || 0
+    const vatAmount = reCal ? calculatedTotals.vatAmount : formik.values?.header?.vatAmount || 0
   
 
   useEffect(() => {
@@ -1071,18 +1071,30 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                     { key: 'cgName', value: 'Client Group' }
                   ]}
                   onChange={async (_, newValue) => {
-                    const noPriceLevelDefined = !newValue?.plId && !defplId
-                    formik.setFieldValue('header.clientName', noPriceLevelDefined ? '' : newValue?.name || '')
-                    formik.setFieldValue('header.clientRef', noPriceLevelDefined ? null : newValue?.reference || '')
-                    formik.setFieldValue('header.accountId', noPriceLevelDefined ? null : newValue?.accountId || null)
-                    formik.setFieldValue('header.isVattable', noPriceLevelDefined ? false : newValue?.isSubjectToVAT || false)
-                    formik.setFieldValue('header.taxId', noPriceLevelDefined ? null : newValue?.taxId || null)
-                    formik.setFieldValue('header.plId', noPriceLevelDefined ? null : newValue?.plId || defplId || null)
-                    formik.setFieldValue('header.clientId', noPriceLevelDefined ? null : newValue?.recordId || null)
+                    if (!newValue?.plId && !defplId && newValue?.recordId) {
+                      formik.setFieldValue('header.clientName', '')
+                      formik.setFieldValue('header.clientRef', null)
+                      formik.setFieldValue('header.clientId', null)
 
-                    if(noPriceLevelDefined && newValue?.recordId)
                       stackError({
-                      message: labels.noPriceLevelDefined
+                        message: labels.noPriceLevelDefined
+                      })
+
+                      return
+                    }
+
+                    formik.setValues({
+                      ...formik.values,
+                      header: {
+                        ...formik.values.header,
+                        clientName: newValue?.name || '',
+                        clientRef: newValue?.reference || '',
+                        accountId: newValue?.accountId || null,
+                        isVattable: newValue?.isSubjectToVAT || false,
+                        taxId: newValue?.taxId || null,
+                        plId: newValue?.plId || defplId || null,
+                        clientId: newValue?.recordId || null
+                      }
                     })
                   }}
                   errorCheck={'header.clientId'}
