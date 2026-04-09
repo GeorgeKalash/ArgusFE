@@ -44,6 +44,11 @@ const Dimensions = () => {
 
   const columns = [
     {
+      field: 'id',
+      headerName: labels.id,
+      flex: 1
+    },
+    {
       field: 'name',
       headerName: labels.name,
       flex: 1
