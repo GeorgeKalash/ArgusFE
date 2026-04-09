@@ -102,6 +102,9 @@ export const PayrollRepository = {
   Period: {
     qry: service + 'qryPE'
   },
+  Formula: {
+    qry: service + 'qryFLA'
+  },
   PayrollConstant: {
     set: service + 'setCON',
     del: service + 'delCON',
