@@ -51,7 +51,7 @@ const Dimensions = () => {
     {
       field: 'name',
       headerName: labels.name,
-      flex: 1
+      flex: 2
     }
   ]
 

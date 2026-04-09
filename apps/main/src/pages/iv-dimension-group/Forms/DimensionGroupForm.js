@@ -52,6 +52,7 @@ export default function DimensionGroupForm({ recordId, labels, maxAccess }) {
       })
 
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      formik.setFieldValue('header.recordId', response.recordId)
       formik.setFieldValue('recordId', response.recordId)
 
       invalidate()
