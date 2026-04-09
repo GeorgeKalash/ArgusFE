@@ -37,7 +37,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, window }) => {
     { label: labels.items },
     { label: labels.barcode, disabled: !store.recordId },
     { label: labels.sales, disabled: !store.recordId },
-    { label: labels.properties, disabled: !store.recordId },
+    { label: labels.dimension, disabled: !store.recordId },
     { label: labels.physical, disabled: !store.recordId },
     { label: labels.vendor, disabled: !store.recordId },
     { label: labels.production, disabled: !store.recordId },

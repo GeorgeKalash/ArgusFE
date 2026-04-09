@@ -501,6 +501,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     reducer={response => {
                       return response?.record?.itemGroups
                     }}
+                    readOnly={editMode}
                     values={formik.values}
                     name='groupId'
                     label={labels.itemGroup}
