@@ -11,6 +11,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import toast from 'react-hot-toast'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 
 const PropertiesForm = ({ labels, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -158,49 +159,55 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
             />
             {
               dimensions && dimensions.length > 0 && (
-                <Grid item xs={6}>
-                  {dimensions?.map((dimension, index) => {
-                    const dimensionNumber = dimension.dimensionId
+                
+                  <Grid item xs={6}>
+                    <FieldSet title={labels.dimensions}>
+                    {dimensions?.map((dimension, index) => {
+                      const dimensionNumber = dimension.dimensionId
 
-                    return (
-                      <Grid container mt={0.2} spacing={2} key={index}>
-                        <Grid item xs={12}>
-                          <ResourceComboBox
-                            endpointId={InventoryRepository.Dimension.qry}
-                            parameters={`_dimension=${dimensionNumber}`}
-                            name={`${dimension.dimensionId}`}
-                            label={dimension.dimensionName}
-                            valueField='id'
-                            displayField='name'
-                            values={formik.values}
-                            onChange={(_, newValue) => formik.setFieldValue(`${dimension.dimensionId}`, newValue?.id || null)}
-                          />
+                      return (
+                        <Grid container mt={0.2} spacing={2} key={index}>
+                          <Grid item xs={12}>
+                            <ResourceComboBox
+                              endpointId={InventoryRepository.Dimension.qry}
+                              parameters={`_dimension=${dimensionNumber}`}
+                              name={`${dimension.dimensionId}`}
+                              label={dimension.dimensionName}
+                              valueField='id'
+                              displayField='name'
+                              values={formik.values}
+                              onChange={(_, newValue) => formik.setFieldValue(`${dimension.dimensionId}`, newValue?.id || null)}
+                            />
+                          </Grid>
                         </Grid>
-                      </Grid>
-                    )
-                  })}
-                </Grid>
+                      )
+                    })}
+                    
+                </FieldSet>
+                  </Grid>
               )
             }
             
-
+          
             <Grid item xs={6}>
-              {dimensionsUDT.map((dimension, index) => {
-                return (
-                  <Grid container mt={0.2} spacing={2} key={index}>
-                    <Grid item xs={12}>
-                      <CustomTextField
-                        name={dimension.key}
-                        label={dimension.value}
-                        value={formik.values[dimension.key]}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                        onClear={() => formik.setFieldValue([dimension.key], '')}
-                      />
+              <FieldSet title={labels.texts}>
+                {dimensionsUDT.map((dimension, index) => {
+                  return (
+                    <Grid container mt={0.2} spacing={2} key={index}>
+                      <Grid item xs={12}>
+                        <CustomTextField
+                          name={dimension.key}
+                          label={dimension.value}
+                          value={formik.values[dimension.key]}
+                          onChange={formik.handleChange}
+                          maxAccess={maxAccess}
+                          onClear={() => formik.setFieldValue([dimension.key], '')}
+                        />
+                      </Grid>
                     </Grid>
-                  </Grid>
-                )
-              })}
+                  )
+                })}
+              </FieldSet>
             </Grid>
           </Grid>
         </Grow>
