@@ -1,19 +1,19 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
-import DimensionsForm from './Forms/DimensionsForm'
+import DimensionGroupForm from './Forms/DimensionGroupForm'
 
-const Dimensions = () => {
+const DimensionGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,7 +22,7 @@ const Dimensions = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.Dimensions.page,
+      extension: InventoryRepository.DimensionGroup.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
@@ -31,29 +31,42 @@ const Dimensions = () => {
 
   const {
     query: { data },
-    labels,
-    invalidate,
-    paginationParameters,
     refetch,
-    access
+    labels,
+    access,
+    paginationParameters,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Dimensions.page,
-    datasetId: ResourceIds.Dimensions
+    endpointId: InventoryRepository.DimensionGroup.page,
+    datasetId: ResourceIds.DimensionGroup
   })
 
   const columns = [
     {
-      field: 'id',
-      headerName: labels.id,
-      flex: 1
-    },
-    {
       field: 'name',
       headerName: labels.name,
-      flex: 2
-    }
+      flex: 1
+    },
   ]
+
+  function openForm(recordId) {
+    stack({
+      Component: DimensionGroupForm,
+      props: {
+        labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 700,
+      height: 500,
+      title: labels.DimensionGroups
+    })
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
 
   const add = () => {
     openForm()
@@ -61,29 +74,11 @@ const Dimensions = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: InventoryRepository.Dimensions.del,
+      extension: InventoryRepository.DimensionGroup.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
     toast.success(platformLabels.Deleted)
-  }
-
-  function openForm(id) {
-    stack({
-      Component: DimensionsForm,
-      props: {
-        labels,
-        id,
-        maxAccess: access
-      },
-      width: 500,
-      height: 200,
-      title: labels.Dimensions
-    })
-  }
-
-  const edit = obj => {
-    openForm(obj?.id)
+    invalidate()
   }
 
   return (
@@ -96,13 +91,13 @@ const Dimensions = () => {
           name='table'
           columns={columns}
           gridData={data}
-          rowId={['id']}
+          rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           pageSize={50}
-          refetch={refetch}
-          paginationParameters={paginationParameters}
           paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
@@ -110,4 +105,4 @@ const Dimensions = () => {
   )
 }
 
-export default Dimensions
+export default DimensionGroup
