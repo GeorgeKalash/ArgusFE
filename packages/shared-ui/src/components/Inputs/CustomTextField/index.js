@@ -106,8 +106,12 @@ const CustomTextField = ({
     }
 
     if (phone) {
-      const truncatedValue = inputValue.slice(0, maxLength)
-      e.target.value = truncatedValue?.replace(/[^\d+\s]/g, '')
+      let count = 0
+      e.target.value = inputValue
+        .replace(/[^\d+\s]/g, '')
+        .split('')
+        .filter(char => char === ' ' || count++ < maxLength)
+        .join('')
       props?.onChange(e)
     }
 
@@ -171,7 +175,7 @@ const CustomTextField = ({
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
-        maxLength: maxLength,
+        maxLength: phone ? undefined : maxLength,
         ...(dir ? { dir } : {}),
         inputMode: numberField && 'numeric',
         pattern: numberField && '[0-9]*',
