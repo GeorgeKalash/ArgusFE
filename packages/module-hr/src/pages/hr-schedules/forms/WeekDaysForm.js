@@ -18,7 +18,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import dayjs from 'dayjs'
 import { formatTimeToApi } from '@argus/shared-domain/src/lib/date-helper'
 
-export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayId, mode, invalidate }) {
+export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, invalidate, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -33,14 +33,14 @@ export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayI
     maxAccess,
     conditionSchema: ['items'],
     initialValues: {
-      header:{
+      header: {
         scId: scheduleId,
         dow: dayId,
         dayTypeId: null,
         firstIn: null,
         lastOut: null
       },
-      items:[{
+      items: [{
         id: 1,
         scId: scheduleId,
         dow: dayId,
@@ -53,10 +53,20 @@ export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayI
     validationSchema: yup.object({
       header: yup.object({
         dayTypeId: yup.string().required(),
-        firstIn: yup.string().required(),
-        lastOut: yup.string().required(),
-        items: yup.array().of(schema)
-      })
+        firstIn: yup.string().nullable().test(function (value) {
+          const { isWorkingDay, dayTypeId } = this.parent
+          if(!dayTypeId) return false
+
+          return isWorkingDay ? !!value : true
+        }),
+        lastOut: yup.string().nullable().test(function (value) {
+          const { isWorkingDay, dayTypeId } = this.parent
+          if(!dayTypeId) return false
+
+          return isWorkingDay ? !!value : true
+        })
+      }),
+      items: yup.array().of(schema)
     }),
     onSubmit: async values => {  
         const modifiedItems = values?.items
@@ -77,8 +87,6 @@ export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayI
           record: JSON.stringify(
             {
               ...values?.header,
-              scId: scheduleId,
-              dow: dayId,  
               firstIn: values?.header?.firstIn ? formatTimeToApi(values.header.firstIn) : null,
               lastOut: values?.header?.lastOut ? formatTimeToApi(values.header.lastOut) : null
             })
@@ -90,9 +98,10 @@ export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayI
         })
         toast.success(platformLabels.Updated)
         invalidate()
+        window.close()
     }
   })
-
+  
   async function fetchForm() {
     if(!dayId || !scheduleId) return
     const res = await getRequest({
@@ -105,13 +114,13 @@ export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayI
       parameters: `_scId=${scheduleId}&_dow=${dayId}`
     })
 
-    formik.setValues({
-      header: {
+    const header = res?.record ? {
         ...res?.record,
         firstIn: res?.record?.firstIn ? dayjs(res.record.firstIn, 'HH:mm') : null,
         lastOut: res?.record?.lastOut ? dayjs(res.record.lastOut, 'HH:mm') : null
-      },
-      items: (periods?.list || []).map((item, index) => {
+      } : formik.initialValues.header
+
+    const items =  periods?.list ? periods.list.map((item, index) => {
         return {
            ...item,
            id: index++,
@@ -119,8 +128,9 @@ export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayI
            end: item?.end ? dayjs(item.end, 'HH:mm') : null
           }
         }
-      )
-    })
+      ) : formik.initialValues.items 
+
+    formik.setValues({ header, items })
   }
   
   const columns = [
@@ -142,9 +152,9 @@ export default function WeekDaysBatchForm ({ labels, maxAccess, scheduleId, dayI
       props:{ use24Hour: true }
     }
   ]
-   
+
   useEffect(() => {
-    if (mode != 'newMode') fetchForm()
+    fetchForm() 
   }, [])
 
   return (

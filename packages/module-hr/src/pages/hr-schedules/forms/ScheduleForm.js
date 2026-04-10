@@ -61,7 +61,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId, setUpdatedRe
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.AttendanceSchedule} form={formik} maxAccess={maxAccess} editMode={formik.values.recordId} isCleared={false}>
+    <FormShell resourceId={ResourceIds.AttendanceSchedule} form={formik} maxAccess={maxAccess} editMode={formik.values.recordId}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

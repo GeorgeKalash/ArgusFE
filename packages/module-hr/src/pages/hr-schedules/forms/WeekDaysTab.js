@@ -9,14 +9,15 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
-import WeekDaysBatchForm from '@argus/shared-ui/src/components/Shared/Forms/WeekDaysBatchForm'
-import { Box, IconButton } from '@mui/material'
-import Icon from '@argus/shared-core/src/@core/components/icon'
+import WeekDaysForm from './WeekDaysForm'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function WeekDaysTab({ recordId, labels, maxAccess }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { getAllKvsByDataset } = useContext(CommonContext)
+  const { systemDefaults } = useContext(DefaultsContext)
+  const firstDayOfTheWeek = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fdowCombo')?.value) || null
  
   async function getWeekDays() {
     return new Promise((resolve, reject) => {
@@ -38,7 +39,18 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
     if (durationMins < 1440 && firstIn !== lastOut) return String(hours).padStart(2, '0') + ':' + String(mins).padStart(2, '0')
     else if (firstIn === lastOut && firstIn !== '00:00') return '24:00'
     else return '00:00'
-}
+  }
+
+  const reorderByFirstDay = (list, firstDayOfTheWeek) => {
+    const startIndex = list.findIndex(item => item.dow === firstDayOfTheWeek)
+
+    if (startIndex === -1) return list
+
+    return [
+      ...list.slice(startIndex),
+      ...list.slice(0, startIndex)
+    ]
+  }
 
   const fetchGridData = async () => {
     const [weekDays, response] = await Promise.all([
@@ -63,7 +75,9 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
       }
     })
 
-    return { list: modifiedList }
+    const orderedList = reorderByFirstDay(modifiedList, firstDayOfTheWeek)
+    
+    return { list: orderedList }
   }
 
   const {
@@ -96,18 +110,6 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
       field: 'duration',
       headerName: labels.duration,
       flex: 1,
-    },
-    {
-      field: 'Batch',
-      headerName: labels.batch,
-      flex: 1,
-      cellRenderer: row => (
-        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-          <IconButton size='small' onClick={() => openForm(row.data, 'newMode')}>
-            <Icon icon='mdi:application-edit-outline' fontSize={18} />
-          </IconButton>
-        </Box>
-      )
     }
   ]
 
@@ -115,15 +117,14 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
     openForm(obj)
   }
 
-  const openForm = (obj, mode) => {
+  const openForm = (obj) => {
       stack({
-        Component: WeekDaysBatchForm,
+        Component: WeekDaysForm,
         props: {
           labels,
           maxAccess,
           scheduleId: recordId,
           dayId: obj?.dow,
-          mode,
           invalidate
         },
         width: 600,
