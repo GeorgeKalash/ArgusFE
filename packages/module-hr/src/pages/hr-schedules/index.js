@@ -43,7 +43,13 @@ export default function Schedules(){
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
-    return { ...response, _startAt: _startAt }
+    const list = response?.list?.map(item => ({ ...item, checked: false })) || []
+
+    return {
+      list,
+      _startAt,
+      count: list.length
+    }
   }
 
   const columns = [
@@ -60,6 +66,7 @@ export default function Schedules(){
   ]
 
   const del = async obj => {
+    if (obj.recordId == scheduleId.current) scheduleId.current = null
     await postRequest({
       extension: TimeAttendanceRepository.Schedule.del,
       record: JSON.stringify(obj)
@@ -136,7 +143,9 @@ export default function Schedules(){
           onDelete={del}
           pageSize={50}
           maxAccess={access}
-          onSelectionChange={row => scheduleId.current = row?.recordId}
+          rowSelection='single'
+          showCheckboxColumn={true}
+          handleCheckboxChange={row => scheduleId.current = row?.checked ? row?.recordId : null}
         />
       </Grow>
     </VertLayout>

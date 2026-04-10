@@ -38,11 +38,10 @@ export default function ScheduleForm({ labels, maxAccess, recordId, setUpdatedRe
       })
 
       if (!obj.recordId) {
-        toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', response.recordId)
         setUpdatedRecordId(response.recordId)
-      } else toast.success(platformLabels.Edited)
-
+      }
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
@@ -71,6 +70,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId, setUpdatedRe
                 label={labels.reference}
                 value={formik.values.reference}
                 maxAccess={maxAccess}
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -82,6 +82,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId, setUpdatedRe
                 label={labels.name}
                 value={formik.values.name}
                 required
+                maxLength='40'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}

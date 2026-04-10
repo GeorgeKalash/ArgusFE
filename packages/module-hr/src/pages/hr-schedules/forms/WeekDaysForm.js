@@ -37,8 +37,8 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
         scId: scheduleId,
         dow: dayId,
         dayTypeId: null,
-        firstIn: null,
-        lastOut: null
+        firstIn: dayjs('00:00', 'HH:mm'),
+        lastOut: dayjs('00:00', 'HH:mm')
       },
       items: [{
         id: 1,
@@ -52,24 +52,24 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
     },
     validationSchema: yup.object({
       header: yup.object({
-        dayTypeId: yup.string().required(),
+        dayTypeId: yup.number().required(),
         firstIn: yup.string().nullable().test(function (value) {
           const { isWorkingDay, dayTypeId } = this.parent
-          if(!dayTypeId) return false
+          if (!dayTypeId) return false
 
-          return isWorkingDay ? !!value : true
+          return isWorkingDay ? !!value && formatTimeToApi(value) !== '00:00' : true
         }),
         lastOut: yup.string().nullable().test(function (value) {
           const { isWorkingDay, dayTypeId } = this.parent
-          if(!dayTypeId) return false
+          if (!dayTypeId) return false
 
-          return isWorkingDay ? !!value : true
+          return isWorkingDay ? !!value && formatTimeToApi(value) !== '00:00' : true
         })
       }),
       items: yup.array().of(schema)
     }),
     onSubmit: async values => {  
-        const modifiedItems = values?.items
+        const modifiedItems = values?.header?.isWorkingDay ? values?.items
         .map((item, index) => {
             return {
             ...item,
@@ -80,15 +80,15 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
             end: item?.end ? formatTimeToApi(item?.end) : null
             }
         })
-        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row))) : []
 
         await postRequest({
           extension: TimeAttendanceRepository.ScheduleDay.set,
           record: JSON.stringify(
             {
               ...values?.header,
-              firstIn: values?.header?.firstIn ? formatTimeToApi(values.header.firstIn) : null,
-              lastOut: values?.header?.lastOut ? formatTimeToApi(values.header.lastOut) : null
+              firstIn: values?.header?.isWorkingDay && values?.header?.firstIn ? formatTimeToApi(values.header.firstIn) : '00:00',
+              lastOut: values?.header?.isWorkingDay && values?.header?.lastOut ? formatTimeToApi(values.header.lastOut) : '00:00'
             })
         })
 
@@ -168,7 +168,7 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
     >
       <VertLayout>
         <Fixed>
-          <Grid container gap={2}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={TimeAttendanceRepository.DayTypes.qry}
@@ -184,8 +184,14 @@ export default function WeekDaysForm ({ labels, maxAccess, scheduleId, dayId, in
                 maxAccess={maxAccess}
                 required
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('header.dayTypeId', newValue?.recordId || '')
-                  formik.setFieldValue('header.isWorkingDay', newValue?.isWorkingDay || false)
+                  formik.setValues({
+                    ...formik.values,
+                    header:{
+                      ...formik.values.header,
+                      isWorkingDay: newValue?.isWorkingDay || false,
+                      dayTypeId: newValue?.recordId || null
+                    }
+                  })
                 }}
                 error={formik.touched?.header?.dayTypeId && Boolean(formik.errors?.header?.dayTypeId)}
               />

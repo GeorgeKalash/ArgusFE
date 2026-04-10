@@ -69,9 +69,9 @@ export default function WeekDaysTab({ recordId, labels, maxAccess }) {
         dowName: day.value,
         duration: matched
           ? formatDuration(matched.duration, matched.firstIn, matched.lastOut)
-          : null,
-        firstIn: matched?.firstIn || null,
-        lastOut: matched?.lastOut || null
+          : '00:00',
+        firstIn: matched?.firstIn || '00:00',
+        lastOut: matched?.lastOut || '00:00'
       }
     })
 

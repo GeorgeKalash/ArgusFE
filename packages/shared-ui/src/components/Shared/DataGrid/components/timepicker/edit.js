@@ -7,7 +7,7 @@ export default function TimeEdit({ column: { props, field }, id, value, update }
     <CustomTimePicker
       autoFocus
       value={currentValue}
-      required={true}
+      required={props?.required || false}
       hasBorder={false}
       ampm={!props.use24Hour}
       format="HH:mm"
