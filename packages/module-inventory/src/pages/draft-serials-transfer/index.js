@@ -37,6 +37,11 @@ const DraftSerialsTranfer = () => {
     }
   })
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.DraftTransfer,
+    action: openForm
+  })
+
   const columns = [
     {
       field: 'reference',
@@ -103,7 +108,7 @@ const DraftSerialsTranfer = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.DraftTransfer.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -117,11 +122,6 @@ const DraftSerialsTranfer = () => {
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
-
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.DraftTransfer,
-    action: openForm
-  })
 
   const add = async () => {
     await proxyAction()
@@ -161,6 +161,7 @@ const DraftSerialsTranfer = () => {
       </Fixed>
       <Grow>
         <Table
+          name='transferTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
@@ -168,7 +169,6 @@ const DraftSerialsTranfer = () => {
           refetch={refetch}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}
