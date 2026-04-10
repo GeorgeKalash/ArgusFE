@@ -108,7 +108,7 @@ const DraftSerialsTranfer = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.DraftTransfer.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -161,6 +161,7 @@ const DraftSerialsTranfer = () => {
       </Fixed>
       <Grow>
         <Table
+          name='transferTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

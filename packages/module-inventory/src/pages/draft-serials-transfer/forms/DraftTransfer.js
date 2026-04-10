@@ -91,9 +91,9 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     },
     validationSchema: yup.object({
       header: yup.object({
-        date: yup.string().required(),
-        fromSiteId: yup.string().required(),
-        toSiteId: yup.string().required()
+        date: yup.date().required(),
+        fromSiteId: yup.number().required(),
+        toSiteId: yup.number().required()
       }),
       items: yup.array().of(
         yup.object().shape({
@@ -482,9 +482,15 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       parameters: `_dtId=${recordId}`
     })
 
-    formik.setFieldValue('header.carrierId', dtd?.record?.carrierId || null)
-    formik.setFieldValue('header.fromSiteId', dtd?.record?.siteId || formik?.values?.header?.fromSiteId || null)
-    formik.setFieldValue('header.toSiteId', dtd?.record?.toSiteId || formik?.values?.header?.toSiteId || null)
+    formik.setValues({
+      ...formik.values,
+      header: {
+          ...formik.values.header,
+          carrierId: dtd?.record?.carrierId || null,
+          toSiteId: dtd?.record?.toSiteId || formik?.values?.header?.toSiteId || null,
+          fromSiteId: dtd?.record?.siteId || formik?.values?.header?.fromSiteId || null
+      }
+    })
   }
 
   useEffect(() => {
@@ -636,11 +642,16 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('header.fromSiteId', !newValue?.isInactive ? newValue?.recordId : null)
-                      if (newValue?.isInactive)
+                      if (newValue?.isInactive) {
                         stackError({
                           message: labels.inactiveSite
                         })
+                        formik.setFieldValue('header.fromSiteId', null)
+                        
+                        return
+                      }
+
+                      formik.setFieldValue('header.fromSiteId', newValue?.recordId || null)
                     }}
                     error={formik.touched?.header?.fromSiteId && Boolean(formik.errors?.header?.fromSiteId)}
                   />
@@ -674,11 +685,16 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('header.toSiteId', !newValue?.isInactive ? newValue?.recordId : null)
-                      if (newValue?.isInactive) 
+                      if (newValue?.isInactive) {
                         stackError({
                           message: labels.inactiveSite
                         })
+                        formik.setFieldValue('header.toSiteId', null)
+                        
+                        return
+                      }
+
+                      formik.setFieldValue('header.toSiteId', newValue?.recordId || null)
                     }}
                     error={formik.touched?.header?.toSiteId && Boolean(formik.errors?.header?.toSiteId)}
                   />
