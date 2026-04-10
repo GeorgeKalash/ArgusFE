@@ -107,7 +107,7 @@ const CustomTextField = ({
 
     if (phone) {
       const truncatedValue = inputValue.slice(0, maxLength)
-      e.target.value = truncatedValue?.replace(/[^\d+]/g, '')
+      e.target.value = truncatedValue?.replace(/[^\d+\s]/g, '')
       props?.onChange(e)
     }
 
