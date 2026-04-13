@@ -124,5 +124,7 @@ const Reset = () => {
 
 Reset.getLayout = page => <BlankLayout>{page}</BlankLayout>
 Reset.guestGuard = true
+Reset.hasNavbar = false
+
 
 export default Reset

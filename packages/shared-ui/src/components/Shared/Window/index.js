@@ -26,6 +26,8 @@ import { CacheDataProvider } from '@argus/shared-providers/src/providers/CacheDa
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import styles from './Window.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import { useLayout } from '@argus/shared-providers/src/providers/LayoutContext'
+
 
 function LoadingOverlay() {
   return (
@@ -67,9 +69,10 @@ const Window = React.memo(
     disabledApply,
     isLoading = true,
     spacing = true,
-    centerToScreen = false,
     ...props
   }) => {
+
+    const { hasNavbar } = useLayout()
     const { settings } = useSettings()
     const { navCollapsed } = settings
     const { loading } = useContext(RequestsContext)
@@ -148,8 +151,8 @@ const Window = React.memo(
       ? containerHeight
       : Math.max(120, height * scaleFactor)
       
-    const baseWidth = centerToScreen ? screenWidth : availableWidth
-    const baseHeight = centerToScreen ? screenHeight : availableHeight
+    const baseWidth = !hasNavbar ? screenWidth : availableWidth
+    const baseHeight = !hasNavbar ? screenHeight : availableHeight
 
     const x = (baseWidth - scaledWidth) / 2
     const y = (baseHeight - scaledHeight) / 2
@@ -171,13 +174,13 @@ const Window = React.memo(
     }, [minimized, expanded])
 
     useEffect(() => {
-      if (centerToScreen && !expanded && !minimized) {
+      if (!hasNavbar && !expanded && !minimized) {
         setDragPos({
           x: Math.max(0, x),
           y: Math.max(0, y)
         })
       }
-    }, [centerToScreen, x, y, expanded, minimized])
+    }, [!hasNavbar, x, y, expanded, minimized])
 
     const handleExpandToggle = () => {
       if (!expanded) {
@@ -218,14 +221,14 @@ const Window = React.memo(
         <Box
           className={styles.parentBox}
           style={{
-            width: centerToScreen ? '100vw' : (spacing ? containerWidth : '100vw'),
-            height: centerToScreen ? '100vh' : (spacing ? containerHeight : '100vh'),
+            width: !hasNavbar ? '100vw' : (spacing ? containerWidth : '100vw'),
+            height: !hasNavbar ? '100vh' : (spacing ? containerHeight : '100vh'),
             alignItems: minimized
               ? 'flex-end'
-              : centerToScreen
+              : !hasNavbar
               ? 'flex-start'
               : 'center',
-            ...(centerToScreen && {
+            ...(!hasNavbar && {
               position: 'fixed',
               justifyContent: 'flex-start',
               zIndex: 1300,
@@ -236,9 +239,9 @@ const Window = React.memo(
           <Draggable
             handle="#draggable-dialog-title"
             cancel=".no-drag"
-            bounds={centerToScreen ? false : 'parent'}
+            bounds={!hasNavbar ? false : 'parent'}
             position={
-              centerToScreen
+              !hasNavbar
                 ? dragPos
                 : (minimized || expanded ? { x: 0, y: 0 } : dragPos)
             }

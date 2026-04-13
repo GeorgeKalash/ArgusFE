@@ -51,7 +51,7 @@ const ResetPassForm = ({ labels, username = '' }) => {
             router.push('/login')
           })
           .catch(error => {
-            stackError({ message: error,centerResetPass: true  })
+            stackError({ message: error })
           })
       } else {
         toast.error(labels.passNotMatching)
