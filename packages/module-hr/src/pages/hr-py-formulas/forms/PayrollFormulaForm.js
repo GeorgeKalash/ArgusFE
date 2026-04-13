@@ -55,10 +55,8 @@ export default function PayrollFormulaForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
-      } else toast.success(platformLabels.Edited)
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      formik.setFieldValue('recordId', response.recordId)
 
       invalidate()
     }
@@ -74,15 +72,15 @@ export default function PayrollFormulaForm({ labels, maxAccess, recordId }) {
           parameters: `_recordId=${recordId}`
         })
 
-        formik.setValues(res.record)
+        formik.setValues(res?.record)
       }
       const res2 = await getRequest({
         extension: PayrollRepository.Formula.getPack,
         parameters: ``
       })
 
-      setVariables(res2.record.variables);
-      setConstants(res2.record.constants);
+      setVariables(res2?.record?.variables);
+      setConstants(res2?.record?.constants);
     })()
   }, [])
 

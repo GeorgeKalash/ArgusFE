@@ -1,8 +1,9 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useContext } from 'react';
 import 'mathlive';
 import { cleanFormula } from '@argus/shared-utils/src/utils/ValidateFormula';
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { validateFormula } from '@argus/shared-utils/src/utils/ValidateFormula'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext';
 
 export default function FormulaEditor({
   name,
@@ -15,7 +16,7 @@ export default function FormulaEditor({
   touched
 }) {
   const mathRef = useRef(null);
-
+  const { platformLabels } = useContext(ControlContext)
   const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function FormulaEditor({
     }
 
     typingTimeoutRef.current = setTimeout(() => {
-      const error = validateFormula(val, variables, constants);
+      validateFormula(val, variables, constants);
     }, 300);
   };
 
@@ -92,7 +93,7 @@ export default function FormulaEditor({
       )}
 
       <div style={{ marginTop: 12 }}>
-        <strong>Variables:</strong>
+        <strong>{platformLabels.Variables}:</strong>
         <div style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -111,7 +112,7 @@ export default function FormulaEditor({
         </div>
       </div>
       <div style={{ marginTop: 12 }}>
-        <strong>Constants:</strong>
+        <strong>{platformLabels.Constants}:</strong>
         <div style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -131,7 +132,7 @@ export default function FormulaEditor({
       </div>
 
       <div style={{ marginTop: 12 }}>
-        <strong>Operators:</strong>
+        <strong>{platformLabels.Operators}:</strong>
         <div style={{
             display: 'flex',
             flexWrap: 'wrap',

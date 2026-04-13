@@ -74,7 +74,7 @@ const PayrollFormulas = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
+      height: 600,
       title: labels.formula
     })
   }
@@ -95,6 +95,7 @@ const PayrollFormulas = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
