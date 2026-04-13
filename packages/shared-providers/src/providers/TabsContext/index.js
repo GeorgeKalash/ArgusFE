@@ -340,7 +340,7 @@ const TabsProvider = ({ children }) => {
       setCurrentTabIndex(0)
 
       if (normalizeRoute(router.asPath) !== '/') {
-        await navigateTo('/')
+        window.history.replaceState(null, '', '/')
       }
     }
 
@@ -410,7 +410,7 @@ const TabsProvider = ({ children }) => {
         setCurrentTabIndex(0)
 
         if (normalizeRoute(router.asPath) !== '/') {
-          await navigateTo('/')
+          window.history.replaceState(null, '', '/')
         }
 
         if (isClosingCurrentTab) {
