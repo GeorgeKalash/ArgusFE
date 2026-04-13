@@ -58,6 +58,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       stdWeight: 0,
       designerId: null,
       itemCategoryId: null,
+      itemGroupId: null,
       designerRef: '',
       designerName: '',
       isInactive: false
@@ -261,11 +262,31 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     name='itemCategoryId'
                     label={labels.category}
                     valueField='recordId'
-                    displayField={['reference', 'name']}
-                    readOnly
+                    displayField='name'
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('itemCategoryId', newValue?.recordId || null)}
+                    error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
                   />
                 </Grid>
-
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Group.qry}
+                    parameters='_startAt=0&_pageSize=1000'
+                    values={formik.values}
+                    name='itemGroupId'
+                    label={labels.itemGroup}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    displayFieldWidth={1}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('itemGroupId', newValue?.recordId || null)}
+                    error={formik.touched.itemGroupId && formik.errors.itemGroupId}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ManufacturingRepository.Routing.snapshot2}
