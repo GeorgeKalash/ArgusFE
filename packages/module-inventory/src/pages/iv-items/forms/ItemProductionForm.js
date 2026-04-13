@@ -37,7 +37,10 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
       bomId: null,
       wipItemId: null,
       wipItemSku: '',
-      wipItemName: ''
+      wipItemName: '',
+      routingId: null,
+      routingRef: '',
+      routingName: ''
     },
     maxAccess,
     validateOnChange: true,
@@ -230,6 +233,34 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 }}
                 error={formik.touched.rmcId && Boolean(formik.errors.rmcId)}
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={ManufacturingRepository.Routing.snapshot2}
+                parameters={{
+                  _lineId: 0
+                }}
+                valueField='reference'
+                displayField='name'
+                name='routingId'
+                label={labels.routing}
+                form={formik}
+                minChars={2}
+                firstValue={formik.values.routingRef}
+                secondValue={formik.values.routingName}
+                errorCheck={'routingId'}
+                maxAccess={maxAccess}
+                displayFieldWidth={2}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('routingRef', newValue?.reference || null)
+                  formik.setFieldValue('routingName', newValue?.name || null)
+                  formik.setFieldValue('routingId', newValue?.recordId || null)
+                }}
               />
             </Grid>
             <Grid item xs={12}>
