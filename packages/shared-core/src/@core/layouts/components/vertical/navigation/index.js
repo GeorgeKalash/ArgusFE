@@ -59,7 +59,7 @@ const Navigation = props => {
     setNavVisible
   } = props
 
-  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex, handleBookmark } =
+  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex, handleBookmark, setTabSwitch } =
     useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
   const [filteredMenu, setFilteredMenu] = useState([])
@@ -232,8 +232,17 @@ const Navigation = props => {
       setReloadOpenedPage([])
       setReloadOpenedPage(node)
     } else if (existingTabIndex !== -1) {
+      setTabSwitch(true)
       setCurrentTabIndex(existingTabIndex)
-      window.history.replaceState(null, '', openTabs[existingTabIndex].route)
+
+      router.replace(openTabs[existingTabIndex].route, undefined, {
+        shallow: true,
+        scroll: false
+      })
+
+      setTimeout(() => {
+        setTabSwitch(false)
+      }, 0)
     } else router.push(node.path)
     setLastOpenedPage(node)
   }

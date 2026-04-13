@@ -81,7 +81,8 @@ const TabsProvider = ({ children }) => {
     openTabs,
     setOpenTabs,
     currentTabIndex,
-    setCurrentTabIndex
+    setCurrentTabIndex,
+    tabSwitch
   } = useContext(MenuContext)
 
   const { lockedScreens, removeLockedScreen } = useContext(LockedScreensContext)
@@ -503,7 +504,7 @@ const TabsProvider = ({ children }) => {
       return
     }
 
-    if (!tabSwitchingRef.current && currentTabIndex !== existingIndex) {
+    if (!tabSwitchingRef.current && !tabSwitch && currentTabIndex !== existingIndex) {
       setCurrentTabIndex(existingIndex)
     }
   }, [

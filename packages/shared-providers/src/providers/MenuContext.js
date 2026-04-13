@@ -15,6 +15,7 @@ const MenuProvider = ({ children }) => {
   const [lastOpenedPage, setLastOpenedPage] = useState(null)
   const [reloadOpenedPage, setReloadOpenedPage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [tabSwitch, setTabSwitch] = useState(false)
 
   const [openTabs, setOpenTabs] = useState([])
 
@@ -142,7 +143,9 @@ const MenuProvider = ({ children }) => {
     openTabs,
     setOpenTabs,
     currentTabIndex,
-    setCurrentTabIndex
+    setCurrentTabIndex,
+    tabSwitch,
+    setTabSwitch
   }
 
   return (
