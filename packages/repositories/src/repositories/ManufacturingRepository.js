@@ -478,4 +478,10 @@ export const ManufacturingRepository = {
     del: service + 'delDCA',
     snapshot: service + 'snapshotDCA'
   },
+  StandardCostParameters: {
+    page: service + 'pageSCP',
+    set: service + 'setSCP',
+    get: service + 'getSCP',
+    del: service + 'delSCP'
+  }
 }
