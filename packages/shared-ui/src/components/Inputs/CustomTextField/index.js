@@ -175,7 +175,7 @@ const CustomTextField = ({
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
-        maxLength: phone ? undefined : maxLength,
+        ...(phone ? {} : { maxLength }),
         ...(dir ? { dir } : {}),
         inputMode: numberField && 'numeric',
         pattern: numberField && '[0-9]*',
