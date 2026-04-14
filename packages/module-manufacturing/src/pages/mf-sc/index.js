@@ -73,39 +73,39 @@ const StandardCost = () => {
       flex: 1
     },
     {
-        field: 'itemGroupRef',
-        headerName: labels.itemGroupRef,
-        flex: 1
+      field: 'itemGroupRef',
+      headerName: labels.itemGroupRef,
+      flex: 1
     },
     {
-        field: 'itemGroupName',
-        headerName: labels.itemGroup,
-        flex: 1
+      field: 'itemGroupName',
+      headerName: labels.itemGroup,
+      flex: 1
     },
     {
-        field: 'itemCategoryRef',
-        headerName: labels.itemCategoryRef,
-        flex: 1
+      field: 'itemCategoryRef',
+      headerName: labels.itemCategoryRef,
+      flex: 1
     },
     {
-        field: 'itemCategoryName',
-        headerName: labels.itemCategory,
-        flex: 1
+      field: 'itemCategoryName',
+      headerName: labels.itemCategory,
+      flex: 1
     },
     {
-        field: 'collectionName',
-        headerName: labels.collection,
-        flex: 1
+      field: 'collectionName',
+      headerName: labels.collection,
+      flex: 1
     },
     {
-        field: 'productionLineRef',
-        headerName: labels.productionLine,
-        flex: 1
+      field: 'productionLineRef',
+      headerName: labels.productionLine,
+      flex: 1
     },
     {
-        field: 'productionLineName',
-        headerName: labels.productionLineName,
-        flex: 1
+      field: 'productionLineName',
+      headerName: labels.productionLineName,
+      flex: 1
     },
     {
       field: 'date',

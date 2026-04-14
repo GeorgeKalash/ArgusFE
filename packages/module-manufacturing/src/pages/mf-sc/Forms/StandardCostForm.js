@@ -44,7 +44,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
       recordId: recordId || null,
       header: {
         recordId,
-        functionId: SystemFunction.PurityAdjustment,
+        functionId: SystemFunction.StandardCost,
         date: new Date(),
         dtId: null,
         itemGroupId: null,
@@ -165,10 +165,14 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
         ...(record?.header || {}),
         date: formatDateFromApi(record?.header?.date),
       },
-      items: []
-    })
+      items: record?.items.map((item, index) => ({
+        id: index + 1,
+        trxId: record?.header?.recordId,
+        seqNo: index + 1,
+        ...item
+      }))
 
-    await loadStandardCostParameters(record?.items || [])
+    })
   }
 
   const columns = [
@@ -434,9 +438,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
         </Fixed>
         <Grow>
           <DataGrid
-              onChange={(value) => {
-              formik.setFieldValue('items', value)
-            }}
+            onChange={(value) => formik.setFieldValue('items', value)}
             value={formik.values?.items}
             error={formik.errors?.items}
             name='items'
