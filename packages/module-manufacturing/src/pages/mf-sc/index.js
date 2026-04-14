@@ -68,9 +68,20 @@ const StandardCost = () => {
 
   const columns = [
     {
+      field: 'dtName',
+      headerName: labels.docType,
+      flex: 1
+    },
+    {
       field: 'reference',
       headerName: labels.reference,
       flex: 1
+    },
+    {
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
     },
     {
       field: 'itemGroupRef',
@@ -106,12 +117,6 @@ const StandardCost = () => {
       field: 'productionLineName',
       headerName: labels.productionLineName,
       flex: 1
-    },
-    {
-      field: 'date',
-      headerName: labels.date,
-      flex: 1,
-      type: 'date'
     },
   ]
 
