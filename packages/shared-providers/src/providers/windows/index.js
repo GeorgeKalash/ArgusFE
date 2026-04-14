@@ -37,7 +37,7 @@ function getWindowDimensions(width, height, spacing = true) {
 
   return {
     width: width || 800,
-    height: height || 400
+    height: height || 600
   }
 }
 

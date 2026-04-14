@@ -46,7 +46,7 @@ import { LockedScreensProvider } from '@argus/shared-providers/src/providers/Loc
 import GlobalErrorHandlers from '@argus/shared-providers/src/providers/GlobalErrorHandlers'
 import RootBoundary from '@argus/shared-ui/src/components/Shared/RootBoundary'
 import { DefaultsProvider } from '@argus/shared-providers/src/providers/DefaultsContext'
-import { LayoutContext } from '@argus/shared-providers/src/providers/LayoutContext'
+import { LayoutProvider } from '@argus/shared-providers/src/providers/LayoutContext'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -146,7 +146,7 @@ const App = props => {
                                               authGuard={authGuard}
                                             >
                                               <PrimeReactProvider>
-                                                <LayoutContext.Provider value={{ hasNavbar }}>
+                                                <LayoutProvider value={{ hasNavbar }}>
                                                   {getLayout(
                                                     <RootBoundary
                                                       resetKey={
@@ -195,7 +195,7 @@ const App = props => {
                                                       </ErrorProvider>
                                                     </RootBoundary>
                                                   )}
-                                                </LayoutContext.Provider>
+                                                </LayoutProvider>
                                               </PrimeReactProvider>
                                             </AclGuard>
                                           </Guard>

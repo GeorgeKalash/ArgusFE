@@ -71,7 +71,6 @@ const Window = React.memo(
     spacing = true,
     ...props
   }) => {
-
     const { hasNavbar } = useLayout()
     const { settings } = useSettings()
     const { navCollapsed } = settings
@@ -180,7 +179,7 @@ const Window = React.memo(
           y: Math.max(0, y)
         })
       }
-    }, [!hasNavbar, x, y, expanded, minimized])
+    }, [hasNavbar, x, y, expanded, minimized])
 
     const handleExpandToggle = () => {
       if (!expanded) {

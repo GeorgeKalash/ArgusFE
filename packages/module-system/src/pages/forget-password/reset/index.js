@@ -49,7 +49,7 @@ const Reset = () => {
               headers: { AccountId: auth?.getAC?.data?.record?.accountId }
             })
             .then(() => openForm(values.username))
-            .catch(error => stackError({ message: error.message || error }))
+            .catch(error => stackError({ message: error?.response?.data?.error || error.message || error }))
         })
         .catch(error => stackError({ message: error.message || error }))
     }
@@ -60,8 +60,8 @@ const Reset = () => {
       Component: ResetPassForm,
       props: { labels: platformLabels, username },
       expandable: false,
-      closable: false,
       draggable: false,
+      closable: false,
       width: 600,
       height: 400,
       spacing: false,
