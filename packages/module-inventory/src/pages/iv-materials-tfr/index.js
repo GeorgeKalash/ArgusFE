@@ -170,21 +170,13 @@ const IvMaterialsTransfer = () => {
     openForm(obj?.recordId)
   }
 
-  function openOutWardsWindow(recordId) {
+  function openForm(recordId) {
     stack({
       Component: MaterialsTransferForm,
       props: {
         recordId
       }
     })
-  }
-
-  async function openForm(recordId) {
-    !plantId && !recordId
-      ? stackError({
-          message: platformLabels.noDefaultPlant
-        })
-      : openOutWardsWindow(recordId)
   }
 
   const del = async obj => {
@@ -209,7 +201,7 @@ const IvMaterialsTransfer = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
