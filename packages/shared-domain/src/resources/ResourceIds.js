@@ -633,6 +633,7 @@ export const ResourceIds = {
   DimensionGroup: 41120,
   Dimensions: 41121,
   PayrollConstant: 75118,
+  StandardCostParameters: 42138,
 
   // GL
   GLSalesInvoice: 51604,
