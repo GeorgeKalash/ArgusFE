@@ -474,6 +474,10 @@ const TabsProvider = ({ children }) => {
       return
     }
 
+    if (!hasHomeTab && openTabs.length === 0 && typeof window !== 'undefined' && window.location.pathname === '/') {
+      return
+    }
+
     const existingIndex = openTabs.findIndex(tab => normalizeRoute(tab.route) === normalizedRoute)
 
     if (existingIndex === -1) {

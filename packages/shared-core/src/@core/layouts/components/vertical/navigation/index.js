@@ -235,10 +235,7 @@ const Navigation = props => {
       setTabSwitch(true)
       setCurrentTabIndex(existingTabIndex)
 
-      router.replace(openTabs[existingTabIndex].route, undefined, {
-        shallow: true,
-        scroll: false
-      })
+      router.replace(openTabs[existingTabIndex].route)
 
       setTimeout(() => {
         setTabSwitch(false)
