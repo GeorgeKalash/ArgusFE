@@ -770,14 +770,14 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     formik.setFieldValue('shipAddress', shipAdd || '')
   }
   async function fillShipment(recordId) {
-    if (!recordId) return
+    if (!recordId) return formik.setFieldValue('shipAddress', null)
 
     const res = await getRequest({
       extension: BusinessPartnerRepository.BPAddress.qry,
       parameters: `_bpId=${recordId}&_filter=`
     })
 
-    const shipId = res?.list[0].addressId
+    const shipId = res?.list?.[0]?.addressId
     const shipAdd = await getAddress(shipId)
     formik.setFieldValue('shipAddress', shipAdd || '')
   }
