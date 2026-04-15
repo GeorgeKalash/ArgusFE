@@ -8,22 +8,20 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
-import FiscalPeriodList from './forms/FiscalPeriodList'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
-export default function PayPeriods () {
+export default function FiscalPeriodList ({fiscalYear}) {
+    
+   
   const { getRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchGridData() {
 
     const response = await getRequest({
-      extension: PayrollRepository.Years.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+      extension: PayrollRepository.Period.qry,
+      parameters: `_year=${fiscalYear}&_salaryType=${5}&_status=0`
     })
 
-    return { ...response, _startAt: _startAt }
+    return response
   }
   
   const {
@@ -40,45 +38,41 @@ export default function PayPeriods () {
 
   const columns = [
     {
-      field: 'fiscalYear',
+      field: 'periodId',
       headerName: labels.year,
       flex: 1
     },
     {
       field: 'startDate',
       headerName: labels.from,
-      flex: 1,
+      flex: 2,
       type: 'date'
     },
     {
       field: 'endDate',
       headerName: labels.to,
-      flex: 1,
+      flex: 2,
       type: 'date'
     }
   ]
 
-  const add = async () => {
-    await openForm()
-  }
-
   const edit = obj => {
-    openForm(obj?.fiscalYear)
+    openForm(obj.recordId)
   }
 
-  async function openForm(fiscalYear) {
-    stack({
-      Component: FiscalPeriodList,
-      props: {
-        fiscalYear
-      }
-    })
+  async function openForm(recordId) {
+    // stack({
+    // Component: ResignationReqForm,
+    // props: {
+    //     recordId,  
+    // }
+    // })
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
