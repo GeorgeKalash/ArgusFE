@@ -44,13 +44,13 @@ const StandardCostParameters = () => {
 
   const columns = [
     {
-      field: 'name',
-      headerName: labels.name,
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'name',
+      headerName: labels.name,
       flex: 1
     },
     {
