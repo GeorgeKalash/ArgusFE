@@ -110,5 +110,12 @@ export const PayrollRepository = {
     del: service + 'delCON',
     get: service + 'getCON',
     page: service + 'pageCON'
+  },
+  Formula: {
+    page: service + 'pageFLA',
+    get: service + 'getFLA',
+    getPack: service + 'getPackFLA',
+    set: service + 'setFLA',
+    del: service + 'delFLA'
   }
 }

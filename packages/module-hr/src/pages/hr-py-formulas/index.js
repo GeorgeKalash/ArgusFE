@@ -5,24 +5,24 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import StandardCostParametersForm from './Forms/StandardCostParametersForm'
+import PayrollFormulaForm from './forms/PayrollFormulaForm'
 
-const StandardCostParameters = () => {
+const PayrollFormulas = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.StandardCostParameters.page,
+      extension: PayrollRepository.Formula.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
@@ -32,32 +32,28 @@ const StandardCostParameters = () => {
   const {
     query: { data },
     labels,
+    access,
     paginationParameters,
-    refetch,
-    access: maxAccess,
-    invalidate
+    invalidate,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.StandardCostParameters.page,
-    datasetId: ResourceIds.StandardCostParameters
+    endpointId: PayrollRepository.Formula.page,
+    datasetId: ResourceIds.PayrollFormulas
   })
 
+  const { platformLabels } = useContext(ControlContext)
+
   const columns = [
-    {
-      field: 'reference',
-      headerName: labels.reference,
-      flex: 1
-    },
     {
       field: 'name',
       headerName: labels.name,
       flex: 1
     },
     {
-      field: 'isInactive',
-      headerName: labels.isInactive,
-      flex: 1,
-      type: 'checkbox'
+      field: 'formula',
+      headerName: labels.formula,
+      flex: 3
     }
   ]
 
@@ -69,33 +65,33 @@ const StandardCostParameters = () => {
     openForm(obj?.recordId)
   }
 
+  function openForm(recordId) {
+    stack({
+      Component: PayrollFormulaForm,
+      props: {
+        labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 600,
+      title: labels.formula
+    })
+  }
+
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.StandardCostParameters.del,
+      extension: PayrollRepository.Formula.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(recordId) {
-    stack({
-      Component: StandardCostParametersForm,
-      props: {
-        labels,
-        recordId,
-        maxAccess
-      },
-      width: 500,
-      height: 250,
-      title: labels.standardCostParameters
-    })
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
@@ -105,15 +101,16 @@ const StandardCostParameters = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          pageSize={50}
-          paginationType='api'
-          paginationParameters={paginationParameters}
           refetch={refetch}
-          maxAccess={maxAccess}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default StandardCostParameters
+export default PayrollFormulas
+
