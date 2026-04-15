@@ -109,7 +109,8 @@ export const SaleRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD',
-    page: service + 'pageDTD'
+    page: service + 'pageDTD',
+    snapshot: service + 'snapshotDTD'
   },
   DocumentType: {
     qry: service + 'qryDT'
