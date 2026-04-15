@@ -6,7 +6,7 @@ const validateFormula = (value, variables = [], constants = []) => {
   const allowedKeys = [...variables, ...constantKeys];
 
   if (!value || value.trim() === '') {
-    return 'Formula is required';
+    return null;
   }
 
   // prevent dot between variables
