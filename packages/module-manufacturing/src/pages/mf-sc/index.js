@@ -85,21 +85,11 @@ const StandardCost = () => {
     },
     {
       field: 'itemGroupRef',
-      headerName: labels.itemGroupRef,
-      flex: 1
-    },
-    {
-      field: 'itemGroupName',
       headerName: labels.itemGroup,
       flex: 1
     },
     {
       field: 'itemCategoryRef',
-      headerName: labels.itemCategoryRef,
-      flex: 1
-    },
-    {
-      field: 'itemCategoryName',
       headerName: labels.itemCategory,
       flex: 1
     },
@@ -114,10 +104,26 @@ const StandardCost = () => {
       flex: 1
     },
     {
-      field: 'productionLineName',
-      headerName: labels.productionLineName,
+      field: 'amount',
+      headerName: labels.amount,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'notes',
+      headerName: labels.notes,
       flex: 1
     },
+    {
+      field: 'statusName',
+      headerName: labels.statusName,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
+      flex: 1
+    }
   ]
 
   const edit = obj => {
@@ -134,7 +140,7 @@ const StandardCost = () => {
       },
       width: 1000,
       height: 700,
-      title: labels.StandardCost
+      title: labels.StandardCostUpdate
     })
   }
 

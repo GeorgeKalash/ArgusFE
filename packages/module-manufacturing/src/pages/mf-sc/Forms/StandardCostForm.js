@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -26,6 +26,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const functionId = SystemFunction.StandardCost
+  const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
@@ -75,7 +76,6 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
         itemCategoryId: yup.number().required(),
         collectionId: yup.number().required(),
         productionLineId: yup.number().required(),
-        amount: yup.number().required(),
       }),
       items: yup.array().of(yup.object({
         value: yup.number().required()
@@ -173,6 +173,8 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
       }))
 
     })
+
+    setReCal(false)
   }
 
   const columns = [
@@ -192,6 +194,15 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
       }
     }
   ]
+
+  const totalAmount = reCal ? (formik.values?.items || []).reduce((sum, item) => {
+      return sum + (parseFloat(item?.value) || 0)
+    }, 0) 
+    : (formik.values?.header?.amount || 0)
+
+  useEffect(() => {
+    formik.setFieldValue('header.amount', totalAmount)
+  }, [totalAmount])
 
   async function loadStandardCostParameters(recordItems = []) {
     const response = await getRequest({
@@ -236,6 +247,12 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
       condition: !isClosed,
       onClick: onClose,
       disabled: isClosed || !editMode
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
     },
     {
       key: 'Reopen',
@@ -377,10 +394,6 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
                     error={formik.touched.header?.collectionId && Boolean(formik.errors.header?.collectionId)}
                   />
                 </Grid>
-              </Grid>
-            </Grid>
-             <Grid item xs={4}>
-              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.StandardCost.pack}
@@ -404,18 +417,19 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
                     error={formik.touched.header?.productionLineId && Boolean(formik.errors.header?.productionLineId)}
                   />
                 </Grid>
+              </Grid>
+            </Grid>
+             <Grid item xs={4}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='header.amount'
                     label={labels.amount}
                     value={formik.values.header.amount}
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('header.amount', e.target.value)}
-                    onClear={() => formik.setFieldValue('header.amount', '')}
                     error={formik.touched.header?.amount && Boolean(formik.errors.header?.amount)}
                     maxLength={15}
-                    readOnly={isClosed}
-                    required
+                    readOnly
                     decimalScale={2}
                   />
                 </Grid>
@@ -438,7 +452,10 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={(value) => formik.setFieldValue('items', value)}
+            onChange={(value) => {
+              formik.setFieldValue('items', value)
+              setReCal(true)
+            }}
             value={formik.values?.items}
             error={formik.errors?.items}
             name='items'
