@@ -96,8 +96,9 @@ export const PayrollRepository = {
   SocialSecurity: {
     qry: service + 'qryES'
   },
-  FiscalYear: {
-    qry: service + 'qryYE'
+  Years: {
+    page: service + 'pageYE',
+    qry: service + 'qryYE',
   },
   Period: {
     qry: service + 'qryPE'
