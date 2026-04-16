@@ -128,8 +128,8 @@ export default function SaleTransactionForm({
 
 
   const { documentType, maxAccess } = useDocumentType({
-    functionId: functionId,
-    access: access,
+    functionId,
+    access,
     enabled: !recordId,
     objectName: 'header'
   })
@@ -167,7 +167,7 @@ export default function SaleTransactionForm({
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {
