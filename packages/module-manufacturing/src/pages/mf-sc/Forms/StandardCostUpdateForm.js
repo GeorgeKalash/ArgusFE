@@ -107,7 +107,7 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
   const onPost = async () => {
     await postRequest({
       extension: ManufacturingRepository.StandardCostUpdate.post,
-      record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
+      record: JSON.stringify({ recordId: formik.values?.header.recordId })
     })
 
     toast.success(platformLabels.Posted)
@@ -118,7 +118,7 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
   const onUnpost = async () => {
     const res = await postRequest({
       extension: ManufacturingRepository.StandardCostUpdate.unpost,
-      record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
+      record: JSON.stringify({ recordId: formik.values?.header.recordId })
     })
 
     toast.success(platformLabels.Unposted)
@@ -129,7 +129,7 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
   const onClose = async () => {
     const res = await postRequest({
       extension: ManufacturingRepository.StandardCostUpdate.close,
-      record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
+      record: JSON.stringify({ recordId: formik.values?.header.recordId })
     })
 
     toast.success(platformLabels.Closed)
@@ -140,7 +140,7 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
   const onReopen = async () => {
     const res = await postRequest({
       extension: ManufacturingRepository.StandardCostUpdate.reopen,
-      record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
+      record: JSON.stringify({ recordId: formik.values?.header.recordId })
     })
 
     toast.success(platformLabels.Reopened)
