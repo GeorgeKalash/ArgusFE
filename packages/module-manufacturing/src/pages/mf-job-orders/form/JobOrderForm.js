@@ -449,6 +449,35 @@ export default function JobOrderForm({
       extension: InventoryRepository.ItemProduction.get,
       parameters: `_recordId=${values?.recordId}`
     })
+    formik.setFieldValue('designRef', ItemProduction?.record?.designRef || '')
+    formik.setFieldValue('designName', ItemProduction?.record?.designName || '')
+    formik.setFieldValue('designId', ItemProduction?.record?.designId || null)
+    if (!isReleased) {
+      const routing = await getRouting(ItemProduction?.record?.routingId)
+      if (routing?.record?.isInactive) {
+        formik.setFieldValue('routingId', null)
+        formik.setFieldValue('routingRef', null)
+        formik.setFieldValue('routingName', null)
+      } else {
+        formik.setFieldValue('routingId', ItemProduction?.record?.routingId || null)
+        formik.setFieldValue('routingRef', ItemProduction?.record?.routingRef || '')
+        formik.setFieldValue('routingName', ItemProduction?.record?.routingName || '')
+      }
+    }
+    formik.setFieldValue('classId', ItemProduction?.record?.classId || null)
+    formik.setFieldValue('standardId', ItemProduction?.record?.standardId || null)
+
+    if (ItemProduction?.record?.designId) {
+      const design =  await getRequest({
+        extension: ManufacturingRepository.Design.get,
+        parameters: `_recordId=${ItemProduction?.record?.designId}`
+      })
+
+      formik.setFieldValue('threeDDId', design?.record?.threeDDId || null)
+      formik.setFieldValue('threeDDRef', design?.record?.threeDDRef || '')
+      formik.setFieldValue('rubberId', design?.record?.rubberId || null)
+      formik.setFieldValue('rubberRef', design?.record?.rubberRef || '')
+    }
     formik.setFieldValue('itemId', values?.recordId)
     formik.setFieldValue('itemName', values?.name)
     formik.setFieldValue('sku', values?.sku)
