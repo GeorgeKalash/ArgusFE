@@ -662,10 +662,13 @@ export default function JobOrderForm({
                         name='date'
                         required
                         readOnly
+                        onChange={formik.setFieldValue}
+                        onClear={() => formik.setFieldValue('date', null)}
                         label={labels.date}
                         value={formik?.values?.date}
                         editMode={editMode}
                         maxAccess={maxAccess}
+                        error={formik.touched.date && Boolean(formik.errors.date)}
                       />
                     </Grid>
                     <Grid item>
@@ -727,6 +730,9 @@ export default function JobOrderForm({
                         endpointId={InventoryRepository.Item.snapshot}
                         name='itemId'
                         readOnly={isCancelled || isPosted}
+                        filter={{
+                          productionLevel: val => [1, 2].includes(parseInt(val))
+                        }}
                         label={labels.item}
                         valueField='sku'
                         displayField='sku'
@@ -737,7 +743,8 @@ export default function JobOrderForm({
                           { key: 'name', value: 'Name' }
                         ]}
                         form={formik}
-                        displayFieldWidth={2}
+                        firstFieldWidth={5}
+                        displayFieldWidth={3}
                         onChange={async (_, newValue) => {
                           if (isReleased) {
                             formik.setFieldValue('itemId', newValue?.recordId || null)
