@@ -253,6 +253,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
   const editMode = !!formik.values.recordId
   const isRaw = formik.values.status === 1
+  const isClosed = formik.values.wip == 2
 
   async function getFilteredMU(itemId, msId = null) {
     if (!itemId) return
@@ -637,6 +638,28 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     })
   }
 
+  const onClose = async () => {
+    const res = await postRequest({
+      extension: SaleRepository.SalesQuotations.close,
+      record: JSON.stringify({ recordId: formik?.values?.recordId })
+    })
+
+    toast.success(platformLabels.Closed)
+    invalidate()
+    refetchForm(res.recordId)
+  }
+
+  const onReopen = async () => {
+    const res = await postRequest({
+      extension: SaleRepository.SalesQuotations.reopen,
+      record: JSON.stringify({ recordId: formik?.values?.recordId })
+    })
+
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    refetchForm(res.recordId)
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -667,7 +690,25 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       condition: true,
       onClick: toConsignments,
       disabled: !(editMode && isRaw)
-    }
+    },
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode
+    },
   ]
 
   async function fillForm(sqHeader, sqItems, clientDiscount) {
@@ -1227,8 +1268,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       previewReport={editMode}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={!isRaw}
-      disabledSavedClear={!isRaw}
+      disabledSubmit={!isRaw || isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -1278,7 +1318,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     name='clientId'
                     label={labels.client}
                     form={formik}
-                    readOnly={formik?.values?.bpId || formik?.values?.items?.some(item => item.itemId)}
+                    readOnly={formik?.values?.bpId || formik?.values?.items?.some(item => item.itemId) || isClosed}
                     displayFieldWidth={4}
                     valueShow='clientRef'
                     secondValueShow='clientName'
@@ -1313,7 +1353,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       })
                     }}
                     image='popup.png'
-                    disabled={!(editMode && isRaw && formik.values.clientId)}
+                    disabled={!(editMode && isRaw && formik.values.clientId) || isClosed}
                     tooltipText={platformLabels.editClient}
                   />
                 </Grid>
@@ -1332,7 +1372,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.lead}
                     form={formik}
                     required={!formik.values.clientId}
-                    readOnly={formik?.values?.clientId || formik?.values?.items?.some(item => item.itemId)}
+                    readOnly={formik?.values?.clientId || formik?.values?.items?.some(item => item.itemId) || isClosed}
                     displayFieldWidth={3}
                     valueShow='bpRef'
                     secondValueShow='bpName'
@@ -1365,7 +1405,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       { key: 'spRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={!isRaw}
+                    readOnly={!isRaw || isClosed}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
@@ -1384,7 +1424,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     value={formik?.values?.date}
                     onChange={formik.setFieldValue}
                     editMode={editMode}
-                    readOnly={!isRaw}
+                    readOnly={!isRaw || isClosed}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
@@ -1418,7 +1458,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.saleZone}
                     valueField='recordId'
                     displayField='name'
-                    readOnly={!isRaw}
+                    readOnly={!isRaw || isClosed}
                     values={formik.values}
                     displayFieldWidth={1.5}
                     onChange={(_, newValue) => {
@@ -1443,7 +1483,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       { key: 'name', value: 'Name' }
                     ]}
                     required
-                    readOnly={formik?.values?.items?.some(item => item.itemId)}
+                    readOnly={formik?.values?.items?.some(item => item.itemId) || isClosed}
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
@@ -1459,7 +1499,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
                     label={labels.plant}
-                    readOnly={!isRaw}
+                    readOnly={!isRaw || isClosed}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -1479,7 +1519,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
-                    readOnly={!isRaw}
+                    readOnly={!isRaw || isClosed}
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1536,7 +1576,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.validity}
                     value={formik?.values?.validity}
                     maxAccess={maxAccess}
-                    readOnly={!isRaw}
+                    readOnly={!isRaw || isClosed}
                     onChange={e => {
                       formik.handleChange(e)
                       if (e.target.value) {
@@ -1584,8 +1624,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            disabled={(!formik.values.clientId && !formik.values.bpId) || !isRaw}
-            allowDelete={isRaw}
+            disabled={(!formik.values.clientId && !formik.values.bpId) || !isRaw || isClosed}
+            allowDelete={isRaw && !isClosed}
+            allowAddNewLine={isRaw && !isClosed}
           />
         </Grow>
         <Fixed>
