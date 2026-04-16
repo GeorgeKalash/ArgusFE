@@ -2,6 +2,7 @@ import { useCallback, useContext, useRef } from 'react'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
+import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 
 export const useValueLinkAccess = ({ cacheOnlyMode }) => {
   const { stack } = useWindow()
@@ -45,9 +46,19 @@ export const useValueLinkAccess = ({ cacheOnlyMode }) => {
 
   const hasNoAccess = useCallback(access => {
     const flags = access?.record?.accessFlags
-    const flagValues = flags && typeof flags === 'object' ? Object.values(flags) : null
 
-    return !flagValues || flagValues.length === 0 || flagValues.every(v => v === false)
+    if (!flags || typeof flags !== 'object') return true
+
+    const entries = Object.entries(flags)
+    if (entries.length === 0) return true
+
+    const trueEntries = entries.filter(([, value]) => value === true)
+    if (trueEntries.length === 0) return true
+
+    const deleteKey = accessMap[TrxType.DEL]
+    const allowedAccesses = trueEntries.filter(([key]) => key !== deleteKey)
+
+    return allowedAccesses.length === 0
   }, [])
 
   const openNoAccessPopup = useCallback(() => {

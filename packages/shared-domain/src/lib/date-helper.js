@@ -181,6 +181,14 @@ const formatDayId = dayId => {
   return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+const formatTimeToApi = time => {
+  return new Date(time).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+}
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -194,5 +202,6 @@ export {
   formatDateFromISO,
   formatDateToISO,
   formatDateTimeForGetAPI,
-  formatDayId
+  formatDayId,
+  formatTimeToApi
 }

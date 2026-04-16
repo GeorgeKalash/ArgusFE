@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react'
+import { useContext } from 'react'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
@@ -15,81 +15,75 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import toast from 'react-hot-toast'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import PropertiesForm from './forms/PropertiesForm'
-import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import DimensionValuesForm from './forms/DimensionValuesForm'
 
-const Properties = () => {
-  const [data, setData] = useState([])
+const DimensionValues = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { systemDefaults } = useContext(DefaultsContext)
-  const [dimNum, setDimNum] = useState(0)
   const { stack } = useWindow()
-  const [dimensionStore, setDimensionStore] = useState([])
-
-  const fetchData = async () => {
-    const dimensionNumber = formik.values?.dimValue?.match(/\d+$/)?.[0]
-    setDimNum(dimensionNumber)
-    if (!dimensionNumber) {
-      setData([])
-
-      return
-    }
-
-    const response = await getRequest({
-      extension: InventoryRepository.Dimension.qry,
-      parameters: `_dimension=${dimensionNumber}`
-    })
-    setData(response || [])
-  }
 
   const {
-    labels: _labels,
+    query: { data },
+    labels,
     access,
-    refetch
+    refetch,
+    invalidate
   } = useResourceQuery({
-    endpointId: InventoryRepository.Dimension.qry,
     queryFn: fetchData,
+    endpointId: InventoryRepository.Dimension.qry,
     datasetId: ResourceIds.IVDimension
   })
 
   const { formik } = useForm({
     initialValues: {
-      dimValue: ''
+      dimValue: null
     },
-    access,
+    maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
       dimValue: yup.string().required()
     })
   })
 
-  const rowColumns = [
+  async function fetchData() {
+    const id = formik.values.dimValue
+
+    if (id) {
+      const response = await getRequest({
+        extension: InventoryRepository.Dimension.qry,
+        parameters: `_dimension=${id}`
+      })
+      return response
+    }
+
+    return []
+  }
+
+  const columns = [
     {
       field: 'id',
-      headerName: _labels.id,
+      headerName: labels.id,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
 
   function openForm(id) {
     stack({
-      Component: PropertiesForm,
+      Component: DimensionValuesForm,
       props: {
-        labels: _labels,
+        labels,
         id: id,
         maxAccess: access,
-        dimNum,
-        fetchData: fetchData
+        dimNum: formik.values?.dimValue
       },
       width: 500,
       height: 270,
-      title: _labels.properties
+      title: labels.properties
     })
   }
 
@@ -108,33 +102,9 @@ const Properties = () => {
       extension: InventoryRepository.Dimension.del,
       record: JSON.stringify(obj)
     })
-    fetchData()
+    invalidate()
     toast.success(platformLabels.Deleted)
   }
-
-  useEffect(() => {
-    fetchData()
-  }, [formik.values.dimValue])
-
-  useEffect(() => {
-    if (!systemDefaults?.list) return
-
-    const filteredList = systemDefaults?.list?.filter(
-      item => item.key?.startsWith('ivtDimension') && item.value
-    )
-
-    const items = filteredList.map(item => ({
-      key: item.key,
-      value: item.value
-    }))
-
-    setDimensionStore(items)
-
-    const firstValidKey = filteredList?.find(item => item.value !== '')?.key
-    if (firstValidKey) {
-      formik.setFieldValue('dimValue', firstValidKey)
-    }
-  }, [systemDefaults])
 
   return (
     <VertLayout>
@@ -143,21 +113,20 @@ const Properties = () => {
           onAdd={add}
           maxAccess={access}
           middleSection={
-            <Grid item sx={{ display: 'flex', mr: 2 }}>
+            <Grid item xs={6}>
               <ResourceComboBox
-                store={dimensionStore}
-                sx={{ width: 450 }}
+                endpointId={InventoryRepository.Dimensions.qry}
                 name='dimValue'
-                label={_labels.properties}
-                valueField='key'
-                displayField='value'
+                label={labels.dimensions}
+                valueField='id'
+                displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('dimValue', newValue ? newValue.key : '')
+                onChange={async (_, newValue) => {
+                  await formik.setFieldValue('dimValue', newValue?.id || null)
+                  refetch()
                 }}
                 required
                 maxAccess={access}
-                filter={item => item.value !== ''}
                 error={!formik.values.dimValue}
               />
             </Grid>
@@ -166,14 +135,13 @@ const Properties = () => {
       </Fixed>
       <Grow>
         <Table
-          columns={rowColumns}
+          columns={columns}
           gridData={data}
           rowId={['id']}
           pageSize={50}
           onEdit={edit}
           paginationType='client'
           refetch={refetch}
-          isLoading={false}
           onDelete={del}
           maxAccess={access}
         />
@@ -182,4 +150,4 @@ const Properties = () => {
   )
 }
 
-export default Properties
+export default DimensionValues

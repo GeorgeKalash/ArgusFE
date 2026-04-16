@@ -1,60 +1,68 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
+import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
-export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, fetchData }) {
+export default function DimensionsForm({ labels, maxAccess, id }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const invalidate = useInvalidate({
+    endpointId: InventoryRepository.Dimensions.page
+  })
+
   const { formik } = useForm({
     initialValues: {
-      id: id || null,
-      dimension: dimNum,
+      id: null,
       name: ''
     },
-    maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      id: yup.string().required()
+      id: yup.number().min(1).max(999).required(),
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: InventoryRepository.Dimension.set,
+        extension: InventoryRepository.Dimensions.set,
         record: JSON.stringify(obj)
       })
 
-      toast.success(platformLabels.Updated)
-      fetchData()
-      window.close()
+      toast.success(!formik.values.recordId ? platformLabels.Added : platformLabels.Edited)
+      formik.setFieldValue('recordId', obj.id)
+
+      invalidate()
     }
   })
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
       if (id) {
         const res = await getRequest({
-          extension: InventoryRepository.Dimension.get,
-          parameters: `_dimension=${dimNum}&_id=${id}`
+          extension: InventoryRepository.Dimensions.get,
+          parameters: `_id=${id}`
         })
 
-        formik.setValues(res.record)
+        formik.setValues({
+            ...res.record,
+            recordId: res.record.id
+        })
       }
     })()
-  }, [id])
+  }, [])
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+    <FormShell resourceId={ResourceIds.Dimensions} form={formik} maxAccess={maxAccess} editMode={editMode} isCleared={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -63,11 +71,12 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
                 name='id'
                 label={labels.id}
                 value={formik.values.id}
-                required
-                maxAccess={maxAccess}
-                maxLength='30'
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('id', '')}
+                maxLength='3'
+                required
+                decimalScale={0}
+                readOnly={editMode}
+                onClear={() => formik.setFieldValue('id', null)}
                 error={formik.touched.id && Boolean(formik.errors.id)}
               />
             </Grid>
@@ -78,6 +87,7 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
+                maxLength='50'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
@@ -86,6 +96,6 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
           </Grid>
         </Grow>
       </VertLayout>
-    </Form>
+    </FormShell>
   )
 }

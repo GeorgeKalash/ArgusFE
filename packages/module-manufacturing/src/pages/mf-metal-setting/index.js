@@ -62,7 +62,17 @@ const MetalSetting = () => {
       field: 'damageNonMetalItemName',
       headerName: labels.damageNonMetalItem,
       flex: 1
-    }
+    },
+    {
+      field: 'sfItemSku',
+      headerName: labels.sfItemSku,
+      flex: 1
+    },
+    {
+      field: 'sfItemName',
+      headerName: labels.sfItemName,
+      flex: 1
+    },
   ]
 
   const add = async () => {

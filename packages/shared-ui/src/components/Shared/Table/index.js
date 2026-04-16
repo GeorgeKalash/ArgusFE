@@ -47,6 +47,7 @@ const Table = ({
   onRowDragEnd = false,
   collabsable = true,
   domLayout = 'normal',
+  highlightRow,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -538,7 +539,8 @@ const Table = ({
     const handleSelectText = event => {
       if (selectionMode === 'row' && onSelectionChange) {
         onSelectionChange(params.data, params.rowIndex)
-      } else if (selectionMode === 'column' && onSelectionChange) {
+      }
+      else if (selectionMode === 'column' && onSelectionChange) {
         const columnValues = params.api.getDisplayedRowCount()
           ? Array.from(
               { length: params.api.getDisplayedRowCount() },
@@ -811,7 +813,11 @@ const Table = ({
 
   const gridOptions = {
     rowClassRules: {
-      'even-row': params => params.node.rowIndex % 2 === 0
+      'even-row': params => params.node.rowIndex % 2 === 0,
+      'highlighted-row': params => {
+        if (!highlightRow) return false
+        return highlightRow.condition?.(params.data)
+      }
     }
   }
 
@@ -910,9 +916,10 @@ const Table = ({
           sx={{
             height: props?.height || '100%',
             maxHeight: props?.maxHeight || 'none',
-            minHeight: 0
+            minHeight: 0,
+            '--highlight-bg': highlightRow?.color || 'transparent',
           }}
-        >
+            >
           {hoveredTable && !pagination && (
             <Box className={'hoverReset'}>
               <IconButton size='small' onClick={onReset}>
@@ -1171,6 +1178,16 @@ const Table = ({
 
         .agGridContainer :global(.ag-cell .MuiBox-root) {
           padding: 0 !important;
+        }
+          
+        .agGridContainer :global(.highlighted-row),
+        .agGridContainer :global(.highlighted-row.ag-row-hover),
+        .agGridContainer :global(.highlighted-row .ag-cell) {
+          background-color: var(--highlight-bg) !important;
+        }
+
+        .agGridContainer :global(.highlighted-row.ag-row-hover) {
+          filter: brightness(95%);
         }
 
         .paginationBar :global(.MuiIconButton-root) {

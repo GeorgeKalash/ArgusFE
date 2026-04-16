@@ -201,7 +201,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
-       sourceNo: yup.string().test( function (value) {
+       sourceNo: yup.string().nullable().test( function (value) {
         const { sourceId } = this.parent
         return !(sourceId && !value)
         }
@@ -1690,8 +1690,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                       displayFieldWidth={1.5}
                       maxAccess={maxAccess}
                       onChange={(_, newValue) => {
-                        formik.setFieldValue('sourceId', newValue ? newValue.recordId : null)
-                        formik.setFieldValue('sourceNo', '')
+                        formik.setFieldValue('sourceNo', null)
+                        formik.setFieldValue('sourceId', newValue?.recordId || null)
                       }}
                       error={formik.touched.sourceId && Boolean(formik.errors.sourceId)}
                     />

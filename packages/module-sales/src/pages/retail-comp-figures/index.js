@@ -250,6 +250,7 @@ const RetailCompFigures = () => {
                   return
                 }
                 const firstColumnValues = data?.list?.filter((_, index) => index !== 0).map(item => item.posRef)
+
                 setChartInfo(prevState => ({
                   ...prevState,
                   categories: firstColumnValues,
@@ -263,6 +264,7 @@ const RetailCompFigures = () => {
                 if (columnField === prevRow) {
                   return
                 }
+
                 setChartInfo(prevState => ({
                   ...prevState,
                   categories: monthsHeaders,
