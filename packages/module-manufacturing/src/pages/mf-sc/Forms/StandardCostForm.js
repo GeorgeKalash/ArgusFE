@@ -159,19 +159,18 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
       parameters: `_recordId=${recordId}`
     })
 
+    const items = await loadStandardCostParameters(
+      record?.items || [],
+      record?.header?.recordId || 0
+    )
+
     formik.setValues({
       recordId: record?.header?.recordId,
       header: {
         ...(record?.header || {}),
         date: formatDateFromApi(record?.header?.date),
       },
-      items: record?.items.map((item, index) => ({
-        id: index + 1,
-        trxId: record?.header?.recordId,
-        seqNo: index + 1,
-        ...item
-      }))
-
+      items
     })
 
     setReCal(false)
@@ -204,7 +203,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
     formik.setFieldValue('header.amount', totalAmount)
   }, [totalAmount])
 
-  async function loadStandardCostParameters(recordItems = []) {
+  async function loadStandardCostParameters(items = [], trxId = 0) {
     const response = await getRequest({
       extension: ManufacturingRepository.StandardCost.pack,
       parameters: ``
@@ -212,20 +211,18 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
 
     const list = response?.record?.standardCostParameters || []
 
-    const items = list.map((param, index) => {
-      const existingItem = (recordItems || []).find(item => item.scpId === param.recordId)
+    return list.map((param, index) => {
+      const existingItem = (items || []).find(item => item.scpId === param.recordId)
 
       return {
         id: index + 1,
-        trxId: recordId || 0,
+        trxId,
         seqNo: index + 1,
         scpId: param.recordId,
         scpName: param.name,
-        value: existingItem?.value ?? null
+        value: existingItem?.value ?? 0
       }
     })
-
-    formik.setFieldValue('items', items)
   }
 
   const actions = [
@@ -263,11 +260,14 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
   ]
 
   useEffect(() => {
-    if (recordId) {
-      refetchForm(recordId)
-    } else {
-      loadStandardCostParameters()
-    }
+    ;(async function () {
+      if (recordId) {
+        refetchForm(recordId)
+      } else {
+        const items = await loadStandardCostParameters([], 0)
+        formik.setFieldValue('items', items)
+      }
+    })()
   }, [])
 
   return (
