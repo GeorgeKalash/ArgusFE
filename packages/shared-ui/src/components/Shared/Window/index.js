@@ -26,6 +26,8 @@ import { CacheDataProvider } from '@argus/shared-providers/src/providers/CacheDa
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import styles from './Window.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import { useLayout } from '@argus/shared-providers/src/providers/LayoutContext'
+
 
 function LoadingOverlay() {
   return (
@@ -69,10 +71,10 @@ const Window = React.memo(
     spacing = true,
     ...props
   }) => {
+    const { hasNavbar } = useLayout()
     const { settings } = useSettings()
     const { navCollapsed } = settings
     const { loading } = useContext(RequestsContext)
-
     const paperRef = useRef(null)
     const [dragPos, setDragPos] = useState({ x: 0, y: 0 })
     const [restoreState, setRestoreState] = useState({
@@ -147,6 +149,12 @@ const Window = React.memo(
     const scaledHeight = expanded
       ? containerHeight
       : Math.max(120, height * scaleFactor)
+      
+    const baseWidth = !hasNavbar ? screenWidth : availableWidth
+    const baseHeight = !hasNavbar ? screenHeight : availableHeight
+
+    const x = (baseWidth - scaledWidth) / 2
+    const y = (baseHeight - scaledHeight) / 2
 
     useEffect(() => {
       if (paperRef.current) paperRef.current.focus()
@@ -163,6 +171,15 @@ const Window = React.memo(
       document.body.style.overflow = minimized || expanded ? 'hidden' : ''
       return () => (document.body.style.overflow = '')
     }, [minimized, expanded])
+
+    useEffect(() => {
+      if (!hasNavbar && !expanded && !minimized) {
+        setDragPos({
+          x: Math.max(0, x),
+          y: Math.max(0, y)
+        })
+      }
+    }, [hasNavbar, x, y, expanded, minimized])
 
     const handleExpandToggle = () => {
       if (!expanded) {
@@ -203,17 +220,30 @@ const Window = React.memo(
         <Box
           className={styles.parentBox}
           style={{
-            width: spacing ? containerWidth : '100vw',
-            height: spacing ? containerHeight : '100vh',
-            alignItems: minimized ? 'flex-end' : 'center'
+            width: !hasNavbar ? '100vw' : (spacing ? containerWidth : '100vw'),
+            height: !hasNavbar ? '100vh' : (spacing ? containerHeight : '100vh'),
+            alignItems: minimized
+              ? 'flex-end'
+              : !hasNavbar
+              ? 'flex-start'
+              : 'center',
+            ...(!hasNavbar && {
+              position: 'fixed',
+              justifyContent: 'flex-start',
+              zIndex: 1300,
+            }),
           }}
           onKeyDown={e => e.key === 'Escape' && closable && onClose()}
         >
           <Draggable
             handle="#draggable-dialog-title"
             cancel=".no-drag"
-            bounds="parent"
-            position={minimized || expanded ? { x: 0, y: 0 } : dragPos}
+            bounds={!hasNavbar ? false : 'parent'}
+            position={
+              !hasNavbar
+                ? dragPos
+                : (minimized || expanded ? { x: 0, y: 0 } : dragPos)
+            }
             disabled={minimized || expanded || !draggable}
             onStop={(_, data) => {
               if (!expanded && !minimized) setDragPos({ x: data.x, y: data.y })
