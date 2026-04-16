@@ -96,7 +96,7 @@ const LoginPage = () => {
         onClose: () => onClose()
       },
       expandable: false,
-      closable: false,
+      closable: true,
       draggable: false,
       spacing: false
     })
