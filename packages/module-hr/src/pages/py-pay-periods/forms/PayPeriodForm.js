@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import * as yup from 'yup'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
@@ -9,63 +9,77 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import toast from 'react-hot-toast'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 
-export default function FiscalPeriodForm ({ labels, periodInfo, maxAccess, refetch, window }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+export default function PayPeriodForm ({ labels, maxAccess, window }) {
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { periodId, periodType, fiscalYear } = periodInfo || {}
+
+  const invalidate = useInvalidate({
+    endpointId: PayrollRepository.FiscalYear.page
+  })
 
   const { formik } = useForm({
     initialValues: {
-      periodId,
-      fiscalYear,
-      status: 1,
-      salaryType: periodType,
+      fiscalYear: null,
       startDate: null,
       endDate: null
     },
     maxAccess,
     validationSchema: yup.object({
+      fiscalYear: yup.number().required(),
       startDate: yup.string().required(),
       endDate: yup.string().required()
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: PayrollRepository.Period.set,
+        extension: PayrollRepository.FiscalYear.set,
         record: JSON.stringify({...obj,
           startDate: formatDateToApi(obj?.startDate),
           endDate: formatDateToApi(obj?.endDate)
         })
       })
       toast.success(platformLabels.Saved)
-      refetch()
+      invalidate()
       window.close()
     }
   })
-
-  useEffect(() => {
-    ;(async function () {
-      if (!periodId && !periodType && !fiscalYear) return
-
-      const res = await getRequest({
-        extension: PayrollRepository.Period.get,
-        parameters: `_year=${fiscalYear}&_salaryType=${periodType}&_periodId=${periodId}`
-      })
-      formik.setValues({...res.record,
-        startDate: res?.record?.startDate ? formatDateFromApi(res?.record?.startDate) : null,
-        endDate: res?.record?.endDate ? formatDateFromApi(res?.record?.endDate) : null
-      })
-    })()
-  }, [])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-          <Grid item xs={12}>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='fiscalYear'
+                label={labels.year}
+                value={formik?.values?.fiscalYear}
+                maxAccess={maxAccess}
+                required
+                allowNegative={false}
+                decimalScale={0}
+                maxLength={4}
+                thousandSeparator={false}
+                onChange={formik.handleChange}
+                onBlur={(e) => {
+                  const year = e.target.value
+                  if (!year) return
+
+                  formik.setValues({
+                    ...formik.values,
+                    startDate: new Date(year, 0, 1, 1, 1, 1, 1),
+                    endDate: new Date(year, 11, 31, 1, 1, 1, 1)
+                  })
+                }}
+                onClear={() => formik.setFieldValue('fiscalYear', null)}
+                error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <CustomDatePicker
                 name='startDate'
                 label={labels.from}

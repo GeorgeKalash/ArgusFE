@@ -1,45 +1,36 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { Grid } from '@mui/material'
+import FiscalPeriodForm from './FiscalPeriodForm'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
-export default function FiscalPeriodList ({fiscalYear}) {
-    
-   
+export default function FiscalPeriodList ({fiscalYear, labels, maxAccess}) {
   const { getRequest } = useContext(RequestsContext)
+  const [periodType, setPeriod] = useState('4')
+  const [data, setData] = useState([])
+  const { stack } = useWindow()
 
   async function fetchGridData() {
-
     const response = await getRequest({
       extension: PayrollRepository.Period.qry,
-      parameters: `_year=${fiscalYear}&_salaryType=${5}&_status=0`
+      parameters: `_year=${fiscalYear}&_salaryType=${periodType}&_status=0`
     })
 
-    return response
+     setData(response?.list || [])
   }
-  
-  const {
-    query: { data },
-    labels,
-    paginationParameters,
-    refetch,
-    access
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: PayrollRepository.Years.page,
-    datasetId: ResourceIds.PayPeriod
-  })
 
   const columns = [
     {
       field: 'periodId',
-      headerName: labels.year,
+      headerName: ' ',
       flex: 1
     },
     {
@@ -53,39 +44,64 @@ export default function FiscalPeriodList ({fiscalYear}) {
       headerName: labels.to,
       flex: 2,
       type: 'date'
+    },
+    {
+      field: 'statusName',
+      headerName: ' ',
+      flex: 2
     }
   ]
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj.periodId)
   }
 
-  async function openForm(recordId) {
-    // stack({
-    // Component: ResignationReqForm,
-    // props: {
-    //     recordId,  
-    // }
-    // })
+  async function openForm(periodId) {
+    stack({
+      Component: FiscalPeriodForm,
+      props: {
+        periodInfo: { fiscalYear, periodType, periodId },
+        labels,
+        maxAccess,
+        refetch: fetchGridData
+      },
+      height: 350,
+      width: 450,
+      title: labels.fiscalPeriod
+    })
   }
+
+  useEffect(() => { fetchGridData() }, [periodType])
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar maxAccess={access} />
+         <GridToolbar maxAccess={maxAccess}
+           leftSection={
+            <Grid item xs={5} sx={{mt: 2}}>
+              <ResourceComboBox
+                datasetId={DataSets.PY_PAY_PERIOD}
+                name='periodType'
+                label={labels.periodType}
+                valueField='key'
+                displayField='value'
+                value={periodType}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => setPeriod(newValue?.key) }
+              />
+            </Grid>
+          }/>
       </Fixed>
       <Grow>
         <Table
           name='year'
           columns={columns}
-          gridData={data}
+          gridData={{list: data}}
           rowId={['recordId']}
-          pageSize={50}
-          refetch={refetch}
           onEdit={edit}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-          maxAccess={access}
+          pagination={false}
+          maxAccess={maxAccess}
+          actionCondition={(row, type) => { return type === 'edit' ? row.status !== 2 : true }}
         />
       </Grow>
     </VertLayout>

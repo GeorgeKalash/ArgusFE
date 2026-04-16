@@ -322,7 +322,7 @@ export default function PayrollListForm({ recordId, window }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={PayrollRepository.Years.qry}
+                endpointId={PayrollRepository.FiscalYear.qry}
                 name='fiscalYear'
                 label={labels.fiscalYear}
                 valueField='fiscalYear'

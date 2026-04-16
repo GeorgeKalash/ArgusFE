@@ -10,16 +10,20 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import FiscalPeriodList from './forms/FiscalPeriodList'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import PayPeriodForm from './forms/PayPeriodForm'
+import toast from 'react-hot-toast'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 export default function PayPeriods () {
-  const { getRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: PayrollRepository.Years.page,
+      extension: PayrollRepository.FiscalYear.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
@@ -31,10 +35,11 @@ export default function PayPeriods () {
     labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PayrollRepository.Years.page,
+    endpointId: PayrollRepository.FiscalYear.page,
     datasetId: ResourceIds.PayPeriod
   })
 
@@ -68,11 +73,26 @@ export default function PayPeriods () {
 
   async function openForm(fiscalYear) {
     stack({
-      Component: FiscalPeriodList,
+      Component: fiscalYear ? FiscalPeriodList : PayPeriodForm,
       props: {
-        fiscalYear
-      }
+        fiscalYear,
+        labels,
+        maxAccess: access
+      },
+      height: fiscalYear ? 650 : 450,
+      width: fiscalYear ? 1000 : 700,
+      title: labels.payPeriods,
+      nextToTitle: fiscalYear ? ` - ${fiscalYear}` : ''
     })
+  }
+
+  const del = async obj => {
+    await postRequest({
+      extension: PayrollRepository.FiscalYear.del,
+      record: JSON.stringify(obj)
+    })
+    toast.success(platformLabels.Deleted)
+    invalidate()
   }
 
   return (
@@ -89,6 +109,7 @@ export default function PayPeriods () {
           pageSize={50}
           refetch={refetch}
           onEdit={edit}
+          onDelete={del}
           paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}
