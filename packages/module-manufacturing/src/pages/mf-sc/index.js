@@ -13,9 +13,9 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import StandardCostForm from './Forms/StandardCostForm'
+import StandardCostUpdateForm from './Forms/StandardCostUpdateForm'
 
-const StandardCost = () => {
+const StandardCostUpdate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -24,7 +24,7 @@ const StandardCost = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.StandardCost.page,
+      extension: ManufacturingRepository.StandardCostUpdate.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
@@ -34,7 +34,7 @@ const StandardCost = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry) {
       return await getRequest({
-        extension:  ManufacturingRepository.StandardCost.snapshot,
+        extension:  ManufacturingRepository.StandardCostUpdate.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -50,15 +50,15 @@ const StandardCost = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.StandardCost.page,
-    datasetId: ResourceIds.StandardCost,
+    endpointId: ManufacturingRepository.StandardCostUpdate.page,
+    datasetId: ResourceIds.StandardCostUpdate,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.StandardCost,
+    functionId: SystemFunction.StandardCostUpdate,
     action: openForm
   })
 
@@ -137,7 +137,7 @@ const StandardCost = () => {
 
   function openForm(recordId) {
     stack({
-      Component: StandardCostForm,
+      Component: StandardCostUpdateForm,
       props: {
         labels,
         recordId,
@@ -151,7 +151,7 @@ const StandardCost = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.StandardCost.del,
+      extension: ManufacturingRepository.StandardCostUpdate.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -171,6 +171,7 @@ const StandardCost = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
@@ -182,4 +183,4 @@ const StandardCost = () => {
   )
 }
 
-export default StandardCost
+export default StandardCostUpdate

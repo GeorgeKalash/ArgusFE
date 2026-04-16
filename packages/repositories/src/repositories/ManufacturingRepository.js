@@ -485,7 +485,7 @@ export const ManufacturingRepository = {
     get: service + 'getSCP',
     del: service + 'delSCP'
   },
-  StandardCost: {
+  StandardCostUpdate: {
     set2: service + 'set2SCU',
     get2: service + 'get2SCU',
     del: service + 'delSCU',

@@ -22,10 +22,10 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
-export default function StandardCostForm({ labels, access, recordId, window }) {
+export default function StandardCostUpdateForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const functionId = SystemFunction.StandardCost
+  const functionId = SystemFunction.StandardCostUpdate
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -36,7 +36,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
   })
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.StandardCost.page
+    endpointId: ManufacturingRepository.StandardCostUpdate.page
   })
 
   const { formik } = useForm({
@@ -45,7 +45,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
       recordId: recordId || null,
       header: {
         recordId,
-        functionId: SystemFunction.StandardCost,
+        functionId: SystemFunction.StandardCostUpdate,
         date: new Date(),
         dtId: null,
         itemGroupId: null,
@@ -80,7 +80,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: ManufacturingRepository.StandardCost.set2,
+        extension: ManufacturingRepository.StandardCostUpdate.set2,
         record: JSON.stringify({
           header: {
             ...obj.header,
@@ -106,7 +106,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
 
   const onPost = async () => {
     await postRequest({
-      extension: ManufacturingRepository.StandardCost.post,
+      extension: ManufacturingRepository.StandardCostUpdate.post,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -117,7 +117,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: ManufacturingRepository.StandardCost.unpost,
+      extension: ManufacturingRepository.StandardCostUpdate.unpost,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -128,7 +128,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
 
   const onClose = async () => {
     const res = await postRequest({
-      extension: ManufacturingRepository.StandardCost.close,
+      extension: ManufacturingRepository.StandardCostUpdate.close,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -139,7 +139,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
 
   const onReopen = async () => {
     const res = await postRequest({
-      extension: ManufacturingRepository.StandardCost.reopen,
+      extension: ManufacturingRepository.StandardCostUpdate.reopen,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -152,7 +152,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
     if (!recordId) return
 
     const { record } = await getRequest({
-      extension: ManufacturingRepository.StandardCost.get2,
+      extension: ManufacturingRepository.StandardCostUpdate.get2,
       parameters: `_recordId=${recordId}`
     })
 
@@ -203,7 +203,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
 
   async function loadStandardCostParameters(items = [], trxId = 0) {
     const response = await getRequest({
-      extension: ManufacturingRepository.StandardCost.pack,
+      extension: ManufacturingRepository.StandardCostUpdate.pack,
       parameters: ``
     })
 
@@ -270,7 +270,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.StandardCost}
+      resourceId={ResourceIds.StandardCostUpdate}
       form={formik}
       maxAccess={maxAccess}
       actions={actions}
@@ -286,7 +286,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.StandardCost.pack}
+                    endpointId={ManufacturingRepository.StandardCostUpdate.pack}
                     reducer={response => response?.record?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
@@ -339,7 +339,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.StandardCost.pack}
+                    endpointId={ManufacturingRepository.StandardCostUpdate.pack}
                     reducer={response => response?.record?.itemGroups}
                     values={formik.values.header}
                     name='header.itemGroupId'
@@ -360,7 +360,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.StandardCost.pack}
+                    endpointId={ManufacturingRepository.StandardCostUpdate.pack}
                     reducer={response => response?.record?.categories}
                     values={formik.values.header}
                     name='header.itemCategoryId'
@@ -380,7 +380,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.StandardCost.pack}
+                    endpointId={ManufacturingRepository.StandardCostUpdate.pack}
                     reducer={response => response?.record?.collections}
                     name='header.collectionId'
                     label={labels.collection}
@@ -402,7 +402,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.StandardCost.pack}
+                    endpointId={ManufacturingRepository.StandardCostUpdate.pack}
                     reducer={response => response?.record?.productionLines}
                     values={formik.values.header}
                     name='header.productionLineId'
