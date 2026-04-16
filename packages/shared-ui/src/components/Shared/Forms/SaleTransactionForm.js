@@ -127,7 +127,7 @@ export default function SaleTransactionForm({
   }
 
 
-  const { documentType, maxAccess } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
     access,
     enabled: !recordId,
@@ -2022,6 +2022,7 @@ export default function SaleTransactionForm({
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
+                  await changeDT(newValue)
                   const recordId = newValue ? newValue.recordId : null
                   await formik.setFieldValue('header.dtId', recordId)
                   if (!newValue) {
