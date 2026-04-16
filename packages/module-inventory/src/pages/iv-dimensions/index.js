@@ -77,7 +77,7 @@ const Dimensions = () => {
         maxAccess: access
       },
       width: 500,
-      height: 200,
+      height: 250,
       title: labels.Dimensions
     })
   }
