@@ -64,7 +64,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
           trxId: recordId || 0,
           seqNo: 1,
           scpId: null,
-          value: null
+          value: 0
         }
       ]
     },
@@ -77,9 +77,6 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
         collectionId: yup.number().required(),
         productionLineId: yup.number().required(),
       }),
-      items: yup.array().of(yup.object({
-        value: yup.number().required()
-      }))
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -187,6 +184,7 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       label: labels.value,
       name: 'value',
+      defaultValue: 0,
       props: {
         maxLength: 15,
         decimalScale: 2
@@ -295,7 +293,11 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
                     label={labels.docType}
                     readOnly={editMode}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
                     values={formik.values.header}
                     onChange={(_, newValue) => {
                       changeDT(newValue)
@@ -364,7 +366,11 @@ export default function StandardCostForm({ labels, access, recordId, window }) {
                     name='header.itemCategoryId'
                     label={labels.category}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['caRef', 'name']}
+                    columnsInDropDown={[
+                      { key: 'caRef', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
                     required
                     readOnly={isClosed}
                     maxAccess={maxAccess}
