@@ -120,6 +120,11 @@ const StandardCost = () => {
       flex: 1
     },
     {
+      field: 'releaseStatus',
+      headerName: labels.releaseStatus,
+      flex: 1
+    },
+    {
       field: 'wipName',
       headerName: labels.wip,
       flex: 1
