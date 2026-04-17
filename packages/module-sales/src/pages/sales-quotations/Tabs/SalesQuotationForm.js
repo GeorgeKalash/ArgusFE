@@ -677,19 +677,19 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       key: 'Invoice',
       condition: true,
       onClick: toInvoice,
-      disabled: !(editMode && isRaw)
+      disabled: !editMode || isRaw
     },
     {
       key: 'Order',
       condition: true,
       onClick: toOrder,
-      disabled: !(editMode && isRaw)
+      disabled: !editMode || isRaw
     },
     {
       key: 'Consignments',
       condition: true,
       onClick: toConsignments,
-      disabled: !(editMode && isRaw)
+      disabled: !editMode || isRaw
     },
     {
       key: 'Close',
