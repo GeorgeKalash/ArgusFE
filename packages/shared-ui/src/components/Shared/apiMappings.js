@@ -912,7 +912,7 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
-  [ResourceIds.AttendanceScheduleFilter]: {
+  [ResourceIds.AttendanceSchedule]: {
     type: COMBOBOX,
     endpoint: TimeAttendanceRepository.AttendanceScheduleFilters.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId&_scId=0`,

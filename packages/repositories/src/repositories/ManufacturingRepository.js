@@ -479,9 +479,22 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotDCA'
   },
   StandardCostParameters: {
+    qry: service + 'qrySCP',
     page: service + 'pageSCP',
     set: service + 'setSCP',
     get: service + 'getSCP',
     del: service + 'delSCP'
-  }
+  },
+  StandardCostUpdate: {
+    set2: service + 'set2SCU',
+    get2: service + 'get2SCU',
+    del: service + 'delSCU',
+    page: service + 'pageSCU',
+    snapshot: service + 'snapshotSCU',
+    post: service + 'postSCU',
+    unpost: service + 'unpostSCU',
+    pack: service + 'getPackSCU',
+    close: service + 'closeSCU',
+    reopen: service + 'reopenSCU'
+  },
 }
