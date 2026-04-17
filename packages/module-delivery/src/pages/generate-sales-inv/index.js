@@ -101,7 +101,8 @@ const GeneratePurchaseInvoice = () => {
         access: maxAccess,
         functionId: SystemFunction.SalesInvoice,
         getResourceId: () => ResourceIds.SalesInvoice,
-        LockRecord
+        LockRecord,
+        getGLResource: () => ResourceIds.GLSalesInvoice
       },
 
       title: _labels.salesInvoice
