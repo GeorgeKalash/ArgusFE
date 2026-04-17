@@ -103,7 +103,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
             sku: yup.string().required(),
             issued: yup.number().required(),
             returned: yup.number().required(),
-            consumed: yup.number().required()
+            consumed: yup.number().required(),
+            toSiteId: yup.number().required(),
           })
         )
         .required()
@@ -213,6 +214,25 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       name: 'consumed',
       label: labels.consumed,
       props: { readOnly: true, maxLength: 9, decimalScale: 3 }
+    },
+    {
+      component: 'resourcecombobox',
+      name: 'toSiteId',
+      label: labels.toSite,
+      props: {
+        endpointId: InventoryRepository.Site.qry,
+        valueField: 'recordId',
+        displayField: 'name',
+        mapping: [
+          { from: 'recordId', to: 'toSiteId' },
+          { from: 'name', to: 'toSiteName' }
+        ],
+        displayFieldWidth: 2,
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
+      }
     }
   ]
 
@@ -395,6 +415,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                   formik.setFieldValue('header.avgWeight', newValue?.avgWeight || 0)
                   formik.setFieldValue('header.workCenterName', newValue?.wcName || '')
                   formik.setFieldValue('header.workCenterId', newValue?.workCenterId || null)
+                  formik.setFieldValue('header.lineId', newValue?.lineId || null)
                   formik.setFieldValue('header.operationId', null)
                   formik.setFieldValue('header.laborId', null)
                   const physical = await getItemPhysical(newValue?.itemId)
@@ -513,6 +534,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 name='header.avgWeight'
                 allowNegative={false}
                 label={labels.avgWeight}
+                decimalScale={3}
                 value={formik?.values?.header.avgWeight}
                 maxAccess={maxAccess}
                 readOnly
@@ -534,7 +556,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 ]}
                 displayFieldWidth={1.5}
                 required
-                readOnly={!formik?.values?.header?.bomId || editMode}
+                readOnly={!formik?.values?.header?.bomId}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('header.sfItemId', newValue?.itemId || null)
@@ -563,6 +585,84 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
               />
             </Grid>
             <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='header.fromSFSiteId'
+                label={labels.fromSemiFinishedSite}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values.header}
+                readOnly={isPosted}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.fromSFSiteId', newValue?.recordId || null)
+                }}
+                error={formik.touched.header?.fromSFSiteId && Boolean(formik.errors.header?.fromSFSiteId)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='header.toFGSiteId'
+                label={labels.toFinishedGoodsSite}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                readOnly={isPosted}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.toFGSiteId', newValue?.recordId || null)
+                }}
+                error={formik.touched.header?.toFGSiteId && Boolean(formik.errors.header?.toFGSiteId)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionLine.qry}
+                parameters='_startAt=0&_pageSize=1000'
+                values={formik.values.header}
+                name='header.lineId'
+                label={labels.productionLine}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                displayFieldWidth={1}
+                readOnly={isPosted}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.lineId', newValue?.recordId || null)
+                }}
+                error={formik.touched.header?.lineId && Boolean(formik.errors.header?.lineId)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionShifts.qry}
+                name='header.shiftId'
+                label={labels.shift}
+                maxAccess={access}
+                readOnly={isPosted}
+                valueField='recordId'
+                displayField={'name'}
+                values={formik.values?.header}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.shiftId', newValue?.recordId || null)
+                }}
+                error={formik.touched?.header?.shiftId && Boolean(formik.errors?.header?.shiftId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
               <CustomNumberField
                 name='header.activeHours'
                 label={labels.activeHours}
@@ -575,7 +675,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 error={formik?.touched?.header?.activeHours && Boolean(formik?.errors?.header?.activeHours)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
               <CustomNumberField
                 name='header.idleHours'
                 label={labels.idleHours}
@@ -599,22 +699,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 maxLength={5}
                 decimalScale={2}
                 error={formik?.touched?.header?.totalHours && Boolean(formik?.errors?.header?.totalHours)}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <ResourceComboBox
-                endpointId={ManufacturingRepository.ProductionShifts.qry}
-                name='header.shiftId'
-                label={labels.shift}
-                maxAccess={access}
-                readOnly={isPosted}
-                valueField='recordId'
-                displayField={'name'}
-                values={formik.values?.header}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('header.shiftId', newValue?.recordId || null)
-                }}
-                error={formik.touched?.header?.shiftId && Boolean(formik.errors?.header?.shiftId)}
               />
             </Grid>
           </Grid>
