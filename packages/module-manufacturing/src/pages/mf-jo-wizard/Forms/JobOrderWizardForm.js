@@ -68,7 +68,10 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         producedWeight: 0,
         activeHours: null,
         idleHours: null,
-        totalHours: null
+        totalHours: null,
+        fromSiteId: null,
+        toSiteId: null,
+        lineId: null
       },
       rows: [
         {
@@ -79,7 +82,9 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
           issued: 0,
           returned: 0,
           consumed: 0,
-          seqNo: 1
+          seqNo: 1,
+          siteId: null,
+          siteName: ''
         }
       ]
     },
@@ -104,7 +109,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
             issued: yup.number().required(),
             returned: yup.number().required(),
             consumed: yup.number().required(),
-            toSiteId: yup.number().required(),
+            siteName: yup.string().required(),
           })
         )
         .required()
@@ -217,22 +222,23 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     },
     {
       component: 'resourcecombobox',
-      name: 'toSiteId',
       label: labels.toSite,
+      name: 'siteName',
       props: {
         endpointId: InventoryRepository.Site.qry,
-        valueField: 'recordId',
         displayField: 'name',
+        valueField: 'recordId',
         mapping: [
-          { from: 'recordId', to: 'toSiteId' },
-          { from: 'name', to: 'toSiteName' }
+          { from: 'recordId', to: 'siteId' },
+          { from: 'reference', to: 'siteRef' },
+          { from: 'name', to: 'siteName' }
         ],
         displayFieldWidth: 2,
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ]
-      }
+      },
     }
   ]
 
@@ -587,7 +593,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
-                name='header.fromSFSiteId'
+                name='header.fromSiteId'
                 label={labels.fromSemiFinishedSite}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -599,15 +605,15 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('header.fromSFSiteId', newValue?.recordId || null)
+                  formik.setFieldValue('header.fromSiteId', newValue?.recordId || null)
                 }}
-                error={formik.touched.header?.fromSFSiteId && Boolean(formik.errors.header?.fromSFSiteId)}
+                error={formik.touched.header?.fromSiteId && Boolean(formik.errors.header?.fromSiteId)}
               />
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
-                name='header.toFGSiteId'
+                name='header.toSiteId'
                 label={labels.toFinishedGoodsSite}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -619,9 +625,9 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 maxAccess={maxAccess}
                 readOnly={isPosted}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('header.toFGSiteId', newValue?.recordId || null)
+                  formik.setFieldValue('header.toSiteId', newValue?.recordId || null)
                 }}
-                error={formik.touched.header?.toFGSiteId && Boolean(formik.errors.header?.toFGSiteId)}
+                error={formik.touched.header?.toSiteId && Boolean(formik.errors.header?.toSiteId)}
               />
             </Grid>
             <Grid item xs={4}>
