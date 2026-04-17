@@ -24,10 +24,13 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 
 export default function JobOrderWizardForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrderWizard,
@@ -274,6 +277,16 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     return returned + returnedValue
   }, 0)
 
+  async function onWorkFlowClick() {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.JobOrderWizard,
+        recordId: formik.values.recordId
+      }
+    })
+  }
+
   const actions = [
     {
       key: 'Unlocked',
@@ -286,7 +299,13 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       disabled: true
-    }
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
   ]
 
   const totalConsumed = formik.values?.rows?.reduce((consumed, row) => {

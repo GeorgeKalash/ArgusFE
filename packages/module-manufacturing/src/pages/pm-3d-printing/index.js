@@ -84,7 +84,11 @@ const ThreeDPrinting = () => {
     {
       field: 'threeDDRef',
       headerName: labels.threeDD,
-      flex: 1
+      flex: 1,
+      linkOpen: data => ({
+        resourceId: ResourceIds.ThreeDDesign,
+        props: { recordId: data?.threeDDId }
+      })
     },
     {
       field: 'fileReference',

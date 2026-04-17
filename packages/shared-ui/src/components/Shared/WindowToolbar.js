@@ -37,7 +37,8 @@ const WindowToolbar = ({
 }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [reportStore, setReportStore] = useState([])
+  const [reportStore, setReportStore] = useState([])  
+  const [defaultLayoutId, setDefaultLayoutId] = useState(null)
 
   const getReportLayout = async () => {
     const reportPack = await getRequest({
@@ -79,6 +80,8 @@ const WindowToolbar = ({
         uniqueId: index + 1
       }))
     )
+
+    setDefaultLayoutId(pack?.defaultLayoutId)
   }
 
   const functionMapping = {
@@ -121,6 +124,7 @@ const WindowToolbar = ({
             resourceId={resourceId}
             condition={previewReport}
             reportStore={reportStore}
+            defaultLayoutId={defaultLayoutId}
             getReportLayout={getReportLayout}
             recordId={recordId}
             reportSize={reportSize}

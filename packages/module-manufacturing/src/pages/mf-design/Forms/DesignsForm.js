@@ -50,7 +50,6 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       description: '',
       threeDDId: null,
       rubberId: null,
-      itemId: null,
       routingId: null,
       lineId: null,
       classId: null,
@@ -58,6 +57,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       stdWeight: 0,
       designerId: null,
       itemCategoryId: null,
+      itemGroupId: null,
       designerRef: '',
       designerName: '',
       isInactive: false
@@ -65,8 +65,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      itemId: yup.number().required()
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       const data = {
@@ -207,32 +206,6 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={InventoryRepository.Item.snapshot}
-                    name='itemId'
-                    label={labels.sku}
-                    valueField='sku'
-                    displayField='name'
-                    valueShow='sku'
-                    secondValueShow='itemName'
-                    form={formik}
-                    required
-                    columnsInDropDown={[
-                      { key: 'sku', value: 'SKU' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('itemId', newValue?.recordId || null)
-                      formik.setFieldValue('itemName', newValue?.name || '')
-                      formik.setFieldValue('sku', newValue?.sku || '')
-                      formik.setFieldValue('itemCategoryId', newValue?.categoryId || null)
-                    }}
-                    displayFieldWidth={2}
-                    maxAccess={maxAccess}
-                    errorCheck={'itemId'}
-                  />
-                </Grid>
-                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.ProductionLine.qry}
                     parameters='_startAt=0&_pageSize=1000'
@@ -261,11 +234,31 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     name='itemCategoryId'
                     label={labels.category}
                     valueField='recordId'
-                    displayField={['reference', 'name']}
-                    readOnly
+                    displayField='name'
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('itemCategoryId', newValue?.recordId || null)}
+                    error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
                   />
                 </Grid>
-
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Group.qry}
+                    parameters='_startAt=0&_pageSize=1000'
+                    values={formik.values}
+                    name='itemGroupId'
+                    label={labels.itemGroup}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    displayFieldWidth={1}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('itemGroupId', newValue?.recordId || null)}
+                    error={formik.touched.itemGroupId && formik.errors.itemGroupId}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ManufacturingRepository.Routing.snapshot2}

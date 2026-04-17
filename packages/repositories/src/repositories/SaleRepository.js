@@ -109,7 +109,8 @@ export const SaleRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD',
-    page: service + 'pageDTD'
+    page: service + 'pageDTD',
+    snapshot: service + 'snapshotDTD'
   },
   DocumentType: {
     qry: service + 'qryDT'
@@ -120,6 +121,13 @@ export const SaleRepository = {
     set: service + 'setCCS',
     del: service + 'delCCS',
     page: service + 'pageCCS'
+  },
+  SalesOrderSource: {
+    qry: service + 'qryORS',
+    get: service + 'getORS',
+    set: service + 'setORS',
+    del: service + 'delORS',
+    page: service + 'pageORS'
   },
   Price: {
     qry: service + 'qryCC',
@@ -244,12 +252,13 @@ export const SaleRepository = {
     page: service + 'pageDRE',
     page2: service + 'page2DRE',
     snapshot: service + 'snapshotDRE',
-    get: service + 'getDRE',
+    get2: service + 'get2DRE',
     set2: service + 'set2DRE',
     del: service + 'delDRE',
     close: service + 'closeDRE',
     reopen: service + 'reopenDRE',
-    post: service + 'postDRE'
+    post: service + 'postDRE',
+    pack: service + 'getPackDRE'
   },
   DraftReturnSerial: {
     qry: service + 'qryDRS',
@@ -293,8 +302,8 @@ export const SaleRepository = {
   ReturnOnInvoice: {
     snapshot: service + 'snapshotRET',
     page: service + 'pageRET',
-    get: service + 'getRET',
     set2: service + 'set2RET',
+    get2: service + 'get2RET',
     del: service + 'delRET',
     verify: service + 'verifyRET',
     post: service + 'postRET',

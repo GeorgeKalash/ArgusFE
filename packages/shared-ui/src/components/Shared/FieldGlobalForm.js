@@ -39,7 +39,6 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
     validateOnChange: true,
     initialValues: {
       gridRows: [],
-      search: '',
       ...row
     },
     onSubmit: async obj => {
@@ -74,10 +73,6 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
     }
   })
 
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('search', value)
-  }
 
   const columns = [
     {
@@ -98,7 +93,7 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
     },
     {
       component: 'resourcecombobox',
-      name: 'accessLevelCombo',
+      name: 'accessLevelName',
       label: labels.accessLevel,
       props: {
         datasetId: DataSets.AU_RESOURCE_CONTROL_ACCESS_LEVEL,
@@ -171,15 +166,6 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
     })()
   }, [])
 
-  const { gridRows, search } = formik.values
-  const lowerSearch = search.toLowerCase()
-
-  const filteredRows = search
-    ? gridRows.filter(
-        ({ controlId, name }) =>
-          controlId?.toLowerCase()?.toString().includes(lowerSearch) || name?.toLowerCase().includes(lowerSearch)
-      )
-    : gridRows
 
   function handleRowsChange(newValues) {
     const updatedRows = formik.values.gridRows.map(row => {
@@ -224,27 +210,14 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
                 helperText={formik.touched.resourceName && formik.errors.resourceName}
               />
             </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('search', e)}
-                search={true}
-                height={35}
-              />
-            </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <DataGrid
             onChange={value => handleRowsChange(value)}
-            value={filteredRows}
+            value={formik.values.gridRows}
             error={formik.errors.gridRows}
+            enableFilters
             columns={columns}
             allowDelete={false}
             allowAddNewLine={false}

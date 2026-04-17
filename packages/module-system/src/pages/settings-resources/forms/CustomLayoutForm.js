@@ -1,7 +1,5 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
@@ -15,7 +13,7 @@ import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
+const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -141,10 +139,16 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
     })
 
     toast.success(platformLabels.Updated)
-    window.close()
+    fetchData()
   }
 
   const columns = [
+    {
+      component: 'textfield',
+      label: labels.id,
+      name: 'savedIndex',
+      props: { disabled: true },
+    },
     {
       component: 'textfield',
       label: labels.api,
@@ -174,10 +178,34 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
       component: 'checkbox',
       label: labels.isInactive,
       name: 'isInactive'
+    },
+    {
+      component: 'textfield',
+      valueGetter: (params) =>
+        params?.data?.originalInactive !== true && params?.data?.savedIndex != null
+          ? labels.default
+          : '',
+      flex: 0.5,
+      props: { disabled: true },
+      link: {   
+        enabled: true,     
+        onClick: async (row) => {
+          await postRequest({
+            extension: SystemRepository.DefaultLayout.setDefaultLayout,
+            record: JSON.stringify({
+              resourceId: row.resourceId,
+              defaultLayoutId: row.id
+            })
+          })
+
+          toast.success(platformLabels.Updated)
+          invalidate()
+          window.close()
+        }
+      }
     }
   ]
-
-  useEffect(() => {
+  const fetchData = async () => {
     getRequest({
       extension: SystemRepository.ReportTemplate.qry,
       parameters: `_resourceId=${row.resourceId}`
@@ -185,13 +213,19 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
       const modifiedList = res.list
         ?.map((itemPartsItem, index) => ({
           ...itemPartsItem,
-          id: index + 1
+          originalInactive: itemPartsItem.isInactive,
+          savedIndex: itemPartsItem.id
         }))
       formik.setValues({
         ...formik.values,
         items: modifiedList
       })
     })
+
+  }
+
+  useEffect(() => {
+    fetchData()
   }, [])
 
   return (

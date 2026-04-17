@@ -153,6 +153,9 @@ export const ManufacturingRepository = {
     wip: service + 'wipJOB',
     sync: service + 'syncJOB'
   },
+  GenerateAMC:{
+    generate: service + 'generateAMC'
+  },
   ProductionSheet: {
     page: service + 'pagePST',
     qry: service + 'qryPST',
@@ -444,7 +447,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotDIS',
     get: service + 'getDIS',
     set2: service + 'set2DIS',
-    del: service + 'delDIS'
+    del: service + 'delDIS',
+    post: service + 'postDIS'
   },
   DisposalItem: {
     qry: service + 'qryDII'
@@ -473,5 +477,24 @@ export const ManufacturingRepository = {
     get: service + 'getDCA',
     del: service + 'delDCA',
     snapshot: service + 'snapshotDCA'
+  },
+  StandardCostParameters: {
+    qry: service + 'qrySCP',
+    page: service + 'pageSCP',
+    set: service + 'setSCP',
+    get: service + 'getSCP',
+    del: service + 'delSCP'
+  },
+  StandardCostUpdate: {
+    set2: service + 'set2SCU',
+    get2: service + 'get2SCU',
+    del: service + 'delSCU',
+    page: service + 'pageSCU',
+    snapshot: service + 'snapshotSCU',
+    post: service + 'postSCU',
+    unpost: service + 'unpostSCU',
+    pack: service + 'getPackSCU',
+    close: service + 'closeSCU',
+    reopen: service + 'reopenSCU'
   },
 }

@@ -26,6 +26,7 @@ import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import LinkCellRenderer from '@argus/shared-ui/src/components/Shared/Table/LinkCellRenderer'
 
 const Table = ({
   name,
@@ -46,6 +47,7 @@ const Table = ({
   onRowDragEnd = false,
   collabsable = true,
   domLayout = 'normal',
+  highlightRow,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -534,10 +536,11 @@ const Table = ({
   const FieldWrapper = params => {
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
-    const handleClick = event => {
+    const handleSelectText = event => {
       if (selectionMode === 'row' && onSelectionChange) {
         onSelectionChange(params.data, params.rowIndex)
-      } else if (selectionMode === 'column' && onSelectionChange) {
+      }
+      else if (selectionMode === 'column' && onSelectionChange) {
         const columnValues = params.api.getDisplayedRowCount()
           ? Array.from(
               { length: params.api.getDisplayedRowCount() },
@@ -555,12 +558,19 @@ const Table = ({
       selection.addRange(range)
     }
 
+    const handleClick = event => {
+      handleSelectText(event)
+    }
+
     const handleDoubleClick = params => {
       navigator.clipboard.writeText(params.target.innerText).then(() => {
         setTooltipOpen(true)
         setTimeout(() => setTooltipOpen(false), 500)
       })
     }
+
+    const hasValue = params.value != null && params.value !== ''
+    const displayValue = hasValue ? params.value : ''
 
     return (
       <>
@@ -570,7 +580,7 @@ const Table = ({
           onDoubleClick={handleDoubleClick}
           className={`fieldWrapper ${!params.colDef?.wrapText ? 'nowrap' : ''}`}
         >
-          {params.value}
+          {displayValue}
         </Box>
       </>
     )
@@ -694,20 +704,36 @@ const Table = ({
           }
         ]
       : []),
-    ...filteredColumns.map(column => ({
-      ...column,
-      width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
-      flex: column.flex,
-      sort: column.sort || '',
-      cellRenderer:
-        column.type === 'image'
-          ? imageRenderer(column)
-          : column.isTree
-          ? IndentedCellRenderer
-          : column.cellRenderer
-          ? column.cellRenderer
-          : FieldWrapper
-    }))
+    ...filteredColumns.map(column => {
+      const isLinkedColumn = column.type === 'link' || !!column.linkOpen
+
+      return {
+        ...column,
+        width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
+        flex: column.flex,
+        sort: column.sort || '',
+        cellRenderer:
+          column.type === 'image'
+            ? imageRenderer(column)
+            : isLinkedColumn
+            ? params => (
+                <LinkCellRenderer
+                  data={params.data}
+                  field={column.field}
+                  value={params.value}
+                  params={params}
+                  wrapText={column.wrapText}
+                  onClick={column.onClick}
+                  linkOpen={column.linkOpen}
+                />
+              )
+            : column.isTree
+            ? IndentedCellRenderer
+            : column.cellRenderer
+            ? column.cellRenderer
+            : FieldWrapper
+      }
+    })
   ]
 
   if (props?.onEdit || props?.onDelete) {
@@ -787,7 +813,11 @@ const Table = ({
 
   const gridOptions = {
     rowClassRules: {
-      'even-row': params => params.node.rowIndex % 2 === 0
+      'even-row': params => params.node.rowIndex % 2 === 0,
+      'highlighted-row': params => {
+        if (!highlightRow) return false
+        return highlightRow.condition?.(params.data)
+      }
     }
   }
 
@@ -886,10 +916,10 @@ const Table = ({
           sx={{
             height: props?.height || '100%',
             maxHeight: props?.maxHeight || 'none',
-            minHeight: 0
+            minHeight: 0,
+            '--highlight-bg': highlightRow?.color || 'transparent',
           }}
-        
-        >
+            >
           {hoveredTable && !pagination && (
             <Box className={'hoverReset'}>
               <IconButton size='small' onClick={onReset}>
@@ -1131,7 +1161,6 @@ const Table = ({
           object-fit: contain !important;
         }
 
-
         .agGridContainer :global(.ag-header),
         .agGridContainer :global(.ag-header-cell) {
           height: 32px !important;
@@ -1149,6 +1178,16 @@ const Table = ({
 
         .agGridContainer :global(.ag-cell .MuiBox-root) {
           padding: 0 !important;
+        }
+          
+        .agGridContainer :global(.highlighted-row),
+        .agGridContainer :global(.highlighted-row.ag-row-hover),
+        .agGridContainer :global(.highlighted-row .ag-cell) {
+          background-color: var(--highlight-bg) !important;
+        }
+
+        .agGridContainer :global(.highlighted-row.ag-row-hover) {
+          filter: brightness(95%);
         }
 
         .paginationBar :global(.MuiIconButton-root) {

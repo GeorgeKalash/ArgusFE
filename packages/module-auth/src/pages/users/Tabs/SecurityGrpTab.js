@@ -5,11 +5,8 @@ import { useContext, useEffect, useState } from 'react'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
-import { Grid } from '@mui/material'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
@@ -30,7 +27,6 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   const { formik } = useForm({
     validateOnChange: true,
     initialValues: {
-      search: '',
       groups: initialGroups
     },
     onSubmit: async values => {
@@ -60,11 +56,6 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
     })
   }
 
-  const isSearchActive = !!formik.values.search
-
-  const filteredData = isSearchActive
-    ? fullGroups.filter(item => item.sgName?.toLowerCase().includes(formik.values.search.toLowerCase()))
-    : fullGroups
 
   async function fetchGridData() {
     const res = await getRequest({
@@ -89,63 +80,23 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   }, [storeRecordId])
 
   function handleRowsChange(updatedFilteredRows) {
-    const isSearchActive = !!formik.values.search
-
-    if (!isSearchActive) {
-      setFullGroups(updatedFilteredRows)
-
-      return
-    }
-
-    const updatedMap = new Map(updatedFilteredRows.map(row => [row.id, row]))
-
-    const merged = fullGroups
-      .filter(row => {
-        const isFiltered = row.sgName?.toLowerCase().includes(formik.values.search.toLowerCase())
-        const stillExists = updatedMap.has(row.id)
-
-        return !isFiltered || stillExists
-      })
-      .map(row => {
-        return updatedMap.get(row.id) || row
-      })
-
-    setFullGroups(merged)
-  }
-
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('search', value)
+    setFullGroups(updatedFilteredRows)
+    return
   }
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!storeRecordId}>
       <VertLayout>
-        <Fixed>
-          <Grid container>
-            <Grid item xs={4}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={labels.search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                  fetchGridData()
-                }}
-                onChange={handleSearchChange}
-              />
-            </Grid>
-          </Grid>
-        </Fixed>
         <Grow>
           <DataGrid
             onChange={handleRowsChange}
-            value={filteredData}
-            allowAddNewLine={!formik.values.search}
+            value={fullGroups}
+            enableFilters
+            initialValues={formik?.initialValues?.groups?.[0]}
             columns={[
               {
                 component: 'resourcecombobox',
-                name: 'sgId',
+                name: 'sgName',
                 label: labels.group,
                 props: {
                   endpointId: AccessControlRepository.SecurityGroup.qry,

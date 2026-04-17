@@ -91,8 +91,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
         invoiceRef: '',
         subTotal: 0,
         vatAmount: 0,
-        amount: 0,
-        search: ''
+        amount: 0
       },
       serials: [
         {
@@ -153,7 +152,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
       )
     }),
     onSubmit: async obj => {
-      const { invoiceId, invoiceRef, disSkuLookup, search, date, ...rest } = obj.header
+      const { invoiceId, invoiceRef, disSkuLookup, date, ...rest } = obj.header
 
       const DraftReturnPack = {
         header: {
@@ -342,7 +341,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
   }
 
   async function saveHeader(lastLine, type) {
-    const { invoiceId, invoiceRef, disSkuLookup, search, date, ...rest } = formik?.values?.header
+    const { invoiceId, invoiceRef, disSkuLookup, date, ...rest } = formik?.values?.header
 
     const DraftReturnPack = {
       header: {
@@ -574,7 +573,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
   }
 
   const onPost = async () => {
-    const { invoiceId, invoiceRef, disSkuLookup, search, date, ...rest } = formik?.values?.header
+    const { invoiceId, invoiceRef, disSkuLookup, date, ...rest } = formik?.values?.header
 
     await postRequest({
       extension: PurchaseRepository.PUDraftReturn.post,
@@ -714,21 +713,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     })
 
     return res?.list
-  }
-
-  const filteredData = formik.values.header?.search
-    ? formik.values.serials.filter(
-        item =>
-          item.srlNo?.toString()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.sku?.toString()?.toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.weight?.toString()?.includes(formik.values.header?.search)
-      )
-    : formik.values.serials
-
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('header.search', value)
   }
 
   const handleGridChange = (value, action, row) => {
@@ -1181,34 +1165,21 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
                 disabled={!formik?.values?.header?.invoiceId || isPosted}
               />
             </Grid>
-            <Grid item xs={4}>
-              <CustomTextField
-                name='header.search'
-                value={formik.values.header?.search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  formik.setFieldValue('header.search', '')
-                }}
-                onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('header.search', e)}
-                search={true}
-              />
-            </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <DataGrid
             onChange={(value, action, row) => handleGridChange(value, action, row)}
-            value={filteredData || []}
+            value={formik.values.serials || []}
             error={formik.errors.serials}
             initialValues={formik?.initialValues?.serials?.[0]}
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
+            enableFilters
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isPosted}
             allowAddNewLine={
-              !formik?.values?.header?.search &&
               (formik.values?.serials?.length === 0 ||
                 !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo)
             }
