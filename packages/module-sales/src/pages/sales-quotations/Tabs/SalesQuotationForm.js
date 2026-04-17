@@ -1268,7 +1268,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       previewReport={editMode}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isReleased || isClosed}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -1405,7 +1405,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       { key: 'spRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={isReleased || isClosed}
+                    readOnly={isClosed}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
@@ -1424,7 +1424,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     value={formik?.values?.date}
                     onChange={formik.setFieldValue}
                     editMode={editMode}
-                    readOnly={isReleased || isClosed}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
@@ -1458,7 +1458,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.saleZone}
                     valueField='recordId'
                     displayField='name'
-                    readOnly={isReleased || isClosed}
+                    readOnly={isClosed}
                     values={formik.values}
                     displayFieldWidth={1.5}
                     onChange={(_, newValue) => {
@@ -1499,7 +1499,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
                     label={labels.plant}
-                    readOnly={isReleased || isClosed}
+                    readOnly={isClosed}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -1519,7 +1519,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
-                    readOnly={isReleased || isClosed}
+                    readOnly={isClosed}
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1576,7 +1576,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.validity}
                     value={formik?.values?.validity}
                     maxAccess={maxAccess}
-                    readOnly={isReleased || isClosed}
+                    readOnly={isClosed}
                     onChange={e => {
                       formik.handleChange(e)
                       if (e.target.value) {
@@ -1624,9 +1624,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            disabled={(!formik.values.clientId && !formik.values.bpId) || isReleased || isClosed}
-            allowDelete={!isReleased && !isClosed}
-            allowAddNewLine={!isReleased && !isClosed}
+            disabled={(!formik.values.clientId && !formik.values.bpId) || isClosed}
+            allowDelete={!isClosed}
+            allowAddNewLine={!isClosed}
           />
         </Grow>
         <Fixed>
@@ -1639,7 +1639,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   value={formik.values.description}
                   rows={3}
                   editMode={editMode}
-                  readOnly={isReleased || isClosed}
+                  readOnly={isClosed}
                   maxAccess={maxAccess}
                   onChange={e => formik.setFieldValue('description', e.target.value)}
                   onClear={() => formik.setFieldValue('description', null)}
@@ -1656,7 +1656,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     value={formik?.values?.deliveryDate}
                     onChange={formik.setFieldValue}
                     editMode={editMode}
-                    readOnly={isReleased || isClosed}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('deliveryDate', null)}
                     error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
@@ -1703,7 +1703,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.discount}
                     value={formik.values.currentDiscount}
                     displayCycleButton={true}
-                    readOnly={isReleased || isClosed}
+                    readOnly={isClosed}
                     iconKey={cycleButtonState.text}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
@@ -1753,7 +1753,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.misc}
                     value={formik.values.miscAmount || 0}
                     decimalScale={2}
-                    readOnly={isReleased || isClosed}
+                    readOnly={isClosed}
                     onChange={e => formik.setFieldValue('miscAmount', e.target.value)}
                     onBlur={async () => {
                       setReCal(true)
