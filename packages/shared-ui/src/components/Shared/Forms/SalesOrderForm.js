@@ -1361,6 +1361,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesOrder.pack}
                     reducer={response => response?.record?.documentTypes}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
