@@ -1562,7 +1562,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     readOnly
                     disabled={formik.values.exWorks}
                     maxAccess={maxAccess}
-                    viewDropDown={formik.values.clientId || formik.values.bpId}
+                    viewDropDown={!isClosed && formik.values.clientId || formik.values.bpId}
                     viewAdd={(formik.values.clientId || formik.values.bpId) && !editMode}
                     onChange={e => formik.setFieldValue('shipAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('shipAddress', null)}
