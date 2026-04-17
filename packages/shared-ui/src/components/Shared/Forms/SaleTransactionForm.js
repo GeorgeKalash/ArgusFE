@@ -65,16 +65,15 @@ import { LockedScreensContext } from '@argus/shared-providers/src/providers/Lock
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 export default function SaleTransactionForm({
-  labels,
-  access,
   recordId,
   functionId,
   window,
   lockRecord,
-  getResourceId,
-  getGLResource
+  getResourceId
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { addLockedScreen } = useContext(LockedScreensContext)
@@ -92,10 +91,45 @@ export default function SaleTransactionForm({
   const filteredMeasurements = useRef([])
   const [taxDetails, setTaxDetails] = useState([])
 
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.SalesInvoice,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
+    editMode: !!recordId
+  })
 
-  const { documentType, maxAccess } = useDocumentType({
-    functionId: functionId,
-    access: access,
+  const getCorrectLabel = functionId => {
+    const fn = Number(functionId)
+    if (fn === SystemFunction.SalesInvoice) {
+      return labels.salesInvoice
+    } else if (fn === SystemFunction.SalesReturn) {
+      return labels.salesReturn
+    } else if (fn === SystemFunction.ConsignmentIn) {
+      return labels.consignmentIn
+    } else if (fn === SystemFunction.ConsignmentOut) {
+      return labels.consignmentOut
+    } else {
+      return null
+    }
+  }
+  
+  useSetWindow({ title: getCorrectLabel(functionId), window })
+  
+  const getGLResource = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.GLSalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.GLSalesReturn
+      default:
+        return null
+    }
+  }
+
+
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId,
+    access,
     enabled: !recordId,
     objectName: 'header'
   })
@@ -133,7 +167,7 @@ export default function SaleTransactionForm({
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {
@@ -1988,6 +2022,7 @@ export default function SaleTransactionForm({
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
+                  await changeDT(newValue)
                   const recordId = newValue ? newValue.recordId : null
                   await formik.setFieldValue('header.dtId', recordId)
                   if (!newValue) {
