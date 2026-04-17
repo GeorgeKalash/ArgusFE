@@ -31,7 +31,7 @@ const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
-  const { stack, LockRecord } = useWindow()
+  const { stack, lockRecord } = useWindow()
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateInvoices
@@ -96,16 +96,11 @@ const GeneratePurchaseInvoice = () => {
     stack({
       Component: SaleTransactionForm,
       props: {
-        labels: _labels,
         recordId,
-        access: maxAccess,
         functionId: SystemFunction.SalesInvoice,
         getResourceId: () => ResourceIds.SalesInvoice,
-        LockRecord,
-        getGLResource: () => ResourceIds.GLSalesInvoice
+        lockRecord
       },
-
-      title: _labels.salesInvoice
     })
   }
 
