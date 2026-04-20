@@ -83,8 +83,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
           returned: 0,
           consumed: 0,
           seqNo: 1,
-          siteId: null,
-          siteName: ''
+          siteId: null
         }
       ]
     },
@@ -657,7 +656,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 endpointId={ManufacturingRepository.ProductionShifts.qry}
                 name='header.shiftId'
                 label={labels.shift}
-                maxAccess={access}
+                maxAccess={maxAccess}
                 readOnly={isPosted}
                 valueField='recordId'
                 displayField={'name'}
