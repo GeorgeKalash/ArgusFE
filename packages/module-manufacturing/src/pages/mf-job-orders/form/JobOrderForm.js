@@ -31,6 +31,7 @@ import Samples from './Samples'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import FormGrid from '@argus/shared-ui/src/components/form'
 
 export default function JobOrderForm({
   labels,
@@ -661,11 +662,13 @@ export default function JobOrderForm({
                       <CustomDatePicker
                         name='date'
                         required
-                        readOnly
+                        onChange={formik.setFieldValue}
+                        onClear={() => formik.setFieldValue('date', null)}
                         label={labels.date}
                         value={formik?.values?.date}
                         editMode={editMode}
                         maxAccess={maxAccess}
+                        error={formik.touched.date && Boolean(formik.errors.date)}
                       />
                     </Grid>
                     <Grid item>
@@ -716,6 +719,7 @@ export default function JobOrderForm({
                         ]}
                         values={formik.values}
                         readOnly={isCancelled || isPosted}
+                        maxAccess={maxAccess}
                         onChange={(_, newValue) => {
                           formik.setFieldValue('plantId', newValue?.recordId || null)
                         }}
@@ -724,7 +728,7 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item>
                       <ResourceLookup
-                        endpointId={InventoryRepository.Item.snapshot}
+                        endpointId={InventoryRepository.Item.snapshot5}
                         name='itemId'
                         readOnly={isCancelled || isPosted}
                         label={labels.item}
@@ -737,7 +741,8 @@ export default function JobOrderForm({
                           { key: 'name', value: 'Name' }
                         ]}
                         form={formik}
-                        displayFieldWidth={2}
+                        firstFieldWidth={5}
+                        displayFieldWidth={3}
                         onChange={async (_, newValue) => {
                           if (isReleased) {
                             formik.setFieldValue('itemId', newValue?.recordId || null)
@@ -1013,157 +1018,161 @@ export default function JobOrderForm({
                 </Grid>
               </Grid>
             </Grid>
-            <Grid container spacing={2} xs={4} sx={{ pl: 2 }}>
-              <Grid item>
-                <ImageUpload
-                  ref={imageUploadRef}
-                  resourceId={ResourceIds.MFJobOrders}
-                  recordId={formik.values.recordId}
-                  seqNo={0}
-                  customWidth={300}
-                  customHeight={180}
-                  disabled={isCancelled || isPosted}
-                  isAbsolutePath={true}
-                  parentImage={parentImage}
-                />
-              </Grid>
+            <Grid container xs={4} sx={{ pl: 2}}>
               <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={ManufacturingRepository.MFJobOrder.pack}
-                  reducer={response => response?.record?.jobCategories}
-                  name='categoryId'
-                  label={labels.category}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  valueField='recordId'
-                  maxAccess={maxAccess}
-                  displayField='name'
-                  readOnly={isCancelled || isReleased || isPosted}
-                  values={formik.values}
-                  onChange={(_, newValue) => {
-                    formik.setFieldValue('categoryId', newValue?.recordId)
-                  }}
-                  error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={ManufacturingRepository.MFJobOrder.pack}
-                  reducer={response => response?.record?.categories}
-                  name='itemCategoryId'
-                  label={labels.itemCategory}
-                  readOnly
-                  valueField='recordId'
-                  displayField={['caRef', 'name']}
-                  values={formik.values}
-                  error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
-                  maxAccess={maxAccess}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceLookup
-                  endpointId={ProductModelingRepository.ThreeDDrawing.snapshot2}
-                  valueField='reference'
-                  displayField='reference'
-                  secondDisplayField={false}
-                  name='threeDDId'
-                  label={labels.threeDD}
-                  form={formik}
-                  valueShow='threeDDRef'
-                  maxAccess={maxAccess}
-                  readOnly={isCancelled || isReleased || isPosted}
-                  onChange={(_, newValue) => {
-                    formik.setFieldValue('threeDDId', newValue?.recordId || null)
-                    formik.setFieldValue('threeDDRef', newValue?.reference || '')
-                    formik.setFieldValue('fileReference', newValue?.fileReference || '')
-                  }}
-                  errorCheck={'threeDDId'}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceLookup
-                  endpointId={ProductModelingRepository.Rubber.snapshot}
-                  valueField='reference'
-                  displayField='reference'
-                  secondDisplayField={false}
-                  name='rubberId'
-                  label={labels.rubber}
-                  form={formik}
-                  valueShow='rubberRef'
-                  maxAccess={maxAccess}
-                  readOnly={isCancelled || isReleased || isPosted}
-                  onChange={(_, newValue) => {
-                    formik.setFieldValue('rubberId', newValue?.recordId || null)
-                    formik.setFieldValue('rubberRef', newValue?.reference || '')
-                  }}
-                  errorCheck={'rubberId'}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={ManufacturingRepository.MFJobOrder.pack}
-                  reducer={response => response?.record?.salesPeople}
-                  name='spId'
-                  label={labels.orderedBy}
-                  columnsInDropDown={[
-                    { key: 'spRef', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  valueField='recordId'
-                  maxAccess={maxAccess}
-                  displayField='name'
-                  readOnly={isCancelled || isReleased || isPosted}
-                  values={formik.values}
-                  onChange={(_, newValue) => {
-                    formik.setFieldValue('spId', newValue?.recordId)
-                  }}
-                  error={formik.touched.spId && Boolean(formik.errors.spId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceLookup
-                  endpointId={SaleRepository.Client.snapshot}
-                  name='clientId'
-                  label={labels.client}
-                  valueField='reference'
-                  displayField='name'
-                  valueShow='clientRef'
-                  secondValueShow='clientName'
-                  form={formik}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  onChange={async (_, newValue) => {
-                    await fillBillingInfo(newValue)
-                    formik.setFieldValue('clientName', newValue?.name || '')
-                    formik.setFieldValue('clientRef', newValue?.reference || '')
+                <Grid container spacing={2}>
+                  <Grid item>
+                    <ImageUpload
+                      ref={imageUploadRef}
+                      resourceId={ResourceIds.MFJobOrders}
+                      recordId={formik.values.recordId}
+                      seqNo={0}
+                      customWidth={300}
+                      customHeight={180}
+                      disabled={isCancelled || isPosted}
+                      isAbsolutePath={true}
+                      parentImage={parentImage}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={ManufacturingRepository.MFJobOrder.pack}
+                      reducer={response => response?.record?.jobCategories}
+                      name='categoryId'
+                      label={labels.category}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      valueField='recordId'
+                      maxAccess={maxAccess}
+                      displayField='name'
+                      readOnly={isCancelled || isReleased || isPosted}
+                      values={formik.values}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('categoryId', newValue?.recordId)
+                      }}
+                      error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={ManufacturingRepository.MFJobOrder.pack}
+                      reducer={response => response?.record?.categories}
+                      name='itemCategoryId'
+                      label={labels.itemCategory}
+                      readOnly
+                      valueField='recordId'
+                      displayField={['caRef', 'name']}
+                      values={formik.values}
+                      error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
+                      maxAccess={maxAccess}
+                    />
+                  </Grid>
+                  <FormGrid hideonempty item xs={12}>
+                    <ResourceLookup
+                      endpointId={ProductModelingRepository.ThreeDDrawing.snapshot2}
+                      valueField='reference'
+                      displayField='reference'
+                      secondDisplayField={false}
+                      name='threeDDId'
+                      label={labels.threeDD}
+                      form={formik}
+                      valueShow='threeDDRef'
+                      maxAccess={maxAccess}
+                      readOnly={isCancelled || isReleased || isPosted}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('threeDDId', newValue?.recordId || null)
+                        formik.setFieldValue('threeDDRef', newValue?.reference || '')
+                        formik.setFieldValue('fileReference', newValue?.fileReference || '')
+                      }}
+                      errorCheck={'threeDDId'}
+                    />
+                  </FormGrid>
+                  <FormGrid hideonempty item xs={12}>
+                    <ResourceLookup
+                      endpointId={ProductModelingRepository.Rubber.snapshot}
+                      valueField='reference'
+                      displayField='reference'
+                      secondDisplayField={false}
+                      name='rubberId'
+                      label={labels.rubber}
+                      form={formik}
+                      valueShow='rubberRef'
+                      maxAccess={maxAccess}
+                      readOnly={isCancelled || isReleased || isPosted}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('rubberId', newValue?.recordId || null)
+                        formik.setFieldValue('rubberRef', newValue?.reference || '')
+                      }}
+                      errorCheck={'rubberId'}
+                    />
+                  </FormGrid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={ManufacturingRepository.MFJobOrder.pack}
+                      reducer={response => response?.record?.salesPeople}
+                      name='spId'
+                      label={labels.orderedBy}
+                      columnsInDropDown={[
+                        { key: 'spRef', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      valueField='recordId'
+                      maxAccess={maxAccess}
+                      displayField='name'
+                      readOnly={isCancelled || isReleased || isPosted}
+                      values={formik.values}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('spId', newValue?.recordId)
+                      }}
+                      error={formik.touched.spId && Boolean(formik.errors.spId)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceLookup
+                      endpointId={SaleRepository.Client.snapshot}
+                      name='clientId'
+                      label={labels.client}
+                      valueField='reference'
+                      displayField='name'
+                      valueShow='clientRef'
+                      secondValueShow='clientName'
+                      form={formik}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      onChange={async (_, newValue) => {
+                        await fillBillingInfo(newValue)
+                        formik.setFieldValue('clientName', newValue?.name || '')
+                        formik.setFieldValue('clientRef', newValue?.reference || '')
 
-                    formik.setFieldValue('clientId', newValue?.recordId || null)
-                  }}
-                  secondFieldName={'clientName'}
-                  errorCheck={'clientId'}
-                  maxAccess={maxAccess}
-                  readOnly={isCancelled || isReleased || isPosted}
-                  displayFieldWidth={3}
-                  editMode={editMode}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextArea
-                  name='billAddress'
-                  label={labels.billAddress}
-                  value={formik.values.billAddress}
-                  rows={3.5}
-                  maxLength='100'
-                  readOnly={isCancelled || isReleased || isPosted}
-                  maxAccess={maxAccess}
-                  onChange={e => formik.setFieldValue('billAddress', e.target.value)}
-                  onClear={() => formik.setFieldValue('billAddress', null)}
-                />
-              </Grid>
+                        formik.setFieldValue('clientId', newValue?.recordId || null)
+                      }}
+                      secondFieldName={'clientName'}
+                      errorCheck={'clientId'}
+                      maxAccess={maxAccess}
+                      readOnly={isCancelled || isReleased || isPosted}
+                      displayFieldWidth={3}
+                      editMode={editMode}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomTextArea
+                      name='billAddress'
+                      label={labels.billAddress}
+                      value={formik.values.billAddress}
+                      rows={3.5}
+                      maxLength='100'
+                      readOnly={isCancelled || isReleased || isPosted}
+                      maxAccess={maxAccess}
+                      onChange={e => formik.setFieldValue('billAddress', e.target.value)}
+                      onClear={() => formik.setFieldValue('billAddress', null)}
+                    />
+                  </Grid>
+                </Grid>
+               </Grid>
             </Grid>
           </Grid>
         </Fixed>
