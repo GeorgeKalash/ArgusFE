@@ -191,12 +191,16 @@ export default function PuDashboard() {
     setLastOpenedPage,
   } = useContext(MenuContext);
 
-  const menuWidth =
-    screenWidth <= 768 ? 180 :
-    screenWidth <= 1024 ? 200 :
-    screenWidth <= 1280 ? 210 :
-    screenWidth <= 1366 ? 220 :
-    screenWidth <= 1600 ? 240 : 300;
+  const getMenuWidth = width => {
+    if (width <= 768) return 180;
+    if (width <= 1024) return 200;
+    if (width <= 1280) return 210;
+    if (width <= 1366) return 220;
+    if (width <= 1600) return 240;
+    return 300;
+  };
+
+  const menuWidth = getMenuWidth(screenWidth);
 
   const sidebarWidth = navCollapsed ? 10 : menuWidth;
   const availableWidth = Math.max(0, screenWidth - sidebarWidth);
