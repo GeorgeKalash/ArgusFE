@@ -69,6 +69,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
         spId,
         notes: '',
         date: new Date(),
+        dbcr: null,
         status: 1
       },
       rows: [
@@ -519,15 +520,16 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
             <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.DB_CR}
-                name='dbcr'
+                name='header.dbcr'
                 label={labels.dbcr}
                 valueField='key'
                 displayField='value'
-                values={formik.values}
+                readOnly={isPosted}
+                values={formik.values.header}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('dbcr', '')}
-                onChange={(_, newValue) => formik.setFieldValue('dbcr', newValue?.key || null)}
-                error={formik.touched.dbcr && Boolean(formik.errors.dbcr)}
+                onClear={() => formik.setFieldValue('header.dbcr', '')}
+                onChange={(_, newValue) => formik.setFieldValue('header.dbcr', newValue?.key || null)}
+                error={formik?.touched?.header?.dbcr && Boolean(formik?.errors?.header?.dbcr)}
               />
             </Grid>
             <Grid item xs={6}>
