@@ -27,6 +27,7 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 export default function BalanceTransferMultiForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -58,6 +59,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
         reference: '',
         dtId: null,
         accountId: null,
+        contactId: null,
         currencyId: null,
         amount: null,
         exRate: 1,
@@ -218,6 +220,21 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       props: {
         maxLength: 15,
         decimalScale: 2
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.contact,
+      name: 'contactId',
+      props: {
+        endpointId: formik.values?.header?.accountId && FinancialRepository.Contact.qry,
+        parameters: formik.values?.header?.accountId && `_accountId=${formik.values?.header?.accountId}`,
+        valueField: 'recordId',
+        displayField: 'name',
+        mapping: [
+          { from: 'name', to: 'contactName' },
+          { from: 'recordId', to: 'contactId' }
+        ]
       }
     },
     {
@@ -422,7 +439,25 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
               />
             </Grid>
-            <Grid item xs={6}></Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={formik.values?.header?.accountId && FinancialRepository.Contact.qry}
+                parameters={formik.values?.header?.accountId && `_accountId=${formik.values?.header?.accountId}`}
+                name='header.contactId'
+                readOnly={isPosted}
+                label={labels.contact}
+                valueField='recordId'
+                displayField={'name'}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('header.contactId', newValue?.recordId || null)}
+                error={formik.touched.header?.contactId && Boolean(formik.errors.header?.contactId)}
+              />
+            </Grid>
             <Grid item xs={6}>
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
@@ -481,7 +516,20 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 error={formik?.touched?.header?.currencyId && Boolean(formik?.errors?.header?.currencyId)}
               />
             </Grid>
-            <Grid item xs={6}></Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                datasetId={DataSets.DB_CR}
+                name='dbcr'
+                label={labels.dbcr}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('dbcr', '')}
+                onChange={(_, newValue) => formik.setFieldValue('dbcr', newValue?.key || null)}
+                error={formik.touched.dbcr && Boolean(formik.errors.dbcr)}
+              />
+            </Grid>
             <Grid item xs={6}>
               <CustomNumberField
                 name='header.amount'
