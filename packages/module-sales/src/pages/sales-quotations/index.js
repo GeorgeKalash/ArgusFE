@@ -94,6 +94,16 @@ const SalesQuotations = () => {
       field: 'description',
       headerName: labels.description,
       flex: 2
+    },
+    {
+      field: 'rsName',
+      headerName: labels.releaseStatus,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
+      flex: 1
     }
   ]
 
