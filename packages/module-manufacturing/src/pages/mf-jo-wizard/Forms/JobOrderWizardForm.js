@@ -71,7 +71,10 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         producedWeight: 0,
         activeHours: null,
         idleHours: null,
-        totalHours: null
+        totalHours: null,
+        fromSiteId: null,
+        toSiteId: null,
+        lineId: null
       },
       rows: [
         {
@@ -82,7 +85,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
           issued: 0,
           returned: 0,
           consumed: 0,
-          seqNo: 1
+          seqNo: 1,
+          siteId: null
         }
       ]
     },
@@ -106,7 +110,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
             sku: yup.string().required(),
             issued: yup.number().required(),
             returned: yup.number().required(),
-            consumed: yup.number().required()
+            consumed: yup.number().required(),
+            siteName: yup.string().required(),
           })
         )
         .required()
@@ -216,6 +221,26 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       name: 'consumed',
       label: labels.consumed,
       props: { readOnly: true, maxLength: 9, decimalScale: 3 }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.toSite,
+      name: 'siteName',
+      props: {
+        endpointId: InventoryRepository.Site.qry,
+        displayField: 'name',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'siteId' },
+          { from: 'reference', to: 'siteRef' },
+          { from: 'name', to: 'siteName' }
+        ],
+        displayFieldWidth: 2,
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
+      },
     }
   ]
 
@@ -414,6 +439,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                   formik.setFieldValue('header.avgWeight', newValue?.avgWeight || 0)
                   formik.setFieldValue('header.workCenterName', newValue?.wcName || '')
                   formik.setFieldValue('header.workCenterId', newValue?.workCenterId || null)
+                  formik.setFieldValue('header.lineId', newValue?.lineId || null)
                   formik.setFieldValue('header.operationId', null)
                   formik.setFieldValue('header.laborId', null)
                   const physical = await getItemPhysical(newValue?.itemId)
@@ -532,6 +558,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 name='header.avgWeight'
                 allowNegative={false}
                 label={labels.avgWeight}
+                decimalScale={3}
                 value={formik?.values?.header.avgWeight}
                 maxAccess={maxAccess}
                 readOnly
@@ -553,7 +580,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 ]}
                 displayFieldWidth={1.5}
                 required
-                readOnly={!formik?.values?.header?.bomId || editMode}
+                readOnly={!formik?.values?.header?.bomId}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('header.sfItemId', newValue?.itemId || null)
@@ -582,6 +609,84 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
               />
             </Grid>
             <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='header.fromSiteId'
+                label={labels.fromSemiFinishedSite}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values.header}
+                readOnly={isPosted}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.fromSiteId', newValue?.recordId || null)
+                }}
+                error={formik.touched.header?.fromSiteId && Boolean(formik.errors.header?.fromSiteId)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='header.toSiteId'
+                label={labels.toFinishedGoodsSite}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                readOnly={isPosted}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.toSiteId', newValue?.recordId || null)
+                }}
+                error={formik.touched.header?.toSiteId && Boolean(formik.errors.header?.toSiteId)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionLine.qry}
+                parameters='_startAt=0&_pageSize=1000'
+                values={formik.values.header}
+                name='header.lineId'
+                label={labels.productionLine}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                displayFieldWidth={1}
+                readOnly={isPosted}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.lineId', newValue?.recordId || null)
+                }}
+                error={formik.touched.header?.lineId && Boolean(formik.errors.header?.lineId)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionShifts.qry}
+                name='header.shiftId'
+                label={labels.shift}
+                maxAccess={maxAccess}
+                readOnly={isPosted}
+                valueField='recordId'
+                displayField={'name'}
+                values={formik.values?.header}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.shiftId', newValue?.recordId || null)
+                }}
+                error={formik.touched?.header?.shiftId && Boolean(formik.errors?.header?.shiftId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
               <CustomNumberField
                 name='header.activeHours'
                 label={labels.activeHours}
@@ -594,7 +699,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 error={formik?.touched?.header?.activeHours && Boolean(formik?.errors?.header?.activeHours)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
               <CustomNumberField
                 name='header.idleHours'
                 label={labels.idleHours}
@@ -618,22 +723,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 maxLength={5}
                 decimalScale={2}
                 error={formik?.touched?.header?.totalHours && Boolean(formik?.errors?.header?.totalHours)}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <ResourceComboBox
-                endpointId={ManufacturingRepository.ProductionShifts.qry}
-                name='header.shiftId'
-                label={labels.shift}
-                maxAccess={access}
-                readOnly={isPosted}
-                valueField='recordId'
-                displayField={'name'}
-                values={formik.values?.header}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('header.shiftId', newValue?.recordId || null)
-                }}
-                error={formik.touched?.header?.shiftId && Boolean(formik.errors?.header?.shiftId)}
               />
             </Grid>
           </Grid>
