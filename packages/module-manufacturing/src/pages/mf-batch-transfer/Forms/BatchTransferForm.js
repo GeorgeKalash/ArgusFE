@@ -51,8 +51,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
 
   const conditions = {
     jobId: row => row?.jobId,
-    pcs: row => row?.jobId > 0 && row?.pcs <= row?.jobPcs,
-    qty: row => row?.jobId > 0 && row?.qty <= row?.jobQty,
+    pcs: row => row?.jobId > 0,
+    qty: row => row?.jobId > 0,
     sku: row => row?.sku,
     itemName: row => row?.itemName
   }
@@ -226,8 +226,6 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
             categoryName: '',
             pcs: 0,
             qty: 0,
-            jobPcs: 0,
-            jobQty: 0
           })
 
           return
@@ -248,8 +246,6 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           categoryName: newRow?.itemCategoryName || '',
           pcs: res3.record?.pcs || 0,
           qty: res3.record?.qty || 0,
-          jobPcs: res3.record?.pcs || 0,
-          jobQty: res3.record?.qty || 0
         })
       }
     },
@@ -290,24 +286,6 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       name: 'pcs',
       label: labels.pcs,
       flex: 0.5
-    },
-    {
-      component: 'numberfield',
-      name: 'jobQty',
-      label: labels.jobQty,
-      flex: 0.7,
-      props: {
-        readOnly: true
-      }
-    },
-    {
-      component: 'numberfield',
-      name: 'jobPcs',
-      label: labels.jobPcs,
-      flex: 0.7,
-      props: {
-        readOnly: true
-      }
     },
     {
       component: 'textfield',
