@@ -122,7 +122,8 @@ export default function ChatPage() {
                   sender: "ai",
                   type: "text",
                   text: "",
-                  isStreaming: true
+                  isStreaming: true,
+                  isWaiting: true
                 }
               ]
             }
@@ -151,7 +152,8 @@ export default function ChatPage() {
               text:
                 updatedMessages[last]
                   .text + event.text,
-              isStreaming: true
+              isStreaming: true,
+              isWaiting: false
             };
 
             return {
@@ -252,44 +254,57 @@ export default function ChatPage() {
           }}
         >
           
-          {msg.isStreaming ? (
+          {msg.isWaiting ? (
+            <div
+              style={{
+                display: "flex",
+                gap: "6px",
+                alignItems: "center",
+                padding: "4px 0"
+              }}
+            >
+              <span className="typing-dot"></span>
+              <span className="typing-dot"></span>
+              <span className="typing-dot"></span>
+            </div>
+          ) : msg.isStreaming ? (
             <div style={{ whiteSpace: "pre-wrap" }}>
               {msg.text}▋
             </div>
           ) : (
-          <ReactMarkdown
-            components={{
-              p: ({ node, ...props }) => (
-                <p
-                  style={{
-                    margin: 0,
-                    lineHeight: 1.5
-                  }}
-                  {...props}
-                />
-              ),
-              ul: ({ node, ...props }) => (
-                <ul
-                  style={{
-                    margin: "6px 0",
-                    paddingLeft: "20px"
-                  }}
-                  {...props}
-                />
-              ),
-              ol: ({ node, ...props }) => (
-                <ol
-                  style={{
-                    margin: "6px 0",
-                    paddingLeft: "20px"
-                  }}
-                  {...props}
-                />
-              )
-            }}
-          >
-            {msg.text}
-          </ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                p: ({ node, ...props }) => (
+                  <p
+                    style={{
+                      margin: 0,
+                      lineHeight: 1.5
+                    }}
+                    {...props}
+                  />
+                ),
+                ul: ({ node, ...props }) => (
+                  <ul
+                    style={{
+                      margin: "6px 0",
+                      paddingLeft: "20px"
+                    }}
+                    {...props}
+                  />
+                ),
+                ol: ({ node, ...props }) => (
+                  <ol
+                    style={{
+                      margin: "6px 0",
+                      paddingLeft: "20px"
+                    }}
+                    {...props}
+                  />
+                )
+              }}
+            >
+              {msg.text}
+            </ReactMarkdown>
           )}
             </div>
           );
@@ -449,7 +464,8 @@ export default function ChatPage() {
     <div
       style={{
         display: "flex",
-        height: "100vh"
+        height: "100vh",
+        overflow: "hidden"
       }}
     >
       <div
