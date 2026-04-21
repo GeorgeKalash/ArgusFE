@@ -550,23 +550,6 @@ const GenerateOutboundTransportation2 = () => {
             </Grid>
 
             <Grid item xs={1.33}>
-              <CustomNumberField
-                name='truckNo'
-                label={labels.truckNo}
-                value={formik.values.truckNo}
-                onChange={async e => {
-                  formik.setFieldValue('truckNo', e.target.value)
-                }}
-                onClear={async () => {
-                  formik.setFieldValue('truckNo', 0)
-                  handleTruckNoChange(0)
-                }}
-                onBlur={async e => {
-                  handleTruckNoChange(e.target.value)
-                }}
-              />
-            </Grid>
-            <Grid item xs={1.33}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Category.qry}
                 parameters='_name=&_pageSize=1000&_startAt=0'
@@ -586,6 +569,23 @@ const GenerateOutboundTransportation2 = () => {
                   formik.setFieldValue('itemCategoryId', newValue?.recordId || null)
                 }}
                 error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
+              />
+            </Grid>
+            <Grid item xs={1.33}>
+              <CustomNumberField
+                name='truckNo'
+                label={labels.truckNo}
+                value={formik.values.truckNo}
+                onChange={async e => {
+                  formik.setFieldValue('truckNo', e.target.value)
+                }}
+                onClear={async () => {
+                  formik.setFieldValue('truckNo', 0)
+                  handleTruckNoChange(0)
+                }}
+                onBlur={async e => {
+                  handleTruckNoChange(e.target.value)
+                }}
               />
             </Grid>
             <Grid item xs={1.33}>
