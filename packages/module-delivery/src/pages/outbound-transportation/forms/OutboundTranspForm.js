@@ -335,7 +335,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           { from: 'clientRef', to: 'clientRef' },
           { from: 'clientName', to: 'clientName' },
           { from: 'volume', to: 'soVolume' },
-          { from: 'weight', to: 'soWeight' },
           { from: 'szName', to: 'szName' },
           { from: 'wipName', to: 'soWipStatusName' }
         ],
