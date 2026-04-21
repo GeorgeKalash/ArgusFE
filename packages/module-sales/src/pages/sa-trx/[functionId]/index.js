@@ -189,46 +189,15 @@ const SaTrx = () => {
     openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
-  const getCorrectLabel = functionId => {
-    if (functionId === SystemFunction.SalesInvoice) {
-      return labels.salesInvoice
-    } else if (functionId === SystemFunction.SalesReturn) {
-      return labels.salesReturn
-    } else if (functionId === SystemFunction.ConsignmentIn) {
-      return labels.consignmentIn
-    } else if (functionId === SystemFunction.ConsignmentOut) {
-      return labels.consignmentOut
-    } else {
-      return null
-    }
-  }
-
-  const getGLResource = functionId => {
-    const fn = Number(functionId)
-    switch (fn) {
-      case SystemFunction.SalesInvoice:
-        return ResourceIds.GLSalesInvoice
-      case SystemFunction.SalesReturn:
-        return ResourceIds.GLSalesReturn
-      default:
-        return null
-    }
-  }
-
   function openStack(recordId) {
     stack({
       Component: SaleTransactionForm,
       props: {
-        labels,
         recordId,
-        access,
         functionId,
         lockRecord,
         getResourceId,
-        getGLResource
-      },
-     
-      title: getCorrectLabel(parseInt(functionId))
+      }
     })
   }
 

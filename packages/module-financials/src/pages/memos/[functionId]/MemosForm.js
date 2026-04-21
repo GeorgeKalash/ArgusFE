@@ -444,13 +444,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   <CustomTextField
                     name='reference'
                     label={labels.reference}
-                    value={formik.values.reference}
-                    readOnly
-                    rows={2}
-                    maxAccess={maxAccess}
+                    value={formik?.values?.reference}
+                    maxAccess={!editMode && maxAccess}
+                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    error={formik?.touched?.reference && Boolean(formik?.errors?.reference)}
                   />
                 </Grid>
                 <Grid item xs={12}>

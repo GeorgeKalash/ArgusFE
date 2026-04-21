@@ -51,10 +51,11 @@ import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
@@ -262,6 +263,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
+  const isReleased = formik.values.status == 4
 
   async function getFilteredMU(itemId, msId) {
     if (!itemId) return
@@ -704,7 +706,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     copy.date = formatDateToApi(copy.date)
     copy.dueDate = formatDateToApi(copy.dueDate)
 
-    await postRequest({
+    const res = await postRequest({
       extension: SaleRepository.SalesOrder.postToInvoice,
       record: JSON.stringify(copy)
     })
@@ -712,6 +714,16 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     toast.success(platformLabels.Invoice)
     invalidate()
     window.close()
+
+    stack({
+      Component: SaleTransactionForm,
+      props: {
+        recordId: res.recordId,
+        functionId: SystemFunction.SalesInvoice,
+        getResourceId: () => ResourceIds.SalesInvoice,
+        lockRecord
+      }
+    })
   }
 
   async function onWorkFlowClick() {
@@ -780,7 +792,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       key: 'Invoice',
       condition: true,
       onClick: toInvoice,
-      disabled: !(formik.values.deliveryStatus === 1 && formik.values.status !== 3 && isClosed)
+      disabled: !(
+        isReleased ||
+        (formik.values.deliveryStatus === 1 && formik.values.status !== 3 && isClosed)
+      )
     },
     {
       key: 'generateProdOrder',
@@ -1346,6 +1361,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesOrder.pack}
                     reducer={response => response?.record?.documentTypes}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[

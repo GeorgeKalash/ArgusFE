@@ -94,7 +94,10 @@ export default function Samples({ labels, maxAccess, recordId }) {
       component: 'numberfield',
       label: labels.itemWgt,
       name: 'itemWeight',
-      flex: 2
+      flex: 2,
+      props:{
+        decimalScale: 3
+      }
     }
   ]
 
@@ -143,13 +146,13 @@ export default function Samples({ labels, maxAccess, recordId }) {
         <Fixed>
           <Grid container sx={{ pt: 2 }}>
             <Grid item xs={4}>
-              <CustomNumberField name='avgWeight' label={labels.average} value={avgWeight} readOnly />
+              <CustomNumberField name='avgWeight' label={labels.average} value={avgWeight} decimalScale={3} readOnly />
             </Grid>
             <Grid item xs={4}>
               <CustomNumberField name='totalCount' label={labels.totalCount} value={totalCount} readOnly />
             </Grid>
             <Grid item xs={4}>
-              <CustomNumberField name='totWeight' label={labels.totWeight} value={totWeight} readOnly />
+              <CustomNumberField name='totWeight' label={labels.totWeight} value={totWeight} decimalScale={3} readOnly />
             </Grid>
           </Grid>
         </Fixed>

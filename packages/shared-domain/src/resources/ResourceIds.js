@@ -323,7 +323,7 @@ export const ResourceIds = {
   SalaryChangeReasonFilter: 71105,
   EmploymentStatusFilter: 71107,
   SponsorFilter: 71108,
-  AttendanceScheduleFilter: 72105,
+  AttendanceSchedule: 72105,
   IndemnityAccuralsFilter: 73101,
   LeaveScheduleFilter: 73103,
   PayrollFilter: 75201,
@@ -634,6 +634,7 @@ export const ResourceIds = {
   Dimensions: 41121,
   PayrollConstant: 75118,
   StandardCostParameters: 42138,
+  StandardCostUpdate: 42140,
   PayPeriod: 75108,
 
   // GL
@@ -700,6 +701,7 @@ export const ResourceIds = {
   MCRCashTransfers: 33605,
   MCRIncreaseDecreaseAdj: 33606,
   SalaryBatch: 75115,
+  PayrollFormulas: 75119,
 
   // Address
   ADDBPMasterData: 21600,

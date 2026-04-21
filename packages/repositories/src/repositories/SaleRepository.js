@@ -109,7 +109,8 @@ export const SaleRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD',
-    page: service + 'pageDTD'
+    page: service + 'pageDTD',
+    snapshot: service + 'snapshotDTD'
   },
   DocumentType: {
     qry: service + 'qryDT'
@@ -242,7 +243,9 @@ export const SaleRepository = {
     del: service + 'delQTN',
     postQuotTrx: service + 'transfer1QTN',
     postToInvTrx: service + 'transfer2QTN',
-    postToCons: service + 'transfer3QTN'
+    postToCons: service + 'transfer3QTN',
+    close: service + 'closeQTN',
+    reopen: service + 'reopenQTN',
   },
   QuotationItem: {
     qry: service + 'qryQTI'

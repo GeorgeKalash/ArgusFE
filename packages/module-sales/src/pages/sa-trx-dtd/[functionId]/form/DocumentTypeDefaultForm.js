@@ -24,7 +24,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, f
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.DocumentTypeDefault.qry
+    endpointId: SaleRepository.DocumentTypeDefault.page
   })
 
   const { formik } = useForm({

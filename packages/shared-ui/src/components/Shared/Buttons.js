@@ -703,5 +703,12 @@ export const getButtons = platformLabels => [
     color: '#2C7693',
     image: 'return.png',
     main: false
-  }
+  },
+  {
+    key: 'Recalculate',
+    label: platformLabels.Recalculate,
+    color: '#231f20',
+    image: 'calculator.png',
+    main: false
+  },
 ]
