@@ -35,7 +35,8 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DeliveryTrip,
     access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   async function getDefaultData() {
@@ -49,7 +50,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       return acc
     }, {})
 
-    formik.setFieldValue('plantId', parseInt(plantIdDefault?.plantId))
+    formik.setFieldValue('header.plantId', parseInt(plantIdDefault?.plantId))
   }
 
   const invalidate = useInvalidate({
@@ -59,28 +60,31 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   const { formik } = useForm({
     initialValues: {
       recordId: null,
-      reference: '',
-      plantId: null,
-      vehicleId: null,
-      driverId: null,
-      date: new Date(),
-      departureTime: new Date(),
-      departureTimeField: null,
-      arrivalTime: null,
-      arrivalTimeField: null,
-      notes: '',
-      dtId: null,
-      status: 1,
-      statusName: '',
-      printStatusName: '',
-      dtName: '',
-      plantName: '',
-      vehName: '',
-      driverName: '',
-      capacityVolume: null,
-      wip: 1,
-      wipName: '',
-      orders: [
+      header: {
+        recordId: null,
+        reference: '',
+        plantId: null,
+        vehicleId: null,
+        driverId: null,
+        date: new Date(),
+        departureTime: new Date(),
+        departureTimeField: null,
+        arrivalTime: null,
+        arrivalTimeField: null,
+        notes: '',
+        dtId: null,
+        status: 1,
+        statusName: '',
+        printStatusName: '',
+        dtName: '',
+        plantName: '',
+        vehName: '',
+        driverName: '',
+        capacityVolume: null,
+        wip: 1,
+        wipName: ''
+      },
+      tripOrders: [
         {
           id: 1,
           soRef: null,
@@ -88,39 +92,37 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           soDate: null,
           clientName: null,
           soVolume: null,
+          soWeight: null,
           soWipStatusName: null
         }
       ]
     },
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     validateOnChange: true,
     validationSchema: yup.object({
-      departureTime: yup.string().required(),
-      plantId: yup.number().required()
+      header: yup.object({
+        departureTime: yup.string().required(),
+        plantId: yup.number().required()
+      })
     }),
     onSubmit: async obj => {
-      const copy = { ...obj }
-      delete copy.orders
+      const header = { ...obj.header }
 
-      copy.date = formatDateToApi(copy.date)
+      header.date = formatDateToApi(header.date)
 
-      const combinedDateTime = getShiftedDate(copy.departureTime, copy.departureTimeField)
-      copy.departureTime = formatDateToApi(combinedDateTime)
+      const combinedDateTime = getShiftedDate(header.departureTime, header.departureTimeField)
+      header.departureTime = formatDateToApi(combinedDateTime)
 
-      if (copy.arrivalTime) {
-        const arrCombinedDateTime = getShiftedDate(copy.arrivalTime, copy.arrivalTimeField)
-        copy.arrivalTime = formatDateToApi(arrCombinedDateTime)
+      if (header.arrivalTime) {
+        const arrCombinedDateTime = getShiftedDate(header.arrivalTime, header.arrivalTimeField)
+        header.arrivalTime = formatDateToApi(arrCombinedDateTime)
       }
 
-      const headerResponse = await postRequest({
-        extension: DeliveryRepository.Trip.set,
-        record: JSON.stringify(copy)
-      })
+      let filteredOrders = formik.values.tripOrders.filter(
+        order => order.soId !== '' && order.soId !== undefined && order.soId !== null
+      )
 
-      formik.setFieldValue('recordId', headerResponse.recordId)
-
-      let filteredOrders = formik.values.orders.filter(order => order.soId !== '' && order.soId !== undefined)
       const soIdSet = new Set()
       let hasDuplicates = false
 
@@ -139,22 +141,23 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       filteredOrders = filteredOrders?.some(order => order.soId)
         ? filteredOrders.map((order, index) => ({
             ...order,
-            tripId: headerResponse.recordId || 0,
             id: index + 1
           }))
         : []
 
       const data = {
-        tripId: headerResponse.recordId || 0,
+        header,
         tripOrders: filteredOrders
       }
 
-      await postRequest({
+      const response = await postRequest({
         extension: DeliveryRepository.TripOrderPack2.set2,
         record: JSON.stringify(data)
       })
 
-      await refetchForm(headerResponse.recordId)
+      formik.setFieldValue('recordId', response.recordId)
+
+      await refetchForm(response.recordId)
       !formik.values.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
 
       invalidate()
@@ -173,54 +176,38 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     return combinedDateTime
   }
 
-  const totalVol = formik.values.orders.reduce((volSum, row) => {
+  const totalVol = formik.values.tripOrders.reduce((volSum, row) => {
     const volValue = parseFloat(row.soVolume) || 0
 
     return volSum + volValue
   }, 0)
 
-  const totalWeight = formik.values.orders.reduce((weightSum, row) => {
+  const totalWeight = formik.values.tripOrders.reduce((weightSum, row) => {
     const weightValue = parseFloat(row.soWeight) || 0
 
     return weightSum + weightValue
   }, 0)
 
-  const isPosted = formik.values.status === 3
-  const isClosed = formik.values.wip === 2
+  const isPosted = formik.values.header.status === 3
+  const isClosed = formik.values.header.wip === 2
   const editMode = !!formik.values.recordId
 
   async function refetchForm(recordId) {
     const res = await getOutboundTransp(recordId)
-    const formattedDepDate = formatDateFromApi(res.record.departureTime)
-    const formattedArrDate = formatDateFromApi(res.record.arrivalTime)
+    const formattedDepDate = formatDateFromApi(res.record.header.departureTime)
+    const formattedArrDate = formatDateFromApi(res.record.header.arrivalTime)
 
-    res.record.date = formatDateFromApi(res.record.date)
-    res.record.departureTime = formattedDepDate
-    if (formattedDepDate) res.record.departureTimeField = dayjs(dayjs(formattedDepDate), 'hh:mm A')
-    res.record.arrivalTime = formattedArrDate
-    if (formattedArrDate) res.record.arrivalTimeField = dayjs(dayjs(formattedArrDate), 'hh:mm A')
-
-    await getOrders(res.record)
-  }
-
-  async function getOutboundTransp(recordId) {
-    return await getRequest({
-      extension: DeliveryRepository.Trip.get,
-      parameters: `_recordId=${recordId}`
-    })
-  }
-
-  const getOrders = async data => {
-    const res = await getRequest({
-      extension: DeliveryRepository.TripOrder.qry,
-      parameters: `_tripId=${data.recordId}`
-    })
+    res.record.header.date = formatDateFromApi(res.record.header.date)
+    res.record.header.departureTime = formattedDepDate
+    if (formattedDepDate) res.record.header.departureTimeField = dayjs(dayjs(formattedDepDate), 'hh:mm A')
+    res.record.header.arrivalTime = formattedArrDate
+    if (formattedArrDate) res.record.header.arrivalTimeField = dayjs(dayjs(formattedArrDate), 'hh:mm A')
 
     let ordersList = []
 
-    if (res.list != []) {
+    if (res.record.tripOrders != []) {
       ordersList = await Promise.all(
-        res.list.map((item, index) => {
+        res.record.tripOrders.map((item, index) => {
           return {
             ...item,
             id: index + 1,
@@ -231,15 +218,24 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     }
 
     formik.setValues({
-      ...data,
-      orders: ordersList
+      recordId: res.record.header.recordId,
+      header: res.record.header,
+      tripOrders: ordersList
     })
   }
 
+  async function getOutboundTransp(recordId) {
+    return await getRequest({
+      extension: DeliveryRepository.Trip.get2,
+      parameters: `_recordId=${recordId}`
+    })
+  }
+
+
   const onPost = async () => {
-    const res = await postRequest({
+    await postRequest({
       extension: DeliveryRepository.Trip.post,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify(formik.values.header)
     })
 
     toast.success(platformLabels.Posted)
@@ -251,7 +247,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   const onUnpost = async () => {
     await postRequest({
       extension: DeliveryRepository.Trip.unpost,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify(formik.values.header)
     })
 
     toast.success(platformLabels.Unposted)
@@ -261,9 +257,9 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   }
 
   const onClose = async () => {
-    const res = await postRequest({
+    await postRequest({
       extension: DeliveryRepository.Trip.close,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify(formik.values.header)
     })
 
     if (recordId) toast.success(platformLabels.Closed)
@@ -275,7 +271,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   const onReopen = async () => {
     await postRequest({
       extension: DeliveryRepository.Trip.reopen,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify(formik.values.header)
     })
 
     if (recordId) toast.success(platformLabels.Reopened)
@@ -339,6 +335,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           { from: 'clientRef', to: 'clientRef' },
           { from: 'clientName', to: 'clientName' },
           { from: 'volume', to: 'soVolume' },
+          { from: 'weight', to: 'soWeight' },
           { from: 'szName', to: 'szName' },
           { from: 'wipName', to: 'soWipStatusName' }
         ],
@@ -427,29 +424,29 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${SystemFunction.DeliveryTrip}&_startAt=${0}&_pageSize=${1000}`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
-                    name='dtId'
+                    name='header.dtId'
                     label={labels.docType}
                     readOnly={editMode}
                     valueField='recordId'
                     displayField='name'
-                    values={formik.values}
+                    values={formik.values.header}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || '')
+                      formik.setFieldValue('header.dtId', newValue?.recordId || '')
                       changeDT(newValue)
                     }}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={4}>
                   <CustomDatePicker
-                    name='departureTime'
+                    name='header.departureTime'
                     label={labels.departureDate}
-                    value={formik.values?.departureTime}
+                    value={formik.values.header?.departureTime}
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('departureTime', '')}
+                    onClear={() => formik.setFieldValue('header.departureTime', '')}
                     readOnly={isPosted || isClosed}
-                    error={formik.touched.departureTime && Boolean(formik.errors.departureTime)}
+                    error={formik.touched?.header?.departureTime && Boolean(formik.errors?.header?.departureTime)}
                     maxAccess={maxAccess}
                     required
                   />
@@ -457,7 +454,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
-                    name='plantId'
+                    name='header.plantId'
                     label={labels.plant}
                     valueField='recordId'
                     readOnly={isPosted || isClosed}
@@ -466,11 +463,11 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    values={formik.values}
+                    values={formik.values.header}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
+                      formik.setFieldValue('header.plantId', newValue ? newValue?.recordId : '')
                     }}
-                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                    error={formik.touched?.header?.plantId && Boolean(formik.errors?.header?.plantId)}
                     required
                   />
                 </Grid>
@@ -480,42 +477,45 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
               <Grid container xs={12} spacing={2}>
                 <Grid item xs={4}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.reference}
-                    value={formik.values.reference}
+                    value={formik.values.header.reference}
                     readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    onClear={() => formik.setFieldValue('header.reference', '')}
+                    error={formik.touched?.header?.reference && Boolean(formik.errors?.header?.reference)}
                   />
                 </Grid>
 
                 <Grid item xs={4}>
                   <CustomTimePicker
                     label={labels.departureTime}
-                    name='departureTimeField'
-                    value={formik.values?.departureTimeField}
+                    name='header.departureTimeField'
+                    value={formik.values.header?.departureTimeField}
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('departureTimeField', '')}
+                    onClear={() => formik.setFieldValue('header.departureTimeField', '')}
                     readOnly={isPosted || isClosed}
-                    error={formik.touched.departureTimeField && Boolean(formik.errors.departureTimeField)}
+                    error={
+                      formik.touched?.header?.departureTimeField &&
+                      Boolean(formik.errors?.header?.departureTimeField)
+                    }
                     maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={DeliveryRepository.Driver.qry}
-                    name='driverId'
+                    name='header.driverId'
                     label={labels.driver}
                     valueField='recordId'
                     readOnly={isPosted || isClosed}
                     displayField='name'
-                    values={formik.values}
+                    values={formik.values.header}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('driverId', newValue ? newValue?.recordId : '')
+                      formik.setFieldValue('header.driverId', newValue ? newValue?.recordId : '')
                     }}
-                    error={formik.touched.driverId && Boolean(formik.errors.driverId)}
+                    error={formik.touched?.header?.driverId && Boolean(formik.errors?.header?.driverId)}
                   />
                 </Grid>
               </Grid>
@@ -524,30 +524,30 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
               <Grid container xs={12} spacing={2}>
                 <Grid item xs={4}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     label={labels.date}
-                    value={formik.values?.date}
+                    value={formik.values.header?.date}
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('date', '')}
+                    onClear={() => formik.setFieldValue('header.date', '')}
                     readOnly={isPosted || isClosed}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={4}>
                   <CustomDatePicker
-                    name='arrivalTime'
+                    name='header.arrivalTime'
                     label={labels.arrivalDate}
-                    value={formik.values?.arrivalTime}
+                    value={formik.values.header?.arrivalTime}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('arrivalTime', newValue)
+                      formik.setFieldValue('header.arrivalTime', newValue)
                       if (!newValue) {
-                        formik.setFieldValue('arrivalTimeField', '')
+                        formik.setFieldValue('header.arrivalTimeField', '')
                       }
                     }}
-                    onClear={() => formik.setFieldValue('arrivalTime', '')}
+                    onClear={() => formik.setFieldValue('header.arrivalTime', '')}
                     readOnly={isPosted || isClosed}
-                    error={formik.touched.arrivalTime && Boolean(formik.errors.arrivalTime)}
+                    error={formik.touched?.header?.arrivalTime && Boolean(formik.errors?.header?.arrivalTime)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -555,16 +555,16 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={DeliveryRepository.Vehicle.qry}
-                    name='vehicleId'
+                    name='header.vehicleId'
                     label={labels.vehicle}
                     valueField='recordId'
                     readOnly={isPosted || isClosed}
                     displayField='name'
-                    values={formik.values}
+                    values={formik.values.header}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('vehicleId', newValue ? newValue?.recordId : '')
+                      formik.setFieldValue('header.vehicleId', newValue ? newValue?.recordId : '')
                     }}
-                    error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
+                    error={formik.touched?.header?.vehicleId && Boolean(formik.errors?.header?.vehicleId)}
                   />
                 </Grid>
               </Grid>
@@ -575,27 +575,30 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                 <Grid item xs={4}>
                   <CustomTimePicker
                     label={labels.arrivalTime}
-                    name='arrivalTimeField'
-                    value={formik.values?.arrivalTimeField}
+                    name='header.arrivalTimeField'
+                    value={formik.values.header?.arrivalTimeField}
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('arrivalTimeField', '')}
-                    readOnly={isPosted || isClosed || !formik.values?.arrivalTime}
-                    error={formik.touched.arrivalTimeField && Boolean(formik.errors.arrivalTimeField)}
+                    onClear={() => formik.setFieldValue('header.arrivalTimeField', '')}
+                    readOnly={isPosted || isClosed || !formik.values.header?.arrivalTime}
+                    error={
+                      formik.touched?.header?.arrivalTimeField &&
+                      Boolean(formik.errors?.header?.arrivalTimeField)
+                    }
                     maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={4}>
                   <CustomTextArea
-                    name='notes'
+                    name='header.notes'
                     type='text'
                     label={labels.notes}
-                    value={formik.values.notes}
+                    value={formik.values.header.notes}
                     readOnly={isPosted || isClosed}
                     rows={3}
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('notes', e.target.value)}
-                    onClear={() => formik.setFieldValue('notes', '')}
-                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+                    onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.notes', '')}
+                    error={formik.touched?.header?.notes && Boolean(formik.errors?.header?.notes)}
                   />
                 </Grid>
               </Grid>
@@ -606,10 +609,10 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         <Grow>
           <DataGrid
             onChange={value => {
-              formik.setFieldValue('orders', value)
+              formik.setFieldValue('tripOrders', value)
             }}
-            value={formik?.values?.orders}
-            error={formik?.errors?.orders}
+            value={formik?.values?.tripOrders}
+            error={formik?.errors?.tripOrders}
             columns={columns}
             allowDelete={!isPosted && !isClosed}
             allowAddNewLine={!isPosted && !isClosed}

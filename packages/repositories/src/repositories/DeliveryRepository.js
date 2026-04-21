@@ -20,6 +20,7 @@ export const DeliveryRepository = {
     page: service + 'pageTRP',
     set: service + 'setTRP',
     get: service + 'getTRP',
+    get2: service + 'get2TRP',
     qry: service + 'qryTRP',
     del: service + 'delTRP',
     snapshot: service + 'snapshotTRP',
