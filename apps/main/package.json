@@ -39,6 +39,7 @@
     "@argus/shared-store": "file:../../packages/shared-store",
     "@argus/shared-ui": "file:../../packages/shared-ui",
     "@argus/shared-utils": "file:../../packages/shared-utils",
+    "@assistant-ui/react": "^0.12.25",
     "@babel/core": "7.21.8",
     "@babel/eslint-parser": "7.21.8",
     "@casl/ability": "6.5.0",
