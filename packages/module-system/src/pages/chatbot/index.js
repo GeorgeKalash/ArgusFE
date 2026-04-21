@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,7 +16,11 @@ import {
   Line,
   Pie
 } from "react-chartjs-2";
-import { getFakeResponse } from "@argus/shared-utils/src/utils/chatMock";
+
+import { sendChatMessage } from "@argus/shared-providers/src/providers/chatService";
+import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
+import ReactMarkdown from "react-markdown";
+
 
 ChartJS.register(
   CategoryScale,
@@ -30,6 +34,8 @@ ChartJS.register(
 );
 
 export default function ChatPage() {
+  const { user } = useContext(AuthContext);
+
   const [chats, setChats] = useState([
     {
       id: 1,
@@ -97,7 +103,6 @@ export default function ChatPage() {
     if (!input.trim() || loading) return;
 
     const userText = input;
-    const lowerText = input.toLowerCase();
 
     setLoading(true);
 
@@ -112,6 +117,12 @@ export default function ChatPage() {
                   sender: "me",
                   type: "text",
                   text: userText
+                },
+                {
+                  sender: "ai",
+                  type: "text",
+                  text: "",
+                  isStreaming: true
                 }
               ]
             }
@@ -121,25 +132,85 @@ export default function ChatPage() {
 
     setInput("");
 
-    setTimeout(() => {
-      const response = getFakeResponse(userText);
+    sendChatMessage(userText, user.accessToken, (event) => {
+      if (event.type === "chunk") {
+        setChats((prevChats) =>
+          prevChats.map((chat) => {
+            if (chat.id !== selectedChatId)
+              return chat;
 
-      setChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat.id === selectedChatId
-            ? {
-                ...chat,
-                messages: [
-                  ...chat.messages,
-                  ...response.messages
-                ]
-              }
-            : chat
-        )
-      );
+            const updatedMessages = [
+              ...chat.messages
+            ];
 
-      setLoading(false);
-    }, 2000);
+            const last =
+              updatedMessages.length - 1;
+
+            updatedMessages[last] = {
+              ...updatedMessages[last],
+              text:
+                updatedMessages[last]
+                  .text + event.text,
+              isStreaming: true
+            };
+
+            return {
+              ...chat,
+              messages: updatedMessages
+            };
+          })
+        );
+      }
+
+      if (event.type === "message") {
+        setChats((prevChats) =>
+          prevChats.map((chat) =>
+            chat.id === selectedChatId
+              ? {
+                  ...chat,
+                  messages: [
+                    ...chat.messages,
+                    event.message
+                  ]
+                }
+              : chat
+          )
+        );
+      }
+
+      if (event.type === "done") {
+        setChats((prevChats) =>
+          prevChats.map((chat) => {
+            if (chat.id !== selectedChatId)
+              return chat;
+
+            const updatedMessages = [
+              ...chat.messages
+            ];
+
+            const lastIndex =
+              updatedMessages.length - 1;
+
+            if (
+              updatedMessages[lastIndex]
+                ?.isStreaming
+            ) {
+              updatedMessages[lastIndex] = {
+                ...updatedMessages[lastIndex],
+                isStreaming: false
+              };
+            }
+
+            return {
+              ...chat,
+              messages: updatedMessages
+            };
+          })
+        );
+
+        setLoading(false);
+      }
+    });
   };
 
   useEffect(() => {
@@ -177,12 +248,51 @@ export default function ChatPage() {
                 : "#000",
             padding: "10px 14px",
             borderRadius: "14px",
-            maxWidth: "70%"
+            maxWidth: "70%",
           }}
         >
-          {msg.text}
-        </div>
-      );
+          
+          {msg.isStreaming ? (
+            <div style={{ whiteSpace: "pre-wrap" }}>
+              {msg.text}▋
+            </div>
+          ) : (
+          <ReactMarkdown
+            components={{
+              p: ({ node, ...props }) => (
+                <p
+                  style={{
+                    margin: 0,
+                    lineHeight: 1.5
+                  }}
+                  {...props}
+                />
+              ),
+              ul: ({ node, ...props }) => (
+                <ul
+                  style={{
+                    margin: "6px 0",
+                    paddingLeft: "20px"
+                  }}
+                  {...props}
+                />
+              ),
+              ol: ({ node, ...props }) => (
+                <ol
+                  style={{
+                    margin: "6px 0",
+                    paddingLeft: "20px"
+                  }}
+                  {...props}
+                />
+              )
+            }}
+          >
+            {msg.text}
+          </ReactMarkdown>
+          )}
+            </div>
+          );
     }
 
     if (msg.type === "table") {
@@ -342,7 +452,6 @@ export default function ChatPage() {
         height: "100vh"
       }}
     >
-      {/* Sidebar */}
       <div
         style={{
           width: "280px",
@@ -391,7 +500,6 @@ export default function ChatPage() {
         ))}
       </div>
 
-      {/* Main Chat */}
       <div
         style={{
           flex: 1,
@@ -427,7 +535,6 @@ export default function ChatPage() {
           <div ref={messagesEndRef}></div>
         </div>
 
-        {/* Input + Send */}
         <div
           style={{
             padding: "16px",
