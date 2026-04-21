@@ -505,18 +505,8 @@ export default function JobOrderForm({
     formik.setValues(updatedValues)
   }
   async function fillDesignInfo(values) {
-    if (!values?.recordId) {
-      formik.setValues({
-        ...formik.values,
-        designId: null,
-        designRef: '',
-        designName: ''
-      })
-      return
-    }
-
-    if (imageSource == 1) updateParent(values.recordId, imageSource)
-    else if (imageSource == 2) updateParent(values.itemId, imageSource)
+    if (imageSource == 1) updateParent(values?.recordId, imageSource)
+    else if (imageSource == 2) updateParent(values?.itemId, imageSource)
 
     const updatedValues = {
       ...formik.values,
