@@ -90,7 +90,10 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
                 displayField='value'
                 required
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('AI_provider_Id', newValue?.key || null)}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('AI_provider_Id', newValue?.key || null)
+                  formik.setFieldValue('AI_Model_Version', null)
+                }}
                 error={formik.touched.AI_provider_Id && Boolean(formik.errors.AI_provider_Id)}
               />
             </Grid>
@@ -117,6 +120,7 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
                 displayField='value'
                 values={formik.values}
                 required
+                readOnly={!formik.values.AI_provider_Id}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => formik.setFieldValue('AI_Model_Version', newValue?.key || null)}
                 error={formik.touched.AI_Model_Version && Boolean(formik.errors.AI_Model_Version)}
