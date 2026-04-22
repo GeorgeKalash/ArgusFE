@@ -20,6 +20,9 @@ import {
 import { sendChatMessage } from "@argus/shared-providers/src/providers/chatService";
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import ReactMarkdown from "react-markdown";
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import DeleteDialog from "@argus/shared-ui/src/components/Shared/DeleteDialog";
+
 
 
 ChartJS.register(
@@ -35,6 +38,7 @@ ChartJS.register(
 
 export default function ChatPage() {
   const { user } = useContext(AuthContext);
+  const { stack } = useWindow()
 
   const [chats, setChats] = useState([
     {
@@ -57,6 +61,7 @@ export default function ChatPage() {
 
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchText, setSearchText] = useState("");
   const [loading, setLoading] =
     useState(false);
 
@@ -461,6 +466,122 @@ export default function ChatPage() {
     return null;
   };
 
+
+  const confirmDeleteChat = (chat) => {
+    openDelete({
+      ...chat
+    });
+  };
+
+  const onDelete = (chat) => {
+    deleteChat(chat.id);
+  };
+
+  function openDelete(chat) {
+    stack({
+      Component: DeleteDialog,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () =>
+          onDelete(chat)
+      },
+      refresh: false
+    });
+  }
+  
+
+  const deleteChat = (chatId) => {
+    const visibleChats =
+      searchText.trim()
+        ? filteredChats
+        : chats;
+
+    const deletedIndex =
+      visibleChats.findIndex(
+        (c) => c.id === chatId
+      );
+
+    const updatedChats =
+      chats.filter(
+        (c) => c.id !== chatId
+      );
+
+    setChats(updatedChats);
+
+    // if deleted chat was not selected
+    if (
+      selectedChatId !== chatId
+    ) {
+      return;
+    }
+
+    let nextChat = null;
+
+    // try next visible row
+    if (
+      deletedIndex >= 0 &&
+      visibleChats[
+        deletedIndex + 1
+      ]
+    ) {
+      const nextId =
+        visibleChats[
+          deletedIndex + 1
+        ].id;
+
+      nextChat =
+        updatedChats.find(
+          (c) => c.id === nextId
+        );
+    }
+
+    // else previous visible row
+    if (
+      !nextChat &&
+      deletedIndex > 0
+    ) {
+      const prevId =
+        visibleChats[
+          deletedIndex - 1
+        ].id;
+
+      nextChat =
+        updatedChats.find(
+          (c) => c.id === prevId
+        );
+    }
+
+    // else first remaining chat
+    if (
+      !nextChat &&
+      updatedChats.length
+    ) {
+      nextChat =
+        updatedChats[0];
+    }
+
+    // set selected
+    if (nextChat) {
+      setSelectedChatId(
+        nextChat.id
+      );
+    } else {
+      setSelectedChatId(
+        null
+      );
+    }
+  };
+
+  const filteredChats =
+    chats.filter((chat) =>
+      chat.title
+        .toLowerCase()
+        .includes(
+          searchText.toLowerCase()
+        )
+    );
+
   return (
     <div
       style={{
@@ -494,6 +615,24 @@ export default function ChatPage() {
         >
           <h3>Chats</h3>
 
+          <input
+            value={searchText}
+            onChange={(e) =>
+              setSearchText(
+                e.target.value
+              )
+            }
+            placeholder="Search chats..."
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginTop: "12px",
+              marginBottom: "12px",
+              borderRadius: "8px",
+              border: "1px solid #ccc"
+            }}
+          />
+
           <button
             onClick={createNewChat}
             style={{
@@ -507,28 +646,48 @@ export default function ChatPage() {
             + New Chat
           </button>
 
-          {chats.map((chat) => (
+          {filteredChats.map((chat) => (
             <div
               key={chat.id}
-              onClick={() =>
-                setSelectedChatId(chat.id)
-              }
               style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent:
+                  "space-between",
                 padding: "10px",
                 marginBottom: "8px",
                 borderRadius: "8px",
-                cursor: "pointer",
                 background:
                   chat.id === selectedChatId
                     ? "#f1f1f1"
-                    : "transparent",
-                fontWeight:
-                  chat.id === selectedChatId
-                    ? "bold"
-                    : "normal"
+                    : "transparent"
               }}
             >
-              {chat.title}
+              <div
+                onClick={() =>
+                  setSelectedChatId(chat.id)
+                }
+                style={{
+                  flex: 1,
+                  cursor: "pointer"
+                }}
+              >
+                {chat.title}
+              </div>
+
+              <button
+                onClick={() =>
+                  confirmDeleteChat(chat)
+                }
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  color: "#999"
+                }}
+              >
+                🗑
+              </button>
             </div>
           ))}
         </div>
