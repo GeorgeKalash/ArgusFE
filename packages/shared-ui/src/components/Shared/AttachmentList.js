@@ -18,7 +18,7 @@ import CustomButton from '../Inputs/CustomButton'
 import FolderForm from './FolderForm'
 import { useError } from '@argus/shared-providers/src/providers/error'
 
-const AttachmentList = ({ resourceId, recordId, window }) => {
+const AttachmentList = ({ resourceId, recordId, activeStatus, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -161,6 +161,7 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
       props: {
         recordId,
         resourceId,
+        disabled: !activeStatus,
         seqNo: maxSeqNo
       }
     })

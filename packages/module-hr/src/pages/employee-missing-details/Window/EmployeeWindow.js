@@ -15,12 +15,13 @@ import HiringTab from '@argus/shared-ui/src/components/Shared/EmployeePages/Hiri
 import SkillsTab from '@argus/shared-ui/src/components/Shared/EmployeePages/SkillsTab'
 import UserDefinedTab from '@argus/shared-ui/src/components/Shared/EmployeePages/UserDefinedTab'
 
-const EmployeeListWindow = ({ recordId, labels, maxAccess, employeeStatus }) => {
+export default function EmployeeWindow ({ recordId, labels, maxAccess, employeeStatus }) {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId: recordId || null, hireDate: null })
   const { getRequest } = useContext(RequestsContext)
   const [quickView, setQuickView] = useState(null)
   const activeStatus = employeeStatus == 1
+
   const imageUploadRef = useRef(null)
 
   const tabs = [
@@ -106,31 +107,29 @@ const EmployeeListWindow = ({ recordId, labels, maxAccess, employeeStatus }) => 
         </CustomTabPanel>
 
         <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
-          <JobTab store={store} labels={labels} maxAccess={maxAccess} activeStatus={activeStatus} />
+          <JobTab store={store} labels={labels} maxAccess={maxAccess} activeStatus={activeStatus}/>
         </CustomTabPanel>
 
         <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
-          <LeavesTab store={store} labels={labels} maxAccess={maxAccess} activeStatus={activeStatus} />
+          <LeavesTab store={store} labels={labels} maxAccess={maxAccess} activeStatus={activeStatus}/>
         </CustomTabPanel>
 
         <CustomTabPanel index={3} value={activeTab} maxAccess={maxAccess}>
-          <HiringTab store={store} labels={labels} maxAccess={maxAccess} activeStatus={activeStatus} />
+          <HiringTab store={store} labels={labels} maxAccess={maxAccess} activeStatus={activeStatus}/>
         </CustomTabPanel>
 
         <CustomTabPanel index={4} value={activeTab} maxAccess={maxAccess}>
-          <AttachmentList resourceId={ResourceIds.Files} recordId={recordId} isNotTab={recordId} activeStatus={activeStatus} />
+          <AttachmentList resourceId={ResourceIds.Files} recordId={recordId} isNotTab={recordId} activeStatus={activeStatus}/>
         </CustomTabPanel>
 
         <CustomTabPanel index={5} value={activeTab} maxAccess={maxAccess}>
-          <SkillsTab store={store} labels={labels} maxAccess={maxAccess} activeStatus={activeStatus} />
+          <SkillsTab store={store} labels={labels} maxAccess={maxAccess} activeStatus={activeStatus}/>
         </CustomTabPanel>
 
         <CustomTabPanel index={6} value={activeTab} maxAccess={maxAccess}>
-          <UserDefinedTab store={store} maxAccess={maxAccess} activeStatus={activeStatus} />
+          <UserDefinedTab store={store} maxAccess={maxAccess} activeStatus={activeStatus}/>
         </CustomTabPanel>
       </Grid>
     </Grid>
   )
 }
-
-export default EmployeeListWindow

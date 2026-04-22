@@ -15,7 +15,7 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import EmploymentHistory from './EmploymentHistory'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 
-const JobTab = ({ labels, maxAccess, store }) => {
+const JobTab = ({ labels, maxAccess, store, activeStatus }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -108,7 +108,8 @@ const JobTab = ({ labels, maxAccess, store }) => {
         labels,
         maxAccess,
         employeeId: recordId,
-        recordId: obj?.recordId
+        recordId: obj?.recordId,
+        activeStatus
       },
       width: 500,
       height: 400,
@@ -153,6 +154,13 @@ const JobTab = ({ labels, maxAccess, store }) => {
           pagination={false}
           refetch={refetch}
           maxAccess={maxAccess}
+          actionCondition={(row, actionType) => {
+            if (actionType === 'delete' || actionType === 'edit') {
+              return row.activeStatus == 1
+            }
+
+            return true
+          }}
         />
       </Grow>
 

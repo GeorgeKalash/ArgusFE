@@ -16,7 +16,7 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-const SkillsForm = ({ recordId, employeeId, labels, maxAccess, window }) => {
+const SkillsForm = ({ recordId, employeeId, labels, maxAccess, activeStatus, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -80,7 +80,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, window }) => {
   }, [])
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
+    <Form onSave={formik.handleSubmit} disabledSubmit={!activeStatus} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -92,6 +92,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, window }) => {
                 required
                 maxLength={50}
                 maxAccess={maxAccess}
+                readOnly={!activeStatus}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('institution', '')}
                 error={formik.touched.institution && Boolean(formik.errors.institution)}
@@ -106,6 +107,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, window }) => {
                 maxAccess={maxAccess}
                 required
                 displayField='name'
+                readOnly={!activeStatus}
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('clId', newValue?.recordId || null)
@@ -119,6 +121,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, window }) => {
                 label={labels.from}
                 value={formik.values?.dateFrom}
                 maxAccess={maxAccess}
+                readOnly={!activeStatus}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('dateFrom', null)}
                 error={formik.touched.dateFrom && Boolean(formik.errors.dateFrom)}
@@ -131,6 +134,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, window }) => {
                 value={formik.values?.dateTo}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
+                readOnly={!activeStatus}
                 onClear={() => formik.setFieldValue('dateTo', null)}
                 error={formik.touched.dateTo && Boolean(formik.errors.dateTo)}
               />
@@ -142,6 +146,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, window }) => {
                 value={formik?.values?.remarks}
                 maxLength='100'
                 rows={2}
+                readOnly={!activeStatus}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('remarks', '')}
@@ -156,6 +161,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, window }) => {
                 required
                 maxAccess={maxAccess}
                 maxLength={20}
+                readOnly={!activeStatus}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('grade', '')}
                 error={formik.touched.grade && Boolean(formik.errors.grade)}
@@ -168,6 +174,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, window }) => {
                 value={formik.values.major}
                 required
                 maxLength={50}
+                readOnly={!activeStatus}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('major', '')}

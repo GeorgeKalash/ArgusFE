@@ -1,4 +1,4 @@
-import { Grid, FormControlLabel, RadioGroup, Radio } from '@mui/material'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useContext, useEffect } from 'react'
@@ -22,7 +22,7 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import CustomRadioButtonGroup from '@argus/shared-ui/src/components/Inputs/CustomRadioButtonGroup'
 
-const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData }) => {
+const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData, activeStatus }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -98,7 +98,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
       if (!values.recordId) {
         formik.setFieldValue('recordId', res.recordId)
       }
-      setStore(prevStore => ({
+      setStore && setStore(prevStore => ({
         ...prevStore,
         recordId: res.recordId,
         hireDate: values.hireDate
@@ -129,7 +129,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
           birthDate: res?.record?.birthDate ? formatDateFromApi(res.record.birthDate) : null
         })
 
-        setStore(prevStore => ({
+       setStore && setStore(prevStore => ({
           ...prevStore,
           hireDate: res?.record?.hireDate
         }))
@@ -157,6 +157,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
       reportSize={5}
       previewReport={editMode}
       actions={actions}
+      disabledSubmit={!activeStatus}
     >
       <VertLayout>
         <Grow>
@@ -170,7 +171,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     value={formik.values.reference}
                     required
                     maxLength='10'
-                    readOnly={editMode}
+                    readOnly={editMode || !activeStatus}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
@@ -184,6 +185,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     value={formik.values.firstName}
                     maxAccess={maxAccess}
                     required
+                    readOnly={!activeStatus}
                     maxLength='20'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('firstName', '')}
@@ -198,6 +200,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     maxAccess={maxAccess}
                     required
                     maxLength='20'
+                    readOnly={!activeStatus}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('middleName', '')}
                     error={formik.touched.middleName && Boolean(formik.errors.middleName)}
@@ -211,6 +214,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     maxAccess={maxAccess}
                     maxLength='20'
                     required
+                    readOnly={!activeStatus}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('lastName', '')}
                     error={formik.touched.lastName && Boolean(formik.errors.lastName)}
@@ -223,6 +227,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     value={formik.values.familyName}
                     maxAccess={maxAccess}
                     maxLength='20'
+                    readOnly={!activeStatus}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('familyName', '')}
                     error={formik.touched.familyName && Boolean(formik.errors.familyName)}
@@ -247,6 +252,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     value={formik.values.homeMail}
                     maxAccess={maxAccess}
                     maxLength='40'
+                    readOnly={!activeStatus}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('homeMail', '')}
                     error={formik.touched.homeMail && Boolean(formik.errors.homeMail)}
@@ -259,6 +265,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     value={formik.values.workMail}
                     maxAccess={maxAccess}
                     maxLength='40'
+                    readOnly={!activeStatus}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('workMail', '')}
                     error={formik.touched.workMail && Boolean(formik.errors.workMail)}
@@ -272,6 +279,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     maxAccess={maxAccess}
                     maxLength={15}
                     phone={true}
+                    readOnly={!activeStatus}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('mobile', null)}
                     error={formik.touched.mobile && Boolean(formik.errors.mobile)}
@@ -285,6 +293,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     maxAccess={maxAccess}
                     maxLength={15}
                     phone={true}
+                    readOnly={!activeStatus}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('phone', null)}
                     error={formik.touched.phone && Boolean(formik.errors.phone)}
@@ -298,6 +307,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     values={formik.values}
                     valueField='key'
                     displayField='value'
+                    readOnly={!activeStatus}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('civilStatus', newValue?.key || null)
                     }}
@@ -312,6 +322,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
+                    readOnly={!activeStatus}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('otpId', newValue?.recordId || null)
                     }}
@@ -328,6 +339,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     label={labels.birthDate}
                     value={formik.values?.birthDate}
                     required
+                    readOnly={!activeStatus}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('birthDate', null)}
                     error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
@@ -341,6 +353,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     values={formik.values}
                     valueField='key'
                     displayField='value'
+                    readOnly={!activeStatus}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('religion', newValue?.key || null)
                     }}
@@ -355,6 +368,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
+                    readOnly={!activeStatus}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('nationalityId', newValue?.recordId || 0)
                     }}
@@ -371,6 +385,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     valueField='key'
                     displayField='value'
                     maxAccess={maxAccess}
+                    readOnly={!activeStatus}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('bloodType', newValue?.key || null)
                     }}
@@ -386,6 +401,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     required
                     valueField='key'
                     displayField='value'
+                    readOnly={!activeStatus}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       if (newValue?.key == 1 || newValue?.key == 3 || newValue?.key == 4) {
@@ -408,7 +424,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     values={formik.values}
                     maxAccess={maxAccess}
                     required={formik.values.scType == 2}
-                    readOnly={formik.values.scType == 1 || formik.values.scType == 3 || formik.values.scType == 4}
+                    readOnly={formik.values.scType == 1 || formik.values.scType == 3 || formik.values.scType == 4 || !activeStatus}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('scId', newValue?.recordId || null)
                     }}
@@ -423,6 +439,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     maxLength='30'
+                    readOnly={!activeStatus}
                     onClear={() => formik.setFieldValue('placeOfBirth', '')}
                     error={formik.touched.placeOfBirth && Boolean(formik.errors.placeOfBirth)}
                   />
@@ -433,6 +450,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     label={labels.hireDate}
                     value={formik.values?.hireDate}
                     required
+                    readOnly={!activeStatus}
                     maxAccess={maxAccess}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('hireDate', null)}
@@ -450,6 +468,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                       { label: labels.male, value: 1 },
                       { label: labels.female, value: 2 }
                     ]}
+                    readOnly={!activeStatus}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -462,6 +481,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     }}
                     label={labels.isConfidential}
                     maxAccess={maxAccess}
+                    disabled={!activeStatus}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -478,7 +498,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                       formik.setFieldValue('sgId', newValue?.recordId || null)
                     }}
                     required={formik.values.isConfidential}
-                    readOnly={!formik.values.isConfidential}
+                    readOnly={!formik.values.isConfidential || !activeStatus}
                     error={formik.touched.sgId && Boolean(formik.errors.sgId)}
                   />
                 </Grid>

@@ -142,12 +142,13 @@ const EmployeeList = () => {
     openForm()
   }
 
-  function openForm(recordId) {
+  function openForm(obj) {
     stack({
       Component: EmployeeListWindow,
       props: {
         labels,
-        recordId,
+        recordId: obj?.recordId,
+        employeeStatus: obj?.activeStatus,
         maxAccess: access
       },
       width: 1000,
@@ -157,7 +158,7 @@ const EmployeeList = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.parent?.recordId)
+    openForm(obj?.parent)
   }
 
   return (
