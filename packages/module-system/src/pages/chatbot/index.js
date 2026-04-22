@@ -56,6 +56,7 @@ export default function ChatPage() {
   const inputRef = useRef(null);
 
   const [input, setInput] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] =
     useState(false);
 
@@ -470,55 +471,72 @@ export default function ChatPage() {
     >
       <div
         style={{
-          width: "280px",
-          borderRight: "1px solid #ddd",
-          padding: "16px"
+          width: sidebarOpen
+            ? "280px"
+            : "0px",
+          minWidth: sidebarOpen
+            ? "280px"
+            : "0px",
+          flexShrink: 0,
+          overflow: "hidden",
+          transition:
+            "all 0.25s ease",
+          borderRight:
+            sidebarOpen
+              ? "1px solid #ddd"
+              : "none"
         }}
       >
-        <h3>Chats</h3>
-
-        <button
-          onClick={createNewChat}
+        <div
           style={{
-            width: "100%",
-            padding: "10px",
-            marginTop: "12px",
-            marginBottom: "20px",
-            cursor: "pointer"
+            padding: "16px"
           }}
         >
-          + New Chat
-        </button>
+          <h3>Chats</h3>
 
-        {chats.map((chat) => (
-          <div
-            key={chat.id}
-            onClick={() =>
-              setSelectedChatId(chat.id)
-            }
+          <button
+            onClick={createNewChat}
             style={{
+              width: "100%",
               padding: "10px",
-              marginBottom: "8px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              background:
-                chat.id === selectedChatId
-                  ? "#f1f1f1"
-                  : "transparent",
-              fontWeight:
-                chat.id === selectedChatId
-                  ? "bold"
-                  : "normal"
+              marginTop: "12px",
+              marginBottom: "20px",
+              cursor: "pointer"
             }}
           >
-            {chat.title}
-          </div>
-        ))}
-      </div>
+            + New Chat
+          </button>
 
+          {chats.map((chat) => (
+            <div
+              key={chat.id}
+              onClick={() =>
+                setSelectedChatId(chat.id)
+              }
+              style={{
+                padding: "10px",
+                marginBottom: "8px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                background:
+                  chat.id === selectedChatId
+                    ? "#f1f1f1"
+                    : "transparent",
+                fontWeight:
+                  chat.id === selectedChatId
+                    ? "bold"
+                    : "normal"
+              }}
+            >
+              {chat.title}
+            </div>
+          ))}
+        </div>
+      </div>
       <div
         style={{
           flex: 1,
+          minWidth: 0,
           display: "flex",
           flexDirection: "column"
         }}
@@ -530,7 +548,24 @@ export default function ChatPage() {
             fontWeight: "bold"
           }}
         >
-          AI Assistant
+          <button
+            onClick={() =>
+              setSidebarOpen(!sidebarOpen)
+            }
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              fontSize: "20px",
+              padding: "4px 8px",
+              borderRadius: "6px"
+            }}
+          >
+            ☰
+          </button>
+          <span>
+            AI Assistant
+          </span>
         </div>
 
         <div
