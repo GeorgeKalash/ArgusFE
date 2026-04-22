@@ -68,7 +68,7 @@ const Users = () => {
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 900,
+      width: 1000,
       height: 650,
       title: labels.users
     })
