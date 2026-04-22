@@ -458,6 +458,8 @@ const GenerateOutboundTransportation2 = () => {
         .filter(item => item.checked)
         .map(item => ({
           ...item,
+          filteredCategoryPct: item.filteredCategoryPct.toFixed(2),
+          filteredCategoryVolme: item.filteredCategoryVolme.toFixed(2),
           orders: item.orders?.map(order => ({ ...order, checked: true }))
         }))
 
