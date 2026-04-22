@@ -427,7 +427,6 @@ export default function JobOrderForm({
   }
 
   async function fillItemInfo(values) {
-    if (imageSource == 2) updateParent(values.recordId, imageSource)
     if (!values?.recordId) {
       formik.setValues({
         ...formik.values,
@@ -437,36 +436,43 @@ export default function JobOrderForm({
         itemsPL: null,
         stdWeight: null,
         itemCategoryId: null,
+        routingId: null,
+        routingName: '',
+        routingRef: '',
+        classId: null,
+        standardId: null,
+        lineId: null,
+        designId: null,
+        designRef: '',
+        designName: '',
+        workCenterId: null,
+        wcRef: '',
+        wcName: '',
+        expectedQty: null,
+        expectedPcs: null,
         itemFromDesign: false
       })
+
+      setParentImage({ recordId: null, resourceId: null })
       return
     }
-
-    const ItemPhysProp = await getRequest({
-      extension: InventoryRepository.Physical.get,
-      parameters: `_itemId=${values?.recordId}`
-    })
 
     const ItemProduction = await getRequest({
       extension: InventoryRepository.ItemProduction.get,
       parameters: `_recordId=${values?.recordId}`
     })
+    
+    if (imageSource == 2) updateParent(values?.recordId, imageSource)
+    else if (imageSource == 1) updateParent(ItemProduction?.record?.designId, imageSource)
 
     const updatedValues = {
       ...formik.values,
       designRef: ItemProduction?.record?.designRef || '',
       designName: ItemProduction?.record?.designName || '',
       designId: ItemProduction?.record?.designId || null,
-      classId: ItemProduction?.record?.classId || null,
-      standardId: ItemProduction?.record?.standardId || null,
       itemId: values?.recordId,
       itemName: values?.name,
       sku: values?.sku,
-      stdWeight: ItemPhysProp?.record?.weight,
-      expectedQty:
-        !ItemPhysProp?.record?.weight || !formik.values.expectedPcs
-          ? 0
-          : formik.values.expectedPcs * ItemPhysProp?.record?.weight,
       itemsPL: ItemProduction?.record?.lineId,
       lineId: ItemProduction?.record?.lineId,
       itemCategoryId: values?.categoryId
@@ -495,14 +501,26 @@ export default function JobOrderForm({
       updatedValues.threeDDRef = design?.record?.threeDDRef || ''
       updatedValues.rubberId = design?.record?.rubberId || null
       updatedValues.rubberRef = design?.record?.rubberRef || ''
+      updatedValues.classId = design?.record?.classId || null
+      updatedValues.standardId = design?.record?.standardId || null
+      updatedValues.stdWeight = design?.record?.stdWeight || null
+      updatedValues.expectedQty =
+        !design?.record?.stdWeight || !formik.values.expectedPcs
+          ? 0
+          : formik.values.expectedPcs * design?.record?.stdWeight
     } else {
       updatedValues.threeDDId = null
       updatedValues.threeDDRef = ''
       updatedValues.rubberId = null
       updatedValues.rubberRef = ''
+      updatedValues.classId = null
+      updatedValues.standardId = null
+      updatedValues.stdWeight = null
+      updatedValues.expectedQty = null
     }
 
     formik.setValues(updatedValues)
+    await updateWC(ItemProduction?.record?.routingId, false)
   }
   async function fillDesignInfo(values) {
     if (imageSource == 1) updateParent(values?.recordId, imageSource)
