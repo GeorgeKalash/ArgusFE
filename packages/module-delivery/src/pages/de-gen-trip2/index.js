@@ -190,24 +190,26 @@ const GenerateOutboundTransportation2 = () => {
       headerName: labels.name,
       wrapText: true,
       autoHeight: true,
-      flex: 3,
+      flex: 2,
       rowDrag: true
     },
     {
       field: 'volume',
       headerName: labels.volume,
-      flex: 2,
+      flex: 1,
       type: 'number'
     },
     {
       field: 'filteredCategoryVolme',
       headerName: labels.categVol,
-      type: 'number'
+      type: 'number',
+      flex: 1
     },
     {
       field: 'filteredCategoryPct',
       headerName: labels.categPct,
-      type: 'number'
+      type: 'number',
+      flex: 1
     }
   ]
 
@@ -567,6 +569,14 @@ const GenerateOutboundTransportation2 = () => {
                   onSaleZoneChange(formik.values.szId, newValue?.recordId)
                   
                   formik.setFieldValue('itemCategoryId', newValue?.recordId || null)
+
+                  formik.setFieldValue('data', { list: [] })
+                  formik.setFieldValue('orders', { list: [] })
+                  formik.setFieldValue('selectedTrucks', [])
+                  formik.setFieldValue('vehicleAllocations', { list: [] })
+                  formik.setFieldValue('salesZones', { list: [] })
+                  setFilteredOrders([])
+                  setSelectedSaleZones([])
                 }}
                 error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
               />
