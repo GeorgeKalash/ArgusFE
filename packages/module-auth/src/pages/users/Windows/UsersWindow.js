@@ -5,10 +5,10 @@ import SecurityGrpTab from '../Tabs/SecurityGrpTab'
 import RowAccessTab from '../Tabs/RowAccessTab'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
-import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import DocTypeTab from '../Tabs/DocTypeTab'
 import ReleaseCodeTab from '../Tabs/ReleaseCodeTab'
 import SitesTab from '../Tabs/SitesTab'
+import AIForm from '../Tabs/AIForm'
 
 const UsersWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -21,7 +21,8 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
     { label: labels.docType, disabled: !storeRecordId },
     { label: labels.site, disabled: !storeRecordId },
     { label: labels.rowAccess, disabled: !storeRecordId },
-    { label: labels.releaseCode, disabled: !storeRecordId }
+    { label: labels.releaseCode, disabled: !storeRecordId },
+    { label: labels.AI, disabled: !storeRecordId }
   ]
 
   return (
@@ -47,6 +48,9 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
       </CustomTabPanel>
       <CustomTabPanel index={6} value={activeTab} maxAccess={maxAccess}>
         <ReleaseCodeTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
+      </CustomTabPanel>
+      <CustomTabPanel index={7} value={activeTab} maxAccess={maxAccess}>
+        <AIForm labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
     </>
   )
