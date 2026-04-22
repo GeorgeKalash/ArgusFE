@@ -279,13 +279,13 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      flex: 0.5
+      flex: 1
     },
     {
       component: 'numberfield',
       name: 'pcs',
       label: labels.pcs,
-      flex: 0.5
+      flex: 1
     },
     {
       component: 'textfield',
