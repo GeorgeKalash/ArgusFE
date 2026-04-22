@@ -112,5 +112,8 @@ export const AccessControlRepository = {
     get2: service + 'get2RDT',
     set2: service + 'set2RDT',
     del: service + 'delRDT'
+  },
+  Provider: {
+    get: service + 'getProviderPack',
   }
 }
