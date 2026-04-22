@@ -43,6 +43,7 @@ export default function ChatPage() {
   const [chats, setChats] = useState([
     {
       id: 1,
+      conversationId: '',
       title: "Welcome",
       messages: [
         {
@@ -91,6 +92,7 @@ export default function ChatPage() {
 
     const newChat = {
       id: Date.now(),
+      conversationId: '',
       title: "New Chat",
       messages: [
         {
@@ -139,7 +141,27 @@ export default function ChatPage() {
 
     setInput("");
 
-    sendChatMessage(userText, user.accessToken, (event) => {
+    const conversationId = selectedChat.conversationId
+
+    sendChatMessage(userText, user.accessToken, conversationId, (event) => {
+      if (
+        event.type ===
+        "conversationId"
+      ) {
+        setChats((prevChats) =>
+          prevChats.map((chat) =>
+            chat.id === selectedChatId
+              ? {
+                  ...chat,
+                  conversationId:
+                    chat.conversationId || event.value
+                }
+              : chat
+          )
+        );
+
+        return;
+      }
       if (event.type === "chunk") {
         setChats((prevChats) =>
           prevChats.map((chat) => {

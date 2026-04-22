@@ -1,6 +1,7 @@
 export async function sendChatMessage(
   text,
   token,
+  conversationId,
   onEvent
 ) {
 
@@ -12,13 +13,9 @@ export async function sendChatMessage(
         "Content-Type": "application/json",
         },
         body: JSON.stringify({
+            conversationId: conversationId,
             argusToken: token,
-            messages: [
-                {
-                role: "user",
-                content: text
-                }
-            ]
+            message: text
         })
     }
     );
@@ -68,6 +65,14 @@ export async function sendChatMessage(
         try {
             const json = JSON.parse(trimmed);
 
+            if (json.type === "conversationId") {
+                onEvent({
+                    type: "conversationId",
+                    value: json.value
+                });
+
+                continue;
+            }
             if (json.type === "text") {
             onEvent({
                 type: "chunk",
