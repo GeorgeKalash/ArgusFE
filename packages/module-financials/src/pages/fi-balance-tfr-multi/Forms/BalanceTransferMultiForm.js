@@ -1,7 +1,7 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -34,6 +34,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
   const { platformLabels } = useContext(ControlContext)
   const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const [filteredContacts, setFilteredContacts] = useState({})
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BalanceTransferMultiAccount,
@@ -178,6 +179,28 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
     if (formik.values.header.dtId && !recordId) getDTD(formik?.values?.header?.dtId)
   }, [formik.values.header.dtId])
 
+  async function fillContactStore(rowId, accountId) {
+    if (!rowId) return
+
+    if (!accountId) {
+      setFilteredContacts(prev => ({
+        ...prev,
+        [rowId]: []
+      }))
+      return
+    }
+
+    const res = await getRequest({
+      extension: FinancialRepository.Contact.qry,
+      parameters: `_accountId=${accountId}`
+    })
+
+    setFilteredContacts(prev => ({
+      ...prev,
+      [rowId]: res?.list || []
+    }))
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -198,6 +221,14 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ]
+      },
+      onChange: async ({ row: { update, newRow } }) => {
+        await fillContactStore(newRow?.id, newRow?.accountId)
+
+        update({
+          contactId: null,
+          contactName: ''
+        })
       }
     },
     {
@@ -228,14 +259,19 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       label: labels.contact,
       name: 'contactId',
       props: {
-        endpointId: formik.values?.header?.accountId && FinancialRepository.Contact.qry,
-        parameters: formik.values?.header?.accountId && `_accountId=${formik.values?.header?.accountId}`,
+        store: [],
         valueField: 'recordId',
         displayField: 'name',
         mapping: [
           { from: 'name', to: 'contactName' },
           { from: 'recordId', to: 'contactId' }
         ]
+      },
+      propsReducer({ row, props }) {
+        return {
+          ...props,
+          store: filteredContacts[row?.id] || []
+        }
       }
     },
     {
@@ -269,6 +305,10 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
             id: index + 1
           }))
         : formik.values.rows
+    
+    await Promise.all(
+      modifiedList.map(row => fillContactStore(row.id, row.accountId))
+    )
 
     formik.setValues({
       recordId: res?.record?.header?.recordId,
@@ -442,21 +482,23 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={formik.values?.header?.accountId && FinancialRepository.Contact.qry}
-                parameters={formik.values?.header?.accountId && `_accountId=${formik.values?.header?.accountId}`}
-                name='header.contactId'
-                readOnly={isPosted}
-                label={labels.contact}
+                endpointId={SystemRepository.Currency.qry}
+                name='header.currencyId'
+                label={labels.currency}
                 valueField='recordId'
-                displayField={'name'}
+                readOnly={editMode}
+                required
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('header.contactId', newValue?.recordId || null)}
-                error={formik.touched.header?.contactId && Boolean(formik.errors.header?.contactId)}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.currencyId', newValue?.recordId || null)
+                }}
+                error={formik?.touched?.header?.currencyId && Boolean(formik?.errors?.header?.currencyId)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -498,23 +540,21 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
-                name='header.currencyId'
-                label={labels.currency}
+                endpointId={formik.values?.header?.accountId && FinancialRepository.Contact.qry}
+                parameters={formik.values?.header?.accountId && `_accountId=${formik.values?.header?.accountId}`}
+                name='header.contactId'
+                readOnly={isPosted}
+                label={labels.contact}
                 valueField='recordId'
-                readOnly={editMode}
-                required
-                displayField={['reference', 'name']}
+                displayField={'name'}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('header.currencyId', newValue?.recordId || null)
-                }}
-                error={formik?.touched?.header?.currencyId && Boolean(formik?.errors?.header?.currencyId)}
+                onChange={(_, newValue) => formik.setFieldValue('header.contactId', newValue?.recordId || null)}
+                error={formik.touched.header?.contactId && Boolean(formik.errors.header?.contactId)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -561,6 +601,11 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
             allowDelete={!isPosted}
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'rows').length > 0}
             onValidationRequired={onValidationRequired}
+            onSelectionChange={(row, _, field) => {
+              if (field === 'contactId') {
+                fillContactStore(row?.id, row?.accountId)
+              }
+            }}
           />
         </Grow>
         <Fixed>
