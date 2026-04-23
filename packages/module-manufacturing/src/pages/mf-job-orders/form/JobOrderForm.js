@@ -445,6 +445,11 @@ export default function JobOrderForm({
       extension: InventoryRepository.ItemProduction.get,
       parameters: `_recordId=${values?.recordId}`
     })
+
+    const ItemPhysProp = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${values?.recordId}`
+    })
     
     if (imageSource == 2) updateParent(values?.recordId, imageSource)
     else if (imageSource == 1) updateParent(ItemProduction?.record?.designId, imageSource)
@@ -499,8 +504,10 @@ export default function JobOrderForm({
       updatedValues.rubberRef = ''
       updatedValues.classId = null
       updatedValues.standardId = null
-      updatedValues.stdWeight = null
-      updatedValues.expectedQty = null
+      updatedValues.stdWeight = ItemPhysProp?.record?.weight
+      updatedValues.expectedQty = !ItemPhysProp?.record?.weight || !formik.values.expectedPcs
+          ? 0
+          : formik.values.expectedPcs * ItemPhysProp?.record?.weight
     }
 
     formik.setValues(updatedValues)
