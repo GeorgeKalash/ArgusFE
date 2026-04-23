@@ -101,7 +101,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         laborId: yup.number().required(),
         pcs: yup.number().min(0.01).nullable(),
         avgWeight: yup.number().min(0.01).nullable(),
-        producedWeight: yup.number().min(0.01).required()
+        producedWeight: yup.number().min(0.01).required(),
+        workCenterName: yup.string().required(),
       }),
       rows: yup
         .array()
@@ -477,6 +478,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 label={labels.workCenter}
                 value={formik?.values?.header?.workCenterName}
                 readOnly
+                required
+                error={formik?.touched?.header?.workCenterName && Boolean(formik?.errors?.header?.workCenterName)}
               />
             </Grid>
             <Grid item xs={4}>

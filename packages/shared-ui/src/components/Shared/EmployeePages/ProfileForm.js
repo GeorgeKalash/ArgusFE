@@ -21,11 +21,14 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import CustomRadioButtonGroup from '@argus/shared-ui/src/components/Inputs/CustomRadioButtonGroup'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import TerminationForm from './TerminationForm'
 
-const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData, activeStatus }) => {
+const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData, mainWindow, activeStatus }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
+  const { stack } = useWindow()
 
   const invalidate = useInvalidate({
     endpointId: EmployeeRepository.EmployeeChart.page
@@ -139,11 +142,32 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
 
   const editMode = !!formik?.values?.recordId
 
+  async function onTermination () {
+   stack({
+    Component: TerminationForm,
+    props: {
+      labels,
+      employeeId: recordId,
+      maxAccess,
+      mainWindow
+    },
+    width: 600,
+    height: 450,
+    title: labels.termination
+    })
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'Termination',
+      condition: true,
+      onClick: onTermination,
       disabled: !editMode
     }
   ]

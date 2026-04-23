@@ -136,7 +136,9 @@ export const EmployeeRepository = {
     del: service + 'delSD'
   },
   TerminationEmployee: {
-    get: service + 'getTE'
+    get: service + 'getTE',
+    set: service + 'setTE',
+    del: service + 'delTE'
   },
   EmployementHistory: {
     qry: service + 'qryEH',

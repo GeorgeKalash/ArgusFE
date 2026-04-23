@@ -97,10 +97,15 @@ export const PayrollRepository = {
     qry: service + 'qryES'
   },
   FiscalYear: {
-    qry: service + 'qryYE'
+    page: service + 'pageYE',
+    qry: service + 'qryYE',
+    set: service + 'setYE',
+    del: service + 'delYE'
   },
   Period: {
-    qry: service + 'qryPE'
+    qry: service + 'qryPE',
+    get: service + 'getPE',
+    set: service + 'setPE'
   },
   Formula: {
     qry: service + 'qryFLA'

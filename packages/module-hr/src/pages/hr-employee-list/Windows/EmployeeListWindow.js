@@ -15,7 +15,7 @@ import HiringTab from '@argus/shared-ui/src/components/Shared/EmployeePages/Hiri
 import SkillsTab from '@argus/shared-ui/src/components/Shared/EmployeePages/SkillsTab'
 import UserDefinedTab from '@argus/shared-ui/src/components/Shared/EmployeePages/UserDefinedTab'
 
-const EmployeeListWindow = ({ recordId, labels, maxAccess, employeeStatus }) => {
+const EmployeeListWindow = ({ recordId, labels, maxAccess, employeeStatus, window}) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId: recordId || null, hireDate: null })
   const { getRequest } = useContext(RequestsContext)
@@ -101,6 +101,7 @@ const EmployeeListWindow = ({ recordId, labels, maxAccess, employeeStatus }) => 
             getData={getData}
             maxAccess={maxAccess}
             imageUploadRef={imageUploadRef}
+            mainWindow={window}
             activeStatus={activeStatus}
           />
         </CustomTabPanel>
