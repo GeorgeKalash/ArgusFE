@@ -153,7 +153,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     const formattedDepDate = formatDateFromApi(res.record.header.departureTime)
     const formattedArrDate = formatDateFromApi(res.record.header.arrivalTime)
 
-     let tripOrders = await Promise.all(
+     let tripOrders = res.record?.tripOrders ? await Promise.all(
       (res.record?.tripOrders || []).map((item, index) => {
         return {
           ...item,
@@ -161,7 +161,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           soDate: formatDateFromApi(item.soDate)
         }
       })
-    )
+    ) : formik.initialValues.tripOrders
 
     formik.setValues({
       recordId: res.record.header.recordId,
