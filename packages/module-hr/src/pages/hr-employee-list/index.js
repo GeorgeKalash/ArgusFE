@@ -179,6 +179,7 @@ const EmployeeList = () => {
           deleteConfirmationType={'strict'}
           pageSize={50}
           maxAccess={access}
+          actionCondition={(row, type) => { return type === 'delete' ? row?.parent?.activeStatus == 1 : true }}
         />
       </Grow>
     </VertLayout>
