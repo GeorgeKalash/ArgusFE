@@ -24,7 +24,7 @@ import CustomRadioButtonGroup from '@argus/shared-ui/src/components/Inputs/Custo
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import TerminationForm from './TerminationForm'
 
-const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData }) => {
+const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData, mainWindow }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -148,7 +148,8 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
     props: {
       labels,
       employeeId: recordId,
-      maxAccess
+      maxAccess,
+      mainWindow
     },
     width: 600,
     height: 450,

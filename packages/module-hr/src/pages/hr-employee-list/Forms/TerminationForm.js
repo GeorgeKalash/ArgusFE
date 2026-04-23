@@ -14,7 +14,7 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
-export default function TerminationForm ({ employeeId, labels, maxAccess, window }) {
+export default function TerminationForm ({ employeeId, labels, maxAccess, mainWindow, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -44,6 +44,7 @@ export default function TerminationForm ({ employeeId, labels, maxAccess, window
 
       toast.success(platformLabels.Saved)
       window.close()
+      mainWindow.close()
     }
   })
 
@@ -72,6 +73,7 @@ export default function TerminationForm ({ employeeId, labels, maxAccess, window
     })
     toast.success(platformLabels.Saved)
     window.close()
+    mainWindow.close()
   }
 
   const actions = [

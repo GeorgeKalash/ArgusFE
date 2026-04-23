@@ -15,7 +15,7 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { formatDateMDY } from '@argus/shared-domain/src/lib/date-helper'
 
-const EmployeeListWindow = ({ recordId, labels, maxAccess }) => {
+const EmployeeListWindow = ({ recordId, labels, maxAccess, window }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId: recordId || null, hireDate: null })
   const { getRequest } = useContext(RequestsContext)
@@ -101,6 +101,7 @@ const EmployeeListWindow = ({ recordId, labels, maxAccess }) => {
             getData={getData}
             maxAccess={maxAccess}
             imageUploadRef={imageUploadRef}
+            mainWindow={window}
           />
         </CustomTabPanel>
 
