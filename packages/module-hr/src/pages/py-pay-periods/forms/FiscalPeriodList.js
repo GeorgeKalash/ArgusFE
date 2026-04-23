@@ -19,6 +19,8 @@ export default function FiscalPeriodList ({fiscalYear, labels, maxAccess}) {
   const { stack } = useWindow()
 
   async function fetchGridData() {
+    if (!periodType) return
+    
     const response = await getRequest({
       extension: PayrollRepository.Period.qry,
       parameters: `_year=${fiscalYear}&_salaryType=${periodType}&_status=0`
@@ -30,7 +32,7 @@ export default function FiscalPeriodList ({fiscalYear, labels, maxAccess}) {
   const columns = [
     {
       field: 'periodId',
-      headerName: ' ',
+      headerName: '',
       flex: 1
     },
     {
@@ -47,7 +49,7 @@ export default function FiscalPeriodList ({fiscalYear, labels, maxAccess}) {
     },
     {
       field: 'statusName',
-      headerName: ' ',
+      headerName: '',
       flex: 2
     }
   ]
@@ -96,7 +98,7 @@ export default function FiscalPeriodList ({fiscalYear, labels, maxAccess}) {
         <Table
           name='year'
           columns={columns}
-          gridData={{list: data}}
+          gridData={{ list: data }}
           rowId={['recordId']}
           onEdit={edit}
           pagination={false}

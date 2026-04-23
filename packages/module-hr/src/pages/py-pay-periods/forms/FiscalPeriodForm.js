@@ -28,8 +28,8 @@ export default function FiscalPeriodForm ({ labels, periodInfo, maxAccess, refet
     },
     maxAccess,
     validationSchema: yup.object({
-      startDate: yup.string().required(),
-      endDate: yup.string().required()
+      startDate: yup.date().required(),
+      endDate: yup.date().required()
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -54,8 +54,8 @@ export default function FiscalPeriodForm ({ labels, periodInfo, maxAccess, refet
         parameters: `_year=${fiscalYear}&_salaryType=${periodType}&_periodId=${periodId}`
       })
       formik.setValues({...res.record,
-        startDate: res?.record?.startDate ? formatDateFromApi(res?.record?.startDate) : null,
-        endDate: res?.record?.endDate ? formatDateFromApi(res?.record?.endDate) : null
+        startDate: formatDateFromApi(res?.record?.startDate),
+        endDate: formatDateFromApi(res?.record?.endDate) 
       })
     })()
   }, [])

@@ -7,16 +7,21 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import Form from '@argus/shared-ui/src/components/Shared/Form'
+import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import toast from 'react-hot-toast'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import { useError } from '@argus/shared-providers/src/providers/error'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 export default function PayPeriodForm ({ labels, maxAccess, window }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack: stackError } = useError()
+  const MIN_YEAR = 1900
+  const MAX_YEAR = 2100
 
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.FiscalYear.page
@@ -31,8 +36,8 @@ export default function PayPeriodForm ({ labels, maxAccess, window }) {
     maxAccess,
     validationSchema: yup.object({
       fiscalYear: yup.number().required(),
-      startDate: yup.string().required(),
-      endDate: yup.string().required()
+      startDate: yup.date().required(),
+      endDate: yup.date().required()
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -49,7 +54,7 @@ export default function PayPeriodForm ({ labels, maxAccess, window }) {
   })
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+    <FormShell resourceId={ResourceIds.PayPeriod} form={formik} maxAccess={maxAccess} isInfo={false} editMode={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -66,16 +71,25 @@ export default function PayPeriodForm ({ labels, maxAccess, window }) {
                 thousandSeparator={false}
                 onChange={formik.handleChange}
                 onBlur={(e) => {
-                  const year = e.target.value
-                  if (!year) return
+                  const year = Number(e.target.value)
+                  const isInvalidYear =  year < MIN_YEAR || year > MAX_YEAR
 
-                  formik.setValues({
-                    ...formik.values,
-                    startDate: new Date(year, 0, 1, 1, 1, 1, 1),
-                    endDate: new Date(year, 11, 31, 1, 1, 1, 1)
-                  })
+                  if (isInvalidYear) {
+                    formik.setFieldValue('fiscalYear', null)
+                    stackError({
+                      message: labels.invalidDate
+                    })
+                  }
+
+                  formik.setFieldValue('startDate', !isInvalidYear ? new Date(year, 0, 1, 1, 1, 1, 1) : null)
+                  formik.setFieldValue('endDate', !isInvalidYear ? new Date(year, 11, 31, 1, 1, 1, 1) : null)
                 }}
-                onClear={() => formik.setFieldValue('fiscalYear', null)}
+                onClear={() => { 
+                  formik.setFieldValue('fiscalYear', null)
+                  formik.setFieldValue('startDate', null)
+                  formik.setFieldValue('endDate', null)
+                 }
+                }
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
             </Grid>
@@ -108,6 +122,6 @@ export default function PayPeriodForm ({ labels, maxAccess, window }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </Form>
+    </FormShell>
   )
 }
