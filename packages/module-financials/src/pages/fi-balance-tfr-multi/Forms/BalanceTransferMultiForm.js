@@ -264,8 +264,14 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
         displayField: 'name',
         mapping: [
           { from: 'name', to: 'contactName' },
-          { from: 'recordId', to: 'contactId' }
-        ]
+          { from: 'recordId', to: 'contactId' },
+          { from: 'reference', to: 'contactRef' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 2
       },
       propsReducer({ row, props }) {
         return {
