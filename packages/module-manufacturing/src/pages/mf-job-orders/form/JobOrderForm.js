@@ -433,23 +433,6 @@ export default function JobOrderForm({
         itemId: null,
         itemName: null,
         sku: null,
-        itemsPL: null,
-        stdWeight: null,
-        itemCategoryId: null,
-        routingId: null,
-        routingName: '',
-        routingRef: '',
-        classId: null,
-        standardId: null,
-        lineId: null,
-        designId: null,
-        designRef: '',
-        designName: '',
-        workCenterId: null,
-        wcRef: '',
-        wcName: '',
-        expectedQty: null,
-        expectedPcs: null,
         itemFromDesign: false
       })
 
