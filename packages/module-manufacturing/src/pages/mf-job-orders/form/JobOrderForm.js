@@ -430,14 +430,16 @@ export default function JobOrderForm({
   async function fillItemInfo(values) {
     if (imageSource == 2) updateParent(values.recordId, imageSource)
     if (!values?.recordId) {
-      formik.setFieldValue('itemId', null)
-      formik.setFieldValue('itemName', null)
-      formik.setFieldValue('sku', null)
-      formik.setFieldValue('itemsPL', null)
-      formik.setFieldValue('stdWeight', null)
-      formik.setFieldValue('itemCategoryId', null)
-      formik.setFieldValue('itemFromDesign', false)
-
+      formik.setValues({
+        ...formik.values,
+        itemId: null,
+        itemName: null,
+        sku: null,
+        itemsPL: null,
+        stdWeight: null,
+        itemCategoryId: null,
+        itemFromDesign: false
+      })
       return
     }
 
@@ -450,55 +452,101 @@ export default function JobOrderForm({
       extension: InventoryRepository.ItemProduction.get,
       parameters: `_recordId=${values?.recordId}`
     })
-    formik.setFieldValue('itemId', values?.recordId)
-    formik.setFieldValue('itemName', values?.name)
-    formik.setFieldValue('sku', values?.sku)
-    formik.setFieldValue('stdWeight', ItemPhysProp?.record?.weight)
-    formik.setFieldValue(
-      'expectedQty',
-      !ItemPhysProp?.record?.weight || !formik.values.expectedPcs
-        ? 0
-        : formik.values.expectedPcs * ItemPhysProp?.record?.weight
-    )
-    formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
-    formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
-    formik.setFieldValue('itemCategoryId', values?.categoryId)
+
+    const updatedValues = {
+      ...formik.values,
+      designRef: ItemProduction?.record?.designRef || '',
+      designName: ItemProduction?.record?.designName || '',
+      designId: ItemProduction?.record?.designId || null,
+      classId: ItemProduction?.record?.classId || null,
+      standardId: ItemProduction?.record?.standardId || null,
+      itemId: values?.recordId,
+      itemName: values?.name,
+      sku: values?.sku,
+      stdWeight: ItemPhysProp?.record?.weight,
+      expectedQty:
+        !ItemPhysProp?.record?.weight || !formik.values.expectedPcs
+          ? 0
+          : formik.values.expectedPcs * ItemPhysProp?.record?.weight,
+      itemsPL: ItemProduction?.record?.lineId,
+      lineId: ItemProduction?.record?.lineId,
+      itemCategoryId: values?.categoryId
+    }
+
+    if (!isReleased) {
+      const routing = await getRouting(ItemProduction?.record?.routingId)
+
+      if (routing?.record?.isInactive) {
+        updatedValues.routingId = null
+        updatedValues.routingRef = null
+        updatedValues.routingName = null
+      } else {
+        updatedValues.routingId = ItemProduction?.record?.routingId || null
+        updatedValues.routingRef = ItemProduction?.record?.routingRef || ''
+        updatedValues.routingName = ItemProduction?.record?.routingName || ''
+      }
+    }
+    if (ItemProduction?.record?.designId) {
+      const design = await getRequest({
+        extension: ManufacturingRepository.Design.get,
+        parameters: `_recordId=${ItemProduction?.record?.designId}`
+      })
+
+      updatedValues.threeDDId = design?.record?.threeDDId || null
+      updatedValues.threeDDRef = design?.record?.threeDDRef || ''
+      updatedValues.rubberId = design?.record?.rubberId || null
+      updatedValues.rubberRef = design?.record?.rubberRef || ''
+    } else {
+      updatedValues.threeDDId = null
+      updatedValues.threeDDRef = ''
+      updatedValues.rubberId = null
+      updatedValues.rubberRef = ''
+    }
+
+    formik.setValues(updatedValues)
   }
   async function fillDesignInfo(values) {
-    if (imageSource == 1) updateParent(values.recordId, imageSource)
-    else if (imageSource == 2) updateParent(values.itemId, imageSource)
-    formik.setFieldValue('designId', values?.recordId || null)
-    formik.setFieldValue('designRef', values?.reference || '')
-    formik.setFieldValue('designName', values?.name || '')
-    formik.setFieldValue('stdWeight', values?.stdWeight)
-    formik.setFieldValue(
-      'expectedQty',
-      !values?.stdWeight || !formik.values.expectedPcs ? 0 : formik.values.expectedPcs * values?.stdWeight
-    )
+    if (imageSource == 1) updateParent(values?.recordId, imageSource)
+    else if (imageSource == 2) updateParent(values?.itemId, imageSource)
+
+    const updatedValues = {
+      ...formik.values,
+      designId: values?.recordId || null,
+      designRef: values?.reference || '',
+      designName: values?.name || '',
+      stdWeight: values?.stdWeight,
+      expectedQty:
+        !values?.stdWeight || !formik.values.expectedPcs
+          ? 0
+          : formik.values.expectedPcs * values?.stdWeight,
+      lineId: values?.lineId || null,
+      designPL: values?.lineId || null,
+      classId: values?.classId || null,
+      standardId: values?.standardId || null,
+      itemCategoryId: values?.itemCategoryId || null,
+      threeDDId: values?.threeDDId || null,
+      threeDDRef: values?.threeDDRef || '',
+      rubberId: values?.rubberId || null,
+      rubberRef: values?.rubberRef || '',
+      itemId: values?.itemId || null,
+      itemName: values?.itemName || '',
+      sku: values?.sku || '',
+    }
+
     if (!isReleased) {
       const routing = await getRouting(values?.routingId)
       if (routing?.record?.isInactive) {
-        formik.setFieldValue('routingId', null)
-        formik.setFieldValue('routingRef', null)
-        formik.setFieldValue('routingName', null)
+        updatedValues.routingId = null
+        updatedValues.routingRef = null
+        updatedValues.routingName = null
       } else {
-        formik.setFieldValue('routingId', values?.routingId || null)
-        formik.setFieldValue('routingRef', values?.routingRef)
-        formik.setFieldValue('routingName', values?.routingName)
+        updatedValues.routingId = values?.routingId || null
+        updatedValues.routingRef = values?.routingRef
+        updatedValues.routingName = values?.routingName
       }
     }
-    formik.setFieldValue('lineId', values?.lineId)
-    formik.setFieldValue('designPL', values?.lineId)
-    formik.setFieldValue('classId', values?.classId)
-    formik.setFieldValue('standardId', values?.standardId)
-    formik.setFieldValue('itemCategoryId', values?.itemCategoryId || null)
-    formik.setFieldValue('threeDDId', values?.threeDDId)
-    formik.setFieldValue('threeDDRef', values?.threeDDRef)
-    formik.setFieldValue('rubberId', values?.rubberId)
-    formik.setFieldValue('rubberRef', values?.rubberRef)
-    formik.setFieldValue('itemId', values?.itemId)
-    formik.setFieldValue('itemName', values?.itemName)
-    formik.setFieldValue('sku', values?.sku)
+
+    formik.setValues(updatedValues)
   }
   async function fillBillingInfo(values) {
     if (!values?.recordId) return

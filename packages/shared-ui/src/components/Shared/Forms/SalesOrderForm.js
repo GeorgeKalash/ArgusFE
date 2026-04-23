@@ -792,10 +792,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       key: 'Invoice',
       condition: true,
       onClick: toInvoice,
-      disabled: !(
-        isReleased ||
-        (formik.values.deliveryStatus === 1 && formik.values.status !== 3 && isClosed)
-      )
+      disabled: !isReleased
     },
     {
       key: 'generateProdOrder',
