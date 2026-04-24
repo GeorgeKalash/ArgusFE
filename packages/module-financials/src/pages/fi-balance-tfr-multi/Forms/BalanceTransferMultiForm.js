@@ -92,7 +92,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
         accountId: yup.string().required(),
         currencyId: yup.number().required(),
         date: yup.date().required(),
-        amount: yup.number().required()
+        amount: yup.number().required(),
+        dbcr: yup.string().required()
       }),
       rows: yup
         .array()
@@ -574,6 +575,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 label={labels.dbcr}
                 valueField='key'
                 displayField='value'
+                required
                 readOnly={isPosted}
                 values={formik.values.header}
                 maxAccess={maxAccess}
