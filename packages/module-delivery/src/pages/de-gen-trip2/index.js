@@ -752,7 +752,7 @@ const GenerateOutboundTransportation2 = () => {
           </Grid>
         </Grow>
         <Fixed>
-          <Grid container spacing={2} p={2} alignItems='flex-end'>
+          <Grid container spacing={2} p={2}>
             <Grid item xs={0.65}>
               <CustomButton
                 onClick={() => resetForm()}
