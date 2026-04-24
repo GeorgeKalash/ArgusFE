@@ -13,7 +13,7 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import SkillsForm from './SkillsForm'
 
-const SkillsTab = ({ labels, maxAccess, store, activeStatus }) => {
+const SkillsTab = ({ labels, maxAccess, store, isActive }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -100,7 +100,7 @@ const SkillsTab = ({ labels, maxAccess, store, activeStatus }) => {
         maxAccess,
         recordId: id,
         employeeId: recordId,
-        activeStatus
+        isActive
       },
       width: 600,
       height: 500,
@@ -111,7 +111,7 @@ const SkillsTab = ({ labels, maxAccess, store, activeStatus }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} />
+        <GridToolbar onAdd={add} disableAdd={!isActive} maxAccess={maxAccess} />
       </Fixed>
       <Grow>
         <Table
@@ -120,7 +120,7 @@ const SkillsTab = ({ labels, maxAccess, store, activeStatus }) => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDelete={del}
+          onDelete={isActive ? del : null}
           pageSize={50}
           pagination={false}
           refetch={refetch}

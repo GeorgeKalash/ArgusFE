@@ -15,7 +15,7 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import EmploymentHistory from './EmploymentHistory'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 
-const JobTab = ({ labels, maxAccess, store, activeStatus }) => {
+const JobTab = ({ labels, maxAccess, store, isActive }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -109,7 +109,7 @@ const JobTab = ({ labels, maxAccess, store, activeStatus }) => {
         maxAccess,
         employeeId: recordId,
         recordId: obj?.recordId,
-        activeStatus
+        isActive
       },
       width: 500,
       height: 400,
@@ -127,7 +127,7 @@ const JobTab = ({ labels, maxAccess, store, activeStatus }) => {
       <Fixed>
         <Grid container xs={12}>
           <Grid item xs={1.3}>
-            <GridToolbar onAdd={openForm} maxAccess={maxAccess} />
+            <GridToolbar onAdd={openForm} disableAdd={!isActive} maxAccess={maxAccess} />
           </Grid>
           <Grid item xs={3} paddingTop={1}>
             <CustomTextField
@@ -154,13 +154,7 @@ const JobTab = ({ labels, maxAccess, store, activeStatus }) => {
           pagination={false}
           refetch={refetch}
           maxAccess={maxAccess}
-          actionCondition={(row, actionType) => {
-            if (actionType === 'delete' || actionType === 'edit') {
-              return row.activeStatus == 1
-            }
-
-            return true
-          }}
+          actionCondition={(row, actionType) => (actionType === 'delete') ? row.isActive : true }
         />
       </Grow>
 

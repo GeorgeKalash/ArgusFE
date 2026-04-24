@@ -59,7 +59,7 @@ export default function EmployeeMissingDetails () {
     labels,
     access
   } = useResourceQuery({
-    datasetId: ResourceIds.EmployeePenalties
+    datasetId: ResourceIds.EmployeeMissingDetails
   })
 
   const columns = [
@@ -91,7 +91,7 @@ export default function EmployeeMissingDetails () {
       },
       height: 680,
       width: 1200,
-      title: labels.employelist
+      title: labels.employeeList
     })
   }
 
@@ -110,12 +110,11 @@ export default function EmployeeMissingDetails () {
                     datasetId={DataSets.EMPLOYEE_STATUS}
                     name='status'
                     label={labels.status}
-                    required
                     valueField='key'
                     displayField='value'
                     value={status}
-                    onClear={() => setStatus('0')}
-                    onChange={(_, newValue) => setStatus(newValue?.key || '0') }
+                    onClear={() => setStatus('2')}
+                    onChange={(_, newValue) => setStatus(newValue?.key || '2') }
                 />
             </Grid>
           }
@@ -125,8 +124,8 @@ export default function EmployeeMissingDetails () {
         <Table
           name='table'
           columns={columns}
-          gridData={ {list: data }}
-          rowId={['recordId']}
+          gridData={{ list: data }}
+          rowId={['fieldId']}
           onEdit={edit}
           pageSize={50}
           paginationType='client'

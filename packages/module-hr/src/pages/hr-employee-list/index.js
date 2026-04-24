@@ -10,8 +10,8 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import EmployeeListWindow from './Windows/EmployeeListWindow'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
+import EmployeeListWindow from '@argus/shared-ui/src/components/Shared/EmployeeListWindow'
 
 const EmployeeList = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

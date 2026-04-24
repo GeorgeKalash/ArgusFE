@@ -15,7 +15,7 @@ import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomD
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-const UserDefinedTab = ({ maxAccess, store, activeStatus }) => {
+const UserDefinedTab = ({ maxAccess, store, isActive }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -100,7 +100,7 @@ const UserDefinedTab = ({ maxAccess, store, activeStatus }) => {
             value={value || ''}
             maxAccess={maxAccess}
             onChange={formik.handleChange}
-            readOnly={!activeStatus}
+            readOnly={!isActive}
             onClear={() => formik.setFieldValue(String(fieldId), '')}
           />
         )
@@ -113,7 +113,7 @@ const UserDefinedTab = ({ maxAccess, store, activeStatus }) => {
             label={field.name}
             value={value || ''}
             maxAccess={maxAccess}
-            readOnly={!activeStatus}
+            readOnly={!isActive}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue(String(fieldId), '')}
           />
@@ -126,7 +126,7 @@ const UserDefinedTab = ({ maxAccess, store, activeStatus }) => {
             name={String(fieldId)}
             label={field.name}
             maxAccess={maxAccess}
-            readOnly={!activeStatus}
+            readOnly={!isActive}
             value={value ? new Date(value) : null}
             onChange={(_, newValue) => formik.setFieldValue(String(fieldId), newValue || '')}
             onClear={() => formik.setFieldValue(String(fieldId), '')}
@@ -139,7 +139,7 @@ const UserDefinedTab = ({ maxAccess, store, activeStatus }) => {
             name={String(fieldId)}
             label={field.name}
             maxAccess={maxAccess}
-            readOnly={!activeStatus}
+            readOnly={!isActive}
             value={value ? new Date(value) : null}
             onChange={(_, newValue) => formik.setFieldValue(String(fieldId), newValue || '')}
             onClear={() => formik.setFieldValue(String(fieldId), '')}
@@ -153,7 +153,7 @@ const UserDefinedTab = ({ maxAccess, store, activeStatus }) => {
             name={String(fieldId)}
             label={field.name}
             checked={value === true || value === 'true'}
-            readOnly={!activeStatus}
+            readOnly={!isActive}
             onChange={event => formik.setFieldValue(String(fieldId), event.target.checked)}
             maxAccess={maxAccess}
           />
@@ -165,7 +165,7 @@ const UserDefinedTab = ({ maxAccess, store, activeStatus }) => {
   }
 
   return (
-    <Form onSave={formik.handleSubmit} disabledSubmit={!activeStatus} maxAccess={maxAccess} editMode={editMode}>
+    <Form onSave={formik.handleSubmit} disabledSubmit={!isActive} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

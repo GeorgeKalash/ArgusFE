@@ -20,7 +20,7 @@ import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollR
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
+const HiringTab = ({ labels, maxAccess, store, isActive }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId, hireDate } = store
@@ -110,7 +110,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
   }, [hireDate])
 
   return (
-    <Form onSave={formik.handleSubmit} disabledSubmit={!activeStatus} maxAccess={maxAccess} editMode={editMode}>
+    <Form onSave={formik.handleSubmit} disabledSubmit={!isActive} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -125,7 +125,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     displayField='name'
                     values={formik.values}
                     maxAccess={maxAccess}
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('npId', newValue?.recordId || null)
                     }}
@@ -141,7 +141,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     maxLength={9}
                     onChange={formik.handleChange}
                     allowNegative={false}
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     onBlur={e => {
                       const value = e.target.value
                       formik.setFieldValue('probationPeriod', value)
@@ -168,7 +168,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     label={labels.probationEndDate}
                     value={formik.values?.probationEndDate}
                     required
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     onChange={(e, newValue) => {
                       let start = null
                       let end = newValue ? new Date(newValue) : null
@@ -198,7 +198,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     label={labels.nextReviewDate}
                     value={formik.values?.nextReviewDate}
                     onChange={formik.setFieldValue}
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('nextReviewDate', '')}
                     error={formik.touched.nextReviewDate && Boolean(formik.errors.nextReviewDate)}
@@ -210,7 +210,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     label={labels.termEndDate}
                     value={formik.values?.termEndDate}
                     maxAccess={maxAccess}
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('termEndDate', '')}
                     error={formik.touched.termEndDate && Boolean(formik.errors.termEndDate)}
@@ -222,7 +222,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     label={labels.pyActiveDate}
                     value={formik.values?.pyActiveDate}
                     required
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     maxAccess={maxAccess}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('pyActiveDate', '')}
@@ -238,7 +238,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     maxAccess={maxAccess}
                     valueField='key'
                     displayField='value'
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('languageId', newValue?.key || null)
                     }}
@@ -252,7 +252,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     value={formik?.values?.recruitmentInfo}
                     maxLength='255'
                     maxAccess={maxAccess}
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('recruitmentInfo', '')}
                     error={formik.touched.recruitmentInfo && Boolean(formik.errors.recruitmentInfo)}
@@ -269,7 +269,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     value={formik.values.recruitmentCost}
                     maxAccess={maxAccess}
                     maxLength='10'
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('recruitmentCost', '')}
                     error={formik.touched.recruitmentCost && Boolean(formik.errors.recruitmentCost)}
@@ -282,7 +282,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     value={formik.values.pyReference}
                     maxAccess={maxAccess}
                     maxLength='10'
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('pyReference', '')}
                     error={formik.touched.pyReference && Boolean(formik.errors.pyReference)}
@@ -295,7 +295,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     value={formik.values.taReference}
                     maxAccess={maxAccess}
                     maxLength='10'
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('taReference', '')}
                     error={formik.touched.taReference && Boolean(formik.errors.taReference)}
@@ -308,7 +308,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     label={labels.ssBranch}
                     valueField='recordId'
                     displayField='name'
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(event, newValue) => {
@@ -324,7 +324,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     label={labels.sponsor}
                     valueField='recordId'
                     displayField='name'
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
@@ -340,7 +340,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     value={formik.values.otherRef}
                     maxAccess={maxAccess}
                     maxLength={15}
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('otherRef', '')}
                     error={formik.touched.otherRef && Boolean(formik.errors.otherRef)}
@@ -354,7 +354,7 @@ const HiringTab = ({ labels, maxAccess, store, activeStatus }) => {
                     values={formik.values}
                     valueField='recordId'
                     displayField='name'
-                    readOnly={!activeStatus}
+                    readOnly={!isActive}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('bsId', newValue?.recordId || null)
