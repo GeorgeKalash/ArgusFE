@@ -529,9 +529,23 @@ export default function ChatPage() {
         (c) => c.id !== chatId
       );
 
+    if (!updatedChats.length) {
+      const newChat = {
+        id: Date.now(),
+        title: "New Chat",
+        conversationId: null,
+        messages: []
+      };
+
+      setChats([newChat]);
+      setSelectedChatId(
+        newChat.id
+      );
+      return;
+    }
+
     setChats(updatedChats);
 
-    // if deleted chat was not selected
     if (
       selectedChatId !== chatId
     ) {
@@ -540,7 +554,6 @@ export default function ChatPage() {
 
     let nextChat = null;
 
-    // try next visible row
     if (
       deletedIndex >= 0 &&
       visibleChats[
@@ -558,7 +571,6 @@ export default function ChatPage() {
         );
     }
 
-    // else previous visible row
     if (
       !nextChat &&
       deletedIndex > 0
@@ -574,25 +586,14 @@ export default function ChatPage() {
         );
     }
 
-    // else first remaining chat
-    if (
-      !nextChat &&
-      updatedChats.length
-    ) {
+    if (!nextChat) {
       nextChat =
         updatedChats[0];
     }
 
-    // set selected
-    if (nextChat) {
-      setSelectedChatId(
-        nextChat.id
-      );
-    } else {
-      setSelectedChatId(
-        null
-      );
-    }
+    setSelectedChatId(
+      nextChat.id
+    );
   };
 
   const filteredChats =
@@ -697,19 +698,22 @@ export default function ChatPage() {
                 {chat.title}
               </div>
 
-              <button
-                onClick={() =>
-                  confirmDeleteChat(chat)
-                }
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  color: "#999"
-                }}
-              >
-                🗑
-              </button>
+              {chat.conversationId && (
+                <button
+                  onClick={() =>
+                    confirmDeleteChat(chat)
+                  }
+                  style={{
+                    border: "none",
+                    background:
+                      "transparent",
+                    cursor: "pointer",
+                    color: "#999"
+                  }}
+                >
+                  🗑
+                </button>
+              )}
             </div>
           ))}
         </div>
