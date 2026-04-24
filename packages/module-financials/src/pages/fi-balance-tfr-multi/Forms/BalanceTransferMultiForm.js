@@ -98,7 +98,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
         .array()
         .of(
           yup.object().shape({
-            accountRef: yup.string().required()
+            accountRef: yup.string().required(),
+            amount: yup.number().min(0.01).required()
           })
         )
         .required()
@@ -261,7 +262,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       props: {
         store: [],
         valueField: 'recordId',
-        displayField: 'name',
+        displayField: ['name', 'reference'],
         mapping: [
           { from: 'name', to: 'contactName' },
           { from: 'recordId', to: 'contactId' },
@@ -552,7 +553,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 readOnly={isPosted}
                 label={labels.contact}
                 valueField='recordId'
-                displayField={'name'}
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -607,11 +608,6 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
             allowDelete={!isPosted}
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'rows').length > 0}
             onValidationRequired={onValidationRequired}
-            onSelectionChange={(row, _, field) => {
-              if (field === 'contactId') {
-                fillContactStore(row?.id, row?.accountId)
-              }
-            }}
           />
         </Grow>
         <Fixed>
