@@ -290,8 +290,7 @@ const Navigation = props => {
     const truncatedTitle = truncateTitle(node.title, level)
 
     const icon =
-      image &&
-      require(`@argus/shared-ui/src/components/images/folderIcons/${image}`).default.src
+      image && `/images/folderIcons/${image}`
 
     return (
       <div key={node.id} style={{ paddingBottom: isRoot ? 5 : undefined }}>
@@ -366,8 +365,8 @@ const Navigation = props => {
                 <img
                   src={
                     !navCollapsed
-                      ? require('@argus/shared-ui/src/components/images/logos/ArgusNewLogo2.png').default.src
-                      : require('@argus/shared-ui/src/components/images/logos/WhiteA.png').default.src
+                      ? '/images/logos/ArgusNewLogo2.png'
+                      : '/images/logos/WhiteA.png'
                   }
                   alt='Argus'
                   className={styles['Argus-Icon']}

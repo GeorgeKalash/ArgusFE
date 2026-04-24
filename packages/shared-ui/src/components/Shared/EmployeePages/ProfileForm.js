@@ -149,7 +149,8 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
       labels,
       employeeId: recordId,
       maxAccess,
-      mainWindow
+      mainWindow,
+      onSuccess: invalidate
     },
     width: 600,
     height: 450,

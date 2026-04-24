@@ -84,7 +84,7 @@ const TaskList = ({ store, labels, access }) => {
               }
             >
               <Image
-                src={require('@argus/shared-ui/src/components/images/buttonsIcons/partGrid.png').default.src}
+                src='/images/buttonsIcons/partGrid.png'
                 width={18}
                 height={18}
                 alt='post.png'
@@ -118,7 +118,7 @@ const TaskList = ({ store, labels, access }) => {
               }
             >
               <Image
-                src={require('@argus/shared-ui/src/components/images/buttonsIcons/labor2Grid.png').default.src}
+                src='/images/buttonsIcons/labor2Grid.png'
                 width={18}
                 height={18}
                 alt='post.png'

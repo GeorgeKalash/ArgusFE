@@ -947,7 +947,7 @@ export default function RetailTransactionsForm({
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {
