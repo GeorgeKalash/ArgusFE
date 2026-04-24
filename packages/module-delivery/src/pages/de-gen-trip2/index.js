@@ -204,12 +204,6 @@ const GenerateOutboundTransportation2 = () => {
       headerName: labels.categVol,
       type: 'number',
       flex: 1
-    },
-    {
-      field: 'filteredCategoryPct',
-      headerName: labels.categPct,
-      type: 'number',
-      flex: 1
     }
   ]
 
@@ -458,7 +452,6 @@ const GenerateOutboundTransportation2 = () => {
         .filter(item => item.checked)
         .map(item => ({
           ...item,
-          filteredCategoryPct: item.filteredCategoryPct.toFixed(2),
           filteredCategoryVolme: item.filteredCategoryVolme.toFixed(2),
           orders: item.orders?.map(order => ({ ...order, checked: true }))
         }))
@@ -507,6 +500,22 @@ const GenerateOutboundTransportation2 = () => {
   }, [JSON.stringify(selectedSaleZones.list)])
 
   const balance = totalTrucksVolume - ordersVolume
+
+  const getSelectedZonesTotals = () => {
+    const totalFilteredCategoryVolume = (selectedSaleZones?.list || [])?.reduce((sum, zone) => {
+      return sum + (parseFloat(zone.filteredCategoryVolme) || 0)
+    }, 0)
+
+    const fullVolume = (selectedSaleZones?.list || []).reduce((sum, zone) => {
+      return sum + (parseFloat(zone.volume) || 0)
+    }, 0)
+
+    const totalPct = fullVolume ? ((totalFilteredCategoryVolume * 100) / fullVolume).toFixed(2) : 0
+
+    return { totalFilteredCategoryVolume, totalPct }
+  }
+
+  const { totalFilteredCategoryVolume, totalPct } = getSelectedZonesTotals()
 
   return (
     <Form onSave={formik.handleSubmit} isSaved={false} maxAccess={access} fullSize>
@@ -743,7 +752,7 @@ const GenerateOutboundTransportation2 = () => {
           </Grid>
         </Grow>
         <Fixed>
-          <Grid container spacing={2} p={2}>
+          <Grid container spacing={2} p={2} alignItems='flex-end'>
             <Grid item xs={0.65}>
               <CustomButton
                 onClick={() => resetForm()}
@@ -762,7 +771,27 @@ const GenerateOutboundTransportation2 = () => {
                 image={'import.png'}
               />
             </Grid>
-            <Grid item xs={8.75}></Grid>
+
+            <Grid item xs={1.5}>
+              <CustomNumberField
+                name='totalFilteredCategoryVolume'
+                label={labels.totalVolume}
+                value={totalFilteredCategoryVolume.toFixed(2)}
+                readOnly
+              />
+            </Grid>
+
+            <Grid item xs={1.5}>
+              <CustomNumberField
+                name='filteredCategoryPercentage'
+                label={labels.totalPct}
+                value={totalPct}
+                readOnly
+              />
+            </Grid>
+
+            <Grid item xs={5.75}></Grid>
+
             <Grid item xs={0.65}>
               <CustomButton
                 onClick={openForm}
