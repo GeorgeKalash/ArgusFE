@@ -505,12 +505,7 @@ const GenerateOutboundTransportation2 = () => {
     const totalFilteredCategoryVolume = (selectedSaleZones?.list || [])?.reduce((sum, zone) => {
       return sum + (parseFloat(zone.filteredCategoryVolme) || 0)
     }, 0)
-
-    const fullVolume = (selectedSaleZones?.list || []).reduce((sum, zone) => {
-      return sum + (parseFloat(zone.volume) || 0)
-    }, 0)
-
-    const totalPct = fullVolume ? ((totalFilteredCategoryVolume * 100) / fullVolume).toFixed(2) : 0
+    const totalPct = ordersVolume ? ((totalFilteredCategoryVolume * 100) / ordersVolume).toFixed(2) : 0
 
     return { totalFilteredCategoryVolume, totalPct }
   }
@@ -775,7 +770,7 @@ const GenerateOutboundTransportation2 = () => {
             <Grid item xs={1.5}>
               <CustomNumberField
                 name='totalFilteredCategoryVolume'
-                label={labels.totalVolume}
+                label={labels.totalCategVolume}
                 value={totalFilteredCategoryVolume.toFixed(2)}
                 readOnly
               />
@@ -784,7 +779,7 @@ const GenerateOutboundTransportation2 = () => {
             <Grid item xs={1.5}>
               <CustomNumberField
                 name='filteredCategoryPercentage'
-                label={labels.totalPct}
+                label={labels.totalCategVolPct}
                 value={totalPct}
                 readOnly
               />
