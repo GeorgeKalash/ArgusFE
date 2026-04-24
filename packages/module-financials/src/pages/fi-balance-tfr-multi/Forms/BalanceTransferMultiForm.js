@@ -228,7 +228,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
 
         update({
           contactId: null,
-          contactName: ''
+          contactName: '',
+          contactRef: '',
         })
       }
     },
@@ -527,6 +528,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                   formik.setFieldValue('header.accountRef', newValue?.reference || '')
                   formik.setFieldValue('header.accountName', newValue?.name || '')
                   formik.setFieldValue('header.fromGroup', newValue?.groupName || '')
+                  formik.setFieldValue('header.contactId', null)
+                  
                   formik.setFieldValue('header.accountId', newValue?.recordId || null)
                 }}
                 errorCheck={'header.accountId'}
