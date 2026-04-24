@@ -330,7 +330,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
+        imgSrc: '/images/TableIcons/imgSerials.png',
         hidden: false
       }
     } else {

@@ -3,7 +3,6 @@ import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
-import editIcon from '@argus/shared-ui/src/components/images/TableIcons/edit.png'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -12,7 +11,6 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { TrxType, accessMap } from '@argus/shared-domain/src/resources/AccessLevels'
-import deleteIcon from '@argus/shared-ui/src/components/images/TableIcons/delete.png'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from '../DeleteDialog'
 import StrictConfirmation from '../StrictConfirmation'
@@ -644,7 +642,7 @@ const Table = ({
     props?.setRowData(updatedVisibleRows)
   }
 
-  const EMPTY_PHOTO = require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+  const EMPTY_PHOTO = '/images/emptyPhoto.jpg'
   const imageRenderer =
     column =>
     ({ data }) => {
@@ -764,7 +762,7 @@ const Table = ({
                   }}
                   className={'actionIconButton'}
                 >
-                  <Image src={editIcon} alt='Edit' className={'actionIcon'} />
+                  <Image src={'/images/TableIcons/edit.png'} width={18} height={18} alt='Edit' className={'actionIcon'} />
                 </IconButton>
               )}
 
@@ -781,7 +779,7 @@ const Table = ({
                   color='error'
                   className={'actionIconButton'}
                 >
-                  <Image src={deleteIcon} alt={platformLabels.Delete} className={'actionIcon'} />
+                  <Image src={'/images/TableIcons/delete.png'} width={18} height={18} alt={platformLabels.Delete} className={'actionIcon'} />
                 </IconButton>
               )}
               {globalStatus &&
@@ -802,7 +800,7 @@ const Table = ({
                     color='error'
                     className={'actionIconButton'}
                   >
-                    <Image src={deleteIcon} alt={platformLabels.Delete} className={'actionIcon'} />
+                    <Image src={'/images/TableIcons/delete.png'} width={18} height={18} alt={platformLabels.Delete} className={'actionIcon'} />
                   </IconButton>
                 )}
             </Box>

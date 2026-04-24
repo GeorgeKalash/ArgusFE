@@ -11,7 +11,6 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
-import editTime from '@argus/shared-ui/src/components/images/TableIcons/editTime.png'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import OverrideForm from '@argus/shared-ui/src/components/Shared/Forms/OverrideForm'
 import TimeVariatrionForm from '@argus/shared-ui/src/components/Shared/Forms/TimeVariatrionForm'
@@ -141,7 +140,7 @@ export default function TimeVariation() {
             }}
           >
             {[20, 21, 41].includes(row?.data?.timeCode) && row?.data?.status != -1 && (
-              <Image src={editTime} alt={platformLabels.History} width={18} height={18} />
+              <Image src={'/images/TableIcons/editTime.png'} alt={platformLabels.History} width={18} height={18} />
             )}
           </IconButton>
         </Box>

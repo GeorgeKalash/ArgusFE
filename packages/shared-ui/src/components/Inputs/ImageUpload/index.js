@@ -15,7 +15,7 @@ import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimen
 import CustomButton from '../CustomButton'
 
 const EMPTY_PHOTO =
-  require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+  '/images/emptyPhoto.jpg'
 
 const css = `
 .ImageUpload_container {

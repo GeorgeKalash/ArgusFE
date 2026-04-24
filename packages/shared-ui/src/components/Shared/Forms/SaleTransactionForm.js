@@ -579,7 +579,7 @@ export default function SaleTransactionForm({
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
+        imgSrc: '/images/TableIcons/imgSerials.png',
         hidden: false
       }
     } else {
@@ -907,7 +907,7 @@ export default function SaleTransactionForm({
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {
@@ -954,7 +954,7 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'saTrx',
       props: {
-        imgSrc:  require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src,
+        imgSrc:  '/images/buttonsIcons/popup-black.png',
         onCondition: row => {
           return {
             disabled: !row.itemId
