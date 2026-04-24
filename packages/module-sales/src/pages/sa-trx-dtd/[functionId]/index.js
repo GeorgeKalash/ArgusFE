@@ -14,13 +14,12 @@ import DocumentTypeDefaultForm from './form/DocumentTypeDefaultForm'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
-const CAadjustment = () => {
+const SalesTrxDefaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
-
   const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
@@ -53,12 +52,7 @@ const CAadjustment = () => {
   })
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
-      return await getRequest({
-        extension: SaleRepository.DocumentTypeDefault.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const columns = [
@@ -127,10 +121,12 @@ const CAadjustment = () => {
     toast.success(platformLabels.Deleted)
   }
 
+  const reportName = functionId == SystemFunction.SalesReturn ? 'SADTD_2' : 'SADTD_1'
+  
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'SADTD'} filterBy={filterBy} />
+        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} reportName={reportName} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -151,4 +147,4 @@ const CAadjustment = () => {
   )
 }
 
-export default CAadjustment
+export default SalesTrxDefaults
