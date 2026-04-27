@@ -193,7 +193,6 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.name}
                     value={formik.values.name}
                     required
-                    readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
