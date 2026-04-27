@@ -1349,6 +1349,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
       mdValue: 0,
+      trackBy: itemInfo?.trackBy,
       taxId: effectiveTaxId,
       taxName: effectiveTaxName,
       taxDetails: null
