@@ -50,6 +50,9 @@ const SalesOrder = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -88,6 +91,9 @@ const SalesOrder = () => {
     {
       field: 'dsName',
       headerName: labels.deliveryStatus,
+      type: 'badge',
+      family: 'delivery',
+      valueField: 'deliveryStatus',
       flex: 1
     },
     {
@@ -98,6 +104,9 @@ const SalesOrder = () => {
     {
       field: 'wipName',
       headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     },
     {

@@ -27,6 +27,7 @@ import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import LinkCellRenderer from '@argus/shared-ui/src/components/Shared/Table/LinkCellRenderer'
+import { getStatusBadgeColor } from "@argus/shared-utils/src/utils/status-badge-colors";
 
 const Table = ({
   name,
@@ -152,6 +153,40 @@ const Table = ({
             ) : null
           }
         }
+      }
+      if (col.type === 'badge') {
+        return {
+          ...col,
+
+          valueGetter: ({ data }) => ({
+            label: data?.[col.field],
+            code: data?.[col.valueField]
+          }),
+
+          cellRenderer: ({ value }) => {
+            const colors = getStatusBadgeColor(col.family, value?.code);
+
+            return (
+              <span
+                style={{
+                  background: colors.bg,
+                  color: colors.text,
+                  border: `1px solid ${colors.border}`,
+                  padding: "3px 10px",
+                  borderRadius: "999px",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  display: "inline-block",
+                  whiteSpace: "nowrap"
+                }}
+              >
+                {value?.label}
+              </span>
+            );
+          },
+
+          sortable: !disableSorting
+        };
       }
 
       return {
