@@ -22,8 +22,8 @@ import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import ReactMarkdown from "react-markdown";
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from "@argus/shared-ui/src/components/Shared/DeleteDialog";
-
-
+import { ResourceIds } from "@argus/shared-domain/src/resources/ResourceIds";
+import { useResourceQuery } from "@argus/shared-hooks/src/hooks/resource";
 
 ChartJS.register(
   CategoryScale,
@@ -40,37 +40,36 @@ export default function ChatPage() {
   const { user } = useContext(AuthContext);
   const { stack } = useWindow()
 
-  const [chats, setChats] = useState([
-    {
-      id: 1,
-      conversationId: '',
-      title: "Welcome",
-      messages: [
-        {
-          sender: "ai",
-          type: "text",
-          text: "Hello 👋 How can I help you?"
-        }
-      ]
-    }
-  ]);
-
-  const [selectedChatId, setSelectedChatId] =
-    useState(1);
-
   const inputRef = useRef(null);
-
+  const messagesEndRef = useRef(null);
+  
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  const {
+    labels,
+  } = useResourceQuery({
+    datasetId: ResourceIds.AIChatbot,
+  })
+  
+  const newChat = {
+    id: Date.now(),
+    conversationId: "",
+    title: labels?.newChat || "New Chat",
+    messages: []
+    };
+    
+  const [chats, setChats] = useState([newChat]);
 
-  const messagesEndRef = useRef(null);
-
-  const selectedChat = chats.find(
-    (chat) => chat.id === selectedChatId
-  );
+  const [selectedChatId, setSelectedChatId] = useState(() => newChat.id);
+  
+  const selectedChat =
+    chats.find(
+      (chat) =>
+        chat.id === selectedChatId
+    ) || chats[0];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -79,32 +78,27 @@ export default function ChatPage() {
   }, [selectedChat]);
 
   const createNewChat = () => {
-    const currentChat = chats.find(
-      (chat) => chat.id === selectedChatId
+    const existingDraft =
+      chats.find(
+        (chat) =>
+          !chat.conversationId
+      );
+
+    if (existingDraft) {
+      setSelectedChatId(
+        existingDraft.id
+      );
+      return;
+    }
+
+    setChats((prev) => [
+      newChat,
+      ...prev
+    ]);
+
+    setSelectedChatId(
+      newChat.id
     );
-
-    const isEmptyChat =
-      currentChat &&
-      currentChat.messages.length === 1 &&
-      currentChat.messages[0].sender === "ai";
-
-    if (isEmptyChat) return;
-
-    const newChat = {
-      id: Date.now(),
-      conversationId: '',
-      title: "New Chat",
-      messages: [
-        {
-          sender: "ai",
-          type: "text",
-          text: "Hello 👋 How can I help you?"
-        }
-      ]
-    };
-
-    setChats((prev) => [newChat, ...prev]);
-    setSelectedChatId(newChat.id);
   };
 
   const sendMessage = () => {
@@ -141,7 +135,7 @@ export default function ChatPage() {
 
     setInput("");
 
-    const conversationId = selectedChat.conversationId
+    const conversationId = selectedChat?.conversationId
 
     sendChatMessage(userText, user.accessToken, conversationId, (event) => {
       if (
@@ -530,13 +524,6 @@ export default function ChatPage() {
       );
 
     if (!updatedChats.length) {
-      const newChat = {
-        id: Date.now(),
-        title: "New Chat",
-        conversationId: null,
-        messages: []
-      };
-
       setChats([newChat]);
       setSelectedChatId(
         newChat.id
@@ -636,38 +623,66 @@ export default function ChatPage() {
             padding: "16px"
           }}
         >
-          <h3>Chats</h3>
-
-          <input
-            value={searchText}
-            onChange={(e) =>
-              setSearchText(
-                e.target.value
-              )
-            }
-            placeholder="Search chats..."
+        <button
+          onClick={createNewChat}
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "12px 14px",
+            background: "#fff",
+            color: "#111",
+            border: "1px solid #ddd",
+            borderRadius: "10px",
+            cursor: "pointer",
+            fontSize: "15px",
+            fontWeight: "500",
+            transition:
+              "all 0.2s ease"
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.background =
+              "#f7f7f7")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.background =
+              "#fff")
+          }
+        >
+          <span
             style={{
-              width: "100%",
-              padding: "10px",
-              marginTop: "12px",
-              marginBottom: "12px",
-              borderRadius: "8px",
-              border: "1px solid #ccc"
-            }}
-          />
-
-          <button
-            onClick={createNewChat}
-            style={{
-              width: "100%",
-              padding: "10px",
-              marginTop: "12px",
-              marginBottom: "20px",
-              cursor: "pointer"
+              fontSize: "18px",
+              lineHeight: 1
             }}
           >
-            + New Chat
-          </button>
+            ✎
+          </span>
+
+          <span>
+            {labels?.newChat ??
+              "New Chat"}
+          </span>
+        </button>
+        <input
+          value={searchText}
+          onChange={(e) =>
+            setSearchText(
+              e.target.value
+            )
+          }
+          placeholder={labels?.placeholder ?? ''}
+          style={{
+            width: "100%",
+            padding: "10px",
+            marginTop: "12px",
+            marginBottom: "12px",
+            borderRadius: "8px",
+            border: "1px solid #ccc"
+          }}
+        />
+
+        
 
           {filteredChats.map((chat) => (
             <div
@@ -749,7 +764,7 @@ export default function ChatPage() {
             ☰
           </button>
           <span>
-            AI Assistant
+            {labels?.aiAssistant ?? ''}
           </span>
         </div>
 
@@ -763,12 +778,40 @@ export default function ChatPage() {
             gap: "12px"
           }}
         >
-          {selectedChat.messages.map(
-            (msg, i) =>
-              renderMessage(msg, i)
-          )}
+          {selectedChat.messages.length === 0 ? (
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              color: "#666",
+              textAlign: "center"
+            }}
+          >
+            <h2
+              style={{
+                marginBottom: "10px"
+              }}
+            >
+              {labels?.startNewChat ?? ''}
+            </h2>
 
-          <div ref={messagesEndRef}></div>
+            <div>
+              {labels?.askAnything ?? ''}
+            </div>
+          </div>
+        ) : (
+          <>
+            {selectedChat.messages.map(
+              (msg, i) =>
+                renderMessage(msg, i)
+            )}
+
+            <div ref={messagesEndRef}></div>
+          </>
+        )}
         </div>
 
         <div
@@ -790,7 +833,7 @@ export default function ChatPage() {
               e.key === "Enter" &&
               sendMessage()
             }
-            placeholder="Type message..."
+            placeholder={labels?.fieldPlaceHolder ?? ''}
             style={{
               flex: 1,
               padding: "12px",
@@ -819,8 +862,8 @@ export default function ChatPage() {
             }}
           >
             {loading
-              ? "Sending..."
-              : "Send"}
+              ? labels?.sending ?? ''
+              : labels?.send ?? ''}
           </button>
         </div>
       </div>
