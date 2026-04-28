@@ -13,29 +13,14 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 
 const AIForm = ({ labels, maxAccess, storeRecordId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
-
-  async function getAIProvider() {
-    return new Promise((resolve, reject) => {
-      getAllKvsByDataset({
-        _dataset: DataSets.AI_PROVIDER,
-        callback: result => {
-          if (result) resolve(result)
-          else reject()
-        }
-      })
-    })
-  }
 
   const { formik } = useForm({
     initialValues: {
       AI_provider_Id: null,
-      AI_provider_Id_key: null,
       AI_API_KEY: null,
       AI_Model_Version: null
     },
@@ -73,7 +58,6 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
 
         const userDocObject = {
           AI_provider_Id: null,
-          AI_provider_Id_key: null,
           AI_API_KEY: null,
           AI_Model_Version: null
         }
@@ -83,13 +67,6 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
             userDocObject[x.key] = x.value || null
           }
         })
-
-        const aiProvider = await getAIProvider()
-        const provider = aiProvider?.find(
-          x => x.value === userDocObject.AI_provider_Id
-        )
-
-        userDocObject.AI_provider_Id_key = provider?.key || null
 
         formik.setValues(userDocObject)
       }
@@ -112,7 +89,6 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
                 required
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('AI_provider_Id_key', newValue?.key || null)
                   formik.setFieldValue('AI_Model_Version', null)
                   
                   formik.setFieldValue('AI_provider_Id', newValue?.value || '')
@@ -135,8 +111,8 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={formik?.values?.AI_provider_Id_key && AccessControlRepository.Provider.get}
-                parameters={formik?.values?.AI_provider_Id_key && `_providerId=${formik.values.AI_provider_Id_key}`}
+                endpointId={formik?.values?.AI_provider_Id && AccessControlRepository.Provider.get}
+                parameters={formik?.values?.AI_provider_Id && `_providerString=${formik.values.AI_provider_Id}`}
                 name='AI_Model_Version'
                 label={labels.modelVersion}
                 valueField='value'
