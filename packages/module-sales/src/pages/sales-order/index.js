@@ -112,6 +112,9 @@ const SalesOrder = () => {
     {
       field: 'printStatusName',
       headerName: labels.printStatus,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {

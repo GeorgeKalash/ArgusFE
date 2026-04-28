@@ -115,6 +115,9 @@ const OutboundTransp = () => {
     {
       field: 'printStatusName',
       headerName: _labels.printStatus,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {

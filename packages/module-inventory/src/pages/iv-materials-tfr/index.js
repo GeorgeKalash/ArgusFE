@@ -156,6 +156,9 @@ const IvMaterialsTransfer = () => {
     {
       field: 'printStatusName',
       headerName: _labels.print,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {

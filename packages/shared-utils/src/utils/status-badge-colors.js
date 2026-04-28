@@ -19,7 +19,7 @@ export const StatusBadgeColors = {
     "1": { key: "notDelivered", bg: "#F9FAFB", text: "#6B7280", border: "#E5E7EB" },
     "2": { key: "partial", bg: "#FFF7ED", text: "#C2410C", border: "#FDBA74" },
     "3": { key: "fullyDelivered", bg: "#ECFEFF", text: "#0E7490", border: "#A5F3FC" },
-    "4": { key: "terminated", bg: "#F3F4F6", text: "#374151", border: "#D1D5DB" },
+    "4": { key: "terminated", bg: "#f6f4f3", text: "#da6333", border: "#f2ba9a" },
     "5": { key: "inProcess", bg: "#EFF6FF", text: "#1D4ED8", border: "#93C5FD" }
   }
 };

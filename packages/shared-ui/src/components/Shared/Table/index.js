@@ -28,6 +28,7 @@ import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import LinkCellRenderer from '@argus/shared-ui/src/components/Shared/Table/LinkCellRenderer'
 import { getStatusBadgeColor } from "@argus/shared-utils/src/utils/status-badge-colors";
+import { getStatusIcon } from "@argus/shared-utils/src/utils/status-icon";
 import Chip from "@mui/material/Chip";
 
 const Table = ({
@@ -192,6 +193,38 @@ const Table = ({
           },
 
           sortable: !disableSorting
+        };
+      }
+      if (col.type === "icon") {
+        return {
+          ...col,
+
+          cellRenderer: ({ data }) => {
+            const code = data?.[col.valueField];
+
+            const config = getStatusIcon(col.family, code);
+
+            if (!config) return null;
+
+            const Icon = config.icon;
+
+            return (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon
+                  sx={{
+                    fontSize: rowHeight * 0.55,
+                    color: config.color
+                  }}
+                />
+              </div>
+            );
+          },
+
+          cellStyle: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
         };
       }
 
