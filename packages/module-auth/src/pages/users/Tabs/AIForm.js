@@ -89,9 +89,11 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
                 required
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('AI_Model_Version', null)
-                  
-                  formik.setFieldValue('AI_provider_Id', newValue?.value || '')
+                  formik.setValues({
+                    ...formik.values,
+                    AI_provider_Id: newValue?.value || '',
+                    AI_Model_Version: ''
+                  })
                 }}
                 error={formik.touched.AI_provider_Id && Boolean(formik.errors.AI_provider_Id)}
               />
