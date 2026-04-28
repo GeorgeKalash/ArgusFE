@@ -20,7 +20,7 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
   const { platformLabels } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
-  async function getAccessLevel() {
+  async function getAIProvider() {
     return new Promise((resolve, reject) => {
       getAllKvsByDataset({
         _dataset: DataSets.AI_PROVIDER,
@@ -84,8 +84,8 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
           }
         })
 
-        const accessLevel = await getAccessLevel()
-        const provider = accessLevel?.find(
+        const aiProvider = await getAIProvider()
+        const provider = aiProvider?.find(
           x => x.value === userDocObject.AI_provider_Id
         )
 
