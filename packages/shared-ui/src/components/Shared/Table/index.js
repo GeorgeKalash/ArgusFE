@@ -28,6 +28,7 @@ import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import LinkCellRenderer from '@argus/shared-ui/src/components/Shared/Table/LinkCellRenderer'
 import { getStatusBadgeColor } from "@argus/shared-utils/src/utils/status-badge-colors";
+import Chip from "@mui/material/Chip";
 
 const Table = ({
   name,
@@ -167,21 +168,22 @@ const Table = ({
             const colors = getStatusBadgeColor(col.family, value?.code);
 
             return (
-              <span
-                style={{
-                  background: colors.bg,
-                  color: colors.text,
-                  border: `1px solid ${colors.border}`,
-                  padding: "3px 10px",
-                  borderRadius: "999px",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  display: "inline-block",
-                  whiteSpace: "nowrap"
-                }}
-              >
-                {value?.label}
-              </span>
+              <Chip
+                  label={value?.label}
+                  size="small"
+                  sx={{
+                    height: 24,
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    backgroundColor: colors.bg,
+                    color: colors.text,
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: "8px",
+                    "& .MuiChip-label": {
+                      px: 1
+                    }
+                  }}
+                />
             );
           },
 

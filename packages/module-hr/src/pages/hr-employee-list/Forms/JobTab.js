@@ -78,7 +78,14 @@ const JobTab = ({ labels, maxAccess, store }) => {
     : jobInfo
 
   const columns = [
-    { field: 'statusName', headerName: labels.status, flex: 1 },
+    { 
+      field: 'statusName', 
+      headerName: labels.status, 
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
+      flex: 1 
+    },
     { field: 'date', headerName: labels.date, flex: 1, type: 'date' }
   ]
 
@@ -88,7 +95,14 @@ const JobTab = ({ labels, maxAccess, store }) => {
     { field: 'branchName', headerName: labels.branch, flex: 1 },
     { field: 'positionName', headerName: labels.position, flex: 1 },
     { field: 'reportToName', headerName: labels.reportTo, flex: 1 },
-    { field: 'statusName', headerName: labels.status, flex: 1 }
+    { 
+      field: 'statusName', 
+      headerName: labels.status, 
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
+      flex: 1 
+    }
   ]
 
   const del = async obj => {
