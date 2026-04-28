@@ -116,16 +116,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     releaseStatus: '',
     wip: 1,
     deliveryStatus: 1,
-    printStatusName: '',
     isVattable: false,
     exWorks: false,
     taxId: '',
     shipAddress: '',
     billAddress: '',
-    subtotal: '',
+    subtotal: 0,
     miscAmount: 0,
     amount: 0,
-    vatAmount: '',
+    vatAmount: 0,
     tdAmount: 0,
     overdraft: false,
     plId: '',
@@ -140,8 +139,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     tdPct: 0,
     initialTdPct: 0,
     baseAmount: 0,
-    volume: '',
-    weight: '',
+    volume: 0,
+    weight: 0,
     qty: 0,
     serializedAddress: '',
     items: [
@@ -838,18 +837,20 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           )
         : formik.initialValues.items
 
-    formik.setValues({
-      ...header,
-      currentDiscount:
-        header?.tdType == 1 || header?.tdType == null
-          ? header?.tdAmount
-          : header?.tdPct,
-      amount: parseFloat(header?.amount).toFixed(2),
-      shipAddress: shipAdd,
-      billAddress: billAdd,
-      tdPct: header?.tdPct || 0,
-      initialTdPct: client?.record?.tdPct || 0,
-      items: modifiedList
+    formik.resetForm({
+      values: {
+        ...header,
+        currentDiscount:
+          header?.tdType == 1 || header?.tdType == null
+            ? header?.tdAmount
+            : header?.tdPct,
+        amount: Number(header?.amount),
+        shipAddress: shipAdd,
+        billAddress: billAdd,
+        tdPct: header?.tdPct || 0,
+        initialTdPct: client?.record?.tdPct || 0,
+        items: modifiedList
+      }
     })
   }
 
@@ -1276,12 +1277,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }, [address])
 
   useEffect(() => {
-    formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
-    formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(2))
-    formik.setFieldValue('weight', parseFloat(totalWeight).toFixed(2))
-    formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
-    formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
+    formik.setFieldValue('qty', Number(totalQty))
+    formik.setFieldValue('amount', Number(amount))
+    formik.setFieldValue('volume', Number(totalVolume))
+    formik.setFieldValue('weight', Number(totalWeight))
+    formik.setFieldValue('subtotal', Number(subtotal))
+    formik.setFieldValue('vatAmount', Number(vatAmount))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {

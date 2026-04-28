@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useEffect, useLayoutEffect } from 'react'
+import { useEffect, useRef, useLayoutEffect } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from '@argus/shared-utils/src/utils/maxAccess'
 import * as yup from 'yup'
 
@@ -46,9 +46,21 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     return yup.object().shape(updatedSchema)
   }
 
+  const originalSubmit = formikProps.onSubmit;
 
   const formik = useFormik({
     ...formikProps,
+    onSubmit: async (values, helpers) => {
+      submitSucceededRef.current = false
+
+      try {
+        await originalSubmit?.(values, helpers)
+        submitSucceededRef.current = true
+      } catch (error) {
+        submitSucceededRef.current = false
+        throw error
+      }
+    },
     validate(values) {
       let maxAccessErrors = {}
 
@@ -118,6 +130,29 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
       }
     }
   })
+
+  const submitSucceededRef = useRef(false)
+  const wasSubmittingRef = useRef(false)
+
+  useEffect(() => {
+    if (formik.isSubmitting) {
+      wasSubmittingRef.current = true
+      return
+    }
+
+    if (
+      wasSubmittingRef.current &&
+      !formik.isSubmitting &&
+      submitSucceededRef.current
+    ) {
+      wasSubmittingRef.current = false
+      submitSucceededRef.current = false
+
+      formik.resetForm({
+        values: formik.values
+      })
+    }
+  }, [formik.isSubmitting])
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 

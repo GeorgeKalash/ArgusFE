@@ -6,6 +6,8 @@ import { getButtons } from './Buttons'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomButton from '../Inputs/CustomButton'
 import ReportGenerator from './ReportGenerator'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import DirtyDialog from '@argus/shared-ui/src/components/Shared/DirtyDialog'
 
 const WindowToolbar = ({
   onSave,
@@ -37,6 +39,8 @@ const WindowToolbar = ({
 }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
   const [reportStore, setReportStore] = useState([])  
   const [defaultLayoutId, setDefaultLayoutId] = useState(null)
 
@@ -105,6 +109,22 @@ const WindowToolbar = ({
     onInfo
   }
 
+  const handleProtectedClick = (button, handleClick) => {
+    if (button.checkDirty && form?.dirty) {
+      stack({
+        Component: DirtyDialog,
+        props: {
+          fullScreen: false,
+        },
+        refresh: false
+      })
+
+      return
+    }
+
+    handleClick?.()
+  }
+
   const buttons = getButtons(platformLabels)
 
   return (
@@ -149,7 +169,7 @@ const WindowToolbar = ({
               return (
                 isVisible && (
                   <CustomButton
-                    onClick={handleClick}
+                    onClick={() => handleProtectedClick(button, handleClick)}
                     label={button.label}
                     color={button.color}
                     border={button.border}
