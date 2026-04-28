@@ -78,6 +78,10 @@ const Table = ({
   const rowHeightImage =
     width <= 768 ? 44 : width <= 1024 ? 46 : width <= 1280 ? 50 : width <= 1366 ? 50 : width < 1600 ? 52 : 70
 
+  const badgeHeight = Math.round(rowHeight * 0.65);
+  const badgeFont = Math.max(10, Math.round(rowHeight * 0.33));
+  const badgeRadius = Math.round(badgeHeight / 3);
+
   const columns = props?.columns
     .filter(
       ({ field }) =>
@@ -172,13 +176,13 @@ const Table = ({
                   label={value?.label}
                   size="small"
                   sx={{
-                    height: 24,
-                    fontSize: "12px",
+                    height: `${badgeHeight}px`,
+                    fontSize: `${badgeFont}px`,
                     fontWeight: 500,
                     backgroundColor: colors.bg,
                     color: colors.text,
                     border: `1px solid ${colors.border}`,
-                    borderRadius: "8px",
+                    borderRadius: `${badgeRadius}px`,
                     "& .MuiChip-label": {
                       px: 1
                     }
