@@ -265,15 +265,7 @@ const TabsProvider = ({ children }) => {
     if (!cachedPage) {
       pagesCacheRef.current.set(router.asPath, children)
     }
-
-    setOpenTabs(prevTabs =>
-      prevTabs.map(tab =>
-        normalizeRoute(tab.route) === normalizedRoute && tab.page !== children
-          ? { ...tab, page: children }
-          : tab
-      )
-    )
-  }, [router.asPath, children, shouldManageTabs, normalizeRoute, setOpenTabs])
+  }, [router.asPath, children, shouldManageTabs, normalizeRoute])
 
   useEffect(() => {
     if (!shouldManageTabs || !router.asPath || (menu.length === 0 && gear.length === 0)) return
@@ -730,11 +722,16 @@ const TabsProvider = ({ children }) => {
         className={styles.panelsWrapper}
         sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}
       >
-        {openTabs.map((activeTab, i) => (
-          <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
-            {activeTab.page}
-          </CustomTabPanel>
-        ))}
+        {openTabs.map((activeTab, i) => {
+          const isHomeTab = normalizeRoute(activeTab.route) === '/default'
+          const isActiveHome = isHomeTab && i === currentTabIndex
+
+          return (
+            <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
+              {isActiveHome ? children : activeTab.page}
+            </CustomTabPanel>
+          )
+        })}
       </Box>
 
       <Menu
