@@ -105,7 +105,6 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
                 value={formik.values.AI_API_KEY}
                 required
                 maxAccess={maxAccess}
-                maxLength='128'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('AI_API_KEY', '')}
                 error={formik.touched.AI_API_KEY && Boolean(formik.errors.AI_API_KEY)}
