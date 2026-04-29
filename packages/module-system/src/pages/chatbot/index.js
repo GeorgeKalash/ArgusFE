@@ -17,13 +17,19 @@ import {
   Pie
 } from "react-chartjs-2";
 
-import { sendChatMessage } from "@argus/shared-providers/src/providers/chatService";
+import MuiTooltip from "@mui/material/Tooltip";
+
+import { parseChatStream } from "@argus/shared-providers/src/providers/chatService";
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import ReactMarkdown from "react-markdown";
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from "@argus/shared-ui/src/components/Shared/DeleteDialog";
 import { ResourceIds } from "@argus/shared-domain/src/resources/ResourceIds";
 import { useResourceQuery } from "@argus/shared-hooks/src/hooks/resource";
+import { RequestsContext } from "@argus/shared-providers/src/providers/RequestsContext";
+import { ChatbotRepository } from '@argus/repositories/src/repositories/ChatbotRepository'
+import { useError } from '@argus/shared-providers/src/providers/error'
+
 
 ChartJS.register(
   CategoryScale,
@@ -38,7 +44,9 @@ ChartJS.register(
 
 export default function ChatPage() {
   const { user } = useContext(AuthContext);
-  const { stack } = useWindow()
+  const { connectorStreamRequest, postConnectorRequest } = useContext(RequestsContext)
+  // const { stack } = useWindow()
+    const errorModel = useError()
 
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -54,22 +62,27 @@ export default function ChatPage() {
     datasetId: ResourceIds.AIChatbot,
   })
   
+  async function showError(props) {
+    if (errorModel) await errorModel.stack(props)
+  }
+
   const newChat = {
     id: Date.now(),
     conversationId: "",
     title: labels?.newChat || "New Chat",
-    messages: []
+    messages: [],
+    historyLoaded: false
     };
     
-  const [chats, setChats] = useState([newChat]);
+  const [chats, setChats] = useState([]);
 
-  const [selectedChatId, setSelectedChatId] = useState(() => newChat.id);
-  
+  const [selectedChatId, setSelectedChatId] = useState(null);
+
   const selectedChat =
     chats.find(
       (chat) =>
-        chat.id === selectedChatId
-    ) || chats[0];
+        chat && chat.id === selectedChatId
+    ) || null;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -77,51 +90,107 @@ export default function ChatPage() {
     });
   }, [selectedChat]);
 
+  useEffect(() => {
+    loadConversations();
+  }, []);
+  
+  const buildNewChat = () => ({
+    id: Date.now(),
+    conversationId: "",
+    title: labels?.newChat || "New Chat",
+    messages: []
+  });
+
   const createNewChat = () => {
-    const existingDraft =
-      chats.find(
-        (chat) =>
-          !chat.conversationId
-      );
+    const existingDraft = chats.find(
+      (chat) => !chat.conversationId
+    );
 
     if (existingDraft) {
-      setSelectedChatId(
-        existingDraft.id
-      );
-      return;
+      setSelectedChatId(existingDraft.id);
+      return existingDraft;
     }
 
-    setChats((prev) => [
-      newChat,
-      ...prev
-    ]);
+    const draft = buildNewChat();
 
-    setSelectedChatId(
-      newChat.id
-    );
+    setChats((prev) => [draft, ...prev]);
+    setSelectedChatId(draft.id);
+
+    return draft;
   };
 
-  const sendMessage = () => {
-    if (!input.trim() || loading) return;
+  const loadConversations = async () => {
+    const res =
+      await postConnectorRequest({
+        extension: ChatbotRepository.list,
+        record: {
+          argusToken: user.accessToken
+        }
+      });
+
+    const mapped =
+      res?.map((item) => ({
+        id: item.conversationId,
+        conversationId: item.conversationId,
+        title:
+          item.summary?.trim()
+            ? item.summary
+            : item.conversationId,
+        messages: [],
+        historyLoaded: false
+      }));
+
+    if (mapped.length) {
+      setChats(mapped);
+    } else {
+      const draft = createNewChat();
+
+      setChats([draft]);
+      setSelectedChatId(draft.id);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading)
+      return;
+
+    let activeChat = selectedChat;
 
     const userText = input;
 
     setLoading(true);
+    if (!activeChat) {
+      const existingDraft = chats.find(
+        (chat) => !chat.conversationId
+      );
+
+      if (existingDraft) {
+        activeChat = existingDraft;
+        setSelectedChatId(existingDraft.id);
+      } else {
+        const draft = buildNewChat(); 
+
+        setChats((prev) => [draft, ...prev]);
+        setSelectedChatId(draft.id);
+
+        activeChat = draft;
+      }
+    }
 
     setChats((prevChats) =>
       prevChats.map((chat) =>
-        chat.id === selectedChatId
+        chat.id === activeChat.id
           ? {
               ...chat,
               messages: [
                 ...chat.messages,
                 {
-                  sender: "me",
+                  sender: "user",
                   type: "text",
                   text: userText
                 },
                 {
-                  sender: "ai",
+                  sender: "assistant",
                   type: "text",
                   text: "",
                   isStreaming: true,
@@ -135,106 +204,130 @@ export default function ChatPage() {
 
     setInput("");
 
-    const conversationId = selectedChat?.conversationId
+    const conversationId = selectedChat?.conversationId;
 
-    sendChatMessage(userText, user.accessToken, conversationId, (event) => {
-      if (
-        event.type ===
-        "conversationId"
-      ) {
-        setChats((prevChats) =>
-          prevChats.map((chat) =>
-            chat.id === selectedChatId
-              ? {
+    const response =
+      await connectorStreamRequest({
+        extension:
+          ChatbotRepository.chat,
+        record: {
+          argusToken: user.accessToken,
+          conversationId,
+          message: userText
+        }
+      });
+
+    await parseChatStream(
+      response,
+      (event) => {
+        if (event.type === "conversationId") {
+          setChats((prevChats) =>
+            prevChats.map(
+              (chat) =>
+                chat.id === activeChat.id
+                  ? {
+                      ...chat,
+                      conversationId: chat.conversationId || event.value,
+                      title: !chat.conversationId ? event.value : chat.title
+                    }
+                  : chat
+            )
+          );
+
+          return;
+        }
+
+        if (event.type === "chunk") {
+          setChats((prevChats) =>
+            prevChats.map(
+              (chat) => {
+                if (
+                  chat.id !== activeChat.id
+                )
+                  return chat;
+
+                const updatedMessages =
+                  [
+                    ...chat.messages
+                  ];
+
+                const last = updatedMessages.length - 1;
+
+                updatedMessages[last] = {
+                  ...updatedMessages[last],
+                  text: updatedMessages[last].text +event.text,
+                  isStreaming:true,
+                  isWaiting:false
+                };
+
+                return {
                   ...chat,
-                  conversationId:
-                    chat.conversationId || event.value
+                  messages: updatedMessages
+                };
+              }
+            )
+          );
+        }
+
+        if (event.type ==="done") {
+          setChats((prevChats) =>
+            prevChats.map(
+              (chat) => {
+                if (chat.id !== activeChat.id)
+                  return chat;
+
+                const updatedMessages = [...chat.messages];
+
+                const lastIndex = updatedMessages.length - 1;
+
+                if (updatedMessages[lastIndex]?.isStreaming) {
+                  updatedMessages[lastIndex] = {
+                    ...updatedMessages[lastIndex],
+                    isStreaming: false
+                  };
                 }
-              : chat
-          )
-        );
 
-        return;
-      }
-      if (event.type === "chunk") {
-        setChats((prevChats) =>
-          prevChats.map((chat) => {
-            if (chat.id !== selectedChatId)
-              return chat;
-
-            const updatedMessages = [
-              ...chat.messages
-            ];
-
-            const last =
-              updatedMessages.length - 1;
-
-            updatedMessages[last] = {
-              ...updatedMessages[last],
-              text:
-                updatedMessages[last]
-                  .text + event.text,
-              isStreaming: true,
-              isWaiting: false
-            };
-
-            return {
-              ...chat,
-              messages: updatedMessages
-            };
-          })
-        );
-      }
-
-      if (event.type === "message") {
-        setChats((prevChats) =>
-          prevChats.map((chat) =>
-            chat.id === selectedChatId
-              ? {
+                return {
                   ...chat,
-                  messages: [
-                    ...chat.messages,
-                    event.message
-                  ]
-                }
-              : chat
-          )
-        );
-      }
+                  messages: updatedMessages
+                };
+              }
+            )
+          );
 
-      if (event.type === "done") {
-        setChats((prevChats) =>
-          prevChats.map((chat) => {
-            if (chat.id !== selectedChatId)
-              return chat;
+          setLoading(false);
+        }
 
-            const updatedMessages = [
-              ...chat.messages
-            ];
+        if (event.type ==="error") {
+          showError({
+            message:event.message
+          });
 
-            const lastIndex =
-              updatedMessages.length - 1;
+          setChats((prevChats) =>
+            prevChats.map((chat) => {
+              if (chat.id !== activeChat.id)
+                return chat;
 
-            if (
-              updatedMessages[lastIndex]
-                ?.isStreaming
-            ) {
-              updatedMessages[lastIndex] = {
-                ...updatedMessages[lastIndex],
-                isStreaming: false
+              const updatedMessages = [...chat.messages];
+
+              const last = updatedMessages.length - 1;
+
+              if (updatedMessages[last]?.isWaiting) {
+                updatedMessages.pop();
+              }
+
+              return {
+                ...chat,
+                messages:updatedMessages
               };
-            }
+            })
+          );
 
-            return {
-              ...chat,
-              messages: updatedMessages
-            };
-          })
-        );
-
-        setLoading(false);
+          setLoading(false);
+          return;
+        }
       }
-    });
+    );
   };
 
   useEffect(() => {
@@ -259,15 +352,15 @@ export default function ChatPage() {
           key={index}
           style={{
             alignSelf:
-              msg.sender === "me"
+              msg.sender === "user"
                 ? "flex-end"
                 : "flex-start",
             background:
-              msg.sender === "me"
+              msg.sender === "user"
                 ? "#2563eb"
                 : "#f1f1f1",
             color:
-              msg.sender === "me"
+              msg.sender === "user"
                 ? "#fff"
                 : "#000",
             padding: "10px 14px",
@@ -483,105 +576,105 @@ export default function ChatPage() {
   };
 
 
-  const confirmDeleteChat = (chat) => {
-    openDelete({
-      ...chat
-    });
-  };
+  // const confirmDeleteChat = (chat) => {
+  //   openDelete({
+  //     ...chat
+  //   });
+  // };
 
-  const onDelete = (chat) => {
-    deleteChat(chat.id);
-  };
+  // const onDelete = (chat) => {
+  //   deleteChat(chat.id);
+  // };
 
-  function openDelete(chat) {
-    stack({
-      Component: DeleteDialog,
-      props: {
-        open: [true, {}],
-        fullScreen: false,
-        onConfirm: () =>
-          onDelete(chat)
-      },
-      refresh: false
-    });
-  }
+  // function openDelete(chat) {
+  //   stack({
+  //     Component: DeleteDialog,
+  //     props: {
+  //       open: [true, {}],
+  //       fullScreen: false,
+  //       onConfirm: () =>
+  //         onDelete(chat)
+  //     },
+  //     refresh: false
+  //   });
+  // }
   
 
-  const deleteChat = (chatId) => {
-    const visibleChats =
-      searchText.trim()
-        ? filteredChats
-        : chats;
+  // const deleteChat = (chatId) => {
+  //   const visibleChats =
+  //     searchText.trim()
+  //       ? filteredChats
+  //       : chats;
 
-    const deletedIndex =
-      visibleChats.findIndex(
-        (c) => c.id === chatId
-      );
+  //   const deletedIndex =
+  //     visibleChats.findIndex(
+  //       (c) => c.id === chatId
+  //     );
 
-    const updatedChats =
-      chats.filter(
-        (c) => c.id !== chatId
-      );
+  //   const updatedChats =
+  //     chats.filter(
+  //       (c) => c.id !== chatId
+  //     );
 
-    if (!updatedChats.length) {
-      setChats([newChat]);
-      setSelectedChatId(
-        newChat.id
-      );
-      return;
-    }
+  //   if (!updatedChats.length) {
+  //     setChats([newChat]);
+  //     setSelectedChatId(
+  //       newChat.id
+  //     );
+  //     return;
+  //   }
 
-    setChats(updatedChats);
+  //   setChats(updatedChats);
 
-    if (
-      selectedChatId !== chatId
-    ) {
-      return;
-    }
+  //   if (
+  //     selectedChatId !== chatId
+  //   ) {
+  //     return;
+  //   }
 
-    let nextChat = null;
+  //   let nextChat = null;
 
-    if (
-      deletedIndex >= 0 &&
-      visibleChats[
-        deletedIndex + 1
-      ]
-    ) {
-      const nextId =
-        visibleChats[
-          deletedIndex + 1
-        ].id;
+  //   if (
+  //     deletedIndex >= 0 &&
+  //     visibleChats[
+  //       deletedIndex + 1
+  //     ]
+  //   ) {
+  //     const nextId =
+  //       visibleChats[
+  //         deletedIndex + 1
+  //       ].id;
 
-      nextChat =
-        updatedChats.find(
-          (c) => c.id === nextId
-        );
-    }
+  //     nextChat =
+  //       updatedChats.find(
+  //         (c) => c.id === nextId
+  //       );
+  //   }
 
-    if (
-      !nextChat &&
-      deletedIndex > 0
-    ) {
-      const prevId =
-        visibleChats[
-          deletedIndex - 1
-        ].id;
+  //   if (
+  //     !nextChat &&
+  //     deletedIndex > 0
+  //   ) {
+  //     const prevId =
+  //       visibleChats[
+  //         deletedIndex - 1
+  //       ].id;
 
-      nextChat =
-        updatedChats.find(
-          (c) => c.id === prevId
-        );
-    }
+  //     nextChat =
+  //       updatedChats.find(
+  //         (c) => c.id === prevId
+  //       );
+  //   }
 
-    if (!nextChat) {
-      nextChat =
-        updatedChats[0];
-    }
+  //   if (!nextChat) {
+  //     nextChat =
+  //       updatedChats[0];
+  //   }
 
-    setSelectedChatId(
-      nextChat.id
-    );
-  };
+  //   setSelectedChatId(
+  //     nextChat.id
+  //   );
+  // };
 
   const filteredChats =
     chats.filter((chat) =>
@@ -591,6 +684,72 @@ export default function ChatPage() {
           searchText.toLowerCase()
         )
     );
+
+  const openChat = async (chat) => {
+    if (!chat) return;
+
+    setSelectedChatId(chat.id);
+
+    if (!chat.conversationId) return;
+
+    if (chat.historyLoaded) return;
+
+    const res = await postConnectorRequest({
+        extension: ChatbotRepository.history,
+        record: {
+          argusToken: user.accessToken,
+          conversationId: chat.conversationId
+        }
+      });
+
+    const mappedMessages =
+      res.map((msg) => ({
+        sender: msg.role,
+        type: "text",
+
+        text: msg.content,
+
+        createdAt: msg.createdAt
+      }));
+
+    setChats((prevChats) =>
+      prevChats.map((c) =>
+        c.id === chat.id
+          ? {
+              ...c,
+              messages: mappedMessages,
+              historyLoaded: true
+            }
+          : c
+      )
+    );
+  };
+
+  const StartNewChat = () => (
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+        color: "#666",
+        textAlign: "center"
+      }}
+    >
+      <h2
+        style={{
+          marginBottom: "10px"
+        }}
+      >
+        {labels?.startNewChat ?? ''}
+      </h2>
+
+      <div>
+        {labels?.askAnything ?? ''}
+      </div>
+    </div>
+  )
 
   return (
     <div
@@ -701,19 +860,28 @@ export default function ChatPage() {
                     : "transparent"
               }}
             >
-              <div
-                onClick={() =>
-                  setSelectedChatId(chat.id)
-                }
-                style={{
-                  flex: 1,
-                  cursor: "pointer"
-                }}
+              <MuiTooltip
+                title={chat.title}
+                arrow
+                placement="bottom"
+                enterDelay={2000}
               >
-                {chat.title}
-              </div>
+                <div
+                  onClick={() =>
+                    openChat(chat)
+                  }
+                  style={{
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    textOverflow: "ellipsis",
+                    flex: 1
+                  }}
+                  >
+                  {chat.title}
+                </div>
+              </MuiTooltip>
 
-              {chat.conversationId && (
+              {/* {chat.conversationId && (
                 <button
                   onClick={() =>
                     confirmDeleteChat(chat)
@@ -728,7 +896,7 @@ export default function ChatPage() {
                 >
                   🗑
                 </button>
-              )}
+              )} */}
             </div>
           ))}
         </div>
@@ -778,40 +946,50 @@ export default function ChatPage() {
             gap: "12px"
           }}
         >
-          {selectedChat.messages.length === 0 ? (
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "column",
-              color: "#666",
-              textAlign: "center"
-            }}
-          >
-            <h2
-              style={{
-                marginBottom: "10px"
-              }}
-            >
-              {labels?.startNewChat ?? ''}
-            </h2>
+          {
+            !selectedChat ? (
 
-            <div>
-              {labels?.askAnything ?? ''}
-            </div>
-          </div>
-        ) : (
-          <>
-            {selectedChat.messages.map(
-              (msg, i) =>
-                renderMessage(msg, i)
-            )}
+              <StartNewChat />
 
-            <div ref={messagesEndRef}></div>
-          </>
-        )}
+            ) : selectedChat.conversationId &&
+                !selectedChat.historyLoaded &&
+                selectedChat.messages.length === 0 ? (
+
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  color: "#666",
+                  textAlign: "center"
+                }}
+              >
+                <div>
+                  {labels?.loadingConversation ?? ''}
+                </div>
+              </div>
+
+            ) : selectedChat.messages.length === 0 ? (
+
+              <StartNewChat />
+
+            ) : (
+
+              <>
+                {selectedChat.messages.map(
+                  (msg, i) =>
+                    renderMessage(msg, i)
+                )}
+
+                <div
+                  ref={messagesEndRef}
+                ></div>
+              </>
+
+            )
+          }
         </div>
 
         <div

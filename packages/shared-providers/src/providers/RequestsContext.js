@@ -345,22 +345,47 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
   }
 
-  const connectorRequest = async body => {
+  const connectorRequest = body => {
     return fetch(
-      process.env
-        .NEXT_PUBLIC_CONNECTOR_URL +
-        body.extension,
+      process.env.NEXT_PUBLIC_CONNECTOR_URL + body.extension,
       {
         method: "POST",
         headers: {
-          "Content-Type":
-            "application/json"
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(
-          body.record
-        )
+        body: JSON.stringify(body.record)
       }
-    );
+    )
+      .then(async response => {
+        if (!response.ok) {
+          const text = await response.text();
+          throw {
+            status: response.status,
+            message: text || "Request failed"
+          };
+        }
+
+        return response;
+      })
+      .catch(error => {
+        if (!body?.noHandleError) {
+          showError({
+            message:
+              error.message || error,
+            height:
+              error.status === 404 ||
+              error.status === 500
+                ? 400
+                : ""
+          });
+        }
+
+        if (body?.throwError) {
+          throw error;
+        }
+
+        return null;
+      });
   };
 
   const postConnectorRequest = async body => {
