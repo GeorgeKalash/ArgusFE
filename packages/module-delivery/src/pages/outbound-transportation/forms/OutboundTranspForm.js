@@ -26,6 +26,7 @@ import CustomTimePicker from '@argus/shared-ui/src/components/Inputs/CustomTimeP
 import dayjs from 'dayjs'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { getDirtyFields } from '@argus/shared-utils/src/utils/getDirtyFields'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -45,39 +46,41 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     endpointId: DeliveryRepository.Trip.page
   })
 
-  const { formik } = useForm({
-    initialValues: {
+  const initialValues = {
+    recordId: null,
+    header: {
       recordId: null,
-      header: {
-        recordId: null,
-        reference: '',
-        plantId,
-        vehicleId: null,
-        driverId: null,
-        date: new Date(),
-        departureTime: new Date(),
-        departureTimeField: null,
-        arrivalTime: null,
-        arrivalTimeField: null,
-        notes: '',
-        dtId: null,
-        status: 1,
-        capacityVolume: null,
-        wip: 1
-      },
-      tripOrders: [
-        {
-          id: 1,
-          soRef: null,
-          soId: null,
-          soDate: null,
-          clientName: null,
-          soVolume: null,
-          soWeight: null,
-          soWipStatusName: null
-        }
-      ]
+      reference: '',
+      plantId,
+      vehicleId: null,
+      driverId: null,
+      date: new Date(),
+      departureTime: new Date(),
+      departureTimeField: null,
+      arrivalTime: null,
+      arrivalTimeField: null,
+      notes: '',
+      dtId: null,
+      status: 1,
+      capacityVolume: null,
+      wip: 1
     },
+    tripOrders: [
+      {
+        id: 1,
+        soRef: null,
+        soId: null,
+        soDate: null,
+        clientName: null,
+        soVolume: null,
+        soWeight: null,
+        soWipStatusName: null
+      }
+    ]
+  }
+
+  const { formik } = useForm({
+    initialValues, 
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     validationSchema: yup.object({
@@ -101,12 +104,12 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
       const data = {
         header,
-        tripOrders: formik.values.tripOrders?.some(order => order.soId)
-          ? formik.values.tripOrders.map((order, index) => ({
-              ...order,
-              id: index + 1
-            }))
-          : []
+        tripOrders: formik.values.tripOrders
+          ?.filter(order => order.soId)
+          .map((order, index) => ({
+            ...order,
+            id: index + 1
+          }))
       }
 
       const response = await postRequest({
@@ -153,7 +156,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     const formattedDepDate = formatDateFromApi(res.record.header.departureTime)
     const formattedArrDate = formatDateFromApi(res.record.header.arrivalTime)
 
-     let tripOrders = res.record?.tripOrders ? await Promise.all(
+     let tripOrders = res.record?.tripOrders?.length ? await Promise.all(
       (res.record?.tripOrders || []).map((item, index) => {
         return {
           ...item,
@@ -161,19 +164,21 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           soDate: formatDateFromApi(item.soDate)
         }
       })
-    ) : formik.initialValues.tripOrders
+    ) : initialValues.tripOrders
 
-    formik.setValues({
-      recordId: res.record.header.recordId,
-      header: {
-        ...res.record.header,
-        date: formatDateFromApi(res.record.header.date),
-        departureTime: formattedDepDate,
-        departureTimeField: formattedDepDate ? dayjs(dayjs(formattedDepDate), 'hh:mm A') : null,
-        arrivalTime: formattedArrDate,
-        arrivalTimeField: formattedArrDate ? dayjs(dayjs(formattedArrDate), 'hh:mm A') : null
-      },
-      tripOrders
+    formik.resetForm({
+      values: {
+        recordId: res.record.header.recordId,
+        header: {
+          ...res.record.header,
+          date: formatDateFromApi(res.record.header.date),
+          departureTime: formattedDepDate,
+          departureTimeField: formattedDepDate ? dayjs(dayjs(formattedDepDate), 'hh:mm A') : null,
+          arrivalTime: formattedArrDate,
+          arrivalTimeField: formattedArrDate ? dayjs(dayjs(formattedArrDate), 'hh:mm A') : null
+        },
+        tripOrders
+      }
     })
   }
 
@@ -557,6 +562,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
             }}
             value={formik?.values?.tripOrders}
             error={formik?.errors?.tripOrders}
+            initialValue={initialValues.tripOrders[0]}
             columns={columns}
             maxAccess={maxAccess}
             allowDelete={!isClosed}
