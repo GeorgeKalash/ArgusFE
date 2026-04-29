@@ -255,9 +255,11 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
           isClosed: res.record.wip === 2
         }))
 
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
+        formik.resetForm({
+          values: {
+            ...res.record,
+            date: formatDateFromApi(res.record.date)
+          }
         })
       }
     })()
