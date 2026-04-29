@@ -339,7 +339,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         }
         if (newRow.isInactive) {
           update({
-            ...formik.initialValues.items[0],
+            ...initialValues.items[0],
             id: newRow.id
           })
 
@@ -835,7 +835,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
               }
             })
           )
-        : formik.initialValues.items
+        : initialValues.items
 
     formik.resetForm({
       values: {
@@ -1649,7 +1649,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             }}
             value={formik.values.items}
             error={formik.errors.items}
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={initialValues?.items?.[0]}
             columns={columns}
             name='items'
             maxAccess={maxAccess}
