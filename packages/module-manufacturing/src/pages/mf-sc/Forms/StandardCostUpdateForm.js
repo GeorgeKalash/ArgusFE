@@ -161,13 +161,15 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
       record?.header?.recordId || 0
     )
 
-    formik.setValues({
-      recordId: record?.header?.recordId,
-      header: {
-        ...(record?.header || {}),
-        date: formatDateFromApi(record?.header?.date),
-      },
-      items
+    formik.resetForm({
+      values: {
+        recordId: record?.header?.recordId,
+        header: {
+          ...(record?.header || {}),
+          date: formatDateFromApi(record?.header?.date),
+        },
+        items
+      }
     })
 
     setReCal(false)
