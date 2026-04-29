@@ -114,11 +114,13 @@ export default function LeaveReturnForm({ recordId, window }) {
       })
 
       const obj = await fillDate(record.returnType, record.leaveId)
-      formik.setValues({
-        ...record,
-        date: formatDateFromApi(record.date),
-        minDate: obj.minDate,
-        maxDate: obj.maxDate
+      formik.resetForm({
+        values: {
+          ...record,
+          date: formatDateFromApi(record.date),
+          minDate: obj.minDate,
+          maxDate: obj.maxDate
+        }
       })
     }
   }
