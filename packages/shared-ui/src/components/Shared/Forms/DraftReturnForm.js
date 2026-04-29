@@ -61,72 +61,74 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   const defspId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
   const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
+  const initialValues = {
+    recordId: recordId || null,
+    header: {
+      dtId: null,
+      reference: '',
+      date: new Date(),
+      plantId: null,
+      clientId: null,
+      clientRef: '',
+      clientName: '',
+      currencyId: defCurrencyId || null,
+      spId: defspId || null,
+      siteId: defSiteId || null,
+      description: '',
+      status: 1,
+      wip: 1,
+      isVattable: false,
+      taxId: null,
+      subTotal: 0,
+      amount: 0,
+      vatAmount: 0,
+      plId: defplId || null,
+      ptId: null,
+      weight: 0,
+      accountId: null,
+      disSkuLookup: false,
+      invoiceId: null,
+      invoiceRef: '',
+      returnReasonId: null,
+    },
+    items: [
+      {
+        id: 1,
+        returnId: recordId || 0,
+        srlNo: '',
+        metalId: '',
+        designId: '',
+        itemId: '',
+        sku: '',
+        itemName: '',
+        seqNo: 1,
+        extendedPrice: 0,
+        baseLaborPrice: 0,
+        weight: 0,
+        metalRef: '',
+        designRef: '',
+        vatAmount: 0,
+        vatPct: 0,
+        unitPrice: 0,
+        taxId: null,
+        taxDetails: null,
+        priceType: 0,
+        volume: 0,
+        invoiceReference: '',
+        invoiceTrxId: null,
+        invoiceSeqNo: 1,
+        invoiceComponentSeqNo: 0
+      }
+    ],
+    metalGridData: [],
+    itemGridData: [],
+    taxDetailsStore: []
+  }
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
-    initialValues: {
-      recordId: recordId || null,
-      header: {
-        dtId: null,
-        reference: '',
-        date: new Date(),
-        plantId: null,
-        clientId: null,
-        clientRef: '',
-        clientName: '',
-        currencyId: defCurrencyId || null,
-        spId: defspId || null,
-        siteId: defSiteId || null,
-        description: '',
-        status: 1,
-        wip: 1,
-        isVattable: false,
-        taxId: null,
-        subTotal: 0,
-        amount: 0,
-        vatAmount: 0,
-        plId: defplId || null,
-        ptId: null,
-        weight: 0,
-        accountId: null,
-        disSkuLookup: false,
-        invoiceId: null,
-        invoiceRef: '',
-        returnReasonId: null,
-      },
-      items: [
-        {
-          id: 1,
-          returnId: recordId || 0,
-          srlNo: '',
-          metalId: '',
-          designId: '',
-          itemId: '',
-          sku: '',
-          itemName: '',
-          seqNo: 1,
-          extendedPrice: 0,
-          baseLaborPrice: 0,
-          weight: 0,
-          metalRef: '',
-          designRef: '',
-          vatAmount: 0,
-          vatPct: 0,
-          unitPrice: 0,
-          taxId: null,
-          taxDetails: null,
-          priceType: 0,
-          volume: 0,
-          invoiceReference: '',
-          invoiceTrxId: null,
-          invoiceSeqNo: 1,
-          invoiceComponentSeqNo: 0
-        }
-      ],
-      metalGridData: [],
-      itemGridData: [],
-      taxDetailsStore: []
-    },
+    initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -463,7 +465,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
 
           if (!successSave) {
             update({
-              ...formik?.initialValues?.items?.[0],
+              ...initialValues?.items?.[0],
               id: newRow?.id,
               srlNo: ''
             })
@@ -712,15 +714,22 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       }) || []
     )
 
-    await formik.setValues({
-      recordId: pack.header?.recordId || null,
-      header: {
-        ...pack.header,
-        plId: defplId || pack.header?.plId || null,
-        date: formatDateFromApi(pack.header?.date)
-      },
-      items: modifiedList.length ? modifiedList : formik?.initialValues?.items,
-      taxDetails: pack.taxDetails
+    const items = modifiedList.length ? modifiedList : initialValues?.items
+    const summaryGridData = getSummaryGridData(items)
+
+    formik.resetForm({
+      values: {
+        recordId: pack.header?.recordId || null,
+        header: {
+          ...pack.header,
+          plId: defplId || pack.header?.plId || null,
+          date: formatDateFromApi(pack.header?.date)
+        },
+        items,
+        ...summaryGridData,
+        taxDetails: pack.taxDetails,
+        taxDetailsStore: []
+      }
     })
 
   }
@@ -756,48 +765,51 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     }
   }
 
-  useEffect(() => {
-    if (formik?.values?.items?.length) {
-      const items = formik?.values?.items
-
-      const metalMap = items.reduce((acc, { metalId, weight, metalRef }) => {
-        if (metalId) {
-          if (!acc[metalId]) {
-            acc[metalId] = { metal: metalRef, pcs: 0, totalWeight: 0 }
-          }
-          acc[metalId].pcs += 1
-          acc[metalId].totalWeight += parseFloat(weight || 0)
+  function getSummaryGridData(items = []) {
+    const metalMap = items.reduce((acc, { metalId, weight, metalRef }) => {
+      if (metalId) {
+        if (!acc[metalId]) {
+          acc[metalId] = { metal: metalRef, pcs: 0, totalWeight: 0 }
         }
 
-        return acc
-      }, {})
+        acc[metalId].pcs += 1
+        acc[metalId].totalWeight += parseFloat(weight || 0)
+      }
 
-      Object.keys(metalMap).forEach(metalId => {
-        metalMap[metalId].totalWeight = parseFloat(metalMap[metalId].totalWeight.toFixed(2))
-      })
+      return acc
+    }, {})
 
-      formik.setFieldValue('metalGridData', Object.values(metalMap))
+    Object.keys(metalMap).forEach(metalId => {
+      metalMap[metalId].totalWeight = parseFloat(metalMap[metalId].totalWeight.toFixed(2))
+    })
 
-      let seqNo = 0
+    let seqNo = 0
 
-      const itemMap = items.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
-        if (itemId) {
-          if (!acc[itemId]) {
-            seqNo++
-            acc[itemId] = { sku, pcs: 0, weight: 0, itemName, seqNo, categoryName }
-          }
-          acc[itemId].pcs += 1
-          acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
+    const itemMap = items.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
+      if (itemId) {
+        if (!acc[itemId]) {
+          seqNo++
+          acc[itemId] = { sku, pcs: 0, weight: 0, itemName, seqNo, categoryName }
         }
 
-        return acc
-      }, {})
+        acc[itemId].pcs += 1
+        acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
+      }
 
-      formik.setFieldValue(
-        'itemGridData',
-        Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo)
-      )
+      return acc
+    }, {})
+
+    return {
+      metalGridData: Object.values(metalMap),
+      itemGridData: Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo)
     }
+  }
+
+  useEffect(() => {
+    const summaryGridData = getSummaryGridData(formik.values.items)
+
+    formik.setFieldValue('metalGridData', summaryGridData.metalGridData)
+    formik.setFieldValue('itemGridData', summaryGridData.itemGridData)
   }, [formik?.values?.items])
 
   const { subTotal, vatAmount, weight, amount } = formik?.values?.items?.reduce(
@@ -1292,7 +1304,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             onChange={(value, action, row) => handleGridChange(value, action, row)}
             value={formik.values.items || []}
             error={formik.errors.items}
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={initialValues?.items?.[0]}
             columns={serialsColumns}
             showCounterColumn={true}
             name='items'
