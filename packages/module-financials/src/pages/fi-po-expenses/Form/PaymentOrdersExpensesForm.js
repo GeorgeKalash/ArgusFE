@@ -59,44 +59,46 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
+  const initialValues = {
+    recordId: null,
+    reference: '',
+    accountType: 3,
+    currencyId: parseInt(currencyId),
+    paymentMethod: null,
+    date: new Date(),
+    amount: null,
+    notes: '',
+    subTotal: null,
+    exRate: 1,
+    rateCalcMethod: 1,
+    baseAmount: null,
+    dtId: null,
+    status: 1,
+    releaseStatus: null,
+    cashAccountId: parseInt(cashAccountId),
+    plantId: parseInt(plantId),
+    expenses: [
+      {
+        id: 1,
+        pvId: recordId || 0,
+        seqNo: 1,
+        etId: '',
+        subTotal: null,
+        vatAmount: null,
+        amount: null,
+        supplierName: '',
+        taxRef: '',
+        notes: '',
+        isVAT: false,
+        hasCostCenters: false,
+        costCenters: []
+      }
+    ]
+  }
+  
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
-    initialValues: {
-      recordId: null,
-      reference: '',
-      accountType: 3,
-      currencyId: parseInt(currencyId),
-      paymentMethod: null,
-      date: new Date(),
-      amount: null,
-      notes: '',
-      subTotal: null,
-      exRate: 1,
-      rateCalcMethod: 1,
-      baseAmount: null,
-      dtId: null,
-      status: 1,
-      releaseStatus: null,
-      cashAccountId: parseInt(cashAccountId),
-      plantId: parseInt(plantId),
-      expenses: [
-        {
-          id: 1,
-          pvId: recordId || 0,
-          seqNo: 1,
-          etId: '',
-          subTotal: null,
-          vatAmount: null,
-          amount: null,
-          supplierName: '',
-          taxRef: '',
-          notes: '',
-          isVAT: false,
-          hasCostCenters: false,
-          costCenters: []
-        }
-      ]
-    },
+    initialValues,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -203,10 +205,12 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
       })
     )
 
-    formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res.record.date),
-      expenses: expensesList
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: formatDateFromApi(res.record.date),
+        expenses: expensesList
+      }
     })
 
     return res.record
@@ -782,7 +786,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
           onChange={value => formik.setFieldValue('expenses', value)}
           value={formik.values.expenses}
           error={formik.errors.expenses}
-          initialValues={formik?.initialValues?.expenses[0]}
+          initialValues={initialValues?.expenses[0]}
           columns={columns}
           allowDelete={!isClosed && !isCancelled}
           allowAddNewLine={!isClosed && !isCancelled}
