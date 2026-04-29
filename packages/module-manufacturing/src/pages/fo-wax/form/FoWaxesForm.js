@@ -273,15 +273,17 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     const header = await getHeaderData(recordId)
     const items = await getItems(recordId)
     const factor = await getMetalSetting(header.metalId, header.metalColorId)
-    formik.setValues({
-      ...formik.values,
-      recordId: header.recordId,
-      header: {
-        ...formik.values.header,
-        ...header,
-        factor: factor?.rate
-      },
-      items
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        recordId: header.recordId,
+        header: {
+          ...formik.values.header,
+          ...header,
+          factor: factor?.rate
+        },
+        items
+      }
     })
   }
 
@@ -449,9 +451,9 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   }, [recordId])
 
   useEffect(() => {
-    formik.setFieldValue('header.rmWgt', parseFloat(rmWgt).toFixed(2))
-    formik.setFieldValue('header.netWgt', parseFloat(netWgt).toFixed(2))
-    formik.setFieldValue('header.suggestedWgt', parseFloat(suggestedWgt).toFixed(2))
+    formik.setFieldValue('header.rmWgt', parseInt(rmWgt))
+    formik.setFieldValue('header.netWgt', parseInt(netWgt))
+    formik.setFieldValue('header.suggestedWgt', parseInt(suggestedWgt))
   }, [rmWgt, netWgt, suggestedWgt])
 
   useEffect(() => {
