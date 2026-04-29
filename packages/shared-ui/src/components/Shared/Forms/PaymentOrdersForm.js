@@ -192,9 +192,11 @@ export default function PaymentOrdersForm({ recordId, window }) {
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res.record.date)
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: formatDateFromApi(res.record.date)
+      }
     })
   }
 
