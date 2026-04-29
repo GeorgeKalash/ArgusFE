@@ -1,25 +1,7 @@
-export async function sendChatMessage(
-  text,
-  token,
-  conversationId,
+export async function parseChatStream(
+  response,
   onEvent
 ) {
-
-  const response = await fetch(
-    process.env.NEXT_PUBLIC_CONNECTOR_URL + "chat",
-    {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            conversationId: conversationId,
-            argusToken: token,
-            message: text
-        })
-    }
-    );
-
   const reader =
     response.body.getReader();
 
@@ -34,57 +16,94 @@ export async function sendChatMessage(
 
     if (done) break;
 
-    const chunk = decoder.decode(value, {
-        stream: true
-    });
+    buffer += decoder.decode(
+      value,
+      { stream: true }
+    );
 
-    console.log("RAW:", chunk);
-
-    buffer += chunk;
-
-    const parts = buffer.split("\n");
+    const parts =
+      buffer.split("\n");
 
     buffer = parts.pop();
 
     for (const part of parts) {
-        let trimmed = part.trim();
+      let trimmed =
+        part.trim();
 
-        if (!trimmed) continue;
+      if (!trimmed) continue;
 
-        if (trimmed.startsWith("data:")) {
-            trimmed = trimmed
-            .replace(/^data:\s*/, "")
-            .trim();
-        }
+      if (
+        trimmed.startsWith(
+          "data:"
+        )
+      ) {
+        trimmed = trimmed
+          .replace(
+            /^data:\s*/,
+            ""
+          )
+          .trim();
+      }
 
-        if (trimmed === "[DONE]") {
-            onEvent({ type: "done" });
-            return;
-        }
+      if (
+        trimmed ===
+        "[DONE]"
+      ) {
+        onEvent({
+          type: "done"
+        });
 
-        try {
-            const json = JSON.parse(trimmed);
+        return;
+      }
 
-            if (json.type === "conversationId") {
-                onEvent({
-                    type: "conversationId",
-                    value: json.value
-                });
-
-                continue;
-            }
-            if (json.type === "text") {
-            onEvent({
-                type: "chunk",
-                text: json.content
-            });
-            }
-        } catch (e) {
-            console.log(
-            "Cannot parse:",
+      try {
+        const json =
+          JSON.parse(
             trimmed
-            );
+          );
+
+        if (
+          json.type ===
+          "conversationId"
+        ) {
+          onEvent({
+            type:
+              "conversationId",
+            value:
+              json.value
+          });
+
+          continue;
         }
+
+        if (
+          json.type ===
+          "text"
+        ) {
+          onEvent({
+            type: "chunk",
+            text:
+              json.content
+          });
+        }
+
+        if (
+          json.type === "error"
+        ) {
+          onEvent({
+            type: "error",
+            message:
+              json.message
+          });
+
+          continue;
+        }
+      } catch (e) {
+        console.log(
+          "Cannot parse:",
+          trimmed
+        );
+      }
     }
   }
 

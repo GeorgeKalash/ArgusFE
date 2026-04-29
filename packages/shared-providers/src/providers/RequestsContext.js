@@ -345,6 +345,39 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
   }
 
+  const connectorRequest = async body => {
+    return fetch(
+      process.env
+        .NEXT_PUBLIC_CONNECTOR_URL +
+        body.extension,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+        body: JSON.stringify(
+          body.record
+        )
+      }
+    );
+  };
+
+  const postConnectorRequest = async body => {
+    const response =
+      await connectorRequest(
+        body
+      );
+
+    return await response.json();
+  };
+
+  const connectorStreamRequest = async body => {
+    return await connectorRequest(
+      body
+    );
+  };
+
   const values = {
     getRequest,
     postRequest,
@@ -352,6 +385,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     postIdentityRequest,
     getMicroRequest,
     getRequestFullEndPoint,
+    connectorStreamRequest,
+    postConnectorRequest,
     LoadingOverlay,
     loading: activeRequests
   }
