@@ -518,9 +518,11 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
         const res = await getData(recordId)
         const res3 = await getDataGrid(recordId)
 
-        formik.setValues({
-          ...res.record,
-          items: res3
+        formik.resetForm({
+          values: {
+            ...res.record,
+            items: res3
+          }
         })
       }
     })()
@@ -617,6 +619,8 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
                     secondValueShow='wcName'
                     displayFieldWidth={2}
                     form={formik}
+                    readOnly={isClosed || isCancelled}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('workCenterId', newValue?.recordId || null)
                       formik.setFieldValue('wcRef', newValue?.reference || '')
