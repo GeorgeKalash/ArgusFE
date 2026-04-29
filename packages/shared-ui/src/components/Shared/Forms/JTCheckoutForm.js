@@ -148,19 +148,21 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
       extension: ManufacturingRepository.JobTransfer.get2,
       parameters: `_recordId=${recordId}`
     }).then(async res => {
-      formik.setValues({
-        ...formik.values,
-        recordId: res?.record?.transfer?.recordId || null,
-        transfer: {
-          ...res?.record?.transfer,
-          date: formatDateFromApi(res?.record?.transfer?.date),
-          closedDate: formatDateFromApi(res?.record?.transfer?.closedDate),
-          postedDate: formatDateFromApi(res?.record?.transfer?.postedDate),
-          maxQty: res?.record?.transfer.qty,
-          maxPcs: res?.record?.transfer.pcs,
-          workCenterId: res?.record?.transfer?.fromWCId
-        },
-        categorySummary: res?.record?.categorySummary || []
+      formik.resetForm({
+        values: {
+          ...formik.values,
+          recordId: res?.record?.transfer?.recordId || null,
+          transfer: {
+            ...res?.record?.transfer,
+            date: formatDateFromApi(res?.record?.transfer?.date),
+            closedDate: formatDateFromApi(res?.record?.transfer?.closedDate),
+            postedDate: formatDateFromApi(res?.record?.transfer?.postedDate),
+            maxQty: res?.record?.transfer.qty,
+            maxPcs: res?.record?.transfer.pcs,
+            workCenterId: res?.record?.transfer?.fromWCId
+          },
+          categorySummary: res?.record?.categorySummary || []
+        }
       })
     })
   }
