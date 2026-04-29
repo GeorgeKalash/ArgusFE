@@ -84,9 +84,6 @@ const CbBankAccounts = () => {
     {
       field: 'statusName',
       headerName: labels.statusName,
-      type: 'badge',
-      family: 'document',
-      valueField: 'status',
       flex: 1
     },
     {

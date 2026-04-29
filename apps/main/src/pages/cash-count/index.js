@@ -83,9 +83,6 @@ const CashCount = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
-      type: 'badge',
-      family: 'document',
-      valueField: 'status',
       flex: 1
     },
     {
@@ -96,9 +93,6 @@ const CashCount = () => {
     {
       field: 'wipName',
       headerName: _labels.wip,
-      type: 'badge',
-      family: 'wip',
-      valueField: 'wip',
       flex: 1
     }
   ]

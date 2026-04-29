@@ -164,17 +164,28 @@ const Table = ({
         return {
           ...col,
 
-          valueGetter: ({ data }) => ({
-            label: data?.[col.field],
-            code: data?.[col.valueField]
-          }),
+          valueGetter: ({ data }) => data?.[col.field],
 
-          cellRenderer: ({ value }) => {
-            const colors = getStatusBadgeColor(col.family, value?.code);
+          cellRenderer: params => {
+            const { data } = params;
+
+            const label = data?.[col.field];
+            const code = data?.[col.valueField];
+
+            const isEmpty =
+              label === null ||
+              label === undefined ||
+              label === "" ||
+              String(label).trim() === "";
+
+            if (isEmpty) return null;
+
+            const colors = getStatusBadgeColor(col.family, code);
 
             return (
+              <FieldWrapper {...params}>
               <Chip
-                  label={value?.label}
+                  label={label}
                   size="small"
                   sx={{
                     height: `${badgeHeight}px`,
@@ -189,6 +200,7 @@ const Table = ({
                     }
                   }}
                 />
+              </FieldWrapper>
             );
           },
 
@@ -654,7 +666,7 @@ const Table = ({
           onDoubleClick={handleDoubleClick}
           className={`fieldWrapper ${!params.colDef?.wrapText ? 'nowrap' : ''}`}
         >
-          {displayValue}
+          {params.children || displayValue}
         </Box>
       </>
     )
@@ -1004,6 +1016,7 @@ const Table = ({
           <AgGridReact
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
+            ensureDomOrder={true}
             enableRangeSelection={true}
             columnDefs={finalColumns}
             domLayout={domLayout}
