@@ -740,16 +740,18 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           )
         : formik.values.items
 
-    formik.setValues({
-      ...sqHeader.record,
-      currentDiscount:
-        sqHeader?.record?.tdType == 1 || sqHeader?.record?.tdType == null
-          ? sqHeader?.record?.tdAmount
-          : sqHeader?.record?.tdPct,
-      amount: parseFloat(sqHeader?.record?.amount).toFixed(2),
-      maxDiscount: clientDiscount?.record?.tdPct || 0,
-      shipAddress: shipAdd,
-      items: modifiedList
+    formik.resetForm({
+      values: {
+        ...sqHeader.record,
+        currentDiscount:
+          sqHeader?.record?.tdType == 1 || sqHeader?.record?.tdType == null
+            ? sqHeader?.record?.tdAmount
+            : sqHeader?.record?.tdPct,
+        amount: sqHeader?.record?.amount,
+        maxDiscount: clientDiscount?.record?.tdPct || 0,
+        shipAddress: shipAdd,
+        items: modifiedList
+      }
     })
   }
 
@@ -1211,12 +1213,12 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   }, [address])
 
   useEffect(() => {
-    formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
-    formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(2))
-    formik.setFieldValue('weight', parseFloat(totalWeight).toFixed(2))
-    formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
-    formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
+    formik.setFieldValue('qty', parseFloat(totalQty))
+    formik.setFieldValue('amount', parseFloat(amount))
+    formik.setFieldValue('volume', parseFloat(totalVolume))
+    formik.setFieldValue('weight', parseFloat(totalWeight))
+    formik.setFieldValue('subtotal', parseFloat(subtotal))
+    formik.setFieldValue('vatAmount', parseFloat(vatAmount))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
@@ -1618,7 +1620,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={initialValues?.items?.[0]}
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
