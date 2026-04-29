@@ -5,13 +5,15 @@ import ReportParameterBrowser from '@argus/shared-ui/src/components/Shared/Repor
 import { Grid } from '@mui/material'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
+import { useRouter } from 'next/router'
 const styles = {
   leftSectionGridItem: 'leftSectionGridItem',
   bottomSectionContainer: 'bottomSectionContainer'
 }
 
 const RPBGridToolbar = ({
+  pageId,
   add,
   access,
   onApply,
@@ -31,6 +33,13 @@ const RPBGridToolbar = ({
   const [search, setSearch] = useState('')
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const { track } = useInteractionTracker()
+  const router = useRouter()
+  console.log('routrer',router)
+
+  function trackInteraction() {
+    track(pageId)
+  }
 
   useEffect(() => {
     setRpbParams([])
@@ -47,6 +56,7 @@ const RPBGridToolbar = ({
   }
 
   const openRPB = () => {
+    trackInteraction()
     stack({
       Component: ReportParameterBrowser,
       props: {
@@ -98,6 +108,7 @@ const RPBGridToolbar = ({
       key: 'GO',
       condition: true,
       onClick: () => {
+        trackInteraction()
         if (typeof filterBy === 'function') filters(search, reportParams)
         else
           onApply({
@@ -110,10 +121,17 @@ const RPBGridToolbar = ({
     {
       key: 'Print',
       condition: !!rest?.Print,
-      onClick: () => rest?.Print(rpbParams),
+      onClick: () => {
+        trackInteraction()
+        rest?.Print(rpbParams)
+      },
       disabled: rest?.disablePrint
     }
   ].filter(item => !item?.hidden)
+
+  useEffect(() => {
+    if (rpbParams.length > 0) trackInteraction()
+  }, [rpbParams])
 
   return (
     <>
@@ -202,9 +220,13 @@ const RPBGridToolbar = ({
       `}</style>
 
       <GridToolbar
-        onSearch={value => filters(value, reportParams)}
+        onSearch={value => {
+          trackInteraction()
+          filters(value, reportParams)
+        }}
         reportParams={reportParams}
         onSearchClear={() => {
+          trackInteraction()
           setSearch('')
           if (typeof filterBy === 'function') filterBy('params', reportParams)
           else onClear(reportParams)

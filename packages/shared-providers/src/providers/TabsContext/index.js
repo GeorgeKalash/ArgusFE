@@ -10,6 +10,7 @@ import { RequestsContext } from '../RequestsContext'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { LockedScreensContext } from '../LockedScreensContext'
 import styles from './TabsProvider.module.css'
+import { useInteractionTracker } from '../InteractionTrackerProvider'
 
 const TabsContext = createContext()
 
@@ -87,6 +88,7 @@ const TabsProvider = ({ children }) => {
 
   const { lockedScreens, removeLockedScreen } = useContext(LockedScreensContext)
   const { postRequest } = useContext(RequestsContext)
+  const { interactions, clearPageInteractions } = useInteractionTracker()
 
   const [anchorEl, setAnchorEl] = useState(null)
   const [tabsIndex, setTabsIndex] = useState(null)
@@ -250,6 +252,21 @@ const TabsProvider = ({ children }) => {
     setMenuPosition(null)
     setTabsIndex(null)
   }, [])
+
+  const handleCloseTab = async activeTab => {
+    const hasUnsavedChanges = interactions.length ? interactions.includes(activeTab.resourceId) : false
+
+    if (hasUnsavedChanges) {
+      const confirmed = window.confirm(
+        'You have unsaved changes on this page. Are you sure you want to close this tab?'
+      )
+
+      if (!confirmed) return
+    }
+
+    clearPageInteractions(activeTab.resourceId)
+    await closeTab(activeTab.route)
+  }
 
   useEffect(() => {
     if (!shouldManageTabs || !children || !router.asPath) return
@@ -700,7 +717,7 @@ const TabsProvider = ({ children }) => {
                         e.preventDefault()
                         e.stopPropagation()
                         if (activeTab) unlockIfLocked(activeTab)
-                        await closeTab(activeTab.route)
+                        await handleCloseTab(activeTab)
                       }}
                     >
                       <CloseIcon className={styles.svgIcon} />
