@@ -100,11 +100,13 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res?.record?.date),
-      startDate: formatDateFromApi(res?.record?.startDate),
-      endDate: formatDateFromApi(res?.record?.endDate)
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: formatDateFromApi(res?.record?.date),
+        startDate: formatDateFromApi(res?.record?.startDate),
+        endDate: formatDateFromApi(res?.record?.endDate)
+      }
     })
     setStore(prevStore => ({
       ...prevStore,
