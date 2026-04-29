@@ -121,7 +121,7 @@ export const LeaveForm = ({ recordId, window }) => {
     if (!employeeId || !ltId) {
       formik.setFieldValue('leaveBalance', 0)
 
-      return
+      return 0
     }
 
     const res = await getRequest({
@@ -133,7 +133,7 @@ export const LeaveForm = ({ recordId, window }) => {
     if (!lsIdValue) {
       formik.setFieldValue('leaveBalance', 0)
 
-      return
+      return 0
     }
 
     const res2 = await getRequest({
@@ -144,6 +144,8 @@ export const LeaveForm = ({ recordId, window }) => {
     })
 
     formik.setFieldValue('leaveBalance', res2?.list?.[0]?.summary?.balance ?? 0)
+
+    return res2?.list?.[0]?.summary?.balance ?? 0
   }
 
   const isClosed = formik.values.wip == 2
@@ -183,25 +185,28 @@ export const LeaveForm = ({ recordId, window }) => {
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({
-      ...res.record.leave,
-      date: res.record.leave.date ? formatDateFromApi(res.record.leave.date) : null,
-      startDate: res.record.leave.startDate ? formatDateFromApi(res.record.leave.startDate) : null,
-      endDate: res.record.leave.endDate ? formatDateFromApi(res.record.leave.endDate) : null,
-      items:
-        res.record.leaveDays.map((day, index) => ({
-          ...day,
-          dayId: formatDayId(day.dayId),
-          id: index
-        })) || []
-    })
-
-    getLeaveBalance(
+    const leaveBalance = await getLeaveBalance(
       recordId,
       res?.record?.leave?.employeeId,
       res?.record?.leave?.ltId,
       formatDateFromApi(res?.record?.leave?.date)
     )
+
+    formik.resetForm({
+      values: {
+        ...res.record.leave,
+        leaveBalance,
+        date: res.record.leave.date ? formatDateFromApi(res.record.leave.date) : null,
+        startDate: res.record.leave.startDate ? formatDateFromApi(res.record.leave.startDate) : null,
+        endDate: res.record.leave.endDate ? formatDateFromApi(res.record.leave.endDate) : null,
+        items:
+          res.record.leaveDays.map((day, index) => ({
+            ...day,
+            dayId: formatDayId(day.dayId),
+            id: index
+          })) || []
+      }
+    })
   }
 
   const onClose = async () => {
@@ -266,6 +271,8 @@ export const LeaveForm = ({ recordId, window }) => {
         }
       }
     })
+
+    totalDays = parseFloat(totalDays.toFixed(2))
 
     return { totalHours, totalDays }
   }
@@ -550,7 +557,7 @@ export const LeaveForm = ({ recordId, window }) => {
                 value={formik.values.leaveDays}
                 readOnly
                 maxAccess={maxAccess}
-                decimalScale={3}
+                decimalScale={2}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('leaveDays', null)}
                 error={formik.touched.leaveDays && Boolean(formik.errors.leaveDays)}
