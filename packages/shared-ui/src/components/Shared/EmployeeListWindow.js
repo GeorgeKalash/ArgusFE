@@ -14,14 +14,19 @@ import LeavesTab from '@argus/shared-ui/src/components/Shared/EmployeePages/Leav
 import HiringTab from '@argus/shared-ui/src/components/Shared/EmployeePages/HiringTab'
 import SkillsTab from '@argus/shared-ui/src/components/Shared/EmployeePages/SkillsTab'
 import UserDefinedTab from '@argus/shared-ui/src/components/Shared/EmployeePages/UserDefinedTab'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-export default function EmployeeListWindow ({ recordId, labels, maxAccess, employeeStatus, window}) {
+export default function EmployeeListWindow ({ recordId, employeeStatus, window}) {
   const [activeTab, setActiveTab] = useState(0)
   const isActive = employeeStatus ? employeeStatus == 1 : true
   const [store, setStore] = useState({ recordId: recordId || null, hireDate: null, isActive })
   const { getRequest } = useContext(RequestsContext)
   const [quickView, setQuickView] = useState(null)
   const imageUploadRef = useRef(null)
+
+  const { labels, access: maxAccess } = useResourceParams({ datasetId: ResourceIds.EmployeeFilter, editMode: !!recordId})
+  useSetWindow({ title: labels.employee, window })
 
   const tabs = [
     { label: labels.Profile },
@@ -133,3 +138,5 @@ export default function EmployeeListWindow ({ recordId, labels, maxAccess, emplo
     </Grid>
   )
 }
+EmployeeListWindow.width = 1000
+EmployeeListWindow.height = 700

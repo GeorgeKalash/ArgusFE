@@ -146,14 +146,9 @@ const EmployeeList = () => {
     stack({
       Component: EmployeeListWindow,
       props: {
-        labels,
         recordId: obj?.recordId,
-        employeeStatus: obj?.activeStatus,
-        maxAccess: access
-      },
-      width: 1000,
-      height: 700,
-      title: labels.employee
+        employeeStatus: obj?.activeStatus
+      }
     })
   }
 

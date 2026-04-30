@@ -199,9 +199,25 @@ const Table = ({
         const start = (page - 1) * pageSize
         const end = page * pageSize
         const slicedGridData = props?.gridData?.list?.slice(start, end)
-        setGridData({
-          ...props.gridData,
-          list: slicedGridData
+       setGridData(prev => {
+          const isSame =
+            (prev?.list || []).length === slicedGridData.length &&
+            (prev?.list || []).every((prevRow, index) => {
+              const nextRow = slicedGridData[index]
+              if (!nextRow) return false
+
+              const prevKeys = Object.keys(prevRow)
+              if (prevKeys.length !== Object.keys(nextRow).length) return false
+
+              return prevKeys.every(key => prevRow[key] === nextRow[key])
+            })
+
+          if (isSame) return prev
+
+          return {
+            ...props.gridData,
+            list: slicedGridData
+          }
         })
         setStartAt(start)
       } else {
@@ -898,7 +914,6 @@ const Table = ({
   }
 
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
-
   return (
     <VertLayout>
       <Grow>

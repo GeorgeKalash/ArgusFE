@@ -1,13 +1,13 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ReportRepository } from '@argus/repositories/src/repositories/ReportRepository'
 import EmployeeListWindow from '@argus/shared-ui/src/components/Shared/EmployeeListWindow'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 export default function EmployeeMissingList ({labels, maxAccess, fieldId, status}) {
   const { getRequest } = useContext(RequestsContext)
@@ -27,20 +27,13 @@ export default function EmployeeMissingList ({labels, maxAccess, fieldId, status
 
     return response
   }
-  
+
   const {
     query: { data }
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ReportRepository.EmployeeMissingDetails.RT107b,
     datasetId: ResourceIds.EmployeeMissingDetails,
-  })
-
-  const {
-    labels: employeeLabels
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    datasetId: ResourceIds.EmployeeFilter
   })
 
   const columns = [
@@ -96,14 +89,9 @@ export default function EmployeeMissingList ({labels, maxAccess, fieldId, status
     stack({
       Component: EmployeeListWindow,
       props: {
-        labels: employeeLabels,
         recordId: obj?.recordId,
-        employeeStatus: obj?.activeStatus,
-        maxAccess
-      },
-      width: 1000,
-      height: 700,
-      title: employeeLabels.employee
+        employeeStatus: obj?.activeStatus
+      }
     })
   }  
 

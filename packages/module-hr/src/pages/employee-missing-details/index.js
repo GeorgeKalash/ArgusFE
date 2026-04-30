@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -14,6 +13,7 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import EmployeeMissingList from './Form/EmployeeMissingList'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
 export default function EmployeeMissingDetails () {
   const { getRequest } = useContext(RequestsContext)
@@ -58,7 +58,7 @@ export default function EmployeeMissingDetails () {
   const {
     labels,
     access
-  } = useResourceQuery({
+  } = useResourceParams({
     datasetId: ResourceIds.EmployeeMissingDetails
   })
 
