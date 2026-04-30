@@ -170,5 +170,21 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     }
   }, [reference?.isEmpty])
 
-  return { formik }
+  const normalized = value => {
+    if (value instanceof Date) return value.dateOnly ? value.toDateString() : value.valueOf()
+    if (Array.isArray(value)) return value.map(normalized)
+    if (value && typeof value === 'object')
+      return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, normalized(v)]))
+
+    return typeof value === 'string' && value.trim() !== '' && !isNaN(value) ? Number(value) : value
+  }
+
+  const dirty = JSON.stringify(normalized(formik.values)) !== JSON.stringify(normalized(formik.initialValues))
+  
+  return {
+    formik: {
+      ...formik,
+      dirty 
+    }
+  }
 }
