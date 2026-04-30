@@ -26,7 +26,6 @@ import CustomTimePicker from '@argus/shared-ui/src/components/Inputs/CustomTimeP
 import dayjs from 'dayjs'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-import { getDirtyFields } from '@argus/shared-utils/src/utils/getDirtyFields'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
