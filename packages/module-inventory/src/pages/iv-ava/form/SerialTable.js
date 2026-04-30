@@ -40,14 +40,6 @@ const SerialTable = ({ labels, obj, access }) => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
-      type: 'badge',
-      family: 'document',
-      valueField: 'status',
-      flex: 1
-    },
-    {
       field: 'pcs',
       headerName: labels.pieces,
       flex: 1

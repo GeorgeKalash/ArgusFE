@@ -51,7 +51,9 @@ const Approvals = props => {
     },
     {
       field: 'responseName',
-
+      type: 'badge',
+      family: 'approvals',
+      valueField: 'response',
       headerName: _labels.response,
       flex: 1
     },
