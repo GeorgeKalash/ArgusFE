@@ -993,9 +993,9 @@ export default function MaterialsTransferForm({ recordId, window }) {
                     displayField='name'
                     values={formik?.values}
                     onChange={async (_, newValue) => {
-                      onChangeDT(newValue?.recordId)
-                      formik.setFieldValue('dtId', newValue?.recordId || '')
                       changeDT(newValue)
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
+
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     maxAccess={maxAccess}
