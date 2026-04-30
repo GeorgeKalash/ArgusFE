@@ -287,6 +287,10 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
   }
 
+  useEffect(() => {
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
+
   const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
     (acc, row) => {
       const qtyValue = parseFloat(row?.qty) || 0
