@@ -178,7 +178,9 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
       component: 'textfield',
       label: labels.name,
       name: 'scpName',
-      readOnly: true
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'numberfield',
