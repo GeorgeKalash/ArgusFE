@@ -258,8 +258,8 @@ export const LeaveForm = ({ recordId, window }) => {
     let totalDays = 0
 
     items.forEach(row => {
-      const hours = parseFloat(row.hours) || 0
-      const scheduled = parseFloat(row.scheduledHours) || 0
+      const hours = row.hours || 0
+      const scheduled = row.scheduledHours || 0
 
       totalHours += hours
 
