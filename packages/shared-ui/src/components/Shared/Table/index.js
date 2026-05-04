@@ -29,7 +29,7 @@ import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimen
 import LinkCellRenderer from '@argus/shared-ui/src/components/Shared/Table/LinkCellRenderer'
 
 const Table = ({
-  name,
+  name = 'table',
   paginationType = '',
   globalStatus = true,
   viewCheckButtons = false,
@@ -822,13 +822,92 @@ const Table = ({
   }
 
   const tableName =
-    name && name !== 'table' ? `${name}.${props?.maxAccess?.record?.resourceId}` : props?.maxAccess?.record?.resourceId
+    name && `${name}.${props?.maxAccess?.record?.resourceId}`
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
     queryKey: [tableName],
     queryFn: () => getFromDB(storeName, tableName),
     enabled: !!tableName
   })
+
+  const getContextMenuItems = params => {
+    // only apply on column headers
+    if (!params.column) return params.defaultItems || []
+
+    const colId = params.column.getColId()
+    const isPinned = params.column.isPinned()
+
+    const pin = pinned => {
+      params.columnApi.applyColumnState({
+        state: [{ colId, pinned }]
+      })
+
+      const columnState = params.columnApi.getColumnState()
+      saveToDB(storeName, tableName, columnState)
+      invalidate()
+    }
+
+    return [
+      {
+        name: 'Freeze Left',
+        disabled: isPinned === 'left',
+        action: () => pin('left')
+      },
+      {
+        name: 'Freeze Right',
+        disabled: isPinned === 'right',
+        action: () => pin('right')
+      },
+      {
+        name: 'Unfreeze',
+        disabled: !isPinned,
+        action: () => pin(null)
+      },
+      'separator',
+      ...(params.defaultItems || [])
+    ]
+  }
+
+  const onGridReady = params => {
+    const gridElement = gridRef.current
+
+    if (!gridElement) {
+      console.log('Grid ref not ready')
+      return
+    }
+
+    gridElement.addEventListener('contextmenu', event => {
+      const headerCell = event.target.closest('.ag-header-cell')
+
+      if (!headerCell) return
+
+      event.preventDefault()
+
+      const colId = headerCell.getAttribute('col-id')
+      if (!colId) return
+
+      const column = params.columnApi.getColumn(colId)
+      const isPinned = column.isPinned()
+
+      const pin = pinned => {
+        params.columnApi.applyColumnState({
+          state: [{ colId, pinned }]
+        })
+
+        const columnState = params.columnApi.getColumnState()
+        saveToDB(storeName, tableName, columnState)
+        invalidate()
+      }
+
+      const choice = window.prompt(
+        `Column: ${colId}\n1 = Freeze Left\n2 = Freeze Right\n3 = Unfreeze`
+      )
+
+      if (choice === '1') pin('left')
+      if (choice === '2') pin('right')
+      if (choice === '3') pin(null)
+    })
+  }
 
   const onColumnMoved = params => {
     if (params.columnApi && tableName && params.source != 'gridOptionsChanged') {
@@ -879,9 +958,25 @@ const Table = ({
       })
     : columnDefs
 
-  const finalColumns = updatedColumns?.sort((a, b) => {
-    return (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
-  })
+  const finalColumns = (() => {
+    const left = []
+    const center = []
+    const right = []
+
+    updatedColumns.forEach(col => {
+      if (col.pinned === 'left') left.push(col)
+      else if (col.pinned === 'right') right.push(col)
+      else center.push(col)
+    })
+
+    const sortFn = (a, b) => (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
+
+    left.sort(sortFn)
+    center.sort(sortFn)
+    right.sort(sortFn)
+
+    return [...left, ...center, ...right]
+  })()
 
   const hoverTimeoutRef = useRef(null)
 
@@ -950,6 +1045,12 @@ const Table = ({
             onColumnResized={onColumnResized}
             onSortChanged={onSortChanged}
             enableRtl={languageId === 2}
+            getContextMenuItems={getContextMenuItems}
+            suppressContextMenu={false}
+            allowContextMenuWithControlKey={true}
+            onGridReady={params => {
+              onGridReady(params)
+            }}
           />
         </Box>
       </Grow>
