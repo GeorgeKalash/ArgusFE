@@ -9,8 +9,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import SerialTable from './forms/SerialTable'
-import serialIcon from '@argus/shared-ui/src/components/images/TableIcons/imgSerials.png'
-import lotIcon from '@argus/shared-ui/src/components/images/TableIcons/lot.png'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
 import LotForm from './forms/LotForm'
@@ -129,7 +127,7 @@ const AvailabilitiesBySite = () => {
             <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
               <IconButton size='small' onClick={() => (trackBy === 1 ? onSerial(row.data) : onLot(row.data))}>
                 <Image
-                  src={trackBy === 1 ? serialIcon : lotIcon}
+                  src={trackBy === 1 ? '/images/TableIcons/imgSerials.png' : '/images/TableIcons/lot.png'}
                   width={trackBy === 1 ? 25 : 18}
                   height={18}
                   alt={trackBy === 1 ? labels.serial : labels.lot}

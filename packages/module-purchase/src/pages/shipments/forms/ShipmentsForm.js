@@ -581,7 +581,7 @@ export default function ShipmentsForm({ recordId, window }) {
       hidden: true,
       name: 'lotButton',
       props: {
-        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/lot.png').default.src,
+        imgSrc: '/images/buttonsIcons/lot.png',
       },
       label: labels.lot, //not added
       onClick: (e, row) => {}

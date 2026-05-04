@@ -98,7 +98,7 @@ const Reset = () => {
                       <div key='email-icon'>
                         <img
                           key='icon'
-                          src={require('@argus/shared-ui/src/components/images/password/mail.png').default.src}
+                          src='/images/password/mail.png'
                           alt='mail icon'
                           class={inputs.iconImage}
                         />

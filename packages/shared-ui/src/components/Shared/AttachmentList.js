@@ -18,7 +18,7 @@ import CustomButton from '../Inputs/CustomButton'
 import FolderForm from './FolderForm'
 import { useError } from '@argus/shared-providers/src/providers/error'
 
-const AttachmentList = ({ resourceId, recordId, window }) => {
+const AttachmentList = ({ resourceId, recordId, isActive, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -127,7 +127,8 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
                     values: row.data,
                     maxAccess: access,
                     recordId,
-                    resourceId
+                    resourceId,
+                    disabled: !isActive
                   }
                 })
               }}
@@ -161,6 +162,7 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
       props: {
         recordId,
         resourceId,
+        disabled: !isActive,
         seqNo: maxSeqNo
       }
     })
@@ -182,14 +184,14 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar maxAccess={access} labels={labels} onAdd={add} />
+        <GridToolbar maxAccess={access} disableAdd={!isActive} labels={labels} onAdd={add} />
       </Fixed>
       <Grow>
         <Table
           name='attachmentTable'
           columns={columns}
           gridData={data}
-          onDelete={del}
+          onDelete={isActive ? del : null}
           rowId={['seqNo']}
           isLoading={false}
           maxAccess={access}
