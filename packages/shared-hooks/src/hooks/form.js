@@ -176,7 +176,7 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     if (value && typeof value === 'object')
       return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, normalized(v)]))
 
-    return typeof value === 'string' && value.trim() !== '' && !isNaN(value) ? Number(value) : value
+    return value
   }
 
   const dirty = JSON.stringify(normalized(formik.values)) !== JSON.stringify(normalized(formik.initialValues))

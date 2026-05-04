@@ -80,16 +80,27 @@ const CustomNumberField = ({
       return null
     }
 
-    const num = val != '' ? val : null
+    if (val === '') return null
 
-    return isNaN(num) ? null : num
+    const num = Number(val)
+
+    return Number.isNaN(num) ? null : num
   }
 
   const handleNumberChangeValue = (e, blur) => {
     const value = formatNumber(e)
-    if (value) e.target.value = value
+    const parsedValue = parseInputValue(value, blur)
 
-    onChange(e, parseInputValue(value, blur))
+    const event = {
+      ...e,
+      target: {
+        ...e.target,
+        name: e.target.name,
+        value: parsedValue
+      }
+    }
+
+    onChange(event, parsedValue)
   }
 
   const handleNumberMouseLeave = e => {
