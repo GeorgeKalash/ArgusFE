@@ -76,7 +76,7 @@ const ResetPassForm = ({ labels, username = '' }) => {
                 <div key='forgot-icon'>
                   <img
                     key='forgot-icon'
-                    src={require('@argus/shared-ui/src/components/images/password/forgotPWD1.png').default.src}
+                    src='/images/password/forgotPWD1.png'
                     alt='forgot-icon'
                     class={inputs.iconImage}
                   />

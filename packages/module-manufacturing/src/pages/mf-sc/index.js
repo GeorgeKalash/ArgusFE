@@ -117,6 +117,9 @@ const StandardCostUpdate = () => {
     {
       field: 'statusName',
       headerName: labels.statusName,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -127,6 +130,9 @@ const StandardCostUpdate = () => {
     {
       field: 'wipName',
       headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     }
   ]

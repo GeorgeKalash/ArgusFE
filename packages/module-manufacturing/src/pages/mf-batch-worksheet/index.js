@@ -77,6 +77,9 @@ const MfBatchWorksheet = () => {
     {
       field: 'wipName',
       headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     }
   ]

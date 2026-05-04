@@ -15,7 +15,7 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import EmploymentHistory from './EmploymentHistory'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 
-const JobTab = ({ labels, maxAccess, store }) => {
+const JobTab = ({ labels, maxAccess, store, isActive }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -78,7 +78,11 @@ const JobTab = ({ labels, maxAccess, store }) => {
     : jobInfo
 
   const columns = [
-    { field: 'statusName', headerName: labels.status, flex: 1 },
+    { 
+      field: 'statusName', 
+      headerName: labels.status,
+      flex: 1 
+    },
     { field: 'date', headerName: labels.date, flex: 1, type: 'date' }
   ]
 
@@ -88,7 +92,11 @@ const JobTab = ({ labels, maxAccess, store }) => {
     { field: 'branchName', headerName: labels.branch, flex: 1 },
     { field: 'positionName', headerName: labels.position, flex: 1 },
     { field: 'reportToName', headerName: labels.reportTo, flex: 1 },
-    { field: 'statusName', headerName: labels.status, flex: 1 }
+    { 
+      field: 'statusName', 
+      headerName: labels.status, 
+      flex: 1 
+    }
   ]
 
   const del = async obj => {
@@ -108,7 +116,8 @@ const JobTab = ({ labels, maxAccess, store }) => {
         labels,
         maxAccess,
         employeeId: recordId,
-        recordId: obj?.recordId
+        recordId: obj?.recordId,
+        isActive
       },
       width: 500,
       height: 400,
@@ -126,7 +135,7 @@ const JobTab = ({ labels, maxAccess, store }) => {
       <Fixed>
         <Grid container xs={12}>
           <Grid item xs={1.3}>
-            <GridToolbar onAdd={openForm} maxAccess={maxAccess} />
+            <GridToolbar onAdd={openForm} disableAdd={!isActive} maxAccess={maxAccess} />
           </Grid>
           <Grid item xs={3} paddingTop={1}>
             <CustomTextField
@@ -153,6 +162,7 @@ const JobTab = ({ labels, maxAccess, store }) => {
           pagination={false}
           refetch={refetch}
           maxAccess={maxAccess}
+          actionCondition={(row, actionType) => (actionType === 'delete') ? row.isActive : true }
         />
       </Grow>
 

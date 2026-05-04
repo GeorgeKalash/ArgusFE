@@ -49,5 +49,6 @@ export const commonResourceIds = [
   ResourceIds.Samples,
   ResourceIds.PayrollHeader,
   ResourceIds.ItemDetails,
-  ResourceIds.TaxDetails
+  ResourceIds.TaxDetails,
+  ResourceIds.EmployeeFilter,
 ]

@@ -71,6 +71,9 @@ const DeliveryOrders = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -102,6 +105,9 @@ const DeliveryOrders = () => {
     {
       field: 'printStatusName',
       headerName: _labels.printStatus,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {
@@ -112,6 +118,9 @@ const DeliveryOrders = () => {
     {
       field: 'invoiceStatus',
       headerName: _labels.invoice,
+      type: "icon",
+      family: "invoice",
+      valueField: "invoice",
       flex: 1
     }
   ]

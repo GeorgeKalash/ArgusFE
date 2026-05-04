@@ -128,6 +128,9 @@ const SaTrx = () => {
     {
       field: 'printStatusName',
       headerName: labels.printStatus,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {
@@ -143,6 +146,9 @@ const SaTrx = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]

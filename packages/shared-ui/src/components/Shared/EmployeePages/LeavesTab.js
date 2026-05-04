@@ -11,7 +11,7 @@ import { LoanManagementRepository } from '@argus/repositories/src/repositories/L
 import { formatDateTimeForGetAPI } from '@argus/shared-domain/src/lib/date-helper'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 
-const LeavesTab = ({ labels, maxAccess, store }) => {
+const LeavesTab = ({ labels, maxAccess, store, isActive }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
 
@@ -141,6 +141,7 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
           refetch={refetch}
           maxAccess={maxAccess}
           showSelectAll={false}
+          disableCheckBox={!isActive}
         />
       </Grow>
     </VertLayout>

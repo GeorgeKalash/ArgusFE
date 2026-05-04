@@ -119,11 +119,17 @@ const PostDraftReturn = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
       field: 'wipName',
       headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     },
     {
@@ -136,7 +142,7 @@ const PostDraftReturn = () => {
             <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
               <IconButton size='small' onClick={() => confirmationPost(row.data)}>
                 <Image
-                  src={require('@argus/shared-ui/src/components/images/buttonsIcons/post-black.png').default.src}
+                  src='/images/buttonsIcons/post-black.png'
                   width={18}
                   height={18}
                   alt='post.png'
