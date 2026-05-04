@@ -58,12 +58,15 @@ const TaskList = ({ store, labels, access }) => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'woTaskStatus',
+      valueField: 'status',
       flex: 1
     },
     {
       field: 'parts',
       headerName: labels.parts,
-      flex: 1,
+      flex: 0.5,
       cellRenderer: row => {
         return (
           <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
@@ -97,7 +100,7 @@ const TaskList = ({ store, labels, access }) => {
     {
       field: 'labors',
       headerName: labels.labors,
-      flex: 1,
+      flex: 0.5,
       cellRenderer: row => {
         return (
           <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
@@ -131,7 +134,7 @@ const TaskList = ({ store, labels, access }) => {
     {
       field: 'mark',
       headerName: labels.markAsComplete,
-      flex: 1,
+      flex: 1.25,
       cellRenderer: row => {
         return (
           <Box display='flex' justifyContent='center' alignItems='center' height='100%'>

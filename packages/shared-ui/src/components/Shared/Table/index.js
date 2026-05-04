@@ -25,6 +25,9 @@ import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import LinkCellRenderer from '@argus/shared-ui/src/components/Shared/Table/LinkCellRenderer'
+import { getStatusBadgeColor } from "@argus/shared-utils/src/utils/status-badge-colors";
+import { getStatusIcon } from "@argus/shared-utils/src/utils/status-icon";
+import Chip from "@mui/material/Chip";
 
 const Table = ({
   name,
@@ -73,6 +76,10 @@ const Table = ({
 
   const rowHeightImage =
     width <= 768 ? 44 : width <= 1024 ? 46 : width <= 1280 ? 50 : width <= 1366 ? 50 : width < 1600 ? 52 : 70
+
+  const badgeHeight = Math.round(rowHeight * 0.65);
+  const badgeFont = Math.max(10, Math.round(rowHeight * 0.33));
+  const badgeRadius = Math.round(badgeHeight / 3);
 
   const columns = props?.columns
     .filter(
@@ -150,6 +157,85 @@ const Table = ({
             ) : null
           }
         }
+      }
+      if (col.type === 'badge') {
+        return {
+          ...col,
+
+          valueGetter: ({ data }) => data?.[col.field],
+
+          cellRenderer: params => {
+            const { data } = params;
+
+            const label = data?.[col.field];
+            const code = data?.[col.valueField];
+
+            const isEmpty =
+              label === null ||
+              label === undefined ||
+              label === "" ||
+              String(label).trim() === "";
+
+            if (isEmpty) return null;
+
+            const colors = getStatusBadgeColor(col.family, code);
+
+            return (
+              <FieldWrapper {...params}>
+              <Chip
+                  label={label}
+                  size="small"
+                  sx={{
+                    height: `${badgeHeight}px`,
+                    fontSize: `${badgeFont}px`,
+                    fontWeight: 500,
+                    backgroundColor: colors.bg,
+                    color: colors.text,
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: `${badgeRadius}px`,
+                    "& .MuiChip-label": {
+                      px: 1
+                    }
+                  }}
+                />
+              </FieldWrapper>
+            );
+          },
+
+          sortable: !disableSorting
+        };
+      }
+      if (col.type === "icon") {
+        return {
+          ...col,
+
+          cellRenderer: ({ data }) => {
+            const code = data?.[col.valueField];
+
+            const config = getStatusIcon(col.family, code);
+
+            if (!config) return null;
+
+            const Icon = config.icon;
+
+            return (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon
+                  sx={{
+                    fontSize: rowHeight * 0.55,
+                    color: config.color
+                  }}
+                />
+              </div>
+            );
+          },
+
+          cellStyle: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        };
       }
 
       return {
@@ -612,7 +698,7 @@ const Table = ({
           onDoubleClick={handleDoubleClick}
           className={`fieldWrapper ${!params.colDef?.wrapText ? 'nowrap' : ''}`}
         >
-          {displayValue}
+          {params.children || displayValue}
         </Box>
       </>
     )
@@ -961,6 +1047,7 @@ const Table = ({
           <AgGridReact
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
+            ensureDomOrder={true}
             enableRangeSelection={true}
             columnDefs={finalColumns}
             domLayout={domLayout}

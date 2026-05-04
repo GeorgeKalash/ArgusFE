@@ -47,6 +47,9 @@ export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
