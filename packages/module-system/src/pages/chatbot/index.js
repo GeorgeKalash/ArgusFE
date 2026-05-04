@@ -94,12 +94,7 @@ export default function ChatPage() {
     loadConversations();
   }, []);
   
-  const buildNewChat = () => ({
-    id: Date.now(),
-    conversationId: "",
-    title: labels?.newChat || "New Chat",
-    messages: []
-  });
+  const buildNewChat = () => (newChat);
 
   const createNewChat = () => {
     const existingDraft = chats.find(
@@ -678,7 +673,7 @@ export default function ChatPage() {
 
   const filteredChats =
     chats.filter((chat) =>
-      chat.title?.toLowerCase()?.includes(
+      chat.title.toLowerCase()?.includes(
           searchText.toLowerCase()
         )
     );
