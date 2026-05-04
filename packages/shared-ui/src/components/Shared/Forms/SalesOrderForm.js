@@ -278,7 +278,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }
 
   function checkMinMaxAmount(amount, type, modType) {
-    let currentAmount = parseFloat(amount) || 0
+    let currentAmount = amount || 0
 
     if (type === modType) {
       if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
@@ -490,7 +490,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const muQty = newRow?.muQty ?? filteredItems?.qty
 
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update({ ...data, baseQty: parseFloat(newRow?.qty) * muQty })
+        update({ ...data, baseQty: newRow?.qty * muQty })
       }
     },
     {
@@ -962,7 +962,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     if (cycleButtonState.value == 1) {
       currentPctAmount =
         formik.values.currentDiscount < 0 || formik.values.currentDiscount > 100 ? 0 : formik.values.currentDiscount
-      currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(subtotal)) / 100
+      currentTdAmount = (currentPctAmount * subtotal) / 100
       currentDiscountAmount = currentPctAmount
 
       formik.setFieldValue('tdAmount', currentTdAmount)
@@ -973,7 +973,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         formik.values.currentDiscount < 0 || subtotal < formik.values.currentDiscount
           ? 0
           : formik.values.currentDiscount
-      currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(subtotal)) * 100
+      currentPctAmount = (currentTdAmount / subtotal) * 100
       currentDiscountAmount = currentTdAmount
       formik.setFieldValue('tdPct', currentPctAmount)
       formik.setFieldValue('tdAmount', currentTdAmount)
@@ -994,12 +994,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
-      basePrice: parseFloat(newRow?.basePrice) || 0,
+      basePrice: newRow?.basePrice || 0,
       volume: newRow?.volume || 0,
       weight: newRow?.weight,
       unitPrice: newRow?.unitPrice || 0,
-      upo: parseFloat(newRow?.upo) || 0,
-      qty: parseFloat(newRow?.qty),
+      upo: newRow?.upo || 0,
+      qty: newRow?.qty,
       extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,
       mdType: newRow?.mdType,
@@ -1056,7 +1056,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   const subTotal = getSubtotal(parsedItemsArray)
 
-  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.miscAmount)
+  const miscValue = formik.values.miscAmount == 0 ? 0 : formik.values.miscAmount
 
   const _footerSummary = getFooterTotals(parsedItemsArray, {
     totalQty: 0,
@@ -1064,8 +1064,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     totalVolume: 0,
     totalUpo: 0,
     sumVat: 0,
-    sumExtended: parseFloat(subTotal),
-    tdAmount: parseFloat(formik.values.tdAmount),
+    sumExtended: subTotal,
+    tdAmount: formik.values.tdAmount,
     net: 0,
     miscAmount: miscValue
   })
@@ -1079,18 +1079,18 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
-      tdAmount: parseFloat(currentDiscount),
+      tdAmount: currentDiscount,
       tdPlain: typeChange == 1,
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
       currentDiscount: currentDiscount,
       hiddenTdPct: tdPct,
-      hiddenTdAmount: parseFloat(tdAmount),
+      hiddenTdAmount: tdAmount,
       typeChange: typeChange
     })
 
-    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
+    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct || 0)
@@ -1106,7 +1106,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         qty: item?.qty,
         weight: item?.weight,
         extendedPrice: item?.extendedPrice,
-        baseLaborPrice: parseFloat(item?.baseLaborPrice),
+        baseLaborPrice: item?.baseLaborPrice,
         vatAmount: item?.vatAmount,
         tdPct: tdPct,
         taxDetails: formik.values.isVattable ? item.taxDetails : null
@@ -1121,7 +1121,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }
 
   function ShowMdValueErrorMessage(clientMaxDiscount, rowData, update) {
-    if (parseFloat(rowData.mdAmount) > clientMaxDiscount) {
+    if (rowData.mdAmount > clientMaxDiscount) {
       formik.setFieldValue('mdAmount', clientMaxDiscount)
       rowData.mdAmount = clientMaxDiscount
       const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
@@ -1287,7 +1287,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   useEffect(() => {
     if (reCal) {
-      let currentTdAmount = (parseFloat(formik.values.tdPct) * parseFloat(subtotal)) / 100
+      let currentTdAmount = (formik.values.tdPct * subtotal) / 100
       recalcGridVat(formik.values.tdType, formik.values.tdPct, currentTdAmount, formik.values.currentDiscount)
     }
   }, [subtotal])
@@ -1776,7 +1776,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     handleButtonClick={handleButtonClick}
                     ShowDiscountIcons={true}
                     onChange={e => {
-                      let discount = Number(e.target.value.replace(/,/g, ''))
+                      let discount = e.target.value
                       if (formik.values.tdType == 1) {
                         if (discount < 0 || subtotal < discount) {
                           discount = 0
@@ -1790,16 +1790,16 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     }}
                     onBlur={async e => {
                       setReCal(true)
-                      let discountAmount = Number(e.target.value.replace(/,/g, ''))
-                      let tdPct = Number(e.target.value.replace(/,/g, ''))
-                      let tdAmount = Number(e.target.value.replace(/,/g, ''))
+                      let discountAmount = e.target.value
+                      let tdPct = e.target.value
+                      let tdAmount = e.target.value
                       if (formik.values.tdType == 1) {
-                        tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
+                        tdPct = (discountAmount / subtotal) * 100
                         formik.setFieldValue('tdPct', tdPct)
                       }
 
                       if (formik.values.tdType == 2) {
-                        tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
+                        tdAmount = (discountAmount * subtotal) / 100
                         formik.setFieldValue('tdAmount', tdAmount)
                       }
 
