@@ -80,10 +80,7 @@ const JobTab = ({ labels, maxAccess, store }) => {
   const columns = [
     { 
       field: 'statusName', 
-      headerName: labels.status, 
-      type: 'badge',
-      family: 'document',
-      valueField: 'status',
+      headerName: labels.status,
       flex: 1 
     },
     { field: 'date', headerName: labels.date, flex: 1, type: 'date' }
