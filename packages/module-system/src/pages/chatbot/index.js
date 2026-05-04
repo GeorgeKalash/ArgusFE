@@ -678,9 +678,7 @@ export default function ChatPage() {
 
   const filteredChats =
     chats.filter((chat) =>
-      chat.title
-        .toLowerCase()
-        .includes(
+      chat.title?.toLowerCase()?.includes(
           searchText.toLowerCase()
         )
     );
