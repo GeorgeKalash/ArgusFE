@@ -345,6 +345,64 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
   }
 
+  const connectorRequest = body => {
+    return fetch(
+      process.env.NEXT_PUBLIC_CONNECTOR_URL + body.extension,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body.record)
+      }
+    )
+      .then(async response => {
+        if (!response.ok) {
+          const text = await response.text();
+          throw {
+            status: response.status,
+            message: text || "Request failed"
+          };
+        }
+
+        return response;
+      })
+      .catch(error => {
+        if (!body?.noHandleError) {
+          showError({
+            message:
+              error.message || error,
+            height:
+              error.status === 404 ||
+              error.status === 500
+                ? 400
+                : ""
+          });
+        }
+
+        if (body?.throwError) {
+          throw error;
+        }
+
+        return null;
+      });
+  };
+
+  const postConnectorRequest = async body => {
+    const response =
+      await connectorRequest(
+        body
+      );
+
+    return await response.json();
+  };
+
+  const connectorStreamRequest = async body => {
+    return await connectorRequest(
+      body
+    );
+  };
+
   const values = {
     getRequest,
     postRequest,
@@ -352,6 +410,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     postIdentityRequest,
     getMicroRequest,
     getRequestFullEndPoint,
+    connectorStreamRequest,
+    postConnectorRequest,
     LoadingOverlay,
     loading: activeRequests
   }

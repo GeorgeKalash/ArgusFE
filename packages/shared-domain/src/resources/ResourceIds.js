@@ -545,6 +545,7 @@ export const ResourceIds = {
   DSLReasons: 72107,
   TerminationReasons: 71110,
   GeneralSettings: 20600,
+  AIChatbot: 20602,
   JobInfos: 71207,
   EarnedLeave: 73304,
   OpenPaymentOrder: 31334,
