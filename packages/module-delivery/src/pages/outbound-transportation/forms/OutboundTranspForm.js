@@ -135,13 +135,13 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   }
 
   const totalVol = formik.values.tripOrders.reduce((volSum, row) => {
-    const volValue = parseFloat(row.soVolume) || 0
+    const volValue = row.soVolume || 0
 
     return volSum + volValue
   }, 0)
 
   const totalWeight = formik.values.tripOrders.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row.soWeight) || 0
+    const weightValue = row.soWeight || 0
 
     return weightSum + weightValue
   }, 0)
