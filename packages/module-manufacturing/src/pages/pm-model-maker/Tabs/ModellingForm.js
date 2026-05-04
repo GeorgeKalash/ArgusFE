@@ -24,6 +24,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { getDirtyFields } from '@argus/shared-utils/src/utils/getDirtyFields'
 
 export default function ModellingForm({ labels, access, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -206,6 +207,13 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       parameters: `_recordId=${recordId}`
     })
   }
+    useEffect(() => {
+      if (formik.dirty) {
+        console.log(
+          getDirtyFields(formik.values, formik.initialValues)
+        )
+      }
+    }, [formik.values])
 
   return (
     <FormShell
