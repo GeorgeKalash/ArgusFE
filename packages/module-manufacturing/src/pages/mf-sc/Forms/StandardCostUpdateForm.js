@@ -195,7 +195,7 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
   ]
 
   const totalAmount = reCal ? (formik.values?.items || []).reduce((sum, item) => {
-      return sum + (parseFloat(item?.value) || 0)
+      return sum + item?.value
     }, 0) 
     : (formik.values?.header?.amount || 0)
 
