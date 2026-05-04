@@ -11,7 +11,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import Form from './Form'
 
-const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId }) => {
+const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId, disabled }) => {
   const { platformLabels } = useContext(ControlContext)
   const { postRequest } = useContext(RequestsContext)
 
@@ -42,7 +42,7 @@ const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId })
   })
 
   return (    
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={disabled}>
       <VertLayout>
         <Grid item xs={6}>
           <ResourceComboBox
@@ -52,6 +52,7 @@ const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId })
             valueField='recordId'
             displayField='name'
             maxAccess={maxAccess}
+            readOnly={disabled}
             values={formik.values}
             onChange={(event, newValue) => {
               formik.setFieldValue('folderId', newValue?.recordId || 1)

@@ -287,6 +287,10 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
   }
 
+  useEffect(() => {
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
+
   const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
     (acc, row) => {
       const qtyValue = parseFloat(row?.qty) || 0
@@ -330,7 +334,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
+        imgSrc: '/images/TableIcons/imgSerials.png',
         hidden: false
       }
     } else {
@@ -989,9 +993,9 @@ export default function MaterialsTransferForm({ recordId, window }) {
                     displayField='name'
                     values={formik?.values}
                     onChange={async (_, newValue) => {
-                      onChangeDT(newValue?.recordId)
-                      formik.setFieldValue('dtId', newValue?.recordId || '')
                       changeDT(newValue)
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
+
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     maxAccess={maxAccess}

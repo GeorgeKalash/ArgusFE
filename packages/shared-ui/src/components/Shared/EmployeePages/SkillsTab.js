@@ -10,10 +10,10 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import SkillsForm from './SkillsForm'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
+import SkillsForm from './SkillsForm'
 
-const SkillsTab = ({ labels, maxAccess, store }) => {
+const SkillsTab = ({ labels, maxAccess, store, isActive }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -99,7 +99,8 @@ const SkillsTab = ({ labels, maxAccess, store }) => {
         labels,
         maxAccess,
         recordId: id,
-        employeeId: recordId
+        employeeId: recordId,
+        isActive
       },
       width: 600,
       height: 500,
@@ -110,7 +111,7 @@ const SkillsTab = ({ labels, maxAccess, store }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} />
+        <GridToolbar onAdd={add} disableAdd={!isActive} maxAccess={maxAccess} />
       </Fixed>
       <Grow>
         <Table
@@ -119,7 +120,7 @@ const SkillsTab = ({ labels, maxAccess, store }) => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDelete={del}
+          onDelete={isActive ? del : null}
           pageSize={50}
           pagination={false}
           refetch={refetch}

@@ -10,7 +10,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import Form from './Form'
 
-const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
+const AttachmentForm = ({ resourceId, recordId, seqNo, disabled, window }) => {
   const { platformLabels } = useContext(ControlContext)
   const fileUploadRef = useRef(null)
 
@@ -37,7 +37,7 @@ const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
   })
 
   return (
-    <Form onSave={formik.handleSubmit}>
+    <Form onSave={formik.handleSubmit} disabledSubmit={disabled}>
       <VertLayout>
         <Grow>
           <FileUpload ref={fileUploadRef} resourceId={resourceId} seqNo={seqNo} recordId={recordId} />

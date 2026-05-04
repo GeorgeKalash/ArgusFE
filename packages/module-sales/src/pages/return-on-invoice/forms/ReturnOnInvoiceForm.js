@@ -314,12 +314,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   const onCondition = row => {
     if (row.trackBy == 1) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
+        imgSrc: '/images/TableIcons/imgSerials.png',
         hidden: false
       }
     } else if (row.trackBy == 2) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/lot.png').default.src,
+        imgSrc: '/images/buttonsIcons/lot.png',
         hidden: false
       }
     } else {
@@ -835,7 +835,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc:  require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+              imgSrc:  '/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {

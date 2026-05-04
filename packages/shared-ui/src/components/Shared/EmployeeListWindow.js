@@ -2,26 +2,31 @@ import { Grid, Box, Typography } from '@mui/material'
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useContext, useEffect, useRef, useState } from 'react'
-import ProfileForm from '../Forms/ProfileForm'
-import JobTab from '../Forms/JobTab'
-import HiringTab from '../Forms/HiringTab'
-import LeavesTab from '../Forms/LeavesTab'
-import SkillsTab from '../Forms/SkillsTab'
-import UserDefinedTab from '../Forms/UserDefinedTab'
 import AttachmentList from '@argus/shared-ui/src/components/Shared/AttachmentList'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { formatDateMDY } from '@argus/shared-domain/src/lib/date-helper'
+import ProfileForm from '@argus/shared-ui/src/components/Shared/EmployeePages/ProfileForm'
+import JobTab from '@argus/shared-ui/src/components/Shared/EmployeePages/JobTab'
+import LeavesTab from '@argus/shared-ui/src/components/Shared/EmployeePages/LeavesTab'
+import HiringTab from '@argus/shared-ui/src/components/Shared/EmployeePages/HiringTab'
+import SkillsTab from '@argus/shared-ui/src/components/Shared/EmployeePages/SkillsTab'
+import UserDefinedTab from '@argus/shared-ui/src/components/Shared/EmployeePages/UserDefinedTab'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-const EmployeeListWindow = ({ recordId, labels, maxAccess, window }) => {
+export default function EmployeeListWindow ({ recordId, employeeStatus, onSuccess, window}) {
   const [activeTab, setActiveTab] = useState(0)
-  const [store, setStore] = useState({ recordId: recordId || null, hireDate: null })
+  const isActive = employeeStatus ? employeeStatus == 1 : true
+  const [store, setStore] = useState({ recordId: recordId || null, hireDate: null, isActive })
   const { getRequest } = useContext(RequestsContext)
   const [quickView, setQuickView] = useState(null)
-
   const imageUploadRef = useRef(null)
+
+  const { labels, access: maxAccess } = useResourceParams({ datasetId: ResourceIds.EmployeeFilter, editMode: !!recordId})
+  useSetWindow({ title: labels.employee, window })
 
   const tabs = [
     { label: labels.Profile },
@@ -102,35 +107,37 @@ const EmployeeListWindow = ({ recordId, labels, maxAccess, window }) => {
             maxAccess={maxAccess}
             imageUploadRef={imageUploadRef}
             mainWindow={window}
+            isActive={store.isActive}
+            onSuccess={onSuccess}
           />
         </CustomTabPanel>
 
         <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
-          <JobTab store={store} labels={labels} maxAccess={maxAccess} />
+          <JobTab store={store} labels={labels} maxAccess={maxAccess} isActive={store.isActive} />
         </CustomTabPanel>
 
         <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
-          <LeavesTab store={store} labels={labels} maxAccess={maxAccess} />
+          <LeavesTab store={store} labels={labels} maxAccess={maxAccess} isActive={store.isActive} />
         </CustomTabPanel>
 
         <CustomTabPanel index={3} value={activeTab} maxAccess={maxAccess}>
-          <HiringTab store={store} labels={labels} maxAccess={maxAccess} />
+          <HiringTab store={store} labels={labels} maxAccess={maxAccess} isActive={store.isActive} />
         </CustomTabPanel>
 
         <CustomTabPanel index={4} value={activeTab} maxAccess={maxAccess}>
-          <AttachmentList resourceId={ResourceIds.Files} recordId={recordId} isNotTab={recordId} />
+          <AttachmentList resourceId={ResourceIds.Files} recordId={recordId} isNotTab={recordId} isActive={store.isActive} />
         </CustomTabPanel>
 
         <CustomTabPanel index={5} value={activeTab} maxAccess={maxAccess}>
-          <SkillsTab store={store} labels={labels} maxAccess={maxAccess} />
+          <SkillsTab store={store} labels={labels} maxAccess={maxAccess} isActive={store.isActive} />
         </CustomTabPanel>
 
         <CustomTabPanel index={6} value={activeTab} maxAccess={maxAccess}>
-          <UserDefinedTab store={store} maxAccess={maxAccess} />
+          <UserDefinedTab store={store} maxAccess={maxAccess} isActive={store.isActive} />
         </CustomTabPanel>
       </Grid>
     </Grid>
   )
 }
-
-export default EmployeeListWindow
+EmployeeListWindow.width = 1000
+EmployeeListWindow.height = 700
