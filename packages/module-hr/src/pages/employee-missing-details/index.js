@@ -87,7 +87,8 @@ export default function EmployeeMissingDetails () {
         fieldId,
         status,
         maxAccess: access,
-        labels
+        labels,
+        onSuccess: fetchGridData
       },
       height: 680,
       width: 1200,

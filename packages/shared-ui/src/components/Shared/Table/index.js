@@ -195,23 +195,28 @@ const Table = ({
       onSelectionChanged()
     }
     if (props?.gridData && paginationType !== 'api' && pageSize) {
+    const getIsSame = (prevList, newList) => {
+        return (
+          prevList.length === newList?.length &&
+          prevList.every((prevRow, index) => {
+            const nextRow = newList?.[index]
+            if (!nextRow) return false
+
+            const prevKeys = Object.keys(prevRow)
+            if (prevKeys.length !== Object.keys(nextRow).length) return false
+
+            return prevKeys.every(key => prevRow[key] === nextRow[key])
+          })
+        )
+      }
+
       if (page) {
         const start = (page - 1) * pageSize
         const end = page * pageSize
         const slicedGridData = props?.gridData?.list?.slice(start, end)
-       setGridData(prev => {
-          const isSame =
-            (prev?.list || []).length === slicedGridData.length &&
-            (prev?.list || []).every((prevRow, index) => {
-              const nextRow = slicedGridData[index]
-              if (!nextRow) return false
 
-              const prevKeys = Object.keys(prevRow)
-              if (prevKeys.length !== Object.keys(nextRow).length) return false
-
-              return prevKeys.every(key => prevRow[key] === nextRow[key])
-            })
-
+        setGridData(prev => {
+          const isSame = getIsSame(prev?.list || [], slicedGridData)
           if (isSame) return prev
 
           return {
@@ -219,9 +224,22 @@ const Table = ({
             list: slicedGridData
           }
         })
+
         setStartAt(start)
       } else {
-        setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+        const slicedGridData = pageSize
+          ? props?.gridData?.list?.slice(0, pageSize)
+          : props?.gridData?.list
+
+        setGridData(prev => {
+          const isSame = getIsSame(prev?.list || [], slicedGridData)
+          if (isSame) return prev
+
+          return {
+            ...props.gridData,
+            list: slicedGridData
+          }
+        })
       }
     }
   }, [props?.gridData])

@@ -17,7 +17,7 @@ import UserDefinedTab from '@argus/shared-ui/src/components/Shared/EmployeePages
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-export default function EmployeeListWindow ({ recordId, employeeStatus, window}) {
+export default function EmployeeListWindow ({ recordId, employeeStatus, onSuccess, window}) {
   const [activeTab, setActiveTab] = useState(0)
   const isActive = employeeStatus ? employeeStatus == 1 : true
   const [store, setStore] = useState({ recordId: recordId || null, hireDate: null, isActive })
@@ -108,6 +108,7 @@ export default function EmployeeListWindow ({ recordId, employeeStatus, window})
             imageUploadRef={imageUploadRef}
             mainWindow={window}
             isActive={store.isActive}
+            onSuccess={onSuccess}
           />
         </CustomTabPanel>
 

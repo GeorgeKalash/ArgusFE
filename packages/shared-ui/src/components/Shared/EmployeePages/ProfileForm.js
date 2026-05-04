@@ -5,7 +5,6 @@ import { useContext, useEffect } from 'react'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
@@ -24,15 +23,11 @@ import CustomRadioButtonGroup from '@argus/shared-ui/src/components/Inputs/Custo
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import TerminationForm from './TerminationForm'
 
-const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData, mainWindow, isActive }) => {
+const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData, mainWindow, onSuccess, isActive }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
   const { stack } = useWindow()
-
-  const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.EmployeeChart.page
-  })
 
   const { formik } = useForm({
     initialValues: {
@@ -113,7 +108,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
 
         await imageUploadRef.current.submit()
       }
-      invalidate()
+      onSuccess()
       getData(res.recordId)
       toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
     }
@@ -153,7 +148,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
       employeeId: recordId,
       maxAccess,
       mainWindow,
-      onSuccess: invalidate
+      onSuccess
     },
     width: 600,
     height: 450,

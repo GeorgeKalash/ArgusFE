@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -9,7 +9,7 @@ import EmployeeListWindow from '@argus/shared-ui/src/components/Shared/EmployeeL
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
-export default function EmployeeMissingList ({labels, maxAccess, fieldId, status}) {
+export default function EmployeeMissingList ({labels, maxAccess, fieldId, status, onSuccess: refetch}) {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
@@ -29,7 +29,8 @@ export default function EmployeeMissingList ({labels, maxAccess, fieldId, status
   }
 
   const {
-    query: { data }
+    query: { data },
+    invalidate: detailsRefresh
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ReportRepository.EmployeeMissingDetails.RT107b,
@@ -85,12 +86,18 @@ export default function EmployeeMissingList ({labels, maxAccess, fieldId, status
     }
   ]
 
+  function onSuccess () {
+    detailsRefresh()
+    refetch()
+  }
+
   function openForm(obj) {
     stack({
       Component: EmployeeListWindow,
       props: {
         recordId: obj?.recordId,
-        employeeStatus: obj?.activeStatus
+        employeeStatus: obj?.activeStatus,
+        onSuccess
       }
     })
   }  

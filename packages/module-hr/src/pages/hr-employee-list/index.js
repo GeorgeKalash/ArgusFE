@@ -147,7 +147,8 @@ const EmployeeList = () => {
       Component: EmployeeListWindow,
       props: {
         recordId: obj?.recordId,
-        employeeStatus: obj?.activeStatus
+        employeeStatus: obj?.activeStatus,
+        onSuccess: invalidate
       }
     })
   }
