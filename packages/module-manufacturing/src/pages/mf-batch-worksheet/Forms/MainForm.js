@@ -338,23 +338,11 @@ export default function MainForm({ labels, access, store, setStore, window }) {
     }
   ]
 
-  const totalPctOfBatch = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => {
-    const value = parseFloat(row?.pctOfBatch?.toString().replace(/,/g, '')) || 0
+  const totalPctOfBatch = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => sum + row?.pctOfBatch || 0, 0)
 
-    return sum + value
-  }, 0)
+  const totalQtyOut = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => sum + row?.qtyOut || 0, 0)
 
-  const totalQtyOut = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => {
-    const value = parseFloat(row?.qtyOut?.toString().replace(/,/g, '')) || 0
-
-    return sum + value
-  }, 0)
-
-  const totalVariation = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => {
-    const value = parseFloat(row?.variation?.toString().replace(/,/g, '')) || 0
-
-    return sum + value
-  }, 0)
+  const totalVariation = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => sum + row?.variation || 0, 0)
 
   return (
     <FormShell
