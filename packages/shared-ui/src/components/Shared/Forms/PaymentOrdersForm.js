@@ -156,7 +156,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
         dirtyField: DIRTYFIELD_RATE
       })
 
-      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('baseAmount', updatedRateRow?.baseAmount.toFixed(2) || 0)
       formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
@@ -515,7 +515,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
                     rateCalcMethod: formik.values?.rateCalcMethod,
                     dirtyField: DIRTYFIELD_RATE
                   })
-                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                  formik.setFieldValue('baseAmount', updatedRateRow?.baseAmount.toFixed(2) || 0)
                   formik.setFieldValue('amount', e.target.value)
                 }}
                 onClear={() => {
