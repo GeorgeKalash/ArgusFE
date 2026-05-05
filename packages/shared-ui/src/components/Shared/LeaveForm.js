@@ -25,6 +25,7 @@ import dayjs from 'dayjs'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { DataGrid } from './DataGrid'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export const LeaveForm = ({ recordId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -272,7 +273,7 @@ export const LeaveForm = ({ recordId, window }) => {
       }
     })
 
-    totalDays = parseFloat(totalDays.toFixed(2))
+    totalDays = roundTo(totalDays)
 
     return { totalHours, totalDays }
   }
