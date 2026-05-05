@@ -20,7 +20,7 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import { useRefBehavior } from '@argus/shared-hooks/src/hooks/useReferenceProxy'
+import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function DesignsForm({ labels, access, store, setStore }) {
@@ -33,10 +33,10 @@ export default function DesignsForm({ labels, access, store, setStore }) {
     endpointId: ManufacturingRepository.Design.page
   })
 
-  const { changeDT, maxAccess } = useRefBehavior({
+  const { changeDT, maxAccess } = useFieldBehavior({
     access,
-    readOnlyOnEditMode: false,
-    name: 'reference'
+    fieldName: 'reference',
+    editMode: false
   })
 
   const { formik } = useForm({
@@ -112,7 +112,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
           parameters: `_recordId=${res?.record?.groupId}`
         })
 
-        changeDT(res2.record)
+        changeDT(res2.record.nraId)
       }
 
       formik.setValues({
@@ -150,7 +150,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
-                      changeDT(newValue)
+                      changeDT(newValue?.nraId)
                     }}
                     error={formik.touched.groupId && Boolean(formik.errors.groupId)}
                     maxAccess={maxAccess}
@@ -159,7 +159,6 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                 <Grid item xs={12}>
                   <CustomTextField
                     name='reference'
-                    readOnly={editMode}
                     label={labels.reference}
                     value={formik.values.reference}
                     onChange={formik.handleChange}
