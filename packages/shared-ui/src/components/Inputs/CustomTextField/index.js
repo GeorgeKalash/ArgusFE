@@ -211,7 +211,7 @@ const CustomTextField = ({
               </IconButton>
             )}
 
-            {(allowClear || (!clearable && !readOnly && (value || value === 0))) && onClear && (
+            {(allowClear || (!clearable && !_readOnly && (value || value === 0))) && onClear && (
               <IconButton
                 className={inputs.iconButton}
                 tabIndex={-1}
