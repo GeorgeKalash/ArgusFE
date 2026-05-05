@@ -31,7 +31,7 @@ import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDial
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-import { getDirtyFields } from '@argus/shared-utils/src/utils/getDirtyFields'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -432,12 +432,12 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
 
           let newSubtotal = (newRow?.amount || 0) * (100 / (100 + (vatPct || 0))) || 0
           update({
-            subTotal: Number((newSubtotal || 0).toFixed(2)),
-            vatAmount: Number(((newRow?.amount || 0) - (newSubtotal || 0)).toFixed(2))
+            subTotal: roundTo(newSubtotal),
+            vatAmount: roundTo(((newRow?.amount || 0) - (newSubtotal || 0)))
           })
         } else {
           update({
-            subTotal: Number((newRow.amount || 0).toFixed(2)),
+            subTotal: roundTo(newRow.amount),
             vatAmount: 0
           })
         }
@@ -458,12 +458,12 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
           const newSubTotal = amount * (100 / (100 + vatPct))
 
           update({
-            subTotal: Number((newSubTotal || 0).toFixed(2)),
-            vatAmount: Number(((amount || 0) - (newSubTotal || 0)).toFixed(2))
+            subTotal: roundTo(newSubTotal),
+            vatAmount: roundTo(((amount || 0) - (newSubTotal || 0)))
           })
         } else {
           update({
-            subTotal: Number((newRow.amount || 0).toFixed(2)),
+            subTotal: roundTo(newRow.amount),
             vatAmount: 0
           })
         }
@@ -742,7 +742,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                         rateCalcMethod: formik.values?.rateCalcMethod,
                         dirtyField: DIRTYFIELD_RATE
                       })
-                      formik.setFieldValue('baseAmount', updatedRateRow?.baseAmount.toFixed(2) || 0)
+                      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
                       formik.setFieldValue('amount', e.target.value)
                     }}
                     onClear={() => {
