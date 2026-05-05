@@ -119,7 +119,7 @@ const JobOrderWizard = () => {
       field: 'producedWeight',
       headerName: labels.producedWeight,
       flex: 1,
-      type: 'number'
+      type: { field: 'number', decimal: 3 }
     },
     {
       field: 'statusName',
