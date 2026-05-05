@@ -182,6 +182,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const editMode = !!formik.values.recordId
 
   async function getPaymentOrder(recordId) {
+    const vatPct = await getDefaultVAT()
     const res = await getRequest({
       extension: FinancialRepository.PaymentOrders.get,
       parameters: `_recordId=${recordId}`
@@ -209,6 +210,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     formik.resetForm({
       values: {
         ...res.record,
+        vatPct,
         date: formatDateFromApi(res.record.date),
         expenses: expensesList
       }

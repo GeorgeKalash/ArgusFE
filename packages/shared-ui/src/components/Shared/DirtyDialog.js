@@ -6,7 +6,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 const DirtyDialog = ({ window, onConfirm, fullScreen }) => {
   const { platformLabels } = useContext(ControlContext)
 
-  useSetWindow({title: platformLabels.Warning, window})
+  useSetWindow({ title: platformLabels.Warning, window })
 
   return (
     <ConfirmationDialog

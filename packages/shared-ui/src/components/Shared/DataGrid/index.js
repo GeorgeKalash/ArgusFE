@@ -552,10 +552,8 @@ export function DataGrid({
 
               const checked = e.target.checked
 
-              params.node.setDataValue(params.colDef.field, checked)
-
               const changes = { [params.colDef.field]: checked }
-              setData(changes, params)
+              params.node.updateData({ ...params.data, ...changes })
               commit({ ...params.data, ...changes })
 
               if (params.colDef.updateOn !== 'blur') {
