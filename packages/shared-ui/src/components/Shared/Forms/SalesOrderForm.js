@@ -144,6 +144,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     weight: '',
     qty: 0,
     serializedAddress: '',
+    sourceId: null,
+    sourceNo: '',
     items: [
       {
         id: 1,
