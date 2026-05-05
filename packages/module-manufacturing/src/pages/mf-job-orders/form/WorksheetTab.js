@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { Grid } from '@mui/material'
 import WorksheetWindow from '../../mf-worksheet/window/WorksheetWindow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }) {
 
@@ -45,6 +48,18 @@ export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }
       flex: 1
     },
     {
+      field: 'eopQty',
+      headerName: labels.eopQty,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'wipPcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'statusName',
       headerName: labels.status,
       type: 'badge',
@@ -68,6 +83,16 @@ export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }
     })
   }
 
+  const totalPcs = (list || []).reduce(
+    (sum, item) => sum + (item.wipPcs || 0),
+    0
+  );
+
+  const totalQty = (list || []).reduce(
+    (sum, item) => sum + (item.eopQty || 0),
+    0
+  );
+
   return (
     <VertLayout>
       <Grow>
@@ -86,6 +111,28 @@ export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }
           pagination={false}
         />
       </Grow>
+      <Fixed>
+        <Grid container spacing={2} p={2}>
+          <Grid item xs={7}/>
+          <Grid item xs={2}>
+            <CustomNumberField
+                label={labels.totalQty}
+                value={totalQty}
+                readOnly
+                align='right'
+              />
+          </Grid>
+          <Grid item xs={2}>
+            <CustomNumberField
+                label={labels.totalPcs}
+                value={totalPcs}
+                readOnly
+                align='right'
+              />
+          </Grid>
+          <Grid item xs={1}/>
+        </Grid>
+      </Fixed>
     </VertLayout>
   )
 }
