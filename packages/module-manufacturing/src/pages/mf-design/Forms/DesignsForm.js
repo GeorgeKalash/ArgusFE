@@ -159,7 +159,6 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                 <Grid item xs={12}>
                   <CustomTextField
                     name='reference'
-                    readOnly={editMode}
                     label={labels.reference}
                     value={formik.values.reference}
                     onChange={formik.handleChange}
