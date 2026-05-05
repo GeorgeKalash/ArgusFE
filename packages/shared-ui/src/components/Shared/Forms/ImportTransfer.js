@@ -7,7 +7,7 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { ResourceLookup } from '../ResourceLookup'
+import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import * as yup from 'yup'
 
 export default function ImportTransfer({ maxAccess, labels, onImport, window }) {
@@ -47,7 +47,6 @@ export default function ImportTransfer({ maxAccess, labels, onImport, window }) 
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_dgId=${SystemFunction.MaterialTransfer}&_startAt=0&_pageSize=1000`}
-                filter={item => item.activeStatus === 1}
                 name='dtId'
                 label={labels.documentType}
                 valueField='recordId'
@@ -57,7 +56,13 @@ export default function ImportTransfer({ maxAccess, labels, onImport, window }) 
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={async (_, newValue) => formik.setFieldValue('dtId', newValue?.recordId || null)}
+                onChange={async (_, newValue) => {
+                  formik.setValues({
+                    transferId: null,
+                    transferRef: '',
+                    dtId: newValue?.recordId || null
+                  })
+                }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}
               />

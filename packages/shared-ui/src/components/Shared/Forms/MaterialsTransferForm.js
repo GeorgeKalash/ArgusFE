@@ -32,7 +32,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-import CustomButton from '../../Inputs/CustomButton'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ImportTransfer from '@argus/shared-ui/src/components/Shared/Forms/ImportTransfer'
 
 export default function MaterialsTransferForm({ recordId, window }) {
@@ -891,9 +891,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
 
     if (response?.list && refetchSerials) {
       const response2 = await getSerials(recordId)
-      if (response2?.count) {
-        serials.current = response2
-      }
+      if (response2?.count) serials.current = response2
+      else serials.current = []
     }
 
     return response
