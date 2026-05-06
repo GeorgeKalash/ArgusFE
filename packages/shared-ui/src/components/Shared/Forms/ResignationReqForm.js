@@ -101,17 +101,19 @@ export default function ResignationReqForm({ recordId, window }) {
       extension: EmployeeRepository.QuickView.get,
       parameters: `_recordId=${res?.employeeId}&_asOfDate=${formatDateForGetApI(formatDateFromApi(res?.date))}`
     }).then(employeeRes => {
-      formik.setValues({
-        ...formik.values,
-        ...res,
-        effectiveDate: formatDateFromApi(res?.effectiveDate),
-        date: formatDateFromApi(res?.date),
-        hireDate: formatDateFromApi(employeeRes?.record?.hireDate),
-        department: employeeRes?.record?.departmentName,
-        position: employeeRes?.record?.positionName,
-        branch: employeeRes?.record?.branchName,
-        serviceDuration: employeeRes?.record?.serviceDuration,
-        netSalary: employeeRes?.record?.salary
+      formik.resetForm({
+        values: {
+          ...formik.values,
+          ...res,
+          effectiveDate: formatDateFromApi(res?.effectiveDate),
+          date: formatDateFromApi(res?.date),
+          hireDate: formatDateFromApi(employeeRes?.record?.hireDate),
+          department: employeeRes?.record?.departmentName,
+          position: employeeRes?.record?.positionName,
+          branch: employeeRes?.record?.branchName,
+          serviceDuration: employeeRes?.record?.serviceDuration,
+          netSalary: employeeRes?.record?.salary
+        }
       })
     })
   }
@@ -122,7 +124,10 @@ export default function ResignationReqForm({ recordId, window }) {
         extension: EmployeeRepository.QuickView.get,
         parameters: `_recordId=${employeeId}&_asOfDate=${formatDateForGetApI(formik?.values?.date)}`
       }).then(employeeRes => {
-        formik.setFieldValue('hireDate', formatDateFromApi(employeeRes?.record?.hireDate) || null)
+        const hireDate = formatDateFromApi(employeeRes?.record?.hireDate) || null
+
+        if (hireDate) hireDate.dateOnly = true
+        formik.setFieldValue('hireDate', hireDate)
         formik.setFieldValue('department', employeeRes?.record?.departmentName || null)
         formik.setFieldValue('position', employeeRes?.record?.positionName || null)
         formik.setFieldValue('branch', employeeRes?.record?.branchName || null)
