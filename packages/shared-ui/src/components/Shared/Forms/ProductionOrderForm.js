@@ -32,6 +32,7 @@ import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function ProductionOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -65,36 +66,38 @@ export default function ProductionOrderForm({ recordId, window }) {
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
 
+  const initialValues = {
+    recordId,
+    dtId: null,
+    reference: '',
+    plantId,
+    lineId: null,
+    notes: '',
+    date: new Date(),
+    status: 1,
+    rows: [
+      {
+        id: 1,
+        poId: recordId,
+        sku: '',
+        itemName: '',
+        qty: null,
+        pcs: null,
+        designId: null,
+        jobCount: null,
+        notes: '',
+        seqNo: '',
+        lineId: null,
+        lineRef: ''
+      }
+    ]
+  }
+  
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     conditionSchema: ['rows'],
-    initialValues: {
-      recordId,
-      dtId: null,
-      reference: '',
-      plantId,
-      lineId: null,
-      notes: '',
-      date: new Date(),
-      status: 1,
-      rows: [
-        {
-          id: 1,
-          poId: recordId,
-          sku: '',
-          itemName: '',
-          qty: null,
-          pcs: null,
-          designId: null,
-          jobCount: null,
-          notes: '',
-          seqNo: '',
-          lineId: null,
-          lineRef: ''
-        }
-      ]
-    },
+    initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
@@ -142,11 +145,10 @@ export default function ProductionOrderForm({ recordId, window }) {
 
   const totalQty = formik.values?.rows
     ?.reduce((qtySum, row) => {
-      const qtyValue = parseFloat(row.qty) || 0
+      const qtyValue = row.qty || 0
 
       return qtySum + qtyValue
     }, 0)
-    .toFixed(2)
 
   async function onPost() {
     const errors = await formik.validateForm()
@@ -197,12 +199,14 @@ export default function ProductionOrderForm({ recordId, window }) {
 
       formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
 
-      return res
+      return res?.record?.plantId
     }
   }
 
   useEffect(() => {
-    getDTD(formik?.values?.dtId)
+    if (!recordId) {
+      getDTD(formik?.values?.dtId)
+    }
   }, [formik.values.dtId])
 
   const columns = [
@@ -447,12 +451,14 @@ export default function ProductionOrderForm({ recordId, window }) {
           deliveryDate: formatDateFromApi(item.deliveryDate),
           id: index + 1
         }))
-      : formik.initialValues.rows
+      : initialValues.rows
 
-    formik.setValues({
-      ...res?.record?.header,
-      date: formatDateFromApi(res?.record?.header?.date),
-      rows: modifiedList
+    formik.resetForm({
+      values: {
+        ...res?.record?.header,
+        date: formatDateFromApi(res?.record?.header?.date),
+        rows: modifiedList
+      }
     })
 
     return res?.record
@@ -712,7 +718,7 @@ export default function ProductionOrderForm({ recordId, window }) {
             error={formik.errors.rows}
             name='rows'
             maxAccess={maxAccess}
-            initialValues={formik?.initialValues?.rows?.[0]}
+            initialValues={initialValues?.rows?.[0]}
             columns={columns}
             allowAddNewLine={!isPosted && !isClosed}
             allowDelete={!isPosted && !isClosed}
@@ -725,7 +731,7 @@ export default function ProductionOrderForm({ recordId, window }) {
               name='totalQty'
               label={labels.totalQty}
               maxAccess={maxAccess}
-              value={totalQty}
+              value={roundTo(totalQty)}
               maxLength='30'
               readOnly
               error={formik.touched.totalQty && Boolean(formik.errors.totalQty)}
