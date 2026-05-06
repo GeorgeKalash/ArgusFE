@@ -126,10 +126,11 @@ export default function SketchForm({ recordId, invalidate, window }) {
       parameters: `_recordId=${recordId}`
     })
 
-    res.record.date = formatDateFromApi(res?.record?.date)
-
-    formik.setValues({
-      ...res.record
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: formatDateFromApi(res?.record?.date)
+      }
     })
   }
 
@@ -274,7 +275,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     required
                     values={formik.values}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('source', newValue?.key || null)
+                      formik.setFieldValue('source', Number(newValue?.key) || null)
                     }}
                     readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
