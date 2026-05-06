@@ -103,14 +103,16 @@ export default function PayrollListForm({ recordId, window }) {
         parameters: `_recordId=${recordId}`
       })
 
-      formik.setValues({
-        ...res.record,
-        date: formatDateFromApi(res.record.date),
-        payDate: formatDateFromApi(res.record.payDate),
-        startDate: formatDateFromApi(res.record.startDate),
-        endDate: formatDateFromApi(res.record.endDate),
-        taStartDate: formatDateFromApi(res.record.taStartDate),
-        taEndDate: formatDateFromApi(res.record.taEndDate)
+      formik.resetForm({
+        values: {
+          ...res.record,
+          date: formatDateFromApi(res.record.date),
+          payDate: formatDateFromApi(res.record.payDate),
+          startDate: formatDateFromApi(res.record.startDate),
+          endDate: formatDateFromApi(res.record.endDate),
+          taStartDate: formatDateFromApi(res.record.taStartDate),
+          taEndDate: formatDateFromApi(res.record.taEndDate)
+        }
       })
     }
   }
