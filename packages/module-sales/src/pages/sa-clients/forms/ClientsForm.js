@@ -19,20 +19,20 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 import { BusinessPartnerRepository } from '@argus/repositories/src/repositories/BusinessPartnerRepository'
-import { useRefBehavior } from '@argus/shared-hooks/src/hooks/useReferenceProxy'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
+import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
 
 const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
-  const { changeDT, maxAccess } = useRefBehavior({
-    access: access,
-    readOnlyOnEditMode: false,
-    name: 'reference'
+  const { changeDT, maxAccess } = useFieldBehavior({
+    access,
+    fieldName: 'reference',
+    editMode: false
   })
 
   const invalidate = useInvalidate({
@@ -89,12 +89,26 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
     })()
   }, [])
 
+  async function getNraValue (groupId) {
+    if (!groupId) return
+
+    const res = await getRequest({
+      extension: SaleRepository.ClientGroups.get,
+      parameters: `_recordId=${groupId}`
+    })
+    
+    return res?.record?.nraId || null
+  }
+
   const getData = async recordId => {
     if (recordId) {
       const res = await getRequest({
         extension: SaleRepository.Client.get,
         parameters: `_recordId=${recordId}`
       })
+
+      const nraId = await getNraValue(res?.record?.cgId)
+      changeDT(nraId)
 
       formik.setValues({
         ...res.record,
@@ -149,9 +163,9 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('cgId', newValue?.recordId || '')
-                  changeDT(newValue)
+                  changeDT(newValue?.nraId)
                 }}
                 error={formik.touched.cgId && Boolean(formik.errors.cgId)}
               />
@@ -159,7 +173,6 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
-                readOnly={editMode}
                 label={labels.reference}
                 value={formik.values.reference}
                 maxAccess={maxAccess}

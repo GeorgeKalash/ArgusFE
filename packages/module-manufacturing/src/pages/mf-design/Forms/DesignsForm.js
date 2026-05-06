@@ -148,7 +148,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     displayField={'name'}
                     readOnly={!!editMode}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
                       changeDT(newValue?.nraId)
                     }}

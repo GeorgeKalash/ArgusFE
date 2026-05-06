@@ -15,7 +15,6 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import { useRefBehavior } from '@argus/shared-hooks/src/hooks/useReferenceProxy'
 import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
@@ -26,6 +25,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 import PrintConfirmationDialog from './PrintConfirmationDialog'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -46,10 +46,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   })
   const imageUploadRef = useRef(null)
 
-  const { changeDT, maxAccess } = useRefBehavior({
-    access: access,
-    readOnlyOnEditMode: store.recordId,
-    name: 'sku'
+  const { changeDT, maxAccess } = useFieldBehavior({
+    access,
+    fieldName: 'sku',
+    editMode: store.recordId
   })
 
   const { formik } = useForm({
@@ -365,8 +365,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     ]}
                     required
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      changeDT(newValue)
+                    onChange={(_, newValue) => {
+                      changeDT(newValue?.nraId)
 
                       setStore(prevStore => ({
                         ...prevStore,

@@ -19,17 +19,17 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
-import { useRefBehavior } from '@argus/shared-hooks/src/hooks/useReferenceProxy'
+import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
 
 export default function BPMasterDataForm({ labels, maxAccess: access, invalidate, store, setStore, window }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const { changeDT, maxAccess } = useRefBehavior({
+  const { changeDT, maxAccess } = useFieldBehavior({
     access,
-    readOnlyOnEditMode: false,
-    name: 'reference'
+    fieldName: 'reference',
+    editMode: !!recordId
   })
 
   const { formik } = useForm({
@@ -221,9 +221,9 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
                     required
                     readOnly={editMode}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
-                      changeDT(newValue)
+                      changeDT(newValue?.nraId)
                     }}
                     error={formik.touched.groupId && Boolean(formik.errors.groupId)}
                   />

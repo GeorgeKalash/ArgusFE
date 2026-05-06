@@ -29,7 +29,8 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
   })
 
   const { maxAccess, changeDT } = useFieldBehavior({
-    access: access,
+    access,
+    fieldName: 'reference',
     editMode: !!recordId
   })
 
@@ -71,11 +72,6 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
       })
 
       if (!obj.recordId) {
-        setStore({
-          recordId: response.recordId,
-          name: obj.name
-        })
-        formik.setFieldValue('recordId', response.recordId)
         getData(response.recordId)
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
@@ -139,7 +135,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('groupId', newValue ? newValue.recordId : '')
                   changeDT(newValue?.nraId)
                 }}
@@ -154,6 +150,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 value={formik.values.reference}
                 onChange={formik.handleChange}
                 maxLength='10'
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
