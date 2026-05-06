@@ -8,6 +8,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import ReportGenerator from '../ReportGenerator'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const styles = {
   dialogActions: 'dialogActions',
@@ -43,8 +44,10 @@ const GridToolbar = ({
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
   const [reportStore, setReportStore] = useState([])
+  const trackInteraction = usePageInteraction()
 
   const clear = () => {
+    trackInteraction()
     setSearchValue('')
     onSearch('')
     if (onSearchClear) onSearchClear()
@@ -322,6 +325,7 @@ const GridToolbar = ({
                     label={platformLabels.Search}
                     onClear={clear}
                     onChange={e => {
+                      trackInteraction()
                       setSearchValue(e.target.value)
                       if (onSearchChange) onSearchChange(e.target.value)
                     }}
@@ -346,7 +350,11 @@ const GridToolbar = ({
                       isVisible && (
                         <CustomButton
                           key={button.key || index}
-                          onClick={handleClick}
+                          onClick={() => {
+                            trackInteraction()
+                            handleClick()
+                           }
+                          }
                           image={button.image}
                           tooltip={button.label}
                           label={button.label}

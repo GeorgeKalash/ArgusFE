@@ -17,10 +17,12 @@ import ResourceGlobalForm from '@argus/shared-ui/src/components/Shared/ResourceG
 import FieldGlobalForm from '@argus/shared-ui/src/components/Shared/FieldGlobalForm'
 import AccessLevelForm from '@argus/shared-ui/src/components/Shared/AccessLevelForm'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const trackInteraction = usePageInteraction()
 
   async function fetchWithFilter({ filters }) {
     // used for both qry and filter since we have same api
@@ -125,6 +127,7 @@ const GlobalAuthorization = () => {
                     displayField='value'
                     onChange={(_, newValue) => {
                       onChange(newValue?.key)
+                      trackInteraction()
                     }}
                   />
                 </Grid>

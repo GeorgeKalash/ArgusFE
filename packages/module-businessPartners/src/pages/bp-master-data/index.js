@@ -129,7 +129,7 @@ const BPMasterData = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'BPMAS'} filterBy={filterBy} pageId={ResourceIds.BPMasterData}/>
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'BPMAS'} filterBy={filterBy}/>
       </Fixed>
       <Grow>
         <Table

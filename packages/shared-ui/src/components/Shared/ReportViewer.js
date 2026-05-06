@@ -10,6 +10,7 @@ import { generateReport } from '@argus/shared-utils/src/utils/ReportUtils'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,6 +21,7 @@ const ReportViewer = ({ resourceId }) => {
   const [pdf, setPDF] = useState(null)
   const [formatIndex, setFormatIndex] = useState(0)
   const { width } = useWindowDimensions()
+  const trackInteraction = usePageInteraction()
 
   const getExportFormats = async () => {
     if (!exportFormat.length) return
@@ -148,12 +150,13 @@ const ReportViewer = ({ resourceId }) => {
                   values={report}
                   required
                   fullWidth
-                  onChange={(e, newValue) =>
+                  onChange={(e, newValue) => {
+                    trackInteraction()
                     setReport(prevState => ({
                       ...prevState,
                       selectedReport: newValue
                     }))
-                  }
+                  }}
                 />
               </Grid>
           

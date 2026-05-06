@@ -15,11 +15,7 @@ export const InteractionTrackerProvider = ({ children }) => {
   }, [])
 
   const clearPageInteractions = useCallback(pageId => {
-    setInteractions(prev => {
-      const copy = { ...prev }
-      delete copy[pageId]
-      return copy
-    })
+    setInteractions(prev => prev?.filter(id => id !== pageId))
   }, [])
 
   const hasPageInteraction = useCallback(
@@ -42,15 +38,7 @@ export const InteractionTrackerProvider = ({ children }) => {
 }
 
 export const useInteractionTracker = () => {
-  const context = useContext(InteractionTrackerContext)
-
-  if (!context) {
-    throw new Error(
-      'useInteractionTracker must be used within InteractionTrackerProvider'
-    )
-  }
-
-  return context
+  return useContext(InteractionTrackerContext)
 }
 
 export { InteractionTrackerContext }

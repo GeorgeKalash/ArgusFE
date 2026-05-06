@@ -1,10 +1,8 @@
-import { Box, Grid } from '@mui/material'
-import { useContext, useState } from 'react'
+import { Grid } from '@mui/material'
+import { useContext } from 'react'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
-import ErrorWindow from '@argus/shared-ui/src/components/Shared/ErrorWindow'
 import { CTTRXrepository } from '@argus/repositories/src/repositories/CTTRXRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
@@ -15,10 +13,12 @@ import CreditOrderForm from '@argus/shared-ui/src/components/Shared/Forms/Credit
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const UndeliveredCreditOrder = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const trackInteraction = usePageInteraction()
 
   const userData = window.sessionStorage.getItem('userData')
     ? JSON.parse(window.sessionStorage.getItem('userData'))
@@ -107,6 +107,7 @@ const UndeliveredCreditOrder = () => {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 onChange={(event, newValue) => {
+                  trackInteraction()
                   onChange(newValue?.recordId)
                 }}
               />

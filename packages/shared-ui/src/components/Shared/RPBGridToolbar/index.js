@@ -5,15 +5,13 @@ import ReportParameterBrowser from '@argus/shared-ui/src/components/Shared/Repor
 import { Grid } from '@mui/material'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
-import { useRouter } from 'next/router'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 const styles = {
   leftSectionGridItem: 'leftSectionGridItem',
   bottomSectionContainer: 'bottomSectionContainer'
 }
 
 const RPBGridToolbar = ({
-  pageId,
   add,
   access,
   onApply,
@@ -33,13 +31,7 @@ const RPBGridToolbar = ({
   const [search, setSearch] = useState('')
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
-  const { track } = useInteractionTracker()
-  const router = useRouter()
-  console.log('routrer',router)
-
-  function trackInteraction() {
-    track(pageId)
-  }
+  const trackInteraction = usePageInteraction()
 
   useEffect(() => {
     setRpbParams([])

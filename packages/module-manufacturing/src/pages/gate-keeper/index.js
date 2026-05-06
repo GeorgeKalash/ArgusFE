@@ -16,11 +16,13 @@ import CancelDialog from '@argus/shared-ui/src/components/Shared/CancelDialog'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const trackInteraction = usePageInteraction()
 
   const {
     query: { data },
@@ -183,6 +185,7 @@ const GateKeeper = () => {
                   status: filters?.status || 2
                 }}
                 onChange={(event, newValue) => {
+                  trackInteraction()
                   onChange(newValue?.key)
                 }}
               />
