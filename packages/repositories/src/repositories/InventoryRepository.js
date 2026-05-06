@@ -269,7 +269,8 @@ export const InventoryRepository = {
     get2: service + 'get2SRL',
     set: service + 'setSRL',
     get: service + 'getSRL',
-    del: service + 'delSRL'
+    del: service + 'delSRL',
+    clone: service + 'cloneSerial'
   },
   MaterialTransferSerial: {
     qry: service + 'qryTFS'
