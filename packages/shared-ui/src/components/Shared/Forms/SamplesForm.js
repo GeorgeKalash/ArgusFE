@@ -234,13 +234,16 @@ export default function SamplesForm({ recordId, window }) {
         }))
       : formik.initialValues.rows
 
-    formik.setValues({
-      recordId: res?.record?.header?.recordId,
-      header: {
-        ...res?.record?.header,
-        date: formatDateFromApi(res?.record?.header?.date)
-      },
-      rows: modifiedList
+    formik.resetForm({
+      values: {
+        recordId: res?.record?.header?.recordId,
+        imageDirty: false,
+        header: {
+          ...res?.record?.header,
+          date: formatDateFromApi(res?.record?.header?.date)
+        },
+        rows: modifiedList
+      }
     })
 
     return res?.record
