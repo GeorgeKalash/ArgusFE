@@ -821,8 +821,7 @@ const Table = ({
     }
   }
 
-  const tableName =
-    name && `${name}.${props?.maxAccess?.record?.resourceId}`
+  const tableName = name && `${name}.${props?.maxAccess?.record?.resourceId}`
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
     queryKey: [tableName],
@@ -830,42 +829,13 @@ const Table = ({
     enabled: !!tableName
   })
 
-  const getContextMenuItems = params => {
-    // only apply on column headers
-    if (!params.column) return params.defaultItems || []
+  const onColumnPinned = params => {
+    const columnState = params.columnApi.getColumnState()
 
-    const colId = params.column.getColId()
-    const isPinned = params.column.isPinned()
+    if (!tableName) return
 
-    const pin = pinned => {
-      params.columnApi.applyColumnState({
-        state: [{ colId, pinned }]
-      })
-
-      const columnState = params.columnApi.getColumnState()
-      saveToDB(storeName, tableName, columnState)
-      invalidate()
-    }
-
-    return [
-      {
-        name: 'Freeze Left',
-        disabled: isPinned === 'left',
-        action: () => pin('left')
-      },
-      {
-        name: 'Freeze Right',
-        disabled: isPinned === 'right',
-        action: () => pin('right')
-      },
-      {
-        name: 'Unfreeze',
-        disabled: !isPinned,
-        action: () => pin(null)
-      },
-      'separator',
-      ...(params.defaultItems || [])
-    ]
+    saveToDB(storeName, tableName, columnState)
+    invalidate()
   }
 
   const onGridReady = params => {
@@ -887,16 +857,21 @@ const Table = ({
       if (!colId) return
 
       const column = params.columnApi.getColumn(colId)
-      const isPinned = column.isPinned()
-
       const pin = pinned => {
+        const originalOrder = columnDefs.map(col => col.field)
+
         params.columnApi.applyColumnState({
-          state: [{ colId, pinned }]
+          state: [{ colId, pinned }],
+          applyOrder: false
         })
 
-        const columnState = params.columnApi.getColumnState()
-        saveToDB(storeName, tableName, columnState)
-        invalidate()
+        if (!pinned) {
+          const targetIndex = originalOrder.indexOf(colId)
+
+          if (targetIndex > -1) {
+            params.columnApi.moveColumn(colId, targetIndex)
+          }
+        }
       }
 
       const choice = window.prompt(
@@ -951,6 +926,7 @@ const Table = ({
         return {
           ...col,
           width: savedCol?.width ?? 120,
+          pinned: savedCol?.pinned,
           flex: null,
           sortColumn: lastColumn ? columnDefs?.length + 1 : indexSort > -1 ? indexSort : index,
           sort: savedCol?.sort ?? col?.sort
@@ -1043,9 +1019,9 @@ const Table = ({
             onRowDragEnd={onRowDragEnd}
             onColumnMoved={onColumnMoved}
             onColumnResized={onColumnResized}
+            onColumnPinned={onColumnPinned}
             onSortChanged={onSortChanged}
             enableRtl={languageId === 2}
-            getContextMenuItems={getContextMenuItems}
             suppressContextMenu={false}
             allowContextMenuWithControlKey={true}
             onGridReady={params => {
