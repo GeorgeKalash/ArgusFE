@@ -108,20 +108,22 @@ export default function MatPlaningForm({ recordId, window }) {
       parameters: `_mrpId=${requestId}`
     })
 
-    formik.setValues({
-      recordId: record.recordId,
-      header: {
-        ...record,
-        date: formatDateFromApi(record?.date)
-      },
-      items: list?.map((item, index) => {
-        return {
-          ...item,
-          id: index + 1,
-          seqNo: index + 1,
-          date: formatDateFromApi(item.date)
-        }
-      })
+    formik.resetForm({
+      values: {
+        recordId: record.recordId,
+        header: {
+          ...record,
+          date: formatDateFromApi(record?.date)
+        },
+        items: list?.map((item, index) => {
+          return {
+            ...item,
+            id: index + 1,
+            seqNo: index + 1,
+            date: formatDateFromApi(item.date)
+          }
+        })
+      }
     })
   }
 
