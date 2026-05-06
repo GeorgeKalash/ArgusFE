@@ -27,7 +27,7 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
     validationSchema: yup.object({
       AI_provider_Id: yup.string().required(),
       AI_API_KEY: yup.string().required(),
-      AI_Model_Version: yup.number().required()
+      AI_Model_Version: yup.string().required()
     }),
     onSubmit: async obj => {
       const aiFields = ['AI_provider_Id', 'AI_API_KEY', 'AI_Model_Version']
@@ -64,12 +64,10 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
 
         res.list.forEach(x => {
           if (x.key in userDocObject) {
-            userDocObject[x.key] =
-              x.key === 'AI_Model_Version'
-                ? (x.value ? parseInt(x.value) : null)
-                : (x.value || null)
+            userDocObject[x.key] = x.value || null
           }
         })
+
         formik.setValues(userDocObject)
       }
     })()
@@ -86,13 +84,16 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
                 label={labels.AIProvider}
                 datasetId={DataSets.AI_PROVIDER}
                 values={formik.values}
-                valueField='key'
+                valueField='value'
                 displayField='value'
                 required
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('AI_provider_Id', newValue?.key || null)
-                  formik.setFieldValue('AI_Model_Version', null)
+                  formik.setValues({
+                    ...formik.values,
+                    AI_provider_Id: newValue?.value || '',
+                    AI_Model_Version: ''
+                  })
                 }}
                 error={formik.touched.AI_provider_Id && Boolean(formik.errors.AI_provider_Id)}
               />
@@ -104,7 +105,6 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
                 value={formik.values.AI_API_KEY}
                 required
                 maxAccess={maxAccess}
-                maxLength='128'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('AI_API_KEY', '')}
                 error={formik.touched.AI_API_KEY && Boolean(formik.errors.AI_API_KEY)}
@@ -113,16 +113,16 @@ const AIForm = ({ labels, maxAccess, storeRecordId }) => {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={formik?.values?.AI_provider_Id && AccessControlRepository.Provider.get}
-                parameters={formik?.values?.AI_provider_Id && `_providerId=${formik.values.AI_provider_Id}`}
+                parameters={formik?.values?.AI_provider_Id && `_providerString=${formik.values.AI_provider_Id}`}
                 name='AI_Model_Version'
                 label={labels.modelVersion}
-                valueField='key'
+                valueField='value'
                 displayField='value'
                 values={formik.values}
                 required
                 readOnly={!formik.values.AI_provider_Id}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('AI_Model_Version', newValue?.key || null)}
+                onChange={(_, newValue) => formik.setFieldValue('AI_Model_Version', newValue?.value || '')}
                 error={formik.touched.AI_Model_Version && Boolean(formik.errors.AI_Model_Version)}
               />
             </Grid>

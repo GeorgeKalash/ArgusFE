@@ -180,7 +180,6 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.reference}
                     value={formik.values.caRef}
                     required
-                    readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('caRef', '')}

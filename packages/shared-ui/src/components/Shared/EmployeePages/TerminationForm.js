@@ -17,7 +17,6 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 export default function TerminationForm ({ employeeId, labels, maxAccess, mainWindow, window, onSuccess}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { formik } = useForm({
     maxAccess,
     initialValues: {

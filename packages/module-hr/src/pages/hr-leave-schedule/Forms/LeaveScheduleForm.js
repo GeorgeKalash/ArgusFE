@@ -19,57 +19,57 @@ const iconOptions = [
   {
     key: 'Aid-kit',
     value: 'Aid-kit',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Aid-Kit.png').default.src
+    icon: '/images/icons/project-icons/Aid-Kit.png'
   },
   {
     key: 'Birthday',
     value: 'Birthday',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Birthday.png').default.src
+    icon: '/images/icons/project-icons/Birthday.png'
   },
   {
     key: 'Calendar',
     value: 'Calendar',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Calendar.png').default.src
+    icon: '/images/icons/project-icons/Calendar.png'
   },
   {
     key: 'Graduation',
     value: 'Graduation',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Graduation.png').default.src
+    icon: '/images/icons/project-icons/Graduation.png'
   },
   {
     key: 'Engagement',
     value: 'Engagement',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Engagement.png').default.src
+    icon: '/images/icons/project-icons/Engagement.png'
   },
   {
     key: 'Home',
     value: 'Home',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Home.png').default.src
+    icon: '/images/icons/project-icons/Home.png'
   },
   {
     key: 'Injury',
     value: 'Injury',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Injury.png').default.src
+    icon: '/images/icons/project-icons/Injury.png'
   },
   {
     key: 'Maternity',
     value: 'Maternity',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Maternity.png').default.src
+    icon: '/images/icons/project-icons/Maternity.png'
   },
   {
     key: 'Palm-Tree',
     value: 'Palm-Tree',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Palm-Tree.png').default.src
+    icon: '/images/icons/project-icons/Palm-Tree.png'
   },
   {
     key: 'Plane',
     value: 'Plane',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Plane.png').default.src
+    icon: '/images/icons/project-icons/Plane.png'
   },
   {
     key: 'Sport',
     value: 'Sport',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Sport.png').default.src
+    icon: '/images/icons/project-icons/Sport.png'
   }
 ]
 

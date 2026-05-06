@@ -282,7 +282,15 @@ const TabsProvider = ({ children }) => {
     if (!cachedPage) {
       pagesCacheRef.current.set(router.asPath, children)
     }
-  }, [router.asPath, children, shouldManageTabs, normalizeRoute])
+
+    setOpenTabs(prevTabs =>
+      prevTabs.map(tab =>
+        normalizeRoute(tab.route) === normalizedRoute && tab.page !== children
+          ? { ...tab, page: children }
+          : tab
+      )
+    )
+  }, [router.asPath, children, shouldManageTabs, normalizeRoute, setOpenTabs])
 
   useEffect(() => {
     if (!shouldManageTabs || !router.asPath || (menu.length === 0 && gear.length === 0)) return

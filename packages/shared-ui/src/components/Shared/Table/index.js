@@ -3,7 +3,6 @@ import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
-import editIcon from '@argus/shared-ui/src/components/images/TableIcons/edit.png'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -12,7 +11,6 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { TrxType, accessMap } from '@argus/shared-domain/src/resources/AccessLevels'
-import deleteIcon from '@argus/shared-ui/src/components/images/TableIcons/delete.png'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from '../DeleteDialog'
 import StrictConfirmation from '../StrictConfirmation'
@@ -27,6 +25,9 @@ import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import LinkCellRenderer from '@argus/shared-ui/src/components/Shared/Table/LinkCellRenderer'
+import { getStatusBadgeColor } from "@argus/shared-utils/src/utils/status-badge-colors";
+import { getStatusIcon } from "@argus/shared-utils/src/utils/status-icon";
+import Chip from "@mui/material/Chip";
 
 const Table = ({
   name,
@@ -75,6 +76,10 @@ const Table = ({
 
   const rowHeightImage =
     width <= 768 ? 44 : width <= 1024 ? 46 : width <= 1280 ? 50 : width <= 1366 ? 50 : width < 1600 ? 52 : 70
+
+  const badgeHeight = Math.round(rowHeight * 0.65);
+  const badgeFont = Math.max(10, Math.round(rowHeight * 0.33));
+  const badgeRadius = Math.round(badgeHeight / 3);
 
   const columns = props?.columns
     .filter(
@@ -153,6 +158,85 @@ const Table = ({
           }
         }
       }
+      if (col.type === 'badge') {
+        return {
+          ...col,
+
+          valueGetter: ({ data }) => data?.[col.field],
+
+          cellRenderer: params => {
+            const { data } = params;
+
+            const label = data?.[col.field];
+            const code = data?.[col.valueField];
+
+            const isEmpty =
+              label === null ||
+              label === undefined ||
+              label === "" ||
+              String(label).trim() === "";
+
+            if (isEmpty) return null;
+
+            const colors = getStatusBadgeColor(col.family, code);
+
+            return (
+              <FieldWrapper {...params}>
+              <Chip
+                  label={label}
+                  size="small"
+                  sx={{
+                    height: `${badgeHeight}px`,
+                    fontSize: `${badgeFont}px`,
+                    fontWeight: 500,
+                    backgroundColor: colors.bg,
+                    color: colors.text,
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: `${badgeRadius}px`,
+                    "& .MuiChip-label": {
+                      px: 1
+                    }
+                  }}
+                />
+              </FieldWrapper>
+            );
+          },
+
+          sortable: !disableSorting
+        };
+      }
+      if (col.type === "icon") {
+        return {
+          ...col,
+
+          cellRenderer: ({ data }) => {
+            const code = data?.[col.valueField];
+
+            const config = getStatusIcon(col.family, code);
+
+            if (!config) return null;
+
+            const Icon = config.icon;
+
+            return (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon
+                  sx={{
+                    fontSize: rowHeight * 0.55,
+                    color: config.color
+                  }}
+                />
+              </div>
+            );
+          },
+
+          cellStyle: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        };
+      }
 
       return {
         ...col,
@@ -197,17 +281,51 @@ const Table = ({
       onSelectionChanged()
     }
     if (props?.gridData && paginationType !== 'api' && pageSize) {
+    const getIsSame = (prevList, newList) => {
+        return (
+          prevList.length === newList?.length &&
+          prevList.every((prevRow, index) => {
+            const nextRow = newList?.[index]
+            if (!nextRow) return false
+
+            const prevKeys = Object.keys(prevRow)
+            if (prevKeys.length !== Object.keys(nextRow).length) return false
+
+            return prevKeys.every(key => prevRow[key] === nextRow[key])
+          })
+        )
+      }
+
       if (page) {
         const start = (page - 1) * pageSize
         const end = page * pageSize
         const slicedGridData = props?.gridData?.list?.slice(start, end)
-        setGridData({
-          ...props.gridData,
-          list: slicedGridData
+
+        setGridData(prev => {
+          const isSame = getIsSame(prev?.list || [], slicedGridData)
+          if (isSame) return prev
+
+          return {
+            ...props.gridData,
+            list: slicedGridData
+          }
         })
+
         setStartAt(start)
       } else {
-        setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+        const slicedGridData = pageSize
+          ? props?.gridData?.list?.slice(0, pageSize)
+          : props?.gridData?.list
+
+        setGridData(prev => {
+          const isSame = getIsSame(prev?.list || [], slicedGridData)
+          if (isSame) return prev
+
+          return {
+            ...props.gridData,
+            list: slicedGridData
+          }
+        })
       }
     }
   }, [props?.gridData])
@@ -580,7 +698,7 @@ const Table = ({
           onDoubleClick={handleDoubleClick}
           className={`fieldWrapper ${!params.colDef?.wrapText ? 'nowrap' : ''}`}
         >
-          {displayValue}
+          {params.children || displayValue}
         </Box>
       </>
     )
@@ -644,7 +762,7 @@ const Table = ({
     props?.setRowData(updatedVisibleRows)
   }
 
-  const EMPTY_PHOTO = require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+  const EMPTY_PHOTO = '/images/emptyPhoto.jpg'
   const imageRenderer =
     column =>
     ({ data }) => {
@@ -764,7 +882,7 @@ const Table = ({
                   }}
                   className={'actionIconButton'}
                 >
-                  <Image src={editIcon} alt='Edit' className={'actionIcon'} />
+                  <Image src={'/images/TableIcons/edit.png'} width={18} height={18} alt='Edit' className={'actionIcon'} />
                 </IconButton>
               )}
 
@@ -781,7 +899,7 @@ const Table = ({
                   color='error'
                   className={'actionIconButton'}
                 >
-                  <Image src={deleteIcon} alt={platformLabels.Delete} className={'actionIcon'} />
+                  <Image src={'/images/TableIcons/delete.png'} width={18} height={18} alt={platformLabels.Delete} className={'actionIcon'} />
                 </IconButton>
               )}
               {globalStatus &&
@@ -802,7 +920,7 @@ const Table = ({
                     color='error'
                     className={'actionIconButton'}
                   >
-                    <Image src={deleteIcon} alt={platformLabels.Delete} className={'actionIcon'} />
+                    <Image src={'/images/TableIcons/delete.png'} width={18} height={18} alt={platformLabels.Delete} className={'actionIcon'} />
                   </IconButton>
                 )}
             </Box>
@@ -900,7 +1018,6 @@ const Table = ({
   }
 
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
-
   return (
     <VertLayout>
       <Grow>
@@ -930,6 +1047,7 @@ const Table = ({
           <AgGridReact
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
+            ensureDomOrder={true}
             enableRangeSelection={true}
             columnDefs={finalColumns}
             domLayout={domLayout}

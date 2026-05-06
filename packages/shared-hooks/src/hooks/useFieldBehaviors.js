@@ -24,7 +24,7 @@ export function useFieldBehavior({ access, fieldName, editMode = true }) {
     refBehavior: query.data,
     maxAccess: query?.data?.maxAccess,
     changeDT(value) {
-      setNraId(value?.nraId)
+      setNraId(value)
     }
   }
 }
