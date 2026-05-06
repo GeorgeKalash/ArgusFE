@@ -35,6 +35,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function PurchaseRquisitionForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -87,7 +88,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      procurementType: yup.string().required()
+      procurementType: yup.number().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -311,19 +312,21 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
 
       return {
         ...item,
-        totalCost: (item?.unitCost * item?.qty || 0).toFixed(2),
-        unitCost: (item?.unitCost || 0).toFixed(2),
-        qty: (item?.qty || 0).toFixed(2)
+        totalCost: roundTo(item?.unitCost * item?.qty || 0),
+        unitCost: roundTo(item?.unitCost || 0),
+        qty: roundTo(item?.qty || 0)
       }
     })
 
-    formik.setValues({
-      ...requisitionData,
-      date: formatDateFromApi(requisitionData?.date),
-      deliveryDate: formatDateFromApi(requisitionData?.deliveryDate),
-      totalCost: headerTotalCost.toFixed(2),
-      totalQty: headerTotalQty.toFixed(2),
-      items: { list: modifiedList }
+    formik.resetForm({
+      values: {
+        ...requisitionData,
+        date: formatDateFromApi(requisitionData?.date),
+        deliveryDate: formatDateFromApi(requisitionData?.deliveryDate),
+        totalCost: roundTo(headerTotalCost),
+        totalQty: roundTo(headerTotalQty),
+        items: { list: modifiedList }
+      }
     })
   }
 
@@ -442,7 +445,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('procurementType', newValue?.key || null)
+                      formik.setFieldValue('procurementType', Number(newValue?.key) || null)
                     }}
                     error={formik.touched.procurementType && Boolean(formik.errors.procurementType)}
                   />
