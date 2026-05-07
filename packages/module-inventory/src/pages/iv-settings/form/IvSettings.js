@@ -20,7 +20,7 @@ const IvSettings = ({ _labels, access }) => {
   const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const arrayAllow = ['itemSearchStyle', 'itemSearchFields', 'iv_minSerialSize', 'minItemSearchTextSize','iv_clone_serial_number_range']
+  const arrayAllow = ['itemSearchStyle', 'itemSearchFields', 'iv_minSerialSize', 'minItemSearchTextSize','iv_clone_srl_nra']
 
   const { formik } = useForm({
     maxAccess: access,
@@ -66,7 +66,7 @@ const IvSettings = ({ _labels, access }) => {
         myObject[obj.key] = parsedValue
         formik.setFieldValue(obj.key, parsedValue)
 
-        if (obj.key === 'iv_clone_serial_number_range' && parsedValue) {
+        if (obj.key === 'iv_clone_srl_nra' && parsedValue) {
           fillNbInfo(parsedValue)
         }
       }
@@ -144,7 +144,7 @@ const IvSettings = ({ _labels, access }) => {
                   { key: 'description', value: 'Description' }
                 ]}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('iv_clone_serial_number_range', newValue?.recordId || null )
+                  formik.setFieldValue('iv_clone_srl_nra', newValue?.recordId || null )
                   formik.setFieldValue('nraRef', newValue?.reference || '')
                   formik.setFieldValue('nraDescription', newValue?.description || '')
                 }}

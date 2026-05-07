@@ -101,7 +101,7 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
 
       setStore(prevStore => ({
         ...prevStore,
-        recordId
+        recordId: res.record.srlNo
       }))
     }
   }
