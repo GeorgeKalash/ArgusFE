@@ -107,11 +107,17 @@ const OutboundTransp = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
       field: 'printStatusName',
       headerName: _labels.printStatus,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {

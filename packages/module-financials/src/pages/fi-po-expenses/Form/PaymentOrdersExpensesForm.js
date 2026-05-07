@@ -515,7 +515,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
       component: 'button',
       name: 'hasCostCenters',
       props: {
-        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/costCenter.png').default.src
+        imgSrc: '/images/buttonsIcons/costCenter.png'
       },
       label: labels.costCenter,
       onClick: (e, row, update, updateRow) => {

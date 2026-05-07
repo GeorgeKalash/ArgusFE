@@ -78,11 +78,6 @@ const IvSerials = () => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
-    },
-    {
       field: 'weight',
       headerName: labels.weight,
       flex: 1,

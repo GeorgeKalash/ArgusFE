@@ -30,11 +30,13 @@ export default function PayrollFormulaForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
+      reference: '',
       name: '',
       formula: ''
     },
     maxAccess,
     validationSchema: yup.object({
+      reference: yup.string().required(),
       name: yup.string().required(),
       formula: yup
         .string()
@@ -89,6 +91,19 @@ export default function PayrollFormulaForm({ labels, maxAccess, recordId }) {
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='15'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'

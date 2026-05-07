@@ -545,6 +545,7 @@ export const ResourceIds = {
   DSLReasons: 72107,
   TerminationReasons: 71110,
   GeneralSettings: 20600,
+  AIChatbot: 20602,
   JobInfos: 71207,
   EarnedLeave: 73304,
   OpenPaymentOrder: 31334,
@@ -636,6 +637,7 @@ export const ResourceIds = {
   StandardCostParameters: 42138,
   StandardCostUpdate: 42140,
   PayPeriod: 75108,
+  EmployeeMissingDetails: 71407,
 
   // GL
   GLSalesInvoice: 51604,

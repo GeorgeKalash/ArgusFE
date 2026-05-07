@@ -152,6 +152,7 @@ export const InventoryRepository = {
   MaterialsTransfer: {
     page: service + 'pageTFR',
     snapshot: service + 'snapshotTFR',
+    snapshot2: service + 'snapshotTFR2',
     get: service + 'getTFR',
     get2: service + 'getTFR2',
     set2: service + 'set2TFR',
@@ -268,7 +269,8 @@ export const InventoryRepository = {
     get2: service + 'get2SRL',
     set: service + 'setSRL',
     get: service + 'getSRL',
-    del: service + 'delSRL'
+    del: service + 'delSRL',
+    clone: service + 'cloneSerial'
   },
   MaterialTransferSerial: {
     qry: service + 'qryTFS'

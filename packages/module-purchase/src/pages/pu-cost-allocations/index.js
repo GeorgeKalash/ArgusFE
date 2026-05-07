@@ -79,11 +79,17 @@ const PuCostAllocations = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
       field: 'wipName',
       headerName: labels.wipName,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     }
   ]

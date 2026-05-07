@@ -144,6 +144,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     weight: 0,
     qty: 0,
     serializedAddress: '',
+    sourceId: null,
+    sourceNo: '',
     items: [
       {
         id: 1,
@@ -293,7 +295,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const onCondition = row => {
     if (row.itemId && row.taxId) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
         hidden: false
       }
     } else {

@@ -121,7 +121,7 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
               <div key='lock-icon'>
                 <img
                   className={inputs.iconImage}
-                  src={require('@argus/shared-ui/src/components/images/password/forgotPWD3.png').default.src}
+                  src='/images/password/forgotPWD3.png'
                 />
               </div>
             ]}
@@ -163,7 +163,7 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
               <div key='lock-icon'>
                 <img
                   className={inputs.iconImage}
-                  src={require('@argus/shared-ui/src/components/images/password/forgotPWD3.png').default.src}
+                  src='/images/password/forgotPWD3.png'
                 />
               </div>
             ]}
