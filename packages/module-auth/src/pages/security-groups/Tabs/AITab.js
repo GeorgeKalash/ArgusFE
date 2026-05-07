@@ -23,8 +23,7 @@ const AITab = ({ labels, maxAccess, recordId }) => {
         .filter(row => row.checked)
         .map(row => ({
           sgId: recordId,
-          agentId: Number(row.agentId),
-          agentName: row.agentName
+          agentId: Number(row.agentId)
         }))
     }
 
@@ -39,7 +38,7 @@ const AITab = ({ labels, maxAccess, recordId }) => {
   async function getAllAgents() {
     return new Promise((resolve, reject) => {
       getAllKvsByDataset({
-        _dataset: DataSets.AGENT,
+        _dataset: DataSets.AI_AGENT,
         callback: result => {
           if (result) resolve(result)
           else reject()
