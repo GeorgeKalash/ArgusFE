@@ -1,6 +1,6 @@
-import React, { useContext, useRef, useState, useEffect } from 'react'
+import React, { useContext, useRef, useState, useEffect, useMemo } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, IconButton, TextField } from '@mui/material'
+import { Box, IconButton, TextField, Menu, MenuItem } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '@argus/shared-ui/src/components/images/TableIcons/edit.png'
@@ -67,6 +67,8 @@ const Table = ({
   const storeName = 'tableSettings'
   const gridRef = useRef(null)
   const gridApiRef = useRef(null)
+  const [menuAnchor, setMenuAnchor] = useState(null)
+  const [selectedColId, setSelectedColId] = useState(null)
   const [hoveredTable, setHoveredTable] = useState(false)
 
   const { width } = useWindowDimensions()
@@ -830,6 +832,15 @@ const Table = ({
     enabled: !!tableName
   })
 
+  useEffect(() => {
+    if (!tableSettings || !gridApiRef.current?.columnApi) return
+
+    gridApiRef.current.columnApi.applyColumnState({
+      state: tableSettings,
+      applyOrder: true
+    })
+  }, [tableSettings])
+
   const onColumnPinned = params => {
     const columnState = params.columnApi.getColumnState()
 
@@ -842,10 +853,7 @@ const Table = ({
   const onGridReady = params => {
     const gridElement = gridRef.current
 
-    if (!gridElement) {
-      console.log('Grid ref not ready')
-      return
-    }
+    if (!gridElement) return
 
     gridElement.addEventListener('contextmenu', event => {
       const headerCell = event.target.closest('.ag-header-cell')
@@ -857,32 +865,46 @@ const Table = ({
       const colId = headerCell.getAttribute('col-id')
       if (!colId) return
 
-      const column = params.columnApi.getColumn(colId)
-      const pin = pinned => {
-        const originalOrder = columnDefs.map(col => col.field)
+      const column = gridApiRef.current?.columnApi?.getColumn(colId)
 
-        params.columnApi.applyColumnState({
-          state: [{ colId, pinned }],
-          applyOrder: false
-        })
+      const pinned = column?.getPinned()
 
-        if (!pinned) {
-          const targetIndex = originalOrder.indexOf(colId)
+      setSelectedColId({
+        colId,
+        pinned
+      })
 
-          if (targetIndex > -1) {
-            params.columnApi.moveColumn(colId, targetIndex)
-          }
-        }
-      }
-
-      const choice = window.prompt(
-        `Column: ${colId}\n1 = Freeze Left\n2 = Freeze Right\n3 = Unfreeze`
-      )
-
-      if (choice === '1') pin('left')
-      if (choice === '2') pin('right')
-      if (choice === '3') pin(null)
+      setMenuAnchor({
+        mouseX: event.clientX,
+        mouseY: event.clientY
+      })
     })
+  }
+
+  const pinColumn = async (colId, pinned) => {
+    setMenuAnchor(null)
+
+    const originalOrder = columnDefs.map(col => col.field)
+
+    gridApiRef.current?.columnApi?.applyColumnState({
+      state: [{ colId, pinned }],
+      applyOrder: false
+    })
+
+    if (!pinned) {
+      const targetIndex = originalOrder.indexOf(colId)
+      
+      if (targetIndex > -1) {
+        gridApiRef.current?.columnApi?.moveColumn(colId, targetIndex)
+      }
+    }
+    setTimeout(async () => {
+      const columnState = gridApiRef.current?.columnApi?.getColumnState()
+      
+      await saveToDB(storeName, tableName, columnState)
+      
+      invalidate()
+    }, 0)
   }
 
   const onColumnMoved = params => {
@@ -948,25 +970,11 @@ const Table = ({
       })
     : columnDefs
 
-  const finalColumns = (() => {
-    const left = []
-    const center = []
-    const right = []
-
-    updatedColumns.forEach(col => {
-      if (col.pinned === 'left') left.push(col)
-      else if (col.pinned === 'right') right.push(col)
-      else center.push(col)
-    })
-
-    const sortFn = (a, b) => (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
-
-    left.sort(sortFn)
-    center.sort(sortFn)
-    right.sort(sortFn)
-
-    return [...left, ...center, ...right]
-  })()
+  const finalColumns = useMemo(() => {
+    return [...updatedColumns].sort(
+      (a, b) => (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
+    )
+  }, [tableSettings])
 
   const hoverTimeoutRef = useRef(null)
 
@@ -1016,7 +1024,7 @@ const Table = ({
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
             enableRangeSelection={true}
-            columnDefs={finalColumns}
+            columnDefs={columnDefs}
             domLayout={domLayout}
             {...(hasRowId && {
               getRowId: params => params?.data?.id
@@ -1043,6 +1051,37 @@ const Table = ({
               onGridReady(params)
             }}
           />
+          <Menu
+            open={!!menuAnchor}
+            onClose={() => setMenuAnchor(null)}
+            anchorReference="anchorPosition"
+            anchorPosition={
+              menuAnchor
+                ? {
+                    top: menuAnchor.mouseY,
+                    left: menuAnchor.mouseX
+                  }
+                : undefined
+            }
+          >
+            {selectedColId?.pinned !== 'left' && (
+              <MenuItem onClick={() => pinColumn(selectedColId.colId, 'left')}>
+                Freeze Left
+              </MenuItem>
+            )}
+
+            {selectedColId?.pinned !== 'right' && (
+              <MenuItem onClick={() => pinColumn(selectedColId.colId, 'right')}>
+                Freeze Right
+              </MenuItem>
+            )}
+
+            {selectedColId?.pinned && (
+              <MenuItem onClick={() => pinColumn(selectedColId.colId, null)}>
+                Unfreeze
+              </MenuItem>
+            )}
+          </Menu>
         </Box>
       </Grow>
 
