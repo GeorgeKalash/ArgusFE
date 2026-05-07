@@ -52,6 +52,7 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -1032,9 +1033,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       unitPrice: itemPriceRow?.unitPrice,
       extendedPrice: itemPriceRow?.extendedPrice,
       upo: itemPriceRow?.upo,
-      mdValue: itemPriceRow?.mdValue,
+      mdValue: roundTo(itemPriceRow?.mdValue || 0, 3), 
       mdType: itemPriceRow?.mdType,
-      mdAmount: itemPriceRow?.mdAmount,
+      mdAmount: roundTo(itemPriceRow?.mdAmount || 0),
       vatAmount: vatCalcRow?.vatAmount
     }
 
@@ -1093,7 +1094,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct || 0)
+    formik.setFieldValue('tdPct', roundTo(_discountObj?.hiddenTdPct) || 0)
 
     return _discountObj?.hiddenTdPct || 0
   }
@@ -1795,12 +1796,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                       let tdAmount = e.target.value
                       if (formik.values.tdType == 1) {
                         tdPct = (discountAmount / subtotal) * 100
-                        formik.setFieldValue('tdPct', tdPct)
+                        formik.setFieldValue('tdPct', roundTo(tdPct || 0))
                       }
 
                       if (formik.values.tdType == 2) {
                         tdAmount = (discountAmount * subtotal) / 100
-                        formik.setFieldValue('tdAmount', tdAmount)
+                        formik.setFieldValue('tdAmount', roundTo(tdAmount || 0))
                       }
 
                       recalcGridVat(formik.values.tdType, tdPct, tdAmount, discountAmount)

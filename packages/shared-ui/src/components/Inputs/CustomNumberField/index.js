@@ -87,15 +87,14 @@ const CustomNumberField = ({
     return Number.isNaN(num) ? null : num
   }
 
-  const handleNumberChangeValue = (e, blur) => {
-    const value = formatNumber(e)
-    const parsedValue = parseInputValue(value, blur)
+  const handleNumberValueChange = (values, sourceInfo) => {
+    const parsedValue = values.floatValue ?? null
 
     const event = {
-      ...e,
+      ...sourceInfo?.event,
       target: {
-        ...e.target,
-        name: e.target.name,
+        ...sourceInfo?.event?.target,
+        name: props.name,
         value: parsedValue
       }
     }
@@ -164,10 +163,19 @@ const CustomNumberField = ({
         autoSelect && e.target.select()
       }}
       onBlur={e => {
-        onBlur(e)
-        if (e.target.value?.endsWith('.')) {
-          handleNumberChangeValue(e, true)
+        const value = formatNumber(e)
+        const parsedValue = parseInputValue(value, true)
+
+        const event = {
+          ...e,
+          target: {
+            ...e.target,
+            name: e.target.name,
+            value: parsedValue
+          }
         }
+
+        onBlur(event, parsedValue)
       }}
       sx={{
         '& .MuiInputBase-input': {
@@ -212,7 +220,7 @@ const CustomNumberField = ({
           },
       }}
       customInput={TextField}
-      onChange={e => handleNumberChangeValue(e)}
+      onValueChange={handleNumberValueChange}
       onMouseLeave={e => handleNumberMouseLeave(e)}
       {...props}
     />

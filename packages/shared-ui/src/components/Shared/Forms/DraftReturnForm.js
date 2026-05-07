@@ -472,6 +472,10 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             })
           } else {
             await addRow(lineObj)
+
+            if (formik.values.header?.recordId) {
+              await refetchForm(formik.values.header.recordId)
+            }
           }
         }
       }
@@ -742,15 +746,18 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     return taxDetails ? taxDetails?.filter(td => td.taxId === taxId) : []
   }
 
-  const handleGridChange = (value, action, row) => {
+  const handleGridChange = async (value, action, row) => {
     if (action === 'delete') {
-      let updatedItems = formik.values.items
-      updatedItems = updatedItems.filter(item => item.id !== row.id)
-      formik.setFieldValue('items', updatedItems)
       setReCal(true)
-    } else {
-      formik.setFieldValue('items', value)
+
+      if (formik.values.header?.recordId) {
+        await refetchForm(formik.values.header.recordId)
+      }
+
+      return
     }
+
+    formik.setFieldValue('items', value)
   }
 
   async function onChangeDtId(recordId) {

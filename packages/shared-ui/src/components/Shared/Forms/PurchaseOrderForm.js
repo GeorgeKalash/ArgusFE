@@ -773,6 +773,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
           ...puTrxHeader,
           amount: roundTo(puTrxHeader?.amount),
           date: formatDateFromApi(puTrxHeader?.date),
+          weight: puTrxHeader?.weight || 0,
+          volume: puTrxHeader?.volume || 0,
           deliveryDate: puTrxHeader?.deliveryDate && formatDateFromApi(puTrxHeader?.deliveryDate)
         },
         items: modifiedList.length > 0 ? modifiedList : formik?.initialValues?.items
@@ -1002,8 +1004,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
       dirtyField: dirtyField
     })
 
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
-
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
@@ -1095,7 +1095,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
-      if (item?.taxDetails?.length > 0) item.taxDetails = [item.taxDetails[0]]
       if (!item.requestId) {
         const vatCalcRow = getVatCalc({
           priceType: item?.priceType,
