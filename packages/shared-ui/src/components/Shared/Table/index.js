@@ -847,7 +847,6 @@ const Table = ({
     if (!tableName) return
 
     saveToDB(storeName, tableName, columnState)
-    invalidate()
   }
 
   const onGridReady = params => {
@@ -902,8 +901,6 @@ const Table = ({
       const columnState = gridApiRef.current?.columnApi?.getColumnState()
       
       await saveToDB(storeName, tableName, columnState)
-      
-      invalidate()
     }, 0)
   }
 
@@ -911,8 +908,6 @@ const Table = ({
     if (params.columnApi && tableName && params.source != 'gridOptionsChanged') {
       const columnState = params.columnApi.getColumnState()
       saveToDB(storeName, tableName, columnState)
-
-      invalidate()
     }
   }
 
@@ -921,7 +916,6 @@ const Table = ({
       const columnState = params.columnApi.getColumnState()
 
       saveToDB(storeName, tableName, columnState)
-      invalidate()
     }
   }
 
@@ -930,7 +924,6 @@ const Table = ({
       const columnState = params.columnApi.getColumnState()
 
       saveToDB(storeName, tableName, columnState)
-      invalidate()
     }
   }
 
@@ -951,30 +944,6 @@ const Table = ({
 
     invalidate()
   }
-
-  const updatedColumns = tableSettings
-    ? columnDefs.map(({ flex, ...col }, index) => {
-        const savedCol = tableSettings?.find(c => c.colId === col?.field)
-        const indexSort = tableSettings?.findIndex(c => c.colId === col?.field)
-
-        const lastColumn = tableSettings?.length === indexSort + 1
-
-        return {
-          ...col,
-          width: savedCol?.width ?? 120,
-          pinned: savedCol?.pinned,
-          flex: null,
-          sortColumn: lastColumn ? columnDefs?.length + 1 : indexSort > -1 ? indexSort : index,
-          sort: savedCol?.sort ?? col?.sort
-        }
-      })
-    : columnDefs
-
-  const finalColumns = useMemo(() => {
-    return [...updatedColumns].sort(
-      (a, b) => (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
-    )
-  }, [tableSettings])
 
   const hoverTimeoutRef = useRef(null)
 
