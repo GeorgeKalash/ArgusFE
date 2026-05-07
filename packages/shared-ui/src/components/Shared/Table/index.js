@@ -671,148 +671,177 @@ const Table = ({
       )
     }
 
-  const columnDefs = [
-    ...(showCheckboxColumn
+  const columnDefs = useMemo(() => {
+    return [
+      ...(showCheckboxColumn
+        ? [
+            {
+              headerName: '',
+              field: 'checked',
+              flex: checkboxFlex,
+              width: 70,
+              cellRenderer: checkboxCellRenderer,
+              headerComponent: params =>
+                rowSelection !== 'single' &&
+                showSelectAll && (
+                  <Checkbox
+                    checked={checked}
+                    disabled={props?.disableCheckBox}
+                    onChange={e => {
+                      e.preventDefault()
+                      e.stopPropagation()
+
+                      const colId = params.column.getColId()
+                      params.api.ensureColumnVisible(colId)
+
+                      const root = params.api.getGui && params.api.getGui()
+                      const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
+                      const cell = headerRoot && headerRoot.querySelector('.ag-header-cell[col-id="' + colId + '"]')
+                      const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
+                      focusable && focusable.focus && focusable.focus()
+                      selectAll(params, e)
+                    }}
+                    className={'fullSizeCheckbox'}
+                  />
+                ),
+              suppressMenu: true
+            }
+          ]
+        : []),
+      ...filteredColumns.map(column => {
+        const isLinkedColumn = column.type === 'link' || !!column.linkOpen
+
+        return {
+          ...column,
+          width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
+          flex: column.flex,
+          sort: column.sort || '',
+          cellRenderer:
+            column.type === 'image'
+              ? imageRenderer(column)
+              : isLinkedColumn
+              ? params => (
+                  <LinkCellRenderer
+                    data={params.data}
+                    field={column.field}
+                    value={params.value}
+                    params={params}
+                    wrapText={column.wrapText}
+                    onClick={column.onClick}
+                    linkOpen={column.linkOpen}
+                  />
+                )
+              : column.isTree
+              ? IndentedCellRenderer
+              : column.cellRenderer
+              ? column.cellRenderer
+              : FieldWrapper
+        }
+      }),
+    ...(props?.onEdit || props?.onDelete
       ? [
           {
+            field: 'actions',
             headerName: '',
-            field: 'checked',
-            flex: checkboxFlex,
-            width: 70,
-            cellRenderer: checkboxCellRenderer,
-            headerComponent: params =>
-              rowSelection !== 'single' &&
-              showSelectAll && (
-                <Checkbox
-                  checked={checked}
-                  disabled={props?.disableCheckBox}
-                  onChange={e => {
-                    e.preventDefault()
-                    e.stopPropagation()
+            width: 100,
+            cellRenderer: params => {
+              const { data } = params
+              const isStatus3 = data.status === 3
+              const isStatusCanceled = data.status === -1
+              const isWIP = data.wip === 2
+              const deleteBtnVisible = maxAccess
+                ? props?.onDelete && maxAccess[accessMap[TrxType.DEL]]
+                : props?.onDelete
+                ? true
+                : false
 
-                    const colId = params.column.getColId()
-                    params.api.ensureColumnVisible(colId)
+              return (
+                <Box className={'actionsBox'}>
+                  {props?.onEdit &&
+                    (!props?.actionCondition ||
+                      props?.actionCondition(data, 'edit')) && (
+                      <IconButton
+                        size='small'
+                        onClick={() => {
+                          props?.onEdit(data)
+                        }}
+                        className={'actionIconButton'}
+                      >
+                        <Image
+                          src={editIcon}
+                          alt='Edit'
+                          className={'actionIcon'}
+                        />
+                      </IconButton>
+                    )}
 
-                    const root = params.api.getGui && params.api.getGui()
-                    const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
-                    const cell = headerRoot && headerRoot.querySelector('.ag-header-cell[col-id="' + colId + '"]')
-                    const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
-                    focusable && focusable.focus && focusable.focus()
-                    selectAll(params, e)
-                  }}
-                  className={'fullSizeCheckbox'}
-                />
-              ),
-            suppressMenu: true
+                  {!globalStatus &&
+                    deleteBtnVisible && (
+                      <IconButton
+                        size='small'
+                        onClick={() => {
+                          if (
+                            props.deleteConfirmationType ==
+                            'strict'
+                          ) {
+                            openDeleteConfirmation(data)
+                          } else {
+                            openDelete(data)
+                          }
+                        }}
+                        color='error'
+                        className={'actionIconButton'}
+                      >
+                        <Image
+                          src={deleteIcon}
+                          alt={platformLabels.Delete}
+                          className={'actionIcon'}
+                        />
+                      </IconButton>
+                    )}
+
+                  {globalStatus &&
+                    !isStatus3 &&
+                    !isStatusCanceled &&
+                    deleteBtnVisible &&
+                    !isWIP &&
+                    (!props?.actionCondition ||
+                      props?.actionCondition(data, 'delete')) && (
+                      <IconButton
+                        size='small'
+                        onClick={() => {
+                          if (
+                            props?.deleteConfirmationType ==
+                            'strict'
+                          ) {
+                            openDeleteConfirmation(data)
+                          } else {
+                            openDelete(data)
+                          }
+                        }}
+                        color='error'
+                        className={'actionIconButton'}
+                      >
+                        <Image
+                          src={deleteIcon}
+                          alt={platformLabels.Delete}
+                          className={'actionIcon'}
+                        />
+                      </IconButton>
+                    )}
+                </Box>
+              )
+            }
           }
         ]
-      : []),
-    ...filteredColumns.map(column => {
-      const isLinkedColumn = column.type === 'link' || !!column.linkOpen
-
-      return {
-        ...column,
-        width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
-        flex: column.flex,
-        sort: column.sort || '',
-        cellRenderer:
-          column.type === 'image'
-            ? imageRenderer(column)
-            : isLinkedColumn
-            ? params => (
-                <LinkCellRenderer
-                  data={params.data}
-                  field={column.field}
-                  value={params.value}
-                  params={params}
-                  wrapText={column.wrapText}
-                  onClick={column.onClick}
-                  linkOpen={column.linkOpen}
-                />
-              )
-            : column.isTree
-            ? IndentedCellRenderer
-            : column.cellRenderer
-            ? column.cellRenderer
-            : FieldWrapper
-      }
-    })
-  ]
-
-  if (props?.onEdit || props?.onDelete) {
-    const deleteBtnVisible = maxAccess
-      ? props?.onDelete && maxAccess[accessMap[TrxType.DEL]]
-      : props?.onDelete
-      ? true
-      : false
-
-    if (!columnDefs?.some(column => column.field === 'actions'))
-      columnDefs?.push({
-        field: 'actions',
-        headerName: '',
-        width: 100,
-        cellRenderer: params => {
-          const { data } = params
-          const isStatus3 = data.status === 3
-          const isStatusCanceled = data.status === -1
-          const isWIP = data.wip === 2
-
-          return (
-            <Box className={'actionsBox'}>
-              {props?.onEdit && (!props?.actionCondition || props?.actionCondition(data, 'edit')) && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    props?.onEdit(data)
-                  }}
-                  className={'actionIconButton'}
-                >
-                  <Image src={editIcon} alt='Edit' className={'actionIcon'} />
-                </IconButton>
-              )}
-
-              {!globalStatus && deleteBtnVisible && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    if (props.deleteConfirmationType == 'strict') {
-                      openDeleteConfirmation(data)
-                    } else {
-                      openDelete(data)
-                    }
-                  }}
-                  color='error'
-                  className={'actionIconButton'}
-                >
-                  <Image src={deleteIcon} alt={platformLabels.Delete} className={'actionIcon'} />
-                </IconButton>
-              )}
-              {globalStatus &&
-                !isStatus3 &&
-                !isStatusCanceled &&
-                deleteBtnVisible &&
-                !isWIP &&
-                (!props?.actionCondition || props?.actionCondition(data, 'delete')) && (
-                  <IconButton
-                    size='small'
-                    onClick={e => {
-                      if (props?.deleteConfirmationType == 'strict') {
-                        openDeleteConfirmation(data)
-                      } else {
-                        openDelete(data)
-                      }
-                    }}
-                    color='error'
-                    className={'actionIconButton'}
-                  >
-                    <Image src={deleteIcon} alt={platformLabels.Delete} className={'actionIcon'} />
-                  </IconButton>
-                )}
-            </Box>
-          )
-        }
-      })
-  }
+      : [])
+      ]
+    }, [
+      filteredColumns,
+      additionalWidth,
+      checked,
+      languageId
+    ])
 
   const gridOptions = {
     rowClassRules: {
@@ -994,6 +1023,7 @@ const Table = ({
             enableClipboard={true}
             enableRangeSelection={true}
             columnDefs={columnDefs}
+            maintainColumnOrder={true}
             domLayout={domLayout}
             {...(hasRowId && {
               getRowId: params => params?.data?.id
@@ -1035,19 +1065,19 @@ const Table = ({
           >
             {selectedColId?.pinned !== 'left' && (
               <MenuItem onClick={() => pinColumn(selectedColId.colId, 'left')}>
-                Freeze Left
+                {platformLabels.freezeLeft}
               </MenuItem>
             )}
 
             {selectedColId?.pinned !== 'right' && (
               <MenuItem onClick={() => pinColumn(selectedColId.colId, 'right')}>
-                Freeze Right
+                {platformLabels.freezeRight}
               </MenuItem>
             )}
 
             {selectedColId?.pinned && (
               <MenuItem onClick={() => pinColumn(selectedColId.colId, null)}>
-                Unfreeze
+                {platformLabels.unfreeze}
               </MenuItem>
             )}
           </Menu>
