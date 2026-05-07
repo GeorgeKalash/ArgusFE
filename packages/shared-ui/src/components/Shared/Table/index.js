@@ -66,6 +66,7 @@ const Table = ({
   const hasRowId = gridData?.list?.[0]?.id
   const storeName = 'tableSettings'
   const gridRef = useRef(null)
+  const gridApiRef = useRef(null)
   const [hoveredTable, setHoveredTable] = useState(false)
 
   const { width } = useWindowDimensions()
@@ -913,6 +914,19 @@ const Table = ({
 
   const onReset = async () => {
     await deleteFromDB(storeName, tableName)
+
+    const defaultState = columnDefs.map(col => ({
+      colId: col.field,
+      width: col.width,
+      pinned: null,
+      sort: null
+    }))
+
+    gridApiRef.current?.columnApi?.applyColumnState({
+      state: defaultState,
+      applyOrder: true
+    })
+
     invalidate()
   }
 
@@ -1025,6 +1039,7 @@ const Table = ({
             suppressContextMenu={false}
             allowContextMenuWithControlKey={true}
             onGridReady={params => {
+              gridApiRef.current = params
               onGridReady(params)
             }}
           />
