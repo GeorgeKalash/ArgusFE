@@ -34,6 +34,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function PaymentOrdersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -156,7 +157,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
         dirtyField: DIRTYFIELD_RATE
       })
 
-      formik.setFieldValue('baseAmount', updatedRateRow?.baseAmount.toFixed(2) || 0)
+      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
       formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
@@ -170,10 +171,12 @@ export default function PaymentOrdersForm({ recordId, window }) {
         maxAccess: MRCMaxAccess,
         data,
         onOk: childFormikValues => {
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...childFormikValues
-          }))
+          formik.resetForm({
+            values: {
+              ...formik.values, 
+              ...childFormikValues
+            }
+          })
         }
       },
       width: 500,
@@ -195,6 +198,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
     formik.resetForm({
       values: {
         ...res.record,
+        baseAmount: res?.record?.baseAmount || 0,
         date: formatDateFromApi(res.record.date)
       }
     })
@@ -515,7 +519,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
                     rateCalcMethod: formik.values?.rateCalcMethod,
                     dirtyField: DIRTYFIELD_RATE
                   })
-                  formik.setFieldValue('baseAmount', updatedRateRow?.baseAmount.toFixed(2) || 0)
+                  formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
                   formik.setFieldValue('amount', e.target.value)
                 }}
                 onClear={() => {
