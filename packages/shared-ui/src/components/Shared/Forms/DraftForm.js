@@ -1083,7 +1083,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                   form={formik}
                   required
                   readOnly={isClosed}
-                  displayFieldWidth={2}
+                  displayFieldWidth={5}
                   firstFieldWidth={3}
                   valueShow='clientRef'
                   secondValueShow='clientName'
