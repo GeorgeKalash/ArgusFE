@@ -4,7 +4,10 @@ import { useInteractionTracker } from '@argus/shared-providers/src/providers/Int
 
 const usePageInteraction = () => {
   const { track } = useInteractionTracker()
-  const { openTabs, currentTabIndex } = useContext(MenuContext)
+  const menuContext = useContext(MenuContext)
+
+  const openTabs = menuContext?.openTabs || []
+  const currentTabIndex = menuContext?.currentTabIndex ?? null
 
   const currentPageResourceId =
     openTabs?.[currentTabIndex]?.resourceId || null

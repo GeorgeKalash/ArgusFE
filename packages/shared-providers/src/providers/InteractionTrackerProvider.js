@@ -18,18 +18,12 @@ export const InteractionTrackerProvider = ({ children }) => {
     setInteractions(prev => prev?.filter(id => id !== pageId))
   }, [])
 
-  const hasPageInteraction = useCallback(
-    pageId => !!interactions[pageId]?.length,
-    [interactions]
-  )
-
   return (
     <InteractionTrackerContext.Provider
       value={{
         track,
         interactions,
-        clearPageInteractions,
-        hasPageInteraction
+        clearPageInteractions
       }}
     >
       {children}
