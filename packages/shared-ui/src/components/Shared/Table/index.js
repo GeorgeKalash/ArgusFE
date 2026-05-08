@@ -629,7 +629,11 @@ const Table = ({
             params.node.setDataValue(params.colDef.field, checked)
           } else {
             params.api.forEachNode(node => {
-              node.setDataValue(params.colDef.field, node.id === params.node.id ? checked : false)
+             if (node.id === params.node.id) {
+                node.setDataValue(params.colDef.field, checked)
+              } else if (checked) {
+                node.setDataValue(params.colDef.field, false)
+              }
             })
           }
 
