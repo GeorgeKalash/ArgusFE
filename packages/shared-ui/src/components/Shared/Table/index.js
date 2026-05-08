@@ -613,29 +613,28 @@ const Table = ({
         className={'fullSizeCheckbox'}
         checked={params.value}
         disabled={(props?.disable && props?.disable(params?.data)) || props?.disableCheckBox}
+        onClick={e => e.stopPropagation()}
+        onMouseDown={e => e.stopPropagation()}
         onChange={e => {
-          e.preventDefault()
-          const rowIndex = params.node.rowIndex
-          const colId = params.column?.getColId?.() || params.colDef.field
-          params.api.setFocusedCell(rowIndex, colId)
-          params.api.ensureIndexVisible(rowIndex)
-          if (!params.node.isSelected()) params.node.setSelected(true)
+          e.stopPropagation()
 
           const checked = e.target.checked
+          const rowIndex = params.node.rowIndex
+          const colId = params.column?.getColId?.() || params.colDef.field
+
+          params.api.setFocusedCell(rowIndex, colId)
+          params.api.ensureIndexVisible(rowIndex)
+
           if (rowSelection !== 'single') {
             params.node.setDataValue(params.colDef.field, checked)
           } else {
             params.api.forEachNode(node => {
-              if (node.id === params.node.id) {
-                node.setDataValue(params.colDef.field, checked)
-              } else if (checked) {
-                node.setDataValue(params.colDef.field, false)
-              }
+              node.setDataValue(params.colDef.field, node.id === params.node.id ? checked : false)
             })
           }
 
           if (handleCheckboxChange) {
-            handleCheckboxChange(params.data, e.target.checked)
+            handleCheckboxChange(params.data, checked)
           }
         }}
       />
@@ -802,7 +801,6 @@ const Table = ({
                   checked={checked}
                   disabled={props?.disableCheckBox}
                   onChange={e => {
-                    e.preventDefault()
                     e.stopPropagation()
 
                     const colId = params.column.getColId()
