@@ -127,11 +127,13 @@ const ThreeDDesignForm = ({ recordId, window }) => {
       extension: ProductModelingRepository.ThreeDDesign.get,
       parameters: `_recordId=${recordId}`
     }).then(res => {
-      formik.setValues({
-        ...res.record,
-        date: formatDateFromApi(res?.record?.date),
-        startDate: formatDateFromApi(res?.record?.startDate),
-        endDate: formatDateFromApi(res?.record?.endDate)
+      formik.resetForm({
+        values: {
+          ...res.record,
+          date: formatDateFromApi(res?.record?.date),
+          startDate: formatDateFromApi(res?.record?.startDate),
+          endDate: formatDateFromApi(res?.record?.endDate)
+        }
       })
     })
   }
@@ -339,7 +341,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('source', newValue?.key || null)
+                      formik.setFieldValue('source', Number(newValue?.key) || null)
                     }}
                     error={formik.touched.source && Boolean(formik.errors.source)}
                   />
@@ -547,7 +549,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('castingType', newValue?.key)
+                      formik.setFieldValue('castingType', Number(newValue?.key))
                     }}
                     error={formik.touched.castingType && Boolean(formik.errors.castingType)}
                   />
