@@ -29,6 +29,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ImportForm from '@argus/shared-ui/src/components/Shared/ImportForm'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function WCConsumpForm({ recordId, window }) {
   const { stack } = useWindow()
@@ -77,9 +78,7 @@ export default function WCConsumpForm({ recordId, window }) {
     qty: createRowValidation('qty')
   })
 
-  const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
-    initialValues: {
+  const initialValues = {
       recordId,
       header: {
         recordId: null,
@@ -112,7 +111,11 @@ export default function WCConsumpForm({ recordId, window }) {
           baseQty: null
         }
       ]
-    },
+    }
+
+  const { formik } = useForm({
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    initialValues,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -151,7 +154,7 @@ export default function WCConsumpForm({ recordId, window }) {
   const isPosted = formik?.values?.header?.status === 3
   const isClosed = formik?.values?.header?.wip === 2
 
-  const totalCostField = formik.values.items.reduce((sum, item) => sum + (Number(item?.totalCost) || 0), 0)
+  const totalCostField = formik.values.items.reduce((sum, item) => sum + (Number(item?.totalCost) || 0), 0) || 0
 
   const totalQty = reCal
     ? formik.values.items.reduce((sum, item) => sum + (Number(item?.qty) || 0), 0)
@@ -252,14 +255,17 @@ export default function WCConsumpForm({ recordId, window }) {
     const header = await getHeaderData(recordId)
     const items = await getItems(recordId)
 
-    formik.setValues({
-      ...formik.values,
-      recordId: header.recordId,
-      header: {
-        ...formik.values.header,
-        ...header
-      },
-      items
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        recordId: header.recordId,
+        header: {
+          ...formik.values.header,
+          totalCostField: roundTo(totalCostField) || 0,
+          ...header
+        },
+        items
+      }
     })
   }
 
@@ -321,7 +327,7 @@ export default function WCConsumpForm({ recordId, window }) {
 
         if (newRow.isInactive) {
           update({
-            ...formik.initialValues.items[0],
+            ...initialValues.items[0],
             id: newRow.id
           })
           stackError({
@@ -392,7 +398,7 @@ export default function WCConsumpForm({ recordId, window }) {
       async onChange({ row: { update, newRow } }) {
         setReCal(true)
         update({
-          totalCost: parseFloat(newRow?.unitCost * newRow?.qty).toFixed(2),
+          totalCost: roundTo(newRow?.unitCost * newRow?.qty),
           baseQty: newRow?.muQty ? newRow?.muQty * newRow?.qty : newRow?.qty
         })
       },
@@ -491,8 +497,8 @@ export default function WCConsumpForm({ recordId, window }) {
   ]
 
   useEffect(() => {
-    formik.setFieldValue('header.totalQty', parseFloat(totalQty).toFixed(2))
-    formik.setFieldValue('header.totalCostField', parseFloat(totalCostField).toFixed(2))
+    formik.setFieldValue('header.totalQty', roundTo(totalQty))
+    formik.setFieldValue('header.totalCostField', roundTo(totalCostField))
   }, [totalQty, totalCostField])
 
   useEffect(() => {
