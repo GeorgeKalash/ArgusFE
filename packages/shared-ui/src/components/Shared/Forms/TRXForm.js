@@ -116,9 +116,11 @@ export default function TRXForm({ labels, access, setStore, store }) {
         isClosed: res?.record?.wip === 2,
         result: res?.record
       }))
-      formik.setValues({
-        ...res.record,
-        date: formatDateFromApi(res?.record?.date)
+      formik.resetForm({
+        values: {
+          ...res.record,
+          date: formatDateFromApi(res?.record?.date)
+        }
       })
     })
   }
