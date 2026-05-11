@@ -28,6 +28,8 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { getDirtyFields } from '@argus/shared-utils/src/utils/getDirtyFields'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function BalanceTransferMultiForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -307,7 +309,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
     })
 
     const modifiedList =
-      res.record.list.length > 0
+      res?.record?.list?.length > 0
         ? res.record.list.map((item, index) => ({
             ...item,
             fromGroup: item.accountGroupName,
@@ -319,14 +321,16 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       modifiedList.map(row => fillContactStore(row.id, row.accountId))
     )
 
-    formik.setValues({
-      recordId: res?.record?.header?.recordId,
-      header: {
-        ...res?.record?.header,
-        fromGroup: res?.record?.header?.accountGroupName,
-        date: formatDateFromApi(res?.record?.header?.date)
-      },
-      rows: modifiedList
+    formik.resetForm({
+      values: {
+        recordId: res?.record?.header?.recordId,
+        header: {
+          ...res?.record?.header,
+          fromGroup: res?.record?.header?.accountGroupName,
+          date: formatDateFromApi(res?.record?.header?.date)
+        },
+        rows: modifiedList
+      }
     })
 
     return res?.record
@@ -335,6 +339,14 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [])
+
+  useEffect(() => {
+    if (formik.dirty) {
+      console.log(
+        getDirtyFields(formik.values, formik.initialValues)
+      )
+    }
+  }, [formik.values])
 
   const actions = [
     {
@@ -381,10 +393,18 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
   ]
 
   const totalAmount = formik.values?.rows?.reduce((amount, row) => {
-    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+    const amountValue = row.amount || 0
 
     return amount + amountValue
   }, 0)
+
+    useEffect(() => {
+    if (formik.dirty) {
+      console.log(
+        getDirtyFields(formik.values, formik.initialValues)
+      )
+    }
+  }, [formik.values])
 
   return (
     <FormShell
@@ -641,7 +661,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
               <CustomTextField
                 name='header.totalAmount'
                 label={labels.totalAmount}
-                value={totalAmount.toFixed(2)}
+                value={roundTo(totalAmount)}
                 maxAccess={maxAccess}
                 readOnly
               />
