@@ -29,6 +29,7 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -134,7 +135,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         dirtyField: DIRTYFIELD_RATE
       })
 
-      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
       formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
@@ -208,7 +209,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         extension: FinancialRepository.ReceiptVouchers.get,
         parameters: `_recordId=${recordId}`
       })
-      formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
+      formik.resetForm({ values: { ...res.record, date: formatDateFromApi(res.record.date) } })
     }
   }
 
@@ -670,7 +671,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     rateCalcMethod: formik.values?.rateCalcMethod,
                     dirtyField: DIRTYFIELD_RATE
                   })
-                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                  formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
                 }}
                 onClear={async () => {
                   formik.setFieldValue('amount', 0)
