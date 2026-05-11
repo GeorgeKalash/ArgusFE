@@ -27,6 +27,7 @@ import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiC
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function CashTransfersForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -141,10 +142,12 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
         DatasetIdAccess: ResourceIds.MCRCashTransfers,
         data,
         onOk: childFormikValues => {
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...childFormikValues
-          }))
+          formik.resetForm({
+            values: {
+              ...formik.values, 
+              ...childFormikValues
+            }
+          })
         }
       }
     })
@@ -206,7 +209,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
         rateCalcMethod: res.record?.rateCalcMethod,
         dirtyField: DIRTYFIELD_RATE
       })
-      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
       formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
@@ -225,9 +228,11 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   async function refetchForm(recordId) {
     const res = await getData(recordId)
 
-    formik.setValues({
-      ...res.record,
-      recordId
+    formik.resetForm({
+      values: {
+        ...res.record,
+        recordId
+      }
     })
   }
 
@@ -395,6 +400,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
                 { key: 'name', value: 'Name' }
               ]}
               values={formik.values}
+              readOnly={isPosted}
               required
               maxAccess={maxAccess}
               onChange={(_, newValue) => {
@@ -416,6 +422,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
                 { key: 'name', value: 'Name' }
               ]}
               values={formik.values}
+              readOnly={isPosted}
               required
               maxAccess={maxAccess}
               onChange={(_, newValue) => {
@@ -431,6 +438,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
               label={labels.amount}
               value={formik.values.amount}
               maxAccess={maxAccess}
+              readOnly={isPosted}
               onChange={async e => {
                 formik.setFieldValue('amount', e.target.value)
 
@@ -441,7 +449,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
                   rateCalcMethod: formik.values?.rateCalcMethod,
                   dirtyField: DIRTYFIELD_RATE
                 })
-                formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount))
               }}
               onClear={async () => {
                 formik.setFieldValue('amount', 0)
