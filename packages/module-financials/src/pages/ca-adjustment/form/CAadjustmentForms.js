@@ -27,6 +27,7 @@ import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalc
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -90,11 +91,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
       if (!recordId) {
         toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          baseAmount: !formik.values.baseAmount ? obj.amount : formik.values.baseAmount,
-
-          recordId: response.recordId
+        formik.resetForm({
+          values: {
+            ...obj,
+            baseAmount: !formik.values.baseAmount ? obj.amount : formik.values.baseAmount,
+            recordId: response.recordId
+          }
         })
       } else {
         toast.success(platformLabels.Edited)
@@ -119,10 +121,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         DatasetIdAccess: ResourceIds.MCRIncreaseDecreaseAdj,
         data,
         onOk: childFormikValues => {
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...childFormikValues
-          }))
+          formik.resetForm({
+            values: {
+              ...formik.values, 
+              ...childFormikValues
+            }
+          })
         }
       }
     })
@@ -143,7 +147,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         dirtyField: DIRTYFIELD_RATE
       })
 
-      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
       formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
@@ -203,9 +207,11 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
           parameters: `_recordId=${recordId}`
         })
 
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
+        formik.resetForm({
+          values: {
+            ...res.record,
+            date: formatDateFromApi(res.record.date)
+          }
         })
       } else {
         const cashAccountId = formik.values.cashAccountId
@@ -458,7 +464,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
             <Grid item xs={12}>
               <CustomNumberField
                 name='amount'
-                type='text'
                 label={labels.amount}
                 value={formik.values.amount}
                 readOnly={isPosted}
@@ -475,7 +480,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                     rateCalcMethod: formik.values?.rateCalcMethod,
                     dirtyField: DIRTYFIELD_RATE
                   })
-                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                  formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
                 }}
                 onClear={async () => {
                   formik.setFieldValue('amount', 0)
