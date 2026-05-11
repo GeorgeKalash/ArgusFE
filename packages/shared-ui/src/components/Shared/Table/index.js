@@ -671,6 +671,15 @@ const Table = ({
       )
     }
 
+
+  const tableName = name && `${name}.${props?.maxAccess?.record?.resourceId}`
+
+  const { data: tableSettings, refetch: invalidate } = useQuery({
+    queryKey: [tableName],
+    queryFn: () => getFromDB(storeName, tableName),
+    enabled: !!tableName
+  })
+
   const columnDefs = useMemo(() => {
     return [
       ...(showCheckboxColumn
@@ -711,9 +720,13 @@ const Table = ({
       ...filteredColumns.map(column => {
         const isLinkedColumn = column.type === 'link' || !!column.linkOpen
 
+        const savedColumn = tableSettings?.find(
+          item => item.colId === column.field
+        )
+
         return {
           ...column,
-          width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
+          width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
           flex: column.flex,
           sort: column.sort || '',
           cellRenderer:
@@ -853,13 +866,6 @@ const Table = ({
     }
   }
 
-  const tableName = name && `${name}.${props?.maxAccess?.record?.resourceId}`
-
-  const { data: tableSettings, refetch: invalidate } = useQuery({
-    queryKey: [tableName],
-    queryFn: () => getFromDB(storeName, tableName),
-    enabled: !!tableName
-  })
 
   useEffect(() => {
     if (!tableSettings || !gridApiRef.current?.columnApi) return
