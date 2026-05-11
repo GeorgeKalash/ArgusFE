@@ -44,7 +44,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
           itemId: store.recordId,
           currencyId: null,
           plId: null,
-          priceType: '',
+          priceType: 0,
           muId: 0,
           valueType: '',
           value: null,
@@ -80,7 +80,8 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             .map(item => ({
               ...item,
               itemId: recordId,
-              muId: item.muId || 0
+              muId: item.muId || 0,
+              priceType: item.priceType || 0
             }))
         })
       })

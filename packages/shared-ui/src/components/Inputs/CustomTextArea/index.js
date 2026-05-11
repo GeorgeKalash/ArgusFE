@@ -2,8 +2,6 @@ import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef } from 'react'
 import Image from 'next/image'
-import DropDownArrow from '@argus/shared-ui/src/components/images/buttonsIcons/bottom-arrow.png'
-import AddAction from '@argus/shared-ui/src/components/images/buttonsIcons/add.png'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomTextArea.module.css'
 import inputs from '../Inputs.module.css'
@@ -93,12 +91,12 @@ const CustomTextArea = ({
               )}
               {viewAdd && (
                 <IconButton tabIndex={-1}  className={inputs.iconButton}  onClick={handleAddAction} aria-label='Add' disabled={_disabled}>
-                  <Image src={AddAction} alt='Add' width={18} height={18} />
+                  <Image src={'/images/buttonsIcons/add.png'} alt='Add' width={18} height={18} />
                 </IconButton>
               )}
               {viewDropDown && (
                 <IconButton tabIndex={-1}  className={inputs.iconButton}  onClick={onDropDown} aria-label='Drop down' disabled={_disabled}>
-                  <Image  className={inputs.icon}  src={DropDownArrow} alt='Drop Down' width={18} height={18} />
+                  <Image  className={inputs.icon}  src={'/images/buttonsIcons/bottom-arrow.png'} alt='Drop Down' width={18} height={18} />
                 </IconButton>
               )}
             </div>

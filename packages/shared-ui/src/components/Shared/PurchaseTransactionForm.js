@@ -680,7 +680,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       component: 'button',
       name: 'costHistory',
       props: {
-        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src,
+        imgSrc: '/images/buttonsIcons/popup-black.png',
         onCondition: row => {
           return {
             disabled: !row?.itemId
@@ -815,7 +815,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {
@@ -1349,6 +1349,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
       mdValue: 0,
+      trackBy: itemInfo?.trackBy,
       taxId: effectiveTaxId,
       taxName: effectiveTaxName,
       taxDetails: null
@@ -1807,7 +1808,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
+        imgSrc: '/images/TableIcons/imgSerials.png',
         hidden: false
       }
     } else {

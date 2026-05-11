@@ -23,6 +23,7 @@ import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 const GenerateOutboundTransportation2 = () => {
   const [selectedSaleZones, setSelectedSaleZones] = useState([])
@@ -44,6 +45,7 @@ const GenerateOutboundTransportation2 = () => {
     initialValues: {
       search: '',
       departureDate: null,
+      itemCategoryId: null,
       szId: null,
       balance: 0,
       totalAmount: 0,
@@ -188,14 +190,20 @@ const GenerateOutboundTransportation2 = () => {
       headerName: labels.name,
       wrapText: true,
       autoHeight: true,
-      flex: 3,
+      flex: 2,
       rowDrag: true
     },
     {
       field: 'volume',
       headerName: labels.volume,
-      flex: 2,
+      flex: 1,
       type: 'number'
+    },
+    {
+      field: 'filteredCategoryVolme',
+      headerName: labels.categVol,
+      type: 'number',
+      flex: 1
     }
   ]
 
@@ -336,11 +344,11 @@ const GenerateOutboundTransportation2 = () => {
     }
   ]
 
-  const onSaleZoneChange = async szId => {
+  const onSaleZoneChange = async (szId, itemCategoryId) => {
     if (szId) {
       const response = await getRequest({
         extension: DeliveryRepository.Volume.vol,
-        parameters: `_parentId=${szId}`
+        parameters: `_parentId=${szId}&_itemCategoryId=${itemCategoryId || 0}`
       })
 
       if (!response?.record?.saleZoneOrderVolumeSummaries) {
@@ -444,6 +452,7 @@ const GenerateOutboundTransportation2 = () => {
         .filter(item => item.checked)
         .map(item => ({
           ...item,
+          filteredCategoryVolme: item.filteredCategoryVolme.toFixed(2),
           orders: item.orders?.map(order => ({ ...order, checked: true }))
         }))
 
@@ -492,12 +501,23 @@ const GenerateOutboundTransportation2 = () => {
 
   const balance = totalTrucksVolume - ordersVolume
 
+  const getSelectedZonesTotals = () => {
+    const totalFilteredCategoryVolume = (selectedSaleZones?.list || [])?.reduce((sum, zone) => {
+      return sum + (parseFloat(zone.filteredCategoryVolme) || 0)
+    }, 0)
+    const totalPct = ordersVolume ? ((totalFilteredCategoryVolume * 100) / ordersVolume).toFixed(2) : 0
+
+    return { totalFilteredCategoryVolume, totalPct }
+  }
+
+  const { totalFilteredCategoryVolume, totalPct } = getSelectedZonesTotals()
+
   return (
     <Form onSave={formik.handleSubmit} isSaved={false} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} p={2}>
-            <Grid item xs={1.5}>
+            <Grid item xs={1.33}>
               <ResourceComboBox
                 endpointId={DeliveryRepository.GenerateTrip.root}
                 parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
@@ -508,7 +528,7 @@ const GenerateOutboundTransportation2 = () => {
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('szId', newValue?.recordId)
-                  onSaleZoneChange(newValue?.recordId)
+                  onSaleZoneChange(newValue?.recordId, formik.values.itemCategoryId)
                   formik.setFieldValue('data', { list: [] })
                   formik.setFieldValue('orders', { list: [] })
                   formik.setFieldValue('selectedTrucks', [])
@@ -522,7 +542,7 @@ const GenerateOutboundTransportation2 = () => {
               />
             </Grid>
 
-            <Grid item xs={1.5}>
+            <Grid item xs={1.33}>
               <CustomTextField
                 name='search'
                 value={formik.values.search}
@@ -537,7 +557,37 @@ const GenerateOutboundTransportation2 = () => {
               />
             </Grid>
 
-            <Grid item xs={1.5}>
+            <Grid item xs={1.33}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Category.qry}
+                parameters='_name=&_pageSize=1000&_startAt=0'
+                values={formik.values}
+                name='itemCategoryId'
+                label={labels.itemCategory}
+                valueField='recordId'
+                displayField={['caRef', 'name']}
+                columnsInDropDown={[
+                  { key: 'caRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                maxAccess={access}
+                onChange={(_, newValue) => {
+                  onSaleZoneChange(formik.values.szId, newValue?.recordId)
+                  
+                  formik.setFieldValue('itemCategoryId', newValue?.recordId || null)
+
+                  formik.setFieldValue('data', { list: [] })
+                  formik.setFieldValue('orders', { list: [] })
+                  formik.setFieldValue('selectedTrucks', [])
+                  formik.setFieldValue('vehicleAllocations', { list: [] })
+                  formik.setFieldValue('salesZones', { list: [] })
+                  setFilteredOrders([])
+                  setSelectedSaleZones([])
+                }}
+                error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
+              />
+            </Grid>
+            <Grid item xs={1.33}>
               <CustomNumberField
                 name='truckNo'
                 label={labels.truckNo}
@@ -554,7 +604,7 @@ const GenerateOutboundTransportation2 = () => {
                 }}
               />
             </Grid>
-            <Grid item xs={1.5}>
+            <Grid item xs={1.33}>
               <CustomDateTimePicker
                 name='departureDate'
                 min={new Date()}
@@ -567,7 +617,7 @@ const GenerateOutboundTransportation2 = () => {
                 error={formik.touched.departureDate && Boolean(formik.errors.departureDate)}
               />
             </Grid>
-            <Grid item xs={1.5}>
+            <Grid item xs={1.33}>
               <CustomNumberField
                 name='totalTrucksVolume'
                 label={labels.trucksVolume}
@@ -576,7 +626,7 @@ const GenerateOutboundTransportation2 = () => {
                 align='right'
               />
             </Grid>
-            <Grid item xs={1.5}>
+            <Grid item xs={1.33}>
               <CustomNumberField
                 name='ordersVolume'
                 label={labels.ordersVolume}
@@ -585,10 +635,10 @@ const GenerateOutboundTransportation2 = () => {
                 align='right'
               />
             </Grid>
-            <Grid item xs={1.5}>
+            <Grid item xs={1.33}>
               <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
             </Grid>
-            <Grid item xs={1.5}>
+            <Grid item xs={1.33}>
               <CustomNumberField
                 name='zonesVolume'
                 label={labels.zonesVolume}
@@ -716,7 +766,27 @@ const GenerateOutboundTransportation2 = () => {
                 image={'import.png'}
               />
             </Grid>
-            <Grid item xs={8.75}></Grid>
+
+            <Grid item xs={1.5}>
+              <CustomNumberField
+                name='totalFilteredCategoryVolume'
+                label={labels.totalCategVolume}
+                value={totalFilteredCategoryVolume.toFixed(2)}
+                readOnly
+              />
+            </Grid>
+
+            <Grid item xs={1.5}>
+              <CustomNumberField
+                name='filteredCategoryPercentage'
+                label={labels.totalCategVolPct}
+                value={totalPct}
+                readOnly
+              />
+            </Grid>
+
+            <Grid item xs={5.75}></Grid>
+
             <Grid item xs={0.65}>
               <CustomButton
                 onClick={openForm}

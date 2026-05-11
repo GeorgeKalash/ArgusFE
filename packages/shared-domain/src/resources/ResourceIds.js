@@ -323,7 +323,7 @@ export const ResourceIds = {
   SalaryChangeReasonFilter: 71105,
   EmploymentStatusFilter: 71107,
   SponsorFilter: 71108,
-  AttendanceScheduleFilter: 72105,
+  AttendanceSchedule: 72105,
   IndemnityAccuralsFilter: 73101,
   LeaveScheduleFilter: 73103,
   PayrollFilter: 75201,
@@ -545,6 +545,7 @@ export const ResourceIds = {
   DSLReasons: 72107,
   TerminationReasons: 71110,
   GeneralSettings: 20600,
+  AIChatbot: 20602,
   JobInfos: 71207,
   EarnedLeave: 73304,
   OpenPaymentOrder: 31334,
@@ -630,6 +631,13 @@ export const ResourceIds = {
   PurchaseOrderDTD: 50109,
   AccountReconciliations: 40315,
   Reconciliation: 31332,
+  DimensionGroup: 41120,
+  Dimensions: 41121,
+  PayrollConstant: 75118,
+  StandardCostParameters: 42138,
+  StandardCostUpdate: 42140,
+  PayPeriod: 75108,
+  EmployeeMissingDetails: 71407,
 
   // GL
   GLSalesInvoice: 51604,
@@ -695,6 +703,7 @@ export const ResourceIds = {
   MCRCashTransfers: 33605,
   MCRIncreaseDecreaseAdj: 33606,
   SalaryBatch: 75115,
+  PayrollFormulas: 75119,
 
   // Address
   ADDBPMasterData: 21600,

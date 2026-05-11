@@ -115,6 +115,9 @@ const IvMaterialsTransfer = () => {
     {
       field: 'wipName',
       headerName: _labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     }
   ]

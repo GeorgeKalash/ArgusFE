@@ -18,7 +18,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateFromISO, formatDateToApi, formatDateToISO } from '@argus/shared-domain/src/lib/date-helper'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
@@ -32,6 +32,8 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import ImportTransfer from '@argus/shared-ui/src/components/Shared/Forms/ImportTransfer'
 
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -161,8 +163,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
       delete copy.transfers
       delete copy.serials
       copy.date = !!copy.date ? formatDateToApi(copy.date) : null
-      copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
-      copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
+      copy.closedDate = !!copy.closedDate ? formatDateToISO(copy.closedDate) : null
+      copy.receivedDate = !!copy.receivedDate ? formatDateToISO(copy.receivedDate) : null
 
       const serialsValues = []
 
@@ -334,7 +336,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
+        imgSrc: '/images/TableIcons/imgSerials.png',
         hidden: false
       }
     } else {
@@ -552,28 +554,35 @@ export default function MaterialsTransferForm({ recordId, window }) {
     })
 
     res.record.date = formatDateFromApi(res?.record?.date)
-    res.record.closedDate = formatDateFromApi(res?.record?.closedDate)
-    res.record.receivedDate = formatDateFromApi(res?.record?.receivedDate)
+    res.record.closedDate = formatDateFromISO(res?.record?.closedDate)
+    res.record.receivedDate = formatDateFromISO(res?.record?.receivedDate)
 
     return res
   }
 
   async function refetchForm(recordId, refetchSerials) {
     const res = await getData(recordId)
+    if (!!formik.values.notificationGroupId) handleNotificationSubmission(recordId, res.record.reference, formik, 1)
+    const updatedTransfers = await fillDetails(recordId, refetchSerials)
 
-    if (!!formik.values.notificationGroupId) {
-      handleNotificationSubmission(recordId, res.record.reference, formik, 1)
-    }
+    formik.setValues({
+      ...res.record,
+      recordId,
+      transfers: updatedTransfers,
+      notificationGroupId: formik.values.notificationGroupId,
+      serials: serials?.current?.list
+    })
+  }
 
-    const res3 = await getDataGrid(recordId, refetchSerials)
+  async function fillDetails(recordId, refetchSerials){
+    const detailsResp = await getDataGrid(recordId, refetchSerials)
 
-    const updatedTransfers = await Promise.all(
-      res3.list.map(async item => {
+    return await Promise.all(
+      detailsResp?.list.map(async item => {
         return {
           ...item,
           id: item.seqNo,
           totalCost: calcTotalCost(item),
-
           serials: serials?.current?.list
             ?.filter(row => row.seqNo == item.seqNo)
             ?.map((serialDetail, index) => {
@@ -586,12 +595,13 @@ export default function MaterialsTransferForm({ recordId, window }) {
         }
       })
     )
+  }
 
+  async function onImport(recordId, refetchSerials){
+    const transfers = await fillDetails(recordId, refetchSerials)
     formik.setValues({
-      ...res.record,
-      recordId,
-      transfers: updatedTransfers,
-      notificationGroupId: formik.values.notificationGroupId,
+      ...formik.values,
+      transfers,
       serials: serials?.current?.list
     })
   }
@@ -872,6 +882,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
   }
 
   async function getDataGrid(recordId, refetchSerials) {
+    if (!recordId) return
+    
     const response = await getRequest({
       extension: InventoryRepository.MaterialsTransferItems.qry,
       parameters: `_transferId=${recordId}&_functionId=${SystemFunction.MaterialTransfer}`
@@ -879,9 +891,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
 
     if (response?.list && refetchSerials) {
       const response2 = await getSerials(recordId)
-      if (response2?.count) {
-        serials.current = response2
-      }
+      if (response2?.count) serials.current = response2
+      else serials.current = []
     }
 
     return response
@@ -906,29 +917,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
     ;(async function () {
       if (recordId) {
         const res = await getData(recordId)
-
         const resNotification = await getNotificationData(recordId)
-
-        const res3 = await getDataGrid(recordId, true)
-
-        const updatedTransfers = await Promise.all(
-          res3.list.map(async item => {
-            return {
-              ...item,
-              id: item.seqNo,
-              totalCost: calcTotalCost(item),
-              serials: serials?.current?.list
-                ?.filter(row => row.seqNo == item.seqNo)
-                ?.map((serialDetail, index) => {
-                  return {
-                    ...serialDetail,
-                    id: index
-                  }
-                }),
-              unitCost: item.unitCost ?? 0
-            }
-          })
-        )
+        const updatedTransfers = await fillDetails(recordId, true)
 
         formik.setValues({
           ...res.record,
@@ -1078,7 +1068,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
                 </Grid>
               </Grid>
               <Grid container spacing={2} marginTop={0.5}>
-                <Grid item xs={6}>
+                <Grid item xs={5}>
                   <ResourceComboBox
                     endpointId={LogisticsRepository.LoCarrier.qry}
                     name='carrierId'
@@ -1096,6 +1086,26 @@ export default function MaterialsTransferForm({ recordId, window }) {
                       formik.setFieldValue('carrierId', newValue ? newValue.recordId : '')
                     }}
                     error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
+                  />
+                </Grid>
+                <Grid item xs={1}>
+                  <CustomButton
+                    onClick={() => {
+                      stack({
+                        Component: ImportTransfer,
+                        props: {
+                          labels,
+                          maxAccess,
+                          onImport
+                        },
+                        width: 600,
+                        height: 350,
+                        title: labels.import
+                      })
+                    }}
+                    tooltipText={platformLabels.import}
+                    image={'import.png'}
+                    disabled={editMode}
                   />
                 </Grid>
                 <Grid item xs={6}>

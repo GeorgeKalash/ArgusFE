@@ -545,7 +545,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {
@@ -591,6 +591,20 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   ]
 
   async function onClose() {
+    const metalGridWeight = (formik.values.metalGridData || []).reduce((sum, row) => {
+      return sum + (parseFloat(row?.totalWeight) || 0)
+    }, 0)
+    const headerWeight = parseFloat(formik.values.header?.weight) || 0
+
+    const hasWeightMismatch = parseFloat(metalGridWeight.toFixed(2)) !== parseFloat(headerWeight.toFixed(2))
+
+    if (hasWeightMismatch) {
+      stackError({
+        message: platformLabels.Recalculate
+      })
+      return
+    }
+
     const { serials, ...restValues } = formik.values
 
     await postRequest({
@@ -647,6 +661,12 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       }
     })
   }
+  const reCalculateWeight = () => {
+    const totals = calculateDraftTotals(formik.values.items)
+    formik.setFieldValue('header.weight', parseFloat(totals.weight).toFixed(2))
+
+    setReCal(true)
+  }
 
   const actions = [
     {
@@ -686,6 +706,12 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         })
       },
       disabled: !formik.values.header?.clientId || !formik.values.header?.date
+    },
+    {
+      key: 'Recalculate',
+      condition: true,
+      onClick: reCalculateWeight,
+      disabled: !editMode
     }
   ]
 
@@ -1057,7 +1083,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                   form={formik}
                   required
                   readOnly={isClosed}
-                  displayFieldWidth={2}
+                  displayFieldWidth={5}
                   firstFieldWidth={3}
                   valueShow='clientRef'
                   secondValueShow='clientName'

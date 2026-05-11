@@ -28,14 +28,16 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, window }) => {
     _isMetal: false,
     _metal: null,
     nraId: null,
-    productionLevel: null
+    productionLevel: null,
+    _dmgId: null,
+    _dmgName: null
   })
 
   const tabs = [
     { label: labels.items },
     { label: labels.barcode, disabled: !store.recordId },
     { label: labels.sales, disabled: !store.recordId },
-    { label: labels.properties, disabled: !store.recordId },
+    { label: labels.dimension, disabled: !store.recordId },
     { label: labels.physical, disabled: !store.recordId },
     { label: labels.vendor, disabled: !store.recordId },
     { label: labels.production, disabled: !store.recordId },

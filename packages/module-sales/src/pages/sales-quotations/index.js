@@ -50,6 +50,9 @@ const SalesQuotations = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -94,6 +97,19 @@ const SalesQuotations = () => {
       field: 'description',
       headerName: labels.description,
       flex: 2
+    },
+    {
+      field: 'rsName',
+      headerName: labels.releaseStatus,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
+      flex: 1
     }
   ]
 

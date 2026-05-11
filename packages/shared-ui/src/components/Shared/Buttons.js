@@ -311,6 +311,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Termination',
+    label: platformLabels.Termination,
+    color: '#e8e7e7',
+    image: 'redCircle.png',
+    main: false
+  },
+  {
     key: 'RecordRemarks',
     label: platformLabels.RecordRemarks,
     color: '#90278e',
@@ -702,6 +709,20 @@ export const getButtons = platformLabels => [
     label: platformLabels.Return,
     color: '#2C7693',
     image: 'return.png',
+    main: false
+  },
+  {
+    key: 'Recalculate',
+    label: platformLabels.Recalculate,
+    color: '#231f20',
+    image: 'calculator.png',
+    main: false
+  },
+  {
+    key: 'Undo',
+    label: platformLabels.Undo,
+    color: '#bf1e2e',
+    image: 'undoIcon.png',
     main: false
   }
 ]

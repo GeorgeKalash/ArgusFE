@@ -77,6 +77,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       kitItem: false,
       taxId: '',
       lotCategoryId: null,
+      dmgId: null,
       spfId: '',
       categoryName: '',
       defSaleMUId: '',
@@ -149,7 +150,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
       setStore(prevStore => ({
         ...prevStore,
-        _reference: res.record.sku
+        _reference: res.record.sku,
+        _dmgId: res.record.dmgId,
+        _dmgName: res.record.dmgName
       }))
 
       formik.setFieldValue('sku', res.record.sku)
@@ -207,7 +210,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       priceGroupId: res.record.pgId,
       returnPolicy: res.record.returnPolicyId,
       _name: res.record.name,
-      _reference: res.record.sku
+      _reference: res.record.sku,
+      _dmgId: res.record.dmgId,
+      _dmgName: res.record.dmgName
     }))
   }
   useEffect(() => {
@@ -496,6 +501,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     reducer={response => {
                       return response?.record?.itemGroups
                     }}
+                    readOnly={editMode}
                     values={formik.values}
                     name='groupId'
                     label={labels.itemGroup}
@@ -508,7 +514,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     ]}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('groupId', newValue?.recordId || '')
+                      formik.setFieldValue('groupId', newValue?.recordId || null)
+                      formik.setFieldValue('dmgId', newValue?.dmgId || null)
+                      formik.setFieldValue('dmgName', newValue?.dmgName || null)
                     }}
                     error={formik.touched.groupId && formik.errors.groupId}
                   />

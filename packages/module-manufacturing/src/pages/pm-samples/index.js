@@ -102,6 +102,9 @@ const PMSamples = () => {
     {
       field: 'statusName',
       headerName: labels.statusName,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -112,6 +115,9 @@ const PMSamples = () => {
     {
       field: 'wipName',
       headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     }
   ]

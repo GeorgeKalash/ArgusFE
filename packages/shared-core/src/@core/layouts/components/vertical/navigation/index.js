@@ -59,7 +59,7 @@ const Navigation = props => {
     setNavVisible
   } = props
 
-  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex, handleBookmark } =
+  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex, handleBookmark, setTabSwitch } =
     useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
   const [filteredMenu, setFilteredMenu] = useState([])
@@ -232,8 +232,14 @@ const Navigation = props => {
       setReloadOpenedPage([])
       setReloadOpenedPage(node)
     } else if (existingTabIndex !== -1) {
+      setTabSwitch(true)
       setCurrentTabIndex(existingTabIndex)
-      window.history.replaceState(null, '', openTabs[existingTabIndex].route)
+
+      router.replace(openTabs[existingTabIndex].route)
+
+      setTimeout(() => {
+        setTabSwitch(false)
+      }, 0)
     } else router.push(node.path)
     setLastOpenedPage(node)
   }
@@ -284,8 +290,7 @@ const Navigation = props => {
     const truncatedTitle = truncateTitle(node.title, level)
 
     const icon =
-      image &&
-      require(`@argus/shared-ui/src/components/images/folderIcons/${image}`).default.src
+      image && `/images/folderIcons/${image}`
 
     return (
       <div key={node.id} style={{ paddingBottom: isRoot ? 5 : undefined }}>
@@ -360,8 +365,8 @@ const Navigation = props => {
                 <img
                   src={
                     !navCollapsed
-                      ? require('@argus/shared-ui/src/components/images/logos/ArgusNewLogo2.png').default.src
-                      : require('@argus/shared-ui/src/components/images/logos/WhiteA.png').default.src
+                      ? '/images/logos/ArgusNewLogo2.png'
+                      : '/images/logos/WhiteA.png'
                   }
                   alt='Argus'
                   className={styles['Argus-Icon']}

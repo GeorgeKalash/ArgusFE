@@ -3,6 +3,7 @@ const service = 'EP.asmx/'
 export const EmployeeRepository = {
   Employee: {
     snapshot: service + 'snapshotEM',
+    page: service + 'pageEM',
     get1: service + 'getEM1',
     set: service + 'setEM',
     del: service + 'delEM'
@@ -135,7 +136,9 @@ export const EmployeeRepository = {
     del: service + 'delSD'
   },
   TerminationEmployee: {
-    get: service + 'getTE'
+    get: service + 'getTE',
+    set: service + 'setTE',
+    del: service + 'delTE'
   },
   EmployementHistory: {
     qry: service + 'qryEH',

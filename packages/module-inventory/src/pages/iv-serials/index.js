@@ -78,11 +78,6 @@ const IvSerials = () => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
-    },
-    {
       field: 'weight',
       headerName: labels.weight,
       flex: 1,
@@ -103,7 +98,7 @@ const IvSerials = () => {
         maxAccess: access
       },
       width: 850,
-      height: 470,
+      height: 490,
       title: labels.Serials
     })
   }
