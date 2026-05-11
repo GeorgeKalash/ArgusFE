@@ -226,12 +226,14 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       )
     }
 
-    formik.setValues({
-      ...doHeader?.record,
-      plantId: props.plantId || doHeader?.record.plantId,
-      dtId: props.dtId || doHeader?.record.dtId,
-      address: address,
-      orders: ordersList
+    formik.resetForm({
+      values: {
+        ...doHeader?.record,
+        plantId: props.plantId || doHeader?.record.plantId,
+        dtId: props.dtId || doHeader?.record.dtId,
+        address: address,
+        orders: ordersList
+      }
     })
   }
 
