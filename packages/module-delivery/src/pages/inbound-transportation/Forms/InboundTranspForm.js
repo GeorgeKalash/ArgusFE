@@ -176,11 +176,13 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
 
         const totals = getTotals(items)
 
-        formik.setValues({
-            ...formik.values,
-            ...formattedHeader,
-            items: formattedItems,
-            ...totals
+        formik.resetForm({
+            values: {
+                ...formik.values,
+                ...formattedHeader,
+                items: formattedItems,
+                ...totals
+            }
         })
     }
 
@@ -478,10 +480,10 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 label={labels.arrivalDate}
                                 value={formik.values?.arrivalTime}
                                 onChange={(_, newValue) => {
-                                    formik.setFieldValue('arrivalTime', newValue)
+                                    formik.setFieldValue('arrivalTime', newValue || null)
                                     if (!newValue) formik.setFieldValue('convertedArrivalTime', '')
                                 }}
-                                onClear={() => formik.setFieldValue('arrivalTime', '')}
+                                onClear={() => formik.setFieldValue('arrivalTime', null)}
                                 readOnly={isPosted}
                                 maxAccess={maxAccess}
                                 error={formik.touched.arrivalTime && Boolean(formik.errors.arrivalTime)}
