@@ -305,8 +305,6 @@ const PhysicalCountSerial = () => {
             columns={columns}
             gridData={filtered ?? { list: [] }}
             rowId={['recordId']}
-            isLoading={false}
-            paginationType='api'
             pagination={false}
             maxAccess={maxAccess}
             textTransform={true}

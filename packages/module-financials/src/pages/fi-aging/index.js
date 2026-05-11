@@ -151,7 +151,6 @@ const FiAging = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={50}
           disableSorting={true}
           refetch={refetch}

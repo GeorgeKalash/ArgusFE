@@ -514,7 +514,6 @@ const GenerateOutboundTransportation = () => {
                 columns={columnsZones}
                 gridData={filteredData}
                 rowId={['recordId']}
-                isLoading={false}
                 pagination={false}
                 maxAccess={access}
                 showCheckboxColumn={true}
@@ -529,7 +528,6 @@ const GenerateOutboundTransportation = () => {
                     columns={columnsOrders}
                     gridData={formik?.values?.data}
                     rowId={['recordId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     showCheckboxColumn={true}
@@ -573,7 +571,6 @@ const GenerateOutboundTransportation = () => {
                       columns={columnsDeliveryOrders}
                       gridData={formik?.values?.deliveryOrders}
                       rowId={['recordId']}
-                      isLoading={false}
                       pagination={false}
                       maxAccess={access}
                       showCheckboxColumn={true}

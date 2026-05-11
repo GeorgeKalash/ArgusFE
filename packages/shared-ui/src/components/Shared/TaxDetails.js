@@ -123,7 +123,6 @@ const TaxDetails = props => {
           columns={columns}
           gridData={gridData}
           rowId={['recordId']}
-          isLoading={false}
           maxAccess={access}
           pagination={false}
         />

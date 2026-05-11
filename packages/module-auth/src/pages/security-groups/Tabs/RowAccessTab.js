@@ -145,7 +145,6 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
             columns={rowColumns}
             gridData={filtered}
             rowId={['recordId']}
-            isLoading={false}
             maxAccess={maxAccess}
             pagination={false}
             showCheckboxColumn={true}

@@ -659,7 +659,6 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsZones}
                     gridData={filteredData}
                     rowId={['recordId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     disableSorting={true}
@@ -673,7 +672,6 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsOrders}
                     gridData={formik?.values?.orders}
                     rowId={['recordId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     showCheckboxColumn={true}
@@ -689,7 +687,6 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsSelectedZones}
                     gridData={selectedSaleZones}
                     rowId={['recordId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     rowDragManaged={true}
@@ -710,7 +707,6 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsVehicleAllocations}
                     gridData={formik?.values?.vehicleAllocations}
                     rowId={['recordId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     onSelectionChange={row => {
@@ -737,7 +733,6 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsSalesOrders}
                     gridData={filteredOrders}
                     rowId={['vehicleId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                   />

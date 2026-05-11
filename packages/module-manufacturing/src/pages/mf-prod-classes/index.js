@@ -98,7 +98,6 @@ const MfProductionClasses = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='client'
           maxAccess={access}

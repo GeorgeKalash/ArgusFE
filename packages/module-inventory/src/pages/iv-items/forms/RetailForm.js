@@ -101,8 +101,6 @@ const RetailForm = ({ store, maxAccess }) => {
             rowId={['key']}
             pageSize={50}
             pagination={false}
-            paginationType='client'
-            isLoading={false}
             maxAccess={maxAccess}
             showCheckboxColumn={true}
           />

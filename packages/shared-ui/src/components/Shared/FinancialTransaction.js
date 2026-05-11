@@ -84,7 +84,6 @@ const FinancialTransaction = ({ formValues, functionId, window }) => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           maxAccess={access}
           pagination={false}
         />

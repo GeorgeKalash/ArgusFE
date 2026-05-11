@@ -64,7 +64,6 @@ const DistributionTab = ({ store, labels, access }) => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           maxAccess={access}
           pagination={false}
         />

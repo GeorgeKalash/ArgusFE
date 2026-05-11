@@ -199,7 +199,6 @@ const SalesQuotations = () => {
           refetch={refetch}
           onDelete={delSQ}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

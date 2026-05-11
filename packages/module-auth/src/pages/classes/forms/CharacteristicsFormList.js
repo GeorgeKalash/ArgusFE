@@ -96,7 +96,6 @@ const CharacteristicsForm = ({ labels, store, maxAccess, height }) => {
           gridData={CharacteristicGridData}
           rowId={['chId']}
           onDelete={delCharacteristic}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
           height={height - 100}

@@ -96,7 +96,6 @@ const CodeList = ({ store, labels, maxAccess }) => {
           columns={columns}
           gridData={data}
           rowId={['codeId']}
-          isLoading={false}
           pageSize={50}
           pagination={false}
           onDelete={delCode}

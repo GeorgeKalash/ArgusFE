@@ -238,7 +238,6 @@ const TrxDetails = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          isLoading={false}
           pagination={false}
           maxAccess={access}
         />

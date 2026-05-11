@@ -133,7 +133,6 @@ const BarcodeForm = ({ store, labels }) => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           pagination={false}
           maxAccess={access}

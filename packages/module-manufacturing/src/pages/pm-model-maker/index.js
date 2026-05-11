@@ -190,7 +190,6 @@ const ModelMaker = () => {
           refetch={refetch}
           onDelete={delMDL}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

@@ -191,7 +191,6 @@ const SAClients = () => {
           refetch={refetch}
           onEdit={Edit}
           onDelete={Delete}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />

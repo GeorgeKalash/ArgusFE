@@ -104,7 +104,6 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
           columns={columns}
           gridData={data}
           rowId={['code']}
-          isLoading={false}
           pageSize={50}
           pagination={false}
           onDelete={delCode}

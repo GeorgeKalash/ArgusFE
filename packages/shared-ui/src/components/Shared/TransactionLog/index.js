@@ -209,7 +209,6 @@ const TransactionLog = props => {
           gridData={gridData ?? { list: [] }}
           rowId={['recordId']}
           onEdit={showInfo}
-          isLoading={false}
           maxAccess={access}
           pagination={false}
         />

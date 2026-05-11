@@ -193,7 +193,6 @@ const AttachmentList = ({ resourceId, recordId, isActive, window }) => {
           gridData={data}
           onDelete={isActive ? del : null}
           rowId={['seqNo']}
-          isLoading={false}
           maxAccess={access}
           pagination={false}
         />

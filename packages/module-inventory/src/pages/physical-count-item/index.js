@@ -246,10 +246,8 @@ const PhysicalCountItem = () => {
             columns={columns}
             gridData={data ?? { list: [] }}
             rowId={['recordId']}
-            isLoading={false}
             pageSize={50}
             refetch={refetch}
-            paginationType='api'
             pagination={false}
             maxAccess={access}
             textTransform={true}
