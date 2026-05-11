@@ -205,7 +205,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     conditionSchema: ['items'],
-    initialValues: initialValues,
+    initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -310,7 +310,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
         }
         if (newRow.isInactive) {
           update({
-            ...formik.initialValues.items[0],
+            ...initialValues.items[0],
             id: newRow.id
           })
           stackError({
@@ -777,7 +777,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
           volume: puTrxHeader?.volume || 0,
           deliveryDate: puTrxHeader?.deliveryDate && formatDateFromApi(puTrxHeader?.deliveryDate)
         },
-        items: modifiedList.length > 0 ? modifiedList : formik?.initialValues?.items
+        items: modifiedList.length > 0 ? modifiedList : initialValues?.items
       }
     })
   }
@@ -1587,7 +1587,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik?.values?.items}
-            initialValues={formik.initialValues.items[0]}
+            initialValues={initialValues.items[0]}
             error={formik.errors.items}
             allowDelete={!isClosed}
             name='items'
