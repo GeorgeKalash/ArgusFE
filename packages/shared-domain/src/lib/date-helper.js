@@ -84,7 +84,7 @@ function formatDateandTime(date, recFormat) {
   let formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
     'dateFormat'
   ]
-  formats = recFormat ? `${formats} ` + recFormat : formats
+  formats = recFormat || formats;
   const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
 
   //const formattedDate = format(timeStamptoDate(timestamp), formats)

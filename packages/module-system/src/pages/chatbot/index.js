@@ -29,6 +29,7 @@ import { useResourceQuery } from "@argus/shared-hooks/src/hooks/resource";
 import { RequestsContext } from "@argus/shared-providers/src/providers/RequestsContext";
 import { ChatbotRepository } from '@argus/repositories/src/repositories/ChatbotRepository'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import { formatDateTimeDefault } from "@argus/shared-domain/src/lib/date-helper";
 
 
 ChartJS.register(
@@ -183,14 +184,16 @@ export default function ChatPage() {
                 {
                   sender: "user",
                   type: "text",
-                  text: userText
+                  text: userText,
+                  createdAt: new Date().toISOString()
                 },
                 {
                   sender: "assistant",
                   type: "text",
                   text: "",
                   isStreaming: true,
-                  isWaiting: true
+                  isWaiting: true,
+                  createdAt: new Date().toISOString()
                 }
               ]
             }
@@ -326,10 +329,10 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
-  if (!selectedChat?.isLoading) {
-    inputRef.current?.focus();
-  }
-}, [selectedChat?.isLoading]);
+    if (!selectedChat?.isLoading) {
+      inputRef.current?.focus();
+    }
+  }, [selectedChat?.isLoading]);
 
   const renderMessage = (msg, index) => {
     const cardStyle = {
@@ -340,9 +343,15 @@ export default function ChatPage() {
       width: "500px",
       maxWidth: "95%"
     };
-
+console.log(formatMessageDate(msg.createdAt));
     if (msg.type === "text") {
       return (
+        <MuiTooltip
+          title={msg.createdAt ? formatMessageDate(msg.createdAt) : "" }
+          arrow
+          placement="top"
+          enterDelay={500}
+        >
         <div
           key={index}
           style={{
@@ -363,7 +372,6 @@ export default function ChatPage() {
             maxWidth: "70%",
           }}
         >
-          
           {msg.isWaiting ? (
             <div
               style={{
@@ -417,6 +425,7 @@ export default function ChatPage() {
             </ReactMarkdown>
           )}
             </div>
+            </MuiTooltip>
           );
     }
 
@@ -699,9 +708,7 @@ export default function ChatPage() {
       res.map((msg) => ({
         sender: msg.role,
         type: "text",
-
         text: msg.content,
-
         createdAt: msg.createdAt
       }));
 
@@ -743,6 +750,34 @@ export default function ChatPage() {
       </div>
     </div>
   )
+
+  const formatMessageDate = (date) => {
+    if (!date) return "";
+
+    const messageDate = new Date(date);
+    const now = new Date();
+
+    const messageDay = new Date(messageDate);
+    messageDay.setHours(0, 0, 0, 0);
+
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const time = formatDateTimeDefault(messageDate,"hh:mm a");
+
+    if (messageDay.getTime() === today.getTime()) {
+      return time;
+    }
+
+    if (messageDay.getTime() === yesterday.getTime()) {
+      return `Yesterday ${time}`;
+    }
+
+    return formatDateTimeDefault(messageDate, "dd/MM/yyyy hh:mm a");
+  };
 
   return (
     <div
