@@ -196,7 +196,7 @@ const TransactionLog = props => {
               <Grid item xs={6}>
                 {_labels.resourceId}
               </Grid>
-              <Grid tem xs={6}>
+              <Grid item xs={6}>
                 {resourceId}
               </Grid>
             </Grid>

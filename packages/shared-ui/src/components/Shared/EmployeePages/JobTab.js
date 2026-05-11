@@ -40,7 +40,6 @@ const JobTab = ({ labels, maxAccess, store, isActive }) => {
 
   const {
     query: { data },
-    refetch,
     invalidate
   } = useResourceQuery({
     enabled: !!recordId,
@@ -51,8 +50,7 @@ const JobTab = ({ labels, maxAccess, store, isActive }) => {
   })
 
   const {
-    query: { data: jobInfo },
-    refetch: refetchJobInfo
+    query: { data: jobInfo }
   } = useResourceQuery({
     enabled: !!recordId,
     queryFn: fetchGridJobInfoData,
@@ -158,9 +156,7 @@ const JobTab = ({ labels, maxAccess, store, isActive }) => {
           rowId={['recordId']}
           onEdit={openForm}
           onDelete={del}
-          pageSize={50}
           pagination={false}
-          refetch={refetch}
           maxAccess={maxAccess}
           actionCondition={(row, actionType) => (actionType === 'delete') ? row.isActive : true }
         />
@@ -192,9 +188,7 @@ const JobTab = ({ labels, maxAccess, store, isActive }) => {
           columns={jobInfoColumns}
           gridData={filteredJobInfoData}
           rowId={['recordId']}
-          pageSize={50}
           pagination={false}
-          refetch={refetchJobInfo}
           maxAccess={maxAccess}
         />
       </Grow>

@@ -27,7 +27,6 @@ const PhysicalCountItem = () => {
 
   const {
     labels: _labels,
-    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -246,8 +245,6 @@ const PhysicalCountItem = () => {
             columns={columns}
             gridData={data ?? { list: [] }}
             rowId={['recordId']}
-            pageSize={50}
-            refetch={refetch}
             pagination={false}
             maxAccess={access}
             textTransform={true}

@@ -54,7 +54,6 @@ const IvReplenishementsList = ({ store, labels, maxAccess }) => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          pageSize={50}
           pagination={false}
           maxAccess={maxAccess}
         />

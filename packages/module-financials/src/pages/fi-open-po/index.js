@@ -51,7 +51,6 @@ const OpenPaymentOrder = () => {
     query: { data },
     labels,
     filterBy,
-    refetch,
     access,
     invalidate
   } = useResourceQuery({
@@ -198,7 +197,6 @@ const OpenPaymentOrder = () => {
             }}
             onEdit={edit}
             pagination={false}
-            refetch={refetch}
             maxAccess={access}
           />
         </Grow>

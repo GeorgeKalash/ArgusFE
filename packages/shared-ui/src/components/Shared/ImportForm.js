@@ -295,7 +295,6 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
             ]}
             gridData={parsedFileContent}
             rowId={['recordId']}
-            pageSize={50}
             pagination={false}
             maxAccess={access}
             textTransform

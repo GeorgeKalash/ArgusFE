@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-const CharacteristicsForm = ({ labels, store, maxAccess, height }) => {
+const CharacteristicsForm = ({ labels, store, maxAccess, height  }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [CharacteristicGridData, setCharacteristicGridData] = useState()
   const { stack } = useWindow()

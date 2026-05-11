@@ -30,7 +30,6 @@ const PMTasksTab = ({ labels, maxAccess, store }) => {
 
   const {
     query: { data },
-    refetch,
     invalidate
   } = useResourceQuery({
     enabled: !!recordId,
@@ -118,9 +117,7 @@ const PMTasksTab = ({ labels, maxAccess, store }) => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          pageSize={50}
           pagination={false}
-          refetch={refetch}
           maxAccess={maxAccess}
         />
       </Grow>

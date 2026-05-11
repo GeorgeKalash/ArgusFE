@@ -183,7 +183,6 @@ const ComponentBOM = ({ store, labels }) => {
             rowId={'recordId'}
             onEdit={edit}
             onDelete={del}
-            pageSize={50}
             pagination={false}
             maxAccess={access}
           />

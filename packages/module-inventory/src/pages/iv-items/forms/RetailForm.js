@@ -99,7 +99,6 @@ const RetailForm = ({ store, maxAccess }) => {
             columns={rowColumns}
             gridData={{ list: data }}
             rowId={['key']}
-            pageSize={50}
             pagination={false}
             maxAccess={maxAccess}
             showCheckboxColumn={true}
