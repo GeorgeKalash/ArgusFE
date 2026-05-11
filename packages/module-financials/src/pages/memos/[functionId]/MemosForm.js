@@ -31,6 +31,7 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import { ApplyManual } from '@argus/shared-ui/src/components/Shared/ApplyManual'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -131,20 +132,20 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       rateCalcMethod: formik.values?.rateCalcMethod,
       dirtyField: DIRTYFIELD_RATE
     })
-    formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+    formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
   }
 
   useEffect(() => {
-    let calculatedAmount = parseFloat(formik.values.subtotal)
+    let calculatedAmount = formik.values.subtotal
 
     if (formik.values.isSubjectToVAT) {
       const currentVat = (formik?.values?.recordId ? formik?.values?.vatPct : vatPct) || 0
-      const vatAmount = (calculatedAmount * parseFloat(currentVat)) / 100
+      const vatAmount = (calculatedAmount * currentVat) / 100
       formik.setFieldValue('vatAmount', vatAmount)
       formik.setFieldValue('vatPct', currentVat)
       calculatedAmount += vatAmount
     } else {
-      formik.setFieldValue('vatPct', '')
+      formik.setFieldValue('vatPct', null)
       formik.setFieldValue('vatAmount', 0)
     }
 
@@ -160,10 +161,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
           parameters: `_recordId=${recordId}`
         })
 
-        formik.setValues({
-          ...res.record,
-          dueDate: formatDateFromApi(res.record.dueDate),
-          date: formatDateFromApi(res.record.date)
+        formik.resetForm({
+          values: {
+            ...res.record,
+            dueDate: formatDateFromApi(res.record.dueDate),
+            date: formatDateFromApi(res.record.date)
+          }
         })
       }
     })()
@@ -589,9 +592,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     onChange={async e => {
                       const vatPct =
                         formik.values.subtotal != 0
-                          ? (parseFloat(e.target.value) * 100) / parseFloat(formik.values.subtotal)
+                          ? (e.target.value * 100) / formik.values.subtotal
                           : 0
-                      formik.setFieldValue('vatPct', parseFloat(vatPct).toFixed(2) || 0)
+                      formik.setFieldValue('vatPct', roundTo(vatPct) || 0)
                       formik.setFieldValue('vatAmount', e.target.value)
                       const calcAmount = Number(e.target.value || 0) + Number(formik.values.subtotal)
                       formik.setFieldValue('amount', calcAmount)
