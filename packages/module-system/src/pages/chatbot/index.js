@@ -54,7 +54,6 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [loading, setLoading] = useState(false);
   
   const {
     labels,
@@ -71,6 +70,7 @@ export default function ChatPage() {
     conversationId: "",
     title: labels?.newChat || "New Chat",
     messages: [],
+    isLoading: false,
     historyLoaded: false
     };
     
@@ -132,6 +132,7 @@ export default function ChatPage() {
             ? item.summary
             : item.conversationId,
         messages: [],
+        isLoading: false,
         historyLoaded: false
       }));
 
@@ -146,14 +147,13 @@ export default function ChatPage() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || loading)
+    if (!input.trim() || selectedChat?.isLoading)
       return;
 
     let activeChat = selectedChat;
 
     const userText = input;
 
-    setLoading(true);
     if (!activeChat) {
       const existingDraft = chats.find(
         (chat) => !chat.conversationId
@@ -177,6 +177,7 @@ export default function ChatPage() {
         chat.id === activeChat.id
           ? {
               ...chat,
+              isLoading: true,
               messages: [
                 ...chat.messages,
                 {
@@ -284,13 +285,13 @@ export default function ChatPage() {
 
                 return {
                   ...chat,
+                  isLoading: false,
                   messages: updatedMessages
                 };
               }
             )
           );
 
-          setLoading(false);
         }
 
         if (event.type ==="error") {
@@ -318,7 +319,6 @@ export default function ChatPage() {
             })
           );
 
-          setLoading(false);
           return;
         }
       }
@@ -326,10 +326,10 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
-  if (!loading) {
+  if (!selectedChat?.isLoading) {
     inputRef.current?.focus();
   }
-}, [loading]);
+}, [selectedChat?.isLoading]);
 
   const renderMessage = (msg, index) => {
     const cardStyle = {
@@ -995,7 +995,7 @@ export default function ChatPage() {
         >
           <input
             value={input}
-            disabled={loading}
+            disabled={selectedChat?.isLoading}
             ref={inputRef}
             onChange={(e) =>
               setInput(e.target.value)
@@ -1015,24 +1015,24 @@ export default function ChatPage() {
 
           <button
             onClick={sendMessage}
-            disabled={loading}
+            disabled={selectedChat?.isLoading}
             style={{
               padding:
                 "0 18px",
               border: "none",
               borderRadius: "8px",
               background:
-                loading
+                selectedChat?.isLoading
                   ? "#9ca3af"
                   : "#2563eb",
               color: "#fff",
               cursor:
-                loading
+                selectedChat?.isLoading
                   ? "not-allowed"
                   : "pointer"
             }}
           >
-            {loading
+            {selectedChat?.isLoading
               ? labels?.sending ?? ''
               : labels?.send ?? ''}
           </button>
