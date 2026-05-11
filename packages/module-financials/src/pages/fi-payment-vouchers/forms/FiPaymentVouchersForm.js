@@ -32,6 +32,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function FiPaymentVouchersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -172,7 +173,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
         dirtyField: DIRTYFIELD_RATE
       })
 
-      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
       formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
@@ -185,10 +186,12 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
         DatasetIdAccess: ResourceIds.MCRFIPaymentVoucher,
         data,
         onOk: childFormikValues => {
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...childFormikValues
-          }))
+          formik.resetForm({
+            values: {
+              ...formik.values, 
+              ...childFormikValues
+            }
+          })
         }
       }
     })
@@ -261,9 +264,11 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
           parameters: `_recordId=${recordId}`
         })
 
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
+        formik.resetForm({
+          values: {
+            ...res.record,
+            date: formatDateFromApi(res.record.date)
+          }
         })
       }
     })()
@@ -668,7 +673,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                     rateCalcMethod: formik.values?.rateCalcMethod,
                     dirtyField: DIRTYFIELD_RATE
                   })
-                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                  formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
                   formik.setFieldValue('amount', e.target.value)
                 }}
                 onClear={async () => {
