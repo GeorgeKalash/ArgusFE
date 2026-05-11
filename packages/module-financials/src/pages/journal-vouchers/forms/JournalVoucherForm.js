@@ -90,9 +90,11 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
         parameters: `_recordId=${recordId}`
       })
 
-      formik.setValues({
-        ...res.record,
-        date: formatDateFromApi(res.record.date)
+      formik.resetForm({
+        values: {
+          ...res.record,
+          date: formatDateFromApi(res.record.date)
+        }
       })
     }
   }
