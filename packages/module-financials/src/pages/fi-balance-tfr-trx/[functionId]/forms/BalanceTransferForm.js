@@ -27,6 +27,7 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function BalanceTransferForm({
   labels,
@@ -123,7 +124,7 @@ export default function BalanceTransferForm({
       rateCalcMethod: record?.fromRateCalcMethod,
       dirtyField: DIRTYFIELD_RATE
     })
-    formik.setValues({ ...record, date: formatDateFromApi(record.date), fromAmount: updatedRateRow.amount })
+    formik.resetForm({ values: { ...record, date: formatDateFromApi(record.date), fromAmount: updatedRateRow.amount } })
   }
 
   useEffect(() => {
@@ -172,19 +173,19 @@ export default function BalanceTransferForm({
   const onSelectionChange = async (type, currencyId, date, amount) => {
     const rate = await getRates(currencyId, date)
 
-    formik.setFieldValue(`${type}ExRate`, rate?.exRate ? rate?.exRate?.toFixed(2) : '')
+    formik.setFieldValue(`${type}ExRate`, rate?.exRate ? roundTo(rate?.exRate) : '')
     formik.setFieldValue(`${type}RateCalcMethod`, rate?.rateCalcMethod)
 
     const updatedRateRow = getRate({
       amount: amount || 0,
-      exRate: rate?.exRate.toFixed(2),
+      exRate: rate?.exRate ? roundTo(rate?.exRate) : null,
       baseAmount: 0,
       rateCalcMethod: rate?.rateCalcMethod,
       dirtyField: DIRTYFIELD_RATE
     })
 
-    formik.setFieldValue(`${type}BaseAmount`, parseFloat(updatedRateRow?.baseAmount).toFixed(2))
-    formik.setFieldValue(`${type}Amount`, parseFloat(updatedRateRow?.amount).toFixed(2))
+    formik.setFieldValue(`${type}BaseAmount`, roundTo(updatedRateRow?.baseAmount))
+    formik.setFieldValue(`${type}Amount`, roundTo(updatedRateRow?.amount))
   }
 
   const actions = [
@@ -233,7 +234,7 @@ export default function BalanceTransferForm({
       dirtyField: DIRTYFIELD_RATE
     })
 
-    formik.setFieldValue('fromBaseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+    formik.setFieldValue('fromBaseAmount', roundTo(updatedRateRow?.baseAmount))
 
     const updatedRateRowTo = getRate({
       amount: updatedRateRow?.baseAmount || 0,
@@ -243,8 +244,8 @@ export default function BalanceTransferForm({
       dirtyField: DIRTYFIELD_RATE
     })
 
-    formik.setFieldValue('toAmount', parseFloat(updatedRateRowTo?.amount).toFixed(2) || 0)
-    formik.setFieldValue('toBaseAmount', parseFloat(updatedRateRowTo?.baseAmount).toFixed(2) || 0)
+    formik.setFieldValue('toAmount', roundTo(updatedRateRowTo?.amount) || 0)
+    formik.setFieldValue('toBaseAmount', roundTo(updatedRateRowTo?.baseAmount) || 0)
   }
 
   return (
