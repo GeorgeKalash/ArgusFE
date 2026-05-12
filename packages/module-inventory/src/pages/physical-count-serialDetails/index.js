@@ -17,7 +17,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import toast from 'react-hot-toast'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
+import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearGridConfirmation'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -37,9 +37,7 @@ const PhysicalCountSerialDe = () => {
     datasetId: ResourceIds.PhysicalCountSerialDetail
   })
 
-  const { formik } = useForm({
-    maxAccess: access,
-    initialValues: {
+  const initialValues = {
       stockCountId: null,
       siteId: null,
       controllerId: null,
@@ -60,7 +58,11 @@ const PhysicalCountSerialDe = () => {
           itemName: ''
         }
       ]
-    },
+    }
+
+  const { formik } = useForm({
+    maxAccess: access,
+    initialValues,
     validationSchema: yup.object({
       stockCountId: yup.number().required(),
       scDate: yup.date().required(),
@@ -308,7 +310,7 @@ const PhysicalCountSerialDe = () => {
         open: { flag: true },
         fullScreen: false,
         onConfirm: () => {
-          clearOption === 'clearAll' ? formik.resetForm() : formik.setFieldValue('rows', formik.initialValues.rows)
+          clearOption === 'clearAll' ? formik.resetForm() : formik.setFieldValue('rows', initialValues.rows)
           setCombosDisabled(false)
           setEditMode(false)
         },
@@ -354,7 +356,7 @@ const PhysicalCountSerialDe = () => {
   const totalCount = formik.values.rows.filter(item => item.srlNo).length
 
   const totalWeight = formik.values.rows.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
+    const weightValue = row.weight || 0
 
     return weightSum + weightValue
   }, 0)
@@ -494,7 +496,7 @@ const PhysicalCountSerialDe = () => {
             onChange={(value, action, row) => handleGridChange(value, action, row)}
             value={formik.values.controllerId ? formik.values.rows : []}
             error={formik.errors?.rows}
-            initialValues={formik?.initialValues?.rows?.[0]}
+            initialValues={initialValues?.rows?.[0]}
             columns={columns}
             enableFilters
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
@@ -526,7 +528,7 @@ const PhysicalCountSerialDe = () => {
               <CustomTextField
                 name='totalWeight'
                 label={labels.totalWeight}
-                value={getFormattedNumber(totalWeight.toFixed(2))}
+                value={getFormattedNumber(roundTo(totalWeight))}
                 readOnly
                 hidden={!formik.values.controllerId}
                 numberField
