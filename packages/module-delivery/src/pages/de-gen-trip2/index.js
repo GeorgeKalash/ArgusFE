@@ -239,7 +239,7 @@ const GenerateOutboundTransportation2 = () => {
     {
       field: 'seqNo',
       headerName: labels.seqNo,
-      width: 100
+      flex: 0.5
     },
     {
       field: 'allocatedVolume',
@@ -264,34 +264,34 @@ const GenerateOutboundTransportation2 = () => {
     {
       field: 'szName',
       headerName: labels.saleZone,
-      width: 130
+      flex: 1
     },
     {
       field: 'orderRef',
       headerName: labels.reference,
-      width: 130
+      flex: 1
     },
     {
       field: 'orderDate',
       headerName: labels.orderDate,
       type: 'date',
-      width: 130
+      flex: 1
     },
     {
       field: 'clientName',
       headerName: labels.clientName,
-      width: 130
+      flex: 2
     },
     {
       field: 'volume',
       headerName: labels.volume,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'notes',
       headerName: labels.notes,
-      flex: 1,
+      flex: 3,
       wrapText: true,
       autoHeight: true
     }
@@ -302,24 +302,24 @@ const GenerateOutboundTransportation2 = () => {
       field: 'date',
       headerName: labels.date,
       type: 'date',
-      width: 120
+      flex: 1
     },
     {
       field: 'reference',
       headerName: labels.reference,
-      width: 130
+      flex: 1
     },
     {
       field: 'spName',
       headerName: labels.salesPerson,
-      flex: 1,
+      flex: 2,
       wrapText: true,
       autoHeight: true
     },
     {
       field: 'szName',
       headerName: labels.zone,
-      flex: 1,
+      flex: 2,
       wrapText: true,
       autoHeight: true
     },
@@ -328,19 +328,19 @@ const GenerateOutboundTransportation2 = () => {
       headerName: labels.client,
       wrapText: true,
       autoHeight: true,
-      flex: 1
+      flex: 2
     },
     {
       field: 'amount',
       headerName: labels.amount,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'volume',
       headerName: labels.volume,
       type: 'number',
-      width: 130
+      flex: 1
     }
   ]
 
