@@ -17,7 +17,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import toast from 'react-hot-toast'
-import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
+import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearGridConfirmation'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ImportForm from '@argus/shared-ui/src/components/Shared/ImportForm'
@@ -497,13 +497,13 @@ const PhysicalCountItemDe = () => {
   ]
 
   const totalQty = formik.values.rows.reduce((qtySum, row) => {
-    const qtyValue = parseFloat(row.countedQty?.toString().replace(/,/g, '')) || 0
+    const qtyValue = row.countedQty || 0
 
     return qtySum + qtyValue
   }, 0)
 
   const totalWeight = formik.values.rows.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
+    const weightValue = row.weight || 0
 
     return weightSum + weightValue
   }, 0)
@@ -635,7 +635,7 @@ const PhysicalCountItemDe = () => {
               <CustomNumberField
                 name='totalQty'
                 label={labels.totalQty}
-                value={getFormattedNumber(totalQty.toFixed(2))}
+                value={getFormattedNumber(roundTo(totalQty))}
                 readOnly
                 hidden={!formik.values.controllerId}
                 maxAccess={access}
@@ -645,7 +645,7 @@ const PhysicalCountItemDe = () => {
               <CustomNumberField
                 name='totalWeight'
                 label={labels.totalWeight}
-                value={getFormattedNumber(totalWeight.toFixed(2))}
+                value={getFormattedNumber(roundTo(totalWeight))}
                 readOnly
                 hidden={!formik.values.controllerId}
                 maxAccess={access}
