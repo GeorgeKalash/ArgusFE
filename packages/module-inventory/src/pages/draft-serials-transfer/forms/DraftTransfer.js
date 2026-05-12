@@ -29,6 +29,7 @@ import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialsTransferForm'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function DraftTransfer({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -53,42 +54,44 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   const defSiteId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'siteId')?.value) || null
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
+  const initialValues = {
+    recordId,
+    header: {
+      recordId,
+      dtId: null,
+      reference: '',
+      date: new Date(),
+      fromSiteId: defUserSiteId || defSiteId || null,
+      toSiteId: null,
+      notes: '',
+      status: 1,
+      totalWeight: 0,
+      carrierId: null
+    },
+    items: [
+      {
+        id: 1,
+        draftTransferId: recordId || 0,
+        srlNo: '',
+        metalId: null,
+        designId: null,
+        itemId: null,
+        sku: '',
+        itemName: '',
+        seqNo: 1,
+        weight: 0,
+        metalRef: '',
+        designRef: ''
+      }
+    ],
+    metalGridData: [],
+    itemGridData: []
+  }
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
-    initialValues: {
-      recordId,
-      header: {
-        recordId,
-        dtId: null,
-        reference: '',
-        date: new Date(),
-        fromSiteId: defUserSiteId || defSiteId || null,
-        toSiteId: null,
-        notes: '',
-        status: 1,
-        totalWeight: 0,
-        carrierId: null
-      },
-      items: [
-        {
-          id: 1,
-          draftTransferId: recordId || 0,
-          srlNo: '',
-          metalId: null,
-          designId: null,
-          itemId: null,
-          sku: '',
-          itemName: '',
-          seqNo: 1,
-          weight: 0,
-          metalRef: '',
-          designRef: ''
-        }
-      ],
-      metalGridData: [],
-      itemGridData: []
-    },
+    initialValues,
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required(),
@@ -174,14 +177,19 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       id: index + 1
     }))
 
-    formik.setValues({
-      ...formik.values,
-      recordId: header?.recordId || null,
-      header: {
-        ...formik.values.header,
-        ...header
-      },
-      items: itemsList.length ? itemsList : formik.initialValues.items
+    const summaryGridData = getSummaryGridData(items)
+
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        recordId: header?.recordId || null,
+        header: {
+          ...formik.values.header,
+          ...header
+        },
+        ...summaryGridData,
+        items: itemsList.length ? itemsList : initialValues.items
+      }
     })
   }
 
@@ -198,6 +206,10 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
         lineItem: row
       })
     })
+
+    if (formik.values?.recordId) {
+      await refetchForm(formik.values.recordId)
+    }
 
     return true
   }
@@ -303,11 +315,17 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
           if (!successSave) 
             update({
-              ...formik?.initialValues?.items,
+              ...initialValues?.items,
               id: newRow?.id,
               srlNo: ''
             })
-          else  await addRow(lineObj)       
+          else {
+            await addRow(lineObj)
+            
+            if (formik.values?.recordId) {
+              await refetchForm(formik.values.recordId)
+            }
+          }      
         }
       }
     },
@@ -493,54 +511,57 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     })
   }
 
-  useEffect(() => {
-    if (formik?.values?.items?.length) {
-      const itemsList = formik?.values?.items
-
-      const metalMap = itemsList.reduce((acc, { metalId, weight, metalRef }) => {
-        if (metalId) {
-          if (!acc[metalId]) {
-            acc[metalId] = { metal: metalRef, pcs: 0, totalWeight: 0 }
-          }
-          acc[metalId].pcs += 1
-          acc[metalId].totalWeight += parseFloat(weight || 0)
+  function getSummaryGridData(items = []) {
+    const metalMap = items?.reduce((acc, { metalId, weight, metalRef }) => {
+      if (metalId) {
+        if (!acc[metalId]) {
+          acc[metalId] = { metal: metalRef, pcs: 0, totalWeight: 0 }
         }
 
-        return acc
-      }, {})
+        acc[metalId].pcs += 1
+        acc[metalId].totalWeight += weight || 0
+      }
 
-      Object.keys(metalMap).forEach(metalId => {
-        metalMap[metalId].totalWeight = parseFloat(metalMap[metalId].totalWeight.toFixed(2))
-      })
+      return acc
+    }, {})
 
-      formik.setFieldValue('metalGridData', Object.values(metalMap))
+    Object.keys(metalMap).forEach(metalId => {
+      metalMap[metalId].totalWeight = roundTo(metalMap[metalId].totalWeight)
+    })
 
-      var seqNo = 0
+    let seqNo = 0
 
-      const itemMap = itemsList.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
-        if (itemId) {
-          if (!acc[itemId]) {
-            seqNo++
-            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, categoryName: categoryName, seqNo: seqNo }
-          }
-          acc[itemId].pcs += 1
-          acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
+    const itemMap = items.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
+      if (itemId) {
+        if (!acc[itemId]) {
+          seqNo++
+          acc[itemId] = { sku, pcs: 0, weight: 0, itemName, seqNo, categoryName }
         }
 
-        return acc
-      }, {})
+        acc[itemId].pcs += 1
+        acc[itemId].weight = roundTo(acc[itemId].weight + roundTo((weight || 0)))
+      }
 
-      formik.setFieldValue(
-        'itemGridData',
-        Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo)
-      )
+      return acc
+    }, {})
+
+    return {
+      metalGridData: Object.values(metalMap),
+      itemGridData: Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo)
     }
+  }
+
+  useEffect(() => {
+    const summaryGridData = getSummaryGridData(formik.values.items)
+
+    formik.setFieldValue('metalGridData', summaryGridData.metalGridData)
+    formik.setFieldValue('itemGridData', summaryGridData.itemGridData)
   }, [formik?.values?.items])
 
   function calculateTotalWeightFromSerials(items) {
     return items.reduce(
       (acc, row) => {
-        const weight = parseFloat(row.weight) || 0
+        const weight = row.weight || 0
         acc.totalWeight += weight
 
         return acc
@@ -549,7 +570,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     )
   }
 
-    useEffect(() => {
+  useEffect(() => {
     if (!formik.values.items?.length) return
     const totals = calculateTotalWeightFromSerials(formik.values.items)
 
@@ -779,7 +800,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
             columns={itemColumns}
             showCounterColumn={true}
             name='items'
-            initialValues={formik?.initialValues?.items[0]}
+            initialValues={initialValues?.items[0]}
             enableFilters
             maxAccess={maxAccess}
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'items').length > 0}
