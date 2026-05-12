@@ -335,7 +335,7 @@ const TabsProvider = ({ children }) => {
   }, [])
 
   const handleCloseTab = async activeTab => {
-    const hasUnsavedChanges = interactions.length ? interactions.includes(activeTab.resourceId) : false
+    const hasUnsavedChanges = interactions.length ? interactions.some(item => item.pageId === activeTab.resourceId) : false
     const isActiveTab = activeTab?.resourceId == currentTab?.resourceId
     if (hasUnsavedChanges && !isActiveTab) {
       setCloseDialog({
@@ -795,7 +795,7 @@ const TabsProvider = ({ children }) => {
         className={styles.tabs}
       >
         {openTabs.map((activeTab, i) => {
-          const hasUnsavedChanges = interactions.length ? interactions.includes(activeTab.resourceId) : false
+          const hasUnsavedChanges = interactions.length ? interactions.some(item => item.pageId === activeTab.resourceId) : false
           const label = hasUnsavedChanges ? `${activeTab.label} *` : `${activeTab.label}`
           return (
             <Tab

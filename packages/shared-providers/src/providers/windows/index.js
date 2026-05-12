@@ -109,13 +109,13 @@ export function WindowProvider({ children }) {
   }
 
   function closeWindow() {
-    if (currentTab?.resourceId) clearPageInteractions(currentTab.resourceId)
+    if (currentTab?.resourceId) clearPageInteractions(currentTab.resourceId, 'Window')
     unlockRecord()
     setStack(stack => stack.slice(0, stack.length - 1))
   }
 
   function closeWindowById(givenId) {
-    if (currentTab?.resourceId) clearPageInteractions(currentTab.resourceId)
+    if (currentTab?.resourceId) clearPageInteractions(currentTab.resourceId, 'Window')
     unlockRecord()
     closedWindow.current = currentValue
     setStack(stack => stack.filter(({ id }) => givenId != id))
@@ -128,7 +128,7 @@ export function WindowProvider({ children }) {
   function addToStack(options) {
     const { Component, spacing = true, trackPage = true } = options
     const dimensions = getWindowDimensions(options.width, options.height, spacing)
-    if (trackPage) trackInteraction()
+    if (trackPage) trackInteraction('Window')
 
     setStack(stack => [
       ...stack,

@@ -12,11 +12,14 @@ const usePageInteraction = () => {
   const currentPageResourceId =
     openTabs?.[currentTabIndex]?.resourceId || null
 
-  const trackInteraction = useCallback(() => {
-    if (currentPageResourceId) {
-      track(currentPageResourceId)
-    }
-  }, [track, currentPageResourceId])
+  const trackInteraction = useCallback(
+    (source = null) => {
+      if (currentPageResourceId) {
+        track(currentPageResourceId, source)
+      }
+    },
+    [track, currentPageResourceId]
+  )
 
   return trackInteraction
 }

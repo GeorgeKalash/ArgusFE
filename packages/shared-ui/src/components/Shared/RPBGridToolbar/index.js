@@ -48,7 +48,6 @@ const RPBGridToolbar = ({
   }
 
   const openRPB = () => {
-    trackInteraction()
     stack({
       Component: ReportParameterBrowser,
       props: {
@@ -100,7 +99,9 @@ const RPBGridToolbar = ({
       key: 'GO',
       condition: true,
       onClick: () => {
-        trackInteraction()
+        const shouldTrack = (search && reportParams) || typeof filterBy !== 'function'
+        if (shouldTrack) trackInteraction('RPBGridToolbar')
+
         if (typeof filterBy === 'function') filters(search, reportParams)
         else
           onApply({
@@ -114,7 +115,7 @@ const RPBGridToolbar = ({
       key: 'Print',
       condition: !!rest?.Print,
       onClick: () => {
-        trackInteraction()
+        trackInteraction('RPBGridToolbar')
         rest?.Print(rpbParams)
       },
       disabled: rest?.disablePrint
@@ -122,7 +123,7 @@ const RPBGridToolbar = ({
   ].filter(item => !item?.hidden)
 
   useEffect(() => {
-    if (rpbParams.length > 0) trackInteraction()
+    if (rpbParams.length > 0) trackInteraction('RPBGridToolbar')
   }, [rpbParams])
 
   return (
@@ -213,12 +214,12 @@ const RPBGridToolbar = ({
 
       <GridToolbar
         onSearch={value => {
-          trackInteraction()
+          trackInteraction('RPBGridToolbar')
           filters(value, reportParams)
         }}
         reportParams={reportParams}
         onSearchClear={() => {
-          trackInteraction()
+          trackInteraction('RPBGridToolbar')
           setSearch('')
           if (typeof filterBy === 'function') filterBy('params', reportParams)
           else onClear(reportParams)

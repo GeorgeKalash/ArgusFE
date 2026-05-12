@@ -325,7 +325,6 @@ const GridToolbar = ({
                     label={platformLabels.Search}
                     onClear={clear}
                     onChange={e => {
-                      trackInteraction()
                       setSearchValue(e.target.value)
                       if (onSearchChange) onSearchChange(e.target.value)
                     }}
@@ -351,7 +350,7 @@ const GridToolbar = ({
                         <CustomButton
                           key={button.key || index}
                           onClick={() => {
-                            trackInteraction()
+                            if (button.key == 'GO' ? searchValue?.trim() || props?.reportParams : false) trackInteraction('GridToolbar')
                             handleClick()
                            }
                           }
