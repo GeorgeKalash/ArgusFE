@@ -344,7 +344,17 @@ const GenerateOutboundTransportation2 = () => {
     }
   ]
 
-  const onSaleZoneChange = async (szId, itemCategoryId) => {
+  const onSaleZoneChange = async (szId, itemCategoryId, preserveChecks = false) => {
+    const selectedZoneIds = new Set(
+      (selectedSaleZones?.list || []).map(zone => zone.szId)
+    )
+
+    const checkedZoneIds = new Set(
+      (formik.values.salesZones?.list || [])
+        .filter(zone => zone.checked)
+        .map(zone => zone.szId)
+    )
+
     if (szId) {
       const response = await getRequest({
         extension: DeliveryRepository.Volume.vol,
@@ -363,6 +373,7 @@ const GenerateOutboundTransportation2 = () => {
         return {
           ...zone,
           name: zone.zoneName,
+          checked: preserveChecks && checkedZoneIds.has(zone.szId),
           orders: zoneOrders
         }
       })
@@ -371,6 +382,21 @@ const GenerateOutboundTransportation2 = () => {
         ...response.record,
         list: updatedSalesZones
       })
+
+      if (preserveChecks) {
+        setSelectedSaleZones({
+          list: updatedSalesZones
+            .filter(zone => selectedZoneIds.has(zone.szId))
+            .map(zone => ({
+              ...zone,
+              checked: true,
+              orders: zone.orders?.map(order => ({
+                ...order,
+                checked: true
+              })) || []
+            }))
+        })
+      }
     } else {
       formik.setFieldValue('salesZones', { list: [] })
     }
@@ -572,17 +598,9 @@ const GenerateOutboundTransportation2 = () => {
                 ]}
                 maxAccess={access}
                 onChange={(_, newValue) => {
-                  onSaleZoneChange(formik.values.szId, newValue?.recordId)
-                  
-                  formik.setFieldValue('itemCategoryId', newValue?.recordId || null)
+                  onSaleZoneChange(formik.values.szId, newValue?.recordId, true)
 
-                  formik.setFieldValue('data', { list: [] })
-                  formik.setFieldValue('orders', { list: [] })
-                  formik.setFieldValue('selectedTrucks', [])
-                  formik.setFieldValue('vehicleAllocations', { list: [] })
-                  formik.setFieldValue('salesZones', { list: [] })
-                  setFilteredOrders([])
-                  setSelectedSaleZones([])
+                  formik.setFieldValue('itemCategoryId', newValue?.recordId || null)
                 }}
                 error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
               />
