@@ -75,16 +75,16 @@ function formatDateTimeForGetAPI(dateString) {
 
 function formatDateDefault(date) {
   //used for report params
-  return formatDateandTime(date, true)
+  return formatDateandTime(date)
 }
 
-function formatDateandTime(date, recFormat, showDate = true) {
+function formatDateandTime(date, recFormat) {
   if (!date) return
 
   let formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
     'dateFormat'
   ]
-  formats = showDate ? `${formats} ` + recFormat : recFormat
+  formats = recFormat ? `${formats} ` + recFormat : formats
   const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
 
   //const formattedDate = format(timeStamptoDate(timestamp), formats)
@@ -93,8 +93,8 @@ function formatDateandTime(date, recFormat, showDate = true) {
   return formattedDate
 }
 
-function formatDateTimeDefault(date, format = 'hh:mm a', showDate = true) {
-  return formatDateandTime(date, format, showDate)
+function formatDateTimeDefault(date, format = 'hh:mm a') {
+  return formatDateandTime(date, format)
 }
 
 //Omar
