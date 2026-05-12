@@ -93,15 +93,17 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
     })
 
     formik.setFieldValue('items', [])
-    formik.setValues({
-      recordId: res?.record?.header?.recordId,
-      ...res?.record?.header,
-      date: res?.record?.header?.date ? formatDateFromApi(res?.record?.header.date) : null,
-      items:
-        res?.record?.items?.map((item, index) => ({
-          id: index + 1,
-          ...item
-        })) || []
+    formik.resetForm({
+      values: {
+        recordId: res?.record?.header?.recordId,
+        ...res?.record?.header,
+        date: res?.record?.header?.date ? formatDateFromApi(res?.record?.header.date) : null,
+        items:
+          res?.record?.items?.map((item, index) => ({
+            id: index + 1,
+            ...item
+          })) || []
+      }
     })
   }
 
@@ -148,7 +150,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
     formik.setFieldValue(
       'items',
-      items?.list.map((item, index) => ({
+      items?.list?.map((item, index) => ({
         id: index + 1,
         ...item
       })) || []
