@@ -47,7 +47,7 @@ export default function ChatPage() {
   const { user } = useContext(AuthContext);
   const { connectorStreamRequest, postConnectorRequest } = useContext(RequestsContext)
   // const { stack } = useWindow()
-    const errorModel = useError()
+  const errorModel = useError()
 
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -55,7 +55,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchText, setSearchText] = useState("");
-  
+
   const {
     labels,
   } = useResourceQuery({
@@ -343,7 +343,7 @@ export default function ChatPage() {
       width: "500px",
       maxWidth: "95%"
     };
-console.log(formatMessageDate(msg.createdAt));
+
     if (msg.type === "text") {
       return (
         <MuiTooltip
@@ -766,7 +766,7 @@ console.log(formatMessageDate(msg.createdAt));
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    const time = formatDateTimeDefault(messageDate,"hh:mm a");
+    const time = formatDateTimeDefault(messageDate, "hh:mm a", false);
 
     if (messageDay.getTime() === today.getTime()) {
       return time;
@@ -776,7 +776,7 @@ console.log(formatMessageDate(msg.createdAt));
       return `Yesterday ${time}`;
     }
 
-    return formatDateTimeDefault(messageDate, "dd/MM/yyyy hh:mm a");
+    return formatDateTimeDefault(messageDate, "hh:mm a");
   };
 
   return (
