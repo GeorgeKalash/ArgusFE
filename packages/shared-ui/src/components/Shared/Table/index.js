@@ -572,7 +572,22 @@ const Table = ({
       handleCheckboxChange(data, e.target.checked)
     }
 
-    if (typeof setData === 'function') onSelectionChanged
+    if (typeof setData === 'function') {
+      setData(data)
+    }
+  }
+
+  const syncCheckAllState = api => {
+    if (!api) return
+
+    const nodes = []
+    api.forEachNode(node => {
+      nodes.push(node)
+    })
+
+    const areAllChecked = nodes.length > 0 && nodes.every(node => node.data?.checked === true)
+
+    setChecked(areAllChecked)
   }
 
   const onSelectionChanged = params => {
@@ -629,13 +644,15 @@ const Table = ({
             params.node.setDataValue(params.colDef.field, checked)
           } else {
             params.api.forEachNode(node => {
-             if (node.id === params.node.id) {
+              if (node.id === params.node.id) {
                 node.setDataValue(params.colDef.field, checked)
               } else if (checked) {
                 node.setDataValue(params.colDef.field, false)
               }
             })
           }
+
+          syncCheckAllState(params.api)
 
           if (handleCheckboxChange) {
             handleCheckboxChange(params.data, checked)
