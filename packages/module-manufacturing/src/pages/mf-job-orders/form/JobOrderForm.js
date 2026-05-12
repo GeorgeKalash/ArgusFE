@@ -535,10 +535,7 @@ export default function JobOrderForm({
       threeDDId: values?.threeDDId || null,
       threeDDRef: values?.threeDDRef || '',
       rubberId: values?.rubberId || null,
-      rubberRef: values?.rubberRef || '',
-      itemId: values?.itemId || null,
-      itemName: values?.itemName || '',
-      sku: values?.sku || '',
+      rubberRef: values?.rubberRef || ''
     }
 
     if (!isReleased) {
