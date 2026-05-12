@@ -230,13 +230,15 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
         id: index + 1
       }))
 
-      formik.setValues({
-        recordId: res.record.header.recordId,
-        header: {
-          ...res.record.header,
-          date: formatDateFromApi(res?.record?.header?.date)
-        },
-        rows: modifiedList
+      formik.resetForm({
+        values: {
+          recordId: res.record.header.recordId,
+          header: {
+            ...res.record.header,
+            date: formatDateFromApi(res?.record?.header?.date)
+          },
+          rows: modifiedList
+        }
       })
 
       return res?.record
