@@ -19,7 +19,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function SitesForm({ labels, recordId, maxAccess }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -38,14 +37,15 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
       costCenterId: '',
       siteGroupId: '',
       isInactive: false,
-      allowNegativeQty: false
+      allowNegativeQty: false,
+      carrier: false
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required(),
-      plantId: yup.string().required()
+      plantId: yup.number().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -55,31 +55,25 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      } else toast.success(platformLabels.Edited)
-      setEditMode(true)
+      !recordId && formik.setFieldValue('recordId', response.recordId)
+      toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
 
       invalidate()
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.Site.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.Site.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
@@ -127,9 +121,7 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId || '')
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('plantId', newValue?.recordId || null)}
                 maxAccess={maxAccess}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
@@ -148,8 +140,8 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('plId', newValue?.recordId || '')
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('plId', newValue?.recordId || null)
                 }}
               />
             </Grid>
@@ -168,8 +160,8 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('costCenterId', newValue?.recordId)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('costCenterId', newValue?.recordId || null)
                 }}
               />
             </Grid>
@@ -186,8 +178,8 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('siteGroupId', newValue?.recordId)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('siteGroupId', newValue?.recordId || null)
                 }}
               />
             </Grid>
@@ -206,6 +198,15 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
                 value={formik.values?.isInactive}
                 onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels.isInactive}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='carrier'
+                value={formik.values?.carrier}
+                onChange={event => formik.setFieldValue('carrier', event.target.checked)}
+                label={labels.carrier}
                 maxAccess={maxAccess}
               />
             </Grid>
