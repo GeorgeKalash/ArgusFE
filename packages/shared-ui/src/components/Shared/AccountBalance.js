@@ -104,7 +104,6 @@ const AccountBalance = ({ window }) => {
           columns={columns}
           gridData={gridData}
           rowId={['currencyId']}
-          isLoading={!gridData}
           maxAccess={access}
           pagination={false}
         />

@@ -92,7 +92,6 @@ const Aging = ({ recordId, functionId, window }) => {
           columns={columns}
           gridData={gridData}
           rowId={['reference']}
-          isLoading={!gridData}
           maxAccess={access}
           pagination={false}
         />

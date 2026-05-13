@@ -42,7 +42,6 @@ const WorkCenterTab = ({ labels, maxAccess, store }) => {
           columns={columns}
           gridData={{ list: store?.jobWorkCenters || [] }}
           rowId={['recordId']}
-          pageSize={50}
           pagination={false}
           maxAccess={maxAccess}
         />

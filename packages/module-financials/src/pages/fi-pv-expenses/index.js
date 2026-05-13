@@ -168,7 +168,6 @@ const FiPaymentVouchers = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           deleteConfirmationType={'strict'}
           paginationType='api'

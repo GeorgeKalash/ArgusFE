@@ -30,7 +30,6 @@ const AvailabilitiesTab = ({ data, pagination, refetch, access, labels: _labels 
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={pagination}

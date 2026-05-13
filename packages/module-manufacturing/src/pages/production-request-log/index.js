@@ -129,7 +129,6 @@ const ProductionRequestLog = () => {
             gridData={data}
             rowId={['recordId', 'itemId', 'functionId']}
             onDelete={del}
-            isLoading={false}
             maxAccess={access}
             pageSize={2000}
             paginationType='client'

@@ -108,7 +108,6 @@ const ItemsList = ({ store, labels, maxAccess }) => {
           columns={columns}
           gridData={list}
           rowId={['recordId']}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

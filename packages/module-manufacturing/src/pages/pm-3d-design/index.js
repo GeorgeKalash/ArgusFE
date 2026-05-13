@@ -189,7 +189,6 @@ const ThreeDDesign = () => {
           refetch={refetch}
           deleteConfirmationType={'strict'}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

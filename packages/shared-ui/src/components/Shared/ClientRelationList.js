@@ -109,7 +109,6 @@ export const ClientRelationList = ({ recordId, name, reference, category, window
           columns={columns}
           gridData={data}
           rowId={['seqNo']}
-          isLoading={false}
           onEdit={edit}
           pageSize={50}
           refetch={refetch}

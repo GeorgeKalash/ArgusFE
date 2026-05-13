@@ -691,7 +691,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 ]}
                 gridData={{ count: currencyGridData.length, list: currencyGridData }}
                 rowId={['recordId']}
-                paginationType='client'
                 maxAccess={access}
                 pagination={false}
               />

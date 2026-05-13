@@ -132,7 +132,6 @@ const Currencies = () => {
           onEdit={edit}
           onDelete={del}
           refetch={refetch}
-          isLoading={false}
           pageSize={50}
           paginationType='client'
           maxAccess={access}

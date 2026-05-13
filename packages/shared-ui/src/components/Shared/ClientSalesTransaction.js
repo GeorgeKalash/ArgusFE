@@ -71,7 +71,6 @@ const ClientSalesTransaction = ({ functionId, clientId, window }) => {
           columns={columns}
           gridData={data}
           rowId={['clientId']}
-          isLoading={!data}
           maxAccess={access}
           pagination={false}
         />
