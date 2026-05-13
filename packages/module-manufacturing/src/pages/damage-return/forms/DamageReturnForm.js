@@ -101,14 +101,16 @@ export default function DamageReturnForm({ labels, access, recordId }) {
         extension: ManufacturingRepository.MFJobOrder.get,
         parameters: `_recordId=${res?.record?.jobId}`
       }).then(jobRes => {
-        formik.setValues({
-          ...res?.record,
-          date: formatDateFromApi(res?.record?.date),
-          sku: jobRes?.record?.sku,
-          itemName: jobRes?.record?.itemName,
-          designName: jobRes?.record?.designName,
-          designRef: jobRes?.record?.designRef,
-          maxPcs: res?.record?.pcs
+        formik.resetForm({
+          values: {
+            ...res?.record,
+            date: formatDateFromApi(res?.record?.date),
+            sku: jobRes?.record?.sku,
+            itemName: jobRes?.record?.itemName,
+            designName: jobRes?.record?.designName,
+            designRef: jobRes?.record?.designRef,
+            maxPcs: res?.record?.pcs
+          }
         })
       })
     })
