@@ -25,6 +25,7 @@ import toast from 'react-hot-toast'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function CastingForm({ store, setStore, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -240,7 +241,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
 
     const netInput = (Number(formik.values.inputWgt) || 0) + (Number(formik.values.rmWgt) || 0)
 
-    formik.setFieldValue('netInputWgt', Number(netInput.toFixed(3)))
+    formik.setFieldValue('netInputWgt', roundTo(netInput, 3))
   }, [formik.values.inputWgt, formik.values.rmWgt])
 
   async function getWaxInfo(waxId) {
@@ -290,14 +291,16 @@ export default function CastingForm({ store, setStore, access, labels }) {
     const waxInfo = await getWaxInfo(res?.record?.waxId)
     const factorStdLoss = await getfactorStdLoss(waxInfo?.metalId, waxInfo?.metalColorId)
 
-    formik.setValues({
-      ...res?.record,
-      date: formatDateFromApi(res?.record?.date),
-      factor: factorStdLoss?.rate || 0,
-      stdLossRate: factorStdLoss?.stdLossRate || 0,
-      mouldId: waxInfo?.mouldId || null,
-      metalId: waxInfo?.metalId || null,
-      metalColorId: waxInfo?.metalColorId || null
+    formik.resetForm({
+      values: {
+        ...res?.record,
+        date: formatDateFromApi(res?.record?.date),
+        factor: factorStdLoss?.rate || 0,
+        stdLossRate: factorStdLoss?.stdLossRate || 0,
+        mouldId: waxInfo?.mouldId || null,
+        metalId: waxInfo?.metalId || null,
+        metalColorId: waxInfo?.metalColorId || null
+      }
     })
     setStore(prevStore => ({
       ...prevStore,
@@ -646,11 +649,12 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       onChange={e => {
                         let value = Number(e.target.value) > 32767 ? 0 : Number(e.target.value)
                         formik.setFieldValue('inputWgt', value)
+                        setLastEdited('inputWgt')
                         setStore(prevStore => ({
                           ...prevStore,
                           castingInfo: {
                             ...prevStore.castingInfo,
-                            inputWgt: value?.toFixed(3) || 0
+                            inputWgt: roundTo(value, 3) || 0
                           }
                         }))
                         setRecal(true)
@@ -691,7 +695,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                           ...prevStore,
                           castingInfo: {
                             ...prevStore.castingInfo,
-                            outputWgt: value?.toFixed(3) || 0
+                            outputWgt: roundTo(value, 3) || 0
                           }
                         }))
                       }}
