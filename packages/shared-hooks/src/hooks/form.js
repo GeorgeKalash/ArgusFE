@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from '@argus/shared-utils/src/utils/maxAccess'
 import * as yup from 'yup'
 
-export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
+export function useForm({ documentType = {}, fieldBehavior = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
   function explode(str) {
     const parts = str.split('.')
 
@@ -122,6 +122,7 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 
   const { key, value, reference } = documentType
+  const { fieldName, isEmpty } = fieldBehavior || {}
 
   useLayoutEffect(() => {
     if (!key || value == null || formik.values[key] === value) return
@@ -134,6 +135,10 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
       formik.setFieldValue(reference?.fieldName, '')
     }
   }, [reference?.isEmpty])
+  
+  useEffect(() => {
+    if (isEmpty) formik.setFieldValue(fieldName, '')
+  }, [isEmpty])
 
   return { formik }
 }

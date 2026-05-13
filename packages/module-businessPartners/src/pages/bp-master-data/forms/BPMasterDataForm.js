@@ -26,14 +26,16 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const { changeDT, maxAccess } = useFieldBehavior({
+  const { changeDT, maxAccess, fieldBehavior } = useFieldBehavior({
     access,
     fieldName: 'reference',
-    editMode: !!recordId
+    editMode: !!recordId,
+    enableClearing: !recordId
   })
 
   const { formik } = useForm({
     maxAccess,
+    fieldBehavior,
     initialValues: {
       recordId: recordId || null,
       reference: '',

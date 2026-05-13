@@ -33,10 +33,11 @@ export default function DesignsForm({ labels, access, store, setStore }) {
     endpointId: ManufacturingRepository.Design.page
   })
 
-  const { changeDT, maxAccess } = useFieldBehavior({
+  const { changeDT, maxAccess, fieldBehavior } = useFieldBehavior({
     access,
     fieldName: 'reference',
-    editMode: false
+    editMode: false,
+    enableClearing: !recordId
   })
 
   const { formik } = useForm({
@@ -62,6 +63,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       designerName: '',
       isInactive: false
     },
+    fieldBehavior,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({

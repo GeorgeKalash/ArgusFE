@@ -29,10 +29,11 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
-  const { changeDT, maxAccess } = useFieldBehavior({
+  const { changeDT, maxAccess, fieldBehavior } = useFieldBehavior({
     access,
     fieldName: 'reference',
-    editMode: false
+    editMode: false,
+    enableClearing: !recordId
   })
 
   const invalidate = useInvalidate({
@@ -61,6 +62,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       taxId: null,
       isInactive: false
     },
+    fieldBehavior,
     maxAccess: maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({

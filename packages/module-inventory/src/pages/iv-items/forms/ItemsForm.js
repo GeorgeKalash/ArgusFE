@@ -46,10 +46,11 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   })
   const imageUploadRef = useRef(null)
 
-  const { changeDT, maxAccess } = useFieldBehavior({
+  const { changeDT, maxAccess, fieldBehavior} = useFieldBehavior({
     access,
     fieldName: 'sku',
-    editMode: store.recordId
+    editMode: recordId,
+    enableClearing: !recordId
   })
 
   const { formik } = useForm({
@@ -87,6 +88,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       isInactive: false,
       isExternal: false
     },
+    fieldBehavior,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -425,10 +427,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={8}>
                   <CustomTextField
                     name='sku'
-                    required
                     label={labels.reference}
                     value={formik.values.sku}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('sku', '')}

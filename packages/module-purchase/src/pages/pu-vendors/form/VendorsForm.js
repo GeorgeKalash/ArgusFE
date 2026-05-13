@@ -28,10 +28,11 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
     endpointId: PurchaseRepository.Vendor.page
   })
 
-  const { maxAccess, changeDT } = useFieldBehavior({
+  const { maxAccess, changeDT, fieldBehavior } = useFieldBehavior({
     access,
     fieldName: 'reference',
-    editMode: !!recordId
+    editMode: !!recordId,
+    enableClearing: !recordId
   })
 
   const { formik } = useForm({
@@ -51,6 +52,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
       isInactive: false,
       isTaxable: false
     },
+    fieldBehavior,
     maxAccess,
     validateOnChange: true,
     validate: values => {
