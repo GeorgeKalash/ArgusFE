@@ -42,13 +42,13 @@ const CurrenciesTable = ({ labels, maxAccess, store }) => {
         parameters: `_startAt=0&_pageSize=1000&_filter=`
       })
 
-      const checkedres = await getRequest({
+      const checkedRes = await getRequest({
         extension: FinancialRepository.AccountCurrencies.qry,
         parameters: `_accountId=${recordId}`
       })
 
       const checkedIds = new Set(
-        (checkedres?.list || []).map(item => item.currencyId)
+        (checkedRes?.list || []).map(item => item.currencyId)
       )
 
       const mergedData = (res?.list || []).map(currency => ({
