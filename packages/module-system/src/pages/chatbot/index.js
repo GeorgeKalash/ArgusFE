@@ -29,6 +29,7 @@ import { useResourceQuery } from "@argus/shared-hooks/src/hooks/resource";
 import { RequestsContext } from "@argus/shared-providers/src/providers/RequestsContext";
 import { ChatbotRepository } from '@argus/repositories/src/repositories/ChatbotRepository'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import { formatDateTimeDefault } from "@argus/shared-domain/src/lib/date-helper";
 
 
 ChartJS.register(
@@ -46,7 +47,7 @@ export default function ChatPage() {
   const { user } = useContext(AuthContext);
   const { connectorStreamRequest, postConnectorRequest } = useContext(RequestsContext)
   // const { stack } = useWindow()
-    const errorModel = useError()
+  const errorModel = useError()
 
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -54,8 +55,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [loading, setLoading] = useState(false);
-  
+
   const {
     labels,
   } = useResourceQuery({
@@ -71,6 +71,7 @@ export default function ChatPage() {
     conversationId: "",
     title: labels?.newChat || "New Chat",
     messages: [],
+    isLoading: false,
     historyLoaded: false
     };
     
@@ -132,6 +133,7 @@ export default function ChatPage() {
             ? item.summary
             : item.conversationId,
         messages: [],
+        isLoading: false,
         historyLoaded: false
       }));
 
@@ -146,14 +148,13 @@ export default function ChatPage() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || loading)
+    if (!input.trim() || selectedChat?.isLoading)
       return;
 
     let activeChat = selectedChat;
 
     const userText = input;
 
-    setLoading(true);
     if (!activeChat) {
       const existingDraft = chats.find(
         (chat) => !chat.conversationId
@@ -177,19 +178,22 @@ export default function ChatPage() {
         chat.id === activeChat.id
           ? {
               ...chat,
+              isLoading: true,
               messages: [
                 ...chat.messages,
                 {
                   sender: "user",
                   type: "text",
-                  text: userText
+                  text: userText,
+                  createdAt: new Date().toISOString()
                 },
                 {
                   sender: "assistant",
                   type: "text",
                   text: "",
                   isStreaming: true,
-                  isWaiting: true
+                  isWaiting: true,
+                  createdAt: new Date().toISOString()
                 }
               ]
             }
@@ -284,13 +288,13 @@ export default function ChatPage() {
 
                 return {
                   ...chat,
+                  isLoading: false,
                   messages: updatedMessages
                 };
               }
             )
           );
 
-          setLoading(false);
         }
 
         if (event.type ==="error") {
@@ -318,7 +322,6 @@ export default function ChatPage() {
             })
           );
 
-          setLoading(false);
           return;
         }
       }
@@ -326,10 +329,10 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
-  if (!loading) {
-    inputRef.current?.focus();
-  }
-}, [loading]);
+    if (!selectedChat?.isLoading) {
+      inputRef.current?.focus();
+    }
+  }, [selectedChat?.isLoading]);
 
   const renderMessage = (msg, index) => {
     const cardStyle = {
@@ -343,6 +346,12 @@ export default function ChatPage() {
 
     if (msg.type === "text") {
       return (
+        <MuiTooltip
+          title={msg.createdAt ? formatMessageDate(msg.createdAt) : "" }
+          arrow
+          placement="top"
+          enterDelay={500}
+        >
         <div
           key={index}
           style={{
@@ -363,7 +372,6 @@ export default function ChatPage() {
             maxWidth: "70%",
           }}
         >
-          
           {msg.isWaiting ? (
             <div
               style={{
@@ -417,6 +425,7 @@ export default function ChatPage() {
             </ReactMarkdown>
           )}
             </div>
+            </MuiTooltip>
           );
     }
 
@@ -699,9 +708,7 @@ export default function ChatPage() {
       res.map((msg) => ({
         sender: msg.role,
         type: "text",
-
         text: msg.content,
-
         createdAt: msg.createdAt
       }));
 
@@ -743,6 +750,34 @@ export default function ChatPage() {
       </div>
     </div>
   )
+
+  const formatMessageDate = (date) => {
+    if (!date) return "";
+
+    const messageDate = new Date(date);
+    const now = new Date();
+
+    const messageDay = new Date(messageDate);
+    messageDay.setHours(0, 0, 0, 0);
+
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const time = formatDateTimeDefault(messageDate, "hh:mm a", false);
+
+    if (messageDay.getTime() === today.getTime()) {
+      return time;
+    }
+
+    if (messageDay.getTime() === yesterday.getTime()) {
+      return `Yesterday ${time}`;
+    }
+
+    return formatDateTimeDefault(messageDate, "hh:mm a");
+  };
 
   return (
     <div
@@ -995,7 +1030,7 @@ export default function ChatPage() {
         >
           <input
             value={input}
-            disabled={loading}
+            disabled={selectedChat?.isLoading}
             ref={inputRef}
             onChange={(e) =>
               setInput(e.target.value)
@@ -1015,24 +1050,24 @@ export default function ChatPage() {
 
           <button
             onClick={sendMessage}
-            disabled={loading}
+            disabled={selectedChat?.isLoading}
             style={{
               padding:
                 "0 18px",
               border: "none",
               borderRadius: "8px",
               background:
-                loading
+                selectedChat?.isLoading
                   ? "#9ca3af"
                   : "#2563eb",
               color: "#fff",
               cursor:
-                loading
+                selectedChat?.isLoading
                   ? "not-allowed"
                   : "pointer"
             }}
           >
-            {loading
+            {selectedChat?.isLoading
               ? labels?.sending ?? ''
               : labels?.send ?? ''}
           </button>
