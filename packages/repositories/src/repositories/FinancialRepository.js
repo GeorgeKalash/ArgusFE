@@ -294,5 +294,9 @@ export const FinancialRepository = {
     qry: service + 'qryRCL',
     set: service + 'setRCL',
     del: service + 'delRCL'
+  },
+  AccountCurrencies: {
+    qry: service + 'qryACU',
+    set2: service + 'set2ACU'
   }
 }
