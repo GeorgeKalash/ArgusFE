@@ -572,7 +572,22 @@ const Table = ({
       handleCheckboxChange(data, e.target.checked)
     }
 
-    if (typeof setData === 'function') onSelectionChanged
+    if (typeof setData === 'function') {
+      setData(data)
+    }
+  }
+
+  const syncCheckAllState = api => {
+    if (!api) return
+
+    const nodes = []
+    api.forEachNode(node => {
+      nodes.push(node)
+    })
+
+    const areAllChecked = nodes.length > 0 && nodes.every(node => node.data?.checked === true)
+
+    setChecked(areAllChecked)
   }
 
   const onSelectionChanged = params => {
@@ -613,15 +628,18 @@ const Table = ({
         className={'fullSizeCheckbox'}
         checked={params.value}
         disabled={(props?.disable && props?.disable(params?.data)) || props?.disableCheckBox}
+        onClick={e => e.stopPropagation()}
+        onMouseDown={e => e.stopPropagation()}
         onChange={e => {
-          e.preventDefault()
-          const rowIndex = params.node.rowIndex
-          const colId = params.column?.getColId?.() || params.colDef.field
-          params.api.setFocusedCell(rowIndex, colId)
-          params.api.ensureIndexVisible(rowIndex)
-          if (!params.node.isSelected()) params.node.setSelected(true)
+          e.stopPropagation()
 
           const checked = e.target.checked
+          const rowIndex = params.node.rowIndex
+          const colId = params.column?.getColId?.() || params.colDef.field
+
+          params.api.setFocusedCell(rowIndex, colId)
+          params.api.ensureIndexVisible(rowIndex)
+
           if (rowSelection !== 'single') {
             params.node.setDataValue(params.colDef.field, checked)
           } else {
@@ -634,8 +652,10 @@ const Table = ({
             })
           }
 
+          syncCheckAllState(params.api)
+
           if (handleCheckboxChange) {
-            handleCheckboxChange(params.data, e.target.checked)
+            handleCheckboxChange(params.data, checked)
           }
         }}
       />
@@ -802,7 +822,6 @@ const Table = ({
                   checked={checked}
                   disabled={props?.disableCheckBox}
                   onChange={e => {
-                    e.preventDefault()
                     e.stopPropagation()
 
                     const colId = params.column.getColId()
