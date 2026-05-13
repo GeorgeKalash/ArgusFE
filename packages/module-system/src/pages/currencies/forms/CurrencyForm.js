@@ -179,6 +179,7 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
                 readOnly={editMode}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('currencyType', newValue?.key || null)
+                  formik.setFieldValue('baseCurrencyId', null)
                 }}
                 error={formik.touched.currencyType && Boolean(formik.errors.currencyType)}
               />
@@ -187,15 +188,16 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='baseCurrencyId'
+                filter={item => item.currencyType == 2}
                 label={labels.baseCurrency}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                readOnly={formik.values?.currencyType != 2}
+                readOnly={formik.values?.currencyType != 2 || editMode}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => formik.setFieldValue('baseCurrencyId', newValue?.recordId || null)}
                 error={formik.touched.baseCurrencyId && Boolean(formik.errors.baseCurrencyId)}
