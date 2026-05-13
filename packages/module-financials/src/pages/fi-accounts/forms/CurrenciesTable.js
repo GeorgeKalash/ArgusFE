@@ -82,7 +82,7 @@ const CurrenciesTable = ({ labels, maxAccess, store }) => {
           <Table
             columns={columns}
             gridData={{ list: data }}
-            rowId={['recordId']}
+            rowId={['currencyId']}
             maxAccess={maxAccess}
             showCheckboxColumn={true}
             pagination={false}
