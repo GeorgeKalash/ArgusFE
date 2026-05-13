@@ -2302,13 +2302,14 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={formik?.values?.header?.clientId && SaleRepository.Contact.qry}
+                endpointId={formik?.values?.header?.clientId && SaleRepository.Contact.contact}
                 parameters={`_clientId=${formik?.values?.header?.clientId}`}
                 name='header.contactId'
                 label={labels.contact}
                 valueField='recordId'
                 readOnly={isPosted}
                 displayField={['reference', 'name']}
+                displayFieldWidth={2}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
