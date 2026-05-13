@@ -40,7 +40,6 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
       carrier: false
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required(),
