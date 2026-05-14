@@ -382,12 +382,14 @@ export default function JobOrderForm({
       parameters: `_recordId=${recordId}`
     })
     const { jobOrder, ...rest } = res?.record || {}
-    formik.setValues({
-      ...jobOrder,
-      date: formatDateFromApi(jobOrder?.date),
-      endingDT: formatDateFromApi(jobOrder?.endingDT),
-      startingDT: formatDateFromApi(jobOrder?.startingDT),
-      deliveryDate: formatDateFromApi(jobOrder?.deliveryDate)
+    formik.resetForm({
+      values: {
+        ...jobOrder,
+        date: formatDateFromApi(jobOrder?.date),
+        endingDT: formatDateFromApi(jobOrder?.endingDT),
+        startingDT: formatDateFromApi(jobOrder?.startingDT),
+        deliveryDate: formatDateFromApi(jobOrder?.deliveryDate)
+      }
     })
 
     setStore(prevStore => ({
