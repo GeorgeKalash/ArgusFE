@@ -807,126 +807,137 @@ export default function ChatPage() {
       >
         <div
           style={{
-            padding: "16px"
-          }}
-        >
-        <button
-          onClick={createNewChat}
-          style={{
-            width: "100%",
+            height: "100%",
             display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "12px 14px",
-            background: "#fff",
-            color: "#111",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            cursor: "pointer",
-            fontSize: "15px",
-            fontWeight: "500",
-            transition:
-              "all 0.2s ease"
+            flexDirection: "column",
+            padding: "16px",
+            boxSizing: "border-box"
           }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.background =
-              "#f7f7f7")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.background =
-              "#fff")
-          }
         >
-          <span
+          <button
+            onClick={createNewChat}
             style={{
-              fontSize: "18px",
-              lineHeight: 1
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "12px 14px",
+              background: "#fff",
+              color: "#111",
+              border: "1px solid #ddd",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontSize: "15px",
+              fontWeight: "500",
+              transition:
+                "all 0.2s ease"
             }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background =
+                "#f7f7f7")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background =
+                "#fff")
+            }
           >
-            ✎
-          </span>
-
-          <span>
-            {labels?.newChat ??
-              "New Chat"}
-          </span>
-        </button>
-        <input
-          value={searchText}
-          onChange={(e) =>
-            setSearchText(
-              e.target.value
-            )
-          }
-          placeholder={labels?.placeholder ?? ''}
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginTop: "12px",
-            marginBottom: "12px",
-            borderRadius: "8px",
-            border: "1px solid #ccc"
-          }}
-        />
-
-        
-
-          {filteredChats.map((chat) => (
-            <div
-              key={chat.id}
+            <span
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent:
-                  "space-between",
-                padding: "10px",
-                marginBottom: "8px",
-                borderRadius: "8px",
-                background:
-                  chat.id === selectedChatId
-                    ? "#f1f1f1"
-                    : "transparent"
+                fontSize: "18px",
+                lineHeight: 1
               }}
             >
-              <MuiTooltip
-                title={chat.title}
-                arrow
-                placement="bottom"
-                enterDelay={2000}
-              >
-                <div
-                  onClick={() =>
-                    openChat(chat)
-                  }
-                  style={{
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
-                    textOverflow: "ellipsis",
-                    flex: 1
-                  }}
-                  >
-                  {chat.title}
-                </div>
-              </MuiTooltip>
+              ✎
+            </span>
 
-              {/* {chat.conversationId && (
-                <button
-                  onClick={() =>
-                    confirmDeleteChat(chat)
-                  }
-                  style={{
-                    border: "none",
-                    background:
-                      "transparent",
-                    cursor: "pointer",
-                    color: "#999"
-                  }}
+            <span>
+              {labels?.newChat ??
+                "New Chat"}
+            </span>
+          </button>
+          <input
+            value={searchText}
+            onChange={(e) =>
+              setSearchText(
+                e.target.value
+              )
+            }
+            placeholder={labels?.placeholder ?? ''}
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginTop: "12px",
+              marginBottom: "12px",
+              borderRadius: "8px",
+              border: "1px solid #ccc"
+            }}
+          />
+
+          
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              minHeight: 0
+            }}
+          >
+            {filteredChats.map((chat) => (
+              <div
+                key={chat.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent:
+                    "space-between",
+                  padding: "10px",
+                  marginBottom: "8px",
+                  borderRadius: "8px",
+                  background:
+                    chat.id === selectedChatId
+                      ? "#f1f1f1"
+                      : "transparent"
+                }}
+              >
+                <MuiTooltip
+                  title={chat.title}
+                  arrow
+                  placement="bottom"
+                  enterDelay={2000}
                 >
-                  🗑
-                </button>
-              )} */}
-            </div>
-          ))}
+                  <div
+                    onClick={() =>
+                      openChat(chat)
+                    }
+                    style={{
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                      flex: 1
+                    }}
+                    >
+                    {chat.title}
+                  </div>
+                </MuiTooltip>
+
+                {/* {chat.conversationId && (
+                  <button
+                    onClick={() =>
+                      confirmDeleteChat(chat)
+                    }
+                    style={{
+                      border: "none",
+                      background:
+                        "transparent",
+                      cursor: "pointer",
+                      color: "#999"
+                    }}
+                  >
+                    🗑
+                  </button>
+                )} */}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <div
