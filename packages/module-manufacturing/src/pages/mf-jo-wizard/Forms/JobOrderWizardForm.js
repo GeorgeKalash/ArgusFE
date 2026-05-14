@@ -26,6 +26,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function JobOrderWizardForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -246,7 +247,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
   ]
 
   const totalIssued = formik.values?.rows?.reduce((issued, row) => {
-    const issuedValue = parseFloat(row.issued?.toString().replace(/,/g, '')) || 0
+    const issuedValue = row.issued || 0
 
     return issued + issuedValue
   }, 0)
@@ -263,14 +264,16 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         id: index + 1
       }))
 
-      formik.setValues({
-        recordId: res.record.header.recordId,
-        header: {
-          ...res.record.header,
-          date: formatDateFromApi(res?.record?.header?.date),
-          producedWeight: res.record.header.pcs * res.record.header.avgWeight
-        },
-        rows: modifiedList
+      formik.resetForm({
+        values: {
+          recordId: res.record.header.recordId,
+          header: {
+            ...res.record.header,
+            date: formatDateFromApi(res?.record?.header?.date),
+            producedWeight: res.record.header.pcs * res.record.header.avgWeight
+          },
+          rows: modifiedList
+        }
       })
 
       return res?.record
@@ -298,7 +301,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
   }
 
   const totalReturned = formik.values?.rows?.reduce((returned, row) => {
-    const returnedValue = parseFloat(row.returned?.toString().replace(/,/g, '')) || 0
+    const returnedValue = row.returned || 0
 
     return returned + returnedValue
   }, 0)
@@ -335,7 +338,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
   ]
 
   const totalConsumed = formik.values?.rows?.reduce((consumed, row) => {
-    const consumedValue = parseFloat(row.consumed?.toString().replace(/,/g, '')) || 0
+    const consumedValue = row.consumed || 0
 
     return consumed + consumedValue
   }, 0)
@@ -347,7 +350,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
   }, [])
 
   useEffect(() => {
-    formik.setFieldValue('header.totalSFQty', parseFloat(totalUsedSemiFinished).toFixed(2))
+    formik.setFieldValue('header.totalSFQty', roundTo(totalUsedSemiFinished))
   }, [totalUsedSemiFinished])
 
   return (
