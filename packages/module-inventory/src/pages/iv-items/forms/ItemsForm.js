@@ -40,6 +40,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   const currencyId = systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value
   const plId = systemDefaults?.list?.find(({ key }) => key === 'plId')?.value
+  const dmgId = parseInt((systemDefaults?.list?.find(({ key }) => key === 'iv_dmgId')?.value)) || null
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.qry
@@ -77,7 +78,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       kitItem: false,
       taxId: '',
       lotCategoryId: null,
-      dmgId: null,
+      dmgId,
       spfId: '',
       categoryName: '',
       defSaleMUId: '',
@@ -143,25 +144,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         await imageUploadRef.current.submit()
       }
 
-      const res = await getRequest({
-        extension: InventoryRepository.Items.get,
-        parameters: `_recordId=${response.recordId}`
-      })
-
-      setStore(prevStore => ({
-        ...prevStore,
-        _reference: res.record.sku,
-        _dmgId: res.record.dmgId,
-        _dmgName: res.record.dmgName
-      }))
-
-      formik.setFieldValue('sku', res.record.sku)
-      if (window.setTitle && !editMode) {
-        window.setTitle(res.record.sku ? `${labels.items} ${res.record.sku}` : labels.items)
-      }
-
-      await refetchForm(response.recordId)
-
+      await refetchForm(response.recordId, !obj.recordId)
       invalidate()
     }
   })
@@ -180,11 +163,13 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   const editMode = !!formik.values.recordId
 
-  const refetchForm = async recordId => {
+  const refetchForm = async (recordId, showTitle) => {
     const res = await getRequest({
       extension: InventoryRepository.Items.get,
       parameters: `_recordId=${recordId}`
     })
+
+    if (window.setTitle && showTitle) window.setTitle(res.record.sku ? `${labels.items} ${res.record.sku}` : labels.items)
 
     const res2 = await getRequest({
       extension: InventoryRepository.Category.get,
@@ -200,6 +185,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     formik.setValues({ ...res.record, kitItem: !!res.record.kitItem, isExternal })
     setShowLotCategories(res.record.trackBy === 2)
     setShowSerialProfiles(res.record.trackBy === 1)
+
     setStore(prevStore => ({
       ...prevStore,
       nraId: res2?.record?.nraId,
@@ -211,8 +197,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       returnPolicy: res.record.returnPolicyId,
       _name: res.record.name,
       _reference: res.record.sku,
-      _dmgId: res.record.dmgId,
-      _dmgName: res.record.dmgName
+      _dmgId: res.record.dmgId || null,
+      _dmgName: res.record.dmgName || ''
     }))
   }
   useEffect(() => {
@@ -513,10 +499,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       { key: 'name', value: 'Name' }
                     ]}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
-                      formik.setFieldValue('dmgId', newValue?.dmgId || null)
-                      formik.setFieldValue('dmgName', newValue?.dmgName || null)
+                      formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
+                      formik.setFieldValue('dmgName', newValue?.dmgName || '')
                     }}
                     error={formik.touched.groupId && formik.errors.groupId}
                   />
