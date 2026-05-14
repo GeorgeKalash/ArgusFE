@@ -120,7 +120,7 @@ const DeliveryOrders = () => {
       headerName: _labels.invoice,
       type: "icon",
       family: "invoice",
-      valueField: "invoice",
+      valueField: "invoiceId",
       flex: 1
     }
   ]
