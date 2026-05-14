@@ -30,6 +30,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import LotForm from './LotForm'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function AssemblyForm({ labels, maxAccess: access, store, setStore, totalOverhead }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -53,37 +54,39 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   const hiddenMuId = systemDefaults?.list?.find(({ key }) => key === 'mf_mu')?.value == 1
   const siteId = userDefaults?.list?.find(({ key }) => key === 'siteId')?.value
 
+  const initialValues = {
+    recordId: null,
+    bomId: null,
+    bomName: '',
+    bomRef: '',
+    sku: null,
+    itemId: null,
+    itemName: '',
+    siteId: parseInt(siteId) || null,
+    qty: 0,
+    rmCost: 0,
+    notes: '',
+    dtId: null,
+    reference: '',
+    status: 1,
+    releaseStatus: null,
+    date: new Date(),
+    plantId: null,
+    machineId: null,
+    machineName: '',
+    machineRef: '',
+    batches: 0,
+    batchSize: 0,
+    trackBy: null,
+    lotCategoryId: null,
+    labourId: null,
+    shiftId: null,
+    onHand: null,
+    items: []
+  }
+
   const { formik } = useForm({
-    initialValues: {
-      recordId: null,
-      bomId: null,
-      bomName: '',
-      bomRef: '',
-      sku: null,
-      itemId: null,
-      itemName: '',
-      siteId: parseInt(siteId) || null,
-      qty: 0,
-      rmCost: 0,
-      notes: '',
-      dtId: null,
-      reference: '',
-      status: 1,
-      releaseStatus: null,
-      date: new Date(),
-      plantId: null,
-      machineId: null,
-      machineName: '',
-      machineRef: '',
-      batches: 0,
-      batchSize: 0,
-      trackBy: null,
-      lotCategoryId: null,
-      labourId: null,
-      shiftId: null,
-      onHand: null,
-      items: []
-    },
+    initialValues,
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     validateOnChange: true,
@@ -135,34 +138,29 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
 
-  const totalCost = formik.values.items
+  const totalCost = roundTo(formik.values.items
     .reduce((currentCost, row) => {
-      const totalCostValue =
-        (parseFloat(row.qty?.toString().replace(/,/g, '')) || 0) *
-        (parseFloat(row.cost?.toString().replace(/,/g, '')) || 0)
+      const totalCostValue = ((row.qty || 0) * (row.cost || 0))
 
       return currentCost + totalCostValue
-    }, 0)
-    .toFixed(2)
+    }, 0))
 
   const avgUnitCost = ((Number(totalCost) || 0) + (Number(totalOverhead) || 0)) / (Number(formik.values.qty) || 0)
 
   const designQuantity = formik.values.items.reduce((currentQty, row) => {
-    const qtyValue = parseFloat(row.designQty?.toString().replace(/,/g, '')) || 0
+    const qtyValue = row.designQty || 0
 
     return currentQty + qtyValue
   }, 0)
 
   const diffQuantity = formik.values.items.reduce((currentQty, row) => {
-    const qtyValue = parseFloat(row.diffQty?.toString().replace(/,/g, '')) || 0
+    const qtyValue = row.diffQty || 0
 
     return currentQty + qtyValue
   }, 0)
 
   const rawMaterialCost = formik.values.items.reduce((currentCost, row) => {
-    const costValue =
-      (parseFloat(row.cost?.toString().replace(/,/g, '')) || 0) *
-      (parseFloat(row.qty?.toString().replace(/,/g, '')) || 0)
+    const costValue = (row.cost || 0) * (row.qty || 0)
 
     return currentCost + costValue
   }, 0)
@@ -444,8 +442,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       id: item.seqNo,
       cost: item.currentCost || 0,
       onHand: item.onHand || 0,
-      designQty: ((item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0)).toFixed(3),
-      qty: ((item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0)).toFixed(3),
+      designQty: roundTo((item.qty * (formik.values.qty || 0)) / (bomInfo?.qty || 0), 3),
+      qty: roundTo(((item.qty * (formik.values.qty || 0)) / (bomInfo?.qty || 0)), 3),
       diffQty: 0,
       baseQty: item.baseQty * (formik.values.qty || 0),
       siteId: formik.values.siteId,
@@ -477,16 +475,18 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       isPosted: header?.record.status == 3
     }))
 
-    formik.setValues({
-      ...header.record,
-      items:
-        items?.list?.map(item => ({
-          ...item,
-          id: item.seqNo,
-          diffQty: ((item.qty || 0) - (item.designQty || 0)).toFixed(3),
-          designQty: (item.designQty || 0).toFixed(3),
-          qty: (item.qty || 0).toFixed(3)
-        })) || []
+    formik.resetForm({
+      values: {
+        ...header.record,
+        items:
+          items?.list?.map(item => ({
+            ...item,
+            id: item.seqNo,
+            diffQty: roundTo((item.qty || 0) - (item.designQty || 0), 3),
+            designQty: roundTo(item.designQty || 0, 3),
+            qty: roundTo(item.qty || 0, 3)
+          })) || []
+      }
     })
   }
 
@@ -523,7 +523,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       key: 'ClearGrid',
       condition: true,
       onClick: () => {
-        formik.setFieldValue('items', formik.initialValues.items)
+        formik.setFieldValue('items', initialValues.items)
       },
       disabled: formik?.values?.items?.length === 0
     },
@@ -874,7 +874,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     value={formik?.values?.batchSize}
                     maxAccess={maxAccess}
                     onChange={e => {
-                      let batchSize = Number(e.target.value.replace(/,/g, ''))
+                      let batchSize = e.target.value
                       formik.setFieldValue('batchSize', batchSize)
                       if (!batchSize) return
                       formik.setFieldValue('qty', (formik.values.qty || 0) * batchSize)
@@ -892,7 +892,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     maxAccess={maxAccess}
                     allowNegative={false}
                     onChange={e => {
-                      let batch = Number(e.target.value.replace(/,/g, ''))
+                      let batch = e.target.value
                       formik.setFieldValue('batches', batch)
                       if (!batch) return
                       formik.setFieldValue('qty', (formik.values.batchSize || 0) * batch)
