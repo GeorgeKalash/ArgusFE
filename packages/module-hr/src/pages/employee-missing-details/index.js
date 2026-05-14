@@ -14,7 +14,6 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import EmployeeMissingList from './Form/EmployeeMissingList'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 export default function EmployeeMissingDetails () {
   const { getRequest } = useContext(RequestsContext)
@@ -22,7 +21,6 @@ export default function EmployeeMissingDetails () {
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [data, setData] = useState([])
   const [status, setStatus] = useState('0')
-  const trackInteraction = usePageInteraction()
 
   async function getMissingValues() {
     return new Promise((resolve, reject) => {
@@ -118,7 +116,6 @@ export default function EmployeeMissingDetails () {
                     value={status}
                     onClear={() => setStatus('2')}
                     onChange={(_, newValue) => {
-                      trackInteraction()
                       setStatus(newValue?.key || '2') 
                     }}
                 />

@@ -12,14 +12,12 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const SmsRequestLog = () => {
   const { getRequest } = useContext(RequestsContext)
   const { user } = useContext(AuthContext)
   const languageId = user.languageId
   const datasetId = DataSets.MODULE
-  const trackInteraction = usePageInteraction()
 
   const [values, setValues] = useState({
     moduleId: '10',
@@ -82,7 +80,6 @@ const SmsRequestLog = () => {
                     displayField='value'
                     required
                     onChange={(event, newValue) => {
-                      trackInteraction()
                       setValues({ moduleId: newValue?.key || '10', resourceId: '' })
                     }}
                     sx={{ pr: 2 }}
@@ -99,7 +96,6 @@ const SmsRequestLog = () => {
                     valueField='key'
                     displayField='value'
                     onChange={(event, newValue) => {
-                      trackInteraction()
                       onChange(newValue?.key || '')
                       setValues({ ...values, resourceId: newValue?.key || '' })
                     }}

@@ -1,6 +1,6 @@
 import { Grid, DialogActions } from '@mui/material'
 import CustomTextField from '../../Inputs/CustomTextField'
-import { useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useRef } from 'react'
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { getButtons } from '../Buttons'
@@ -9,6 +9,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import ReportGenerator from '../ReportGenerator'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
+import isEqual from 'lodash/isEqual'
 
 const styles = {
   dialogActions: 'dialogActions',
@@ -45,6 +46,61 @@ const GridToolbar = ({
   const { platformLabels } = useContext(ControlContext)
   const [reportStore, setReportStore] = useState([])
   const trackInteraction = usePageInteraction()
+  const initialFieldValuesRef = useRef(null)
+  const previousFieldValuesRef = useRef(null)
+
+  const extractFieldValues = React.useCallback(element => {
+    const fields = new Map()
+
+    const walk = node => {
+      if (!React.isValidElement(node)) return
+
+      const { name, value, values, children } = node.props || {}
+
+      if (name && !fields.has(name)) {
+        fields.set(
+          name,
+          value ??
+            (values && values[name] !== undefined
+              ? values[name]
+              : undefined)
+        )
+      }
+
+      if (children) {
+        React.Children.forEach(children, walk)
+      }
+    }
+
+    walk(element)
+    return Object.fromEntries(fields)
+  }, [])
+
+  useEffect(() => {
+    if (!leftSection || !trackInteraction.isReady) return
+
+    const currentValues = extractFieldValues(leftSection)
+    if (Object.keys(currentValues).length === 0) return
+
+    if (!initialFieldValuesRef.current) {
+      initialFieldValuesRef.current = currentValues
+      previousFieldValuesRef.current = currentValues
+      trackInteraction.trackPageFields(currentValues)
+
+      return
+    }
+
+    const hasChanged = !isEqual(
+      initialFieldValuesRef.current,
+      currentValues
+    )
+    if (hasChanged) trackInteraction.trackPageFields(currentValues)
+  }, [
+    leftSection,
+    extractFieldValues,
+    trackInteraction.isReady,
+    trackInteraction.currentPageResourceId
+  ])
 
   const clear = () => {
     trackInteraction()

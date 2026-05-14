@@ -17,12 +17,10 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import CustomLayoutForm from './forms/CustomLayoutForm'
 import CustomRulesForm from './forms/CustomRulesForm'
 import SecurityGroupsForm from './forms/SecurityGroupsForm'
-import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const trackInteraction = usePageInteraction()
 
   async function fetchWithFilter({ filters }) {
     if (filters.moduleId)
@@ -150,7 +148,6 @@ const GlobalAuthorization = () => {
                 valueField='key'
                 displayField='value'
                 onChange={(event, newValue) => {
-                  trackInteraction()
                   onChange(newValue?.key)
                 }}
                 error={!filters.moduleId}

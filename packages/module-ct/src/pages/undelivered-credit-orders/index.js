@@ -13,12 +13,10 @@ import CreditOrderForm from '@argus/shared-ui/src/components/Shared/Forms/Credit
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const UndeliveredCreditOrder = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const trackInteraction = usePageInteraction()
 
   const userData = window.sessionStorage.getItem('userData')
     ? JSON.parse(window.sessionStorage.getItem('userData'))
@@ -107,7 +105,6 @@ const UndeliveredCreditOrder = () => {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 onChange={(event, newValue) => {
-                  trackInteraction()
                   onChange(newValue?.recordId)
                 }}
               />

@@ -16,14 +16,12 @@ import { Grid } from '@mui/material'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import EmpPenaltyForm from '@argus/shared-ui/src/components/Shared/Forms/EmpPenaltyForm'
-import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const EmpPenalty = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [values, setValues] = useState({ employeeId: null, employeeRef: '', employeeName: '' })
-  const trackInteraction = usePageInteraction()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -176,7 +174,6 @@ const EmpPenalty = () => {
                 ]}
                 maxAccess={access}
                 onChange={(_, newValue) => {
-                  trackInteraction()
                   setValues({
                     employeeId: newValue?.recordId || null,
                     employeeRef: newValue?.reference || '',

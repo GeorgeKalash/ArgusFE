@@ -11,12 +11,10 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { Grid } from '@mui/material'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const IvFy = () => {
   const { getRequest } = useContext(RequestsContext)
   const [fiscalYear, setFiscalYear] = useState({ fiscalYear: 2025 })
-  const trackInteraction = usePageInteraction()
 
   async function fetchGridData() {
     const response = await getRequest({
@@ -83,7 +81,6 @@ const IvFy = () => {
                 displayField='fiscalYear'
                 values={fiscalYear}
                 onChange={(_, newValue) => {
-                  trackInteraction()
                   setFiscalYear({
                     fiscalYear: newValue.fiscalYear
                   })
