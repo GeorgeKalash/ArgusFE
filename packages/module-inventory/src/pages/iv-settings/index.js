@@ -4,7 +4,7 @@ import IvSettings from './form/IvSettings'
 
 const IvSettingsIndex = () => {
   return (
-    <ImmediateWindow datasetId={ResourceIds.IvSettings} labelKey={'ivSettings'} Component={IvSettings} height={400} />
+    <ImmediateWindow datasetId={ResourceIds.IvSettings} labelKey={'ivSettings'} Component={IvSettings} height={430} />
   )
 }
 
