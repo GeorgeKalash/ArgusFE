@@ -12,24 +12,32 @@ const FSAccountDetails = ({ labels, columnVisibility, columnLabels, breakDowns, 
         ...row.values
     }))
 
-    const totalBaseAmount = formattedBreakdowns.reduce(
-        (sum, row) => sum + Number(row.baseAmount || 0),
-        0
+    const totalBaseAmount = Math.round(
+        formattedBreakdowns.reduce(
+            (sum, row) => sum + Number(row.baseAmount || 0),
+            0
+        )
     )
 
-    const totalBaseFiatAmount = formattedBreakdowns.reduce(
-        (sum, row) => sum + Number(row.baseFiatAmount || 0),
-        0
+    const totalBaseFiatAmount = Math.round(
+        formattedBreakdowns.reduce(
+            (sum, row) => sum + Number(row.baseFiatAmount || 0),
+            0
+        )
     )
 
-    const totalReportingMetalAmount = formattedBreakdowns.reduce(
-        (sum, row) => sum + Number(row.reportingMetalAmount || 0),
-        0
+    const totalReportingMetalAmount = Math.round(
+        formattedBreakdowns.reduce(
+            (sum, row) => sum + Number(row.reportingMetalAmount || 0),
+            0
+        )
     )
 
-    const totalCurrentRateBaseAmount = formattedBreakdowns.reduce(
-        (sum, row) => sum + Number(row.currentRateBaseAmount || 0),
-        0
+    const totalCurrentRateBaseAmount = Math.round(
+        formattedBreakdowns.reduce(
+            (sum, row) => sum + Number(row.currentRateBaseAmount || 0),
+            0
+        )
     )
 
     const baseColumns = [
@@ -72,25 +80,25 @@ const FSAccountDetails = ({ labels, columnVisibility, columnLabels, breakDowns, 
             field: 'baseAmount',
             headerName: columnLabels.baseAmount,
             flex: 1.5,
-            type: 'number'
+            type: { field: 'number', decimal: 0 }
         },
         {
             field: 'baseFiatAmount',
             headerName: columnLabels.baseFiatAmount,
             flex: 1.5,
-            type: 'number'
+            type: { field: 'number', decimal: 0 }
         },
         {
             field: 'reportingMetalAmount',
             headerName: columnLabels.reportingMetalAmount,
             flex: 1.5,
-            type: 'number'
+            type: { field: 'number', decimal: 0 }
         },
         {
             field: 'currentRateBaseAmount',
             headerName: columnLabels.currentRateBaseAmount,
             flex: 1.5,
-            type: 'number'
+            type: { field: 'number', decimal: 0 }
         }
     ]
 

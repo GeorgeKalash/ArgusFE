@@ -42,10 +42,7 @@ const FinancialStatements = () => {
     const num = Number(value)
     if (isNaN(num)) return value
 
-    const absFormatted = Math.abs(num).toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })
+    const absFormatted = Math.abs(num).toLocaleString(undefined, {})
 
     switch (Number(numberFormat)) {
       case 1: // Unsigned: 123,456.78
