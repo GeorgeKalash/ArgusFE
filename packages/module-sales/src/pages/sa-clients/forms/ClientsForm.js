@@ -29,7 +29,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
-  const { changeDT, maxAccess, fieldBehavior } = useFieldBehavior({
+  const { onChange, maxAccess, fieldBehavior } = useFieldBehavior({
     access,
     fieldName: 'reference',
     editMode: false,
@@ -110,7 +110,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       })
 
       const nraId = await getNraValue(res?.record?.cgId)
-      changeDT(nraId)
+      onChange(nraId)
 
       formik.setValues({
         ...res.record,
@@ -167,7 +167,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 values={formik.values}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('cgId', newValue?.recordId || '')
-                  changeDT(newValue?.nraId)
+                  onChange(newValue?.nraId)
                 }}
                 error={formik.touched.cgId && Boolean(formik.errors.cgId)}
               />

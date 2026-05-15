@@ -46,7 +46,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   })
   const imageUploadRef = useRef(null)
 
-  const { changeDT, maxAccess, fieldBehavior} = useFieldBehavior({
+  const { onChange, maxAccess, fieldBehavior} = useFieldBehavior({
     access,
     fieldName: 'sku',
     editMode: recordId,
@@ -368,7 +368,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     required
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      changeDT(newValue?.nraId)
+                      onChange(newValue?.nraId)
 
                       setStore(prevStore => ({
                         ...prevStore,

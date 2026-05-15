@@ -26,7 +26,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const { changeDT, maxAccess, fieldBehavior } = useFieldBehavior({
+  const { onChange, maxAccess, fieldBehavior } = useFieldBehavior({
     access,
     fieldName: 'reference',
     editMode: !!recordId,
@@ -225,7 +225,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
-                      changeDT(newValue?.nraId)
+                      onChange(newValue?.nraId)
                     }}
                     error={formik.touched.groupId && Boolean(formik.errors.groupId)}
                   />
