@@ -34,6 +34,35 @@ const FinancialStatements = () => {
     }))
   }
 
+  function formatNumber(value, numberFormat = 1) {
+    if (value === null || value === undefined || value === '') return value
+
+    const num = Number(value)
+    if (isNaN(num)) return value
+
+    const absFormatted = Math.abs(num).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
+
+    switch (Number(numberFormat)) {
+      case 1: // Unsigned: 123,456.78
+        return absFormatted
+
+      case 2: // Signed Prefix: -123,456.78
+        return num < 0 ? `-${absFormatted}` : absFormatted
+
+      case 3: // Signed Postfix: 123,456.78-
+        return num < 0 ? `${absFormatted}-` : absFormatted
+
+      case 4: // Accounting: (123,456.78)
+        return num < 0 ? `(${absFormatted})` : absFormatted
+
+      default:
+        return absFormatted
+    }
+  }
+
   function formatFinancialData(groups) {
     const listSorted = []
 
@@ -59,17 +88,17 @@ const FinancialStatements = () => {
 
         const isBold = (flags & Math.pow(2, 3)) !== 0
 
-        let baseAmount = node.cellValues?.[0]?.baseAmount ?? null
-        let baseFiatAmount = node.cellValues?.[0]?.baseFiatAmount ?? null
-        let reportingMetalAmount = node.cellValues?.[0]?.reportingMetalAmount ?? null
-        let currentRateBaseAmount = node.cellValues?.[0]?.currentRateBaseAmount ?? null
+        const numberFormat = node.numberFormat ?? 1
 
-        if (hasChildren) {
-          if (baseAmount === 0) baseAmount = ''
-          if (baseFiatAmount === 0) baseFiatAmount = ''
-          if (reportingMetalAmount === 0) reportingMetalAmount = ''
-          if (currentRateBaseAmount === 0) currentRateBaseAmount = ''
-        }
+        const rawBaseAmount = node.cellValues?.[0]?.baseAmount ?? null
+        const rawBaseFiatAmount = node.cellValues?.[0]?.baseFiatAmount ?? null
+        const rawReportingMetalAmount = node.cellValues?.[0]?.reportingMetalAmount ?? null
+        const rawCurrentRateBaseAmount = node.cellValues?.[0]?.currentRateBaseAmount ?? null
+
+        let baseAmount = hasChildren && rawBaseAmount === 0 ? '' : formatNumber(rawBaseAmount, numberFormat)
+        let baseFiatAmount = hasChildren && rawBaseFiatAmount === 0 ? '' : formatNumber(rawBaseFiatAmount, numberFormat)
+        let reportingMetalAmount = hasChildren && rawReportingMetalAmount === 0 ? '' : formatNumber(rawReportingMetalAmount, numberFormat)
+        let currentRateBaseAmount = hasChildren && rawCurrentRateBaseAmount === 0 ? '' : formatNumber(rawCurrentRateBaseAmount, numberFormat)
 
         listSorted.push({
           nodeId: node.nodeId,
@@ -205,26 +234,26 @@ const FinancialStatements = () => {
     {
       field: 'baseAmount',
       headerName: columnLabels.baseAmount,
-      width: 150,
-      type: 'number'
+      width: 180,
+      cellClass: 'right'
     },
     {
       field: 'baseFiatAmount',
       headerName: columnLabels.baseFiatAmount,
-      width: 150,
-      type: 'number'
+      width: 180,
+      cellClass: 'right'
     },
     {
       field: 'reportingMetalAmount',
       headerName: columnLabels.reportingMetalAmount,
-      width: 150,
-      type: 'number'
+      width: 180,
+      cellClass: 'right'
     },
     {
       field: 'currentRateBaseAmount',
       headerName: columnLabels.currentRateBaseAmount,
-      width: 150,
-      type: 'number'
+      width: 180,
+      cellClass: 'right'
     }
   ]
 
