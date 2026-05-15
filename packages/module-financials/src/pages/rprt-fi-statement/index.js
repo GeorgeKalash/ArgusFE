@@ -90,10 +90,10 @@ const FinancialStatements = () => {
 
         const numberFormat = node.numberFormat ?? 1
 
-        const rawBaseAmount = node.cellValues?.[0]?.baseAmount ?? null
-        const rawBaseFiatAmount = node.cellValues?.[0]?.baseFiatAmount ?? null
-        const rawReportingMetalAmount = node.cellValues?.[0]?.reportingMetalAmount ?? null
-        const rawCurrentRateBaseAmount = node.cellValues?.[0]?.currentRateBaseAmount ?? null
+        const rawBaseAmount = node.cellValues?.baseAmount ?? null
+        const rawBaseFiatAmount = node.cellValues?.baseFiatAmount ?? null
+        const rawReportingMetalAmount = node.cellValues?.reportingMetalAmount ?? null
+        const rawCurrentRateBaseAmount = node.cellValues?.currentRateBaseAmount ?? null
 
         let baseAmount = hasChildren && rawBaseAmount === 0 ? '' : formatNumber(rawBaseAmount, numberFormat)
         let baseFiatAmount = hasChildren && rawBaseFiatAmount === 0 ? '' : formatNumber(rawBaseFiatAmount, numberFormat)
@@ -134,14 +134,14 @@ const FinancialStatements = () => {
             flags
           })
 
-          if (bits[2] === 1 && node.cellValues?.[0]) {
-            const newValues = { ...node.cellValues[0] }
+          if (bits[2] === 1 && node.cellValues) {
+            const newValues = { ...node.cellValues }
             for (const key in newValues) {
               if (typeof newValues[key] === 'number') {
                 newValues[key] = newValues[key] <= 0 ? -newValues[key] : -newValues[key]
               }
             }
-            node.cellValues[0] = newValues
+            node.cellValues = newValues
           }
 
           node.flags = 0
