@@ -106,7 +106,33 @@ const FSAccountDetails = ({ labels, columnVisibility, columnLabels, breakDowns, 
         ...col,
         hide: columnVisibility[col.field] === false
     }))
+
+    const totalFields = [
+    {
+        field: 'baseAmount',
+        label: columnLabels.baseAmount,
+        value: totalBaseAmount
+    },
+    {
+        field: 'baseFiatAmount',
+        label: columnLabels.baseFiatAmount,
+        value: totalBaseFiatAmount
+    },
+    {
+        field: 'reportingMetalAmount',
+        label: columnLabels.reportingMetalAmount,
+        value: totalReportingMetalAmount
+    },
+    {
+        field: 'currentRateBaseAmount',
+        label: columnLabels.currentRateBaseAmount,
+        value: totalCurrentRateBaseAmount
+    }
+    ].filter(item => columnVisibility[item.field] !== false)
     
+    const hiddenCount = 4 - totalFields.length
+
+    const leftSpacerLg = 4 + hiddenCount * 2
 
     return (
         <VertLayout>
@@ -122,43 +148,18 @@ const FSAccountDetails = ({ labels, columnVisibility, columnLabels, breakDowns, 
             </Grow>
             <Fixed>
                 <Grid container spacing={2} p={2}>
-                    <Grid item xs={12} md={6} lg={4} />
+                    <Grid item xs={12} md={6} lg={leftSpacerLg} />
 
-                    <Grid item xs={12} sm={6} md={3} lg={2}>
-                    <CustomNumberField
-                        label={columnLabels.baseAmount}
-                        value={totalBaseAmount}
+                    {totalFields.map(item => (
+                    <Grid item xs={12} sm={6} md={3} lg={2} key={item.field}>
+                        <CustomNumberField
+                        label={item.label}
+                        value={item.value}
                         readOnly
                         align='right'
-                    />
+                        />
                     </Grid>
-
-                    <Grid item xs={12} sm={6} md={3} lg={2}>
-                    <CustomNumberField
-                        label={columnLabels.baseFiatAmount}
-                        value={totalBaseFiatAmount}
-                        readOnly
-                        align='right'
-                    />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6} md={3} lg={2}>
-                    <CustomNumberField
-                        label={columnLabels.reportingMetalAmount}
-                        value={totalReportingMetalAmount}
-                        readOnly
-                        align='right'
-                    />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6} md={3} lg={2}>
-                    <CustomNumberField
-                        label={columnLabels.currentRateBaseAmount}
-                        value={totalCurrentRateBaseAmount}
-                        readOnly
-                        align='right'
-                    />
-                    </Grid>
+                    ))}
                 </Grid>
             </Fixed>
         </VertLayout>
