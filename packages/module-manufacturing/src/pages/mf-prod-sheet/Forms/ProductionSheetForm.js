@@ -150,14 +150,16 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
 
     const res3 = await getDataGrid()
 
-    formik.setValues({
-      ...res2.record,
-      items: res3.list.map(item => ({
-        ...item,
-        id: item.seqNo,
-        orderedQty: item.orderedQty ?? 0
-      })),
-      date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
+    formik.resetForm({
+      values: {
+        ...res2.record,
+        items: res3.list.map(item => ({
+          ...item,
+          id: item.seqNo,
+          orderedQty: item.orderedQty ?? 0
+        })),
+        date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
+      }
     })
   }
 
@@ -180,14 +182,16 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
 
     const res3 = await getDataGrid()
 
-    formik.setValues({
-      ...res2.record,
-      items: res3.list.map(item => ({
-        ...item,
-        id: item.seqNo,
-        orderedQty: item.orderedQty ?? 0
-      })),
-      date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
+    formik.resetForm({
+      values: {
+        ...res2.record,
+        items: res3.list.map(item => ({
+          ...item,
+          id: item.seqNo,
+          orderedQty: item.orderedQty ?? 0
+        })),
+        date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
+      }
     })
   }
 
@@ -301,14 +305,16 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
 
         const res2 = await getDataGrid()
 
-        formik.setValues({
-          ...res.record,
-          items: res2.list.map(item => ({
-            ...item,
-            id: item.seqNo,
-            orderedQty: item.orderedQty ?? 0
-          })),
-          date: !!res?.record?.date ? formatDateFromApi(res?.record?.date) : null
+        formik.resetForm({
+          values: {
+            ...res.record,
+            items: res2.list.map(item => ({
+              ...item,
+              id: item.seqNo,
+              orderedQty: item.orderedQty ?? 0
+            })),
+            date: !!res?.record?.date ? formatDateFromApi(res?.record?.date) : null
+          }
         })
       }
     })()
@@ -339,7 +345,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 displayField='name'
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId || '')
+                  formik.setFieldValue('dtId', newValue?.recordId || null)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -366,7 +372,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 required
                 readOnly={editMode || isPosted}
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 maxAccess={maxAccess}
               />
@@ -403,7 +409,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
+                  formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.recordId)}
               />
