@@ -15,7 +15,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
@@ -129,12 +128,14 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
         parameters: `_recordId=${res?.record?.workCenterId}`
       })
 
-      formik.setValues({
-        ...res?.record,
-        date: formatDateFromApi(res?.record?.date),
-        startTime: formatDateFromApi(res?.record?.startTime),
-        endTime: formatDateFromApi(res?.record?.endTime),
-        siteId: res2?.record?.siteId
+      formik.resetForm({
+        values: {
+          ...res?.record,
+          date: formatDateFromApi(res?.record?.date),
+          startTime: formatDateFromApi(res?.record?.startTime),
+          endTime: formatDateFromApi(res?.record?.endTime),
+          siteId: res2?.record?.siteId
+        }
       })
       setStore(prevStore => ({
         ...prevStore,
