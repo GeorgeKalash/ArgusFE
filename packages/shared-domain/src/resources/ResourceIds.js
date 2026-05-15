@@ -686,6 +686,8 @@ export const ResourceIds = {
   GLPayrollList: 75600,
   GLItemDisposal: 42610,
 
+  BtDefaults: 38601,
+
   //MCR
   MCRSalesInvoice: 51607,
   MCRSalesReturn: 51608,
