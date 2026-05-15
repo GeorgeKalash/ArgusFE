@@ -100,11 +100,13 @@ export default function RubberForm({ labels, access, recordId }) {
       extension: ProductModelingRepository.Rubber.get,
       parameters: `_recordId=${damageId}`
     }).then(res => {
-      formik.setValues({
-        ...res?.record,
-        startDate: formatDateFromApi(res?.record?.startDate),
-        endDate: formatDateFromApi(res?.record?.endDate),
-        date: formatDateFromApi(res?.record?.date)
+      formik.resetForm({
+        values: {
+          ...res?.record,
+          startDate: formatDateFromApi(res?.record?.startDate),
+          endDate: formatDateFromApi(res?.record?.endDate),
+          date: formatDateFromApi(res?.record?.date)
+        }
       })
     })
   }
