@@ -49,6 +49,8 @@ const AITab = ({ labels, maxAccess, recordId }) => {
 
   useEffect(() => {
     ;(async function () {
+      if (!recordId) return
+      
       const agentsData = await getAllAgents()
 
       const resCheckedAgent = await getRequest({
