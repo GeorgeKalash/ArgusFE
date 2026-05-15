@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react'
-import { Box } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
+import Image from 'next/image'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
@@ -12,6 +13,7 @@ import { RGGeneralRepository } from '@argus/repositories/src/repositories/RGGene
 import { FinancialStatementRepository } from '@argus/repositories/src/repositories/FinancialStatementRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import PrintForm from './Form/PrintForm'
+import FSAccountDetails from './Form/FSAccountDetails'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 const FinancialStatements = () => {
@@ -85,7 +87,6 @@ const FinancialStatements = () => {
         for (let i = 0; i < 32; i++) {
           bits.push((flags >> i) & 1)
         }
-
         const isBold = (flags & Math.pow(2, 3)) !== 0
 
         const numberFormat = node.numberFormat ?? 1
@@ -101,6 +102,7 @@ const FinancialStatements = () => {
         let currentRateBaseAmount = hasChildren && rawCurrentRateBaseAmount === 0 ? '' : formatNumber(rawCurrentRateBaseAmount, numberFormat)
 
         listSorted.push({
+          breakDowns: node?.breakDowns,
           nodeId: node.nodeId,
           parent: parentId,
           level,
@@ -281,6 +283,41 @@ const FinancialStatements = () => {
     }
   ].filter(col => availableCheckboxes[col.field] !== false)
 
+  const finalColumns = [
+    ...baseColumns,
+    {
+      field: 'details',
+      headerName: '',
+      width: 50,
+      cellRenderer: params => {
+        const row = params.data
+
+        const showButton =
+          !row?.isBold &&
+          !row?.hasChildren &&
+          !String(row?.nodeId).endsWith('_flags')
+
+        if (!showButton) return null
+
+        return (
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <IconButton
+              size='small'
+              onClick={() => edit(row)}
+            >
+              <Image
+                src='/images/TableIcons/popup-black.png'
+                width={18}
+                height={18}
+                alt='Details'
+              />
+            </IconButton>
+          </Box>
+        )
+      }
+    }
+  ]
+
   const hasCheckboxes =
     data?.length > 0 &&
     !!columnLabels.currentRateBaseAmount &&
@@ -302,6 +339,26 @@ const FinancialStatements = () => {
       width: 1200,
       height: 600,
       title: labels.Print
+    })
+  }
+
+  const edit = obj => {
+    openForm(obj?.breakDowns)
+  }
+
+  function openForm(breakDowns) {
+    stack({
+      Component: FSAccountDetails,
+      props: {
+        labels,
+        columnVisibility,
+        columnLabels,
+        breakDowns,
+        access
+      },
+      height: 600,
+      width: 1300,
+      title: labels.details
     })
   }
 
@@ -347,7 +404,7 @@ const FinancialStatements = () => {
         <Grow>
           <Table
             name='table'
-            columns={baseColumns}
+            columns={finalColumns}
             gridData={{ list: data }}
             rowId={['nodeId']}
             pagination={false}
