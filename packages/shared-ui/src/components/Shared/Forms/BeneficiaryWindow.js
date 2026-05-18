@@ -164,7 +164,6 @@ const BeneficiaryWindow = ({ clientId }) => {
       columns={columns}
       gridData={data}
       rowId={['beneficiaryId']}
-      isLoading={false}
       pagination={false}
       maxAccess={access}
       onEdit={editBeneficiary}

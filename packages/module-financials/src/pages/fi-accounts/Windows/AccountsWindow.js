@@ -5,6 +5,7 @@ import AccountsForm from '../forms/AccountsForm'
 import CreditLimitsForm from '../forms/CreditLimitsForm'
 import AccountBalanceTable from '../forms/AccountBalanceTable'
 import DimensionsForm from '../forms/DimensionsForm'
+import CurrenciesTable from '../forms/CurrenciesTable'
 
 const AccountsWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -18,7 +19,8 @@ const AccountsWindow = ({ height, recordId, labels, maxAccess }) => {
     { label: labels.Accounts },
     { label: labels.CreditLimits, disabled: !store.recordId },
     { label: labels.AccountBalance, disabled: !store.recordId },
-    { label: labels.Dimensions, disabled: !store.recordId }
+    { label: labels.Dimensions, disabled: !store.recordId },
+    { label: labels.Currencies, disabled: !store.recordId }
   ]
 
   return (
@@ -46,6 +48,9 @@ const AccountsWindow = ({ height, recordId, labels, maxAccess }) => {
       </CustomTabPanel>
       <CustomTabPanel height={height} index={3} value={activeTab} maxAccess={maxAccess}>
         <DimensionsForm store={store} maxAccess={maxAccess} />
+      </CustomTabPanel>
+      <CustomTabPanel height={height} index={4} value={activeTab} maxAccess={maxAccess}>
+        <CurrenciesTable store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>
   )

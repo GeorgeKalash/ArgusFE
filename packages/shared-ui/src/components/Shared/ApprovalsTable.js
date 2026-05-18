@@ -322,7 +322,6 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
           gridData={data}
           rowId={['functionId', 'seqNo', 'recordId']}
           onEdit={openPopup}
-          isLoading={false}
           pageSize={pageSize}
           refetch={refetch}
           paginationParameters={paginationParameters}

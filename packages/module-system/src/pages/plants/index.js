@@ -146,7 +146,6 @@ const Plants = () => {
           refetch={refetch}
           paginationType='api'
           paginationParameters={paginationParameters}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />

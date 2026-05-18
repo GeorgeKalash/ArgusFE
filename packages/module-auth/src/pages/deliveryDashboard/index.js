@@ -55,7 +55,7 @@ const DashboardLayout = () => {
     const volumeRequests = rootResponse.list.map(async zone => {
       const response = await getRequest({
         extension: DeliveryRepository.Volume.vol,
-        parameters: `_parentId=${zone.recordId}`
+        parameters: `_parentId=${zone.recordId}&_itemCategoryId=0`
       })
 
       return {

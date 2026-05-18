@@ -98,6 +98,12 @@ const Sites = () => {
       headerName: labels.isInactive,
       type: 'checkbox',
       flex: 1
+    },
+    {
+      field: 'carrier',
+      headerName: labels.carrier,
+      type: 'checkbox',
+      flex: 1
     }
   ]
 

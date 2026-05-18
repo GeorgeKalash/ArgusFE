@@ -100,7 +100,6 @@ const StockCountController = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

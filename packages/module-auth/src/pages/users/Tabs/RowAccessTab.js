@@ -297,7 +297,6 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
             columns={rowColumns}
             gridData={filteredData}
             rowId={['recordId']}
-            isLoading={false}
             maxAccess={maxAccess}
             pagination={false}
             checkTitle={labels.active}

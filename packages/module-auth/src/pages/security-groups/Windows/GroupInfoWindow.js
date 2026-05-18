@@ -6,6 +6,7 @@ import { useState } from 'react'
 import SGAccessLevelTab from '../Tabs/SGAccessLevelTab'
 import ReleaseCodeTab from '../Tabs/ReleaseCodeTab'
 import RowAccessTab from '../Tabs/RowAccessTab'
+import AITab from '../Tabs/AITab'
 
 const GroupInfoWindow = ({ labels, maxAccess, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -16,7 +17,8 @@ const GroupInfoWindow = ({ labels, maxAccess, recordId, height }) => {
     { label: labels?.users, disabled: !storeRecordId },
     { label: labels?.accessLevel, disabled: !storeRecordId },
     { label: labels?.rowAccess, disabled: !storeRecordId },
-    { label: labels?.releaseCode, disabled: !storeRecordId }
+    { label: labels?.releaseCode, disabled: !storeRecordId },
+    { label: labels?.ai, disabled: !storeRecordId }
   ]
 
   return (
@@ -36,6 +38,9 @@ const GroupInfoWindow = ({ labels, maxAccess, recordId, height }) => {
       </CustomTabPanel>
       <CustomTabPanel index={4} value={activeTab} maxAccess={maxAccess}>
         <ReleaseCodeTab maxAccess={maxAccess} labels={labels} recordId={storeRecordId} />
+      </CustomTabPanel>
+      <CustomTabPanel index={5} value={activeTab} maxAccess={maxAccess}>
+        <AITab maxAccess={maxAccess} labels={labels} recordId={storeRecordId} />
       </CustomTabPanel>
     </>
   )

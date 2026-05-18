@@ -20,6 +20,7 @@ const nextConfig = {
     '@argus/module-purchase',
     '@argus/module-delivery',
     '@argus/module-sales',
+    '@argus/module-bt',
     '@argus/module-manufacturing',
     '@argus/repositories',
     '@argus/shared-domain',

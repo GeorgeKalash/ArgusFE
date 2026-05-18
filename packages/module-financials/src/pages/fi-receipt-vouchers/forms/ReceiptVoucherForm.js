@@ -62,6 +62,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       currencyId,
       currencyName: '',
       dtId: null,
+      spId: null,
       sptId: null,
       dgId: '',
       amount: '',
@@ -453,12 +454,12 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 displayFieldWidth={4}
                 filter={{ isInactive: val => val !== true }}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('spId', newValue?.spId || '')
                   formik.setFieldValue('sptId', newValue?.sptId || '')
                   formik.setFieldValue('accountGroupName', newValue?.groupName || '')
+                  formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}

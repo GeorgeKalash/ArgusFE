@@ -176,7 +176,6 @@ const TransactionTab = ({ store, labels, access, setStore }) => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           onDelete={isClosed ? null : del}
           onEdit={isClosed ? null : edit}
           maxAccess={access}

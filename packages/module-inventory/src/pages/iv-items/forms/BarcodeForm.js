@@ -55,7 +55,6 @@ const BarcodeForm = ({ store, labels }) => {
   const {
     query: { data },
     labels: _labels,
-    refetch,
     invalidate,
     search,
     access
@@ -133,8 +132,6 @@ const BarcodeForm = ({ store, labels }) => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
-          pageSize={50}
           pagination={false}
           maxAccess={access}
         />

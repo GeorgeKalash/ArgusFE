@@ -100,7 +100,6 @@ const ItemCostHistory = props => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           maxAccess={access}
           pagination={false}
         />

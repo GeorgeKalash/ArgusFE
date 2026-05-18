@@ -48,8 +48,8 @@ export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }
       flex: 1
     },
     {
-      field: 'eopQty',
-      headerName: labels.eopQty,
+      field: 'rmQty',
+      headerName: labels.rmQty,
       flex: 1,
       type: 'number'
     },
@@ -89,7 +89,7 @@ export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }
   );
 
   const totalQty = (list || []).reduce(
-    (sum, item) => sum + (item.eopQty || 0),
+    (sum, item) => sum + (item.rmQty || 0),
     0
   );
 

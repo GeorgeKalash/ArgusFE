@@ -109,7 +109,6 @@ const TransactionInquiries = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

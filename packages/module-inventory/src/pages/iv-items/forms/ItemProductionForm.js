@@ -184,6 +184,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 value={formik.values.standardCost}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('standardCost', '')}
+                maxAccess={maxAccess}
                 error={formik.touched.grossWgt && Boolean(formik.errors.grossWgt)}
               />
             </Grid>

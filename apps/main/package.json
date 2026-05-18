@@ -29,6 +29,7 @@
     "@argus/module-remittance": "file:../../packages/module-remittance",
     "@argus/module-rs": "file:../../packages/module-rs",
     "@argus/module-sales": "file:../../packages/module-sales",
+    "@argus/module-bt": "file:../../packages/module-bt",
     "@argus/module-system": "file:../../packages/module-system",
     "@argus/shared-configs": "file:../../packages/shared-configs",
     "@argus/shared-core": "file:../../packages/shared-core",

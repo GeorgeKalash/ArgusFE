@@ -94,7 +94,6 @@ const InwardTransfer = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={editTransfer}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}

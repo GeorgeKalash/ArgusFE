@@ -116,7 +116,6 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
           api={getGridData}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

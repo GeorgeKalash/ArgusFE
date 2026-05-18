@@ -102,7 +102,6 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
           api={getMeasurementUnitGridData}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

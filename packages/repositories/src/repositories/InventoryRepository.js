@@ -269,7 +269,8 @@ export const InventoryRepository = {
     get2: service + 'get2SRL',
     set: service + 'setSRL',
     get: service + 'getSRL',
-    del: service + 'delSRL'
+    del: service + 'delSRL',
+    clone: service + 'cloneSerial'
   },
   MaterialTransferSerial: {
     qry: service + 'qryTFS'
@@ -375,7 +376,8 @@ export const InventoryRepository = {
     set2: service + 'set2DIG',
     del: service + 'delDIG',
     page: service + 'pageDIG',
-    get2: service + 'get2DIG'
+    get2: service + 'get2DIG',
+    get: service + 'getDIG'
   },
   Dimensions: {
     qry: service + 'qryDIM',

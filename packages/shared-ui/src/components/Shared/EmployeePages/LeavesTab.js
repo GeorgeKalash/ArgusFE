@@ -41,7 +41,7 @@ const LeavesTab = ({ labels, maxAccess, store, isActive }) => {
 
   const {
     query: { data },
-    refetch
+    invalidate
   } = useResourceQuery({
     enabled: !!recordId,
     queryFn: fetchGridData,
@@ -134,11 +134,9 @@ const LeavesTab = ({ labels, maxAccess, store, isActive }) => {
               })
             }
 
-            refetch()
+            invalidate()
           }}
-          pageSize={50}
           pagination={false}
-          refetch={refetch}
           maxAccess={maxAccess}
           showSelectAll={false}
           disableCheckBox={!isActive}

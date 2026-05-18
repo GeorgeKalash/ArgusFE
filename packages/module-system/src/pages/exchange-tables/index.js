@@ -109,7 +109,6 @@ const ExchangeTables = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           refetch={refetch}
           pageSize={50}
           paginationParameters={paginationParameters}

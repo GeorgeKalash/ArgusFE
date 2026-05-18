@@ -228,7 +228,6 @@ const OpenMultiCurrencyCashTransfer = () => {
           onEdit={edit}
           paginationType='client'
           refetch={refetch}
-          isLoading={false}
           onDelete={del}
           maxAccess={access}
         />

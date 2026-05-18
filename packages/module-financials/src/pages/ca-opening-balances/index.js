@@ -119,7 +119,6 @@ const OpeningBalance = () => {
           rowId={['currencyId', 'fiscalYear', 'accountId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           refetch={refetch}

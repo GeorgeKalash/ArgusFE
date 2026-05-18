@@ -109,7 +109,6 @@ const RelationList = ({ store, labels, maxAccess }) => {
           api={getRelationGridData}
           onEdit={editRelation}
           onDelete={delRelation}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

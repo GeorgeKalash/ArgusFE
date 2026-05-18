@@ -336,7 +336,6 @@ const Postoutwards = () => {
             pagination={true}
             paginationType='client'
             refetch={refetch}
-            isLoading={false}
             maxAccess={access}
             handleCheckboxChange={calcFc}
             showCheckboxColumn={true}
