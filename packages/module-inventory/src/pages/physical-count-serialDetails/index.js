@@ -185,7 +185,7 @@ const PhysicalCountSerialDe = () => {
     if (action === 'delete') {
       let updatedSerials = formik.values.rows
 
-      updatedSerials = updatedSerials.filter(item => item.srlNo !== row.srlNo)
+      updatedSerials = updatedSerials.filter(item => !(item.srlNo === row.srlNo && item.seqNo === row.seqNo))
       formik.setFieldValue('rows', updatedSerials)
     } else {
       formik.setFieldValue('rows', value)
