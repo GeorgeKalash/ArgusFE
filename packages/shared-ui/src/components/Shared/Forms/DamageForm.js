@@ -156,19 +156,32 @@ export default function DamageForm({ recordId, lockRecord }) {
       extension: ManufacturingRepository.Damage.get2,
       parameters: `_recordId=${damageId}`
     }).then(async res => {
+      if (!res?.record?.header) return
+
       const genJobFromDamage = await getDTD(res?.record?.header?.dtId)
 
-      formik.setValues({
-        recordId: res?.record?.header?.recordId || null,
-        header: {
-          ...res?.record?.header,
-          date: formatDateFromApi(res?.record?.header?.date),
-          maxPcs: res?.record?.header?.jobPcs,
-          workCenterName: res?.record?.header?.wcName,
-          workCenterRef: res?.record?.header?.wcRef,
-          genJobFromDamage
-        },
-        items: res?.record?.items || []
+      const header = res?.record?.header || {}
+
+      const jobQty = header?.jobQty || 0
+      const damagedQty = header?.damagedQty || 0
+      const jobPcs = header?.jobPcs || 0
+      const damagedPcs = header?.damagedPcs || 0
+
+      formik.resetForm({
+        values: {
+          recordId: header?.recordId || null,
+          header: {
+            ...header,
+            date: formatDateFromApi(header.date),
+            maxPcs: header?.jobPcs,
+            workCenterName: header?.wcName,
+            workCenterRef: header?.wcRef,
+            genJobFromDamage,
+            netJobQty: jobQty - damagedQty,
+            netJobPcs: jobPcs - damagedPcs
+          },
+          items: res?.record?.items || []
+        }
       })
 
       !formik.values.recordId &&
