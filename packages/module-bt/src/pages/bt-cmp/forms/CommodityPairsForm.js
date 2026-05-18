@@ -15,7 +15,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
-export default function CommodityPairsForm({ labels, maxAccess, record }) {
+export default function CommodityPairsForm({ labels, maxAccess, record, recordId }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -25,12 +25,11 @@ export default function CommodityPairsForm({ labels, maxAccess, record }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId,
       currencyId: null,
       metalId: null
     },
     maxAccess: maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.number().required(),
       metalId: yup.number().required()
@@ -43,7 +42,7 @@ export default function CommodityPairsForm({ labels, maxAccess, record }) {
 
       !obj.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
 
-      formik.setFieldValue('recordId', String(obj.currencyId * 10) + obj.metalId)
+      formik.setFieldValue('recordId', String(obj.metalId * 10) + obj.currencyId)
       invalidate()
     }
   })
@@ -54,7 +53,7 @@ export default function CommodityPairsForm({ labels, maxAccess, record }) {
     if (record)
       formik.setValues({
         ...record,
-        recordId: String(record.currencyId * 10) + record.metalId
+        recordId: String(record.metalId * 10) + record.currencyId
       })
   }, [])
 

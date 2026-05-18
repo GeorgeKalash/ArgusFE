@@ -78,6 +78,9 @@ const CommodityPairs = () => {
       props: {
         labels,
         record,
+        recordId: record
+          ? String(record.metalId * 10) + record.currencyId
+          : null,
         maxAccess: access
       },
       width: 600,
@@ -95,7 +98,7 @@ const CommodityPairs = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['currencyId', 'metalId']}
+          rowId={['metalId', 'currencyId']}
           onEdit={popup}
           onDelete={del}
           pageSize={50}
