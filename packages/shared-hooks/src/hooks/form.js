@@ -12,7 +12,7 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
       fieldName: parts[1] || ''
     }
   }
-console.log('behavior',behavior)
+
   const dynamicValidationSchema = initialSchema => {
     if (!initialSchema) return yup.object()
 

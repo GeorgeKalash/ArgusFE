@@ -196,7 +196,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['items'],
     initialValues,
     validateOnChange: true,

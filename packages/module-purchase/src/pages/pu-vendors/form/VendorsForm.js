@@ -28,7 +28,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
     endpointId: PurchaseRepository.Vendor.page
   })
 
-  const { maxAccess, onChange, fieldBehavior } = useFieldBehavior({
+  const { maxAccess, onFieldChange, fieldBehavior } = useFieldBehavior({
     access,
     fieldName: 'reference',
     editMode: !!recordId,
@@ -52,7 +52,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
       isInactive: false,
       isTaxable: false
     },
-    fieldBehavior,
+    behavior: { fieldBehavior },
     maxAccess,
     validateOnChange: true,
     validate: values => {
@@ -139,7 +139,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 values={formik.values}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('groupId', newValue ? newValue.recordId : '')
-                  onChange(newValue?.nraId)
+                  onFieldChange(newValue?.nraId)
                 }}
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                 maxAccess={maxAccess}

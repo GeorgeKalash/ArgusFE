@@ -33,13 +33,13 @@ export default function DesignsForm({ labels, access, store, setStore }) {
     endpointId: ManufacturingRepository.Design.page
   })
 
-  const { onChange, maxAccess, fieldBehavior } = useFieldBehavior({
+  const { onFieldChange, maxAccess, fieldBehavior } = useFieldBehavior({
     access,
-    key: 'reference',
+    fieldName: 'reference',
     editMode: false,
     enableClearing: !recordId
   })
-console.log('fieldBehavior',fieldBehavior)
+  
   const { formik } = useForm({
     initialValues: {
       recordId: null,
@@ -63,7 +63,7 @@ console.log('fieldBehavior',fieldBehavior)
       designerName: '',
       isInactive: false
     },
-    behavior:{ fieldBehavior },
+    behavior: { fieldBehavior },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -114,7 +114,7 @@ console.log('fieldBehavior',fieldBehavior)
           parameters: `_recordId=${res?.record?.groupId}`
         })
 
-        onChange(res2.record.nraId)
+        onFieldChange(res2.record.nraId)
       }
 
       formik.setValues({
@@ -152,7 +152,7 @@ console.log('fieldBehavior',fieldBehavior)
                     values={formik.values}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
-                      onChange(newValue?.nraId)
+                      onFieldChange(newValue?.nraId)
                     }}
                     error={formik.touched.groupId && Boolean(formik.errors.groupId)}
                     maxAccess={maxAccess}

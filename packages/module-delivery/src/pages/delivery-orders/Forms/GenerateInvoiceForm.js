@@ -61,7 +61,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
   }, [])
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       reference: form?.values?.reference,
       plantId: form?.values?.plantId,

@@ -53,7 +53,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   const { formik } = useForm({
     maxAccess: maxAccess,
     validateOnChange: true,
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       reference: '',

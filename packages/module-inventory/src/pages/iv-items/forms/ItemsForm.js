@@ -47,7 +47,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   })
   const imageUploadRef = useRef(null)
 
-  const { onChange, maxAccess, fieldBehavior} = useFieldBehavior({
+  const { onFieldChange, maxAccess, fieldBehavior} = useFieldBehavior({
     access,
     fieldName: 'sku',
     editMode: recordId,
@@ -89,7 +89,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       isInactive: false,
       isExternal: false
     },
-    fieldBehavior,
+    behavior: { fieldBehavior },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -354,7 +354,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     required
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      onChange(newValue?.nraId)
+                      onFieldChange(newValue?.nraId)
 
                       setStore(prevStore => ({
                         ...prevStore,
