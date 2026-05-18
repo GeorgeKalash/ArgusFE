@@ -32,12 +32,14 @@ import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
 export default function ProductionOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { userDefaults } = useContext(DefaultsContext)
+  const { userDefaults, systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.ProductionOrder
@@ -52,6 +54,7 @@ export default function ProductionOrderForm({ recordId, window }) {
   useSetWindow({ title: labels.ProductionOrder, window })
 
   const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const generateDirection = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mf_po_gen_direction')?.value) || null
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionOrder.page
@@ -538,14 +541,8 @@ export default function ProductionOrderForm({ recordId, window }) {
     {
       key: 'generate',
       condition: true,
-      onClick: onGenerateAssembly,
-      disabled: !editMode
-    },
-    {
-      key: 'GenerateJob',
-      condition: true,
-      onClick: generateJob,
-      disabled: !isPosted
+      onClick: generateDirection == 1 ? onGenerateAssembly : generateJob,
+      disabled: generateDirection == 2 ? !isPosted : !editMode 
     },
     {
       key: 'Import',
@@ -562,13 +559,21 @@ export default function ProductionOrderForm({ recordId, window }) {
   ]
 
   async function generateJob() {
-    const { rows, rsName, statusName, wipName, batchId, date, plantRef, plantName, isVerified, ...rest } = formik.values
-    await postRequest({
-      extension: ManufacturingRepository.JobOrder.gen,
-      record: JSON.stringify({ ...rest, date: formatDateToApi(date) })
+   if (!generateDirection) {
+    stackError({
+      message: labels?.noDirectionAssigned
     })
 
-    toast.success(platformLabels.Generated)
+    return
+   }
+
+  const { rows, rsName, statusName, wipName, batchId, date, plantRef, plantName, isVerified, ...rest } = formik.values
+  await postRequest({
+    extension: ManufacturingRepository.JobOrder.gen,
+    record: JSON.stringify({ ...rest, date: formatDateToApi(date) })
+  })
+
+  toast.success(platformLabels.Generated)
   }
 
   async function sync() {
