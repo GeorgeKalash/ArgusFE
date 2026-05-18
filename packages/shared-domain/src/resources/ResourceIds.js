@@ -687,6 +687,7 @@ export const ResourceIds = {
   GLItemDisposal: 42610,
 
   BtDefaults: 38601,
+  CommodityPair: 38101,
 
   //MCR
   MCRSalesInvoice: 51607,
