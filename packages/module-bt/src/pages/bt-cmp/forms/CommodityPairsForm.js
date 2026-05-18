@@ -29,7 +29,7 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
       currencyId: null,
       metalId: null
     },
-    maxAccess: maxAccess,
+    maxAccess,
     validationSchema: yup.object({
       currencyId: yup.number().required(),
       metalId: yup.number().required()
@@ -50,7 +50,7 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
-    if (record)
+    if (record && recordId)
       formik.setValues({
         ...record,
         recordId: String(record.metalId * 10) + record.currencyId
