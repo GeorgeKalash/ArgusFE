@@ -305,7 +305,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       key: 'Copy',
       condition: true,
       onClick: () => onCopy(formik?.values),
-      disabled: !(store?.nraId && !formik.values.isExternal)
+      disabled: !editMode || !(store?.nraId && !formik.values.isExternal)
     },
     {
       key: 'History',
