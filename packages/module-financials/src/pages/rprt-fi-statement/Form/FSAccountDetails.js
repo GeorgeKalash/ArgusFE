@@ -1,169 +1,111 @@
+import { Box } from '@mui/material'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { Grid } from '@mui/material'
-import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import React from 'react'
 
-const FSAccountDetails = ({ labels, columnVisibility, columnLabels, breakDowns, access }) => {
+const FSAccountDetails = ({
+  labels,
+  columnVisibility,
+  columnLabels,
+  breakDowns,
+  access
+}) => {
+  const formattedBreakdowns = breakDowns?.map(row => ({
+    ...row,
+    ...row.values
+  }))
 
-    const formattedBreakdowns = breakDowns.map(row => ({
-        ...row,
-        ...row.values
-    }))
-
-    const totalBaseAmount = Math.round(
-        formattedBreakdowns.reduce(
-            (sum, row) => sum + Number(row.baseAmount || 0),
-            0
-        )
-    )
-
-    const totalBaseFiatAmount = Math.round(
-        formattedBreakdowns.reduce(
-            (sum, row) => sum + Number(row.baseFiatAmount || 0),
-            0
-        )
-    )
-
-    const totalReportingMetalAmount = Math.round(
-        formattedBreakdowns.reduce(
-            (sum, row) => sum + Number(row.reportingMetalAmount || 0),
-            0
-        )
-    )
-
-    const totalCurrentRateBaseAmount = Math.round(
-        formattedBreakdowns.reduce(
-            (sum, row) => sum + Number(row.currentRateBaseAmount || 0),
-            0
-        )
-    )
-
-    const baseColumns = [
-        {
-            field: 'seg0',
-            headerName: labels.seg0,
-            flex: 1
-        },
-        {
-            field: 'seg1',
-            headerName: labels.seg1,
-            flex: 1
-        },
-        {
-            field: 'seg2',
-            headerName: labels.seg2,
-            flex: 1
-        },
-        {
-            field: 'seg3',
-            headerName: labels.seg3,
-            flex: 1,
-        },
-        {
-            field: 'seg4',
-            headerName: labels.seg4,
-            flex: 1,
-        },
-        {
-            field: 'ccgRef',
-            headerName: labels.ccgRef,
-            flex: 1,
-        },
-        {
-            field: 'ccRef',
-            headerName: labels.ccRef,
-            flex: 1,
-        },
-        {
-            field: 'baseAmount',
-            headerName: columnLabels.baseAmount,
-            flex: 1.5,
-            type: { field: 'number', decimal: 0 }
-        },
-        {
-            field: 'baseFiatAmount',
-            headerName: columnLabels.baseFiatAmount,
-            flex: 1.5,
-            type: { field: 'number', decimal: 0 }
-        },
-        {
-            field: 'reportingMetalAmount',
-            headerName: columnLabels.reportingMetalAmount,
-            flex: 1.5,
-            type: { field: 'number', decimal: 0 }
-        },
-        {
-            field: 'currentRateBaseAmount',
-            headerName: columnLabels.currentRateBaseAmount,
-            flex: 1.5,
-            type: { field: 'number', decimal: 0 }
-        }
-    ]
-
-    const columns = baseColumns.map(col => ({
-        ...col,
-        hide: columnVisibility[col.field] === false
-    }))
-
-    const totalFields = [
+  const baseColumns = [
     {
-        field: 'baseAmount',
-        label: columnLabels.baseAmount,
-        value: totalBaseAmount
+      field: 'seg0',
+      headerName: labels.seg0,
+      flex: 1
     },
     {
-        field: 'baseFiatAmount',
-        label: columnLabels.baseFiatAmount,
-        value: totalBaseFiatAmount
+      field: 'seg1',
+      headerName: labels.seg1,
+      flex: 1
     },
     {
-        field: 'reportingMetalAmount',
-        label: columnLabels.reportingMetalAmount,
-        value: totalReportingMetalAmount
+      field: 'seg2',
+      headerName: labels.seg2,
+      flex: 1
     },
     {
-        field: 'currentRateBaseAmount',
-        label: columnLabels.currentRateBaseAmount,
-        value: totalCurrentRateBaseAmount
+      field: 'seg3',
+      headerName: labels.seg3,
+      flex: 1
+    },
+    {
+      field: 'seg4',
+      headerName: labels.seg4,
+      flex: 1
+    },
+    {
+      field: 'ccgRef',
+      headerName: labels.ccgRef,
+      flex: 1
+    },
+    {
+      field: 'ccRef',
+      headerName: labels.ccRef,
+      flex: 1
+    },
+    {
+      field: 'baseAmount',
+      headerName: columnLabels.baseAmount,
+      flex: 1.5,
+      type: { field: 'number', decimal: 0 }
+    },
+    {
+      field: 'baseFiatAmount',
+      headerName: columnLabels.baseFiatAmount,
+      flex: 1.5,
+      type: { field: 'number', decimal: 0 }
+    },
+    {
+      field: 'reportingMetalAmount',
+      headerName: columnLabels.reportingMetalAmount,
+      flex: 1.5,
+      type: { field: 'number', decimal: 0 }
+    },
+    {
+      field: 'currentRateBaseAmount',
+      headerName: columnLabels.currentRateBaseAmount,
+      flex: 1.5,
+      type: { field: 'number', decimal: 0 }
     }
-    ].filter(item => columnVisibility[item.field] !== false)
-    
-    const hiddenCount = 4 - totalFields.length
+  ]
 
-    const leftSpacerLg = 4 + hiddenCount * 2
+  const columns = baseColumns.map(col => ({
+    ...col,
+    hide: columnVisibility[col.field] === false
+  }))
 
-    return (
-        <VertLayout>
-            <Grow>
-                <Table
-                    columns={columns}
-                    name='accountDetails'
-                    gridData={{ list: formattedBreakdowns }}
-                    rowId={['ledgerSeqNo']}
-                    pagination={false}
-                    maxAccess={access}
-                />
-            </Grow>
-            <Fixed>
-                <Grid container spacing={2} p={2}>
-                    <Grid item xs={12} md={6} lg={leftSpacerLg} />
+  console.log(columns)
 
-                    {totalFields.map(item => (
-                    <Grid item xs={12} sm={6} md={3} lg={2} key={item.field}>
-                        <CustomNumberField
-                        label={item.label}
-                        value={item.value}
-                        readOnly
-                        align='right'
-                        />
-                    </Grid>
-                    ))}
-                </Grid>
-            </Fixed>
-        </VertLayout>
-    )
+  return (
+    <Box
+      sx={{
+        ml: 4,
+        my: 1,
+        p: 2,
+        border: '1px solid #d9d9d9',
+        borderRadius: 1,
+        backgroundColor: '#fafafa'
+      }}
+    >
+      <Table
+        columns={columns}
+        name='accountDetails'
+        gridData={{ list: formattedBreakdowns }}
+        rowId={['ledgerSeqNo']}
+        pagination={false}
+        maxAccess={access}
+        disableSorting
+        domLayout="autoHeight"
+      />
+    </Box>
+  )
 }
 
-export default FSAccountDetails
+export default React.memo(FSAccountDetails)

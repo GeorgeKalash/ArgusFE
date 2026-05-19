@@ -1050,7 +1050,10 @@ const Table = ({
             !props.maxHeight && !props.height ? 'agGridFlex' : ''
           ].join(' ')}
           sx={{
-            height: props?.height || '100%',
+            height:
+              props?.domLayout === 'autoHeight'
+                ? 'auto'
+                : props?.height || '100%',
             maxHeight: props?.maxHeight || 'none',
             minHeight: 0,
             '--highlight-bg': highlightRow?.color || 'transparent',
@@ -1087,6 +1090,19 @@ const Table = ({
             onColumnResized={onColumnResized}
             onSortChanged={onSortChanged}
             enableRtl={languageId === 2}
+            isFullWidthRow={params => params.rowNode.data?.isDetailRow}
+            fullWidthCellRenderer={params =>
+              props.renderDetailRow
+                ? props.renderDetailRow(params.data.parentRow)
+                : null
+            }
+            getRowHeight={params => {
+              if (params.data?.isDetailRow) {
+                return params.data.detailHeight || 150
+              }
+
+              return hasImageColumn ? rowHeightImage : rowHeight
+            }}
           />
         </Box>
       </Grow>

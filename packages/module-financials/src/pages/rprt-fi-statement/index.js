@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useState, useMemo, useCallback, useEffect } from 'react'
 import { Box, IconButton } from '@mui/material'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import Image from 'next/image'
@@ -20,6 +20,7 @@ const FinancialStatements = () => {
   const { getRequest } = useContext(RequestsContext)
   const [columnVisibility, setColumnVisibility] = useState({})
   const [availableCheckboxes, setAvailableCheckboxes] = useState({})
+  const [tableData, setTableData] = useState([])
   const { stack } = useWindow()
 
   const [columnLabels, setColumnLabels] = useState({
@@ -34,6 +35,42 @@ const FinancialStatements = () => {
       ...prev,
       [field]: event.target.checked
     }))
+  }
+
+  const DETAIL_HEADER_HEIGHT = 32
+  const DETAIL_ROW_HEIGHT = 36
+  const DETAIL_PADDING = 24
+
+  const toggleDetailRow = row => {
+    const detailRowId = `${row.nodeId}_detail`
+
+    const detailExists = tableData.some(r => r.nodeId === detailRowId)
+
+    if (detailExists) {
+      setTableData(prev => prev.filter(r => r.nodeId !== detailRowId))
+      return
+    }
+
+    const index = tableData.findIndex(r => r.nodeId === row.nodeId)
+    if (index === -1) return
+
+    const breakdownCount = row.breakDowns?.length || 0
+    const detailHeight =
+      DETAIL_HEADER_HEIGHT +
+      breakdownCount * DETAIL_ROW_HEIGHT +
+      DETAIL_PADDING
+
+    const detailRow = {
+      nodeId: detailRowId,
+      isDetailRow: true,
+      parentRow: row,
+      detailHeight
+    }
+
+    const newData = [...tableData]
+    newData.splice(index + 1, 0, detailRow)
+
+    setTableData(newData)
   }
 
   function formatNumber(value, numberFormat = 1) {
@@ -222,6 +259,20 @@ const FinancialStatements = () => {
     }
   })
 
+  useEffect(() => {
+    if (data?.length) {
+      setTableData(data)
+    }
+  }, [data])
+
+  const memoizedGridData = useMemo(
+    () => ({ list: tableData }),
+    [tableData]
+  )
+
+console.log('table data = ', tableData)
+console.log('memoizedGridData data = ', memoizedGridData)
+
   const columns = [
     {
       field: 'nodeName',
@@ -280,40 +331,43 @@ const FinancialStatements = () => {
     }
   ].filter(col => availableCheckboxes[col.field] !== false)
 
-  const finalColumns = [
-    ...baseColumns,
-    {
-      field: 'details',
-      headerName: '',
-      width: 50,
-      cellRenderer: params => {
-        const row = params.data
+  const finalColumns = useMemo(
+    () => [
+      ...baseColumns,
+      {
+        field: 'details',
+        headerName: '',
+        width: 50,
+        cellRenderer: params => {
+          const row = params.data
 
-        const showButton =
-          !row?.isBold &&
-          !row?.hasChildren &&
-          !String(row?.nodeId).endsWith('_flags')
+          const showButton =
+            !row?.isBold &&
+            !row?.hasChildren &&
+            !String(row?.nodeId).endsWith('_flags') &&
+            row?.breakDowns?.length > 0
 
-        if (!showButton) return null
+          if (!showButton) return null
 
-        return (
-          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-            <IconButton
-              size='small'
-              onClick={() => edit(row)}
-            >
-              <Image
-                src='/images/TableIcons/popup-black.png'
-                width={18}
-                height={18}
-                alt='Details'
-              />
-            </IconButton>
-          </Box>
-        )
+          const isExpanded = tableData.some(
+            r => r.nodeId === `${row.nodeId}_detail`
+          )
+
+          return (
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <IconButton
+                size="small"
+                onClick={() => toggleDetailRow(row)}
+              >
+                {isExpanded ? '−' : '+'}
+              </IconButton>
+            </Box>
+          )
+        }
       }
-    }
-  ]
+    ],
+    [baseColumns, tableData]
+  )
 
   const hasCheckboxes =
     data?.length > 0 &&
@@ -323,15 +377,46 @@ const FinancialStatements = () => {
     !!columnLabels.reportingMetalAmount
 
   const Print = rpbParams => {
-    if (!data?.length) return
+    if (!tableData?.length) return
+
+    // Build a flattened list that includes detail rows
+    const printableData = []
+
+    tableData.forEach(row => {
+      // Skip synthetic detail rows because we will regenerate them
+      if (row.isDetailRow) return
+
+      // Add the main row
+      printableData.push(row)
+
+      // If this row has breakdowns, add a synthetic detail row after it
+      if (row.breakDowns?.length > 0) {
+        printableData.push({
+          nodeId: `${row.nodeId}_detail_print`,
+          isDetailRow: true,
+          parentRow: row
+        })
+      }
+    })
 
     stack({
       Component: PrintForm,
       props: {
-        tableData: data,
-        rpbParams: rpbParams,
+        tableData: printableData,
+        rpbParams,
         columns: baseColumns,
-        labels
+        labels,
+
+        // Reuse the same renderer used in the main table
+        renderDetailRow: row => (
+          <FSAccountDetails
+            labels={labels}
+            columnVisibility={columnVisibility}
+            columnLabels={columnLabels}
+            breakDowns={row.breakDowns}
+            access={access}
+          />
+        )
       },
       width: 1200,
       height: 600,
@@ -339,25 +424,18 @@ const FinancialStatements = () => {
     })
   }
 
-  const edit = obj => {
-    openForm(obj?.breakDowns)
-  }
-
-  function openForm(breakDowns) {
-    stack({
-      Component: FSAccountDetails,
-      props: {
-        labels,
-        columnVisibility,
-        columnLabels,
-        breakDowns,
-        access
-      },
-      height: 600,
-      width: 1300,
-      title: labels.details
-    })
-  }
+  const renderDetailRow = useCallback(
+    row => (
+      <FSAccountDetails
+        labels={labels}
+        columnVisibility={columnVisibility}
+        columnLabels={columnLabels}
+        breakDowns={row.breakDowns}
+        access={access}
+      />
+    ),
+    [labels, columnVisibility, columnLabels, access]
+  )
 
   return (
     <VertLayout>
@@ -402,7 +480,7 @@ const FinancialStatements = () => {
           <Table
             name='table'
             columns={finalColumns}
-            gridData={{ list: data }}
+            gridData={memoizedGridData}
             rowId={['nodeId']}
             pagination={false}
             collabsable={false}
@@ -410,6 +488,8 @@ const FinancialStatements = () => {
             field='nodeName'
             disableSorting
             fullRowData={data}
+            setRowData={setTableData}
+            renderDetailRow={renderDetailRow}
           />
         </Grow>
       )}
