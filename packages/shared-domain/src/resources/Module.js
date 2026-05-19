@@ -30,5 +30,6 @@ export const Module = {
   Loans: 74,
   Payroll: 75,
   HR: 100,
-  ProductModeling: 48
+  ProductModeling: 48,
+  BrokerageTrading: 38
 }
