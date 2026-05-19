@@ -58,12 +58,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     endpointId: PurchaseRepository.PUDraftReturn.page
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
   const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
@@ -727,20 +721,24 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     }
   }
 
-  async function onChangeDtId(recordId) {
-    if (recordId) {
-      const dtd = await getRequest({
-        extension: PurchaseRepository.DocumentTypeDefault.get,
-        parameters: `_dtId=${recordId}`
-      })
+  async function getDtRelatedFields(recordId) {
+    if (!recordId) return 
 
-      formik.setFieldValue('header.plantId', dtd?.record?.plantId || null)
-      formik.setFieldValue('header.siteId', dtd?.record?.siteId || defSiteId || null)
-    } else {
-      formik.setFieldValue('header.plantId', null)
-      formik.setFieldValue('header.siteId', null)
-    }
+    const dtd = await getRequest({
+      extension: PurchaseRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${recordId}`
+    })
+
+    return dtd?.record || {}
   }
+
+  useEffect(() => {
+    if (!recordId){
+      const response = getDtRelatedFields(formik?.values?.header?.dtId)
+      formik.setFieldValue('header.plantId', response?.plantId || null)
+      formik.setFieldValue('header.siteId', response?.siteId || defSiteId || null)
+    }
+  }, [formik?.values?.header?.dtId])
 
   useEffect(() => {
     if (formik?.values?.serials?.length) {
@@ -942,9 +940,8 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
-                      await onChangeDtId(newValue?.recordId)
-                      changeDT(newValue)
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
+                      changeDT(newValue)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />

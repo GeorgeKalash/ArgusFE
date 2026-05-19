@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -241,6 +241,8 @@ const GeneratePurchaseInvoice = () => {
     }
   }
 
+  useEffect(() => { onChangeDtId(formik.values?.dtId) }, [formik.values?.dtId])
+
   return (
     <Form onSave={onGenerateSI} isSaved={false} maxAccess={access} fullSize>
       <VertLayout>
@@ -364,9 +366,8 @@ const GeneratePurchaseInvoice = () => {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
-                  await onChangeDtId(newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
