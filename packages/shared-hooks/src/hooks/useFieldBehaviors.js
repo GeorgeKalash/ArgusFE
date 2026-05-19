@@ -25,7 +25,7 @@ export function useFieldBehavior({ access, fieldName, editMode = true, enableCle
         ? query?.data?.field?.readOnly && !query?.data?.field?.mandatory
         : false
     },
-    maxAccess: query?.data?.maxAccess || access,
+    maxAccess: query?.data?.maxAccess,
     onFieldChange(value) {
       setNraId(value)
     }

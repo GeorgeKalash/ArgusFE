@@ -79,7 +79,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       ]
     },
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validationSchema: yup.object({
       header: yup.object({
         departureTime: yup.string().required(),

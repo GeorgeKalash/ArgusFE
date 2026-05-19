@@ -48,7 +48,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       seqNo: 1,

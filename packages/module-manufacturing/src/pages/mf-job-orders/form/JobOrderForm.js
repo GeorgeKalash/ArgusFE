@@ -107,7 +107,7 @@ export default function JobOrderForm({
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validationSchema: yup.object({
       date: yup.string().required(),

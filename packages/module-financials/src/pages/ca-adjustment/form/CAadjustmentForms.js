@@ -48,7 +48,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       reference: '',

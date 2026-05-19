@@ -72,7 +72,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const { schema, requiredFields } = createConditionalSchema(scrapsConditions, true, maxAccess, 'scraps')
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {

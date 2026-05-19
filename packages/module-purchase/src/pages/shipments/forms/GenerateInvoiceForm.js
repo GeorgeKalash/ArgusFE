@@ -33,7 +33,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
   const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'PUCurrencyId')?.value)
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       reference: form?.values?.header?.reference,
       plantId: form?.values?.header?.plantId,

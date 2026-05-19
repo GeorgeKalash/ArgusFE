@@ -54,7 +54,7 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
   const invalidate = refetch ?? hookInvalidate;
 
   const { formik } = useForm({
-    documentType: { key: 'transfer.dtId', value: documentType?.dtId },
+    behavior: { key: 'transfer.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId,
       transfer: {

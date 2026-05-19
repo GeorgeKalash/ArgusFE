@@ -179,7 +179,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['items'],
     initialValues,
     validationSchema: yup.object({

@@ -108,7 +108,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     initialValues,
     maxAccess,
     validateOnChange: true,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validationSchema: yup.object({
       accountType: yup.string().required(),
       currencyId: yup.number().required(),

@@ -59,7 +59,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
       date: new Date()
     },
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required(),

@@ -267,7 +267,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['items'],
     initialValues: initialValues,
     validationSchema: yup.object({

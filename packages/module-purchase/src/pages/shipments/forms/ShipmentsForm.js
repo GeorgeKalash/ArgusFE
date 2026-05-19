@@ -65,7 +65,7 @@ export default function ShipmentsForm({ recordId, window }) {
   const marginDefault = parseInt(systemDefaults?.list?.find(obj => obj.key === 'POSHPVarPct')?.value) || 0
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {

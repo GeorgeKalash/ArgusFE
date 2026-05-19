@@ -49,7 +49,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
   const defaultSP = userDefaults?.list?.find(({ key }) => key === 'spId')?.value
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || '',
       dtId: null,

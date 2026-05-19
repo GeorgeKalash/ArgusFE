@@ -86,7 +86,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),

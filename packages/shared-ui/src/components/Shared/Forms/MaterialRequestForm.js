@@ -88,7 +88,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
   }
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       functionId: SystemFunction.MaterialRequest,

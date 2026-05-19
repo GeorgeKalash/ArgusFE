@@ -53,7 +53,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       wip: 1,
