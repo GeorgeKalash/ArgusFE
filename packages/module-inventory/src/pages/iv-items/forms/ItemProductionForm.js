@@ -17,9 +17,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
-import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function ItemProductionForm({ labels, editMode, maxAccess, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,7 +29,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
     operationId: row => row?.operationId,
     rmItemSku: row => row?.rmItemSku,
     designQty: row => row?.designQty,
-    designPcs: row => row?.designPcs && Number(row.designPcs) < 2147483647
+    designPcs: row => row?.designPcs && Number(row.designPcs) <= 2147483647
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
