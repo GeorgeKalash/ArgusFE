@@ -60,10 +60,10 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
 
   const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
-
+  
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       recordId,
       header: {
@@ -721,7 +721,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     }
   }
 
-  async function getDtRelatedFields(recordId) {
+  async function onChangeDT(recordId) {
     if (!recordId) return 
 
     const dtd = await getRequest({
@@ -733,11 +733,13 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
   }
 
   useEffect(() => {
-    if (!recordId){
-      const response = getDtRelatedFields(formik?.values?.header?.dtId)
-      formik.setFieldValue('header.plantId', response?.plantId || null)
-      formik.setFieldValue('header.siteId', response?.siteId || defSiteId || null)
-    }
+    ;(async function () {
+      if (!recordId){
+        const response = await onChangeDT(formik?.values?.header?.dtId)
+        formik.setFieldValue('header.plantId', response?.plantId || null)
+        formik.setFieldValue('header.siteId', response?.siteId || defSiteId || null)
+      }
+    })()
   }, [formik?.values?.header?.dtId])
 
   useEffect(() => {

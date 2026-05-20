@@ -156,6 +156,25 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
     })
   }
 
+  async function onChangeDT (dtId) {
+    if (!dtId) {
+      formik.setFieldValue('productionLineId', null)
+      
+      return
+    }
+
+    const { record } = await getRequest({
+      extension: ProductModelingRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    formik.setFieldValue('productionLineId', record?.productionLineId || null)
+  }
+
+  useEffect(() => {
+     if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.Casting}
@@ -180,22 +199,9 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik?.values}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
                   changeDT(newValue)
-
-                  formik.setFieldValue('productionLineId', null)
-
-                  if (newValue?.recordId) {
-                    const { record } = await getRequest({
-                      extension: ProductModelingRepository.DocumentTypeDefault.get,
-                      parameters: `_dtId=${newValue?.recordId}`
-                    })
-
-                    formik.setFieldValue('productionLineId', record?.productionLineId)
-                  } else {
-                    formik.setFieldValue('productionLineId', null)
-                  }
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}

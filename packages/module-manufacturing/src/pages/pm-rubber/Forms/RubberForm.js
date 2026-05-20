@@ -186,6 +186,31 @@ export default function RubberForm({ labels, access, recordId }) {
     })
   }
 
+  async function onChangeDT (dtId) {
+    if (dtId) {
+      const { record } = await getRequest({
+        extension: ProductModelingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      if (record?.productionLineId) {
+        formik.setFieldValue('modelRef', '')
+        formik.setFieldValue('threeDPId', null)
+        formik.setFieldValue('laborId', null)
+        formik.setFieldValue('laborName', '')
+        formik.setFieldValue('modelId', null)
+        formik.setFieldValue('pcs', '')
+        formik.setFieldValue('jobId', '')
+      }
+      formik.setFieldValue('productionLineId', record?.productionLineId || null)
+    }
+    else formik.setFieldValue('productionLineId', null)
+  }
+
+  useEffect(() => {
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.Rubber}
@@ -214,29 +239,9 @@ export default function RubberForm({ labels, access, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
-
-                  formik.setFieldValue('productionLineId', null)
-
-                  if (newValue?.recordId) {
-                    const { record } = await getRequest({
-                      extension: ProductModelingRepository.DocumentTypeDefault.get,
-                      parameters: `_dtId=${newValue?.recordId}`
-                    })
-
-                    if (record?.productionLineId) {
-                      formik.setFieldValue('modelRef', '')
-                      formik.setFieldValue('threeDPId', null)
-                      formik.setFieldValue('laborId', null)
-                      formik.setFieldValue('laborName', '')
-                      formik.setFieldValue('modelId', null)
-                      formik.setFieldValue('pcs', '')
-                      formik.setFieldValue('jobId', '')
-                    }
-                    formik.setFieldValue('productionLineId', record?.productionLineId || null)
-                  }
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />

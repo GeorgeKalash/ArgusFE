@@ -50,12 +50,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     objectName: 'header'
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
   const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const defplId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'plId')?.value)
   const defspId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
@@ -743,7 +737,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     }
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     if (recordId) {
       const dtd = await getRequest({
         extension: SaleRepository.DocumentTypeDefault.get,
@@ -755,6 +749,10 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       formik.setFieldValue('header.siteId', dtd?.record?.siteId || defSiteId || null)
     }
   }
+  
+  useEffect(() => {
+    if (formik.values?.header?.dtId && !recordId) onChangeDT(formik.values?.header?.dtId)
+  }, [formik.values?.header?.dtId])
 
   useEffect(() => {
     if (formik?.values?.items?.length) {
@@ -993,7 +991,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  await onChangeDtId(newValue?.recordId)
                   changeDT(newValue)
                   formik.setFieldValue('header.dtId', newValue?.recordId || null)
                 }}

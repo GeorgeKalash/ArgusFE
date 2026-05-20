@@ -222,6 +222,45 @@ const ThreeDDesignForm = ({ recordId, window }) => {
     }
   ]
 
+  async function onChangeDT (dtId) {
+    if (dtId) {
+      const { record } = await getRequest({
+        extension: ProductModelingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      if (record?.productionLineId) {
+        formik.setValues({
+          ...formik.values,
+          dtId,
+          productionLineId: record?.productionLineId,
+          sketchId: null,
+          sketchRef: '',
+          sketchName: '',
+          itemGroupId: null,
+          itemGroupRef: '',
+          itemGroupName: '',
+          productionClassId: null,
+          productionClassRef: '',
+          productionClassName: '',
+          productionStandardId: null,
+          productionStandardRef: '',
+          productionStandardName: '',
+          collectionId: null,
+          metalPurity: null,
+          metalId: null,
+          designGroupId: null,
+          designFamilyId: null
+        })
+      }
+    }
+    else formik.setFieldValue('productionLineId', null)
+  }
+
+  useEffect(() => {
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.ThreeDDesign}
@@ -251,43 +290,9 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || '')
                       changeDT(newValue)
-
-                      formik.setFieldValue('productionLineId', null)
-
-                      if (newValue?.recordId) {
-                        const { record } = await getRequest({
-                          extension: ProductModelingRepository.DocumentTypeDefault.get,
-                          parameters: `_dtId=${newValue?.recordId}`
-                        })
-
-                        if (record?.productionLineId) {
-                          formik.setValues({
-                            ...formik.values,
-                            dtId: newValue?.recordId,
-                            productionLineId: record?.productionLineId,
-                            sketchId: null,
-                            sketchRef: '',
-                            sketchName: '',
-                            itemGroupId: null,
-                            itemGroupRef: '',
-                            itemGroupName: '',
-                            productionClassId: null,
-                            productionClassRef: '',
-                            productionClassName: '',
-                            productionStandardId: null,
-                            productionStandardRef: '',
-                            productionStandardName: '',
-                            collectionId: null,
-                            metalPurity: null,
-                            metalId: null,
-                            designGroupId: null,
-                            designFamilyId: null
-                          })
-                        }
-                      }
                     }}
                     readOnly={editMode}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}

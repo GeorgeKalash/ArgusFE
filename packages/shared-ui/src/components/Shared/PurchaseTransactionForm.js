@@ -1647,7 +1647,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     return res?.record
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
       setmetalPriceVisibility(true)
@@ -1752,7 +1752,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
 
   useEffect(() => {
     if (!recordId) {
-      if (formik.values?.header.dtId) onChangeDtId(formik.values?.header.dtId)
+      if (formik.values?.header.dtId) onChangeDT(formik.values?.header.dtId)
       dtInfo(formik.values.header.dtId)
     }
   }, [formik.values?.header.dtId])

@@ -476,7 +476,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     }
   ]
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     const dtd = await getRequest({
       extension: InventoryRepository.DocumentTypeDefaults.get,
       parameters: `_dtId=${recordId}`
@@ -565,7 +565,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   }, [])
 
   useEffect(() => {
-    if (!recordId && formik?.values?.header?.dtId) onChangeDtId(formik?.values?.header?.dtId)
+    if (!recordId && formik?.values?.header?.dtId) onChangeDT(formik?.values?.header?.dtId)
   }, [formik?.values?.header?.dtId])
 
   async function onValidationRequired() {

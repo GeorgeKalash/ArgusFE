@@ -230,7 +230,7 @@ const GeneratePurchaseInvoice = () => {
     formik.handleSubmit()
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     if (recordId) {
       const dtd = await getRequest({
         extension: SaleRepository.DocumentTypeDefault.get,
@@ -241,7 +241,7 @@ const GeneratePurchaseInvoice = () => {
     }
   }
 
-  useEffect(() => { onChangeDtId(formik.values?.dtId) }, [formik.values?.dtId])
+  useEffect(() => { onChangeDT(formik.values?.dtId) }, [formik.values?.dtId])
 
   return (
     <Form onSave={onGenerateSI} isSaved={false} maxAccess={access} fullSize>

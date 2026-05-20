@@ -225,7 +225,7 @@ const GeneratePurchaseInvoice = () => {
     formik.handleSubmit()
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     if (recordId) {
       const dtd = await getRequest({
         extension: PurchaseRepository.DocumentTypeDefault.get,
@@ -235,6 +235,10 @@ const GeneratePurchaseInvoice = () => {
       formik.setFieldValue('plantId', dtd?.record?.plantId || null)
     }
   }
+
+  useEffect(() => {
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   return (
     <Form onSave={onGeneratePI} maxAccess={access} isSaved={false}>
@@ -335,7 +339,6 @@ const GeneratePurchaseInvoice = () => {
                 maxAccess={access}
                 onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
-                  await onChangeDtId(newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />

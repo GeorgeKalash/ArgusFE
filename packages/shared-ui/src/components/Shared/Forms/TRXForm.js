@@ -260,8 +260,9 @@ export default function TRXForm({ labels, access, setStore, store }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId || ''), changeDT(newValue)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('dtId', newValue?.recordId || '')
+                  changeDT(newValue)
                 }}
                 readOnly={editMode}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}

@@ -1461,7 +1461,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return res
   }
 
-  async function onChangeDtId(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) return
     const res = await getDTD(dtId)
     if (res?.record != null) {
@@ -1550,7 +1550,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }, [subtotal])
 
   useEffect(() => {
-    if (formik?.values?.header?.dtId && !recordId) onChangeDtId(formik?.values?.header?.dtId)
+    if (formik?.values?.header?.dtId && !recordId) onChangeDT(formik?.values?.header?.dtId)
   }, [formik?.values?.header?.dtId])
 
   useEffect(() => {

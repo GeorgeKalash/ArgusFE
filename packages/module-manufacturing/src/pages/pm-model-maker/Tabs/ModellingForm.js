@@ -205,6 +205,34 @@ export default function ModellingForm({ labels, access, setStore, store }) {
     })
   }
 
+  async function onChangeDT (dtId) {
+    if (dtId) {
+      const { record } = await getRequest({
+        extension: ProductModelingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+      formik.setFieldValue('productionLineId', record?.productionLineId)
+      if (record?.productionLineId) {
+        formik.setFieldValue('threeDPRef', '')
+        formik.setFieldValue('threeDPId', null)
+        formik.setFieldValue('designGroupId', null)
+        formik.setFieldValue('designFamilyId', null)
+        formik.setFieldValue('productionClassId', null)
+        formik.setFieldValue('productionStandardId', null)
+        formik.setFieldValue('collectionId', null)
+        formik.setFieldValue('itemGroupId', null)
+        formik.setFieldValue('metalId', null)
+        formik.setFieldValue('productionClassRef', '')
+        formik.setFieldValue('productionClassName', '')
+      }
+    }
+    else formik.setFieldValue('productionLineId', null)
+  }
+
+  useEffect(() => {
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.ModelMaker}
@@ -233,34 +261,8 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   changeDT(newValue)
-
-                  formik.setFieldValue('productionLineId', null)
-
-                  if (newValue?.recordId) {
-                    const { record } = await getRequest({
-                      extension: ProductModelingRepository.DocumentTypeDefault.get,
-                      parameters: `_dtId=${newValue?.recordId}`
-                    })
-
-                    formik.setFieldValue('productionLineId', record?.productionLineId)
-
-                    if (record?.productionLineId) {
-                      formik.setFieldValue('threeDPRef', '')
-                      formik.setFieldValue('threeDPId', null)
-
-                      formik.setFieldValue('designGroupId', null)
-                      formik.setFieldValue('designFamilyId', null)
-                      formik.setFieldValue('productionClassId', null)
-                      formik.setFieldValue('productionStandardId', null)
-                      formik.setFieldValue('collectionId', null)
-                      formik.setFieldValue('itemGroupId', null)
-                      formik.setFieldValue('metalId', null)
-                      formik.setFieldValue('productionClassRef', '')
-                      formik.setFieldValue('productionClassName', '')
-                    }
-                  }
                   formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}

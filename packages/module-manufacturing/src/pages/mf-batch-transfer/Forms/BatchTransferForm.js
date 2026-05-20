@@ -342,8 +342,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   ]
 
   useEffect(() => {
-    if (!recordId && documentType?.dtId) onChangeDT(documentType.dtId)
-  }, [documentType?.dtId])
+    if (!recordId && formik.values?.dtId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
@@ -385,7 +385,6 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       changeDT(newValue)
-                      await onChangeDT(newValue?.recordId)
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}

@@ -232,7 +232,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
     }
   ]
 
-  const fillDocumentTypeFields = async dtId => {
+  const onChangeDT = async dtId => {
     if (dtId) {
       const res = await getRequest({
         extension: ManufacturingRepository.DocumentTypeDefault.get,
@@ -259,12 +259,8 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
   }
 
   useEffect(() => {
-    ;(async function () {
-      if (!recordId && documentType?.dtId) {
-        fillDocumentTypeFields(documentType?.dtId)
-      }
-    })()
-  }, [documentType?.dtId])
+    if (!recordId && formik.values?.dtId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   return (
     <FormShell
@@ -296,11 +292,8 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={access}
-                    onChange={async (event, newValue) => {
-                      await fillDocumentTypeFields(newValue?.recordId)
-
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
-
                       changeDT(newValue)
                     }}
                     readOnly={editMode}

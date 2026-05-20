@@ -1187,7 +1187,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     })
   }
 
-  async function onChangeDtId(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) return
 
     const res = await getRequest({
@@ -1226,7 +1226,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     }
   }, [subtotal])
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) onChangeDtId(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {

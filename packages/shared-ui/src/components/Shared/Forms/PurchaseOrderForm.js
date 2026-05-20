@@ -252,7 +252,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
     return res
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     const dtd = await getDTD(recordId)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId || defPlId)
   }
@@ -1156,7 +1156,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
   }, [])
 
   useEffect(() => {
-    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+    if (formik.values?.header.dtId && !recordId) onChangeDT(formik.values?.header.dtId)
   }, [formik.values?.header.dtId])
 
   useEffect(() => {
