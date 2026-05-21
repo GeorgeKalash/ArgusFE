@@ -1279,6 +1279,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.SalesQuotation}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[

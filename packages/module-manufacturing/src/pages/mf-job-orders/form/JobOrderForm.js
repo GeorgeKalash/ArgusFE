@@ -678,6 +678,7 @@ export default function JobOrderForm({
                 <ResourceComboBox
                   endpointId={ManufacturingRepository.MFJobOrder.pack}
                   reducer={response => response?.record?.documentTypes}
+                  filter={!editMode ? item => item.activeStatus === 1 : undefined}
                   name='dtId'
                   label={labels.documentType}
                   columnsInDropDown={[

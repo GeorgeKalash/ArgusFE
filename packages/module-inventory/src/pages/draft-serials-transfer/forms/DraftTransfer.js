@@ -608,6 +608,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     endpointId={InventoryRepository.DraftTransfer.pack}
                     reducer={response => response?.record?.documentTypes}
                     name='header.dtId'
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },

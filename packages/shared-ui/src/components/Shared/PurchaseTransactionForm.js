@@ -1944,6 +1944,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 readOnly={editMode || formik?.values?.items?.some(item => item.sku)}
                 label={labels.documentType}

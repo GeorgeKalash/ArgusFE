@@ -292,6 +292,7 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.AdjustmentCost}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[

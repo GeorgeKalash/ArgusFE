@@ -1297,6 +1297,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseOrder}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     readOnly={editMode}
                     label={labels.documentType}

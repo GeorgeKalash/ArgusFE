@@ -282,6 +282,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.Worksheet.pack}
                     reducer={response => response?.record?.documentTypes}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[

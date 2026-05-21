@@ -280,6 +280,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.StockCount}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 readOnly={editMode || isPosted || isClosed}
                 label={labels.documentType}

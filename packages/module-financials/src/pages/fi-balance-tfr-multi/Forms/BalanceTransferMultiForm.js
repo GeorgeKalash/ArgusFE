@@ -404,6 +404,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.BalanceTransferMultiAccount}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 label={labels.documentType}
                 columnsInDropDown={[

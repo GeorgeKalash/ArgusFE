@@ -2010,6 +2010,7 @@ export default function SaleTransactionForm({
                 endpointId={SaleRepository.SaleTransaction.pack}
                 parameters={`_functionId=${functionId}`}
                 reducer={response => response?.record?.documentTypes}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 readOnly={editMode || formik.values.items?.some(item => item.sku)}
                 label={labels.documentType}

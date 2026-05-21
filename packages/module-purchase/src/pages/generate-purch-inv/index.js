@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -326,6 +326,7 @@ const GeneratePurchaseInvoice = () => {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseInvoice}`}
+                filter={ item => item.activeStatus === 1 }
                 name='dtId'
                 label={labels.documentType}
                 columnsInDropDown={[

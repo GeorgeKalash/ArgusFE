@@ -338,6 +338,7 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
                       <ResourceComboBox
                         endpointId={SystemRepository.DocumentType.qry}
                         parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.JTCheckOut}`}
+                        filter={!editMode ? item => item.activeStatus === 1 : undefined}
                         name='transfer.dtId'
                         label={labels.documentType}
                         columnsInDropDown={[

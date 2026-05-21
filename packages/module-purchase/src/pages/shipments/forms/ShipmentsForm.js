@@ -654,6 +654,7 @@ export default function ShipmentsForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${SystemFunction.Shipment}&_startAt=0&_pageSize=1000`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
                     columnsInDropDown={[

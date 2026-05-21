@@ -978,6 +978,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               <ResourceComboBox
                 endpointId={SaleRepository.DraftReturn.pack}
                 reducer={response => response?.record?.documentTypes}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
