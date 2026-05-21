@@ -14,13 +14,14 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 const IvSettings = ({ _labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const arrayAllow = ['itemSearchStyle', 'itemSearchFields', 'iv_minSerialSize', 'minItemSearchTextSize','iv_clone_srl_nra']
+  const arrayAllow = ['itemSearchStyle', 'itemSearchFields', 'iv_minSerialSize', 'minItemSearchTextSize','iv_clone_srl_nra', 'iv_dmgId']
 
   const { formik } = useForm({
     maxAccess: access,
@@ -148,6 +149,20 @@ const IvSettings = ({ _labels, access }) => {
                   formik.setFieldValue('nraRef', newValue?.reference || '')
                   formik.setFieldValue('nraDescription', newValue?.description || '')
                 }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+             <ResourceComboBox
+                endpointId={InventoryRepository.DimensionGroup.qry}
+                name='iv_dmgId'
+                label={_labels.dimensionGroup}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={access}
+                onChange={(_, newValue) => formik.setFieldValue('iv_dmgId', newValue?.recordId || null)}
+                onClear={() => formik.setFieldValue('iv_dmgId', null)}
+                error={formik.touched.iv_dmgId && Boolean(formik.errors.iv_dmgId)}
               />
             </Grid>
           </Grid>

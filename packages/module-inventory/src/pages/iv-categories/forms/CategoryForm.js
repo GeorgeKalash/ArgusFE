@@ -44,6 +44,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
       spfId: '',
       msId: '',
       isMetal: false,
+      productionLevel: null,
       procurementMethod: '',
       valuationMethod: '',
       metalPurity: '',
@@ -356,6 +357,19 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
           <Grid item xs={4}>
             <Grow>
               <Grid container gap={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.PRODUCTION_LEVEL}
+                    name='productionLevel'
+                    label={labels.productionLevel}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    onChange={(_, newValue) => formik.setFieldValue('productionLevel', newValue?.key || null)}
+                    maxAccess={maxAccess}
+                    error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <CustomCheckBox
                     name='applyVAT'
