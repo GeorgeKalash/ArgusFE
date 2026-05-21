@@ -688,6 +688,8 @@ export const ResourceIds = {
 
   BtDefaults: 38601,
   CommodityPair: 38101,
+  FixingSales: 38302,
+  FixingPurchases: 38303,
 
   //MCR
   MCRSalesInvoice: 51607,
