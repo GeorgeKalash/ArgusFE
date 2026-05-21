@@ -4,38 +4,48 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Grid } from '@mui/material'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 
 const FSAccountDetails = ({ labels, columnVisibility, columnLabels, breakDowns, access }) => {
 
+    const parseFormattedNumber = (value) =>
+        Number(
+            String(getFormattedNumber(value, 0, false)).replace(/,/g, '')
+        ) || 0
+
     const formattedBreakdowns = breakDowns.map(row => ({
         ...row,
-        ...row.values
+        ...row.values,
+        baseAmount: parseFormattedNumber(row.values.baseAmount || 0),
+        baseFiatAmount: parseFormattedNumber(row.values.baseFiatAmount || 0),
+        reportingMetalAmount: parseFormattedNumber(row.values.reportingMetalAmount || 0),
+        currentRateBaseAmount: parseFormattedNumber(row.values.currentRateBaseAmount || 0),
     }))
 
     const totalBaseAmount = Math.round(
         formattedBreakdowns.reduce(
-            (sum, row) => sum + Number(row.baseAmount || 0),
+            (sum, row) => sum + parseFormattedNumber(row.baseAmount || 0),
             0
         )
     )
 
     const totalBaseFiatAmount = Math.round(
         formattedBreakdowns.reduce(
-            (sum, row) => sum + Number(row.baseFiatAmount || 0),
+            (sum, row) => sum + parseFormattedNumber(row.baseFiatAmount || 0),
             0
         )
     )
 
     const totalReportingMetalAmount = Math.round(
         formattedBreakdowns.reduce(
-            (sum, row) => sum + Number(row.reportingMetalAmount || 0),
+            (sum, row) => sum + parseFormattedNumber(row.reportingMetalAmount || 0),
             0
         )
     )
 
     const totalCurrentRateBaseAmount = Math.round(
         formattedBreakdowns.reduce(
-            (sum, row) => sum + Number(row.currentRateBaseAmount || 0),
+            (sum, row) => sum + parseFormattedNumber(row.currentRateBaseAmount || 0),
             0
         )
     )
