@@ -1094,7 +1094,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     const puTrxTaxes = puTrxPack?.taxCodes
     const puTrxSerials = puTrxPack?.serials
     const puTrxInstallments = puTrxPack?.installments
-    const doctypeInfo = await dtInfo(puTrxPack?.header?.dtId)
+    const doctypeInfo = await getDTD(puTrxPack?.header?.dtId)
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -1648,6 +1648,12 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   }
 
   async function onChangeDT(recordId) {
+    if (!recordId) {
+      formik.setFieldValue('disableSKULookup', false)
+      formik.setFieldValue('header.postMetalToFinancials', false)
+
+      return
+    }
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
       setmetalPriceVisibility(true)
@@ -1657,32 +1663,15 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       formik.setFieldValue('header.KGmetalPrice', 0)
       setmetalPriceVisibility(false)
     }
-    formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
+    formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials || false)
+    formik.setFieldValue('disableSKULookup', dtd?.record?.disableSKULookup || false)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
-    formik.setFieldValue(
-      'header.siteId',
-      dtd?.record?.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
-    )
+    formik.setFieldValue('header.siteId',
+      dtd?.record?.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null)
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
   }
 
-  async function dtInfo(dtId) {
-    if (!dtId) {
-      formik.setFieldValue('disableSKULookup', false)
-      formik.setFieldValue('header.postMetalToFinancials', false)
-
-      return
-    }
-
-    const res = await getRequest({
-      extension: PurchaseRepository.DocumentTypeDefault.get,
-      parameters: `_dtId=${dtId}`
-    })
-    formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
-
-    return res?.record
-  }
   useEffect(() => {
     formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
@@ -1751,10 +1740,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   }, [defaultsDataState])
 
   useEffect(() => {
-    if (!recordId) {
-      if (formik.values?.header.dtId) onChangeDT(formik.values?.header.dtId)
-      dtInfo(formik.values.header.dtId)
-    }
+    if (!recordId) onChangeDT(formik.values?.header.dtId)
   }, [formik.values?.header.dtId])
 
   async function getDefaultsData() {

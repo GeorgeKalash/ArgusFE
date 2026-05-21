@@ -206,31 +206,34 @@ export default function ModellingForm({ labels, access, setStore, store }) {
   }
 
   async function onChangeDT (dtId) {
-    if (dtId) {
-      const { record } = await getRequest({
-        extension: ProductModelingRepository.DocumentTypeDefault.get,
-        parameters: `_dtId=${dtId}`
-      })
-      formik.setFieldValue('productionLineId', record?.productionLineId)
-      if (record?.productionLineId) {
-        formik.setFieldValue('threeDPRef', '')
-        formik.setFieldValue('threeDPId', null)
-        formik.setFieldValue('designGroupId', null)
-        formik.setFieldValue('designFamilyId', null)
-        formik.setFieldValue('productionClassId', null)
-        formik.setFieldValue('productionStandardId', null)
-        formik.setFieldValue('collectionId', null)
-        formik.setFieldValue('itemGroupId', null)
-        formik.setFieldValue('metalId', null)
-        formik.setFieldValue('productionClassRef', '')
-        formik.setFieldValue('productionClassName', '')
-      }
+    const { record } = await getRequest({
+      extension: ProductModelingRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    formik.setFieldValue('productionLineId', record?.productionLineId || null)
+    if (record?.productionLineId) {
+      formik.setFieldValue('threeDPRef', '')
+      formik.setFieldValue('threeDPId', null)
+      formik.setFieldValue('designGroupId', null)
+      formik.setFieldValue('designFamilyId', null)
+      formik.setFieldValue('productionClassId', null)
+      formik.setFieldValue('productionStandardId', null)
+      formik.setFieldValue('collectionId', null)
+      formik.setFieldValue('itemGroupId', null)
+      formik.setFieldValue('metalId', null)
+      formik.setFieldValue('productionClassRef', '')
+      formik.setFieldValue('productionClassName', '')
     }
-    else formik.setFieldValue('productionLineId', null)
   }
 
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+   ;(async function () {
+    if (!recordId) {
+      if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
+      else formik.setFieldValue('productionLineId', null)
+    }
+    })()
   }, [formik.values?.dtId])
 
   return (

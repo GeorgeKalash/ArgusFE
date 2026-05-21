@@ -187,28 +187,30 @@ export default function RubberForm({ labels, access, recordId }) {
   }
 
   async function onChangeDT (dtId) {
-    if (dtId) {
-      const { record } = await getRequest({
-        extension: ProductModelingRepository.DocumentTypeDefault.get,
-        parameters: `_dtId=${dtId}`
-      })
+    const { record } = await getRequest({
+      extension: ProductModelingRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
 
-      if (record?.productionLineId) {
-        formik.setFieldValue('modelRef', '')
-        formik.setFieldValue('threeDPId', null)
-        formik.setFieldValue('laborId', null)
-        formik.setFieldValue('laborName', '')
-        formik.setFieldValue('modelId', null)
-        formik.setFieldValue('pcs', '')
-        formik.setFieldValue('jobId', '')
-      }
-      formik.setFieldValue('productionLineId', record?.productionLineId || null)
+    if (record?.productionLineId) {
+      formik.setFieldValue('modelRef', '')
+      formik.setFieldValue('threeDPId', null)
+      formik.setFieldValue('laborId', null)
+      formik.setFieldValue('laborName', '')
+      formik.setFieldValue('modelId', null)
+      formik.setFieldValue('pcs', '')
+      formik.setFieldValue('jobId', '')
     }
-    else formik.setFieldValue('productionLineId', null)
+    formik.setFieldValue('productionLineId', record?.productionLineId || null)
   }
 
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+   ;(async function () {
+    if (!recordId) {
+      if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
+      else formik.setFieldValue('productionLineId', null)
+    }
+    })()
   }, [formik.values?.dtId])
 
   return (

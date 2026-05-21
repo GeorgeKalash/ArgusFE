@@ -349,9 +349,9 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
                         displayField={['reference', 'name']}
                         values={formik.values.transfer}
                         maxAccess
-                        onChange={async (event, newValue) => {
-                          formik.setFieldValue('transfer.dtId', newValue?.recordId || null)
+                        onChange={async (_, newValue) => {
                           changeDT(newValue)
+                          formik.setFieldValue('transfer.dtId', newValue?.recordId || null)
                         }}
                         readOnly={editMode}
                         required

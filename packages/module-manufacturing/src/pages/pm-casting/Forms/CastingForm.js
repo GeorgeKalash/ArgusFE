@@ -157,22 +157,23 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
   }
 
   async function onChangeDT (dtId) {
-    if (!dtId) {
-      formik.setFieldValue('productionLineId', null)
-      
-      return
-    }
-
+    if (!dtId) return
+    
     const { record } = await getRequest({
       extension: ProductModelingRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
     })
 
-    formik.setFieldValue('productionLineId', record?.productionLineId || null)
+    return record || {}
   }
 
   useEffect(() => {
-     if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+    ;(async function () {
+     if (!recordId) {
+      const response = await onChangeDT(formik.values?.dtId)
+      formik.setFieldValue('productionLineId', response?.productionLineId || null)
+     }
+    })()
   }, [formik.values?.dtId])
 
   return (

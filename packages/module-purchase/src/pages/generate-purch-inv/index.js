@@ -237,7 +237,7 @@ const GeneratePurchaseInvoice = () => {
   }
 
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+    if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   return (
