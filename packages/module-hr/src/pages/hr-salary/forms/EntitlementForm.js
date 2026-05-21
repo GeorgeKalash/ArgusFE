@@ -17,6 +17,7 @@ import { calculateFixed } from '@argus/shared-utils/src/utils/Payroll'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
+import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function EntitlementForm({
   labels,
@@ -129,7 +130,7 @@ export default function EntitlementForm({
         })
         formik.setValues({
           ...res?.record,
-          fixedAmount: parseFloat(fixedAmount || 0).toFixed(2) || parseFloat(res?.record?.fixedAmount || 0).toFixed(2),
+          fixedAmount: getFormattedNumber(fixedAmount,2) || getFormattedNumber(res?.record?.fixedAmount,2),
           isPct: res?.record?.pct > 0
         })
       }
