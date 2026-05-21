@@ -14,19 +14,13 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
-import FixingForm from './form/FixingForm'
-import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-import { useError } from '@argus/shared-providers/src/providers/error'
+import FixingForm from '@argus/shared-ui/src/components/Shared/Forms/FixingForm'
 
 export default function BTFixing() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const { systemDefaults } = useContext(DefaultsContext)
-  const { stack: stackError } = useError()
   const { functionId } = Router()
-
-  const msId = systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value
 
   const FixingEndpoints = {
     [SystemFunction.FixingSales]: {
@@ -42,13 +36,13 @@ export default function BTFixing() {
     }
   }
 
-  const getFixingAi = (functionId) => FixingEndpoints[Number(functionId)]
+  const getFixingApi = (functionId) => FixingEndpoints[Number(functionId)]
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: getFixingAi(functionId).page,
+      extension: getFixingApi(functionId).page,
       parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
@@ -76,7 +70,7 @@ export default function BTFixing() {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: getFixingAi(functionId).page,
+    endpointId: getFixingApi(functionId).page,
     datasetId: ResourceIds.FixingSales,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
@@ -88,7 +82,7 @@ export default function BTFixing() {
   async function fetchWithSearch({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: getFixingAi(functionId).snapshot,
+        extension: getFixingApi(functionId).snapshot,
         parameters: `_filter=${filters.qry}&_functionId=${functionId}`
       })
     } else {
@@ -167,39 +161,14 @@ export default function BTFixing() {
     openForm(obj?.recordId)
   }
 
-  const getcorrectLabel = functionId => {
-    if (functionId === SystemFunction.FixingPurchases) {
-      return labels.FixingPurchases
-    } else if (functionId === SystemFunction.FixingSales) {
-      return labels.FixingSales
-    } else {
-      return null
-    }
-  }
-
   function openForm(recordId) {
-    if (!msId) {
-      stackError({
-        message: labels.msIdError
-      })
-
-      return
-    } else {
-      stack({
-        Component: FixingForm,
-        props: {
-          labels,
-          recordId,
-          access,
-          functionId,
-          msId,
-          getResourceId
-        },
-        width: 1100,
-        height: 770,
-        title: getcorrectLabel(parseInt(functionId))
-      })
-    }
+    stack({
+      Component: FixingForm,
+      props: {
+        recordId,
+        functionId,
+      }
+    })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -213,7 +182,7 @@ export default function BTFixing() {
 
   const del = async obj => {
     await postRequest({
-      extension: getFixingAi(functionId).del,
+      extension: getFixingApi(functionId).del,
       record: JSON.stringify(obj)
     })
     invalidate()

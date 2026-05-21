@@ -29,13 +29,37 @@ import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalc
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
-export default function FixingForm({ labels, access, recordId, functionId, msId, getResourceId }) {
+export default function FixingForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const [reCalc, setReCalc] = useState(false)
+  const { stack: stackError } = useError()
+  const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
+  
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.FixingSales:
+        return ResourceIds.FixingSales
+      case SystemFunction.FixingPurchases:
+        return ResourceIds.FixingPurchases
+      default:
+        return null
+    }
+  }
+  
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.FixingSales,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: SystemFunction.FixingPurchases == functionId ? labels.FixingPurchases : labels.FixingSales, window })
 
   const BrokerageTradingRepositories = {
     [SystemFunction.FixingPurchases]: BrokerageTradingRepository.FixingPurchases,
@@ -116,7 +140,8 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
       unitPrice_muId: yup.number().required(),
       baseUnitPrice: yup.number().required(),
       baseQty: yup.number().required(),
-      qty_muId: yup.number().required()
+      qty_muId: yup.number().required(),
+      exRate: yup.number().required()
     }),
     onSubmit: async obj => {
       const values = {
@@ -139,6 +164,8 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
   const isClosed = formik.values.wip == 2
 
   async function refetchForm(recordId) {
+    if (!msId) return
+
     const res = await getRequest({
       extension: getEndpoint(functionId).get,
       parameters: `_recordId=${recordId}`
@@ -182,22 +209,21 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
       extension: getEndpoint(functionId).close,
       record: JSON.stringify({ recordId: formik.values?.recordId })
     })
-    if (res.recordId) {
-      toast.success(platformLabels.Closed)
-      invalidate()
-      refetchForm(res.recordId)
-    }
+
+    toast.success(platformLabels.Closed)
+    invalidate()
+    refetchForm(res.recordId)
   }
 
-  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
-    if (currencyId && date && rateType) {
+  async function getMultiCurrencyFormData(currencyId, date) {
+    if (currencyId && date) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${rateType}`
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${RateDivision.FINANCIALS}`
       })
 
       const updatedRateRow = getRate({
-        amount: amount === 0 ? 0 : amount ?? formik.values.amount,
+        amount: formik.values.amount,
         exRate: res.record?.exRate,
         baseAmount: 0,
         rateCalcMethod: res.record?.rateCalcMethod,
@@ -224,6 +250,12 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
       disabled: true
     },
     {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
       key: 'AccountSummary',
       condition: true,
       onClick: () => {
@@ -241,7 +273,7 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
 
   const getNetAmount = ({ amount, exRate, rateCalcMethod }) => {
     const updatedRateRow = getRate({
-      amount: amount || 0,
+      amount: parseFloat(amount).toFixed(2) || 0,
       exRate,
       baseAmount: 0,
       rateCalcMethod,
@@ -259,7 +291,7 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
     const baseUnitPrice = parseFloat(parseFloat(formik?.values?.unitPrice) / parseFloat(formik?.values?.unitPrice_muQty)).toFixed(2) || 0
     const subtotal = parseFloat(parseFloat(baseQty) * parseFloat(baseUnitPrice)).toFixed(2) || 0
     const taxAmount = (subtotal + parseFloat(formik?.values?.miscAmount)) * vatPct / 100
-    const amount = parseFloat(subtotal) + parseFloat(parseFloat(formik?.values?.miscAmount)) + parseFloat(taxAmount)
+    const amount = parseFloat(subtotal) + parseFloat(formik?.values?.miscAmount) + parseFloat(taxAmount)
 
     formik.setValues({
       ...formik.values,
@@ -290,7 +322,7 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
   const calculateDueDate = (date, dueDays) => {
     if (!date) return null
 
-    const days = dueDays === null || dueDays === undefined || dueDays === '' ? 0 : Number(dueDays)
+    const days = !dueDays ? 0 : Number(dueDays)
 
     if (Number.isNaN(days)) return null
 
@@ -299,6 +331,19 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
 
     return dueDate
   }
+
+useEffect(() => {
+  if (!msId && labels?.msIdError) {
+    
+    window.close()
+    stackError({
+      message: labels.msIdError
+    })
+
+
+    return
+  }
+}, [msId, labels?.msIdError])
 
   return (
     <FormShell
@@ -316,8 +361,8 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={BrokerageTradingRepository.Fixing.pack}
-                parameters={`_dgId=${functionId}&_msId=${msId}`}
+                endpointId={msId && BrokerageTradingRepository.Fixing.pack}
+                parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
                 reducer={response => response?.record?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
@@ -337,8 +382,8 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={BrokerageTradingRepository.Fixing.pack}
-                parameters={`_dgId=${functionId}&_msId=${msId}`}
+                endpointId={msId && BrokerageTradingRepository.Fixing.pack}
+                parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
                 reducer={response => response?.record?.plants}
                 name='plantId'
                 label={labels.plant}
@@ -374,8 +419,8 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
             
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={BrokerageTradingRepository.Fixing.pack}
-                parameters={`_dgId=${functionId}&_msId=${msId}`}
+                endpointId={msId && BrokerageTradingRepository.Fixing.pack}
+                parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
                 reducer={response => response?.record?.currencies}
                 name='fi_currencyId'
                 filter={item => item.currencyType === 1}
@@ -388,10 +433,10 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
                 ]}
                 values={formik.values}
                 required
-                readOnly={isClosed}
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  await getMultiCurrencyFormData(newValue?.recordId, formik.values.date, RateDivision.FINANCIALS)
+                  await getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
                   formik.setFieldValue('fi_currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.fi_currencyId && Boolean(formik.errors.fi_currencyId)}
@@ -410,9 +455,10 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
                 required
                 readOnly={isClosed}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
+
+                  formik.setFieldValue('accountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
@@ -426,18 +472,23 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
-                  await getMultiCurrencyFormData(formik.values.fi_currencyId, newValue, RateDivision.FINANCIALS)
+                  formik.setFieldValue('dueDate', calculateDueDate(newValue, formik.values.dueDays))
+
+                  await getMultiCurrencyFormData(formik.values.fi_currencyId, newValue)
                 }}
                 readOnly={isClosed}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', null)}
+                onClear={() => {
+                  formik.setFieldValue('date', null)
+                  formik.setFieldValue('dueDate', null)
+                }}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={BrokerageTradingRepository.Fixing.pack}
-                parameters={`_dgId=${functionId}&_msId=${msId}`}
+                endpointId={msId && BrokerageTradingRepository.Fixing.pack}
+                parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
                 reducer={response => response?.record?.salesPeople}
                 name='spId'
                 label={labels.spName}
@@ -466,12 +517,15 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
                 allowNegative={false}
                 required
                 readOnly={isClosed}
+                decimalScale={0}
+                maxLength={3}
                 onChange={e => {
                   const value = e.target.value
-                  const dueDays = value === '' ? null : Number(value)
+                  const dueDays = !value ? null : Number(value)
 
-                  formik.setFieldValue('dueDays', dueDays)
                   formik.setFieldValue('dueDate', calculateDueDate(formik.values.date, dueDays))
+                  
+                  formik.setFieldValue('dueDays', dueDays)
                 }}
                 onClear={() => {
                   formik.setFieldValue('dueDays', null)
@@ -496,8 +550,8 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
                 <Grid container xs={12} spacing={2}>
                   <Grid item xs={6}>
                     <ResourceComboBox
-                      endpointId={BrokerageTradingRepository.Fixing.pack}
-                      parameters={`_dgId=${functionId}&_msId=${msId}`}
+                      endpointId={msId && BrokerageTradingRepository.Fixing.pack}
+                      parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
                       name='currencyId_metalId'
                       label={labels.cmp}
                       valueField='recordId'
@@ -517,14 +571,16 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
                       maxAccess={maxAccess}
                       readOnly={isClosed}
                       onChange={async (_, newValue) => {
-                        formik.setFieldValue('currencyId', newValue?.currencyId || null)
-                        formik.setFieldValue('metalId', newValue?.metalId || null)
                         const res = await getMetalPurity(newValue?.metalId)
-                        formik.setFieldValue('purity', res?.purity || null)
-                        formik.setFieldValue(
-                          'currencyId_metalId',
-                          newValue ? `${newValue.currencyId}${newValue.metalId}` : null
-                        )
+
+                        formik.setValues({
+                          ...formik.values,
+                          purity: res?.purity ?? null,
+                          currencyId: newValue?.currencyId || null,
+                          metalId: newValue?.metalId || null,
+                          currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null
+                        })
+                        
                       }}
                       error={formik.touched.currencyId_metalId && Boolean(formik.errors.currencyId_metalId)}
                     />
@@ -540,7 +596,7 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
                       decimalScale={5}
                       readOnly={isClosed}
                       onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('purity', '')}
+                      onClear={() => formik.setFieldValue('purity', null)}
                       error={formik.touched.purity && Boolean(formik.errors.purity)}
                     />
                   </Grid>
@@ -564,8 +620,8 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
                   </Grid>
                   <Grid item xs={3}>
                     <ResourceComboBox
-                      endpointId={BrokerageTradingRepository.Fixing.pack}
-                      parameters={`_dgId=${functionId}&_msId=${msId}`}
+                      endpointId={msId && BrokerageTradingRepository.Fixing.pack}
+                      parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
                       reducer={response => response?.record?.measurementUnits}
                       name='qty_muId'
                       label={labels.mu}
@@ -618,8 +674,8 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
                   </Grid>
                   <Grid item xs={3}>
                     <ResourceComboBox
-                      endpointId={BrokerageTradingRepository.Fixing.pack}
-                      parameters={`_dgId=${functionId}&_msId=${msId}`}
+                      endpointId={msId && BrokerageTradingRepository.Fixing.pack}
+                      parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
                       reducer={response => response?.record?.measurementUnits}
                       name='unitPrice_muId'
                       label={labels.mu}
@@ -660,8 +716,8 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <ResourceComboBox
-                      endpointId={BrokerageTradingRepository.Fixing.pack}
-                      parameters={`_dgId=${functionId}&_msId=${msId}`}
+                      endpointId={msId && BrokerageTradingRepository.Fixing.pack}
+                      parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
                       reducer={response => response?.record?.sources}
                       name='sourceId'
                       label={labels.source}
@@ -795,3 +851,6 @@ export default function FixingForm({ labels, access, recordId, functionId, msId,
     </FormShell>
   )
 }
+
+FixingForm.width = 1100
+FixingForm.height = 770
