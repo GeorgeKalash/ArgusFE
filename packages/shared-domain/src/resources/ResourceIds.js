@@ -324,7 +324,7 @@ export const ResourceIds = {
   EmploymentStatusFilter: 71107,
   SponsorFilter: 71108,
   AttendanceSchedule: 72105,
-  IndemnityAccuralsFilter: 73101,
+  LeaveTypes: 73101,
   LeaveScheduleFilter: 73103,
   PayrollFilter: 75201,
   BankTransferFilter: 75111,
