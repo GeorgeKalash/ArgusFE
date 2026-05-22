@@ -1,8 +1,12 @@
 const service = 'LM.asmx/'
 
 export const LoanManagementRepository = {
-  IndemnityAccuralsFilters: {
-    qry: service + 'qryLT'
+  LeaveTypes: {
+    qry: service + 'qryLT',
+    page: service + 'pageLT',
+    set: service + 'setLT',
+    get: service + 'getLT',
+    del: service + 'delLT'
   },
   LeaveScheduleFilters: {
     qry: service + 'qryLS',
