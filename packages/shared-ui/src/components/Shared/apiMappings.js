@@ -923,9 +923,9 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.IndemnityAccuralsFilter]: {
+  [ResourceIds.LeaveTypes]: {
     type: COMBOBOX,
-    endpoint: LoanManagementRepository.IndemnityAccuralsFilters.qry,
+    endpoint: LoanManagementRepository.LeaveTypes.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
