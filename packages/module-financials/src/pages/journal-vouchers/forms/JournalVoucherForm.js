@@ -167,6 +167,12 @@ export default function JournalVoucherForm({ labels, access, recordId, window })
       onClick: onVerify,
       disabled: !isPosted
     },
+    {
+      key: 'Attachment',
+      condition: true,
+      onClick: 'onClickAttachment',
+      disabled: !editMode
+    }
   ]
 
   return (

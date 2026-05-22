@@ -487,34 +487,26 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 name: 'tpAccountName'
               },
               {
-                component: 'resourcelookup',
-                label: _labels.costRef,
+                component: 'resourcecombobox',
+                label: _labels.costCenter,
                 name: 'costCenterRef',
-
                 props: {
-                  endpointId: GeneralLedgerRepository.CostCenter.snapshot,
-                  valueField: 'recordId',
+                  endpointId: GeneralLedgerRepository.CostCenter.qry,
+                  parameters: `_params=&_startAt=0&_pageSize=1000&`,
+                  displayField: ['reference', 'name'],
                   readOnly: isProcessed,
-                  displayField: 'reference',
-                  displayFieldWidth: 3,
-                  columnsInDropDown: [
-                    { key: 'reference', value: 'reference' },
-                    { key: 'name', value: 'name' }
-                  ],
+                  valueField: 'recordId',
+                  displayFieldWidth: 2,
                   mapping: [
                     { from: 'name', to: 'costCenterName' },
                     { from: 'reference', to: 'costCenterRef' },
                     { from: 'recordId', to: 'costCenterId' }
-                  ]
-                }
-              },
-              {
-                component: 'textfield',
-                label: _labels.costName,
-                props: {
-                  readOnly: true
+                  ],
+                  columnsInDropDown: [
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ],
                 },
-                name: 'costCenterName'
               },
               {
                 component: 'resourcecombobox',
