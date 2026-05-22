@@ -130,7 +130,7 @@ export default function EntitlementForm({
         })
         formik.setValues({
           ...res?.record,
-          fixedAmount: getFormattedNumber(fixedAmount,2) || getFormattedNumber(res?.record?.fixedAmount,2),
+          fixedAmount: Number(getFormattedNumber(fixedAmount,2).replace(/,/g, '')) || Number(getFormattedNumber(res?.record?.fixedAmount,2).replace(/,/g, '')),
           isPct: res?.record?.pct > 0
         })
       }
@@ -255,7 +255,14 @@ export default function EntitlementForm({
                   name='fixedAmount'
                   label={labels.amount}
                   value={formik.values.fixedAmount}
-                  onBlur={e => formik.setFieldValue('fixedAmount', parseFloat(e?.target?.value || 0).toFixed(2))}
+                  onBlur={e =>
+                    formik.setFieldValue(
+                      'fixedAmount',
+                      parseFloat(
+                        String(e?.target?.value || 0).replace(/,/g, '')
+                      ).toFixed(2)
+                    )
+                  }
                   required={!formik.values?.isFormula}
                   allowNegative={false}
                   maxAccess={maxAccess}
