@@ -90,7 +90,7 @@ export default function ChangeVendor({ formValues, onSubmit, window }) {
               label={labels.paymentMethod}
               valueField='key'
               displayField='value'
-              values={formik.values}
+              values={formValues}
               readOnly
             />
           </Grid>
@@ -143,8 +143,14 @@ export default function ChangeVendor({ formValues, onSubmit, window }) {
 
                 formik.setFieldValue('changeToId', isValid ? newValue?.recordId : null)
                 formik.setFieldValue('changeToName', isValid ? newValue?.name : '')
-                formik.setFieldValue('changeToRef', isValid ? newValue?.reference : null)
+                formik.setFieldValue('changeToRef', isValid ? newValue?.reference : '' )
                 formik.setFieldValue('changeTdAmount', isValid && newValue?.tradeDiscount != 0 ? newValue?.tradeDiscount : null)
+
+                if (!isValid) {
+                  setTimeout(() => {
+                    formik.setFieldValue('changeToRef', null)
+                  }, 0)
+                }
               }}
               errorCheck={'changeToId'}
             />
