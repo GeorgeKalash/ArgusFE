@@ -178,7 +178,6 @@ const ReturnOnInvoice = () => {
           refetch={refetch}
           onDelete={delRET}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

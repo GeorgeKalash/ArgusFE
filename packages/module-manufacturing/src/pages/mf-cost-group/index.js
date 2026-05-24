@@ -100,7 +100,6 @@ const CostGroup = () => {
           onEdit={edit}
           refetch={refetch}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

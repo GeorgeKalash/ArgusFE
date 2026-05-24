@@ -104,7 +104,6 @@ const LabelTemplate = () => {
           onDelete={del}
           refetch={refetch}
           paginationType='client'
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />

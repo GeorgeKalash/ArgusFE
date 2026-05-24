@@ -146,7 +146,6 @@ const SystemChecks = () => {
             columns={columns}
             gridData={{ list: filteredData }}
             rowId={['checkId']}
-            isLoading={false}
             maxAccess={access}
             showCheckboxColumn={true}
             handleCheckedRows={() => {}}

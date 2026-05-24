@@ -180,7 +180,6 @@ export default function RtReceiptVouchers() {
           onDelete={del}
           gridData={data ? data : { list: [] }}
           rowId={['recordId']}
-          isLoading={false}
           refetch={refetch}
           paginationParameters={paginationParameters}
           pageSize={50}

@@ -140,7 +140,6 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
             columns={columns}
             gridData={data ? data : { list: [] }}
             rowId={['recordId']}
-            isLoading={false}
             maxAccess={maxAccess}
             pagination={false}
             showCheckboxColumn={true}

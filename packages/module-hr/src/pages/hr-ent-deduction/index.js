@@ -21,10 +21,12 @@ const EntDeduction = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: EmployeeRepository.EmployeeDeduction.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithSearch({ qry }) {

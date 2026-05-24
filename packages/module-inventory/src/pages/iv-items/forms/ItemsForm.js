@@ -83,7 +83,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       categoryName: '',
       defSaleMUId: '',
       pgId: '',
-      productionLevel: '',
+      productionLevel: null,
       collectionId: null,
       isInactive: false,
       isExternal: false
@@ -303,7 +303,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       key: 'Copy',
       condition: true,
       onClick: () => onCopy(formik?.values),
-      disabled: !(store?.nraId && !formik.values.isExternal)
+      disabled: !editMode || !(store?.nraId && !formik.values.isExternal)
     },
     {
       key: 'History',
@@ -351,30 +351,29 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     ]}
                     required
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       changeDT(newValue)
-
-                      setStore(prevStore => ({
-                        ...prevStore,
-                        nraId: newValue?.nraId
-                      }))
-                      formik.setFieldValue('categoryId', newValue?.recordId || '')
-                      if (!formik.values.kitItem) {
-                        formik.setFieldValue('priceType', newValue?.priceType || '')
-                      }
-                      formik.setFieldValue('trackBy', newValue?.trackBy || '')
-                      formik.setFieldValue('procurementMethod', newValue?.procurementMethod || '')
-                      formik.setFieldValue('msId', newValue?.msId || '')
-                      formik.setFieldValue('valuationMethod', newValue?.valuationMethod || '')
-                      formik.setFieldValue('taxId', newValue?.taxId || ''),
-                        formik.setFieldValue('lotCategoryId', newValue?.lotCategoryId || ''),
-                        formik.setFieldValue('spfId', newValue?.spfId || '')
                       setShowLotCategories(newValue?.trackBy === '2' || newValue?.trackBy === 2)
                       setShowSerialProfiles(newValue?.trackBy === '1' || newValue?.trackBy === 1)
                       setStore(prevStore => ({
                         ...prevStore,
                         _metal: formik.values.metalId,
-                        _isMetal: newValue?.isMetal
+                        _isMetal: newValue?.isMetal,
+                        nraId: newValue?.nraId
+                      }))
+
+                      formik.setValues(prev => ({
+                        ...prev,
+                        categoryId: newValue?.recordId || null,
+                        priceType: !prev.kitItem ? (newValue?.priceType || '') : prev.priceType,
+                        trackBy: newValue?.trackBy || null,
+                        procurementMethod: newValue?.procurementMethod || '',
+                        msId: newValue?.msId || null,
+                        valuationMethod: newValue?.valuationMethod || '',
+                        taxId: newValue?.taxId || null,
+                        lotCategoryId: newValue?.lotCategoryId || null,
+                        spfId: newValue?.spfId || null,
+                        productionLevel: newValue?.productionLevel || null
                       }))
                     }}
                     error={formik.touched.categoryId && formik.errors.categoryId}

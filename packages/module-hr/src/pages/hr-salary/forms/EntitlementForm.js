@@ -17,6 +17,7 @@ import { calculateFixed } from '@argus/shared-utils/src/utils/Payroll'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
+import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function EntitlementForm({
   labels,
@@ -129,7 +130,7 @@ export default function EntitlementForm({
         })
         formik.setValues({
           ...res?.record,
-          fixedAmount: parseFloat(fixedAmount || 0).toFixed(2) || parseFloat(res?.record?.fixedAmount || 0).toFixed(2),
+          fixedAmount: Number(getFormattedNumber(fixedAmount,2).replace(/,/g, '')) || Number(getFormattedNumber(res?.record?.fixedAmount,2).replace(/,/g, '')),
           isPct: res?.record?.pct > 0
         })
       }
@@ -254,7 +255,14 @@ export default function EntitlementForm({
                   name='fixedAmount'
                   label={labels.amount}
                   value={formik.values.fixedAmount}
-                  onBlur={e => formik.setFieldValue('fixedAmount', parseFloat(e?.target?.value || 0).toFixed(2))}
+                  onBlur={e =>
+                    formik.setFieldValue(
+                      'fixedAmount',
+                      parseFloat(
+                        String(e?.target?.value || 0).replace(/,/g, '')
+                      ).toFixed(2)
+                    )
+                  }
                   required={!formik.values?.isFormula}
                   allowNegative={false}
                   maxAccess={maxAccess}

@@ -133,7 +133,6 @@ const MaterialsTab = ({ store }) => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           onDelete={isPosted ? null : del}
           onEdit={edit}
           maxAccess={access}

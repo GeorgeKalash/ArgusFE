@@ -318,7 +318,6 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
             columns={columns}
             gridData={formik.values.asset}
             rowId={['recordId']}
-            isLoading={false}
             maxAccess={access}
             pagination={false}
           />

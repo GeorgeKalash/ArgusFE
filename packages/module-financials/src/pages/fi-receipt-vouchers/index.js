@@ -176,7 +176,6 @@ export default function CurrencyTrading() {
           onDelete={del}
           gridData={data ? data : { list: [] }}
           rowId={['recordId']}
-          isLoading={false}
           refetch={refetch}
           deleteConfirmationType={'strict'}
           paginationParameters={paginationParameters}

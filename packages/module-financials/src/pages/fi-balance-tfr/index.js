@@ -175,7 +175,6 @@ const BalanceTrfBetweenAcc = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           deleteConfirmationType='strict'

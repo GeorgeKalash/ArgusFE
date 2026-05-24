@@ -236,7 +236,6 @@ const JobInProcess = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

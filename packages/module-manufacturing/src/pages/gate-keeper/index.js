@@ -195,7 +195,6 @@ const GateKeeper = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={2000}
           paginationType='client'
           refetch={refetch}

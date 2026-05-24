@@ -176,7 +176,6 @@ const Rubber = () => {
           refetch={refetch}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />

@@ -144,7 +144,8 @@ export const InventoryRepository = {
   },
   ItemProduction: {
     get: service + 'getMFR',
-    set: service + 'setMFR'
+    getPack: service + 'getPackMFR',
+    set: service + 'setPackMFR',
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
@@ -389,5 +390,8 @@ export const InventoryRepository = {
   },
   DimensionGroupElement: {
     qry: service + 'qryDIGE',
+  },
+  ItemRawMaterial: {
+    qry: service + 'qryIRM',
   }
 }

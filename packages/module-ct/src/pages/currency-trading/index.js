@@ -110,7 +110,6 @@ export default function CurrencyTrading() {
             }}
             gridData={data ? data : { list: [] }}
             rowId={['recordId']}
-            isLoading={false}
             pageSize={50}
             paginationType='client'
             refetch={refetch}

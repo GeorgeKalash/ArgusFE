@@ -20,7 +20,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function JournalVoucherForm({ labels, access, recordId }) {
+export default function JournalVoucherForm({ labels, access, recordId, window }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
     access: access,
@@ -43,6 +43,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       date: new Date(),
       notes: '',
       dtId: null,
+      isVerified: false,
       status: 1
     },
     validateOnChange: true,
@@ -76,6 +77,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
 
   const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
+  const isVerified = formik.values.isVerified
 
   useEffect(() => {
     ;(async function () {
@@ -119,6 +121,19 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     invalidate()
   }
 
+  const onVerify = async () => {
+    const res = await postRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.verify,
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
+    })
+
+    if (res) {
+      toast.success(!isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      invalidate()
+      window.close()
+    }
+  }
+
   const actions = [
     {
       key: 'GL',
@@ -132,12 +147,30 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode
+      disabled: !editMode || isVerified
     },
     {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
+      disabled: !editMode
+    },
+    {
+      key: 'Verify',
+      condition: !isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Attachment',
+      condition: true,
+      onClick: 'onClickAttachment',
       disabled: !editMode
     }
   ]

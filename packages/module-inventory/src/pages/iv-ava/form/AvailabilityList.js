@@ -140,7 +140,6 @@ const AvailabilityList = ({ obj, labels, access }) => {
           gridData={data}
           rowId={['siteRef']}
           maxAccess={access}
-          pageSize={50}
           pagination={false}
         />
       </Grow>

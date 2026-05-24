@@ -111,32 +111,37 @@ const SmsRequestLog = () => {
           columns={[
             {
               field: 'masterRef',
-              headerName: labels.MasterRef
+              headerName: labels.MasterRef,
+              flex: 1
             },
 
             {
               field: 'smsRequestDate',
               headerName: labels.SmsRequestDate,
-              type: 'date'
+              type: 'date',
+              flex: 1
             },
             {
               field: 'reference',
-              headerName: labels.Reference
+              headerName: labels.Reference,
+              flex: 1
             },
             {
               field: 'mobileNo',
-              headerName: labels.MobileNo
+              headerName: labels.MobileNo,
+              flex: 1
             },
             {
               field: 'smsBody',
               headerName: labels.SmsBody,
               wrapText: true,
               autoHeight: true,
-              flex: 1
+              flex: 2
             },
             {
               field: 'smsStatusName',
-              headerName: labels.SmsStatus
+              headerName: labels.SmsStatus,
+              flex: 1
             }
           ]}
           gridData={data && filters?.resourceId ? data : { list: [] }}
