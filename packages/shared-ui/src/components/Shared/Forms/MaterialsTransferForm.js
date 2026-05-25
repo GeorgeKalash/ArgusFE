@@ -81,6 +81,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     wip: 1,
     carrierId: null,
     plId: null,
+    disableSKULookup: false,
     transfers: [
       {
         id: 1,
@@ -100,6 +101,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         msId: null,
         trackBy: null,
         lotCategoryId: null,
+        caName: '',
         metalId: null,
         metalRef: '',
         totalCost: 0,
@@ -282,6 +284,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     if (dtId) {
       const res = await getDTD(dtId)
 
+      formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
       formik.setFieldValue('toSiteId', res?.record?.toSiteId || null)
       formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId || null)
       formik.setFieldValue('carrierId', res?.record?.carrierId)
@@ -290,7 +293,13 @@ export default function MaterialsTransferForm({ recordId, window }) {
   }
 
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
+    if (!formik?.values?.dtId) {
+      formik.setFieldValue('disableSKULookup', false)
+
+      return
+    }
+
+    if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
@@ -347,9 +356,38 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
   }
 
+  const fillSkuData = async (newRow, update) => {
+    const itemIdValue = formik.values.disableSKULookup ? newRow?.recordId : newRow?.itemId
+    const itemNameValue = formik.values.disableSKULookup ? newRow?.name : newRow?.itemName
+
+    if (itemIdValue) {
+      const { weight, metalId, metalRef } = await getWeightAndMetalId(itemIdValue)
+      const unitCost = (await getUnitCost(itemIdValue)) ?? 0
+      const totalCost = calcTotalCost(newRow)
+      const itemInfo = await getItem(itemIdValue)
+      getFilteredMU(itemIdValue)
+      const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+      update({
+        sku: newRow.sku,
+        itemId: itemIdValue,
+        itemName: itemNameValue,
+        weight,
+        unitCost,
+        totalCost,
+        msId: itemInfo?.msId,
+        caName: itemInfo?.categoryName,
+        muRef: filteredMeasurements?.[0]?.reference,
+        muId: filteredMeasurements?.[0]?.recordId,
+        metalId,
+        metalRef,
+        priceType: newRow?.priceType
+      })
+    }
+  }
+
   const columns = [
     {
-      component: 'resourcelookup',
+      component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
       label: labels.sku,
       name: 'sku',
       link: {
@@ -361,27 +399,30 @@ export default function MaterialsTransferForm({ recordId, window }) {
             plId: formik.values?.plId
           }
         })
-      }, 
+      },
+      ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'sku',
-        displayField: 'sku',
-        displayFieldWidth: 4,
-        mapping: [
-          { from: 'recordId', to: 'itemId' },
-          { from: 'msId', to: 'msId' },
-          { from: 'trackBy', to: 'trackBy' },
-          { from: 'lotCategoryId', to: 'lotCategoryId' },
-          { from: 'priceType', to: 'priceType' },
-          { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' },
-          { from: 'isInactive', to: 'isInactive' }
-        ],
-        columnsInDropDown: [
-          { key: 'sku', value: 'SKU' },
-          { key: 'name', value: 'Name' },
-          { key: 'flName', value: 'flName' }
-        ]
+         ...(!formik.values.disableSKULookup && {
+          endpointId: InventoryRepository.Item.snapshot,
+          valueField: 'sku',
+          displayField: 'sku',
+          displayFieldWidth: 4,
+          mapping: [
+            { from: 'recordId', to: 'itemId' },
+            { from: 'msId', to: 'msId' },
+            { from: 'trackBy', to: 'trackBy' },
+            { from: 'lotCategoryId', to: 'lotCategoryId' },
+            { from: 'priceType', to: 'priceType' },
+            { from: 'sku', to: 'sku' },
+            { from: 'name', to: 'itemName' },
+            { from: 'isInactive', to: 'isInactive' }
+          ],
+          columnsInDropDown: [
+            { key: 'sku', value: 'SKU' },
+            { key: 'name', value: 'Name' },
+            { key: 'flName', value: 'flName' }
+          ]
+        })
       },
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
@@ -394,36 +435,50 @@ export default function MaterialsTransferForm({ recordId, window }) {
           })
         }
 
-        if (!newRow?.itemId) return resetRow()
+        if (!formik.values.disableSKULookup) {
+          if (!newRow?.itemId) {
+            return resetRow()
+          }
 
-        if (newRow.isInactive) {
+          if (newRow.isInactive) {
+            resetRow()
+            stackError({
+              message: labels.inactiveItem
+            })
+
+            return
+          }
+
+          return fillSkuData(newRow, update)
+        }
+
+        if (!newRow?.sku) return resetRow()
+        
+        const skuInfo = await getRequest({
+          extension: InventoryRepository.Items.get2,
+          parameters: `_sku=${newRow.sku}`
+        })
+
+        const record = skuInfo?.record
+
+        if (!record) {
           resetRow()
-          stackError({
-            message: labels.inactiveItem
-          })
+          stackError({ message: labels.invalidSKU })
 
           return
         }
 
-        if (newRow?.itemId) {
-          const { weight, metalId, metalRef } = await getWeightAndMetalId(newRow?.itemId)
-          const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
-          const totalCost = calcTotalCost(newRow)
-          const itemInfo = await getItem(newRow.itemId)
-          getFilteredMU(newRow?.itemId)
-          const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-          update({
-            weight,
-            unitCost,
-            totalCost,
-            msId: itemInfo?.msId,
-            caName: itemInfo?.categoryName,
-            muRef: filteredMeasurements?.[0]?.reference,
-            muId: filteredMeasurements?.[0]?.recordId,
-            metalId,
-            metalRef
-          })
+        if (record.isInactive) {
+          resetRow()
+          stackError({ message: labels.inactiveItem })
+
+          return
         }
+
+        return fillSkuData({
+          ...record,
+          itemId: record.recordId
+        }, update)
       }
     },
     {
@@ -568,6 +623,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     formik.setValues({
       ...res.record,
       recordId,
+      disableSKULookup: formik.values.disableSKULookup,
       transfers: updatedTransfers,
       notificationGroupId: formik.values.notificationGroupId,
       serials: serials?.current?.list
@@ -978,7 +1034,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isPosted || isClosed || editMode}
+                    readOnly={editMode || formik?.values?.transfers?.some(transfer => transfer.sku)}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
