@@ -166,7 +166,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 displayField='name'
                 values={formik.values}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('cgId', newValue?.recordId || '')
+                  formik.setFieldValue('cgId', newValue?.recordId || null)
                   onFieldChange(newValue?.nraId)
                 }}
                 error={formik.touched.cgId && Boolean(formik.errors.cgId)}

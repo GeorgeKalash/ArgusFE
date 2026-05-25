@@ -109,6 +109,7 @@ const documentType = async (
   let isExternal
   let dcTypeRequired
   let activeStatus = true
+  let referenceState = 'valid'
 
   if ((docType && selectNraId === undefined) || selectNraId === 'nraId') {
     if (dtId) {
@@ -153,22 +154,28 @@ const documentType = async (
     }
     if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
   } else if (!nraId) {
-    reference = {
-      readOnly: true,
-      mandatory: false
+    if (selectNraId == 'nraId') {
+      reference = { readOnly: false, mandatory: true }
+      if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
     }
-    if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
+    else {
+      reference = { readOnly: true, mandatory: false }
+      if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
+    }
   }
 
   const fieldName = objectName ? `${objectName}.reference` : 'reference'
 
+  if (selectNraId === undefined) referenceState = 'no_selection'
+  else if (isExternal?.external !== undefined && !isExternal?.external) referenceState = 'not_external'
+  
   return {
     dtId,
     resetReference: reference?.readOnly,
     dcTypeRequired,
     reference: {
       fieldName,
-      isEmpty: isExternal?.external !== undefined && !isExternal?.external ? true : false
+      isEmpty: referenceState != 'valid'
     },
     errorMessage,
     maxAccess,
