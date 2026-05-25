@@ -287,10 +287,10 @@ export default function MaterialsTransferForm({ recordId, window }) {
       const res = await getDTD(dtId)
 
       formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
-      formik.setFieldValue('toSiteId', res?.record?.toSiteId || null)
-      formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId || null)
-      formik.setFieldValue('carrierId', res?.record?.carrierId)
-      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      !recordId && formik.setFieldValue('toSiteId', res?.record?.toSiteId || null)
+      !recordId && formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId || null)
+      !recordId && formik.setFieldValue('carrierId', res?.record?.carrierId)
+      !recordId && formik.setFieldValue('plantId', res?.record?.plantId || plantId)
     }
   }
 
