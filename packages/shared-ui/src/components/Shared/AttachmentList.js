@@ -18,7 +18,7 @@ import CustomButton from '../Inputs/CustomButton'
 import FolderForm from './FolderForm'
 import { useError } from '@argus/shared-providers/src/providers/error'
 
-const AttachmentList = ({ resourceId, recordId, isActive, window }) => {
+const AttachmentList = ({ resourceId, recordId, isActive = true, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
