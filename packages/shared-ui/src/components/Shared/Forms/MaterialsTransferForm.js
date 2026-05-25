@@ -34,11 +34,12 @@ import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ImportTransfer from '@argus/shared-ui/src/components/Shared/Forms/ImportTransfer'
+import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { userDefaults } = useContext(DefaultsContext)
+  const { userDefaults, systemChecks } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const filteredMeasurements = useRef([])
@@ -59,6 +60,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
   })
   const siteId = userDefaults?.list?.find(({ key }) => key === 'siteId')
   const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
   const initialValues = {
     recordId: null,
@@ -356,7 +358,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
   }
 
-  const fillSkuData = async (newRow, update) => {
+  const fillSkuData = async (newRow, update, addRow) => {
     const itemIdValue = formik.values.disableSKULookup ? newRow?.recordId : newRow?.itemId
     const itemNameValue = formik.values.disableSKULookup ? newRow?.name : newRow?.itemName
 
@@ -367,7 +369,9 @@ export default function MaterialsTransferForm({ recordId, window }) {
       const itemInfo = await getItem(itemIdValue)
       getFilteredMU(itemIdValue)
       const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-      update({
+
+      const data = {
+        qty: jumpToNextLine ? 1 : 0,
         sku: newRow.sku,
         itemId: itemIdValue,
         itemName: itemNameValue,
@@ -381,7 +385,10 @@ export default function MaterialsTransferForm({ recordId, window }) {
         metalId,
         metalRef,
         priceType: newRow?.priceType
-      })
+      }
+
+      update(data)
+      if (jumpToNextLine) await addRow()
     }
   }
 
@@ -390,6 +397,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      jumpToNextLine,
       link: {
         enabled: true,
         popup: row =>  stack({
@@ -427,7 +435,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
       },
-      async onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
         const resetRow = () => {
          update({
             ...formik.initialValues.transfers[0],
@@ -449,7 +457,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
             return
           }
 
-          return fillSkuData(newRow, update)
+          return fillSkuData(newRow, update, addRow)
         }
 
         if (!newRow?.sku) return resetRow()
@@ -478,7 +486,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         return fillSkuData({
           ...record,
           itemId: record.recordId
-        }, update)
+        }, update, addRow)
       }
     },
     {
