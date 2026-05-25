@@ -144,7 +144,7 @@ export default function ChangeVendor({ formValues, onSubmit, window }) {
                 formik.setFieldValue('changeToId', isValid ? newValue?.recordId : null)
                 formik.setFieldValue('changeToName', isValid ? newValue?.name : '')
                 formik.setFieldValue('changeToRef', isValid ? newValue?.reference : '' )
-                formik.setFieldValue('changeTdAmount', isValid && newValue?.tradeDiscount != 0 ? newValue?.tradeDiscount : null)
+                formik.setFieldValue('changeTdAmount', isValid && newValue?.tradeDiscount != 0 ? newValue?.tradeDiscount : 0)
 
                 if (!isValid) {
                   setTimeout(() => {
