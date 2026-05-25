@@ -1584,13 +1584,13 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
-      currentDiscount: currentDiscount,
+      currentDiscount, 
       hiddenTdPct: tdPct,
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange: typeChange
     })
-    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
 
+    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
     formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
@@ -1608,7 +1608,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
         extendedPrice: item?.extendedPrice,
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: item?.vatAmount,
-        tdPct: tdPct,
+        tdPct,
         taxDetails: formik.values.header.isVattable === true && item?.taxDetails
           ? item.taxDetails.map(td => ({
               ...td,
@@ -1931,7 +1931,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     let tdAmount = 0
 
     Object.entries(fields).forEach(([key, val]) => {
-      if (key == 'tdAmount') tdAmount = val
+      if (key == 'tdAmount') tdAmount = val || 0
       formik.setFieldValue(`header.${key}`, val)
     })
 
