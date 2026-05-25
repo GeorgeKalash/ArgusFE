@@ -71,7 +71,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     date: new Date(),
     closedDate: null,
     receivedDate: null,
-    fromSiteId: parseInt(siteId?.value || null),
+    fromSiteId: parseInt(siteId?.value) || null,
     toSiteId: null,
     notes: '',
     status: 1,
@@ -1018,6 +1018,24 @@ export default function MaterialsTransferForm({ recordId, window }) {
     invalidate()
   }
 
+  async function onValidationRequired() {
+    if (Object.keys(await formik.validateForm()).length) {
+      const errors = await formik.validateForm()
+
+      const touchedFields = Object.keys(errors).reduce((acc, key) => {
+        if (!formik.touched[key]) {
+          acc[key] = true
+        }
+
+        return acc
+      }, {})
+
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(touchedFields, true)
+      }
+    }
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.MaterialsTransfer}
@@ -1047,8 +1065,9 @@ export default function MaterialsTransferForm({ recordId, window }) {
                     displayField='name'
                     values={formik?.values}
                     onChange={async (_, newValue) => {
-                      changeDT(newValue)
                       formik.setFieldValue('dtId', newValue?.recordId || null)
+                      
+                      changeDT(newValue)
 
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -1261,7 +1280,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
             columns={columns}
             allowDelete={!isClosed}
             allowAddNewLine={!isClosed}
-            disabled={isClosed}
+            disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'transfers').length > 0}
+            onValidationRequired={onValidationRequired}
           />
         </Grow>
         <Fixed>
