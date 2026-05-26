@@ -1841,7 +1841,7 @@ export default function SaleTransactionForm({
     return res?.record?.reference
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
       setMetalPriceOperations()
@@ -1919,7 +1919,7 @@ export default function SaleTransactionForm({
   }, [])
 
   useEffect(() => {
-    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+    if (formik.values?.header.dtId && !recordId) onChangeDT(formik.values?.header.dtId)
   }, [formik.values?.header.dtId])
 
   useEffect(() => {
@@ -2010,6 +2010,7 @@ export default function SaleTransactionForm({
                 endpointId={SaleRepository.SaleTransaction.pack}
                 parameters={`_functionId=${functionId}`}
                 reducer={response => response?.record?.documentTypes}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 readOnly={editMode || formik.values.items?.some(item => item.sku)}
                 label={labels.documentType}

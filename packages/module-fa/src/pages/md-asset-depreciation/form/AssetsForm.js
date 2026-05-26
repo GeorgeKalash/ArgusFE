@@ -232,6 +232,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${SystemFunction.AssetsDepreciation}&_startAt=${0}&_pageSize=${50}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.dtName}
                     readOnly={editMode}

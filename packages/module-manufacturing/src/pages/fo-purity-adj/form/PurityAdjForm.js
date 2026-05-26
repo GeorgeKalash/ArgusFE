@@ -462,7 +462,7 @@ const calculateTotal = key =>
     }
   ]
 
-  async function selectedDocTypeInfo(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) return
 
     const res = await getRequest({
@@ -487,7 +487,7 @@ const calculateTotal = key =>
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
-        const dtInfo = await selectedDocTypeInfo(formik?.values?.header?.dtId)
+        const dtInfo = await onChangeDT(formik?.values?.header?.dtId)
         formik.setFieldValue('header.siteId', dtInfo?.siteId || null)
         formik.setFieldValue('header.workCenterId', dtInfo?.workCenterId || null)
       }

@@ -50,7 +50,8 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true, obj
     documentType: query.data,
     maxAccess: query?.data?.maxAccess || access,
     changeDT(value) {
-      setNraId(value ? value?.nraId || 'nraId' : undefined)
+      if (value) setNraId(value?.nraId || 'nraId')
+      else queryFn()
     }
   }
 }

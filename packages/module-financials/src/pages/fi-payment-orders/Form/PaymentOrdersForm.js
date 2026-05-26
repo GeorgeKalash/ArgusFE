@@ -198,7 +198,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
     })
   }
 
-  async function getDTD(dtId) {
+  async function onChangeDT(dtId) {
     if (dtId) {
       const res = await getRequest({
         extension: FinancialRepository.FIDocTypeDefaults.get,
@@ -212,7 +212,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
   }
 
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) getDTD(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {

@@ -97,6 +97,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_dgId=${SystemFunction.PurchaseInvoice}&_startAt=${0}&_pageSize=${1000}`}
+                filter={ item => item.activeStatus === 1 }
                 name='dtId'
                 label={labels.docType}
                 valueField='recordId'

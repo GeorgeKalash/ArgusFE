@@ -58,18 +58,12 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     endpointId: PurchaseRepository.PUDraftReturn.page
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
   const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
-
+  
   const { formik } = useForm({
     maxAccess,
-    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       header: {
@@ -727,20 +721,26 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     }
   }
 
-  async function onChangeDtId(recordId) {
-    if (recordId) {
-      const dtd = await getRequest({
-        extension: PurchaseRepository.DocumentTypeDefault.get,
-        parameters: `_dtId=${recordId}`
-      })
+  async function onChangeDT(recordId) {
+    if (!recordId) return 
 
-      formik.setFieldValue('header.plantId', dtd?.record?.plantId || null)
-      formik.setFieldValue('header.siteId', dtd?.record?.siteId || defSiteId || null)
-    } else {
-      formik.setFieldValue('header.plantId', null)
-      formik.setFieldValue('header.siteId', null)
-    }
+    const dtd = await getRequest({
+      extension: PurchaseRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${recordId}`
+    })
+
+    return dtd?.record || {}
   }
+
+  useEffect(() => {
+    ;(async function () {
+      if (!recordId){
+        const response = await onChangeDT(formik?.values?.header?.dtId)
+        formik.setFieldValue('header.plantId', response?.plantId || null)
+        formik.setFieldValue('header.siteId', response?.siteId || defSiteId || null)
+      }
+    })()
+  }, [formik?.values?.header?.dtId])
 
   useEffect(() => {
     if (formik?.values?.serials?.length) {
@@ -929,6 +929,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PUDraftSerialReturn}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -942,9 +943,8 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
-                      await onChangeDtId(newValue?.recordId)
-                      changeDT(newValue)
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
+                      changeDT(newValue)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />

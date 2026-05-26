@@ -614,6 +614,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Assembly}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.docType}
                     columnsInDropDown={[

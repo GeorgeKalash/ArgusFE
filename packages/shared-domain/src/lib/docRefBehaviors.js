@@ -111,7 +111,7 @@ const documentType = async (
   let activeStatus = true
   let referenceState = 'valid'
 
-  if ((docType && selectNraId === undefined) || selectNraId === 'nraId') {
+  if ((docType && selectNraId === undefined) || selectNraId === 'nraId' || selectNraId === 'cleared') {
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
       nraId = dcTypNumberRange?.nraId
@@ -126,7 +126,7 @@ const documentType = async (
     }
   }
 
-  if ((selectNraId === 'nraId' || selectNraId === undefined) && functionId) {
+  if ((selectNraId === 'nraId' || selectNraId === undefined || selectNraId === 'cleared') && functionId) {
     if (((!dtId || dtId) && !nraId) || (nraId && !activeStatus)) {
       const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
       nraId = glbSysNumberRange?.nraId
@@ -154,7 +154,7 @@ const documentType = async (
     }
     if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
   } else if (!nraId) {
-    if (selectNraId == 'nraId') {
+    if (selectNraId == 'nraId' || (selectNraId == 'cleared' && isExternal?.external)) {
       reference = { readOnly: false, mandatory: true }
       if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
     }
@@ -166,7 +166,10 @@ const documentType = async (
 
   const fieldName = objectName ? `${objectName}.reference` : 'reference'
 
-  if (selectNraId === undefined) referenceState = 'no_selection'
+  if (selectNraId === undefined){
+     if (dtId) referenceState = 'valid'
+     else referenceState = 'no_selection'
+  }
   else if (isExternal?.external !== undefined && !isExternal?.external) referenceState = 'not_external'
   
   return {
@@ -175,7 +178,7 @@ const documentType = async (
     dcTypeRequired,
     reference: {
       fieldName,
-      isEmpty: referenceState != 'valid'
+      isEmpty: (selectNraId == 'cleared' && !isExternal?.external) || referenceState != 'valid'
     },
     errorMessage,
     maxAccess,
