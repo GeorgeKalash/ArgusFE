@@ -13,8 +13,10 @@
   "dependencies": {
     "mathjs": "^15.1.1",
     "mathlive": "^0.109.1",
+    "remark-gfm": "^3.0.1",
     "slate": "^0.120.0",
     "slate-history": "^0.113.1",
-    "slate-react": "^0.120.0"
+    "slate-react": "^0.120.0",
+    "styled-components": "^5.3.11"
   }
 }

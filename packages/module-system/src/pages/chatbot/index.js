@@ -22,6 +22,7 @@ import MuiTooltip from "@mui/material/Tooltip";
 import { parseChatStream } from "@argus/shared-providers/src/providers/chatService";
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from "@argus/shared-ui/src/components/Shared/DeleteDialog";
 import { ResourceIds } from "@argus/shared-domain/src/resources/ResourceIds";
@@ -404,6 +405,11 @@ export default function ChatPage() {
             </div>
           ) : (
             <ReactMarkdown
+              remarkPlugins={
+                msg.isStreaming
+                  ? []
+                  : [remarkGfm]
+              }
               components={{
                 p: ({ node, ...props }) => (
                   <p
@@ -414,6 +420,48 @@ export default function ChatPage() {
                     {...props}
                   />
                 ),
+
+                table: ({ node, ...props }) => (
+                  <table
+                    style={{
+                      borderCollapse: "collapse",
+                      width: "100%",
+                      marginTop: "10px"
+                    }}
+                    {...props}
+                  />
+                ),
+
+                thead: ({ node, ...props }) => (
+                  <thead
+                    style={{
+                      background: "#e5e7eb"
+                    }}
+                    {...props}
+                  />
+                ),
+
+                th: ({ node, ...props }) => (
+                  <th
+                    style={{
+                      border: "1px solid #d1d5db",
+                      padding: "8px",
+                      textAlign: "left"
+                    }}
+                    {...props}
+                  />
+                ),
+
+                td: ({ node, ...props }) => (
+                  <td
+                    style={{
+                      border: "1px solid #d1d5db",
+                      padding: "8px"
+                    }}
+                    {...props}
+                  />
+                ),
+
                 ul: ({ node, ...props }) => (
                   <ul
                     style={{
@@ -423,6 +471,7 @@ export default function ChatPage() {
                     {...props}
                   />
                 ),
+
                 ol: ({ node, ...props }) => (
                   <ol
                     style={{
