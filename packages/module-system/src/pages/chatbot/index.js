@@ -55,6 +55,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchText, setSearchText] = useState("");
+  const [balanceDetails, setBalanceDetails] = useState(null);
 
   const {
     labels,
@@ -116,16 +117,17 @@ export default function ChatPage() {
   };
 
   const loadConversations = async () => {
-    const res =
-      await postConnectorRequest({
-        extension: ChatbotRepository.list,
-        record: {
-          argusToken: user.accessToken
-        }
-      });
+    const res = await postConnectorRequest({
+      extension: ChatbotRepository.list,
+      record: {
+        argusToken: user.accessToken
+      }
+    });
+
+    setBalanceDetails(res?.balanceDetails || null);
 
     const mapped =
-      res?.map((item) => ({
+      res?.conversations?.map((item) => ({
         id: item.conversationId,
         conversationId: item.conversationId,
         title:
@@ -135,7 +137,7 @@ export default function ChatPage() {
         messages: [],
         isLoading: false,
         historyLoaded: false
-      }));
+      })) || [];
 
     if (mapped.length) {
       setChats(mapped);
@@ -266,6 +268,17 @@ export default function ChatPage() {
               }
             )
           );
+        }
+
+        if (event.type === "balance") {
+          const parsedBalance =
+            typeof event.content === "string"
+              ? JSON.parse(event.content)
+              : event.content;
+
+          setBalanceDetails(parsedBalance);
+         
+          return;
         }
 
         if (event.type ==="done") {
@@ -952,27 +965,98 @@ export default function ChatPage() {
           style={{
             padding: "16px",
             borderBottom: "1px solid #ddd",
-            fontWeight: "bold"
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "12px"
           }}
         >
-          <button
-            onClick={() =>
-              setSidebarOpen(!sidebarOpen)
-            }
+          <div
             style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              fontSize: "20px",
-              padding: "4px 8px",
-              borderRadius: "6px"
+              display: "flex",
+              alignItems: "center"
             }}
           >
-            ☰
-          </button>
-          <span>
-            {labels?.aiAssistant ?? ''}
-          </span>
+            <button
+              onClick={() =>
+                setSidebarOpen(!sidebarOpen)
+              }
+              style={{
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                fontSize: "20px",
+                padding: "4px 8px",
+                borderRadius: "6px"
+              }}
+            >
+              ☰
+            </button>
+
+            <span
+              style={{
+                fontWeight: "bold"
+              }}
+            >
+              {labels?.aiAssistant ?? ""}
+            </span>
+          </div>
+
+          {balanceDetails && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                flexWrap: "wrap"
+              }}
+            >
+              <div
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "999px",
+                  border: "1px solid #ddd",
+                  background: "#fff",
+                  fontSize: "13px",
+                  fontWeight: 500
+                }}
+              >
+                {balanceDetails.provider}
+              </div>
+
+              <div
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "999px",
+                  background: "#eff6ff",
+                  color: "#2563eb",
+                  fontSize: "13px",
+                  fontWeight: 600
+                }}
+              >
+                {balanceDetails.model}
+              </div>
+
+              <div
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "999px",
+                  background:
+                    balanceDetails.balance < 1000
+                      ? "#fef2f2"
+                      : "#ecfdf5",
+                  color:
+                    balanceDetails.balance < 1000
+                      ? "#dc2626"
+                      : "#059669",
+                  fontSize: "13px",
+                  fontWeight: 600
+                }}
+              >
+                {(balanceDetails.balance).toLocaleString()} {labels.tokensLeft}
+              </div>
+            </div>
+          )}
         </div>
 
         <div
