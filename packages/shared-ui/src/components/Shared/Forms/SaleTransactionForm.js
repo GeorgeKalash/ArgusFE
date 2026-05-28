@@ -67,6 +67,7 @@ import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function SaleTransactionForm({
   recordId,
@@ -165,106 +166,109 @@ export default function SaleTransactionForm({
     return spId
   }
 
+  const initialValues =  {
+    recordId: recordId || null,
+    header: {
+      dgId: functionId,
+      recordId: null,
+      dtId: null,
+      reference: '',
+      date: new Date(),
+      dueDate: new Date(),
+      plantId: null,
+      clientId: null,
+      clientName: '',
+      clientRef: '',
+      currencyId: null,
+      currencyName: '',
+      szId: null,
+      spId: null,
+      siteId: null,
+      description: '',
+      status: 1,
+      isVattable: false,
+      taxId: null,
+      subtotal: 0,
+      miscAmount: 0,
+      amount: 0,
+      vatAmount: 0,
+      tdAmount: 0,
+      plId: null,
+      ptId: null,
+      billAddressId: null,
+      billAddress: '',
+      maxDiscount: '',
+      currentDiscount: 0,
+      exRate: 1,
+      rateCalcMethod: 1,
+      tdType: DIRTYFIELD_TDPCT,
+      tdPct: 0,
+      baseAmount: 0,
+      volume: 0,
+      weight: 0,
+      qty: 0,
+      isVerified: false,
+      contactId: null,
+      commitItems: false,
+      postMetalToFinancials: false,
+      metalPrice: 0,
+      KGmetalPrice: 0,
+      balance: 0,
+      accountId: 0,
+      serializedAddress: '',
+    },
+    items: [
+      {
+        id: 1,
+        orderId: recordId || 0,
+        barcode: '',
+        itemId: '',
+        sku: '',
+        itemName: '',
+        seqNo: 1,
+        siteId: null,
+        muId: null,
+        qty: 0,
+        defaultQty: null,
+        volume: 0,
+        weight: 0,
+        isMetal: false,
+        metalId: null,
+        metalPurity: 0,
+        msId: 0,
+        muRef: '',
+        muQty: 0,
+        minPrice: 0,
+        baseQty: 0,
+        mdType: MDTYPE_PCT,
+        basePrice: 0,
+        baseLaborPrice: 0,
+        totalWeightPerG: 0,
+        mdValue: 0,
+        unitPrice: 0,
+        unitCost: 0,
+        overheadId: '',
+        vatAmount: 0,
+        mdAmount: 0,
+        upo: 0,
+        extendedPrice: 0,
+        priceType: 0,
+        applyVat: false,
+        taxId: null,
+        taxDetails: null,
+        notes: '',
+        totalWeight: 0
+      }
+    ],
+    serials: [],
+    lots: [],
+    taxes: []
+  }
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
-    initialValues: {
-      recordId: recordId || null,
-      header: {
-        dgId: functionId,
-        recordId: null,
-        dtId: null,
-        reference: '',
-        date: new Date(),
-        dueDate: new Date(),
-        plantId: null,
-        clientId: null,
-        clientName: '',
-        clientRef: '',
-        currencyId: null,
-        currencyName: '',
-        szId: null,
-        spId: null,
-        siteId: null,
-        description: '',
-        status: 1,
-        isVattable: false,
-        taxId: null,
-        subtotal: 0,
-        miscAmount: 0,
-        amount: 0,
-        vatAmount: 0,
-        tdAmount: 0,
-        plId: null,
-        ptId: null,
-        billAddressId: null,
-        billAddress: '',
-        maxDiscount: '',
-        currentDiscount: 0,
-        exRate: 1,
-        rateCalcMethod: 1,
-        tdType: DIRTYFIELD_TDPCT,
-        tdPct: 0,
-        baseAmount: 0,
-        volume: 0,
-        weight: 0,
-        qty: 0,
-        isVerified: false,
-        contactId: null,
-        commitItems: false,
-        postMetalToFinancials: false,
-        metalPrice: 0,
-        KGmetalPrice: 0,
-        balance: 0,
-        accountId: 0
-      },
-      items: [
-        {
-          id: 1,
-          orderId: recordId || 0,
-          barcode: '',
-          itemId: '',
-          sku: '',
-          itemName: '',
-          seqNo: 1,
-          siteId: null,
-          muId: null,
-          qty: 0,
-          defaultQty: null,
-          volume: 0,
-          weight: 0,
-          isMetal: false,
-          metalId: null,
-          metalPurity: 0,
-          msId: 0,
-          muRef: '',
-          muQty: 0,
-          minPrice: 0,
-          baseQty: 0,
-          mdType: MDTYPE_PCT,
-          basePrice: 0,
-          baseLaborPrice: 0,
-          totalWeightPerG: 0,
-          mdValue: 0,
-          unitPrice: 0,
-          unitCost: 0,
-          overheadId: '',
-          vatAmount: 0,
-          mdAmount: 0,
-          upo: 0,
-          extendedPrice: 0,
-          priceType: 0,
-          applyVat: false,
-          taxId: null,
-          taxDetails: null,
-          notes: '',
-          totalWeight: 0
-        }
-      ],
-      serials: [],
-      lots: [],
-      taxes: []
-    },
+    initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -415,14 +419,14 @@ export default function SaleTransactionForm({
       const calculatedAmount = calcVatAmountPerTaxDetail(
         {
           priceType: row?.priceType,
-          basePrice: parseFloat(row?.basePrice || 0),
-          unitPrice: parseFloat(row?.unitPrice || 0),
-          qty: parseFloat(row?.qty || 0),
-          weight: parseFloat(row?.weight || 0),
-          extendedPrice: parseFloat(row?.extendedPrice || 0),
-          baseLaborPrice: parseFloat(row?.baseLaborPrice || 0),
-          vatAmount: parseFloat(row?.vatAmount || 0),
-          tdPct: parseFloat(formik.values?.header?.tdPct || 0),
+          basePrice: row?.basePrice || 0,
+          unitPrice: row?.unitPrice || 0,
+          qty: row?.qty || 0,
+          weight: row?.weight || 0,
+          extendedPrice: row?.extendedPrice || 0,
+          baseLaborPrice: row?.baseLaborPrice || 0,
+          vatAmount: row?.vatAmount || 0,
+          tdPct: formik.values?.header?.tdPct || 0,
           taxDetails: singleTaxDetail
         },
         singleTaxDetail
@@ -433,7 +437,7 @@ export default function SaleTransactionForm({
         invoiceId: formik.values?.header?.recordId || 0,
         taxSeqNo: td.seqNo,
         taxScheduleAmount: td.amount || 0,
-        amount: parseFloat(calculatedAmount || 0)
+        amount: calculatedAmount || 0
       }
     })
   }
@@ -453,7 +457,7 @@ export default function SaleTransactionForm({
     const totalWeightPerG = basePriceValue + baseLaborPrice
     const unitPrice = ItemConvertPrice?.priceType === 3 ? weight * totalWeightPerG : ItemConvertPrice?.unitPrice || 0
 
-    const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
+    const minPrice = roundTo(ItemConvertPrice?.minPrice || 0, 3)
     let rowTax
     let rowTaxDetails
 
@@ -566,7 +570,7 @@ export default function SaleTransactionForm({
         dirtyField: DIRTYFIELD_RATE
       })
 
-      formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('header.baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
       formik.setFieldValue('header.exRate', res.record?.exRate)
       formik.setFieldValue('header.rateCalcMethod', res.record?.rateCalcMethod)
       formik.setFieldValue('header.rateCalcMethodName', res.record?.rateCalcMethodName)
@@ -863,8 +867,8 @@ export default function SaleTransactionForm({
         decimalScale: 3
       },
       async onChange({ row: { update, oldRow, newRow } }) {
-        const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3)
-        const minPrice = parseFloat(oldRow?.minPrice || 0).toFixed(3)
+        const unitPrice = roundTo(newRow.unitPrice || 0, 3)
+        const minPrice = roundTo(oldRow?.minPrice || 0, 3)
 
         if (parseFloat(minPrice) > 0 && parseFloat(unitPrice) < parseFloat(minPrice)) {
           ShowMinPriceValueErrorMessage(minPrice, unitPrice)
@@ -1019,7 +1023,7 @@ export default function SaleTransactionForm({
   ]
 
   function checkMinMaxAmount(amount, type, modType) {
-    let currentAmount = parseFloat(amount) || 0
+    let currentAmount = amount || 0
 
     if (type === modType) {
       if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
@@ -1259,7 +1263,7 @@ export default function SaleTransactionForm({
           basePrice: item.basePrice,
           unitPrice: item.unitPrice,
           upo: item.upo,
-          vatAmount: item.vatAmount,
+          vatAmount: roundTo(item.vatAmount || 0, 2),
           extendedPrice: item.extendedPrice,
           totalWeight: (item.weight || 0) * (item.qty || 0),
           serials: saTrxPack?.serials
@@ -1278,26 +1282,33 @@ export default function SaleTransactionForm({
     )
 
     itemsUpdate.current = modifiedList
-    formik.setValues({
-      ...formik.values,
-      recordId: saTrxHeader.recordId || null,
-      header: {
-        ...formik.values.header,
-        ...saTrxHeader,
-        amount: parseFloat(saTrxHeader?.amount).toFixed(2) ?? 0,
-        billAddress: billAdd,
-        currentDiscount:
-          saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
-        KGmetalPrice: saTrxHeader?.metalPrice * 1000,
-        subtotal: saTrxHeader?.subtotal.toFixed(2),
-        accountId,
-        commitItems: dtInfo?.record?.commitItems,
-        postMetalToFinancials: dtInfo?.record?.postMetalToFinancials,
-        maxDiscount: maxDiscount || 0,
-        balance
-      },
-      items: modifiedList,
-      taxes: saTrxTaxes
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        recordId: saTrxHeader.recordId || null,
+        header: {
+          ...formik.values.header,
+          ...saTrxHeader,
+          amount: roundTo(saTrxHeader?.amount) ?? 0,
+          billAddress: billAdd,
+          currentDiscount:
+            saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null
+              ? roundTo(saTrxHeader?.tdAmount || 0, 5)
+              : roundTo(saTrxHeader?.tdPct || 0, 5),
+          tdAmount: roundTo(saTrxHeader?.tdAmount || 0, 5),
+          tdPct: roundTo(saTrxHeader?.tdPct || 0, 5),
+          KGmetalPrice: saTrxHeader?.metalPrice * 1000,
+          subtotal: roundTo(saTrxHeader?.subtotal),
+          accountId,
+          commitItems: dtInfo?.record?.commitItems,
+          postMetalToFinancials: dtInfo?.record?.postMetalToFinancials,
+          maxDiscount: maxDiscount || 0,
+          serializedAddress: '',
+          balance
+        },
+        items: modifiedList,
+        taxes: saTrxTaxes
+      }
     })
 
     !formik.values.recordId &&
@@ -1485,7 +1496,7 @@ export default function SaleTransactionForm({
         formik.values.header.currentDiscount < 0 || formik.values.header.currentDiscount > 100
           ? 0
           : formik.values.header.currentDiscount
-      currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(formik.values.header.subtotal)) / 100
+      currentTdAmount = (currentPctAmount * formik.values.header.subtotal) / 100
       currentDiscountAmount = currentPctAmount
 
       formik.setFieldValue('header.tdAmount', currentTdAmount)
@@ -1496,7 +1507,7 @@ export default function SaleTransactionForm({
         formik.values.header.currentDiscount < 0 || formik.values.header.subtotal < formik.values.header.currentDiscount
           ? 0
           : formik.values.header.currentDiscount
-      currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(formik.values.header.subtotal)) * 100
+      currentPctAmount = (currentTdAmount / formik.values.header.subtotal) * 100
       currentDiscountAmount = currentTdAmount
 
       formik.setFieldValue('header.tdPct', currentPctAmount)
@@ -1520,17 +1531,17 @@ export default function SaleTransactionForm({
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
-      basePrice: parseFloat(newRow?.basePrice || 0),
+      basePrice: newRow?.basePrice || 0,
       volume: newRow?.volume || 0,
       weight: newRow?.weight,
-      unitPrice: parseFloat(newRow?.unitPrice) || 0,
-      upo: parseFloat(newRow?.upo) || 0,
-      qty: parseFloat(newRow?.qty || 0),
-      extendedPrice: parseFloat(newRow?.extendedPrice),
+      unitPrice: newRow?.unitPrice || 0,
+      upo: newRow?.upo || 0,
+      qty: newRow?.qty || 0,
+      extendedPrice: newRow?.extendedPrice,
       mdAmount,
       mdType: newRow?.mdType,
       mdValue: newRow?.mdValue,
-      baseLaborPrice: parseFloat(newRow?.baseLaborPrice || 0),
+      baseLaborPrice: newRow?.baseLaborPrice || 0,
       totalWeightPerG: newRow?.totalWeightPerG || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
@@ -1562,12 +1573,12 @@ export default function SaleTransactionForm({
       weight: itemPriceRow?.weight ? itemPriceRow.weight : 0,
       basePrice: itemPriceRow?.basePrice ? itemPriceRow.basePrice : 0,
       unitPrice: itemPriceRow?.unitPrice ? itemPriceRow.unitPrice : 0,
-      extendedPrice: itemPriceRow?.extendedPrice ? itemPriceRow.extendedPrice : 0,
+      extendedPrice: itemPriceRow?.extendedPrice ? roundTo(itemPriceRow?.extendedPrice || 0, 5) : 0,
       upo: itemPriceRow?.upo,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
-      baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(2) : 0,
-      totalWeightPerG: itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice ? roundTo(itemPriceRow.baseLaborPrice) : 0,
+      totalWeightPerG: itemPriceRow?.totalWeightPerG ? roundTo(itemPriceRow.totalWeightPerG) : 0,
       mdAmount: itemPriceRow?.mdAmount ? itemPriceRow.mdAmount : 0,
       vatAmount: vatCalcRow?.vatAmount ? vatCalcRow.vatAmount : 0,
       priceWithVAT: calculatePrice(newRow, newRow?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE)
@@ -1583,21 +1594,21 @@ export default function SaleTransactionForm({
     if (!taxDetails) {
       const price = priceWithVAT ? Math.abs(priceWithVAT - unitPrice) : unitPrice
 
-      return price.toFixed(2)
+      return roundTo(price)
     }
 
     const { amount = 0, taxBase } = taxDetails
 
     switch (dirtyField) {
       case DIRTYFIELD_BASE_PRICE:
-        return (unitPrice * (1 + amount / 100)).toFixed(2)
+        return roundTo(unitPrice * (1 + amount / 100))
 
       case DIRTYFIELD_UNIT_PRICE:
-        if (taxBase == 1) return (priceWithVAT / (1 + amount / 100)).toFixed(2)
+        if (taxBase == 1) return roundTo(priceWithVAT / (1 + amount / 100))
 
-        if (taxBase == 2) return priceWithVAT.toFixed(2)
+        if (taxBase == 2) return roundTo(priceWithVAT)
 
-        return (priceWithVAT - unitPrice).toFixed(2)
+        return roundTo(priceWithVAT - unitPrice)
 
       default:
         return
@@ -1606,23 +1617,23 @@ export default function SaleTransactionForm({
   function getTotPricePerG(header, item, dirtyField) {
     const itemPriceRow = getIPR({
       priceType: item?.priceType,
-      basePrice: parseFloat(item?.basePrice || 0),
-      volume: parseFloat(item?.volume) || 0,
-      weight: parseFloat(item?.weight),
-      unitPrice: parseFloat(item?.unitPrice || 0),
+      basePrice: item?.basePrice || 0,
+      volume: item?.volume || 0,
+      weight: item?.weight,
+      unitPrice: item?.unitPrice || 0,
       upo: 0,
-      qty: parseFloat(item?.qty) || 0,
-      extendedPrice: parseFloat(item?.extendedPrice),
+      qty: item?.qty || 0,
+      extendedPrice: item?.extendedPrice,
       mdAmount: header?.mdAmount || 0,
       mdType: item?.mdType || 1,
       baseLaborPrice: item?.baseLaborPrice || 0,
       totalWeightPerG: item?.TotPricePerG,
-      mdValue: parseFloat(item?.mdValue),
+      mdValue: item?.mdValue,
       tdPct: 0,
       dirtyField
     })
 
-    return itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0
+    return itemPriceRow?.totalWeightPerG ? roundTo(itemPriceRow.totalWeightPerG) : 0
   }
 
   async function getFilteredMU(itemId, msId) {
@@ -1647,7 +1658,7 @@ export default function SaleTransactionForm({
 
   const subTotal = getSubtotal(parsedItemsArray)
 
-  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.header.miscAmount) || 0
+  const miscValue = formik.values.miscAmount == 0 ? 0 : formik.values.header.miscAmount || 0
 
   const _footerSummary = getFooterTotals(parsedItemsArray, {
     totalQty: 0,
@@ -1655,8 +1666,8 @@ export default function SaleTransactionForm({
     totalVolume: 0,
     totalUpo: 0,
     sumVat: 0,
-    sumExtended: parseFloat(subTotal),
-    tdAmount: parseFloat(formik.values.header.tdAmount),
+    sumExtended: subTotal,
+    tdAmount: formik.values.header.tdAmount,
     net: 0,
     miscAmount: miscValue || 0
   })
@@ -1665,25 +1676,25 @@ export default function SaleTransactionForm({
   const amount = reCal ? _footerSummary?.net : formik.values?.header.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.header.volume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.header.weight || 0
-  const subtotal = reCal ? subTotal.toFixed(2) : formik.values?.header.subtotal || 0
+  const subtotal = reCal ? roundTo(subTotal) : formik.values?.header.subtotal || 0
   const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.header.vatAmount || 0
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
-      tdAmount: parseFloat(currentDiscount) || 0,
+      tdAmount: currentDiscount || 0,
       tdPlain: typeChange == 1,
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
       currentDiscount: currentDiscount,
       hiddenTdPct: tdPct || 0,
-      hiddenTdAmount: parseFloat(tdAmount) || 0,
+      hiddenTdAmount: tdAmount || 0,
       typeChange: typeChange
     })
-    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
+    formik.setFieldValue('header.tdAmount', roundTo(_discountObj?.hiddenTdAmount || 0, 5))
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
-    formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
+    formik.setFieldValue('header.currentDiscount', roundTo(_discountObj?.currentDiscount || 0, 5))
+    formik.setFieldValue('header.tdPct', roundTo(_discountObj?.hiddenTdPct || 0, 5))
 
     return _discountObj?.hiddenTdPct
   }
@@ -1696,7 +1707,7 @@ export default function SaleTransactionForm({
         qty: item?.qty,
         weight: item?.weight,
         extendedPrice: item?.extendedPrice,
-        baseLaborPrice: parseFloat(item?.baseLaborPrice),
+        baseLaborPrice: item?.baseLaborPrice,
         vatAmount: item?.vatAmount,
         tdPct: tdPct,
         taxDetails: formik.values.header.isVattable === true && item?.taxDetails
@@ -1706,7 +1717,7 @@ export default function SaleTransactionForm({
             }))
           : null
       })
-      formik.setFieldValue(`items[${index}].vatAmount`, vatCalcRow?.vatAmount)
+      formik.setFieldValue(`items[${index}].vatAmount`, roundTo(vatCalcRow?.vatAmount || 0, 5))
     })
   }
 
@@ -1868,10 +1879,10 @@ export default function SaleTransactionForm({
   }
 
   useEffect(() => {
-    formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
-    formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
-    formik.setFieldValue('header.volume', parseFloat(totalVolume).toFixed(2))
-    formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
+    formik.setFieldValue('header.qty', roundTo(totalQty))
+    formik.setFieldValue('header.weight', roundTo(totalWeight))
+    formik.setFieldValue('header.volume', roundTo(totalVolume))
+    formik.setFieldValue('header.amount', roundTo(amount))
 
     const updatedRateRow = getRate({
       amount: amount ?? 0,
@@ -1881,14 +1892,14 @@ export default function SaleTransactionForm({
       dirtyField: DIRTYFIELD_RATE
     })
 
-    formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-    formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
-    formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
+    formik.setFieldValue('header.baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
+    formik.setFieldValue('header.subtotal', roundTo(subtotal))
+    formik.setFieldValue('header.vatAmount', roundTo(vatAmount))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
     if (reCal) {
-      let currentTdAmount = (parseFloat(formik.values?.header?.tdPct || 0) * parseFloat(subtotal)) / 100
+      let currentTdAmount = (formik.values?.header?.tdPct || 0 * subtotal) / 100
       recalcGridVat(
         formik.values.header.tdType,
         formik.values.header.tdPct,
@@ -1903,10 +1914,10 @@ export default function SaleTransactionForm({
       const res = await getPackData()
       setTaxDetails(res?.taxDetails || [])
       setMeasurements(res?.measurementUnits)
-      setMetalPriceOperations()
-      const defaultObj = await getDefaultsData()
+      !recordId && setMetalPriceOperations()
       !recordId && getUserDefaultsData()
       if (!recordId) {
+        const defaultObj = await getDefaultsData()
         if (defaultObj.salesTD == 'True') {
           setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
           formik.setFieldValue('header.tdType', 2)
@@ -2350,7 +2361,7 @@ export default function SaleTransactionForm({
             enableFilters
             value={formik.values.items}
             error={formik.errors.items}
-            initialValues={formik?.initialValues?.items[0]}
+            initialValues={initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
@@ -2471,7 +2482,7 @@ export default function SaleTransactionForm({
                     iconKey={cycleButtonState.text}
                     ShowDiscountIcons={true}
                     onChange={e => {
-                      let discount = Number(e.target.value.replace(/,/g, ''))
+                      let discount = e.target.value
                       if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
                         if (discount < 0 || discount > 100) discount = 0
                         formik.setFieldValue('header.tdPct', discount)
@@ -2482,17 +2493,17 @@ export default function SaleTransactionForm({
                       formik.setFieldValue('header.currentDiscount', discount)
                     }}
                     onBlur={async e => {
-                      let discountAmount = Number(e.target.value.replace(/,/g, ''))
-                      let tdPct = Number(e.target.value.replace(/,/g, ''))
-                      let tdAmount = Number(e.target.value.replace(/,/g, ''))
+                      let discountAmount = e.target.value
+                      let tdPct = e.target.value
+                      let tdAmount = e.target.value
 
                       if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
-                        tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
+                        tdPct = (discountAmount / subtotal) * 100
                         formik.setFieldValue('header.tdPct', tdPct)
                       }
 
                       if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
-                        tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
+                        tdAmount = (discountAmount * subtotal) / 100
                         formik.setFieldValue('header.tdAmount', tdAmount)
                       }
                       setReCal(true)
@@ -2523,7 +2534,7 @@ export default function SaleTransactionForm({
                         rateCalcMethod: formik.values?.rateCalcMethod,
                         dirtyField: DIRTYFIELD_RATE
                       })
-                      formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                      formik.setFieldValue('header.baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
                     }}
                     onBlur={async () => {
                       setReCal(true)
