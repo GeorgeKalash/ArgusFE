@@ -1,7 +1,7 @@
 const fs = require("fs")
 
-const CONFIG_PATH = "/Users/macpro/SourceCode/Argus/config/client-config.json"
-// const CONFIG_PATH = "C:/inetpub/wwwroot/config/client-config.json"
+// const CONFIG_PATH = "/Users/macpro/SourceCode/Argus/config/client-config.json"
+const CONFIG_PATH = "C:/inetpub/wwwroot/config/client-config.json"
 
 function getClientConfig() {
   try {
