@@ -31,6 +31,7 @@ import { RequestsContext } from "@argus/shared-providers/src/providers/RequestsC
 import { ChatbotRepository } from '@argus/repositories/src/repositories/ChatbotRepository'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { formatDateTimeDefault } from "@argus/shared-domain/src/lib/date-helper";
+import { useReactToPrint } from "react-to-print";
 
 
 ChartJS.register(
@@ -52,6 +53,7 @@ export default function ChatPage() {
 
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const conversationRef = useRef(null);
   
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -474,14 +476,23 @@ export default function ChatPage() {
                   ),
 
                   table: ({ node, ...props }) => (
-                    <table
+                    <div
                       style={{
-                        borderCollapse: "collapse",
                         width: "100%",
-                        marginTop: "10px"
+                        overflowX: "auto",
+                        maxWidth: "100%"
                       }}
-                      {...props}
-                    />
+                    >
+                      <table
+                        style={{
+                          borderCollapse: "collapse",
+                          width: "100%",
+                          minWidth: "max-content",
+                          marginTop: "10px"
+                        }}
+                        {...props}
+                      />
+                    </div>
                   ),
 
                   thead: ({ node, ...props }) => (
@@ -549,56 +560,70 @@ export default function ChatPage() {
         <div
           key={index}
           style={{
+            alignSelf: "flex-start",
             background: "#fff",
             border: "1px solid #ddd",
             borderRadius: "12px",
             padding: "12px",
-            maxWidth: "90%"
+            maxWidth: "90%",
+            width: "fit-content",
+            minWidth: 0,
+            overflow: "hidden"
           }}
           className="chat-message-wrapper"
         >
-          <table
+          <div
             style={{
-              borderCollapse: "collapse",
-              width: "100%"
+              width: "100%",
+              overflowX: "auto",
+              maxWidth: "100%",
+              alignSelf: "flex-start"
             }}
           >
-            <thead>
-              <tr>
-                {msg.columns.map((col, i) => (
-                  <th
-                    key={i}
-                    style={{
-                      padding: "8px",
-                      borderBottom:
-                        "1px solid #ddd",
-                      textAlign: "left"
-                    }}
-                  >
-                    {col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {msg.rows.map((row, r) => (
-                <tr key={r}>
-                  {row.map((cell, c) => (
-                    <td
-                      key={c}
+            <table
+              style={{
+                borderCollapse: "collapse",
+                width: "100%",
+                minWidth: "max-content",
+              }}
+            >
+              <thead>
+                <tr>
+                  {msg.columns.map((col, i) => (
+                    <th
+                      key={i}
                       style={{
                         padding: "8px",
                         borderBottom:
-                          "1px solid #eee"
+                          "1px solid #ddd",
+                        textAlign: "left"
                       }}
                     >
-                      {cell}
-                    </td>
+                      {col}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {msg.rows.map((row, r) => (
+                  <tr key={r}>
+                    {row.map((cell, c) => (
+                      <td
+                        key={c}
+                        style={{
+                          padding: "8px",
+                          borderBottom:
+                            "1px solid #eee"
+                        }}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       );
     }
@@ -896,6 +921,15 @@ export default function ChatPage() {
     return formatDateTimeDefault(messageDate, "hh:mm a");
   };
 
+  const handlePrintConversation =
+    useReactToPrint({
+      content: () =>
+        conversationRef.current,
+      documentTitle:
+        selectedChat?.title ||
+        "Conversation"
+    });
+
   return (
     <div
       style={{
@@ -1161,9 +1195,35 @@ export default function ChatPage() {
               </div>
             </div>
           )}
+
+          <div
+            style={{
+              width: "80px",
+              display: "flex",
+              justifyContent: "flex-end"
+            }}
+          >
+            {selectedChat?.conversationId && (
+              <button
+                onClick={handlePrintConversation}
+                style={{
+                  border: "1px solid #ddd",
+                  background: "#fff",
+                  borderRadius: "8px",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  fontSize: "13px"
+                }}
+              >
+                {labels.export}
+              </button>
+            )}
+          </div>
         </div>
 
         <div
+          ref={conversationRef}
+          className="chat-print-container"
           style={{
             flex: 1,
             padding: "20px",
