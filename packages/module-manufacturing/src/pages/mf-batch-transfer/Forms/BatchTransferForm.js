@@ -58,37 +58,39 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
-
+  
+  const initialValues = {
+    recordId: null,
+    header: {
+      dtId: null,
+      reference: '',
+      date: new Date(),
+      fromWCId: workCenterId,
+      toWCId: null,
+      notes: '',
+      status: 1,
+      wip: 1
+    },
+    items: [
+      {
+        id: 1,
+        jobId: null,
+        btId: recordId || 0,
+        pcs: 0,
+        qty: 0,
+        transferRef: null,
+        sku: '',
+        itemName: '',
+        transferStatusName: '',
+        transferWipName: ''
+      }
+    ]
+  }
+  
   const { formik } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     conditionSchema: ['items'],
-    initialValues: {
-      recordId: null,
-      header: {
-        dtId: null,
-        reference: '',
-        date: new Date(),
-        fromWCId: workCenterId,
-        toWCId: null,
-        notes: '',
-        status: 1,
-        wip: 1
-      },
-      items: [
-        {
-          id: 1,
-          jobId: null,
-          btId: recordId || 0,
-          pcs: 0,
-          qty: 0,
-          transferRef: null,
-          sku: '',
-          itemName: '',
-          transferStatusName: '',
-          transferWipName: ''
-        }
-      ]
-    },
+    initialValues,
     maxAccess,
     validationSchema: yup.object({
       header: yup.object({
@@ -134,7 +136,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
         parameters: `_dtId=${dtId}`
       })
       formik.setFieldValue('header.fromWCId', res?.record?.workCenterId || workCenterId || null)
-      formik.setFieldValue('items', formik.initialValues.items)
+      formik.setFieldValue('items', initialValues.items)
     }
   }
 
@@ -167,20 +169,22 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       parameters: `_btId=${recordId}`
     })
 
-    formik.setValues({
-      ...formik.values,
-      recordId: header.recordId,
-      header: {
-        ...formik.values.header,
-        ...header
-      },
-      items:
-        itemsResponse?.list?.length > 0
-          ? itemsResponse.list.map((item, index) => ({
-              ...item,
-              id: index + 1
-            }))
-          : formik.values.items
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        recordId: header.recordId,
+        header: {
+          ...formik.values.header,
+          ...header
+        },
+        items:
+          itemsResponse?.list?.length > 0
+            ? itemsResponse.list.map((item, index) => ({
+                ...item,
+                id: index + 1
+              }))
+            : formik.values.items
+      }
     })
   }
 
@@ -349,8 +353,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
     if (recordId) refetchForm(recordId)
   }, [recordId])
 
-  const totalQty = formik.values?.items?.reduce((qty, row) => qty + (parseFloat(row.qty) || 0), 0) ?? 0
-  const totalPcs = formik.values?.items?.reduce((pcs, row) => pcs + (parseFloat(row.pcs) || 0), 0) ?? 0
+  const totalQty = formik.values?.items?.reduce((qty, row) => qty + (row.qty || 0), 0) ?? 0
+  const totalPcs = formik.values?.items?.reduce((pcs, row) => pcs + (row.pcs || 0), 0) ?? 0
 
   return (
     <FormShell
@@ -420,7 +424,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                     values={formik.values.header}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('header.fromWCId', newValue?.recordId || null)
-                      formik.setFieldValue('items', formik.initialValues.items)
+                      formik.setFieldValue('items', initialValues.items)
                     }}
                     error={formik.touched.header?.fromWCId && formik.errors.header?.fromWCId}
                     maxAccess={maxAccess}
