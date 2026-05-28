@@ -57,6 +57,7 @@ export default function ChatPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [balanceDetails, setBalanceDetails] = useState(null);
+  const [copiedIndex, setCopiedIndex] = useState(null);
 
   const {
     labels,
@@ -384,7 +385,9 @@ export default function ChatPage() {
             padding: "10px 14px",
             borderRadius: "14px",
             maxWidth: "70%",
+            position: "relative"
           }}
+          className="chat-message-wrapper"
         >
           {msg.isWaiting ? (
             <div
@@ -403,88 +406,134 @@ export default function ChatPage() {
             <div style={{ whiteSpace: "pre-wrap" }}>
               {msg.text}▋
             </div>
-          ) : (
-            <ReactMarkdown
-              remarkPlugins={
-                msg.isStreaming
-                  ? []
-                  : [remarkGfm]
-              }
-              components={{
-                p: ({ node, ...props }) => (
-                  <p
-                    style={{
-                      margin: 0,
-                      lineHeight: 1.5
-                    }}
-                    {...props}
-                  />
-                ),
+          ) : ( 
+            <>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(msg.text);
 
-                table: ({ node, ...props }) => (
-                  <table
-                    style={{
-                      borderCollapse: "collapse",
-                      width: "100%",
-                      marginTop: "10px"
-                    }}
-                    {...props}
-                  />
-                ),
+                  setCopiedIndex(index);
 
-                thead: ({ node, ...props }) => (
-                  <thead
-                    style={{
-                      background: "#e5e7eb"
-                    }}
-                    {...props}
-                  />
-                ),
+                  setTimeout(() => {
+                    setCopiedIndex(null);
+                  }, 2000);
+                }}
+                className="copy-button"
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  right:
+                    msg.sender === "assistant"
+                      ? "-42px"
+                      : "auto",
+                  left:
+                    msg.sender === "user"
+                      ? "-42px"
+                      : "auto",
+                  opacity: 0,
+                  transition: "0.2s ease",
+                  border: "none",
+                  background: "#fff",
+                  borderRadius: "6px",
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                  fontSize: "22px",
+                  color: "#333",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                  width: "34px",
+                  height: "34px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                {copiedIndex === index
+                  ? "✓"
+                  : "⧉"}
+              </button>
+              <ReactMarkdown
+                remarkPlugins={
+                  msg.isStreaming
+                    ? []
+                    : [remarkGfm]
+                }
+                components={{
+                  p: ({ node, ...props }) => (
+                    <p
+                      style={{
+                        margin: 0,
+                        lineHeight: 1.5
+                      }}
+                      {...props}
+                    />
+                  ),
 
-                th: ({ node, ...props }) => (
-                  <th
-                    style={{
-                      border: "1px solid #d1d5db",
-                      padding: "8px",
-                      textAlign: "left"
-                    }}
-                    {...props}
-                  />
-                ),
+                  table: ({ node, ...props }) => (
+                    <table
+                      style={{
+                        borderCollapse: "collapse",
+                        width: "100%",
+                        marginTop: "10px"
+                      }}
+                      {...props}
+                    />
+                  ),
 
-                td: ({ node, ...props }) => (
-                  <td
-                    style={{
-                      border: "1px solid #d1d5db",
-                      padding: "8px"
-                    }}
-                    {...props}
-                  />
-                ),
+                  thead: ({ node, ...props }) => (
+                    <thead
+                      style={{
+                        background: "#e5e7eb"
+                      }}
+                      {...props}
+                    />
+                  ),
 
-                ul: ({ node, ...props }) => (
-                  <ul
-                    style={{
-                      margin: "6px 0",
-                      paddingLeft: "20px"
-                    }}
-                    {...props}
-                  />
-                ),
+                  th: ({ node, ...props }) => (
+                    <th
+                      style={{
+                        border: "1px solid #d1d5db",
+                        padding: "8px",
+                        textAlign: "left"
+                      }}
+                      {...props}
+                    />
+                  ),
 
-                ol: ({ node, ...props }) => (
-                  <ol
-                    style={{
-                      margin: "6px 0",
-                      paddingLeft: "20px"
-                    }}
-                    {...props}
-                  />
-                )
-              }}
-            >
-              {msg.text}
-            </ReactMarkdown>
+                  td: ({ node, ...props }) => (
+                    <td
+                      style={{
+                        border: "1px solid #d1d5db",
+                        padding: "8px"
+                      }}
+                      {...props}
+                    />
+                  ),
+
+                  ul: ({ node, ...props }) => (
+                    <ul
+                      style={{
+                        margin: "6px 0",
+                        paddingLeft: "20px"
+                      }}
+                      {...props}
+                    />
+                  ),
+
+                  ol: ({ node, ...props }) => (
+                    <ol
+                      style={{
+                        margin: "6px 0",
+                        paddingLeft: "20px"
+                      }}
+                      {...props}
+                    />
+                  )
+                }}
+              >
+                {msg.text}
+              </ReactMarkdown>
+            </>
           )}
             </div>
             </MuiTooltip>
@@ -502,6 +551,7 @@ export default function ChatPage() {
             padding: "12px",
             maxWidth: "90%"
           }}
+          className="chat-message-wrapper"
         >
           <table
             style={{
@@ -561,6 +611,7 @@ export default function ChatPage() {
             width: "500px",
             maxWidth: "95%"
           }}
+          className="chat-message-wrapper"
         >
           <h4>{msg.title}</h4>
 
@@ -584,7 +635,7 @@ export default function ChatPage() {
 
     if (msg.type === "lineChart") {
       return (
-        <div key={index} style={cardStyle}>
+        <div key={index} style={cardStyle} className="chat-message-wrapper">
           <h4>{msg.title}</h4>
 
           <Line
@@ -606,7 +657,7 @@ export default function ChatPage() {
 
     if (msg.type === "pieChart") {
       return (
-        <div key={index} style={cardStyle}>
+        <div key={index} style={cardStyle} className="chat-message-wrapper">
           <h4>{msg.title}</h4>
 
           <Pie

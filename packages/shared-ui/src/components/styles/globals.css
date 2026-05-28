@@ -104,3 +104,7 @@ code[class*='language-'] {
     opacity: 1;
   }
 }
+
+.chat-message-wrapper:hover .copy-button {
+  opacity: 1 !important;
+}
