@@ -22,15 +22,16 @@ import { DeliveryRepository } from '@argus/repositories/src/repositories/Deliver
 import InvDetailsForm from './forms/InvDetailsForm'
 import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import toast from 'react-hot-toast'
-
 import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
-  const { stack, LockRecord } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
+  const { stack, lockRecord } = useWindow()
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateInvoices
@@ -40,7 +41,7 @@ const GeneratePurchaseInvoice = () => {
     datasetId: ResourceIds.SalesInvoice
   })
 
-  const defCurrencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value)
 
   const basicValidation = {
     clientId: yup.number().required(),
@@ -95,15 +96,11 @@ const GeneratePurchaseInvoice = () => {
     stack({
       Component: SaleTransactionForm,
       props: {
-        labels: _labels,
         recordId,
-        access: maxAccess,
         functionId: SystemFunction.SalesInvoice,
         getResourceId: () => ResourceIds.SalesInvoice,
-        LockRecord
+        lockRecord
       },
-
-      title: _labels.salesInvoice
     })
   }
 
@@ -343,7 +340,6 @@ const GeneratePurchaseInvoice = () => {
             columns={columns}
             gridData={formik?.values?.data}
             rowId={['orderId']}
-            isLoading={false}
             pagination={false}
             maxAccess={access}
             showCheckboxColumn={true}

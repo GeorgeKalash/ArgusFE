@@ -85,7 +85,6 @@ const ValueFormList = ({ labels, store, maxAccess }) => {
         rowId={['seqNo']}
         onEdit={editValue}
         onDelete={delValue}
-        isLoading={false}
         maxAccess={maxAccess}
         pagination={false}
       />

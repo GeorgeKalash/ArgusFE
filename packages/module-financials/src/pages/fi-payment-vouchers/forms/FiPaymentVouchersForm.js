@@ -31,10 +31,12 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function FiPaymentVouchersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { labels, access } = useResourceParams({
@@ -54,9 +56,9 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
 
   useSetWindow({ title: labels.paymentVoucher, window })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -393,11 +395,11 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.accountId),
-            moduleId: 1
+            date: formik.values.date
           }
         })
       },
-      disabled: !formik.values.accountId
+      disabled: !formik.values.accountId || !formik.values.date
     }
   ]
 
@@ -476,6 +478,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                maxAccess={maxAccess}
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || null)
@@ -603,6 +606,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     required
+                    maxAccess={maxAccess}
                     readOnly={isPosted || isCancelled}
                     values={formik.values}
                     onChange={async (event, newValue) => {
@@ -697,6 +701,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 valueField='recordId'
                 displayField={'firstCheckNo'}
                 values={formik.values}
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('checkbookId', newValue?.recordId || null)
                 }}

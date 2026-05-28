@@ -30,6 +30,7 @@ import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalc
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { ApplyManual } from '@argus/shared-ui/src/components/Shared/ApplyManual'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -39,10 +40,11 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   })
 
   const { stack } = useWindow()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels  } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
 
-  const currencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value) || null
-  const vatPct = parseInt(defaultsData?.list?.find(({ key }) => key === 'vatPct')?.value) || null
+  const currencyId = parseInt(systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value) || null
+  const vatPct = parseInt(systemDefaults?.list?.find(({ key }) => key === 'vatPct')?.value) || null
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -50,7 +52,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     endpointId: FinancialRepository.FiMemo.page
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const { formik } = useForm({
     initialValues: {
@@ -81,11 +83,10 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     validateOnChange: true,
     validationSchema: yup.object({
       amount: yup.number().required(),
-      currencyId: yup.string().required(),
-      accountId: yup.string().required(),
+      currencyId: yup.number().required(),
+      accountId: yup.number().required(),
       subtotal: yup.number().required(),
-      date: yup.string().required(),
-      dueDate: yup.string().required()
+      date: yup.date().required()
     }),
     onSubmit: async obj => {
       if (!obj.recordId) {
@@ -160,7 +161,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
         formik.setValues({
           ...res.record,
-          dueDate: formatDateFromApi(res.record.dueDate),
+          dueDate: res?.record?.dueDate ? formatDateFromApi(res.record.dueDate): null,
           date: formatDateFromApi(res.record.date)
         })
       }
@@ -183,7 +184,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       })
 
       getRes.record.date = formatDateFromApi(getRes.record.date)
-      getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
+      getRes.record.dueDate = getRes?.record?.dueDate ? formatDateFromApi(getRes.record.dueDate) : null
       formik.setValues(getRes.record)
     }
   }
@@ -204,7 +205,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       })
 
       getRes.record.date = formatDateFromApi(getRes.record.date)
-      getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
+      getRes.record.dueDate = getRes?.record?.dueDate ? formatDateFromApi(getRes.record.dueDate) : null
       formik.setValues(getRes.record)
     }
   }
@@ -223,7 +224,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         extension: FinancialRepository.FiMemo.get,
         parameters: `_recordId=${formik.values.recordId}`
       })
-      getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
+      getRes.record.dueDate = getRes?.record?.dueDate ? formatDateFromApi(getRes.record.dueDate) : null
       getRes.record.date = formatDateFromApi(getRes.record.date)
 
       formik.setValues(getRes.record)
@@ -321,11 +322,11 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.accountId),
-            moduleId: 1
+            date: formik.values.date
           }
         })
       },
-      disabled: !formik.values.accountId
+      disabled: !formik.values.accountId || !formik.values.date
     },
     {
       key: 'Apply',
@@ -442,13 +443,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   <CustomTextField
                     name='reference'
                     label={labels.reference}
-                    value={formik.values.reference}
-                    readOnly
-                    rows={2}
-                    maxAccess={maxAccess}
+                    value={formik?.values?.reference}
+                    maxAccess={!editMode && maxAccess}
+                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    error={formik?.touched?.reference && Boolean(formik?.errors?.reference)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -473,10 +473,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     readOnly={isPosted || isCancelled}
                     label={labels.dueDate}
                     value={formik.values.dueDate}
-                    required
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('dueDate', '')}
+                    onClear={() => formik.setFieldValue('dueDate', null)}
                     error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
                   />
                 </Grid>

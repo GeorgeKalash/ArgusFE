@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import ImportTransfer from './ImportTransfer'
 import toast from 'react-hot-toast'
@@ -25,13 +25,15 @@ import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 
-export default function ItemDisposalForm({ recordId, access, labels }) {
+export default function ItemDisposalForm({ recordId, access, labels, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
+  const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ItemDisposal,
@@ -56,9 +58,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
         siteId: null,
         notes: '',
         status: 1,
-        wip: 1,
-        workCenterId: null,
-        wcSiteId: null
+        wip: 1
       },
       items: [
         {
@@ -78,7 +78,6 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required(),
-        workCenterId: yup.number().required(),
         siteId: yup.number().required()
       })
     }),
@@ -125,9 +124,25 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
   })
 
   const editMode = !!formik.values.recordId
-  const calculateTotal = key => formik?.values?.items?.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
-  const totalQty = calculateTotal('qty')
-  const totalPcs = calculateTotal('serialCount')
+  const isPosted = formik?.values?.header?.status === 3
+
+  const totals = reCal
+    ? (formik?.values?.items || []).reduce(
+        (acc, item) => {
+          acc.totalCost += parseFloat(item.totalCost || 0)
+          acc.totalQty += parseFloat(item.qty || 0)
+          acc.totalPcs += parseFloat(item.serialCount || 0)
+          return acc
+        },
+        { totalCost: 0, totalQty: 0, totalPcs: 0 }
+      )
+    : {
+        totalCost: formik?.values?.header?.totalCost || 0,
+        totalQty: formik?.values?.header?.totalQty || 0,
+        totalPcs: formik?.values?.header?.totalPcs || 0
+      }
+    
+  const { totalCost, totalQty, totalPcs } = totals
 
   const onCondition = row => {
     if (row.trackBy === 1) {
@@ -153,6 +168,29 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
 
     return res?.record?.name || ''
   }
+
+  const getPhysicalItem = async itemId => {
+    if (!itemId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return res?.record?.metalRef || ''
+  }
+
+  const getUnitCost = async itemId => {
+    if (!itemId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.CurrentCost.get,
+      parameters: '_itemId=' + itemId
+    })
+
+    return res?.record?.currentCost
+  }
+
 
   const columns = [
     {
@@ -188,14 +226,31 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
 
           return
         }
+      
+        const metalRef = await getPhysicalItem(newRow.itemId)
         const itemGroupName = await getGroupInfo(newRow?.groupId || null)
-        update({ itemGroupName })
+        const unitCost = await getUnitCost(newRow.itemId)
+        update({ 
+          itemGroupName,
+          metalRef, 
+          unitCost, 
+          totalCost: parseFloat(newRow.qty) * parseFloat(unitCost) 
+        })
       }
     },
     {
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.metal,
+      name: 'metalRef',
       props: {
         readOnly: true
       }
@@ -204,15 +259,26 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       component: 'textfield',
       label: labels.itemGroup,
       name: 'itemGroupName',
+      flex: 2,
       props: {
         readOnly: true
       }
     },
     {
       component: 'numberfield',
+      label: labels.serialCount,
+      name: 'serialCount',
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
       label: labels.qty,
       name: 'qty',
-      props: { maxLength: 12, decimalScale: 2 }
+      props: { maxLength: 12, decimalScale: 2 },
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        update({ qty: parseFloat(newRow?.qty) || 0, totalCost: (newRow?.qty || 0) * (newRow?.unitCost || 0) })
+      }
     },
     {
       component: 'button',
@@ -237,13 +303,46 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
     },
     {
       component: 'numberfield',
-      label: labels.serialCount,
-      name: 'serialCount',
+      label: labels.unitCost,
+      name: 'unitCost',
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      label: labels.totalCost,
+      name: 'totalCost',
       props: { readOnly: true }
     }
   ]
 
+  useEffect(() => {
+    formik.setFieldValue('header.totalCost', totalCost)
+    formik.setFieldValue('header.totalQty', totalQty)
+    formik.setFieldValue('header.totalPcs', totalPcs)
+  }, [totalCost, totalQty, totalPcs])
+
+  const triggerReCal = () => setReCal(true)
+
+  const onPost = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.Disposal.post,
+      record: JSON.stringify(formik.values.header)
+    })
+
+    toast.success(platformLabels.Posted)
+    window.close()
+    invalidate()
+  }
+
   const actions = [
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      valuesPath: formik.values.header,
+      datasetId: ResourceIds.GLItemDisposal,
+      disabled: !editMode
+    },
     {
       key: 'IV',
       condition: true,
@@ -256,15 +355,27 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       onClick: () => {
         stack({
           Component: ImportTransfer,
-          props: { maxAccess, labels, form: formik },
+          props: { maxAccess, labels, form: formik, triggerReCal },
           width: 400,
           height: 150,
           refresh: false,
           title: labels.importFromTransfer
         })
       },
-      disabled: formik.values.items.some(item => item.itemId)
-    }
+      disabled: isPosted
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode
+    },
   ]
 
   async function getDisposal(recordId) {
@@ -303,6 +414,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       ? res.list.map((serial, index) => ({ ...serial, id: index + 1 }))
       : formik?.initialValues?.serials
   }
+
   async function refetchForm(recordId) {
     if (!recordId) return
 
@@ -333,6 +445,8 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       recordId: header.recordId || null,
       items: mappedItems
     })
+
+    setReCal(false)
   }
 
   useEffect(() => {
@@ -346,7 +460,9 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
+      previewReport={editMode}
       actions={actions}
+      disabledSubmit={isPosted}
     >
       <VertLayout>
         <Fixed>
@@ -400,6 +516,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                     value={formik?.values?.header?.date}
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
+                    readOnly={isPosted}
                     onClear={() => formik.setFieldValue('header.date', null)}
                     error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
                   />
@@ -419,6 +536,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                     maxAccess={maxAccess}
                     displayFieldWidth={1.5}
                     required
+                    readOnly={isPosted}
                     onChange={(_, newValue) => formik.setFieldValue('header.siteId', newValue?.recordId || null)}
                     error={formik.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
                   />
@@ -428,34 +546,13 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
             <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={ManufacturingRepository.WorkCenter.qry}
-                    name='header.workCenterId'
-                    label={labels.workCenter}
-                    required
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    valueField='recordId'
-                    displayField='name'
-                    displayFieldWidth={1.5}
-                    values={formik.values?.header}
-                    maxAccess={maxAccess}
-                    onChange={(_, newValue) => {
-                      formik.setFieldValue('header.wcSiteId', newValue?.siteId || null)
-                      formik.setFieldValue('header.workCenterId', newValue?.recordId || null)
-                    }}
-                    error={formik.touched?.header?.workCenterId && Boolean(formik.errors?.header?.workCenterId)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
                   <CustomTextArea
                     name='header.notes'
                     label={labels.notes}
                     value={formik.values?.header?.notes}
                     maxLength='100'
                     rows={2}
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.notes', '')}
@@ -469,20 +566,31 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
         <Grow>
           <DataGrid
             name='disposalItem'
-            onChange={value => formik?.setFieldValue('items', value)}
+            onChange={value => {
+              formik?.setFieldValue('items', value)
+              triggerReCal()
+            }}
             maxAccess={maxAccess}
             value={formik?.values?.items}
             error={formik?.errors?.items}
+            enableFilters
+            showCounterColumn={true}
             columns={columns}
+            allowAddNewLine={!isPosted}
+            allowDelete={!isPosted}
+            disabled={isPosted}
           />
         </Grow>
         <Fixed>
           <Grid container spacing={2} justifyContent='flex-end'>
             <Grid item xs={3}>
+              <CustomNumberField name='totalPcs' value={totalPcs} label={labels.totalPcs} readOnly />
+            </Grid>
+            <Grid item xs={3}>
               <CustomNumberField name='totalQty' value={totalQty} label={labels.totalQty} readOnly />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='totalPcs' value={totalPcs} label={labels.totalPcs} readOnly />
+              <CustomNumberField name='totalCost' value={totalCost} label={labels.totalCost} readOnly />
             </Grid>
           </Grid>
         </Fixed>

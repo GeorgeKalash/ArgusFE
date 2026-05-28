@@ -43,7 +43,7 @@ const HREmployeeChart = () => {
       name: item.parent?.fullName || '',
       parent: item.reportToName || '',
       position: item.position?.name || labels.employee,
-      picture: require('@argus/shared-ui/src/components/images/icons/project-icons/defaultEmp.png').default.src,
+      picture: '/images/icons/project-icons/defaultEmp.png',
       tooltip: "''"
     }))
   }

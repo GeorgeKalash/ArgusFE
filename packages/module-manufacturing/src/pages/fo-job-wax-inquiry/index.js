@@ -114,7 +114,6 @@ const JobWaxInquiry = () => {
           columns={columns}
           gridData={data}
           rowId={['waxId']}
-          isLoading={false}
           pagination={false}
           maxAccess={access}
         />

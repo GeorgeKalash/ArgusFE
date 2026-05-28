@@ -15,13 +15,15 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialsTransferForm'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const IvMaterialsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -138,16 +140,25 @@ const IvMaterialsTransfer = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
       field: 'wipName',
       headerName: _labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     },
     {
       field: 'printStatusName',
       headerName: _labels.print,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {
@@ -168,21 +179,13 @@ const IvMaterialsTransfer = () => {
     openForm(obj?.recordId)
   }
 
-  function openOutWardsWindow(recordId) {
+  function openForm(recordId) {
     stack({
       Component: MaterialsTransferForm,
       props: {
         recordId
       }
     })
-  }
-
-  async function openForm(recordId) {
-    !plantId && !recordId
-      ? stackError({
-          message: platformLabels.noDefaultPlant
-        })
-      : openOutWardsWindow(recordId)
   }
 
   const del = async obj => {
@@ -207,7 +210,7 @@ const IvMaterialsTransfer = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

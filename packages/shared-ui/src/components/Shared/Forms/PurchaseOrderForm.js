@@ -58,11 +58,13 @@ import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDial
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function PurchaseOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [measurements, setMeasurements] = useState([])
   const filteredMeasurements = useRef([])
   const [reCal, setReCal] = useState(false)
@@ -76,8 +78,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
   useSetWindow({ title: labels.purchaseOrder, window })
 
-  const defPlId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defPlId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
@@ -429,7 +431,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       component: 'button',
       name: 'costHistory',
       props: {
-        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src,
+        imgSrc: '/images/buttonsIcons/popup-black.png',
         onCondition: row => {
           return {
             disabled: !row.itemId
@@ -463,7 +465,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {

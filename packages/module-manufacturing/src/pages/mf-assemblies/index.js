@@ -93,6 +93,9 @@ const Assembly = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -168,7 +171,6 @@ const Assembly = () => {
           refetch={refetch}
           onDelete={delASM}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

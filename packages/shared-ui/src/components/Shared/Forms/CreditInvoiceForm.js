@@ -35,18 +35,20 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const CreditInvoiceForm = ({ recordId, window }) => {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CreditInvoicePurchase)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const userData = getStorageData('userData').userId
-  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
-  const cashAccountId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value)
+  const cashAccountId = parseInt(userDefaults?.list?.find(({ key }) => key === 'cashAccountId')?.value)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.CreditInvoice,

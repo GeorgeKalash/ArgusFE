@@ -50,19 +50,21 @@ import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
   const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
-  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+  const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesQuotation,
@@ -250,7 +252,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   })
 
   const editMode = !!formik.values.recordId
-  const isRaw = formik.values.status === 1
+  const isReleased = formik.values.status == 4
+  const isClosed = formik.values.wip == 2
 
   async function getFilteredMU(itemId, msId = null) {
     if (!itemId) return
@@ -477,7 +480,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {
@@ -635,6 +638,28 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     })
   }
 
+  const onClose = async () => {
+    const res = await postRequest({
+      extension: SaleRepository.SalesQuotations.close,
+      record: JSON.stringify({ recordId: formik?.values?.recordId })
+    })
+
+    toast.success(platformLabels.Closed)
+    invalidate()
+    refetchForm(res.recordId)
+  }
+
+  const onReopen = async () => {
+    const res = await postRequest({
+      extension: SaleRepository.SalesQuotations.reopen,
+      record: JSON.stringify({ recordId: formik?.values?.recordId })
+    })
+
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    refetchForm(res.recordId)
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -652,20 +677,38 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       key: 'Invoice',
       condition: true,
       onClick: toInvoice,
-      disabled: !(editMode && isRaw)
+      disabled: !editMode || !isReleased
     },
     {
       key: 'Order',
       condition: true,
       onClick: toOrder,
-      disabled: !(editMode && isRaw)
+      disabled: !editMode || !isReleased
     },
     {
       key: 'Consignments',
       condition: true,
       onClick: toConsignments,
-      disabled: !(editMode && isRaw)
-    }
+      disabled: !editMode || !isReleased
+    },
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode
+    },
   ]
 
   async function fillForm(sqHeader, sqItems, clientDiscount) {
@@ -768,14 +811,14 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     formik.setFieldValue('shipAddress', shipAdd || '')
   }
   async function fillShipment(recordId) {
-    if (!recordId) return
+    if (!recordId) return formik.setFieldValue('shipAddress', null)
 
     const res = await getRequest({
       extension: BusinessPartnerRepository.BPAddress.qry,
       parameters: `_bpId=${recordId}&_filter=`
     })
 
-    const shipId = res?.list[0].addressId
+    const shipId = res?.list?.[0]?.addressId
     const shipAdd = await getAddress(shipId)
     formik.setFieldValue('shipAddress', shipAdd || '')
   }
@@ -1111,7 +1154,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     const systemKeys = ['siteId', 'salesTD', 'plId']
     const userKeys = ['plantId', 'siteId', 'spId']
 
-    const systemObject = (defaultsData?.list || []).reduce((acc, { key, value }) => {
+    const systemObject = (systemDefaults?.list || []).reduce((acc, { key, value }) => {
       if (systemKeys.includes(key)) {
         acc[key] = value === 'True' || value === 'False' ? value : value ? parseInt(value) : null
       }
@@ -1119,7 +1162,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       return acc
     }, {})
 
-    const userObject = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+    const userObject = (userDefaults?.list || []).reduce((acc, { key, value }) => {
       if (userKeys.includes(key)) {
         acc[key] = value ? parseInt(value) : null
       }
@@ -1225,8 +1268,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       previewReport={editMode}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={!isRaw}
-      disabledSavedClear={!isRaw}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -1276,7 +1318,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     name='clientId'
                     label={labels.client}
                     form={formik}
-                    readOnly={formik?.values?.bpId || formik?.values?.items?.some(item => item.itemId)}
+                    readOnly={formik?.values?.bpId || formik?.values?.items?.some(item => item.itemId) || isClosed}
                     displayFieldWidth={4}
                     valueShow='clientRef'
                     secondValueShow='clientName'
@@ -1311,7 +1353,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       })
                     }}
                     image='popup.png'
-                    disabled={!(editMode && isRaw && formik.values.clientId)}
+                    disabled={!(editMode && !isReleased && formik.values.clientId) || isClosed}
                     tooltipText={platformLabels.editClient}
                   />
                 </Grid>
@@ -1330,7 +1372,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.lead}
                     form={formik}
                     required={!formik.values.clientId}
-                    readOnly={formik?.values?.clientId || formik?.values?.items?.some(item => item.itemId)}
+                    readOnly={formik?.values?.clientId || formik?.values?.items?.some(item => item.itemId) || isClosed}
                     displayFieldWidth={3}
                     valueShow='bpRef'
                     secondValueShow='bpName'
@@ -1363,7 +1405,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       { key: 'spRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={!isRaw}
+                    readOnly={isClosed}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
@@ -1382,7 +1424,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     value={formik?.values?.date}
                     onChange={formik.setFieldValue}
                     editMode={editMode}
-                    readOnly={!isRaw}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
@@ -1416,7 +1458,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.saleZone}
                     valueField='recordId'
                     displayField='name'
-                    readOnly={!isRaw}
+                    readOnly={isClosed}
                     values={formik.values}
                     displayFieldWidth={1.5}
                     onChange={(_, newValue) => {
@@ -1441,7 +1483,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       { key: 'name', value: 'Name' }
                     ]}
                     required
-                    readOnly={formik?.values?.items?.some(item => item.itemId)}
+                    readOnly={formik?.values?.items?.some(item => item.itemId) || isClosed}
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
@@ -1457,7 +1499,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
                     label={labels.plant}
-                    readOnly={!isRaw}
+                    readOnly={isClosed}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -1477,7 +1519,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
-                    readOnly={!isRaw}
+                    readOnly={isClosed}
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1520,7 +1562,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     readOnly
                     disabled={formik.values.exWorks}
                     maxAccess={maxAccess}
-                    viewDropDown={formik.values.clientId || formik.values.bpId}
+                    viewDropDown={!isClosed && formik.values.clientId || formik.values.bpId}
                     viewAdd={(formik.values.clientId || formik.values.bpId) && !editMode}
                     onChange={e => formik.setFieldValue('shipAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('shipAddress', null)}
@@ -1534,7 +1576,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.validity}
                     value={formik?.values?.validity}
                     maxAccess={maxAccess}
-                    readOnly={!isRaw}
+                    readOnly={isClosed}
                     onChange={e => {
                       formik.handleChange(e)
                       if (e.target.value) {
@@ -1582,8 +1624,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            disabled={(!formik.values.clientId && !formik.values.bpId) || !isRaw}
-            allowDelete={isRaw}
+            disabled={(!formik.values.clientId && !formik.values.bpId) || isClosed}
+            allowDelete={!isClosed}
+            allowAddNewLine={!isClosed}
           />
         </Grow>
         <Fixed>
@@ -1596,7 +1639,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   value={formik.values.description}
                   rows={3}
                   editMode={editMode}
-                  readOnly={!isRaw}
+                  readOnly={isClosed}
                   maxAccess={maxAccess}
                   onChange={e => formik.setFieldValue('description', e.target.value)}
                   onClear={() => formik.setFieldValue('description', null)}
@@ -1613,7 +1656,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     value={formik?.values?.deliveryDate}
                     onChange={formik.setFieldValue}
                     editMode={editMode}
-                    readOnly={!isRaw}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('deliveryDate', null)}
                     error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
@@ -1660,7 +1703,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.discount}
                     value={formik.values.currentDiscount}
                     displayCycleButton={true}
-                    readOnly={!isRaw}
+                    readOnly={isClosed}
                     iconKey={cycleButtonState.text}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
@@ -1710,7 +1753,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.misc}
                     value={formik.values.miscAmount || 0}
                     decimalScale={2}
-                    readOnly={!isRaw}
+                    readOnly={isClosed}
                     onChange={e => formik.setFieldValue('miscAmount', e.target.value)}
                     onBlur={async () => {
                       setReCal(true)

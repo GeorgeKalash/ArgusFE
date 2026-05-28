@@ -61,7 +61,7 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
         />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab} maxAccess={access}>
-        <WorksheetTab store={store} labels={labels} maxAccess={access} />
+        <WorksheetTab store={store} labels={labels} maxAccess={access} setRefetchJob={setRefetchJob}/>
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab} maxAccess={access}>
         <OverheadTab store={store} labels={labels} maxAccess={access} />

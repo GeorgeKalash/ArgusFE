@@ -156,6 +156,9 @@ export default function CurrencyTrading() {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -173,7 +176,6 @@ export default function CurrencyTrading() {
           onDelete={del}
           gridData={data ? data : { list: [] }}
           rowId={['recordId']}
-          isLoading={false}
           refetch={refetch}
           deleteConfirmationType={'strict'}
           paginationParameters={paginationParameters}

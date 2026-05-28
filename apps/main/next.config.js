@@ -15,6 +15,7 @@ const allModules = [
   '@argus/module-purchase',
   '@argus/module-delivery',
   '@argus/module-sales',
+  '@argus/module-bt',
   '@argus/module-manufacturing',
   '@argus/repositories',
   '@argus/shared-domain',
@@ -54,7 +55,6 @@ console.log('✅ transpilePackages =', getTranspilePackages())
 const nextConfig = {
   trailingSlash: true,
   reactStrictMode: false,
-
   transpilePackages: getTranspilePackages(),
 
   experimental: {

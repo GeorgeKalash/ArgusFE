@@ -15,10 +15,12 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import SalesOrderForm from '@argus/shared-ui/src/components/Shared/Forms/SalesOrderForm'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SalesOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -48,6 +50,9 @@ const SalesOrder = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -86,6 +91,9 @@ const SalesOrder = () => {
     {
       field: 'dsName',
       headerName: labels.deliveryStatus,
+      type: 'badge',
+      family: 'delivery',
+      valueField: 'deliveryStatus',
       flex: 1
     },
     {
@@ -96,11 +104,17 @@ const SalesOrder = () => {
     {
       field: 'wipName',
       headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     },
     {
       field: 'printStatusName',
       headerName: labels.printStatus,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {
@@ -131,7 +145,7 @@ const SalesOrder = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'currencyId')
 
     return parseInt(defaultCurrency?.value)
   }
@@ -191,7 +205,6 @@ const SalesOrder = () => {
           refetch={refetch}
           onDelete={delSO}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

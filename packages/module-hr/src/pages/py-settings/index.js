@@ -17,10 +17,12 @@ import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollR
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 import { BenefitsRepository } from '@argus/repositories/src/repositories/BenefitsRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const PYSettings = () => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.PayrollSettings
@@ -30,7 +32,7 @@ const PYSettings = () => {
     ;(async function () {
       const myObject = {}
 
-      const filteredList = defaultsData?.list?.filter(obj => {
+      const filteredList = systemDefaults?.list?.filter(obj => {
         return (
           obj.key === 'ssId' ||
           obj.key === 'ssId_foreigners' ||
@@ -57,7 +59,7 @@ const PYSettings = () => {
       })
       formik.setValues(myObject)
     })()
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const { formik } = useForm({
     maxAccess: access,
@@ -100,7 +102,7 @@ const PYSettings = () => {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-      updateDefaults(data)
+      updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })

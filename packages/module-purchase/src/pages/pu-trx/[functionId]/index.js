@@ -13,13 +13,15 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import PurchaseTransactionForm from './PurchaseTransactionForm'
+import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/PurchaseTransactionForm'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import toast from 'react-hot-toast'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const PuTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -76,6 +78,9 @@ const PuTrx = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -171,7 +176,7 @@ const PuTrx = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'currencyId')
 
     return parseInt(defaultCurrency?.value) || null
   }
@@ -192,26 +197,13 @@ const PuTrx = () => {
     openForm(obj?.recordId)
   }
 
-  const getCorrectLabel = functionId => {
-    if (parseFloat(functionId) === SystemFunction.PurchaseInvoice) {
-      return labels.purchaseInvoice
-    } else if (parseFloat(functionId) === SystemFunction.PurchaseReturn) {
-      return labels.purchaseReturn
-    }
-  }
-
   async function openForm(recordId) {
     stack({
       Component: PurchaseTransactionForm,
       props: {
-        labels,
         recordId,
-        access,
         functionId
-      },
-      width: 1330,
-      height: 720,
-      title: getCorrectLabel(parseInt(functionId))
+      }
     })
   }
 
@@ -247,7 +239,6 @@ const PuTrx = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           refetch={refetch}

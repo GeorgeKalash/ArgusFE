@@ -15,6 +15,8 @@ const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
     `
   })
 
+  const visibleColumns = columns.filter(col => col.hide !== true)
+
   return (
     <VertLayout>
       <Grid item sx={{ m: 2 }}>
@@ -53,7 +55,7 @@ const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
           </Grid>
         )}
 
-        <PrintableTable columns={columns} rows={tableData} showOnScreen treeField='nodeName' firstColWidth='45%' />
+        <PrintableTable columns={visibleColumns} rows={tableData} showOnScreen treeField='nodeName' firstColWidth='45%' />
       </div>
     </VertLayout>
   )

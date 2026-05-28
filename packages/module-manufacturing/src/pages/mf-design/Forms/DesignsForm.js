@@ -20,7 +20,7 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import { useRefBehavior } from '@argus/shared-hooks/src/hooks/useReferenceProxy'
+import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function DesignsForm({ labels, access, store, setStore }) {
@@ -33,10 +33,10 @@ export default function DesignsForm({ labels, access, store, setStore }) {
     endpointId: ManufacturingRepository.Design.page
   })
 
-  const { changeDT, maxAccess } = useRefBehavior({
+  const { changeDT, maxAccess } = useFieldBehavior({
     access,
-    readOnlyOnEditMode: false,
-    name: 'reference'
+    fieldName: 'reference',
+    editMode: false
   })
 
   const { formik } = useForm({
@@ -50,7 +50,6 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       description: '',
       threeDDId: null,
       rubberId: null,
-      itemId: null,
       routingId: null,
       lineId: null,
       classId: null,
@@ -58,6 +57,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       stdWeight: 0,
       designerId: null,
       itemCategoryId: null,
+      itemGroupId: null,
       designerRef: '',
       designerName: '',
       isInactive: false
@@ -65,8 +65,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      itemId: yup.number().required()
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       const data = {
@@ -113,7 +112,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
           parameters: `_recordId=${res?.record?.groupId}`
         })
 
-        changeDT(res2.record)
+        changeDT(res2.record.nraId)
       }
 
       formik.setValues({
@@ -151,7 +150,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
-                      changeDT(newValue)
+                      changeDT(newValue?.nraId)
                     }}
                     error={formik.touched.groupId && Boolean(formik.errors.groupId)}
                     maxAccess={maxAccess}
@@ -160,7 +159,6 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                 <Grid item xs={12}>
                   <CustomTextField
                     name='reference'
-                    readOnly={editMode}
                     label={labels.reference}
                     value={formik.values.reference}
                     onChange={formik.handleChange}
@@ -207,32 +205,6 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={InventoryRepository.Item.snapshot}
-                    name='itemId'
-                    label={labels.sku}
-                    valueField='sku'
-                    displayField='name'
-                    valueShow='sku'
-                    secondValueShow='itemName'
-                    form={formik}
-                    required
-                    columnsInDropDown={[
-                      { key: 'sku', value: 'SKU' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('itemId', newValue?.recordId || null)
-                      formik.setFieldValue('itemName', newValue?.name || '')
-                      formik.setFieldValue('sku', newValue?.sku || '')
-                      formik.setFieldValue('itemCategoryId', newValue?.categoryId || null)
-                    }}
-                    displayFieldWidth={2}
-                    maxAccess={maxAccess}
-                    errorCheck={'itemId'}
-                  />
-                </Grid>
-                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.ProductionLine.qry}
                     parameters='_startAt=0&_pageSize=1000'
@@ -261,22 +233,41 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     name='itemCategoryId'
                     label={labels.category}
                     valueField='recordId'
-                    displayField={['reference', 'name']}
-                    readOnly
+                    displayField='name'
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('itemCategoryId', newValue?.recordId || null)}
+                    error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
                   />
                 </Grid>
-
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Group.qry}
+                    parameters='_startAt=0&_pageSize=1000'
+                    values={formik.values}
+                    name='itemGroupId'
+                    label={labels.itemGroup}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    displayFieldWidth={1}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('itemGroupId', newValue?.recordId || null)}
+                    error={formik.touched.itemGroupId && formik.errors.itemGroupId}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ManufacturingRepository.Routing.snapshot2}
                     parameters={{
-                      _lineId: formik.values.lineId || 0
+                      _lineId: 0
                     }}
                     valueField='reference'
                     displayField='name'
                     name='routingId'
                     label={labels.routing}
-                    readOnly={!formik.values.lineId}
                     form={formik}
                     minChars={2}
                     firstValue={formik.values.routingRef}

@@ -32,7 +32,7 @@ const VendorList = ({ store, labels, maxAccess }) => {
   const {
     query: { data },
     labels: _labels,
-    refetch
+    invalidate
   } = useResourceQuery({
     enabled: !!recordId,
     datasetId: ResourceIds.PriceList,
@@ -88,8 +88,7 @@ const VendorList = ({ store, labels, maxAccess }) => {
       extension: PurchaseRepository.PriceList.del,
       record: JSON.stringify(obj)
     })
-    refetch()
-
+    invalidate()
     toast.success(platformLabels.Deleted)
   }
 
@@ -127,13 +126,10 @@ const VendorList = ({ store, labels, maxAccess }) => {
           columns={columns}
           gridData={data}
           rowId={['vendorId', 'currencyId']}
-          isLoading={false}
-          pageSize={50}
           onEdit={edit}
           pagination={false}
           onDelete={delVendor}
           maxAccess={maxAccess}
-          height={200}
         />
       </Grow>
     </VertLayout>

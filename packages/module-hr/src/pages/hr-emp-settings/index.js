@@ -15,10 +15,12 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import * as yup from 'yup'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const EmpSettings = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.EmpSettings
@@ -26,11 +28,6 @@ const EmpSettings = () => {
 
   useEffect(() => {
     ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: `_filter=`
-      })
-
       const keysToExtract = [
         'nameFormat',
         'passportCombo',
@@ -43,7 +40,7 @@ const EmpSettings = () => {
 
       const myObject = {}
 
-      for (const { key, value } of res.list) {
+      for (const { key, value } of systemDefaults.list) {
         if (keysToExtract.includes(key)) {
           myObject[key] = value ? parseInt(value) : null
 
@@ -101,6 +98,8 @@ const EmpSettings = () => {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
+      
+      updateSystemDefaults(data)
 
       if (obj.nameFormat !== obj.firstNameFormat) {
         await postRequest({

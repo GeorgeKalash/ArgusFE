@@ -18,7 +18,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateFromISO, formatDateToApi, formatDateToISO } from '@argus/shared-domain/src/lib/date-helper'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
@@ -31,10 +31,15 @@ import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import ImportTransfer from '@argus/shared-ui/src/components/Shared/Forms/ImportTransfer'
+import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults, systemChecks } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const filteredMeasurements = useRef([])
@@ -53,8 +58,9 @@ export default function MaterialsTransferForm({ recordId, window }) {
     access,
     enabled: !recordId
   })
-  const siteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = userDefaults?.list?.find(({ key }) => key === 'siteId')
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
   const initialValues = {
     recordId: null,
@@ -65,7 +71,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     date: new Date(),
     closedDate: null,
     receivedDate: null,
-    fromSiteId: parseInt(siteId?.value || null),
+    fromSiteId: parseInt(siteId?.value) || null,
     toSiteId: null,
     notes: '',
     status: 1,
@@ -77,6 +83,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     wip: 1,
     carrierId: null,
     plId: null,
+    disableSKULookup: false,
     transfers: [
       {
         id: 1,
@@ -96,6 +103,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         msId: null,
         trackBy: null,
         lotCategoryId: null,
+        caName: '',
         metalId: null,
         metalRef: '',
         totalCost: 0,
@@ -159,8 +167,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
       delete copy.transfers
       delete copy.serials
       copy.date = !!copy.date ? formatDateToApi(copy.date) : null
-      copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
-      copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
+      copy.closedDate = !!copy.closedDate ? formatDateToISO(copy.closedDate) : null
+      copy.receivedDate = !!copy.receivedDate ? formatDateToISO(copy.receivedDate) : null
 
       const serialsValues = []
 
@@ -260,7 +268,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
   }
 
   function calcTotalCost(rec) {
-    console.log(rec)
     if (rec.priceType === 1) return (Math.round(rec.qty * rec.unitCost * 100) / 100).toFixed(2)
     else if (rec.priceType === 2) return (Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100).toFixed(2)
     else if (rec.priceType === 3) return (Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100).toFixed(2)
@@ -279,12 +286,23 @@ export default function MaterialsTransferForm({ recordId, window }) {
     if (dtId) {
       const res = await getDTD(dtId)
 
-      formik.setFieldValue('toSiteId', res?.record?.toSiteId || null)
-      formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId || null)
-      formik.setFieldValue('carrierId', res?.record?.carrierId)
-      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
+      !recordId && formik.setFieldValue('toSiteId', res?.record?.toSiteId || null)
+      !recordId && formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId || null)
+      !recordId && formik.setFieldValue('carrierId', res?.record?.carrierId)
+      !recordId && formik.setFieldValue('plantId', res?.record?.plantId || plantId)
     }
   }
+
+  useEffect(() => {
+    if (!formik?.values?.dtId) {
+      formik.setFieldValue('disableSKULookup', false)
+
+      return
+    }
+
+    if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
     (acc, row) => {
@@ -329,7 +347,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
+        imgSrc: '/images/TableIcons/imgSerials.png',
         hidden: false
       }
     } else {
@@ -340,11 +358,46 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
   }
 
+  const fillSkuData = async (newRow, update, addRow) => {
+    const itemIdValue = formik.values.disableSKULookup ? newRow?.recordId : newRow?.itemId
+    const itemNameValue = formik.values.disableSKULookup ? newRow?.name : newRow?.itemName
+
+    if (itemIdValue) {
+      const { weight, metalId, metalRef } = await getWeightAndMetalId(itemIdValue)
+      const unitCost = (await getUnitCost(itemIdValue)) ?? 0
+      const totalCost = calcTotalCost(newRow)
+      const itemInfo = await getItem(itemIdValue)
+      getFilteredMU(itemIdValue)
+      const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+
+      const data = {
+        qty: jumpToNextLine ? 1 : 0,
+        sku: newRow.sku,
+        itemId: itemIdValue,
+        itemName: itemNameValue,
+        weight,
+        unitCost,
+        totalCost,
+        msId: itemInfo?.msId,
+        caName: itemInfo?.categoryName,
+        muRef: filteredMeasurements?.[0]?.reference,
+        muId: filteredMeasurements?.[0]?.recordId,
+        metalId,
+        metalRef,
+        priceType: newRow?.priceType
+      }
+
+      update(data)
+      if (jumpToNextLine) await addRow()
+    }
+  }
+
   const columns = [
     {
-      component: 'resourcelookup',
+      component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      jumpToNextLine,
       link: {
         enabled: true,
         popup: row =>  stack({
@@ -354,34 +407,35 @@ export default function MaterialsTransferForm({ recordId, window }) {
             plId: formik.values?.plId
           }
         })
-      }, 
+      },
+      ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'sku',
-        displayField: 'sku',
-        mandatory: true,
-        readOnly: isClosed,
-        displayFieldWidth: 4,
-        mapping: [
-          { from: 'recordId', to: 'itemId' },
-          { from: 'msId', to: 'msId' },
-          { from: 'trackBy', to: 'trackBy' },
-          { from: 'lotCategoryId', to: 'lotCategoryId' },
-          { from: 'priceType', to: 'priceType' },
-          { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' },
-          { from: 'isInactive', to: 'isInactive' }
-        ],
-        columnsInDropDown: [
-          { key: 'sku', value: 'SKU' },
-          { key: 'name', value: 'Name' },
-          { key: 'flName', value: 'flName' }
-        ]
+         ...(!formik.values.disableSKULookup && {
+          endpointId: InventoryRepository.Item.snapshot,
+          valueField: 'sku',
+          displayField: 'sku',
+          displayFieldWidth: 4,
+          mapping: [
+            { from: 'recordId', to: 'itemId' },
+            { from: 'msId', to: 'msId' },
+            { from: 'trackBy', to: 'trackBy' },
+            { from: 'lotCategoryId', to: 'lotCategoryId' },
+            { from: 'priceType', to: 'priceType' },
+            { from: 'sku', to: 'sku' },
+            { from: 'name', to: 'itemName' },
+            { from: 'isInactive', to: 'isInactive' }
+          ],
+          columnsInDropDown: [
+            { key: 'sku', value: 'SKU' },
+            { key: 'name', value: 'Name' },
+            { key: 'flName', value: 'flName' }
+          ]
+        })
       },
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
       },
-      async onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
         const resetRow = () => {
          update({
             ...formik.initialValues.transfers[0],
@@ -389,41 +443,64 @@ export default function MaterialsTransferForm({ recordId, window }) {
           })
         }
 
-        if (!newRow?.itemId) return resetRow()
+        if (!formik.values.disableSKULookup) {
+          if (!newRow?.itemId) {
+            return resetRow()
+          }
 
-        if (newRow.isInactive) {
+          if (newRow.isInactive) {
+            resetRow()
+            stackError({
+              message: labels.inactiveItem
+            })
+
+            return
+          }
+
+          return fillSkuData(newRow, update, addRow)
+        }
+
+        if (!newRow?.sku) return resetRow()
+        
+        const skuInfo = await getRequest({
+          extension: InventoryRepository.Items.get2,
+          parameters: `_sku=${newRow.sku}`
+        })
+
+        const record = skuInfo?.record
+
+        if (!record) {
           resetRow()
-          stackError({
-            message: labels.inactiveItem
-          })
+          stackError({ message: labels.invalidSKU })
 
           return
         }
 
-        if (newRow?.itemId) {
-          const { weight, metalId, metalRef } = await getWeightAndMetalId(newRow?.itemId)
-          const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
-          const totalCost = calcTotalCost(newRow)
-          const itemInfo = await getItem(newRow.itemId)
-          getFilteredMU(newRow?.itemId)
-          const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-          update({
-            weight,
-            unitCost,
-            totalCost,
-            msId: itemInfo?.msId,
-            muRef: filteredMeasurements?.[0]?.reference,
-            muId: filteredMeasurements?.[0]?.recordId,
-            metalId,
-            metalRef
-          })
+        if (record.isInactive) {
+          resetRow()
+          stackError({ message: labels.inactiveItem })
+
+          return
         }
+
+        return fillSkuData({
+          ...record,
+          itemId: record.recordId
+        }, update, addRow)
       }
     },
     {
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.categoryName,
+      name: 'caName',
       props: {
         readOnly: true
       }
@@ -540,28 +617,36 @@ export default function MaterialsTransferForm({ recordId, window }) {
     })
 
     res.record.date = formatDateFromApi(res?.record?.date)
-    res.record.closedDate = formatDateFromApi(res?.record?.closedDate)
-    res.record.receivedDate = formatDateFromApi(res?.record?.receivedDate)
+    res.record.closedDate = formatDateFromISO(res?.record?.closedDate)
+    res.record.receivedDate = formatDateFromISO(res?.record?.receivedDate)
 
     return res
   }
 
   async function refetchForm(recordId, refetchSerials) {
     const res = await getData(recordId)
+    if (!!formik.values.notificationGroupId) handleNotificationSubmission(recordId, res.record.reference, formik, 1)
+    const updatedTransfers = await fillDetails(recordId, refetchSerials)
 
-    if (!!formik.values.notificationGroupId) {
-      handleNotificationSubmission(recordId, res.record.reference, formik, 1)
-    }
+    formik.setValues({
+      ...res.record,
+      recordId,
+      disableSKULookup: formik.values.disableSKULookup,
+      transfers: updatedTransfers,
+      notificationGroupId: formik.values.notificationGroupId,
+      serials: serials?.current?.list
+    })
+  }
 
-    const res3 = await getDataGrid(recordId, refetchSerials)
+  async function fillDetails(recordId, refetchSerials){
+    const detailsResp = await getDataGrid(recordId, refetchSerials)
 
-    const updatedTransfers = await Promise.all(
-      res3.list.map(async item => {
+    return await Promise.all(
+      detailsResp?.list.map(async item => {
         return {
           ...item,
           id: item.seqNo,
           totalCost: calcTotalCost(item),
-
           serials: serials?.current?.list
             ?.filter(row => row.seqNo == item.seqNo)
             ?.map((serialDetail, index) => {
@@ -574,12 +659,14 @@ export default function MaterialsTransferForm({ recordId, window }) {
         }
       })
     )
+  }
 
+  async function onImport(recordId, refetchSerials){
+    const transfers = await fillDetails(recordId, refetchSerials)
     formik.setValues({
-      ...res.record,
-      recordId,
-      transfers: updatedTransfers,
-      notificationGroupId: formik.values.notificationGroupId
+      ...formik.values,
+      transfers,
+      serials: serials?.current?.list
     })
   }
 
@@ -674,7 +761,101 @@ export default function MaterialsTransferForm({ recordId, window }) {
     await refetchForm(formik.values.recordId)
   }
 
-  const actions = [
+  const onVerify = async () => {
+    await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.verify,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+    invalidate()
+    window.close()
+  }
+  
+  const hasInvalidQty = formik.values.transfers?.some(
+    item => Number(item.qty) == 0
+  )
+
+  const onCopy = async () => {
+     if (hasInvalidQty) {
+      stackError({ message: labels.qtyException })
+
+      return
+    }
+
+    const header = { ...formik.values }
+    delete header.transfers
+    delete header.serials
+
+    const payload = {
+      header,
+      items: formik.values?.transfers || [],
+      serials: formik.values?.serials || [],
+      lots: []
+
+    }
+    
+    const res = await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.clone,
+      record: JSON.stringify(payload)
+    })
+
+    toast.success(platformLabels.Copied)
+    refetchForm(res?.recordId)
+    invalidate()
+  }
+
+  const onReturn = async () => {
+    if (formik.values?.fromSiteId == formik.values?.toSiteId) {
+      stackError({
+        message: labels.errorMessage
+      })
+
+      return
+    }
+
+    if (hasInvalidQty) {
+      stackError({ message: labels.qtyException })
+
+      return
+    }
+
+    const header = { ...formik.values }
+    delete header.transfers
+    delete header.serials
+
+    const payload = {
+      header,
+      items: formik.values?.transfers || [],
+      serials: formik.values?.serials || [],
+      lots: []
+
+    }
+
+    const res = await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.return,
+      record: JSON.stringify(payload)
+    })
+
+    toast.success(platformLabels.Returned)
+    refetchForm(res?.recordId)
+    invalidate()
+  }
+
+  const handleMetalClick = async () => {
+   return (formik.values?.transfers || [])
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+  }
+
+   const actions = [
     {
       key: 'RecordRemarks',
       condition: true,
@@ -699,13 +880,13 @@ export default function MaterialsTransferForm({ recordId, window }) {
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || !isClosed || formik.values.isVerified
+      disabled: !editMode || (!isPosted ? !isClosed : formik.values.isVerified )
     },
     {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || !isClosed || formik.values.isVerified
+      disabled: !editMode || (!isPosted ? !isClosed : formik.values.isVerified )
     },
     {
       key: 'Close',
@@ -724,6 +905,36 @@ export default function MaterialsTransferForm({ recordId, window }) {
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Copy',
+      condition: true,
+      onClick: onCopy,
+      disabled: !isPosted
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
+    },
+    {
+      key: 'Return',
+      condition: true,
+      onClick: onReturn,
+      disabled: !isPosted
     }
   ]
 
@@ -735,6 +946,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
   }
 
   async function getDataGrid(recordId, refetchSerials) {
+    if (!recordId) return
+    
     const response = await getRequest({
       extension: InventoryRepository.MaterialsTransferItems.qry,
       parameters: `_transferId=${recordId}&_functionId=${SystemFunction.MaterialTransfer}`
@@ -742,9 +955,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
 
     if (response?.list && refetchSerials) {
       const response2 = await getSerials(recordId)
-      if (response2?.count) {
-        serials.current = response2
-      }
+      if (response2?.count) serials.current = response2
+      else serials.current = []
     }
 
     return response
@@ -769,34 +981,14 @@ export default function MaterialsTransferForm({ recordId, window }) {
     ;(async function () {
       if (recordId) {
         const res = await getData(recordId)
-
         const resNotification = await getNotificationData(recordId)
-
-        const res3 = await getDataGrid(recordId, true)
-
-        const updatedTransfers = await Promise.all(
-          res3.list.map(async item => {
-            return {
-              ...item,
-              id: item.seqNo,
-              totalCost: calcTotalCost(item),
-              serials: serials?.current?.list
-                ?.filter(row => row.seqNo == item.seqNo)
-                ?.map((serialDetail, index) => {
-                  return {
-                    ...serialDetail,
-                    id: index
-                  }
-                }),
-              unitCost: item.unitCost ?? 0
-            }
-          })
-        )
+        const updatedTransfers = await fillDetails(recordId, true)
 
         formik.setValues({
           ...res.record,
           transfers: updatedTransfers,
-          notificationGroupId: resNotification?.record?.notificationGroupId
+          notificationGroupId: resNotification?.record?.notificationGroupId,
+          serials: serials?.current?.list
         })
       }
     })()
@@ -826,6 +1018,24 @@ export default function MaterialsTransferForm({ recordId, window }) {
     invalidate()
   }
 
+  async function onValidationRequired() {
+    if (Object.keys(await formik.validateForm()).length) {
+      const errors = await formik.validateForm()
+
+      const touchedFields = Object.keys(errors).reduce((acc, key) => {
+        if (!formik.touched[key]) {
+          acc[key] = true
+        }
+
+        return acc
+      }, {})
+
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(touchedFields, true)
+      }
+    }
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.MaterialsTransfer}
@@ -850,14 +1060,15 @@ export default function MaterialsTransferForm({ recordId, window }) {
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isPosted || isClosed || editMode}
+                    readOnly={editMode || formik?.values?.transfers?.some(transfer => transfer.sku)}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
                     onChange={async (_, newValue) => {
-                      onChangeDT(newValue?.recordId)
-                      formik.setFieldValue('dtId', newValue?.recordId || '')
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                      
                       changeDT(newValue)
+
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     maxAccess={maxAccess}
@@ -940,7 +1151,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
                 </Grid>
               </Grid>
               <Grid container spacing={2} marginTop={0.5}>
-                <Grid item xs={6}>
+                <Grid item xs={5}>
                   <ResourceComboBox
                     endpointId={LogisticsRepository.LoCarrier.qry}
                     name='carrierId'
@@ -958,6 +1169,26 @@ export default function MaterialsTransferForm({ recordId, window }) {
                       formik.setFieldValue('carrierId', newValue ? newValue.recordId : '')
                     }}
                     error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
+                  />
+                </Grid>
+                <Grid item xs={1}>
+                  <CustomButton
+                    onClick={() => {
+                      stack({
+                        Component: ImportTransfer,
+                        props: {
+                          labels,
+                          maxAccess,
+                          onImport
+                        },
+                        width: 600,
+                        height: 350,
+                        title: labels.import
+                      })
+                    }}
+                    tooltipText={platformLabels.import}
+                    image={'import.png'}
+                    disabled={editMode}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -1039,12 +1270,18 @@ export default function MaterialsTransferForm({ recordId, window }) {
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
+            initialValues={formik?.initialValues?.transfers[0]}
+            enableFilters
             name='transfers'
             maxAccess={maxAccess}
+            showCounterColumn={true}
             value={formik?.values?.transfers}
             error={formik?.errors?.transfers}
             columns={columns}
             allowDelete={!isClosed}
+            allowAddNewLine={!isClosed}
+            disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'transfers').length > 0}
+            onValidationRequired={onValidationRequired}
           />
         </Grow>
         <Fixed>
@@ -1101,5 +1338,5 @@ export default function MaterialsTransferForm({ recordId, window }) {
   )
 }
 
-MaterialsTransferForm.width = 1000
+MaterialsTransferForm.width = 1200
 MaterialsTransferForm.height = 680

@@ -109,7 +109,6 @@ const Agent = () => {
           onEdit={edit}
           refetch={refetch}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'

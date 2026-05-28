@@ -1,7 +1,7 @@
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import SearchIcon from '@mui/icons-material/Search'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import inputs from '../Inputs.module.css'
 
@@ -48,14 +48,17 @@ const CustomTextField = ({
 
   const [focus, setFocus] = useState(!hasBorder)
   const [isFocused, setIsFocused] = useState(false)
-  const [hasValue, setHasValue] = useState(Boolean(value))
+
+  const [hasValue, setHasValue] = useState(
+    value !== null && value !== undefined && String(value).length > 0
+  )
 
   useEffect(() => {
-    setHasValue(Boolean(value && value.length > 0))
+    setHasValue(value !== null && value !== undefined && String(value).length > 0)
   }, [value])
 
   useEffect(() => {
-    if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
+    if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && String(value).length < 1) {
       inputRef.current.focus()
     }
   }, [value])
@@ -91,6 +94,11 @@ const CustomTextField = ({
   const handleInput = e => {
     const inputValue = e.target.value
 
+    if (props?.preventSpace) {
+      e.target.value = inputValue.replace(/\s/g, '')
+      props?.onChange(e)
+    }
+
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
       const truncatedValue = inputValue.slice(0, maxLength)
       e.target.value = truncatedValue
@@ -98,8 +106,12 @@ const CustomTextField = ({
     }
 
     if (phone) {
-      const truncatedValue = inputValue.slice(0, maxLength)
-      e.target.value = truncatedValue?.replace(/[^\d+]/g, '')
+      let count = 0
+      e.target.value = inputValue
+        .replace(/[^\d+\s]/g, '')
+        .split('')
+        .filter(char => char === ' ' || count++ < maxLength)
+        .join('')
       props?.onChange(e)
     }
 
@@ -124,7 +136,14 @@ const CustomTextField = ({
     if (autoFocus && inputRef.current && value == '' && !focus) {
       inputRef.current.focus()
     }
-  }, [autoFocus, inputRef.current, value])
+  }, [autoFocus, value, focus])
+
+  const hasStartAdornment = Boolean(props.InputProps?.startAdornment || startIcons.length > 0)
+
+  const labelOffset = useMemo(() => {
+    if (!hasStartAdornment) return 14
+    return size === 'small' ? 42 : 46
+  }, [hasStartAdornment, size])
 
   const dynamicStartAdornment =
     props.InputProps?.startAdornment || startIcons.length > 0 ? (
@@ -132,11 +151,7 @@ const CustomTextField = ({
         {props.InputProps?.startAdornment}
         {startIcons.map((iconBtn, index) => (
           <InputAdornment key={index} position='start'>
-            {iconBtn && (
-              <IconButton className={inputs.iconButton} tabIndex={-1}>
-                {iconBtn}
-              </IconButton>
-            )}
+            {iconBtn}
           </InputAdornment>
         ))}
       </>
@@ -156,12 +171,14 @@ const CustomTextField = ({
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
       onBlur={() => {
-        setIsFocused(false), setFocus(false), setHasValue(Boolean(value && value.length > 0))
+        setIsFocused(false)
+        setFocus(false)
+        setHasValue(value !== null && value !== undefined && String(value).length > 0)
       }}
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
-        maxLength: maxLength,
+        ...(phone ? {} : { maxLength }),
         ...(dir ? { dir } : {}),
         inputMode: numberField && 'numeric',
         pattern: numberField && '[0-9]*',
@@ -194,7 +211,7 @@ const CustomTextField = ({
               </IconButton>
             )}
 
-            {(allowClear || (!clearable && !readOnly && (value || value === 0))) && onClear && (
+            {(allowClear || (!clearable && !_readOnly && (value || value === 0))) && onClear && (
               <IconButton
                 className={inputs.iconButton}
                 tabIndex={-1}
@@ -213,24 +230,33 @@ const CustomTextField = ({
               </IconButton>
             )}
 
-            {endIcons.map((iconBtn, _) => (
-              <>
-                {iconBtn && (
-                  <IconButton className={inputs.iconButton} tabIndex={-1}>
-                    {iconBtn}
-                  </IconButton>
-                )}
-              </>
-            ))}
+            {endIcons.map((iconBtn, index) =>
+              iconBtn ? (
+                <IconButton key={index} className={inputs.iconButton} tabIndex={-1}>
+                  {iconBtn}
+                </IconButton>
+              ) : null
+            )}
           </InputAdornment>
         )
       }}
       InputLabelProps={{
         ...InputLabelProps,
+        shrink: Boolean(InputLabelProps?.shrink || isFocused || hasValue),
         className:
           isFocused || value || InputLabelProps?.shrink
             ? inputs.inputLabelShrink
-            : inputs.inputLabel
+            : inputs.inputLabel,
+        sx: {
+          ...(InputLabelProps?.sx || {}),
+          ...(hasStartAdornment && {
+            transform: isFocused || hasValue || InputLabelProps?.shrink
+              ? undefined
+              : dir === 'rtl'
+                ? `translate(calc(100% - ${labelOffset}px), ${size === 'small' ? '9px' : '16px'}) scale(1)`
+                : `translate(${labelOffset}px, ${size === 'small' ? '9px' : '16px'}) scale(1)`
+          })
+        }
       }}
       required={_required}
       {...props}

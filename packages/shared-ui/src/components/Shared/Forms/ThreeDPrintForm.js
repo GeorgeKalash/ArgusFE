@@ -24,9 +24,6 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
-import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
-import ThreeDDesignForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
@@ -35,7 +32,6 @@ export default function ThreeDPrintForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const systemFunction = SystemFunction.ThreeDPrint
-  const { stack } = useWindow()
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.Printing,
@@ -91,6 +87,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
       date: yup.date().required(),
       threeDDId: yup.number().required(),
       machineId: yup.number().required(),
+      productionLineId: yup.number().required(),
       setPcs: yup.number().nullable()
     }),
     onSubmit: async values => {
@@ -163,40 +160,12 @@ export default function ThreeDPrintForm({ recordId, window }) {
     invalidate()
   }
 
-  async function getLabels(datasetId) {
-    const res = await getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: `_dataset=${datasetId}`
-    })
-
-    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
-  }
-
   const actions = [
     {
       key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted || !isReleased
-    },
-    {
-      key: 'threeDDesign',
-      condition: true,
-      onClick: async () => {
-        const threeDFormLabels = await getLabels(ResourceIds.ThreeDDesign)
-
-        stack({
-          Component: ThreeDDesignForm,
-          props: {
-            recordId: formik.values?.threeDDId,
-            labels: threeDFormLabels
-          },
-          width: 1200,
-          height: 700,
-          title: threeDFormLabels.ThreeDDesign
-        })
-      },
-      disabled: !formik.values.threeDDId
     },
     {
       key: 'Start',
@@ -234,6 +203,32 @@ export default function ThreeDPrintForm({ recordId, window }) {
     })
   }
 
+  async function load3dFields (values = {}) {
+    formik.setFieldValue('threeDDRef', values?.reference || '')
+    formik.setFieldValue('fileReference', values?.fileReference || '')
+    formik.setFieldValue('designerName', values?.designerName || '')
+    formik.setFieldValue('designerId', values?.designerId || '')
+    formik.setFieldValue('productionClassId', values?.productionClassId || null)
+    formik.setFieldValue('productionStandardId', values?.productionStandardId || null)
+    formik.setFieldValue('productionStandardRef', values?.productionStandardRef || '')
+    formik.setFieldValue('metalRef', values?.metalRef || '')
+    formik.setFieldValue('metalId', values?.metalId || null)
+    formik.setFieldValue('collectionName', values?.collectionName || '')
+    formik.setFieldValue('collectionId', values?.collectionId || null)
+    formik.setFieldValue('itemGroupName', values?.itemGroupName || '')
+    formik.setFieldValue('itemGroupId', values?.itemGroupId || null)
+    if (values?.recordId) {
+      const res = await getDesign(values?.recordId)
+      formik.setFieldValue('designFamilyId', res?.record?.designFamilyId || null)
+      formik.setFieldValue('designGroupId', res?.record?.designGroupId || null)
+    }
+    else {
+      formik.setFieldValue('designFamilyId', null)
+      formik.setFieldValue('designGroupId', null)
+    }
+    formik.setFieldValue('threeDDId', values?.recordId || null)
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.Printing}
@@ -260,12 +255,11 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
-                      if (!newValue?.recordId) {
-                        formik.setFieldValue('productionLineId', null)
-                      }
+                      load3dFields()
+                      if (!newValue?.recordId)  formik.setFieldValue('productionLineId', null)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     maxAccess={maxAccess}
@@ -313,6 +307,10 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     parameters={{
                       _productionLineId: formik.values.productionLineId || 0
                     }}
+                    linkOpen={{
+                      resourceId: ResourceIds.ThreeDDesign,
+                      props: { recordId: formik.values.threeDDId }
+                    }}
                     valueField='reference'
                     displayField='reference'
                     secondDisplayField={false}
@@ -326,30 +324,10 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     ]}
                     valueShow='threeDDRef'
                     maxAccess={maxAccess}
-                    readOnly={isPosted || isReleased}
+                    readOnly={!formik.values.productionLineId || isPosted || isReleased}
                     required
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('threeDDRef', newValue?.reference || '')
-                      formik.setFieldValue('fileReference', newValue?.fileReference || '')
-                      formik.setFieldValue('designerName', newValue?.designerName || '')
-                      formik.setFieldValue('designerId', newValue?.designerId || '')
-                      formik.setFieldValue('productionClassId', newValue?.productionClassId || null)
-                      formik.setFieldValue('productionStandardId', newValue?.productionStandardId || null)
-                      formik.setFieldValue('productionStandardRef', newValue?.productionStandardRef || '')
-                      formik.setFieldValue('metalRef', newValue?.metalRef || '')
-                      formik.setFieldValue('metalId', newValue?.metalId || null)
-                      formik.setFieldValue('collectionName', newValue?.collectionName || '')
-                      formik.setFieldValue('collectionId', newValue?.collectionId || null)
-                      formik.setFieldValue('itemGroupName', newValue?.itemGroupName || '')
-                      formik.setFieldValue('itemGroupId', newValue?.itemGroupId || null)
-
-                      if (newValue?.recordId) {
-                        const res = await getDesign(newValue?.recordId)
-                        formik.setFieldValue('designFamilyId', res?.record?.designFamilyId || null)
-                        formik.setFieldValue('designGroupId', res?.record?.designGroupId || null)
-                      }
-
-                      formik.setFieldValue('threeDDId', newValue?.recordId || null)
+                    onChange={(_, newValue) => {
+                      load3dFields(newValue)
                     }}
                     errorCheck={'threeDDId'}
                   />
@@ -439,6 +417,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     displayFieldWidth={1}
                     maxAccess={maxAccess}
                     readOnly
+                    required
                     error={formik.touched.productionLineId && formik.errors.productionLineId}
                   />
                 </Grid>

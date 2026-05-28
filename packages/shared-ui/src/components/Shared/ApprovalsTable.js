@@ -48,6 +48,7 @@ import PaymentOrdersForm from '@argus/shared-ui/src/components/Shared/Forms/Paym
 import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsumpForm'
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
 import CycleCountsWindow from '@argus/shared-ui/src/components/Shared/Forms/CycleCountsWindow'
+import FixingForm from '@argus/shared-ui/src/components/Shared/Forms/FixingForm'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -221,6 +222,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.StockCount:
         relevantComponent = CycleCountsWindow
+      case SystemFunction.FixingSales:
+      case SystemFunction.FixingPurchases:
+        relevantComponent = FixingForm
       default:
         break
     }
@@ -236,6 +240,7 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         Component: relevantComponent,
         props: {
           recordId: recordId,
+          functionId: obj.functionId,
           plantId: plantId,
           userData: userData
         }
@@ -322,7 +327,6 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
           gridData={data}
           rowId={['functionId', 'seqNo', 'recordId']}
           onEdit={openPopup}
-          isLoading={false}
           pageSize={pageSize}
           refetch={refetch}
           paginationParameters={paginationParameters}

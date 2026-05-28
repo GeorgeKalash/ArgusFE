@@ -141,7 +141,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('groupId', newValue ? newValue.recordId : '')
-                  changeDT(newValue)
+                  changeDT(newValue?.nraId)
                 }}
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                 maxAccess={maxAccess}

@@ -34,9 +34,7 @@ const CustomButton = ({
     setTooltip(null)
   }
 
-  const imageIcon =
-    image &&
-    require(`@argus/shared-ui/src/components/images/buttonsIcons/${image}`)
+  const imageIcon = image ? `/images/buttonsIcons/${image}` : null
 
   const isLabelOnly = !image && !icon && label
 
@@ -81,7 +79,7 @@ const CustomButton = ({
           ) : image ? (
             <img
               className={styles.buttonImage}
-              src={imageIcon.default.src}
+              src={imageIcon}
               alt={label}
             />
           ) : (

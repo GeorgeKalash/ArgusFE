@@ -19,10 +19,12 @@ import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const RetailTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
   const { addLockedScreen } = useContext(LockedScreensContext)
@@ -79,6 +81,9 @@ const RetailTrx = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -95,7 +100,7 @@ const RetailTrx = () => {
   }
 
   async function getDefaultCountry() {
-    const defaultCountry = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const defaultCountry = systemDefaults?.list?.find(({ key }) => key === 'countryId')
 
     return parseInt(defaultCountry?.value)
   }
@@ -117,6 +122,13 @@ const RetailTrx = () => {
   }
 
   async function fetchWithFilter({ filters, pagination }) {
+    if (!posObj?.current?.posId) {
+      stackError({
+        message: labels.noUserPos
+      })
+
+      return
+    }
     if (filters.qry)
       return await getRequest({
         extension: PointofSaleRepository.RetailInvoice.snapshot,
@@ -271,7 +283,6 @@ const RetailTrx = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           refetch={refetch}

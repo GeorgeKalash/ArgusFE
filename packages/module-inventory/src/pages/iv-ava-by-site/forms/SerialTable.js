@@ -55,7 +55,6 @@ const SerialTable = ({ labels, itemId, siteId }) => {
           columns={columns}
           gridData={data}
           rowId={['sku']}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           maxAccess={access}

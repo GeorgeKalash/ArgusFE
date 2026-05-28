@@ -145,12 +145,16 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotJOB',
     snapshot2: service + 'snapshotJOB2',
     snapshot3: service + 'snapshotJOB3',
+    snapshot4: service + 'snapshotJOB4',
     cancel: service + 'cancelJOB',
     post: service + 'postJOB',
     start: service + 'startJOB',
     stop: service + 'stopJOB',
     wip: service + 'wipJOB',
     sync: service + 'syncJOB'
+  },
+  GenerateAMC:{
+    generate: service + 'generateAMC'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -285,7 +289,8 @@ export const ManufacturingRepository = {
     qry: service + 'qryBMI',
     del: service + 'delBMI',
     set: service + 'setBMI',
-    set2: service + 'set2BMI'
+    set2: service + 'set2BMI',
+    preview: service + 'previewBMI'
   },
   Assembly: {
     get: service + 'getASM',
@@ -294,8 +299,7 @@ export const ManufacturingRepository = {
     page: service + 'pageASM',
     snapshot: service + 'snapshotASM',
     post: service + 'postASM',
-    unpost: service + 'unpostASM',
-    generate: service + 'genASM'
+    unpost: service + 'unpostASM'
   },
   AssemblyItems: {
     qry: service + 'qryASC'
@@ -401,9 +405,6 @@ export const ManufacturingRepository = {
     set: service + 'setIMD',
     qry: service + 'qryIMD'
   },
-  JobOrder: {
-    gen: service + 'genORD'
-  },
   RefreshPoItem: {
     refresh: service + 'refreshPOI'
   },
@@ -442,7 +443,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotDIS',
     get: service + 'getDIS',
     set2: service + 'set2DIS',
-    del: service + 'delDIS'
+    del: service + 'delDIS',
+    post: service + 'postDIS'
   },
   DisposalItem: {
     qry: service + 'qryDII'
@@ -471,5 +473,24 @@ export const ManufacturingRepository = {
     get: service + 'getDCA',
     del: service + 'delDCA',
     snapshot: service + 'snapshotDCA'
-  }
+  },
+  StandardCostParameters: {
+    qry: service + 'qrySCP',
+    page: service + 'pageSCP',
+    set: service + 'setSCP',
+    get: service + 'getSCP',
+    del: service + 'delSCP'
+  },
+  StandardCostUpdate: {
+    set2: service + 'set2SCU',
+    get2: service + 'get2SCU',
+    del: service + 'delSCU',
+    page: service + 'pageSCU',
+    snapshot: service + 'snapshotSCU',
+    post: service + 'postSCU',
+    unpost: service + 'unpostSCU',
+    pack: service + 'getPackSCU',
+    close: service + 'closeSCU',
+    reopen: service + 'reopenSCU'
+  },
 }

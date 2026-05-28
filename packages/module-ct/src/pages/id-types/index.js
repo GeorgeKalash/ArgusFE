@@ -116,7 +116,6 @@ const IdTypes = () => {
           refetch={refetch}
           onEdit={popup}
           onDelete={delCharacteristics}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />

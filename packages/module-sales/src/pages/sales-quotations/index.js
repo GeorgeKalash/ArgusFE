@@ -15,10 +15,12 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { useError } from '@argus/shared-providers/src/providers/error'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import SalesQuotationForm from './Tabs/SalesQuotationForm'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SalesQuotations = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -48,6 +50,9 @@ const SalesQuotations = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -92,6 +97,19 @@ const SalesQuotations = () => {
       field: 'description',
       headerName: labels.description,
       flex: 2
+    },
+    {
+      field: 'rsName',
+      headerName: labels.releaseStatus,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
+      flex: 1
     }
   ]
 
@@ -116,7 +134,7 @@ const SalesQuotations = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'currencyId')
 
     return parseInt(defaultCurrency?.value)
   }
@@ -181,7 +199,6 @@ const SalesQuotations = () => {
           refetch={refetch}
           onDelete={delSQ}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

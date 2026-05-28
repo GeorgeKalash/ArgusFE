@@ -11,6 +11,8 @@
     "next": "14.2.35"
   },
   "dependencies": {
+    "mathjs": "^15.1.1",
+    "mathlive": "^0.109.1",
     "slate": "^0.120.0",
     "slate-history": "^0.113.1",
     "slate-react": "^0.120.0"

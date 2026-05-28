@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
@@ -19,45 +19,50 @@ const ChartOfAccounts = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: GeneralLedgerRepository.ChartOfAccounts.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: GeneralLedgerRepository.ChartOfAccounts.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
   const {
     query: { data },
-    search,
-    clear,
     labels,
+    filterBy,
     paginationParameters,
-    refetch,
+    invalidate,
     access,
-    invalidate
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.ChartOfAccounts.page,
     datasetId: ResourceIds.ChartOfAccounts,
-    search: {
-      endpointId: GeneralLedgerRepository.ChartOfAccounts.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
 
-  async function fetchWithSearch({ options = {}, qry }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: GeneralLedgerRepository.ChartOfAccounts.snapshot,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${qry}`
-    })
-  }
-
   const columns = [
+    {
+      field: 'groupName',
+      headerName: labels.group,
+      flex: 1
+    },
     {
       field: 'accountRef',
       headerName: labels.accountRef,
@@ -69,15 +74,25 @@ const ChartOfAccounts = () => {
       flex: 1
     },
     {
-      field: 'description',
-      headerName: labels.description,
+      field: 'isConfidential',
+      headerName: labels.isConfidential,
+      type: 'checkbox'
+    },
+    {
+      field: 'sgName',
+      headerName: labels.securityGrp,
       flex: 1
     },
     {
       field: 'activeStatusName',
       headerName: labels.status,
       flex: 1
-    }
+    },
+    {
+      field: 'disableManualEntry',
+      headerName: labels.disableManualEntry,
+      type: 'checkbox'
+    },
   ]
 
   const del = async obj => {
@@ -115,14 +130,7 @@ const ChartOfAccounts = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={labels}
-          inputSearch={true}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'GLAC'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

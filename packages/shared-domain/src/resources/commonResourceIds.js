@@ -2,6 +2,8 @@ import { ResourceIds } from './ResourceIds'
 
 export const commonResourceIds = [
   ResourceIds.SalesInvoice,
+  ResourceIds.PurchaseInvoice,
+  ResourceIds.PurchaseReturn,
   ResourceIds.SalesOrder,
   ResourceIds.CashCountTransaction,
   ResourceIds.CashTransfer,
@@ -46,5 +48,9 @@ export const commonResourceIds = [
   ResourceIds.LeaveRequest,
   ResourceIds.Samples,
   ResourceIds.PayrollHeader,
-  ResourceIds.ItemDetails
+  ResourceIds.ItemDetails,
+  ResourceIds.TaxDetails,
+  ResourceIds.EmployeeFilter,
+  ResourceIds.FixingSales,
+  ResourceIds.ChangeVendor,
 ]

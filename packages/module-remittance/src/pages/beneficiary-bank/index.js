@@ -174,7 +174,6 @@ const BeneficiaryBank = () => {
           rowId={['beneficiaryId', 'clientId', 'seqNo']}
           onEdit={editBenBank}
           onDelete={delBenBank}
-          isLoading={false}
           pageSize={50}
           paginationType='client'
           refetch={refetch}

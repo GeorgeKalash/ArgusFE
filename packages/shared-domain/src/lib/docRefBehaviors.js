@@ -153,6 +153,10 @@ const documentType = async (
     }
     if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
   } else if (!nraId) {
+    reference = {
+      readOnly: true,
+      mandatory: false
+    }
     if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
   }
 

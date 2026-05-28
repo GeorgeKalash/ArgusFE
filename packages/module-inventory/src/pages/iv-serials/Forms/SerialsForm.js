@@ -45,7 +45,8 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
       designId: null,
       metalRef: null,
       metalPurity: null,
-      mfrSrlNo: null
+      mfrSrlNo: null,
+      nonMetalWeight: null
     },
     maxAccess,
     validateOnChange: true,
@@ -100,7 +101,7 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
 
       setStore(prevStore => ({
         ...prevStore,
-        recordId
+        recordId: res.record.srlNo
       }))
     }
   }
@@ -131,8 +132,37 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
     }
   }
 
+  async function onCopy(){
+    const data = {
+      ...formik.values,
+      productionDate: formik.values?.productionDate ? formatDateToApi(formik.values?.productionDate) : null,
+      admissionDate: formik.values?.admissionDate ? formatDateToApi(formik.values?.admissionDate) : null,
+      warrantyStartDate: formik.values?.warrantyStartDate ? formatDateToApi(formik.values?.warrantyStartDate) : null,
+      warrantyEndDate: formik.values?.warrantyEndDate ? formatDateToApi(formik.values?.warrantyEndDate) : null,
+      expirationDate: formik.values?.expirationDate ? formatDateToApi(formik.values?.expirationDate) : null
+    }
+
+    const res = await postRequest({
+      extension: InventoryRepository.Serial.clone,
+      record: JSON.stringify(data)
+    })
+
+    toast.success(platformLabels.Copied)
+    invalidate()
+    await fetchData(res?.recordId)
+  }
+  
+  const actions = [
+    {
+      key: 'Copy',
+      condition: true,
+      onClick: onCopy,
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.IVSerials} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.IVSerials} actions={actions} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -197,6 +227,15 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('weight', 0)}
                     error={formik.touched.weight && Boolean(formik.errors.weight)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='nonMetalWeight'
+                    label={labels.nonMetalWeight}
+                    value={formik.values.nonMetalWeight}
+                    maxAccess={maxAccess}
+                    readOnly
                   />
                 </Grid>
                 <Grid item xs={12}>

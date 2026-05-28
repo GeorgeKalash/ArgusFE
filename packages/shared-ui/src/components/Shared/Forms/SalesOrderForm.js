@@ -49,14 +49,16 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
   const filteredMeasurements = useRef([])
@@ -72,7 +74,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   useSetWindow({ title: labels.salesOrder, window })
 
-  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+  const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesOrder,
@@ -142,6 +144,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     weight: '',
     qty: 0,
     serializedAddress: '',
+    sourceId: null,
+    sourceNo: '',
     items: [
       {
         id: 1,
@@ -200,6 +204,11 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
+       sourceNo: yup.string().nullable().test( function (value) {
+        const { sourceId } = this.parent
+        return !(sourceId && !value)
+        }
+      ),
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
@@ -256,6 +265,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
+  const isReleased = formik.values.status == 4
 
   async function getFilteredMU(itemId, msId) {
     if (!itemId) return
@@ -285,7 +295,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const onCondition = row => {
     if (row.itemId && row.taxId) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
         hidden: false
       }
     } else {
@@ -389,7 +399,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           msId: itemInfo?.msId,
           muRef: defaultMu?.reference || '',
           muId: defaultMu?.recordId || null,
-          muQty: 0,
+          muQty: defaultMu?.qty || 0,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
@@ -483,7 +493,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const muQty = newRow?.muQty ?? filteredItems?.qty
 
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update({ ...data, baseQty: newRow?.qty * muQty })
+        update({ ...data, baseQty: parseFloat(newRow?.qty) * muQty })
       }
     },
     {
@@ -698,7 +708,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     copy.date = formatDateToApi(copy.date)
     copy.dueDate = formatDateToApi(copy.dueDate)
 
-    await postRequest({
+    const res = await postRequest({
       extension: SaleRepository.SalesOrder.postToInvoice,
       record: JSON.stringify(copy)
     })
@@ -706,6 +716,16 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     toast.success(platformLabels.Invoice)
     invalidate()
     window.close()
+
+    stack({
+      Component: SaleTransactionForm,
+      props: {
+        recordId: res.recordId,
+        functionId: SystemFunction.SalesInvoice,
+        getResourceId: () => ResourceIds.SalesInvoice,
+        lockRecord
+      }
+    })
   }
 
   async function onWorkFlowClick() {
@@ -774,7 +794,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       key: 'Invoice',
       condition: true,
       onClick: toInvoice,
-      disabled: !(formik.values.deliveryStatus === 1 && formik.values.status !== 3 && isClosed)
+      disabled: !isReleased
     },
     {
       key: 'generateProdOrder',
@@ -980,7 +1000,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       weight: newRow?.weight,
       unitPrice: newRow?.unitPrice || 0,
       upo: parseFloat(newRow?.upo) || 0,
-      qty: newRow?.qty,
+      qty: parseFloat(newRow?.qty),
       extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,
       mdType: newRow?.mdType,
@@ -1208,7 +1228,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     const systemKeys = ['siteId', 'salesTD', 'plId']
     const userKeys = ['plantId', 'siteId', 'spId']
 
-    const systemObject = (defaultsData?.list || []).reduce((acc, { key, value }) => {
+    const systemObject = (systemDefaults?.list || []).reduce((acc, { key, value }) => {
       if (systemKeys.includes(key)) {
         acc[key] = value === 'True' || value === 'False' ? value : value ? parseInt(value) : null
       }
@@ -1216,7 +1236,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       return acc
     }, {})
 
-    const userObject = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+    const userObject = (userDefaults?.list || []).reduce((acc, { key, value }) => {
       if (userKeys.includes(key)) {
         acc[key] = value ? parseInt(value) : null
       }
@@ -1340,6 +1360,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesOrder.pack}
                     reducer={response => response?.record?.documentTypes}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -1664,6 +1685,45 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     label={labels.overdraft}
                     maxAccess={access}
                   />
+                </Grid>
+                <Grid item container spacing={2}>
+                  <Grid item xs={6}>
+                    <ResourceComboBox
+                      endpointId={SaleRepository.SalesOrder.pack}
+                      reducer={response => response?.record?.sources}
+                      name='sourceId'
+                      label={labels.source}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      readOnly={isClosed}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      value={formik.values.sourceId}
+                      values={formik.values}
+                      displayFieldWidth={1.5}
+                      maxAccess={maxAccess}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('sourceNo', null)
+                        formik.setFieldValue('sourceId', newValue?.recordId || null)
+                      }}
+                      error={formik.touched.sourceId && Boolean(formik.errors.sourceId)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomTextField
+                      name='sourceNo'
+                      label={labels.sourceNo}
+                      value={formik.values.sourceNo}
+                      maxLength={20}
+                      onChange={formik.handleChange}
+                      readOnly={!formik.values.sourceId || isClosed}
+                      required={formik.values.sourceId}
+                      maxAccess={maxAccess}
+                      error={formik.touched.sourceNo && Boolean(formik.errors.sourceNo)}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>

@@ -1,5 +1,5 @@
-import { useState, useContext, useEffect } from 'react'
-import { Box, toast } from '@mui/material'
+import { useContext } from 'react'
+import { toast } from '@mui/material'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -11,17 +11,17 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const ApproverList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
-
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData() {
     const response = await getRequest({
       extension: DocumentReleaseRepository.GroupCode.qry,
-
       parameters: `_filter=&_groupId=${recordId}`
     })
 
@@ -30,9 +30,7 @@ const ApproverList = ({ store, labels, maxAccess }) => {
 
   const {
     query: { data },
-    labels: _labels,
-
-    refetch
+    invalidate
   } = useResourceQuery({
     enabled: !!recordId,
     datasetId: ResourceIds.DRGroups,
@@ -61,15 +59,15 @@ const ApproverList = ({ store, labels, maxAccess }) => {
         extension: DocumentReleaseRepository.GroupCode.del,
         record: JSON.stringify(obj)
       })
-      refetch()
-      toast.success('Record Deleted Successfully')
+      invalidate()
+      toast.success(platformLabels.Deleted)
     } catch (error) {}
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={() => openForm()} maxAccess={maxAccess} />
+        <GridToolbar onAdd={openForm} maxAccess={maxAccess} />
       </Fixed>
       <Grow>
         <Table
@@ -77,11 +75,9 @@ const ApproverList = ({ store, labels, maxAccess }) => {
           columns={columns}
           gridData={data}
           rowId={['codeId']}
-          pageSize={50}
           pagination={false}
-          onDelete={obj => delApprover(obj)}
+          onDelete={delApprover}
           maxAccess={maxAccess}
-          height={200}
         />
       </Grow>
     </VertLayout>

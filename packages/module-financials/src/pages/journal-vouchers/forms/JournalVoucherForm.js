@@ -20,7 +20,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function JournalVoucherForm({ labels, access, recordId }) {
+export default function JournalVoucherForm({ labels, access, recordId, window }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
     access: access,
@@ -43,6 +43,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       date: new Date(),
       notes: '',
       dtId: null,
+      isVerified: false,
       status: 1
     },
     validateOnChange: true,
@@ -74,8 +75,9 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     }
   })
 
-  const isRaw = formik.values.status == 1
+  const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
+  const isVerified = formik.values.isVerified
 
   useEffect(() => {
     ;(async function () {
@@ -98,19 +100,38 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
   }
 
   const onPost = async () => {
-    const { ...rest } = formik.values
-    const copy = { ...rest }
-    copy.date = formatDateToApi(copy.date)
-
-    const res = await postRequest({
+    await postRequest({
       extension: GeneralLedgerRepository.JournalVoucher.post,
-      record: JSON.stringify(copy)
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
     })
 
     getData(formik.values.recordId)
-    toast.success(platformLabels.Added)
-
+    toast.success(platformLabels.Posted)
     invalidate()
+  }
+
+  const onUnpost = async () => {
+    await postRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.unpost,
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
+    })
+
+    toast.success(platformLabels.Unposted)
+    getData(formik.values.recordId)
+    invalidate()
+  }
+
+  const onVerify = async () => {
+    const res = await postRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.verify,
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
+    })
+
+    if (res) {
+      toast.success(!isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      invalidate()
+      window.close()
+    }
   }
 
   const actions = [
@@ -123,9 +144,34 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     },
     {
       key: 'Locked',
-      condition: true,
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || isVerified
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !isRaw || !editMode
+      disabled: !editMode
+    },
+    {
+      key: 'Verify',
+      condition: !isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Attachment',
+      condition: true,
+      onClick: 'onClickAttachment',
+      disabled: !editMode
     }
   ]
 
@@ -137,8 +183,8 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       functionId={SystemFunction.JournalVoucher}
       maxAccess={maxAccess}
       editMode={editMode}
-      disabledSubmit={!isRaw}
-      disabledSavedClear={!isRaw}
+      disabledSubmit={isPosted}
+      disabledSavedClear={isPosted}
     >
       <VertLayout>
         <Grow>
@@ -150,7 +196,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
-                readOnly={editMode || !isRaw}
+                readOnly={editMode}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
@@ -167,7 +213,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                readOnly={editMode || !isRaw}
+                readOnly={editMode}
                 maxAccess={!editMode && maxAccess}
                 maxLength='30'
                 onChange={formik.handleChange}
@@ -179,7 +225,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
               <CustomDatePicker
                 name='date'
                 label={labels.date}
-                readOnly={!isRaw}
+                readOnly={isPosted}
                 onChange={formik.setFieldValue}
                 value={formik.values.date}
                 maxAccess={maxAccess}
@@ -192,7 +238,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 name='notes'
                 label={labels.notes}
                 value={formik.values.notes}
-                readOnly={!isRaw}
+                readOnly={isPosted}
                 maxLength='100'
                 rows={3}
                 maxAccess={maxAccess}

@@ -82,7 +82,11 @@ const ThreeDDesign = () => {
     {
       field: 'sketchRef',
       headerName: labels.sketchRef,
-      flex: 1
+      flex: 1,
+      linkOpen: data => ({
+        resourceId: ResourceIds.Sketch,
+        props: { recordId: data?.sketchId }
+      })
     },
     {
       field: 'designerName',
@@ -122,11 +126,17 @@ const ThreeDDesign = () => {
     {
       field: 'wipName',
       headerName: labels.wipName,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     },
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -179,7 +189,6 @@ const ThreeDDesign = () => {
           refetch={refetch}
           deleteConfirmationType={'strict'}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

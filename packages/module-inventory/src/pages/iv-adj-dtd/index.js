@@ -104,7 +104,6 @@ const MaterialAdjustmentDTD = () => {
           rowId={['dtId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationType='api'

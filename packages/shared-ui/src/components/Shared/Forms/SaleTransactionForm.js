@@ -37,7 +37,7 @@ import {
   MDTYPE_PCT,
   MDTYPE_AMOUNT
 } from '@argus/shared-utils/src/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
+import { calcVatAmountPerTaxDetail, getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
 import {
   getDiscValues,
   getFooterTotals,
@@ -64,22 +64,23 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 export default function SaleTransactionForm({
-  labels,
-  access,
   recordId,
   functionId,
   window,
   lockRecord,
-  getResourceId,
-  getGLResource
+  getResourceId
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: DIRTYFIELD_TDPCT })
   const [measurements, setMeasurements] = useState([])
   const [address, setAddress] = useState({})
@@ -88,11 +89,47 @@ export default function SaleTransactionForm({
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
   const filteredMeasurements = useRef([])
-  const taxDetailsCacheRef = useRef({})
+  const [taxDetails, setTaxDetails] = useState([])
 
-  const { documentType, maxAccess } = useDocumentType({
-    functionId: functionId,
-    access: access,
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.SalesInvoice,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
+    editMode: !!recordId
+  })
+
+  const getCorrectLabel = functionId => {
+    const fn = Number(functionId)
+    if (fn === SystemFunction.SalesInvoice) {
+      return labels.salesInvoice
+    } else if (fn === SystemFunction.SalesReturn) {
+      return labels.salesReturn
+    } else if (fn === SystemFunction.ConsignmentIn) {
+      return labels.consignmentIn
+    } else if (fn === SystemFunction.ConsignmentOut) {
+      return labels.consignmentOut
+    } else {
+      return null
+    }
+  }
+  
+  useSetWindow({ title: getCorrectLabel(functionId), window })
+  
+  const getGLResource = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.GLSalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.GLSalesReturn
+      default:
+        return null
+    }
+  }
+
+
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId,
+    access,
     enabled: !recordId,
     objectName: 'header'
   })
@@ -101,7 +138,7 @@ export default function SaleTransactionForm({
     endpointId: SaleRepository.SalesTransaction.qry
   })
 
-  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+  const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const conditions = {
     sku: row => row?.sku,
@@ -130,10 +167,9 @@ export default function SaleTransactionForm({
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
-      search: '',
       header: {
         dgId: functionId,
         recordId: null,
@@ -303,24 +339,21 @@ export default function SaleTransactionForm({
         },
         items: updatedRows,
         serials: serialsValues,
-        taxes: Object.values(
-          [
-            ...obj.taxes,
-            ...obj.items
-              .filter(({ taxDetails }) => taxDetails && taxDetails.length > 0)
-              .map(({ taxDetails, id }) => ({
-                seqNo: id,
-                ...taxDetails[0]
-              }))
-          ].reduce((acc, tax) => {
-            if (obj.items.some(item => item.id === tax.seqNo)) {
-              acc[tax.seqNo] = tax
-            }
+        taxes: obj?.items.reduce((acc, item) => {
+          if (item.taxDetails?.length) {
+            item.taxDetails.forEach(td => {
+              const { seqNo, ...rest } = td
 
-            return acc
-          }, {})
-        ),
+              acc.push({
+                seqNo: item.id,
+                taxSeqNo: seqNo,
+                ...rest
+              })
+            })
+          }
 
+          return acc
+        }, []),
         ...(({ header, items, taxes, serials, ...rest }) => rest)(obj)
       }
 
@@ -372,6 +405,39 @@ export default function SaleTransactionForm({
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
+  function buildCalculatedTaxDetails(row, taxDetailsList = []) {
+    return (taxDetailsList || []).map(td => {
+      const singleTaxDetail = {
+        ...td,
+        taxScheduleAmount: td.amount || td.taxScheduleAmount || 0
+      }
+
+      const calculatedAmount = calcVatAmountPerTaxDetail(
+        {
+          priceType: row?.priceType,
+          basePrice: parseFloat(row?.basePrice || 0),
+          unitPrice: parseFloat(row?.unitPrice || 0),
+          qty: parseFloat(row?.qty || 0),
+          weight: parseFloat(row?.weight || 0),
+          extendedPrice: parseFloat(row?.extendedPrice || 0),
+          baseLaborPrice: parseFloat(row?.baseLaborPrice || 0),
+          vatAmount: parseFloat(row?.vatAmount || 0),
+          tdPct: parseFloat(formik.values?.header?.tdPct || 0),
+          taxDetails: singleTaxDetail
+        },
+        singleTaxDetail
+      )
+
+      return {
+        ...td,
+        invoiceId: formik.values?.header?.recordId || 0,
+        taxSeqNo: td.seqNo,
+        taxScheduleAmount: td.amount || 0,
+        amount: parseFloat(calculatedAmount || 0)
+      }
+    })
+  }
+
   async function barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, setItemInfo, defaultMu) {
     let result = {}
     const weight = itemPhysProp?.weight || 0
@@ -388,38 +454,17 @@ export default function SaleTransactionForm({
     const unitPrice = ItemConvertPrice?.priceType === 3 ? weight * totalWeightPerG : ItemConvertPrice?.unitPrice || 0
 
     const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
-    let rowTax = null
-    let rowTaxDetails = null
+    let rowTax
+    let rowTaxDetails
 
-    if (!formik.values.header.taxId) {
-      if (itemInfo?.taxId) {
-        const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
+    const effectiveTaxId = !formik.values.header.isVattable
+      ? null
+      : formik.values.header.taxId
+      ? itemInfo.taxId
+        ? formik.values.header.taxId
+        : null
+      : itemInfo.taxId ?? null
 
-        const details = taxDetailsResponse?.map(item => ({
-          invoiceId: formik.values.recordId,
-          taxSeqNo: item.seqNo,
-          taxId: itemInfo.taxId,
-          taxCodeId: item.taxCodeId,
-          taxBase: item.taxBase,
-          amount: item.amount ?? 0
-        }))
-        rowTax = itemInfo.taxId
-        rowTaxDetails = details
-      }
-    } else {
-      const taxDetailsResponse = await getTaxDetails(formik.values.header.taxId)
-
-      const details = taxDetailsResponse?.map(item => ({
-        invoiceId: formik.values.recordId,
-        taxSeqNo: item.seqNo,
-        taxId: formik.values.header.taxId,
-        taxCodeId: item.taxCodeId,
-        taxBase: item.taxBase,
-        amount: item.amount
-      }))
-      rowTax = formik.values.header.taxId
-      rowTaxDetails = details
-    }
 
     if (parseFloat(unitPrice) < parseFloat(minPrice)) {
       ShowMinPriceValueErrorMessage(minPrice, unitPrice)
@@ -474,15 +519,15 @@ export default function SaleTransactionForm({
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
       mdValue: 0,
-      taxId: rowTax,
+      taxId: effectiveTaxId,
       minPrice,
       siteId: formik.values?.header?.siteId || null,
       siteRef: formik.values?.header?.siteRef || null,
-      taxDetails: rowTaxDetails,
+      taxDetails: null,
       taxDetailsButton: true
     }
 
-    let data = getItemPriceRow({ ...result, id: newRow?.id, qty: newRow?.defaultQty || 1 }, DIRTYFIELD_QTY)
+    let data = getItemPriceRow({ ...result, id: newRow?.id, qty: newRow?.defaultQty || 0 }, DIRTYFIELD_QTY)
 
     const dirtyField = isValidPrice(result.basePrice)
       ? DIRTYFIELD_BASE_PRICE
@@ -490,6 +535,18 @@ export default function SaleTransactionForm({
       ? DIRTYFIELD_UNIT_PRICE
       : null
     if (dirtyField) data = getItemPriceRow(data, dirtyField)
+
+    if (effectiveTaxId) {
+      const taxDetailsResponse = await getTaxDetails(effectiveTaxId)
+      rowTax = effectiveTaxId
+      rowTaxDetails = buildCalculatedTaxDetails(data, taxDetailsResponse)
+    }
+
+    data = {
+      ...data,
+      taxId: rowTax,
+      taxDetails: rowTaxDetails
+    }
 
     update({ ...data, priceWithVAT: calculatePrice(data, rowTaxDetails?.[0], DIRTYFIELD_BASE_PRICE) })
   }
@@ -522,7 +579,7 @@ export default function SaleTransactionForm({
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
+        imgSrc: '/images/TableIcons/imgSerials.png',
         hidden: false
       }
     } else {
@@ -850,7 +907,7 @@ export default function SaleTransactionForm({
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {
@@ -867,7 +924,8 @@ export default function SaleTransactionForm({
           Component: TaxDetails,
           props: {
             taxId: row?.taxId,
-            obj: row
+            obj: row,
+            taxes: editMode ? row?.taxDetails : []
           }
         })
       }
@@ -896,7 +954,7 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'saTrx',
       props: {
-        imgSrc:  require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src,
+        imgSrc:  '/images/buttonsIcons/popup-black.png',
         onCondition: row => {
           return {
             disabled: !row.itemId
@@ -1143,11 +1201,11 @@ export default function SaleTransactionForm({
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.header.accountId),
-            moduleId: 1
+            date: formik?.values?.header?.date
           }
         })
       },
-      disabled: !formik.values.header.clientId
+      disabled: !formik.values.header.clientId || !formik.values.header.date
     },
     {
       key: 'Verify',
@@ -1175,7 +1233,7 @@ export default function SaleTransactionForm({
   async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
-    const saTrxTaxes = saTrxPack?.taxes
+    const saTrxTaxes = saTrxPack?.taxDetails || []
     const balance = saTrxPack?.accountBalance?.balance
     const accountId = saTrxPack?.client?.accountId
     const maxDiscount = saTrxPack?.client?.maxDiscount
@@ -1184,14 +1242,16 @@ export default function SaleTransactionForm({
     saTrxHeader?.tdType === 1 || saTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
-      
-    const taxDetailsMap = saTrxHeader.isVattable
-    ? taxDetailsCacheRef.current
-    : {}
 
 
     const modifiedList = await Promise.all(
-      saTrxItems?.map(async (item, index) => {
+      (saTrxItems || []).map(async (item, index) => {
+        let calculatedTaxDetails = []
+
+        if (item?.taxId) {
+          const rawTaxDetails = saTrxTaxes.filter(td => td.taxId === item.taxId)
+          calculatedTaxDetails = buildCalculatedTaxDetails(item, rawTaxDetails)
+        }
 
         return {
           ...item,
@@ -1210,9 +1270,9 @@ export default function SaleTransactionForm({
                 id: index
               }
             }),
-          priceWithVAT: calculatePrice(item, taxDetailsMap?.[0], DIRTYFIELD_BASE_PRICE),
+          priceWithVAT: calculatePrice(item, calculatedTaxDetails?.[0], DIRTYFIELD_BASE_PRICE),
           totalWeightPerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
-          taxDetails: taxDetailsMap[item.taxId] || null
+          taxDetails: calculatedTaxDetails
         }
       })
     )
@@ -1237,7 +1297,7 @@ export default function SaleTransactionForm({
         balance
       },
       items: modifiedList,
-      taxes: [...saTrxTaxes]
+      taxes: saTrxTaxes
     })
 
     !formik.values.recordId &&
@@ -1273,15 +1333,7 @@ export default function SaleTransactionForm({
       parameters: `_functionId=${functionId}`
     })
 
-    const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
-      if (!acc[td.taxId]) acc[td.taxId] = []
-      acc[td.taxId].push(td)
-      return acc
-    }, {})
-
-    taxDetailsCacheRef.current = taxMap 
-
-    return res?.record?.measurementUnits || []
+    return res?.record
   }
 
 
@@ -1299,7 +1351,7 @@ export default function SaleTransactionForm({
   }
 
   async function setMetalPriceOperations() {
-    const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
+    const defaultMCbaseCU = systemDefaults?.list?.find(({ key }) => key === 'baseMetalCuId')
     const MCbaseCU = defaultMCbaseCU?.value ? parseInt(defaultMCbaseCU.value) : null
     if (MCbaseCU != null) {
       const kgMetalPriceValue = await fillMetalPrice(MCbaseCU)
@@ -1396,13 +1448,9 @@ export default function SaleTransactionForm({
   }
 
   async function getTaxDetails(taxId) {
-    if (!taxId) return []
+    if (!taxId) return taxDetails
 
-    if (taxDetailsCacheRef.current[taxId]) {
-      return taxDetailsCacheRef.current[taxId]
-    }
-
-    return []
+    return taxDetails.filter(t => t.taxId === taxId)
   }
 
 
@@ -1488,8 +1536,6 @@ export default function SaleTransactionForm({
       dirtyField: dirtyField
     })
 
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
-
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
@@ -1499,8 +1545,13 @@ export default function SaleTransactionForm({
       extendedPrice: itemPriceRow?.extendedPrice,
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: itemPriceRow?.vatAmount || 0,
-      tdPct: formik?.values?.header?.tdPct,
-      taxDetails: formik.values.header?.isVattable ? newRow.taxDetails : null
+      tdPct: formik?.values?.header?.tdPct || 0,
+      taxDetails: formik.values.header.isVattable === true && newRow.taxDetails
+        ? newRow.taxDetails.map(td => ({
+            ...td,
+            amount: td.taxScheduleAmount
+          }))
+        : null
     })
 
     let commonData = {
@@ -1639,8 +1690,6 @@ export default function SaleTransactionForm({
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
-      if (item?.taxDetails?.length > 0) item.taxDetails = [item.taxDetails[0]]
-
       const vatCalcRow = getVatCalc({
         priceType: item?.priceType,
         basePrice: item?.basePrice,
@@ -1650,7 +1699,12 @@ export default function SaleTransactionForm({
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: item?.vatAmount,
         tdPct: tdPct,
-        taxDetails: formik.values.header?.isVattable ? item.taxDetails : null
+        taxDetails: formik.values.header.isVattable === true && item?.taxDetails
+          ? item.taxDetails.map(td => ({
+              ...td,
+              amount: td.taxScheduleAmount
+            }))
+          : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, vatCalcRow?.vatAmount)
     })
@@ -1776,27 +1830,6 @@ export default function SaleTransactionForm({
     return res
   }
 
-  const filteredData = useMemo(() => {
-    if (formik?.values?.search) {
-      const filtered = formik.values.items.filter(
-        item =>
-          item.barcode?.toString()?.includes(formik.values.search) ||
-          item.sku?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
-          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
-          item.qty?.toString()?.includes(formik.values.search)
-      )
-
-      return filtered.length > 0 ? filtered : []
-    }
-
-    return formik.values.items
-  }, [formik.values.search, formik.values.items])
-
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('search', value)
-  }
-
   async function getSiteInfo(siteId) {
     if (!siteId) return
 
@@ -1867,11 +1900,12 @@ export default function SaleTransactionForm({
 
   useEffect(() => {
     ;(async function () {
-      const muList = await getPackData()
-      setMeasurements(muList)
+      const res = await getPackData()
+      setTaxDetails(res?.taxDetails || [])
+      setMeasurements(res?.measurementUnits)
       setMetalPriceOperations()
       const defaultObj = await getDefaultsData()
-      getUserDefaultsData()
+      !recordId && getUserDefaultsData()
       if (!recordId) {
         if (defaultObj.salesTD == 'True') {
           setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
@@ -1880,7 +1914,7 @@ export default function SaleTransactionForm({
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('header.tdType', 1)
         }
-      } else if (muList) await refetchForm(recordId, true)
+      } else if (res?.measurementUnits) await refetchForm(recordId, true)
     })()
   }, [])
 
@@ -1895,7 +1929,7 @@ export default function SaleTransactionForm({
   async function getDefaultsData() {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return (
         obj.key === 'baseMetalCuId' ||
         obj.key === 'mc_defaultRTSA' ||
@@ -1920,7 +1954,7 @@ export default function SaleTransactionForm({
   async function getUserDefaultsData() {
     const myObject = {}
 
-    const filteredList = userDefaultsData?.list?.filter(obj => {
+    const filteredList = userDefaults?.list?.filter(obj => {
       return obj.key === 'plantId' || obj.key === 'siteId' || obj.key === 'spId'
     })
     filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
@@ -1935,9 +1969,7 @@ export default function SaleTransactionForm({
     const validSpId = await validateSalesPerson(userDefaultsDataState?.spId)
     formik.setFieldValue('header.spId', validSpId)
     const currentSiteId = userDefaultsDataState?.siteId || null
-    const siteRef = await getSiteInfo(currentSiteId)
     formik.setFieldValue('header.siteId', currentSiteId)
-    formik.setFieldValue('header.siteRef', siteRef || '')
   }
 
   async function previewBtnClicked() {
@@ -1956,15 +1988,6 @@ export default function SaleTransactionForm({
       formik.setFieldValue(`header.${key}`, val)
     })
   }
-
-  useEffect(() => {
-    taxDetailsCacheRef.current = {}
-  }, [
-    formik.values.header.taxId,
-    formik.values.header.currencyId,
-    formik.values.header.date,
-    formik.values.header.isVattable
-  ])
 
 
   return (
@@ -1999,6 +2022,7 @@ export default function SaleTransactionForm({
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
+                  await changeDT(newValue)
                   const recordId = newValue ? newValue.recordId : null
                   await formik.setFieldValue('header.dtId', recordId)
                   if (!newValue) {
@@ -2132,6 +2156,7 @@ export default function SaleTransactionForm({
               <ResourceComboBox
                 endpointId={SaleRepository.SaleTransaction.pack}
                 parameters={`_functionId=${functionId}`}
+                triggerOnDefault={formik.values.header.siteId && !formik.values.header.siteRef}
                 reducer={response => response?.record?.sites}
                 name='header.siteId'
                 label={labels.site}
@@ -2277,13 +2302,14 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={formik?.values?.header?.clientId && SaleRepository.Contact.qry}
+                endpointId={formik?.values?.header?.clientId && SaleRepository.Contact.contact}
                 parameters={`_clientId=${formik?.values?.header?.clientId}`}
                 name='header.contactId'
                 label={labels.contact}
                 valueField='recordId'
                 readOnly={isPosted}
                 displayField={['reference', 'name']}
+                displayFieldWidth={2}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -2294,17 +2320,6 @@ export default function SaleTransactionForm({
                   formik.setFieldValue('header.contactId', newValue?.recordId || null)
                 }}
                 error={formik?.touched?.header?.contactId && Boolean(formik?.errors?.header?.contactId)}
-              />
-            </Grid>
-            <Grid item xs={2}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                onChange={handleSearchChange}
               />
             </Grid>
             <Grid item xs={3}>
@@ -2323,40 +2338,28 @@ export default function SaleTransactionForm({
         <Grow>
           <DataGrid
             onChange={(value, action, row) => {
-              let updatedValue = value
-
-              if (formik.values.search) {
-                const updatedItems = formik.values.items.map(item => {
-                  const updated = updatedValue.find(newItem => newItem.id === item.id)
-
-                  return updated ? { ...item, ...updated } : item
-                })
-
-                formik.setFieldValue('items', updatedItems)
-                itemsUpdate.current = updatedItems
-              } else {
-                formik.setFieldValue('items', updatedValue)
-                itemsUpdate.current = updatedValue
-              }
+              formik.setFieldValue('items', value)
+              itemsUpdate.current = value
               if (action === 'delete') {
                 const filteredItems = formik.values.items.filter(item => item.id !== row.id)
-                updatedValue = value.filter(item => item.id !== row.id)
 
                 formik.setFieldValue('items', filteredItems)
                 setReCal(true)
               }
             }}
-            value={filteredData}
+            enableFilters
+            value={formik.values.items}
             error={formik.errors.items}
             initialValues={formik?.initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             name='items'
+            showCounterColumn={true}
             columns={columns}
             maxAccess={maxAccess}
             allowDelete={!isPosted}
-            allowAddNewLine={!formik.values.search}
+            allowAddNewLine={!isPosted}
             disabled={
               isPosted ||
               !formik.values?.header?.currencyId ||

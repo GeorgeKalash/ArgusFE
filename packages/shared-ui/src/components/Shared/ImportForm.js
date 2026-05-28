@@ -108,24 +108,7 @@ const validateMandatoryFields = (rows, columns, stackError) => {
   return true
 }
 
-const getImportData = (gridData, columns, stackError) => {
-  const mandatoryColumns = columns.filter(col => col.mandatory)
-
-  const missingFields = gridData.list.flatMap(row =>
-    mandatoryColumns
-      .filter(col => row[col.field] === null || row[col.field] === undefined || row[col.field] === '')
-      .map(col => col.headerName)
-  )
-
-  if (missingFields.length > 0) {
-    const uniqueMissingFields = [...new Set(missingFields)]
-    stackError({
-      message: `${uniqueMissingFields.join(', ')} ${uniqueMissingFields.length > 1 ? 'are' : 'is'} mandatory field${
-        uniqueMissingFields.length > 1 ? 's' : ''
-      }.`
-    })
-  }
-
+const getImportData = (gridData, columns) => {
   const convertedData = gridData.list.map(row => {
     return Object.keys(row).reduce((acc, key) => {
       const col = columns.find(c => c.field === key)
@@ -215,10 +198,11 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
 
   const handleSubmit = async () => {
     const isValid = validateMandatoryFields(parsedFileContent.list, columns, stackError)
-    const convertedData = getImportData(parsedFileContent, columns, stackError)
-    const payload = { [objectName]: convertedData }
 
     if (!isValid) return
+
+    const convertedData = getImportData(parsedFileContent, columns)
+    const payload = { [objectName]: convertedData }
 
     const res = await postRequest({
       extension: endPoint,
@@ -311,9 +295,6 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
             ]}
             gridData={parsedFileContent}
             rowId={['recordId']}
-            isLoading={false}
-            pageSize={50}
-            paginationType='api'
             pagination={false}
             maxAccess={access}
             textTransform

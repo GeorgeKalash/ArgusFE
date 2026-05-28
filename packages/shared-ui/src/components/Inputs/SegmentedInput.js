@@ -1,13 +1,12 @@
 import InputMask from 'react-input-mask'
 import { TextField } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import inputs from './Inputs.module.css'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SegmentedInput = ({ name, value, onChange, label, error, required, readOnly }) => {
   const [mask, setMask] = useState('')
-  const { defaultsData } = useContext(ControlContext)
-  const [isFocused, setIsFocused] = useState(false)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const handleInputChange = event => {
     if (!readOnly) {
@@ -36,7 +35,7 @@ const SegmentedInput = ({ name, value, onChange, label, error, required, readOnl
         )
       )
     } else {
-      const defaultSegments = defaultsData.list
+      const defaultSegments = systemDefaults.list
         .filter(obj => ['GLACSeg0', 'GLACSeg1', 'GLACSeg2', 'GLACSeg3', 'GLACSeg4'].includes(obj.key))
         .map(obj => ({
           key: obj.key,
@@ -64,8 +63,6 @@ const SegmentedInput = ({ name, value, onChange, label, error, required, readOnl
       error={Boolean(error)}
       helperText={error}
       required={required}
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
       inputProps={{
         readOnly: readOnly
       }}
@@ -84,7 +81,8 @@ const SegmentedInput = ({ name, value, onChange, label, error, required, readOnl
         }
       }}
       InputLabelProps={{
-        className: isFocused || value ? inputs.inputLabelShrink : inputs.inputLabel
+        shrink: true,
+        className: inputs.inputLabelShrink
       }}
     />
   )

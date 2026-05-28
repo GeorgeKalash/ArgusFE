@@ -25,7 +25,7 @@ const GlobalAuthorization = () => {
   async function fetchWithFilter({ filters }) {
     if (filters.moduleId)
       return await getRequest({
-        extension: SystemRepository.ModuleClassRES.qry,
+        extension: SystemRepository.ModuleClassRES.qry2,
         parameters: `_filter=${filters.qry ?? ''}&_moduleId=${filters.moduleId}`
       })
   }
@@ -41,7 +41,7 @@ const GlobalAuthorization = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchWithFilter,
-    endpointId: SystemRepository.ModuleClassRES.qry,
+    endpointId: SystemRepository.ModuleClassRES.qry2,
     datasetId: ResourceIds.SettingsResources,
     filter: {
       filterFn: fetchWithFilter,
@@ -63,7 +63,7 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        row: { resourceId: row.data.key, resourceName: row.data.value, moduleId: filters.moduleId },
+        row: { resourceId: row.data.resourceId, resourceName: row.data.resourceName, moduleId: filters.moduleId },
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
@@ -79,12 +79,12 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        row: { resourceId: row.data.key, resourceName: row.data.value },
+        row: { resourceId: row.data.resourceId, resourceName: row.data.resourceName },
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
-      width: 800,
-      height: 480,
+      width: 1200,
+      height: 600,
       title: labels.printTemplates
     })
   }
@@ -95,7 +95,7 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        row: { resourceId: row.data.key, resourceName: row.data.value },
+        row: { resourceId: row.data.resourceId, resourceName: row.data.resourceName },
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
@@ -111,7 +111,7 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        row: { resourceId: row.data.key, resourceName: row.data.value, moduleId: filters.moduleId },
+        row: { resourceId: row.data.resourceId, resourceName: row.data.resourceName, moduleId: filters.moduleId },
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
@@ -130,9 +130,7 @@ const GlobalAuthorization = () => {
       <Fixed>
         <GridToolbar
           maxAccess={access}
-          onSearch={value => {
-            filters.moduleId && filterBy('qry', value)
-          }}
+          onSearch={value => filters.moduleId && (!value ? clearFilter('qry') : filterBy('qry', value))}
           onSearchClear={() => {
             clearFilter('qry')
           }}
@@ -161,20 +159,24 @@ const GlobalAuthorization = () => {
       <Table
         columns={[
           {
-            field: 'key',
+            field: 'resourceId',
             headerName: labels.resourceId,
             flex: 1
           },
           {
-            field: 'value',
+            field: 'resourceName',
             headerName: labels.resourceName,
-            flex: 4
+            flex: 3
+          },
+          {
+            field: 'defaultLayoutId',
+            headerName: labels.default,
+            flex: 1
           },
           {
             field: 'Report Layout',
             headerName: labels.reportLayout,
             flex: 1,
-
             cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                 <IconButton size='small' onClick={() => openReportLayoutsForm(row)}>
@@ -222,7 +224,6 @@ const GlobalAuthorization = () => {
         ]}
         gridData={data ?? { list: [] }}
         rowId={['key']}
-        isLoading={false}
         pageSize={50}
         maxAccess={access}
         refetch={refetch}

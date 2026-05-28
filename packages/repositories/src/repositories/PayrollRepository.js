@@ -97,9 +97,28 @@ export const PayrollRepository = {
     qry: service + 'qryES'
   },
   FiscalYear: {
-    qry: service + 'qryYE'
+    page: service + 'pageYE',
+    qry: service + 'qryYE',
+    set: service + 'setYE',
+    del: service + 'delYE'
   },
   Period: {
-    qry: service + 'qryPE'
+    qry: service + 'qryPE',
+    get: service + 'getPE',
+    set: service + 'setPE'
+  },
+  PayrollConstant: {
+    set: service + 'setCON',
+    del: service + 'delCON',
+    get: service + 'getCON',
+    page: service + 'pageCON'
+  },
+  Formula: {
+    qry: service + 'qryFLA',
+    page: service + 'pageFLA',
+    get: service + 'getFLA',
+    getPack: service + 'getPackFLA',
+    set: service + 'setFLA',
+    del: service + 'delFLA'
   }
 }

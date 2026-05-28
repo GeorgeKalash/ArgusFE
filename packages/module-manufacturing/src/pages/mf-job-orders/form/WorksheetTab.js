@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { Grid } from '@mui/material'
 import WorksheetWindow from '../../mf-worksheet/window/WorksheetWindow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
-export default function WorksheetTab({ store, maxAccess, labels }) {
+export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }) {
+
   const { stack } = useWindow()
   const { jobWorksheets, jobReference } = store || {}
   const [list, setList] = useState([])
@@ -44,8 +48,23 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
       flex: 1
     },
     {
+      field: 'rmQty',
+      headerName: labels.rmQty,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'wipPcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -59,10 +78,20 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
       Component: WorksheetWindow,
       props: {
         recordId,
-        joInvalidate: refetch
+        joInvalidate: setRefetchJob
       }
     })
   }
+
+  const totalPcs = (list || []).reduce(
+    (sum, item) => sum + (item.wipPcs || 0),
+    0
+  );
+
+  const totalQty = (list || []).reduce(
+    (sum, item) => sum + (item.rmQty || 0),
+    0
+  );
 
   return (
     <VertLayout>
@@ -82,6 +111,28 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
           pagination={false}
         />
       </Grow>
+      <Fixed>
+        <Grid container spacing={2} p={2}>
+          <Grid item xs={7}/>
+          <Grid item xs={2}>
+            <CustomNumberField
+                label={labels.totalQty}
+                value={totalQty}
+                readOnly
+                align='right'
+              />
+          </Grid>
+          <Grid item xs={2}>
+            <CustomNumberField
+                label={labels.totalPcs}
+                value={totalPcs}
+                readOnly
+                align='right'
+              />
+          </Grid>
+          <Grid item xs={1}/>
+        </Grid>
+      </Fixed>
     </VertLayout>
   )
 }

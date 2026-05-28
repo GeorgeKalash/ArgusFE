@@ -40,7 +40,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
       sgId: null
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       activeStatus: yup.number().required(),
@@ -59,13 +58,16 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         .matches(/^[A-Za-z0-9-]+$/)
     }),
     onSubmit: async values => {
+      const { segments, activeStatusName, groupName, ...rest } = values
       const response = await postRequest({
         extension: GeneralLedgerRepository.ChartOfAccounts.set,
-        record: JSON.stringify(values)
+        record: JSON.stringify({
+          ...rest,
+          segments: segments?.filter(segment => segment != null && segment !== '')
+        })
       })
 
-      const actionMessage = values.recordId ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
+      toast.success(values.recordId ? platformLabels.Edited : platformLabels.Added)
       formik.setFieldValue('recordId', response.recordId)
       invalidate()
     }
@@ -97,7 +99,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                 valueField='recordId'
                 displayField='name'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => formik && formik.setFieldValue('groupId', newValue?.recordId || null)}
+                onChange={(_, newValue) => formik.setFieldValue('groupId', newValue?.recordId || null)}
                 error={formik.touched.groupId && Boolean(formik.errors.groupId)}
               />
             </Grid>
@@ -122,7 +124,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
@@ -135,7 +136,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                 label={labels.description}
                 value={formik.values.description}
                 required
-                rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('description', '')}
@@ -152,7 +152,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                 valueField='key'
                 displayField='value'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('activeStatus', newValue?.key || null)
                 }}
                 error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
@@ -167,7 +167,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                 valueField='key'
                 displayField='value'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('sign', newValue?.key || null)
                 }}
                 error={formik.touched.sign && Boolean(formik.errors.sign)}
@@ -204,9 +204,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                 valueField='recordId'
                 displayField='name'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('sgId', newValue?.recordId || null)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('sgId', newValue?.recordId || null)}
                 required={formik.values.isConfidential}
                 readOnly={!formik.values.isConfidential}
                 error={formik.touched.sgId && Boolean(formik.errors.sgId)}

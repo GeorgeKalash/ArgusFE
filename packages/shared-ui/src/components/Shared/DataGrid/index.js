@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, Grid, IconButton, Link } from '@mui/material'
+import { Box, IconButton, Link } from '@mui/material'
+import Checkbox from '@mui/material/Checkbox'
 import components from './components'
 import { CacheStoreProvider } from '@argus/shared-providers/src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
@@ -9,11 +10,10 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
-import styles from './DataGrid.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import FilterAltIcon from '@mui/icons-material/FilterAlt'
 
 export function DataGrid({
   name,
@@ -34,41 +34,60 @@ export function DataGrid({
   bg,
   searchValue,
   onValidationRequired,
-  isDeleteDisabled
+  isDeleteDisabled,
+  maxLines,
+  showCounterColumn = false,
+  enableFilters = false
 }) {
   const gridApiRef = useRef(null)
-
   const { user } = useContext(AuthContext)
-
   let lastCellStopped = useRef()
-
   const isDup = useRef(null)
-
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
-
   const [ready, setReady] = useState(false)
-
   const [columnState, setColumnState] = useState()
-
   const skip = allowDelete ? 1 : 0
-
   const gridContainerRef = useRef(null)
+  const [showFilters, setShowFilters] = useState(false)
+  const { width } = useWindowDimensions()
+  const hoverFilterRef = useRef(null)
 
   const generalMaxAccess = maxAccess && maxAccess?.record?.accessFlags
-
   const isAccessDenied = maxAccess?.editMode
     ? generalMaxAccess && !generalMaxAccess[accessMap[TrxType.EDIT]]
     : generalMaxAccess && !generalMaxAccess[accessMap[TrxType.ADD]]
 
   const _disabled = isAccessDenied || disabled
 
-  const { width } = useWindowDimensions()
 
   const rowHeight =
     width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
-   function checkDuplicates(field, data) {
+
+  const isEmptyMaxLines = [0, '0', null, ''].includes(maxLines)
+
+  const canAddNewLine = () => {
+    if (showFilters || isEmptyMaxLines || !allowAddNewLine || _disabled) return false
+    if ( maxLines === undefined) return true
+
+    const limit = parseInt(maxLines)
+    if (!Number.isFinite(limit)) return true
+
+    return (value?.length || 0) < limit
+  }
+  
+  const GridCheckbox = ({ checked, disabled, onChange }) => {
+    return (
+      <Checkbox
+        className={`fullSizeCheckbox`}
+        checked={!!checked}
+        disabled={!!disabled}
+        onChange={onChange}
+      />
+    )
+  }
+
+  function checkDuplicates(field, data) {
     return value.find(
       item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
     )
@@ -78,7 +97,7 @@ export function DataGrid({
     stack({
       Component: ConfirmationDialog,
       props: {
-        DialogText: platformLabels?.duplicateItem,
+        DialogText: platformLabels?.DuplicationDisabled,
         okButtonAction: window => {
           deleteRow(params), window.close()
         },
@@ -103,14 +122,11 @@ export function DataGrid({
       commit({ changes: { ...params.node.data, changes } })
 
       const focusedCell = params.api.getFocusedCell()
-
       const colId = focusedCell.column.colId
-
       const isUpdatedColumn = Object.keys(changes || {}).includes(colId)
 
       if (isUpdatedColumn && !disableRefocus) {
         params.api.stopEditing()
-
         setTimeout(() => {
           params.api.startEditingCell({
             rowIndex: params.rowIndex,
@@ -122,7 +138,6 @@ export function DataGrid({
 
     const updateRowCommit = changes => {
       const rowToUpdate = value?.find(item => item?.id === changes?.id)
-
       const updatedRow = { ...rowToUpdate, ...changes.changes }
 
       gridApiRef.current.applyTransaction({
@@ -132,10 +147,12 @@ export function DataGrid({
       commit({ changes: updatedRow })
     }
 
-    const addRow = async ({ changes }) => {
-      if (params.rowIndex === value.length - 1 && !changes) {
-        addNewRow(params)
-
+    const addRow = async (param = {}) => {
+      const { changes } = param
+      if (!changes) {
+        if (params.rowIndex === value.length - 1) {
+          addNewRow(params)
+        }
         return
       }
 
@@ -166,7 +183,7 @@ export function DataGrid({
             rowIndex: index + 1,
             colKey: column?.name
           })
-        }, 10)  
+        }, 10)
       } else {
         rows = [...value.map(row => (row.id === updatedRow.id ? updatedRow : row))]
         const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
@@ -205,7 +222,6 @@ export function DataGrid({
     const newRows = value.filter(({ id }) => id !== params.data.id)
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
-
     onChange(newRows, 'delete', params.data)
   }
 
@@ -238,7 +254,6 @@ export function DataGrid({
       if (!el) return false
       const root = gridContainerRef.current
       const path = e?.composedPath?.()
-
       const withinContainer = !!(root && (root.contains(el) || path?.includes(root)))
 
       const agStructure = !!(
@@ -279,13 +294,13 @@ export function DataGrid({
     }
 
     window.addEventListener('pointerdown', onPointerDownCapture, true)
-
     return () => {
       window.removeEventListener('pointerdown', onPointerDownCapture, true)
     }
   }, [])
 
   useEffect(() => {
+    if (isEmptyMaxLines) return
     if (!value?.length && allowAddNewLine && ready) {
       addNewRow()
       setReady(false)
@@ -316,12 +331,13 @@ export function DataGrid({
 
       setTimeout(() => {
         const rowNode = gridApiRef.current.getRowNode(newRowNode.data.id)
-
         if (rowNode) {
           const rowIndex = rowNode.rowIndex
+          const { columnIndex } = findNextEditableColumn(-1, rowIndex, 1, gridApiRef.current)
+
           gridApiRef.current.startEditingCell({
             rowIndex: rowIndex,
-            colKey: allColumns[0].name
+            colKey: allColumns[columnIndex]?.name
           })
         }
         if (typeof onValidationRequired === 'function') onValidationRequired()
@@ -331,7 +347,6 @@ export function DataGrid({
 
   const findCell = params => {
     const allColumns = params.api.getColumnDefs()
-
     if (gridApiRef.current) {
       return {
         rowIndex: params.rowIndex,
@@ -339,8 +354,23 @@ export function DataGrid({
       }
     }
   }
+  
+  const counterColumn = showCounterColumn
+    ? [
+        {
+          component: 'numberfield',
+          name: 'Count',
+          label: ' ',
+          flex: 0.7,
+          props: { disabled: true },
+          valueGetter: params => params?.node?.rowIndex + 1
+        }
+      ]
+    : []
 
-  const allColumns = columns?.filter(
+  const mergedColumns = [...counterColumn, ...columns]
+
+  const allColumns = mergedColumns?.filter(
     ({ name: field, hidden }) =>
       (accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden) ||
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
@@ -353,6 +383,7 @@ export function DataGrid({
         (allColumns?.[i]?.props?.readOnly &&
           (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
             accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
+             !allColumns?.[i]?.props?.disabled && 
       (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
         !allColumns?.[i]?.props?.disableCondition(data)) &&
       (typeof allColumns?.[i]?.props?.onCondition !== 'function' ||
@@ -393,7 +424,6 @@ export function DataGrid({
         count++
       }
     }
-
     return count
   }
 
@@ -402,7 +432,6 @@ export function DataGrid({
 
     if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && event.key !== 'Enter') {
       isDup.current = true
-
       return
     } else {
       isDup.current = false
@@ -417,7 +446,6 @@ export function DataGrid({
         rowIndex: node.rowIndex,
         colKey: nextColumnId
       })
-
       return
     }
 
@@ -430,7 +458,6 @@ export function DataGrid({
     if (currentColumnIndex === allColumns.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
       if ((error || !allowAddNewLine) && !event.shiftKey) {
         event.stopPropagation()
-
         return
       }
     }
@@ -441,6 +468,10 @@ export function DataGrid({
       (currentColumnIndex === allColumns.length - 1 - skip || !countColumn) &&
       node.rowIndex === api.getDisplayedRowCount() - 1
     ) {
+      if (!canAddNewLine()) {
+        event.stopPropagation()
+        return
+      }
       if (allowAddNewLine && !error && !_disabled) {
         event.stopPropagation()
         addNewRow()
@@ -453,9 +484,7 @@ export function DataGrid({
 
       if (event.target.tabIndex === 0 && document.querySelector('.ag-root') && focusElement && !event.shiftKey) {
         event.preventDefault()
-
         focusElement.focus()
-
         return
       }
     }
@@ -489,9 +518,56 @@ export function DataGrid({
   const CustomCellRenderer = params => {
     const { column } = params
 
+    const comp =
+      typeof column.colDef?.component === 'string' ? column.colDef.component : column.colDef?.component
+    const isCheckbox = comp === 'checkbox'
+
+    if (isCheckbox) {
+      const disabledCheckbox = _disabled || !!column.colDef?.props?.readOnly
+
+      return (
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            padding: '0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <GridCheckbox
+            checked={params.value}
+            disabled={disabledCheckbox}
+            onChange={e => {
+              e.preventDefault()
+              e.stopPropagation()
+
+              const rowIndex = params.node.rowIndex
+              const colId = params.column?.getColId?.() || params.colDef.field
+
+              params.api.setFocusedCell(rowIndex, colId)
+              params.api.ensureIndexVisible(rowIndex)
+              if (!params.node.isSelected?.() && params.node.setSelected) params.node.setSelected(true)
+
+              const checked = e.target.checked
+
+              params.node.setDataValue(params.colDef.field, checked)
+
+              const changes = { [params.colDef.field]: checked }
+              setData(changes, params)
+              commit({ ...params.data, ...changes })
+
+              if (params.colDef.updateOn !== 'blur') {
+                process(params, params.data, setData)
+              }
+            }}
+          />
+        </Box>
+      )
+    }
     if (column.colDef?.link?.enabled) {
-      const { getHref, target, popup, onClick } = column.colDef.link
-      const linkHref = typeof getHref === 'function' ? getHref(params.data) : '#'
+      const { popup, onClick } = column.colDef.link
 
       return (
         <Box
@@ -504,15 +580,11 @@ export function DataGrid({
           }}
         >
           <Link
-            href={popup ? '#' : linkHref} 
-            target={!popup ? target || '_self' : undefined}
-            rel={!popup && target === '_blank' ? 'noopener noreferrer' : undefined}
+            component="button"
             onClick={e => {
               e.stopPropagation()
               if (popup) {
-                e.preventDefault()
                 popup(params.data)
-                
                 return
               }
               onClick?.(params.data)
@@ -520,7 +592,11 @@ export function DataGrid({
             style={{
               color: '#1976d2',
               textDecoration: 'underline',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              font: 'inherit'
             }}
           >
             {params.value}
@@ -528,8 +604,8 @@ export function DataGrid({
         </Box>
       )
     }
+    
 
-         
     const Component =
       typeof column.colDef.component === 'string'
         ? components[column.colDef.component].view
@@ -543,24 +619,19 @@ export function DataGrid({
       }
 
       setData(changes, params)
-
       commit(changes)
-
       process(params, oldRow, setData)
     }
 
     const updateRow = ({ changes }) => {
       const oldRow = params.data
-
       setData(changes, params)
-
       commit(changes)
-
       process(params, oldRow, setData)
     }
 
     return (
-      <Box className={`${styles.cellBox}`} >
+      <Box className={`cellBox`}>
         <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
@@ -591,7 +662,6 @@ export function DataGrid({
       }
 
       setCurrentValue(changes)
-
       setData(changes, params)
 
       if (column.colDef.updateOn !== 'blur' && value !== '.') {
@@ -602,20 +672,16 @@ export function DataGrid({
 
     const updateRow = ({ changes, commitOnBlur }) => {
       const oldRow = params.data
-
       setCurrentValue(changes || '')
-
       setData(changes, params)
 
       if (params?.colDef?.disableDuplicate && checkDuplicates(params.colDef?.field, params.node?.data)) {
         stackDuplicate(params)
-
         return
       }
 
       if (column.colDef.updateOn !== 'blur' || commitOnBlur) {
         commit(changes)
-
         process(params, oldRow, setData)
       }
     }
@@ -624,8 +690,8 @@ export function DataGrid({
     const centered = comp === 'checkbox' || comp === 'button' || comp === 'icon'
 
     return (
-      <Box className={`${styles.cellEditorBox} ${centered ? styles.cellEditorBoxCentered : ''} `}>
-        <Box className={`${styles.cellEditorInner} ${centered ? styles.cellEditorInnerCentered : ''}`}>
+      <Box className={`cellEditorBox ${centered ? 'cellEditorBoxCentered' : ''} `}>
+        <Box className={`cellEditorInner ${centered ? 'cellEditorInnerCentered' : ''}`}>
           <Component
             id={params.node.data.id}
             {...params}
@@ -651,7 +717,6 @@ export function DataGrid({
       const shouldHide = Object.entries(deleteHideCondition).some(([key, value]) =>
         Array.isArray(value) ? value.includes(params.data[key]) : params.data[key] === value
       )
-
       if (shouldHide) return null
     }
 
@@ -659,14 +724,14 @@ export function DataGrid({
 
     return (
       <Box
-        className={styles.actionCell}
+        className={'actionCell'}
         onClick={() => openDelete(params)}
         sx={{
           pointerEvents: disabledForRow ? 'none' : 'auto'
         }}
       >
         <IconButton disabled={disabledForRow}>
-          <GridDeleteIcon className={styles.deleteIcon} />
+          <GridDeleteIcon className={'deleteIcon'} />
         </IconButton>
       </Box>
     )
@@ -683,63 +748,125 @@ export function DataGrid({
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
 
+      
+  const isRowEmpty = row => {
+    if (!row) return true
+
+    if (initialValues) {
+      return JSON.stringify(row) === JSON.stringify({ ...initialValues, id: row.id })
+    }
+
+    return false
+  }
+
+  const hasRealRows = Array.isArray(value) && value.length > 0
+  const hasOnlyInitialRow = hasRealRows && value.every(row => isRowEmpty(row))
+  const hasRows = hasRealRows && !hasOnlyInitialRow
+
   const columnDefs = [
     ...allColumns.map(column => {
- 
-    const mergedCellClass = [
-      column.cellClass,
-      styles.wrapTextCell
-    ]
+      const mergedCellClass = [column.cellClass, 'wrapTextCell']
+
+      const component = column.component === 'checkbox' || column.component === 'button' || column.component === 'icon'
 
       const centered =
-        column.component === 'checkbox' || column.component === 'button' || column.component === 'icon'
+        component
           ? 'cellBoxCentered'
           : 'noCenterCell'
 
+      const filterMap = {
+        date: 'agDateColumnFilter',
+        textfield: 'agTextColumnFilter',
+        numberfield: 'agNumberColumnFilter'
+      }
+
+      const isDateColumn = column.component === 'date'
+      const isNumberColumn = column.component === 'numberfield'
       return {
         ...column,
         ...{ width: column.width + additionalWidth },
         field: column.name,
         headerName: column.label || column.name,
         headerTooltip: column.label,
-        editable: !_disabled,
+        editable: params => !_disabled && !params.colDef?.props?.disabled,
         flex: column.flex || (!column.width && 1),
         sortable: false,
+        floatingFilter: enableFilters && hasRows && showFilters && !component,
+        filter: enableFilters && !component && hasRows && (filterMap[column.component] || 'agTextColumnFilter'),
+        ...(isNumberColumn
+          ? {
+              filterValueGetter: params => {
+                const num = Number(params.data?.[column.name])
+                return Number.isNaN(num)
+                  ? null
+                  : column?.props?.decimalScale != null
+                    ? Number(num.toFixed(column.props.decimalScale))
+                    : num
+              }
+            }
+          : {}),
+        filterParams: isDateColumn
+          ? {
+              buttons: ['reset'],
+              comparator: (filterLocalDateAtMidnight, cellValue) => {
+                if (!cellValue) return -1
+
+                const cellDate = new Date(cellValue)
+                const normalizedCellDate = new Date(
+                  cellDate.getFullYear(),
+                  cellDate.getMonth(),
+                  cellDate.getDate()
+                )
+
+                if (normalizedCellDate < filterLocalDateAtMidnight) return -1
+                if (normalizedCellDate > filterLocalDateAtMidnight) return 1
+                return 0
+              }
+            }
+          : {
+              buttons: ['reset']
+            },
         cellRenderer: CustomCellRenderer,
         cellEditor: CustomCellEditor,
         wrapText: true,
         autoHeight: true,
         cellClass: `${mergedCellClass || undefined}  ${centered}`,
         ...(column?.checkAll?.visible && {
-          headerComponent: () => {
+          headerClass: 'agHeaderCheckboxCell',
+          headerComponent: params => {
             const selectAll = e => {
+              e.preventDefault()
+              e.stopPropagation()
+
+              const colId = params.column.getColId()
+              params.api.ensureColumnVisible(colId)
+              const root = params.api.getGui && params.api.getGui()
+              const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
+              const cell = headerRoot && headerRoot.querySelector(`.ag-header-cell[col-id="${colId}"]`)
+              const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
+              focusable && focusable.focus && focusable.focus()
+
               if (column?.checkAll?.onChange) {
                 column?.checkAll?.onChange({ checked: e.target?.checked })
               }
             }
 
             return (
-              <Grid container className={styles.headerCheckboxContainer}>
-                <CustomCheckBox
-                  className={styles.headerCheckbox}
-                  checked={column?.checkAll?.value}
-                  onChange={e => {
-                    selectAll(e)
-                  }}
-                  disabled={column.checkAll?.disabled}
-                />
-              </Grid>
+              <GridCheckbox
+                checked={!!column?.checkAll?.value}
+                disabled={!!column?.checkAll?.disabled}
+                onChange={selectAll}
+              />
             )
-          }
+          },
+          suppressMenu: true
         }),
+
         cellEditorParams: { maxAccess },
         cellClassRules: cellClassRules,
         suppressKeyboardEvent: params => {
           const { event } = params
-
-          return  event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter'
-            ? true
-            : false
+          return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
         }
       }
     }),
@@ -759,7 +886,6 @@ export function DataGrid({
     const allRowNodes = []
     gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
     const updatedGridData = allRowNodes.map(row => (row.id === data?.id ? data : row))
-
     onChange(updatedGridData)
   }
 
@@ -769,11 +895,15 @@ export function DataGrid({
 
     const { colDef, rowIndex, api } = params
 
-    if (colDef.component !== 'button')
+    const nonEditableByClick =
+      colDef.component === 'button' || colDef.component === 'checkbox' || colDef.component === 'icon'
+
+    if (!nonEditableByClick) {
       api.startEditingCell({
         rowIndex: rowIndex,
         colKey: colDef.field
       })
+    }
 
     if (params?.data.id !== rowSelectionModel) {
       const selectedRow = params?.data
@@ -805,7 +935,6 @@ export function DataGrid({
     }
 
     const gridContainer = gridContainerRef.current
-
     if (gridContainer) {
       document.addEventListener('click', handleBlur)
     }
@@ -830,7 +959,6 @@ export function DataGrid({
     }
 
     const gridContainer = gridContainerRef.current
-
     if (gridContainer) {
       gridContainer.addEventListener('mousedown', handleBlur)
     }
@@ -847,13 +975,11 @@ export function DataGrid({
     const index = newRows.findIndex(({ id }) => id === row.id)
     newRows[index] = row
     onChange(newRows)
-
     return row
   }
 
   async function updateState({ newRow }) {
     gridApiRef.current.updateRows([newRow])
-
     handleRowChange(newRow)
   }
 
@@ -863,9 +989,7 @@ export function DataGrid({
     const rowNode = params.api.getRowNode(id)
     if (rowNode) {
       const currentData = rowNode.data
-
       const newData = { ...currentData, ...changes }
-
       rowNode.updateData(newData)
     }
   }
@@ -874,6 +998,7 @@ export function DataGrid({
     const cellId = `${params.node.id}-${params.column.colId}`
     const { data, colDef } = params
     const disableRefocus = colDef?.component === 'numberfield'
+
     let newValue = params?.data[params.column.colId]
     let currentValue = value?.[params.rowIndex]?.[params.column.colId]
     if (newValue == currentValue && newValue !== '.') return
@@ -893,10 +1018,10 @@ export function DataGrid({
 
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
+
     if (colDef.updateOn === 'blur' && data[colDef?.field] !== newValue?.[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
-
         return
       }
 
@@ -908,6 +1033,14 @@ export function DataGrid({
     gridApiRef.current?.setQuickFilter(searchValue)
   }, [searchValue])
 
+  useEffect(() => {
+    if (!gridApiRef.current || showFilters) return
+
+    gridApiRef.current.setFilterModel(null)
+    gridApiRef.current.hidePopupMenu?.()
+    document.activeElement?.blur?.()
+  }, [showFilters])
+
   const onColumnResized = params => {
     if (params?.source === 'uiColumnResized') {
       const columnState = params.columnApi.getColumnState()
@@ -918,7 +1051,6 @@ export function DataGrid({
   const finalColumns =  columnDefs?.map(def => {
     const colId = def.field
     const state = columnState?.find(s => s.colId === colId)
-
     if (!state) return def
 
     return {
@@ -928,18 +1060,81 @@ export function DataGrid({
     }
   })
 
+  
+  const handleDragStart = e => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const container = gridContainerRef.current
+    const button = hoverFilterRef.current
+    const header = container?.querySelector('.ag-header-row.ag-header-row-column')
+
+    if (!container || !button || !header) return
+
+    const c = container.getBoundingClientRect()
+    const h = header.getBoundingClientRect()
+    const b = button.getBoundingClientRect()
+
+    const startX = e.clientX
+    const startY = e.clientY
+    const startLeft = b.left - c.left
+    const startTop = b.top - c.top
+
+    const onMove = ev => {
+      let left = startLeft + (ev.clientX - startX)
+      let top = startTop + (ev.clientY - startY)
+
+      left = Math.max(0, Math.min(left, c.width - b.width))
+      top = Math.max(0, Math.min(top, h.height - b.height))
+
+      button.style.left = `${left}px`
+      button.style.top = `${top}px`
+      button.style.right = 'auto'
+    }
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }
+
+  useEffect(() => {
+    const button = hoverFilterRef.current
+    if (!button) return
+
+    button.style.left = 'auto'
+    button.style.right = '6px'
+    button.style.top = '6px'
+  }, [width])
+
   return (
-    <Box className={styles.root} sx={{ height: height || 'auto' }}>
+    <Box className={'root'} sx={{ height: height || 'auto' }}>
       <CacheStoreProvider>
-        <Box
-          className={`ag-theme-alpine ${styles.agContainer}`}
-          ref={gridContainerRef}
+        <Box 
+          className={`ag-theme-alpine agContainer ${showFilters ? 'filters-open' : 'filters-closed'}`}
+          ref={gridContainerRef} 
           style={{ '--ag-header-bg': bg }}
         >
+          {enableFilters && hasRows && (
+            <Box
+              ref={hoverFilterRef}
+              className='hoverFilter'
+              onPointerDown={handleDragStart}
+              style={{ right: 6, top: 6 }}
+            >
+              <IconButton size='small' onClick={() => setShowFilters(v => !v)}>
+                <FilterAltIcon fontSize='small' />
+              </IconButton>
+            </Box>
+          )}
           {value && (
             <AgGridReact
+              popupParent={document.body}
               gridApiRef={gridApiRef}
-              rowData={value}
+              rowData={isEmptyMaxLines ? [] : value}
               columnDefs={finalColumns}
               rowHeight={rowHeight}
               suppressRowClickSelection={false}
@@ -966,6 +1161,429 @@ export function DataGrid({
           )}
         </Box>
       </CacheStoreProvider>
+
+      <style jsx global>{`
+        .root {
+          flex: 1;
+        }
+        .agContainer :global(.ag-floating-filter-button) {
+          display: none !important;
+        }
+        .ag-menu,
+        .ag-popup,
+        .ag-popup-child {
+          z-index: 20 !important;
+        }
+        .ag-select-list {
+          max-height: none !important;
+          overflow: visible !important;
+        }
+        .hoverFilter {
+          position: absolute;
+          z-index: 10;
+          background: #fff;
+          border-radius: 4px;
+          cursor: grab;
+          user-select: none;
+          touch-action: none;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+
+        .hoverFilter:active {
+          cursor: grabbing;
+        }
+
+        .agContainer :global(.ag-header-cell .ag-header-cell-menu-button) {
+          display: none !important;
+        }
+
+        .agContainer.filters-open :global(.ag-header-cell .ag-header-cell-menu-button) {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        .agContainer.filters-open :global(.ag-header-cell .ag-header-icon) {
+          position: absolute;
+          right: 4px;
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .agContainer.filters-open :global(.ag-header-cell:hover .ag-header-icon) {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        .agContainer :global(.ag-header-icon.ag-header-label-icon.ag-filter-icon) {
+          display: none !important;
+        }
+
+        .agContainer :global(.ag-filter-icon) {
+          display: none !important;
+        }
+
+        .agContainer:hover .hoverFilter {
+          opacity: 1;
+        }
+
+        .agContainer {
+          width: 100%;
+          height: 100%;
+          flex: 1;
+          position: relative;
+        }
+
+        .ag-theme-alpine .ag-filter-apply-panel button,
+        .ag-theme-alpine .ag-filter-apply-panel .ag-button {
+          font-size: 10px !important;
+          padding: 2px 6px !important;
+          height: 22px !important;
+          min-height: 22px !important;
+        }
+
+        .agContainer.ag-theme-alpine {
+          --ag-header-height: 20px !important;
+          --ag-font-size: 0.9rem;
+        }
+
+        .agContainer :global(.ag-header),
+        .agContainer :global(.ag-header-cell),
+        .agContainer :global(.ag-header-row) {
+          height: 40px !important;
+          background: var(--ag-header-bg, #f5f5f5);
+        }
+
+        .agContainer :global(.ag-header-cell-text) {
+          font-size: 0.9rem;
+        }
+
+        .agContainer :global(.ag-floating-filter) {
+          display: flex;
+          align-items: center;
+          padding: 0 4px;
+        }
+
+        .agContainer :global(.agHeaderCheckboxCell.ag-header-cell) {
+          padding: 0 !important;
+        }
+
+        .agContainer :global(.agHeaderCheckboxCell .ag-header-cell-label) {
+          padding: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .agContainer :global(.agHeaderCheckboxCell .ag-header-cell-comp-wrapper) {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 0 !important;
+        }
+        .agContainer :global(.fullSizeCheckbox) {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .agContainer :global(.MuiCheckbox-root) {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        .agContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+          font-size: 20px !important;
+        }
+
+        .agContainer :global(.cellBox) {
+          overflow: hidden;
+        }
+
+        .agContainer :global(.ag-cell) {
+          border-right: 1px solid #d0d0d0 !important;
+          font-size: 0.8rem !important;
+          line-height: 1.1;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+        }
+
+        .agContainer :global(.ag-cell-wrapper),
+        .agContainer :global(.ag-cell-value) {
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          padding: 0px !important;
+        }
+
+        .agContainer :global(.ag-cell .MuiBox-root) {
+          display: flex;
+          align-items: center;
+          height: auto;
+          padding: 0 !important;
+        }
+
+        .agContainer :global(.MuiIconButton-root) {
+          padding: 0 !important;
+        }
+
+        .cellBox,
+        .cellEditorBox {
+          width: 100% !important;
+          height: auto;
+          padding: 0px !important;
+          display: flex;
+        }
+
+        .agContainer:dir(ltr) :global(.noCenterCell) {
+          padding-right: 0 !important;
+        }
+        .agContainer:dir(rtl) :global(.noCenterCell) {
+          padding-left: 0 !important;
+        }
+
+        .agContainer :global(.ag-cell.cellBoxCentered) {
+          justify-content: center;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        .cellEditorBoxCentered {
+          justify-content: center;
+        }
+        .cellEditorInner {
+          width: 100%;
+          height: auto;
+          display: flex;
+          align-items: center;
+          box-sizing: border-box;
+        }
+
+        .cellEditorInnerCentered {
+          justify-content: center;
+        }
+
+        .actionCell {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex: 1;
+        }
+
+        .deleteIcon,
+        .cellIcon {
+          font-size: 1.3rem !important;
+        }
+
+        .wrapTextCell :global(.ag-cell-wrapper),
+        .wrapTextCell :global(.ag-cell-value) {
+          white-space: normal;
+          line-height: 1.2;
+          height: auto;
+        }
+
+        .wrapTextCell .cellBox {
+          height: auto;
+        }
+
+        .agContainer :global(.ag-cell.cell-error) {
+          border: 1px solid #ff0000 !important;
+        }
+
+        .agContainer :global(.ag-cell.ag-cell-focus:not(.cell-error)),
+        .agContainer :global(.ag-cell.ag-cell-inline-editing:not(.cell-error)),
+        .agContainer :global(.ag-cell.ag-cell-inline-editing.ag-cell-focus:not(.cell-error)) {
+          box-shadow: none !important;
+          outline: none !important;
+          border-color: transparent !important;
+          border-radius: 0px !important;
+        }
+
+        .agContainer :global(.ag-cell),
+        .agContainer :global(.ag-cell-focus),
+        .agContainer :global(.ag-cell.ag-cell-inline-editing) {
+          border-right: 1px solid #d0d0d0 !important;
+        }
+
+        @media (max-width: 1599px) {
+          .agContainer.ag-theme-alpine {
+            --ag-font-size: 11px;
+          }
+
+          .agContainer :global(.ag-header),
+          .agContainer :global(.ag-header-cell),
+          .agContainer :global(.ag-header-row) {
+            height: 33px !important;
+          }
+
+          .agContainer :global(.ag-header-cell-text),
+          .agContainer :global(.ag-cell) {
+            font-size: 11px !important;
+          }
+        }
+
+        @media (max-width: 1280px) {
+          .agContainer.filters-open :global(.ag-header-cell .ag-header-cell-menu-button) {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            width: 14px !important;
+            min-width: 14px !important;
+            height: 14px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+
+          .agContainer.filters-closed :global(.ag-header-cell .ag-header-cell-menu-button) {
+            display: none !important;
+          }
+          .agContainer.ag-theme-alpine {
+            --ag-header-height: 26px;
+            --ag-font-size: 10px;
+          }
+
+          .agContainer :global(.ag-header-cell) {
+            padding-inline: 5px !important;
+          }
+
+          .agContainer:dir(ltr) :global(.noCenterCell:not(.ag-cell-inline-editing)) {
+            padding-left: 5px !important;
+          }
+
+          .agContainer:dir(rtl) :global(.noCenterCell:not(.ag-cell-inline-editing)) {
+            padding-right: 5px !important;
+          }
+
+          .agContainer :global(.ag-header),
+          .agContainer :global(.ag-header-cell) {
+            height: 29px !important;
+          }
+
+          .agContainer :global(.ag-header-cell-text),
+          .agContainer :global(.ag-cell) {
+            font-size: 10px !important;
+          }
+
+          .agContainer :global(.agHeaderCheckboxCell.ag-header-cell) {
+            padding: 0 !important;
+          }
+          .agContainer :global(.agHeaderCheckboxCell .ag-header-cell-label) {
+            padding: 0 !important;
+          }
+        }
+
+        @media (max-width: 1024px) {
+          .agContainer.ag-theme-alpine {
+            --ag-font-size: 10px;
+          }
+
+          .agContainer :global(.ag-header),
+          .agContainer :global(.ag-header-cell) {
+            height: 29px !important;
+          }
+
+          .agContainer :global(.ag-header-cell-text),
+          .agContainer :global(.ag-cell) {
+            font-size: 9px !important;
+          }
+        }
+
+        @media (max-width: 834px) {
+          .agContainer.ag-theme-alpine {
+            --ag-header-height: 26px;
+            --ag-font-size: 9px;
+          }
+
+          .agContainer :global(.ag-header),
+          .agContainer :global(.ag-header-cell) {
+            height: 26px !important;
+          }
+
+          .agContainer :global(.ag-header-cell-text),
+          .agContainer :global(.ag-cell) {
+            font-size: 9px !important;
+          }
+        }
+
+        @media (max-width: 1600px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 1.2rem !important;
+          }
+        }
+
+        @media (max-width: 1366px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 1.1rem !important;
+          }
+        }
+
+        @media (max-width: 1024px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 1rem !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 0.95rem !important;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 0.9rem !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 0.85rem !important;
+          }
+        }
+
+        @media (max-width: 375px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 0.8rem !important;
+          }
+        }
+
+        .agContainer :global(.ag-cell .wrap) {
+          white-space: normal;
+          line-height: 1.2;
+          display: flex;
+          align-items: center;
+        }
+
+        .agContainer :global(.ag-cell img),
+        .agContainer :global(.ag-cell svg),
+        .agContainer :global(.ag-cell .MuiSvgIcon-root) {
+          vertical-align: middle;
+        }
+      `}</style>
     </Box>
   )
 }
+

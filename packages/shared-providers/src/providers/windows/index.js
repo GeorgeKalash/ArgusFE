@@ -8,13 +8,50 @@ import { v4 as uuidv4 } from 'uuid'
 const WindowContext = React.createContext(null)
 const ClearContext = React.createContext(null)
 
+const CLOSED_MENU_WIDTH = 72
+const DEFAULT_WINDOW_MARGIN = 32
+const DEFAULT_VERTICAL_MARGIN = 32
+
+function getWindowDimensions(width, height, spacing = true) {
+  if (typeof window === 'undefined') {
+    return {
+      width: width || 800,
+      height: height || 400
+    }
+  }
+
+  if (!spacing) {
+    const computedWidth =
+      width ||
+      Math.max(400, window.innerWidth - CLOSED_MENU_WIDTH - DEFAULT_WINDOW_MARGIN)
+
+    const computedHeight =
+      height ||
+      Math.max(300, window.innerHeight - DEFAULT_VERTICAL_MARGIN)
+
+    return {
+      width: computedWidth,
+      height: computedHeight
+    }
+  }
+
+  return {
+    width: width || 800,
+    height: height || 600
+  }
+}
+
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [rerenderFlag, setRerenderFlag] = useState(false)
   const [lockProps, setLockProps] = useState(null)
   const closedWindow = useRef(null)
-  const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
+  const userId =
+    typeof window !== 'undefined'
+      ? JSON.parse(window.sessionStorage.getItem('userData'))?.userId
+      : null
+
   const currentValue = { ...stack[stack.length - 1] }
 
   function lockRecord(obj) {
@@ -70,7 +107,7 @@ export function WindowProvider({ children }) {
   function closeWindowById(givenId) {
     unlockRecord()
     closedWindow.current = currentValue
-    setStack(stack.filter(({ id }) => givenId != id))
+    setStack(stack => stack.filter(({ id }) => givenId != id))
   }
 
   function openWindow(id) {
@@ -78,15 +115,40 @@ export function WindowProvider({ children }) {
   }
 
   function addToStack(options) {
-    const { Component } = options
+    const { Component, spacing = true } = options
+    const dimensions = getWindowDimensions(options.width, options.height, spacing)
+
     setStack(stack => [
       ...stack,
-      { ...options, width: Component?.width || options.width, height: Component?.height || options.height, id: uuidv4() }
+      {
+        ...options,
+        spacing,
+        width: Component?.width || dimensions.width,
+        height: Component?.height || dimensions.height,
+        id: uuidv4()
+      }
     ])
   }
 
   function updateWindow(id, updates) {
-    setStack(prev => prev.map(w => (w.id === id ? { ...w, ...updates } : w)))
+    setStack(prev =>
+      prev.map(w => {
+        if (w.id !== id) return w
+
+        const nextSpacing = updates.spacing ?? w.spacing
+        const nextWidth = updates.width ?? w.width
+        const nextHeight = updates.height ?? w.height
+        const dimensions = getWindowDimensions(nextWidth, nextHeight, nextSpacing)
+
+        return {
+          ...w,
+          ...updates,
+          spacing: nextSpacing,
+          width: dimensions.width,
+          height: dimensions.height
+        }
+      })
+    )
   }
 
   return (
@@ -107,7 +169,8 @@ export function WindowProvider({ children }) {
           draggable,
           height,
           styles,
-          minimizable
+          minimizable,
+          spacing = true
         }) => (
           <ClearContext.Provider
             key={rerenderFlag}
@@ -152,6 +215,7 @@ export function WindowProvider({ children }) {
               Title={title}
               nextToTitle={nextToTitle}
               controlled
+              spacing={spacing}
               onClose={() => {
                 closeWindow()
                 onClose?.()
@@ -177,7 +241,8 @@ export function WindowProvider({ children }) {
                 window={{
                   close: () => closeWindowById(id),
                   setTitle: newTitle => updateWindow(id, { title: newTitle || title }),
-                  setNextToTitle :  newTitle  =>   updateWindow(id, { nextToTitle: newTitle || title }),
+                  setNextToTitle: newTitle => updateWindow(id, { nextToTitle: newTitle || title }),
+                  setSpacing: value => updateWindow(id, { spacing: value })
                 }}
               />
             </Window>
@@ -188,7 +253,16 @@ export function WindowProvider({ children }) {
   )
 }
 
-export function ImmediateWindow({ datasetId, Component, labelKey, titleName, height, width, props = {} }) {
+export function ImmediateWindow({
+  datasetId,
+  Component,
+  labelKey,
+  titleName,
+  height,
+  width,
+  props = {},
+  spacing = true
+}) {
   const { stack } = useWindow()
   const { labels: _labels, access } = useResourceParams({ datasetId })
   const [rendered, setRendered] = useState(false)
@@ -205,12 +279,13 @@ export function ImmediateWindow({ datasetId, Component, labelKey, titleName, hei
       Component,
       props: { access, _labels, ...props },
       expandable: false,
-      minimizable: false, 
+      minimizable: false,
       refresh: false,
       closable: false,
       draggable: false,
-      width: width || 600,
-      height: height || 400,
+      spacing,
+      width,
+      height,
       title: _labels[labelKey] || titleName
     })
   }

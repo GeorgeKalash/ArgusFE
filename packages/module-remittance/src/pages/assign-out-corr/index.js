@@ -308,7 +308,6 @@ const OutwardsCorrespondent = () => {
             columns={rowColumns}
             gridData={data}
             rowId={['recordId']}
-            isLoading={false}
             refetch={refetch}
             maxAccess={maxAccess}
             pageSize={50}

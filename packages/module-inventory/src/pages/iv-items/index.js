@@ -16,7 +16,6 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [params, setParams] = useState('')
 
   const { stack } = useWindow()
 
@@ -164,7 +163,6 @@ const IvItems = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

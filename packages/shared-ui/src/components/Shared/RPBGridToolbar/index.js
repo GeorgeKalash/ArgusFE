@@ -5,7 +5,11 @@ import ReportParameterBrowser from '@argus/shared-ui/src/components/Shared/Repor
 import { Grid } from '@mui/material'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import styles from './RPBGridToolbar.module.css'
+
+const styles = {
+  leftSectionGridItem: 'leftSectionGridItem',
+  bottomSectionContainer: 'bottomSectionContainer'
+}
 
 const RPBGridToolbar = ({
   add,
@@ -56,7 +60,6 @@ const RPBGridToolbar = ({
   const formatDataDictForApi = rpbParams => {
     const formattedData = rpbParams.reduce((acc, { display }, index) => {
       acc[index] = display || ''
-
       return acc
     }, {})
 
@@ -113,44 +116,130 @@ const RPBGridToolbar = ({
   ].filter(item => !item?.hidden)
 
   return (
-    <GridToolbar
-      onSearch={value => filters(value, reportParams)}
-      reportParams={reportParams}
-      onSearchClear={() => {
-        setSearch('')
-        if (typeof filterBy === 'function') filterBy('params', reportParams)
-        else onClear(reportParams)
-      }}
-      onSearchChange={value => {
-        value != '' ? setSearch(value) : setSearch('')
-      }}
-      inputSearch={hasSearch}
-      actions={actions}
-      disableActionsPadding={disableActionsPadding} 
-      leftSection={
-        leftSection && (
-          <Grid item className={styles.leftSectionGridItem}>
-            {leftSection}
-          </Grid>
-        )
-      }
-      bottomSection={
-        rpbParams &&
-        rpbParams.length > 0 && (
-          <Grid container className={styles.bottomSectionContainer}>
-            {rpbParams.map(
-              (param, i) =>
-                param.display && (
-                  <Grid key={i} item>
-                    [<b>{param.caption}:</b> {param.display}]
-                  </Grid>
-                )
-            )}
-          </Grid>
-        )
-      }
-      {...rest}
-    />
+    <>
+      <style jsx global>{`
+        .leftSectionGridItem {
+          width: 33.3333%;
+          display: flex;
+          justify-content: flex-start;
+          align-items: end;
+        }
+
+        .bottomSectionContainer {
+          display: flex !important;
+          flex-wrap: wrap;
+          padding-top: 12px;
+          margin: 0 !important;
+          gap: 4px 12px;
+          align-items: center;
+          font-size: 12px;
+        }
+
+        @media (max-width: 1600px) {
+          .leftSectionGridItem {
+            width: 40%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: end;
+          }
+
+          .bottomSectionContainer {
+            font-size: 11px;
+          }
+        }
+
+        @media (max-width: 1280px) {
+          .leftSectionGridItem {
+            width: 50%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: end;
+          }
+
+          .bottomSectionContainer {
+            font-size: 10px;
+          }
+        }
+
+        @media (max-width: 1024px) {
+          .leftSectionGridItem {
+            width: 60%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: end;
+          }
+
+          .bottomSectionContainer {
+            font-size: 9px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .leftSectionGridItem {
+            width: 100%;
+            margin-top: 8px;
+          }
+
+          .bottomSectionContainer {
+            justify-content: flex-start;
+            font-size: 8px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .bottomSectionContainer {
+            gap: 2px 6px;
+            font-size: 7px;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .bottomSectionContainer {
+            gap: 2px 4px;
+            font-size: 6px;
+          }
+        }
+      `}</style>
+
+      <GridToolbar
+        onSearch={value => filters(value, reportParams)}
+        reportParams={reportParams}
+        onSearchClear={() => {
+          setSearch('')
+          if (typeof filterBy === 'function') filterBy('params', reportParams)
+          else onClear(reportParams)
+        }}
+        onSearchChange={value => {
+          value != '' ? setSearch(value) : setSearch('')
+        }}
+        inputSearch={hasSearch}
+        actions={actions}
+        disableActionsPadding={disableActionsPadding}
+        leftSection={
+          leftSection && (
+            <Grid item className={styles.leftSectionGridItem}>
+              {leftSection}
+            </Grid>
+          )
+        }
+        bottomSection={
+          rpbParams &&
+          rpbParams.length > 0 && (
+            <Grid container className={styles.bottomSectionContainer}>
+              {rpbParams.map(
+                (param, i) =>
+                  param.display && (
+                    <Grid key={i} item>
+                      [<b>{param.caption}:</b> {param.display}]
+                    </Grid>
+                  )
+              )}
+            </Grid>
+          )
+        }
+        {...rest}
+      />
+    </>
   )
 }
 

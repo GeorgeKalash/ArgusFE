@@ -123,7 +123,6 @@ const DocumentTypeMaps = () => {
           onEdit={edit}
           onDelete={del}
           refetch={refetch}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'

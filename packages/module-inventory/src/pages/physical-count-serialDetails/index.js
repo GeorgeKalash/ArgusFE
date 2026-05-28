@@ -23,11 +23,13 @@ import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearG
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ImportSerials from '@argus/shared-ui/src/components/Shared/ImportSerials'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const PhysicalCountSerialDe = () => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
   const [editMode, setEditMode] = useState(false)
   const [combosDisabled, setCombosDisabled] = useState(false)
 
@@ -45,7 +47,6 @@ const PhysicalCountSerialDe = () => {
       SCStatus: null,
       SCWIP: null,
       EndofSiteStatus: null,
-      search: '',
       scRef: null,
       scDate: null,
       rows: [
@@ -184,7 +185,7 @@ const PhysicalCountSerialDe = () => {
     if (action === 'delete') {
       let updatedSerials = formik.values.rows
 
-      updatedSerials = updatedSerials.filter(item => item.srlNo !== row.srlNo)
+      updatedSerials = updatedSerials.filter(item => !(item.srlNo === row.srlNo && item.seqNo === row.seqNo))
       formik.setFieldValue('rows', updatedSerials)
     } else {
       formik.setFieldValue('rows', value)
@@ -374,15 +375,6 @@ const PhysicalCountSerialDe = () => {
     })
   }
 
-  const filtered = formik.values.search
-    ? formik.values.rows.filter(
-        item =>
-          (item.sku && item.sku?.toLowerCase().toString()?.includes(formik.values.search?.toLowerCase())) ||
-          (item.srlNo && item.srlNo?.toString()?.includes(formik.values.search?.toLowerCase())) ||
-          (item.weight && item.weight?.toString()?.includes(formik.values.search?.toLowerCase()))
-      )
-    : formik.values.rows
-
   return (
     <FormShell
       form={formik}
@@ -495,35 +487,19 @@ const PhysicalCountSerialDe = () => {
                 maxAccess={access}
               />
             </Grid>
-            <Grid item xs={3}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={labels.search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                onChange={event => {
-                  formik.setFieldValue('search', event.target.value)
-                }}
-                onSearch={e => formik.setFieldValue('search', e)}
-                search={true}
-                readOnly={formik?.values?.rows?.length === 0}
-              />
-            </Grid>
           </Grid>
         </Fixed>
         <Grow key={formik?.values?.controllerId}>
           <DataGrid
             onChange={(value, action, row) => handleGridChange(value, action, row)}
-            value={formik.values.controllerId ? filtered : []}
+            value={formik.values.controllerId ? formik.values.rows : []}
             error={formik.errors?.rows}
             initialValues={formik?.initialValues?.rows?.[0]}
             columns={columns}
+            enableFilters
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
             allowDelete={formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
             allowAddNewLine={
-              !formik?.values?.search &&
               formik.values.controllerId &&
               formik.values?.SCStatus != 3 &&
               formik.values?.EndofSiteStatus != 3 &&

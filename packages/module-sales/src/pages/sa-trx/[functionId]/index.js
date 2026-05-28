@@ -18,10 +18,12 @@ import toast from 'react-hot-toast'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
   const { addLockedScreen } = useContext(LockedScreensContext)
@@ -126,6 +128,9 @@ const SaTrx = () => {
     {
       field: 'printStatusName',
       headerName: labels.printStatus,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {
@@ -141,6 +146,9 @@ const SaTrx = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -166,7 +174,7 @@ const SaTrx = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'currencyId')
 
     return defaultCurrency?.value ? parseInt(defaultCurrency.value) : null
   }
@@ -187,46 +195,15 @@ const SaTrx = () => {
     openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
-  const getCorrectLabel = functionId => {
-    if (functionId === SystemFunction.SalesInvoice) {
-      return labels.salesInvoice
-    } else if (functionId === SystemFunction.SalesReturn) {
-      return labels.salesReturn
-    } else if (functionId === SystemFunction.ConsignmentIn) {
-      return labels.consignmentIn
-    } else if (functionId === SystemFunction.ConsignmentOut) {
-      return labels.consignmentOut
-    } else {
-      return null
-    }
-  }
-
-  const getGLResource = functionId => {
-    const fn = Number(functionId)
-    switch (fn) {
-      case SystemFunction.SalesInvoice:
-        return ResourceIds.GLSalesInvoice
-      case SystemFunction.SalesReturn:
-        return ResourceIds.GLSalesReturn
-      default:
-        return null
-    }
-  }
-
   function openStack(recordId) {
     stack({
       Component: SaleTransactionForm,
       props: {
-        labels,
         recordId,
-        access,
         functionId,
         lockRecord,
         getResourceId,
-        getGLResource
-      },
-     
-      title: getCorrectLabel(parseInt(functionId))
+      }
     })
   }
 
@@ -286,7 +263,6 @@ const SaTrx = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           refetch={refetch}

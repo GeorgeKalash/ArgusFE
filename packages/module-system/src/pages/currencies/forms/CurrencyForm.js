@@ -1,5 +1,5 @@
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -18,8 +18,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function CurrencyForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -41,7 +39,8 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
       purchase: false,
       isoCode: '',
       symbol: '',
-      maxRateVarPct: null
+      maxRateVarPct: null,
+      baseCurrencyId: null
     },
     maxAccess,
     validateOnChange: true,
@@ -50,7 +49,7 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
       reference: yup.string().required(),
       decimals: yup.string().required(),
       currencyType: yup.string().required(),
-      profileId: yup.string().required()
+      profileId: yup.number().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -58,16 +57,13 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      !obj?.recordId &&
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      setEditMode(true)
+      !obj?.recordId && formik.setFieldValue('recordId', response.recordId)
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -148,8 +144,8 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('decimals', newValue?.key)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('decimals', newValue?.key || null)
                 }}
                 error={formik.touched.decimals && Boolean(formik.errors.decimals)}
               />
@@ -164,8 +160,8 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('profileId', newValue?.key)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('profileId', newValue?.key || null)
                 }}
                 error={formik.touched.profileId && Boolean(formik.errors.profileId)}
               />
@@ -181,10 +177,30 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 readOnly={editMode}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('currencyType', newValue?.key)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('currencyType', newValue?.key || null)
+                  formik.setFieldValue('baseCurrencyId', null)
                 }}
                 error={formik.touched.currencyType && Boolean(formik.errors.currencyType)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='baseCurrencyId'
+                filter={item => item.currencyType == 2}
+                label={labels.baseCurrency}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                readOnly={formik.values?.currencyType != 2 || editMode}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('baseCurrencyId', newValue?.recordId || null)}
+                error={formik.touched.baseCurrencyId && Boolean(formik.errors.baseCurrencyId)}
               />
             </Grid>
             <Grid item xs={6}>

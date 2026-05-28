@@ -79,6 +79,9 @@ const PUDraftSerialsReturns = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -124,8 +127,8 @@ const PUDraftSerialsReturns = () => {
         access,
         recordId
       },
-      width: 1400,
-      height: 800,
+      width: 1300,
+      height: 750,
       title: labels.draftSerReturn
     })
   }

@@ -16,6 +16,7 @@
   width: 100%;
   flex: 1 !important;
   min-height: 0;
+  overflow: hidden;
 }
 
 .customTabPanel {
@@ -38,13 +39,6 @@
 .hiddenPanel {
   visibility: hidden;
   pointer-events: none;
-}
-
-.panelsWrapper {
-  position: relative;
-  width: 100%;
-  flex: 1 !important;
-  overflow: hidden;
 }
 
 .tabsProviderContainer {
@@ -80,7 +74,7 @@
   margin-right: 2px !important;
   display: flex;
   align-items: center;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.08s ease, color 0.08s ease;
 }
 
 .tabRoot:hover {
@@ -99,7 +93,7 @@
 
 .svgIcon {
   color: #231f20 !important;
-  transition: color 0.2s ease;
+  transition: color 0.08s ease;
   padding: 0px !important;
   padding-left: 1px !important;
   font-size: 20px !important;
@@ -107,7 +101,7 @@
 
 .tabSvgIcon {
   color: #5a585e !important;
-  transition: color 0.2s ease;
+  transition: color 0.08s ease;
   padding: 0px !important;
 }
 
@@ -128,7 +122,7 @@
   padding: 6px 16px !important;
   color: #231f20 !important;
   font-size: 13px !important;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.08s ease, color 0.08s ease;
 }
 
 .dropdownItem:hover {

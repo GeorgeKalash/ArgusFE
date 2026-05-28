@@ -30,11 +30,8 @@ const calcVatAmountPerTaxDetail = (vatCalcRow, taxDetail) => {
       }
       break
     case TAXBASE_FAPQU:
-      if (vatCalcRow?.priceType === 3) vatAmount = taxDetail.amount * vatCalcRow.qty * vatCalcRow.weight
-      else vatAmount = taxDetail.amount * vatCalcRow.qty
+      vatAmount = taxDetail.amount * vatCalcRow.qty
 
-      //price type = 1 -> taxDetail.amount * vatCalcRow.qty
-      //price type = 3 => qty * weight
       break
     case TAXBASE_FAPIUW: // base price
       vatAmount = (vatCalcRow.basePrice * vatCalcRow.qty * taxDetail.amount) / 100
@@ -52,7 +49,8 @@ const calcVatAmountPerTaxDetail = (vatCalcRow, taxDetail) => {
 
 const calcVatAmount = vatCalcRow => {
   let vatAmount = 0
-
+  vatCalcRow.qty = vatCalcRow.priceType == 3 ? vatCalcRow.qty * vatCalcRow.weight : vatCalcRow.qty
+  
   if (vatCalcRow.taxDetails != null) {
     for (let i = 0; i < vatCalcRow.taxDetails.length; i++) {
       vatAmount += calcVatAmountPerTaxDetail(vatCalcRow, vatCalcRow.taxDetails[i])
@@ -68,4 +66,4 @@ const getVatCalc = _vatCalcRow => {
   return _vatCalcRow
 }
 
-export { VatCalcRow, getVatCalc, TAXBASE_POU, TAXBASE_FAPQU, TAXBASE_FAPIUW, TAXBASE_PLP }
+export { VatCalcRow, getVatCalc, TAXBASE_POU, TAXBASE_FAPQU, TAXBASE_FAPIUW, TAXBASE_PLP, calcVatAmountPerTaxDetail }

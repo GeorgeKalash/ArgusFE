@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -17,11 +17,14 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import StrictConfirmation from '@argus/shared-ui/src/components/Shared/StrictConfirmation'
 
 export default function SiteManagementForm({ labels, maxAccess, record }) {
   const { platformLabels } = useContext(ControlContext)
-  const { recordId, name, sku } = record
-
+  const InitialRecords = useRef(record)
+  const { recordId, name, sku } = InitialRecords?.current || {}
+  const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -229,8 +232,34 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
       condition: true,
       onClick: 'onRecordRemarks',
       disabled: !editMode
+    },
+    {
+      key: 'Delete',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: StrictConfirmation,
+          props: {
+            action: () => deleteRecord(formik.values.itemId),
+            type: 'delete'
+          },
+          expandable: false
+        })
+      },
+      disabled: !editMode
     }
   ]
+
+  async function deleteRecord(itemId){
+    if (!itemId) return
+
+    await postRequest({
+      extension: InventoryRepository.Management.del,
+      record: JSON.stringify({ itemId })
+    })
+    toast.success(platformLabels.Deleted)
+    refetchForm(itemId)
+  }
 
   return (
     <FormShell

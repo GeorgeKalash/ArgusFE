@@ -36,12 +36,15 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/PurchaseTransactionForm'
 
-export default function PUDraftReturnForm({ labels, access, recordId }) {
+export default function PUDraftReturnForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -61,8 +64,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     }
   }, [documentType?.dtId])
 
-  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
     maxAccess,
@@ -88,8 +91,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
         invoiceRef: '',
         subTotal: 0,
         vatAmount: 0,
-        amount: 0,
-        search: ''
+        amount: 0
       },
       serials: [
         {
@@ -150,7 +152,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       )
     }),
     onSubmit: async obj => {
-      const { invoiceId, invoiceRef, disSkuLookup, search, date, ...rest } = obj.header
+      const { invoiceId, invoiceRef, disSkuLookup, date, ...rest } = obj.header
 
       const DraftReturnPack = {
         header: {
@@ -339,7 +341,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   }
 
   async function saveHeader(lastLine, type) {
-    const { invoiceId, invoiceRef, disSkuLookup, search, date, ...rest } = formik?.values?.header
+    const { invoiceId, invoiceRef, disSkuLookup, date, ...rest } = formik?.values?.header
 
     const DraftReturnPack = {
       header: {
@@ -520,7 +522,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc:require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src, 
+              imgSrc:'/images/buttonsIcons/tax-icon.png', 
               hidden: false
             }
           } else {
@@ -571,7 +573,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   }
 
   const onPost = async () => {
-    const { invoiceId, invoiceRef, disSkuLookup, search, date, ...rest } = formik?.values?.header
+    const { invoiceId, invoiceRef, disSkuLookup, date, ...rest } = formik?.values?.header
 
     await postRequest({
       extension: PurchaseRepository.PUDraftReturn.post,
@@ -580,10 +582,21 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
         date: formatDateToApi(date),
         wip: 2
       })
-    }).then(async () => {
+    }).then(async res => {
       toast.success(platformLabels.Posted)
+      window.close();
       invalidate()
-      await refetchForm(formik?.values?.recordId)
+      openPurchaseReturn(res?.recordId)
+    })
+  }
+
+  async function openPurchaseReturn(recordId) {
+    stack({
+      Component: PurchaseTransactionForm,
+      props: {
+        recordId,
+        functionId: SystemFunction.PurchaseReturn
+      }
     })
   }
 
@@ -608,10 +621,11 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.header?.accountId),
-            moduleId: 1
+            date: formik?.values?.header?.date
           }
         })
-      }
+      },
+      disabled: !formik.values.header?.accountId || !formik.values.header?.date
     },
     {
       key: 'Unlocked',
@@ -699,21 +713,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     })
 
     return res?.list
-  }
-
-  const filteredData = formik.values.header?.search
-    ? formik.values.serials.filter(
-        item =>
-          item.srlNo?.toString()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.sku?.toString()?.toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.weight?.toString()?.includes(formik.values.header?.search)
-      )
-    : formik.values.serials
-
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('header.search', value)
   }
 
   const handleGridChange = (value, action, row) => {
@@ -1080,7 +1079,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 form={formik}
                 required
                 readOnly={isPosted}
-                displayFieldWidth={2}
+                displayFieldWidth={3}
                 firstFieldWidth={3}
                 secondFieldName={'header.vendorName'}
                 valueShow='vendorRef'
@@ -1130,7 +1129,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                key={`${formik.values.header?.vendorId}-${formik.values.header?.date?.toISOString()}-${
+                key={`${formik.values.header?.vendorId}-${formik?.values?.header?.date ? formik.values.header?.date?.toISOString() : null}-${
                   formik.values.header?.currencyId
                 }`}
                 endpointId={
@@ -1140,7 +1139,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 }
                 parameters={`_vendorId=${
                   formik?.values?.header?.vendorId
-                }&_returnDate=${formik?.values?.header?.date?.toISOString()}`}
+                }&_returnDate=${formik?.values?.header?.date ? formik?.values?.header?.date?.toISOString() : null}`}
                 filter={item => item.currencyId == formik?.values?.header?.currencyId}
                 name='header.invoiceId'
                 label={labels.puInv}
@@ -1166,34 +1165,21 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 disabled={!formik?.values?.header?.invoiceId || isPosted}
               />
             </Grid>
-            <Grid item xs={4}>
-              <CustomTextField
-                name='header.search'
-                value={formik.values.header?.search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  formik.setFieldValue('header.search', '')
-                }}
-                onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('header.search', e)}
-                search={true}
-              />
-            </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <DataGrid
             onChange={(value, action, row) => handleGridChange(value, action, row)}
-            value={filteredData || []}
+            value={formik.values.serials || []}
             error={formik.errors.serials}
             initialValues={formik?.initialValues?.serials?.[0]}
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
+            enableFilters
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isPosted}
             allowAddNewLine={
-              !formik?.values?.header?.search &&
               (formik.values?.serials?.length === 0 ||
                 !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo)
             }
@@ -1202,36 +1188,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           />
         </Grow>
         <Grid container spacing={2}>
-          <Grid item xs={5} height={'13vh'} sx={{ display: 'flex', flex: 1 }}>
-            <Table
-              name='metal'
-              gridData={{ count: 1, list: formik?.values?.metalGridData }}
-              maxAccess={access}
-              columns={[
-                { field: 'metal', headerName: labels.metal, flex: 1 },
-                { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
-                { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
-              ]}
-              rowId={['metal']}
-              pagination={false}
-            />
-          </Grid>
-          <Grid item xs={0.5}></Grid>
-          <Grid item xs={2}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} height={20}></Grid>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='header.weight'
-                  maxAccess={maxAccess}
-                  label={labels.totalWeight}
-                  value={weight}
-                  readOnly
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={8} height={'13vh'} sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={6.5} height={'20vh'} sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='item'
               columns={[
@@ -1247,7 +1204,31 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
               pagination={false}
             />
           </Grid>
-        </Grid>
+          <Grid item xs={3.5} height={'20vh'} sx={{ display: 'flex', flex: 1 }}>
+            <Table
+              name='metal'
+              gridData={{ count: 1, list: formik?.values?.metalGridData }}
+              maxAccess={access}
+              columns={[
+                { field: 'metal', headerName: labels.metal, flex: 1 },
+                { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
+                { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
+              ]}
+              rowId={['metal']}
+              pagination={false}
+            />
+          </Grid>
+          <Grid item xs={2}> 
+            <Grid item xs={12} height={20}></Grid>
+              <CustomNumberField
+                name='header.weight'
+                maxAccess={maxAccess}
+                label={labels.totalWeight}
+                value={weight}
+                readOnly
+              />
+            </Grid>
+        </Grid> 
       </VertLayout>
     </FormShell>
   )

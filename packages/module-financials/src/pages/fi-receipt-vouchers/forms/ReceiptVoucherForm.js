@@ -28,10 +28,12 @@ import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalc
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -44,9 +46,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     endpointId: FinancialRepository.ReceiptVouchers.page
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const defaultAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defaultAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
     maxAccess: maxAccess,
@@ -60,6 +62,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       currencyId,
       currencyName: '',
       dtId: null,
+      spId: null,
       sptId: null,
       dgId: '',
       amount: '',
@@ -339,11 +342,11 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.accountId),
-            moduleId: 1
+            date: formik.values.date
           }
         })
       },
-      disabled: !formik.values.accountId
+      disabled: !formik.values.accountId || !formik.values.date
     }
   ]
 
@@ -451,12 +454,12 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 displayFieldWidth={4}
                 filter={{ isInactive: val => val !== true }}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('spId', newValue?.spId || '')
                   formik.setFieldValue('sptId', newValue?.sptId || '')
                   formik.setFieldValue('accountGroupName', newValue?.groupName || '')
+                  formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}

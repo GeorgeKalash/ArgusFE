@@ -24,10 +24,12 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import toast from 'react-hot-toast'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function CastingForm({ store, setStore, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const recordId = store?.recordId
   const [recal, setRecal] = useState(false)
@@ -42,7 +44,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
   const invalidate = useInvalidate({
     endpointId: FoundryRepository.Casting.page
   })
-  const castingWorkCenterId = defaultsData?.list?.find(({ key }) => key === 'castingWorkCenterId')?.value
+  const castingWorkCenterId = systemDefaults?.list?.find(({ key }) => key === 'castingWorkCenterId')?.value
 
   const { formik } = useForm({
     maxAccess,
@@ -519,7 +521,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                   <Grid item>
                     <ResourceComboBox
                       endpointId={ManufacturingRepository.Labor.qry}
-                      parameters={`_startAt=0&_pageSize=200&_params=`}
+                      parameters={`_startAt=0&_pageSize=10000&_params=`}
                       filter={labor => labor.workCenterId == castingWorkCenterId}
                       name='laborId'
                       label={labels.labor}

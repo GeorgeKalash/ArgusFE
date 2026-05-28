@@ -42,7 +42,8 @@ const Components = ({ store, maxAccess, labels }) => {
           itemId: '',
           seqNo: 1,
           qty: null,
-          pcs: null
+          pcs: null,
+          size: null
         }
       ]
     },
@@ -178,7 +179,16 @@ const Components = ({ store, maxAccess, labels }) => {
         decimalScale: 0,
         maxLength: 10
       }
-    }
+    },
+    {
+      component: 'numberfield',
+      label: labels.size,
+      name: 'size',
+      props: {
+        decimalScale: 0,
+        maxLength: 3
+      }
+    },
   ]
 
   return (

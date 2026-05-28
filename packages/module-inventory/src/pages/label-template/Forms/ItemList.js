@@ -136,7 +136,6 @@ const ItemList = ({ recordId: tlId, labels, maxAccess }) => {
           rowId={['seqNo']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

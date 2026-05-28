@@ -71,7 +71,6 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
 
   const {
     query: { data },
-    refetch,
     filterBy,
     filters,
     invalidate
@@ -246,9 +245,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         ]}
         gridData={filteredData}
         rowId={['sgId', 'moduleId', 'resourceId']}
-        isLoading={false}
         maxAccess={maxAccess}
-        refetch={refetch}
         pagination={false}
       />
     </Grow>
