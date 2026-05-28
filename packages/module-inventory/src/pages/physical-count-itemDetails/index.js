@@ -22,6 +22,7 @@ import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearG
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ImportForm from '@argus/shared-ui/src/components/Shared/ImportForm'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import { getDirtyFields } from '@argus/shared-utils/src/utils/getDirtyFields'
 
 const PhysicalCountItemDe = () => {
   const { stack } = useWindow()
@@ -48,28 +49,30 @@ const PhysicalCountItemDe = () => {
     return res?.record
   }
 
+  const initialValues = {
+    stockCountId: null,
+    siteId: null,
+    controllerId: null,
+    status: 1,
+    SCStatus: null,
+    SCWIP: null,
+    EndofSiteStatus: null,
+    rows: [
+      {
+        id: 1,
+        sku: '',
+        itemId: null,
+        itemName: '',
+        countedQty: 0,
+        weight: 0,
+        metalPurity: 0
+      }
+    ]
+  }
+
   const { formik } = useForm({
     maxAccess: access,
-    initialValues: {
-      stockCountId: null,
-      siteId: null,
-      controllerId: null,
-      status: 1,
-      SCStatus: null,
-      SCWIP: null,
-      EndofSiteStatus: null,
-      rows: [
-        {
-          id: 1,
-          sku: '',
-          itemId: null,
-          itemName: '',
-          countedQty: 0,
-          weight: 0,
-          metalPurity: 0
-        }
-      ]
-    },
+    initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
       stockCountId: yup.string().required(),
@@ -134,26 +137,31 @@ const PhysicalCountItemDe = () => {
 
     getDTDsku(stockCountId)
 
-    await getRequest({
+    const res = await getRequest({
       extension: SCRepository.StockCountItemDetail.qry,
       parameters: `_stockCountId=${stockCountId}&_siteId=${formik.values.siteId}&_controllerId=${controllerId}`
-    }).then(res => {
-      if (res.list) {
-        const modifiedList = res.list?.map((item, index) => ({
-          ...item,
-          id: index + 1,
-          metalPurity: item?.metalPurity || 0,
-          weight: item?.weight || 0,
-          countedQty: item?.countedQty || 0
-        }))
-        if (modifiedList.length > 0) {
-          formik.setFieldValue('rows', modifiedList)
-          rowsUpdate.current = modifiedList
-        }
-      }
-
-      setEditMode(res?.list?.length > 0)
     })
+
+    const modifiedList =
+      res.list?.length > 0
+        ? res.list.map((item, index) => ({
+            ...item,
+            id: index + 1,
+            metalPurity: item?.metalPurity || 0,
+            weight: item?.weight || 0,
+            countedQty: item?.countedQty || 0
+          }))
+        : initialValues.rows
+
+    const nextValues = {
+      ...formik.values,
+      controllerId,
+      rows: modifiedList
+    }
+
+    formik.resetForm({ values: nextValues })
+    rowsUpdate.current = modifiedList
+    setEditMode(res?.list?.length > 0)
   }
 
   useEffect(() => {
@@ -238,6 +246,14 @@ const PhysicalCountItemDe = () => {
   }
 
   const defaultQty = !jumpToNextLine && !showDefaultQty ? 0 : 1
+
+    useEffect(() => {
+    if (formik.dirty) {
+      console.log(
+        getDirtyFields(formik.values, formik.initialValues)
+      )
+    }
+  }, [formik.values])
 
   const columns = [
     {
@@ -352,8 +368,8 @@ const PhysicalCountItemDe = () => {
   ]
 
   const clearGrid = () => {
-    formik.setFieldValue('rows', formik.initialValues.rows)
-    rowsUpdate.current = formik.initialValues.rows
+    formik.setFieldValue('rows', initialValues.rows)
+    rowsUpdate.current = initialValues.rows
 
     setEditMode(false)
   }
@@ -432,8 +448,7 @@ const PhysicalCountItemDe = () => {
         open: { flag: true },
         fullScreen: false,
         onConfirm: () => {
-          formik.resetForm()
-          formik.setFieldValue('rows', [])
+          formik.resetForm({ values: initialValues })
 
           setEditMode(false)
         },
@@ -615,7 +630,7 @@ const PhysicalCountItemDe = () => {
             }}
             value={formik.values.controllerId && typeof disSkuLookup === 'boolean' ? formik.values?.rows : []}
             error={formik.errors?.rows}
-            initialValues={formik?.initialValues?.rows?.[0]}
+            initialValues={initialValues?.rows?.[0]}
             columns={columns}
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
             allowDelete={formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
