@@ -108,3 +108,16 @@ code[class*='language-'] {
 .chat-message-wrapper:hover .copy-button {
   opacity: 1 !important;
 }
+
+@media print {
+  .chat-print-container {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  .chat-message-wrapper {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
