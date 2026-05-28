@@ -68,6 +68,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import CommissionDetailsForm from '@argus/module-sales/src/pages/sa-trx/[functionId]/Forms/CommissionDetailsForm'
+import FIReceiptVoucherForm from './FIReceiptVoucherForm'
 
 export default function SaleTransactionForm({
   recordId,
@@ -1144,6 +1145,15 @@ export default function SaleTransactionForm({
     })
   }
 
+  const onReceiptVoucher = () => {
+    stack({
+      Component: FIReceiptVoucherForm,
+      props: {
+        header: formik.values.header
+      }
+    })
+  }
+
 
   const actions = [
     {
@@ -1239,6 +1249,12 @@ export default function SaleTransactionForm({
       key: 'Commission',
       condition: true,
       onClick: onCommissionClick,
+      disabled: !isPosted
+    },
+    {
+      key: 'RV',
+      condition: true,
+      onClick: onReceiptVoucher,
       disabled: !isPosted
     }
   ]
