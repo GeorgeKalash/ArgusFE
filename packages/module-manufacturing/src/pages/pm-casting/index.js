@@ -156,7 +156,6 @@ const Casting = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           deleteConfirmationType={'strict'}

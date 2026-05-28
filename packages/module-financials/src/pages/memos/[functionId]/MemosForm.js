@@ -84,11 +84,10 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     validateOnChange: true,
     validationSchema: yup.object({
       amount: yup.number().required(),
-      currencyId: yup.string().required(),
-      accountId: yup.string().required(),
+      currencyId: yup.number().required(),
+      accountId: yup.number().required(),
       subtotal: yup.number().required(),
-      date: yup.string().required(),
-      dueDate: yup.string().required()
+      date: yup.date().required()
     }),
     onSubmit: async obj => {
       if (!obj.recordId) {
@@ -164,7 +163,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         formik.resetForm({
           values: {
             ...res.record,
-            dueDate: formatDateFromApi(res.record.dueDate),
+            dueDate: res?.record?.dueDate ? formatDateFromApi(res.record.dueDate) : null,
             date: formatDateFromApi(res.record.date)
           }
         })
@@ -188,7 +187,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       })
 
       getRes.record.date = formatDateFromApi(getRes.record.date)
-      getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
+      getRes.record.dueDate = getRes?.record?.dueDate ? formatDateFromApi(getRes.record.dueDate) : null
       formik.setValues(getRes.record)
     }
   }
@@ -209,7 +208,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       })
 
       getRes.record.date = formatDateFromApi(getRes.record.date)
-      getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
+      getRes.record.dueDate = getRes?.record?.dueDate ? formatDateFromApi(getRes.record.dueDate) : null
       formik.setValues(getRes.record)
     }
   }
@@ -228,7 +227,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         extension: FinancialRepository.FiMemo.get,
         parameters: `_recordId=${formik.values.recordId}`
       })
-      getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
+      getRes.record.dueDate = getRes?.record?.dueDate ? formatDateFromApi(getRes.record.dueDate) : null
       getRes.record.date = formatDateFromApi(getRes.record.date)
 
       formik.setValues(getRes.record)
@@ -477,10 +476,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     readOnly={isPosted || isCancelled}
                     label={labels.dueDate}
                     value={formik.values.dueDate}
-                    required
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('dueDate', '')}
+                    onClear={() => formik.setFieldValue('dueDate', null)}
                     error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
                   />
                 </Grid>

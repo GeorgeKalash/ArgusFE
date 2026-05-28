@@ -182,7 +182,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
 
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.IndemnityAccuralsFilters.qry}
+                endpointId={LoanManagementRepository.LeaveTypes.qry}
                 filter={item => item.isPaid}
                 name='ltId'
                 label={labels.ltId}

@@ -299,8 +299,7 @@ export const ManufacturingRepository = {
     page: service + 'pageASM',
     snapshot: service + 'snapshotASM',
     post: service + 'postASM',
-    unpost: service + 'unpostASM',
-    generate: service + 'genASM'
+    unpost: service + 'unpostASM'
   },
   AssemblyItems: {
     qry: service + 'qryASC'
@@ -405,9 +404,6 @@ export const ManufacturingRepository = {
   IssueOfMaterialDimension: {
     set: service + 'setIMD',
     qry: service + 'qryIMD'
-  },
-  JobOrder: {
-    gen: service + 'genORD'
   },
   RefreshPoItem: {
     refresh: service + 'refreshPOI'

@@ -219,47 +219,44 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     let totalAlloy = 0
     let expectedAlloy = 0
     let qtyOutConverted = 0
-    let qtyInConverted = 0
     let totalRmQty = 0
     let totalDesiredPurity = 0
 
     items.forEach(item => {
       const qty = item.qty || 0
       const rmQty = item.rmQty || 0
-      const qtyAtPurity = item.qtyAtPurity || 0
       const expectedAlloyQty = item.expectedAlloyQty || 0
       const purity = item.purity || 0
 
       qtyOut += qty
       qtyOutConverted += rmQty
-      qtyInConverted += qtyAtPurity
       expectedAlloy += expectedAlloyQty
       totalRmQty += rmQty
-
+      
       if (item.type == 2) {
         totalAlloy += qty
       }
-
+      
       if (headerPurity && item.type == 1) {
         totalDesiredPurity += (qty * purity) / headerPurity
       }
-
     })
-
+    
     return {
       qtyOut,
       totalAlloy,
       expectedAlloy,
       qtyOutConverted,
-      qtyInConverted,
       totalRmQty,
       totalDesiredPurity
     }
   }
 
-
+  
   const headerPurity = formik.values?.header?.purity
+  const baseSalesMetalPurity = formik.values?.header?.baseSalesMetalPurity || 0
   const totals = calculateGridTotals(formik.values?.items || [], headerPurity)
+  
   
   const qtyIn = formik.values?.header?.qty || 0 + scrapQty || 0
   const qtyOut = totals.qtyOut
@@ -270,7 +267,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const totalRmQty = recalc ? totals.totalRmQty : formik.values?.header?.sumRMQty
   
   const avgPurity = recalc
-    ? roundTo(((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (qtyOut || 1))
+    ? roundTo(((totalRmQty || 0) * baseSalesMetalPurity) / (qtyOut || 1))
     : formik.values?.header?.avgPurity || 0
 
   const totalDesiredPurity = totals.totalDesiredPurity
@@ -718,7 +715,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   }, [baseSalesMetalId])
 
   const qtyOutConverted = totals.qtyOutConverted
-  const qtyInConverted = totals.qtyInConverted
+  const qtyInConverted = qtyIn * headerPurity / baseSalesMetalPurity
 
   const deltaQty = qtyInConverted - qtyOutConverted
 

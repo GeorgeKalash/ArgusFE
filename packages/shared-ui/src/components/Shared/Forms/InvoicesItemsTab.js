@@ -66,7 +66,6 @@ const InvoicesItemsTab = ({ store, labels, access, setStore }) => {
           columns={columns}
           gridData={invoicesItemsData}
           rowId={['recordId']}
-          isLoading={false}
           maxAccess={access}
           pagination={false}
         />

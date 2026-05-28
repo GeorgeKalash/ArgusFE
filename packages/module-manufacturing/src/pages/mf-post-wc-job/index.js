@@ -380,7 +380,6 @@ const PostWorkCenterJob = () => {
             columns={columns}
             gridData={formik?.values?.data}
             rowId={['recordId']}
-            isLoading={false}
             pagination={false}
             maxAccess={maxAccess}
           />

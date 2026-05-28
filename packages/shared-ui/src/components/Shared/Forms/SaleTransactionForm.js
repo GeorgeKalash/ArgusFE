@@ -68,6 +68,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import CommissionDetailsForm from '@argus/module-sales/src/pages/sa-trx/[functionId]/Forms/CommissionDetailsForm'
 
 export default function SaleTransactionForm({
   recordId,
@@ -1133,6 +1134,21 @@ export default function SaleTransactionForm({
     invalidate()
   }
 
+  const onCommissionClick = () => {
+    stack({
+      Component: CommissionDetailsForm,
+      props: {
+        header: formik.values.header,
+        labels,
+        maxAccess
+      },
+      width: 500,
+      height: 350,
+      title: labels.CommissionDetails
+    })
+  }
+
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -1222,6 +1238,12 @@ export default function SaleTransactionForm({
       condition: formik.values.header.isVerified,
       onClick: verifyRecord,
       disabled: !formik.values.header.isVerified
+    },
+    {
+      key: 'Commission',
+      condition: true,
+      onClick: onCommissionClick,
+      disabled: !isPosted
     }
   ]
 

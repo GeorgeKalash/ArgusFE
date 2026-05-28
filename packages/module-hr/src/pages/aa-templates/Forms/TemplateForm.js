@@ -72,8 +72,7 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
 
   const {
     query: { data },
-    invalidate: invalidateBody,
-    refetch
+    invalidate: invalidateBody
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: AdministrationRepository.TemplateBody.qry,

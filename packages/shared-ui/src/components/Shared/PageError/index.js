@@ -44,7 +44,6 @@ const PageError = ({ onClose, message, height = '', spacing }) => {
       onClose={onClose}
       expandable={false}
       controlled={true}
-      isLoading={false}
       refresh={false}
     >
       <DialogContent className={styles.dialogContent} style={{ '--sf': scaleFactor }}>

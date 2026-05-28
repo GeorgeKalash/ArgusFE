@@ -27,6 +27,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import JTCheckoutForm from '@argus/shared-ui/src/components/Shared/Forms/JTCheckoutForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
   const { platformLabels } = useContext(ControlContext)
@@ -240,6 +241,17 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           parameters: `_jobId=${newRow?.jobId}&_workCenterId=${formik.values?.header?.fromWCId}`
         })
 
+        let metalRef
+
+        if (res2.record?.itemId) {
+          const res4 = await getRequest({
+            extension: InventoryRepository.Physical.get,
+            parameters: `_itemId=${res2.record?.itemId}`
+          })
+
+          metalRef = res4?.record?.metalRef || ''
+        }
+
         update({
           jobId: newRow?.jobId || null,
           jobRef: newRow?.jobRef || '',
@@ -248,6 +260,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           sku: res2.record?.sku || '',
           itemGroupName: res2.record?.itemGroupName || '',
           categoryName: newRow?.itemCategoryName || '',
+          metalRef,
           pcs: res3.record?.pcs || 0,
           qty: res3.record?.qty || 0,
         })
@@ -275,6 +288,14 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       label: labels.itemCategoryName,
       name: 'categoryName',
       flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.metalRef,
+      name: 'metalRef',
       props: {
         readOnly: true
       }

@@ -234,6 +234,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
         items?.list?.map(({ ...item }, index) => ({
           id: index + 1,
           ...item,
+          itemId: item.rmItemId || null,
+          sku: item.rmItemSku || "",
+          itemName: item.rmItemName || "",
           pcs: item.pcs || 0,
           qty: item.qty || 0
         })) || formik.values.items

@@ -144,7 +144,8 @@ export const InventoryRepository = {
   },
   ItemProduction: {
     get: service + 'getMFR',
-    set: service + 'setMFR'
+    getPack: service + 'getPackMFR',
+    set: service + 'setPackMFR',
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
@@ -376,7 +377,8 @@ export const InventoryRepository = {
     set2: service + 'set2DIG',
     del: service + 'delDIG',
     page: service + 'pageDIG',
-    get2: service + 'get2DIG'
+    get2: service + 'get2DIG',
+    get: service + 'getDIG'
   },
   Dimensions: {
     qry: service + 'qryDIM',
@@ -388,5 +390,8 @@ export const InventoryRepository = {
   },
   DimensionGroupElement: {
     qry: service + 'qryDIGE',
+  },
+  ItemRawMaterial: {
+    qry: service + 'qryIRM',
   }
 }

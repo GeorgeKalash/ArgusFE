@@ -222,7 +222,6 @@ const InwardSettlement = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={editInward}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}

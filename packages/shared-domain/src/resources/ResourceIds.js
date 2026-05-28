@@ -324,7 +324,7 @@ export const ResourceIds = {
   EmploymentStatusFilter: 71107,
   SponsorFilter: 71108,
   AttendanceSchedule: 72105,
-  IndemnityAccuralsFilter: 73101,
+  LeaveTypes: 73101,
   LeaveScheduleFilter: 73103,
   PayrollFilter: 75201,
   BankTransferFilter: 75111,
@@ -638,6 +638,7 @@ export const ResourceIds = {
   StandardCostUpdate: 42140,
   PayPeriod: 75108,
   EmployeeMissingDetails: 71407,
+  ChangeVendor: 50615,
 
   // GL
   GLSalesInvoice: 51604,
@@ -685,6 +686,11 @@ export const ResourceIds = {
   GLWorkOrder: 45600,
   GLPayrollList: 75600,
   GLItemDisposal: 42610,
+
+  BtDefaults: 38601,
+  CommodityPair: 38101,
+  FixingSales: 38302,
+  FixingPurchases: 38303,
 
   //MCR
   MCRSalesInvoice: 51607,

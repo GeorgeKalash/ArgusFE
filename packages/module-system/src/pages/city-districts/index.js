@@ -118,7 +118,6 @@ const CityDistricts = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           refetch={refetch}

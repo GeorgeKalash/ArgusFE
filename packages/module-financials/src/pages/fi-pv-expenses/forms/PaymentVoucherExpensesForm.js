@@ -726,6 +726,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
@@ -772,6 +773,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                         ]}
                         readOnly={isPosted || isCancelled}
                         values={formik.values}
+                        maxAccess={maxAccess}
                         onChange={async (_, newValue) => {
                           await getMultiCurrencyFormData(
                             newValue?.recordId,
@@ -882,6 +884,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     valueField='recordId'
                     displayField={'firstCheckNo'}
                     values={formik.values}
+                    maxAccess={maxAccess}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('checkbookId', newValue ? newValue?.recordId : '')
                     }}

@@ -218,20 +218,15 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   }
 
   async function setDefaults(dtId) {
-    if (dtId) {
-      const res = await getRequest({
-        extension: FinancialRepository.FIDocTypeDefaults.get,
-        parameters: `_dtId=${dtId}`
-      })
+    if (!dtId) return
 
-      const siteIdValue = res.record?.siteId
-      const plantIdValue = res.record?.plantId
+    const res = await getRequest({
+      extension: FinancialRepository.FIDocTypeDefaults.get,
+      parameters: `_dtId=${dtId}`
+    })
 
-      if (siteIdValue && plantIdValue) {
-        formik.setFieldValue('siteId', siteIdValue)
-        formik.setFieldValue('plantId', plantIdValue)
-      }
-    }
+    formik.setFieldValue('siteId', res?.record?.siteId || null)
+    formik.setFieldValue('plantId', res?.record?.plantId || null)
   }
 
   const getResourceId = functionId => {
@@ -593,7 +588,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   }, [])
 
   useEffect(() => {
-    setDefaults(formik?.values?.dtId)
+    if (!recordId) setDefaults(formik?.values?.dtId)
   }, [formik.values.dtId])
 
   return (

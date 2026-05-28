@@ -61,7 +61,6 @@ const SerialTable = ({ labels, itemId }) => {
           columns={columns}
           gridData={tableData}
           rowId={['srlNo']}
-          isLoading={true}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

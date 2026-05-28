@@ -86,7 +86,6 @@ export default function BenificiaryHistoryForm({ client, beneficiary }) {
         columns={columns}
         gridData={data}
         rowId={['beneficiaryId']}
-        isLoading={false}
         pagination={false}
         maxAccess={access}
       />

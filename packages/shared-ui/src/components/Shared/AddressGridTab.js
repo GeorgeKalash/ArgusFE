@@ -71,7 +71,6 @@ const AddressGridTab = ({
           rowId={['recordId']}
           onEdit={editAddress}
           onDelete={delAddress}
-          isLoading={false}
           maxAccess={maxAccess}
           pageSize={50}
           refetch={refetch}

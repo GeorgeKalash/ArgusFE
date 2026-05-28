@@ -171,7 +171,6 @@ const Assembly = () => {
           refetch={refetch}
           onDelete={delASM}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

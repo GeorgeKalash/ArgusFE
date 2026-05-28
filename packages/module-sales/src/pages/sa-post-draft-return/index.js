@@ -209,7 +209,6 @@ const PostDraftReturn = () => {
           rowId={['recordId']}
           refetch={refetch}
           onEdit={edit}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

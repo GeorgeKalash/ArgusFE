@@ -716,7 +716,7 @@ const Table = ({
         <Box
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
-          className={`fieldWrapper ${!params.colDef?.wrapText ? 'nowrap' : ''}`}
+          className={`fieldWrapper ${params.colDef?.wrapText ? 'wrap' : 'nowrap'}`}
         >
           {params.children || displayValue}
         </Box>
@@ -1394,13 +1394,11 @@ const Table = ({
 
           .agGridContainer :global(.ag-cell-wrapper),
           .agGridContainer :global(.ag-cell-value) {
-            height: 100% !important;
             display: flex !important;
             align-items: center !important;
           }
 
           .fieldWrapper {
-            height: 100% !important;
             display: flex !important;
             align-items: center !important;
             padding-inline: 6px;
@@ -1423,6 +1421,11 @@ const Table = ({
 
           .paginationBar :global(.MuiSvgIcon-root) {
             font-size: 16px !important;
+          }
+
+          .agGridContainer :global(.ag-cell-wrap-text .fieldWrapper.wrap) {
+            overflow-wrap: anywhere !important;
+            line-height: 1.25 !important;
           }
         }
 

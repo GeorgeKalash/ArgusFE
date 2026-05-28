@@ -65,9 +65,10 @@ import Installments from '@argus/shared-ui/src/components/Shared/Installments'
 import { PUSerialsForm } from '@argus/shared-ui/src/components/Shared/PUSerialsForm'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-import useSetWindow from "@argus/shared-hooks/src/hooks/useSetWindow";
-import useResourceParams from "@argus/shared-hooks/src/hooks/useResourceParams";
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import ChangeVendor from '@argus/shared-ui/src/components/Shared/ChangeVendor'
 
 export default function PurchaseTransactionForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -1588,13 +1589,12 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
-      currentDiscount: currentDiscount,
+      currentDiscount, 
       hiddenTdPct: tdPct,
       hiddenTdAmount: tdAmount,
       typeChange: typeChange
     })
     formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? roundTo(_discountObj?.hiddenTdAmount) : 0)
-
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
     formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
@@ -1612,7 +1612,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
         extendedPrice: item?.extendedPrice,
         baseLaborPrice: item?.baseLaborPrice,
         vatAmount: item?.vatAmount,
-        tdPct: tdPct,
+        tdPct,
         taxDetails: formik.values.header.isVattable === true && item?.taxDetails
           ? item.taxDetails.map(td => ({
               ...td,
@@ -1625,8 +1625,8 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   }
 
   async function recalcGridVat(typeChange, tdPct, tdAmount, currentDiscount) {
-    const currentTdPct = checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
-    recalcNewVat(currentTdPct)
+   const currentTdPct = checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
+   recalcNewVat(currentTdPct)
   }
 
   async function refetchForm(recordId) {
@@ -1930,6 +1930,23 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     })
   }
 
+  async function updateValues(fields) {
+    setReCal(true)
+    let tdAmount = 0
+
+    Object.entries(fields).forEach(([key, val]) => {
+      if (key == 'tdAmount') tdAmount = val || 0
+      formik.setFieldValue(`header.${key}`, val)
+    })
+
+    formik.setFieldValue('header.currentDiscount',tdAmount)
+    recalcGridVat(
+      formik.values.header.tdType,
+      formik.values.header.tdPct,
+      tdAmount,
+      tdAmount
+    )
+  }
 
   return (
     <FormShell
@@ -2162,7 +2179,24 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                 editMode={editMode}
               />
             </Grid>
-            <Grid item xs={2.4}>
+              <Grid item xs={1}>
+              <CustomButton
+                onClick={() => {
+                  stack({
+                    Component: ChangeVendor,
+                    props: {
+                      formValues: formik.values.header,
+                      onSubmit: fields => updateValues(fields)
+                    }
+                  })
+                }}
+                label={platformLabels.ChangeVendor}
+                disabled={!editMode || isPosted}
+                image={'popup.png'}
+                color='#231f20'
+              />
+            </Grid>
+            <Grid item xs={1.4}>
               <CustomCheckBox
                 name='header.isVattable'
                 value={formik.values?.header?.isVattable}

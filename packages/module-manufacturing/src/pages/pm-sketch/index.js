@@ -181,7 +181,6 @@ const Sketch = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'

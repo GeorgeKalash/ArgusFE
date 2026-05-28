@@ -340,7 +340,6 @@ const GeneratePurchaseInvoice = () => {
             columns={columns}
             gridData={formik?.values?.data}
             rowId={['orderId']}
-            isLoading={false}
             pagination={false}
             maxAccess={access}
             showCheckboxColumn={true}

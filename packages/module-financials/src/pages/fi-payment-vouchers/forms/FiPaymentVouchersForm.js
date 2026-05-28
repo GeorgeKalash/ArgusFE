@@ -483,6 +483,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                maxAccess={maxAccess}
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || null)
@@ -610,6 +611,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     required
+                    maxAccess={maxAccess}
                     readOnly={isPosted || isCancelled}
                     values={formik.values}
                     onChange={async (event, newValue) => {
@@ -704,6 +706,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 valueField='recordId'
                 displayField={'firstCheckNo'}
                 values={formik.values}
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('checkbookId', newValue?.recordId || null)
                 }}

@@ -524,7 +524,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                   <Grid item>
                     <ResourceComboBox
                       endpointId={ManufacturingRepository.Labor.qry}
-                      parameters={`_startAt=0&_pageSize=200&_params=`}
+                      parameters={`_startAt=0&_pageSize=10000&_params=`}
                       filter={labor => labor.workCenterId == castingWorkCenterId}
                       name='laborId'
                       label={labels.labor}
