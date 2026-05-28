@@ -28,6 +28,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useClientConfig } from '@argus/shared-hooks/src/hooks/useClientConfig'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
@@ -37,6 +38,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const passwordExpiryDays = systemDefaults?.list?.find(({ key }) => key === 'passwordExpiryDays')?.value
+  const { config } = useClientConfig()
 
   const { formik } = useForm({
     maxAccess,
@@ -103,7 +105,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
 
         const user = getStorageData('userData')
         await axios.post(
-          `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/setID`,
+          `${config?.authUrl}/MA.asmx/setID`,
           {
             record: JSON.stringify({
               accountId: user.accountId,

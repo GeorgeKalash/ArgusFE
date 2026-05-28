@@ -4,6 +4,7 @@ import axios from 'axios'
 import SHA1 from 'crypto-js/sha1'
 import jwt from 'jwt-decode'
 import { getFromDB, saveToDB } from '@argus/shared-domain/src/lib/indexDB'
+import { useClientConfig } from '@argus/shared-hooks/src/hooks/useClientConfig'
 
 const defaultProvider = {
   user: null,
@@ -102,7 +103,7 @@ const AuthProvider = ({ children }) => {
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
   const [errorMsg, setErrorMsg] = useState(null)
-  const [config, setConfig] = useState(null)
+  const { config } = useClientConfig()
   const router = useRouter()
 
   const initAuth = async () => {
@@ -160,16 +161,6 @@ const AuthProvider = ({ children }) => {
     }
     setLoading(false)
   }
-
-  useEffect(() => {
-    fetch("/api/client-config/")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("CONFIG FROM API:", data)
-        setConfig(data?.config)
-      })
-  }, [])
-
 
   useEffect(() => {
     initAuth()
