@@ -22,6 +22,7 @@ import MuiTooltip from "@mui/material/Tooltip";
 import { parseChatStream } from "@argus/shared-providers/src/providers/chatService";
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from "@argus/shared-ui/src/components/Shared/DeleteDialog";
 import { ResourceIds } from "@argus/shared-domain/src/resources/ResourceIds";
@@ -30,6 +31,7 @@ import { RequestsContext } from "@argus/shared-providers/src/providers/RequestsC
 import { ChatbotRepository } from '@argus/repositories/src/repositories/ChatbotRepository'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { formatDateTimeDefault } from "@argus/shared-domain/src/lib/date-helper";
+import { useReactToPrint } from "react-to-print";
 
 
 ChartJS.register(
@@ -51,11 +53,13 @@ export default function ChatPage() {
 
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const conversationRef = useRef(null);
   
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [balanceDetails, setBalanceDetails] = useState(null);
+  const [copiedIndex, setCopiedIndex] = useState(null);
 
   const {
     labels,
@@ -204,6 +208,9 @@ export default function ChatPage() {
     );
 
     setInput("");
+    if (inputRef.current) {
+      inputRef.current.style.height = "48px";
+    }
 
     const conversationId = selectedChat?.conversationId;
 
@@ -383,7 +390,10 @@ export default function ChatPage() {
             padding: "10px 14px",
             borderRadius: "14px",
             maxWidth: "70%",
+            position: "relative",
+            whiteSpace: "pre-wrap",
           }}
+          className="chat-message-wrapper"
         >
           {msg.isWaiting ? (
             <div
@@ -402,40 +412,143 @@ export default function ChatPage() {
             <div style={{ whiteSpace: "pre-wrap" }}>
               {msg.text}▋
             </div>
-          ) : (
-            <ReactMarkdown
-              components={{
-                p: ({ node, ...props }) => (
-                  <p
-                    style={{
-                      margin: 0,
-                      lineHeight: 1.5
-                    }}
-                    {...props}
-                  />
-                ),
-                ul: ({ node, ...props }) => (
-                  <ul
-                    style={{
-                      margin: "6px 0",
-                      paddingLeft: "20px"
-                    }}
-                    {...props}
-                  />
-                ),
-                ol: ({ node, ...props }) => (
-                  <ol
-                    style={{
-                      margin: "6px 0",
-                      paddingLeft: "20px"
-                    }}
-                    {...props}
-                  />
-                )
-              }}
-            >
-              {msg.text}
-            </ReactMarkdown>
+          ) : ( 
+            <>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(msg.text);
+
+                  setCopiedIndex(index);
+
+                  setTimeout(() => {
+                    setCopiedIndex(null);
+                  }, 2000);
+                }}
+                className="copy-button"
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  right:
+                    msg.sender === "assistant"
+                      ? "-42px"
+                      : "auto",
+                  left:
+                    msg.sender === "user"
+                      ? "-42px"
+                      : "auto",
+                  opacity: 0,
+                  transition: "0.2s ease",
+                  border: "none",
+                  background: "#fff",
+                  borderRadius: "6px",
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                  fontSize: "22px",
+                  color: "#333",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                  width: "34px",
+                  height: "34px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                {copiedIndex === index
+                  ? "✓"
+                  : "⧉"}
+              </button>
+              <ReactMarkdown
+                remarkPlugins={
+                  msg.isStreaming
+                    ? []
+                    : [remarkGfm]
+                }
+                components={{
+                  p: ({ node, ...props }) => (
+                    <p
+                      style={{
+                        margin: 0,
+                        lineHeight: 1.5
+                      }}
+                      {...props}
+                    />
+                  ),
+
+                  table: ({ node, ...props }) => (
+                    <div
+                      style={{
+                        width: "100%",
+                        overflowX: "auto",
+                        maxWidth: "100%"
+                      }}
+                    >
+                      <table
+                        style={{
+                          borderCollapse: "collapse",
+                          width: "100%",
+                          minWidth: "max-content",
+                          marginTop: "10px"
+                        }}
+                        {...props}
+                      />
+                    </div>
+                  ),
+
+                  thead: ({ node, ...props }) => (
+                    <thead
+                      style={{
+                        background: "#e5e7eb"
+                      }}
+                      {...props}
+                    />
+                  ),
+
+                  th: ({ node, ...props }) => (
+                    <th
+                      style={{
+                        border: "1px solid #d1d5db",
+                        padding: "8px",
+                        textAlign: "left"
+                      }}
+                      {...props}
+                    />
+                  ),
+
+                  td: ({ node, ...props }) => (
+                    <td
+                      style={{
+                        border: "1px solid #d1d5db",
+                        padding: "8px"
+                      }}
+                      {...props}
+                    />
+                  ),
+
+                  ul: ({ node, ...props }) => (
+                    <ul
+                      style={{
+                        margin: "6px 0",
+                        paddingLeft: "20px"
+                      }}
+                      {...props}
+                    />
+                  ),
+
+                  ol: ({ node, ...props }) => (
+                    <ol
+                      style={{
+                        margin: "6px 0",
+                        paddingLeft: "20px"
+                      }}
+                      {...props}
+                    />
+                  )
+                }}
+              >
+                {msg.text}
+              </ReactMarkdown>
+            </>
           )}
             </div>
             </MuiTooltip>
@@ -447,55 +560,70 @@ export default function ChatPage() {
         <div
           key={index}
           style={{
+            alignSelf: "flex-start",
             background: "#fff",
             border: "1px solid #ddd",
             borderRadius: "12px",
             padding: "12px",
-            maxWidth: "90%"
+            maxWidth: "90%",
+            width: "fit-content",
+            minWidth: 0,
+            overflow: "hidden"
           }}
+          className="chat-message-wrapper"
         >
-          <table
+          <div
             style={{
-              borderCollapse: "collapse",
-              width: "100%"
+              width: "100%",
+              overflowX: "auto",
+              maxWidth: "100%",
+              alignSelf: "flex-start"
             }}
           >
-            <thead>
-              <tr>
-                {msg.columns.map((col, i) => (
-                  <th
-                    key={i}
-                    style={{
-                      padding: "8px",
-                      borderBottom:
-                        "1px solid #ddd",
-                      textAlign: "left"
-                    }}
-                  >
-                    {col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {msg.rows.map((row, r) => (
-                <tr key={r}>
-                  {row.map((cell, c) => (
-                    <td
-                      key={c}
+            <table
+              style={{
+                borderCollapse: "collapse",
+                width: "100%",
+                minWidth: "max-content",
+              }}
+            >
+              <thead>
+                <tr>
+                  {msg.columns.map((col, i) => (
+                    <th
+                      key={i}
                       style={{
                         padding: "8px",
                         borderBottom:
-                          "1px solid #eee"
+                          "1px solid #ddd",
+                        textAlign: "left"
                       }}
                     >
-                      {cell}
-                    </td>
+                      {col}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {msg.rows.map((row, r) => (
+                  <tr key={r}>
+                    {row.map((cell, c) => (
+                      <td
+                        key={c}
+                        style={{
+                          padding: "8px",
+                          borderBottom:
+                            "1px solid #eee"
+                        }}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       );
     }
@@ -512,6 +640,7 @@ export default function ChatPage() {
             width: "500px",
             maxWidth: "95%"
           }}
+          className="chat-message-wrapper"
         >
           <h4>{msg.title}</h4>
 
@@ -535,7 +664,7 @@ export default function ChatPage() {
 
     if (msg.type === "lineChart") {
       return (
-        <div key={index} style={cardStyle}>
+        <div key={index} style={cardStyle} className="chat-message-wrapper">
           <h4>{msg.title}</h4>
 
           <Line
@@ -557,7 +686,7 @@ export default function ChatPage() {
 
     if (msg.type === "pieChart") {
       return (
-        <div key={index} style={cardStyle}>
+        <div key={index} style={cardStyle} className="chat-message-wrapper">
           <h4>{msg.title}</h4>
 
           <Pie
@@ -791,6 +920,15 @@ export default function ChatPage() {
 
     return formatDateTimeDefault(messageDate, "hh:mm a");
   };
+
+  const handlePrintConversation =
+    useReactToPrint({
+      content: () =>
+        conversationRef.current,
+      documentTitle:
+        selectedChat?.title ||
+        "Conversation"
+    });
 
   return (
     <div
@@ -1057,9 +1195,35 @@ export default function ChatPage() {
               </div>
             </div>
           )}
+
+          <div
+            style={{
+              width: "80px",
+              display: "flex",
+              justifyContent: "flex-end"
+            }}
+          >
+            {selectedChat?.conversationId && (
+              <button
+                onClick={handlePrintConversation}
+                style={{
+                  border: "1px solid #ddd",
+                  background: "#fff",
+                  borderRadius: "8px",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  fontSize: "13px"
+                }}
+              >
+                {labels.export}
+              </button>
+            )}
+          </div>
         </div>
 
         <div
+          ref={conversationRef}
+          className="chat-print-container"
           style={{
             flex: 1,
             padding: "20px",
@@ -1123,23 +1287,42 @@ export default function ChatPage() {
             gap: "10px"
           }}
         >
-          <input
+          <textarea
             value={input}
             disabled={selectedChat?.isLoading}
             ref={inputRef}
-            onChange={(e) =>
-              setInput(e.target.value)
+            onChange={(e) => {
+              setInput(e.target.value);
+
+              e.target.style.height = "auto";
+              e.target.style.height =
+                Math.min(e.target.scrollHeight, 160) + "px";
+            }}
+            onKeyDown={(e) => {
+              if (
+                e.key === "Enter" &&
+                !e.shiftKey
+              ) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            rows={1}
+            placeholder={
+              labels?.fieldPlaceHolder ?? ""
             }
-            onKeyDown={(e) =>
-              e.key === "Enter" &&
-              sendMessage()
-            }
-            placeholder={labels?.fieldPlaceHolder ?? ''}
             style={{
               flex: 1,
               padding: "12px",
-              borderRadius: "8px",
-              border: "1px solid #ccc"
+              borderRadius: "12px",
+              border: "1px solid #ccc",
+              resize: "none",
+              overflowY: "auto",
+              minHeight: "48px",
+              maxHeight: "160px",
+              fontFamily: "inherit",
+              fontSize: "14px",
+              lineHeight: 1.5
             }}
           />
 
