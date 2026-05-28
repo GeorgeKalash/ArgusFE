@@ -206,6 +206,9 @@ export default function ChatPage() {
     );
 
     setInput("");
+    if (inputRef.current) {
+      inputRef.current.style.height = "48px";
+    }
 
     const conversationId = selectedChat?.conversationId;
 
@@ -385,7 +388,8 @@ export default function ChatPage() {
             padding: "10px 14px",
             borderRadius: "14px",
             maxWidth: "70%",
-            position: "relative"
+            position: "relative",
+            whiteSpace: "pre-wrap",
           }}
           className="chat-message-wrapper"
         >
@@ -1223,23 +1227,42 @@ export default function ChatPage() {
             gap: "10px"
           }}
         >
-          <input
+          <textarea
             value={input}
             disabled={selectedChat?.isLoading}
             ref={inputRef}
-            onChange={(e) =>
-              setInput(e.target.value)
+            onChange={(e) => {
+              setInput(e.target.value);
+
+              e.target.style.height = "auto";
+              e.target.style.height =
+                Math.min(e.target.scrollHeight, 160) + "px";
+            }}
+            onKeyDown={(e) => {
+              if (
+                e.key === "Enter" &&
+                !e.shiftKey
+              ) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            rows={1}
+            placeholder={
+              labels?.fieldPlaceHolder ?? ""
             }
-            onKeyDown={(e) =>
-              e.key === "Enter" &&
-              sendMessage()
-            }
-            placeholder={labels?.fieldPlaceHolder ?? ''}
             style={{
               flex: 1,
               padding: "12px",
-              borderRadius: "8px",
-              border: "1px solid #ccc"
+              borderRadius: "12px",
+              border: "1px solid #ccc",
+              resize: "none",
+              overflowY: "auto",
+              minHeight: "48px",
+              maxHeight: "160px",
+              fontFamily: "inherit",
+              fontSize: "14px",
+              lineHeight: 1.5
             }}
           />
 
