@@ -443,7 +443,7 @@ export default function BalanceTransferForm({
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='fromAmount'
                     label={labels.amount}
@@ -461,7 +461,7 @@ export default function BalanceTransferForm({
                     maxAccess={maxAccess}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='fromBaseAmount'
                     label={labels.baseAmount}
@@ -474,26 +474,26 @@ export default function BalanceTransferForm({
                     maxAccess={maxAccess}
                   />
                 </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='fromExRate'
-                label={labels.rate}
-                value={formik.values.fromExRate}
-                maxLength={14}
-                decimalScale={2}
-                onChange={e => {
-                  formik.setFieldValue('fromExRate', e.target.value || null)
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='fromExRate'
+                    label={labels.rate}
+                    value={formik.values.fromExRate}
+                    maxLength={14}
+                    decimalScale={2}
+                    onChange={e => {
+                      formik.setFieldValue('fromExRate', e.target.value || null)
 
-                  onChangeValue(e.target.value, formik.values.fromAmount)
-                }}
-                readOnly={isPosted}
-                onClear={() => formik.setFieldValue('fromExRate', '')}
-                required
-                error={formik.touched.fromExRate && Boolean(formik.errors.fromExRate)}
-                maxAccess={maxAccess}
-              />
+                      onChangeValue(e.target.value, formik.values.fromAmount)
+                    }}
+                    readOnly={isPosted}
+                    onClear={() => formik.setFieldValue('fromExRate', '')}
+                    required
+                    error={formik.touched.fromExRate && Boolean(formik.errors.fromExRate)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox

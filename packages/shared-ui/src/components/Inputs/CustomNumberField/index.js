@@ -34,7 +34,7 @@ const CustomNumberField = ({
   allowNegative = true,
   arrow = false,
   displayCycleButton = false,
-  align = 'left',
+  align = 'right',
   handleButtonClick,
   cycleButtonLabel = '',
   iconMapIndex = 0,

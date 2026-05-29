@@ -630,9 +630,21 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
+    const isRightAligned =
+      column.colDef?.component === 'numberfield'
+        ? (column.colDef?.props?.align ?? 'right') === 'right'
+        : false
+
     return (
-      <Box className={`cellBox`}>
-        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
+      <Box
+        className={`cellBox ${isRightAligned ? 'rightAlignedCellBox' : ''}`}
+      >
+        <Component
+          {...params}
+          column={column.colDef}
+          updateRow={updateRow}
+          update={update}
+        />
       </Box>
     )
   }
@@ -1329,6 +1341,11 @@ export function DataGrid({
           align-items: center;
           overflow: hidden;
           padding: 0px !important;
+          flex:1;
+        }
+
+        .rightAlignedCellBox {
+          justify-content: flex-end !important;
         }
 
         .agContainer :global(.ag-cell .MuiBox-root) {

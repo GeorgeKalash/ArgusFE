@@ -584,7 +584,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 error={formik?.touched?.header?.dbcr && Boolean(formik?.errors?.header?.dbcr)}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={3}>
               <CustomNumberField
                 name='header.amount'
                 required
@@ -637,8 +637,9 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
+            <Grid item xs={3}/>
+            <Grid item xs={3}>
+              <CustomNumberField
                 name='header.totalAmount'
                 label={labels.totalAmount}
                 value={totalAmount.toFixed(2)}

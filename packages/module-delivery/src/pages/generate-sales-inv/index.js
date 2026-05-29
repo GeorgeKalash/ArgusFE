@@ -396,7 +396,6 @@ const GeneratePurchaseInvoice = () => {
                 label={labels.amount}
                 value={formik?.values?.amount}
                 readOnly
-                align='right'
               />
             </Grid>
           </Grid>
