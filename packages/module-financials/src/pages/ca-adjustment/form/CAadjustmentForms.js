@@ -427,7 +427,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                       !formik.values.currencyId ||
                       formik.values.currencyId === getDefaultsData()?.currencyId
                     }
-                    tooltipText={platformLabels.add}
+                    tooltipText={platformLabels.MultiCurrencyRate}
                     image={'popup.png'}
                   />
                 </Grid>

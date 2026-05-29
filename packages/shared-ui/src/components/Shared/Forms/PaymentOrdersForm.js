@@ -373,7 +373,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={8}>
+                <Grid item xs={7}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
                     name='currencyId'
@@ -396,7 +396,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={1}>
                   <CustomButton
                     onClick={() => openMCRForm(formik.values)}
                     image='popup.png'
@@ -404,7 +404,35 @@ export default function PaymentOrdersForm({ recordId, window }) {
                     disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
                   />
                 </Grid>
+                <Grid item xs={4}>
+                  <CustomNumberField
+                    name='amount'
+                    required
+                    label={labels.amount}
+                    maxLength={'10'}
+                    decimalScale={2}
+                    readOnly={isClosed || isCancelled}
+                    value={formik.values.amount}
+                    maxAccess={maxAccess}
+                    onChange={async e => {
+                      const updatedRateRow = getRate({
+                        amount: e.target.value ?? 0,
+                        exRate: formik.values?.exRate,
+                        baseAmount: 0,
+                        rateCalcMethod: formik.values?.rateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                      formik.setFieldValue('amount', e.target.value)
+                    }}
+                    onClear={() => {
+                      formik.setFieldValue('amount', '')
+                    }}
+                    error={formik.touched.amount && Boolean(formik.errors.amount)}
+                  />
+                </Grid>
               </Grid>
+            
             </Grid>
             <Grid item xs={6}>
               <CustomTextField
@@ -496,33 +524,6 @@ export default function PaymentOrdersForm({ recordId, window }) {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
-                name='amount'
-                required
-                label={labels.amount}
-                maxLength={'10'}
-                decimalScale={2}
-                readOnly={isClosed || isCancelled}
-                value={formik.values.amount}
-                maxAccess={maxAccess}
-                onChange={async e => {
-                  const updatedRateRow = getRate({
-                    amount: e.target.value ?? 0,
-                    exRate: formik.values?.exRate,
-                    baseAmount: 0,
-                    rateCalcMethod: formik.values?.rateCalcMethod,
-                    dirtyField: DIRTYFIELD_RATE
-                  })
-                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-                  formik.setFieldValue('amount', e.target.value)
-                }}
-                onClear={() => {
-                  formik.setFieldValue('amount', '')
-                }}
-                error={formik.touched.amount && Boolean(formik.errors.amount)}
-              />
-            </Grid>
-            <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.FI_PV_GROUP_TYPE}
                 name='accountType'
@@ -543,25 +544,6 @@ export default function PaymentOrdersForm({ recordId, window }) {
                   formik.setFieldValue('accountType', newValue?.key || null)
                 }}
                 error={formik.touched.accountType && Boolean(formik.errors.accountType)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                neverPopulate={true}
-                endpointId={FinancialRepository.DescriptionTemplate.qry}
-                name='templateId'
-                label={labels.descriptionTemplate}
-                valueField='recordId'
-                displayField='name'
-                values={formik.values}
-                onChange={(_, newValue) => {
-                  const notes = formik.values.notes || ''
-                  if (newValue?.name) formik.setFieldValue('notes', notes === '' ? newValue.name : `${notes}\n${newValue.name}`)
-                  formik.setFieldValue('templateId',newValue?.recordId || null)
-                }}
-                readOnly={isClosed || isCancelled}
-                error={formik.touched.templateId && Boolean(formik.errors.templateId)}
-                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -593,6 +575,26 @@ export default function PaymentOrdersForm({ recordId, window }) {
                 maxAccess={maxAccess}
               />
             </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                neverPopulate={true}
+                endpointId={FinancialRepository.DescriptionTemplate.qry}
+                name='templateId'
+                label={labels.descriptionTemplate}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={(_, newValue) => {
+                  const notes = formik.values.notes || ''
+                  if (newValue?.name) formik.setFieldValue('notes', notes === '' ? newValue.name : `${notes}\n${newValue.name}`)
+                  formik.setFieldValue('templateId',newValue?.recordId || null)
+                }}
+                readOnly={isClosed || isCancelled}
+                error={formik.touched.templateId && Boolean(formik.errors.templateId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}/>
             <Grid item xs={6}>
               <CustomTextArea
                 name='notes'

@@ -376,7 +376,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
                     !formik.values.currencyId ||
                     formik.values.currencyId === getDefaultsData()?.currencyId
                   }
-                  tooltipText={platformLabels.add}
+                  tooltipText={platformLabels.MultiCurrencyRate}
                   image={'popup.png'}
                 />
               </Grid>

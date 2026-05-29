@@ -842,7 +842,13 @@ export function DataGrid({
         cellEditor: CustomCellEditor,
         wrapText: true,
         autoHeight: true,
-        cellClass: `${mergedCellClass || undefined}  ${centered}`,
+        cellClass: [
+          ...mergedCellClass,
+          centered,
+          isNumberColumn ? 'numberCell' : ''
+        ]
+          .filter(Boolean)
+          .join(' '),
         ...(column?.checkAll?.visible && {
           headerClass: 'agHeaderCheckboxCell',
           headerComponent: params => {
@@ -1341,10 +1347,9 @@ export function DataGrid({
           align-items: center;
           overflow: hidden;
           padding: 0px !important;
-          flex:1;
         }
 
-        .rightAlignedCellBox {
+        .agContainer :global(.ag-cell.numberCell) {
           justify-content: flex-end !important;
         }
 

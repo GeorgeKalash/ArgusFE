@@ -604,7 +604,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={8}>
+                <Grid item xs={7}>
                   <ResourceComboBox
                     endpointId={FinancialRepository.ReceiptVouchers.pack}
                     reducer={response => response?.record?.currencies}
@@ -629,15 +629,43 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={1}>
                   <CustomButton
                     onClick={() => openMCRForm(formik.values)}
                     image='popup.png'
-                    tooltipText={platformLabels.add}
+                    tooltipText={platformLabels.MultiCurrencyRate}
                     disabled={
                       !formik.values.currencyId ||
                       formik.values.currencyId === currencyId
                     }
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <CustomNumberField
+                    name='amount'
+                    required
+                    label={labels.amount}
+                    value={formik.values.amount}
+                    readOnly={isCancelled || isPosted}
+                    maxAccess={maxAccess}
+                    maxLength={'10'}
+                    decimalScale={2}
+                    onChange={async e => {
+                      formik.setFieldValue('amount', e.target.value)
+
+                      const updatedRateRow = getRate({
+                        amount: e.target.value ?? 0,
+                        exRate: formik.values?.exRate,
+                        baseAmount: 0,
+                        rateCalcMethod: formik.values?.rateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                    }}
+                    onClear={async () => {
+                      formik.setFieldValue('amount', 0)
+                    }}
+                    error={formik.touched.amount && Boolean(formik.errors.amount)}
                   />
                 </Grid>
               </Grid>
@@ -674,35 +702,6 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 }}
                 error={formik.touched.collectorId && Boolean(formik.errors.collectorId)}
                 maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='amount'
-                required
-                label={labels.amount}
-                value={formik.values.amount}
-                readOnly={isCancelled || isPosted}
-                maxAccess={maxAccess}
-                maxLength={'10'}
-                decimalScale={2}
-                onChange={async e => {
-                  formik.setFieldValue('amount', e.target.value)
-
-                  const updatedRateRow = getRate({
-                    amount: e.target.value ?? 0,
-                    exRate: formik.values?.exRate,
-                    baseAmount: 0,
-                    rateCalcMethod: formik.values?.rateCalcMethod,
-                    dirtyField: DIRTYFIELD_RATE
-                  })
-                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-                }}
-                onClear={async () => {
-                  formik.setFieldValue('amount', 0)
-                }}
-                error={formik.touched.amount && Boolean(formik.errors.amount)}
               />
             </Grid>
             <Grid item xs={6}></Grid>

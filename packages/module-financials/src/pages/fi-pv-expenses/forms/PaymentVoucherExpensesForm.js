@@ -775,7 +775,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                       <CustomButton
                         onClick={() => openMCRForm(formik.values)}
                         image='popup.png'
-                        tooltipText={platformLabels.add}
+                        tooltipText={platformLabels.MultiCurrencyRate}
                         disabled={
                           !formik.values.currencyId ||
                           formik.values.currencyId === currencyId
@@ -884,7 +884,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     value={amountSum}
                     readOnly
                     maxAccess={maxAccess}
-                    thousandSeparator={false}
                     onChange={async e => {
                       const updatedRateRow = getRate({
                         amount: e.target.value ?? 0,

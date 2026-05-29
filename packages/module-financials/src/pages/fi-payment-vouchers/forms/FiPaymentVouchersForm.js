@@ -592,7 +592,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={8}>
+                <Grid item xs={7}>
                   <ResourceComboBox
                     endpointId={FinancialRepository.PaymentVouchers.pack}
                     reducer={response => response?.record?.currencies}
@@ -617,16 +617,43 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={1}>
                  <CustomButton
                   onClick={() => openMCRForm(formik.values)}
                   image='popup.png'
-                  tooltipText={platformLabels.add}
+                  tooltipText={platformLabels.MultiCurrencyRate}
                   disabled={
                     !formik.values.currencyId ||
                     formik.values.currencyId === currencyId
                   }
                 />
+                </Grid>
+                <Grid item xs={4}>
+                  <CustomNumberField
+                    name='amount'
+                    required
+                    label={labels.amount}
+                    maxLength={14}
+                    decimalScale={2}
+                    readOnly={isPosted || isCancelled}
+                    value={formik.values.amount}
+                    maxAccess={maxAccess}
+                    onChange={async e => {
+                      const updatedRateRow = getRate({
+                        amount: e.target.value ?? 0,
+                        exRate: formik.values?.exRate,
+                        baseAmount: 0,
+                        rateCalcMethod: formik.values?.rateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                      formik.setFieldValue('amount', e.target.value)
+                    }}
+                    onClear={async () => {
+                      formik.setFieldValue('amount', 0)
+                    }}
+                    error={formik.touched.amount && Boolean(formik.errors.amount)}
+                  />
                 </Grid>
               </Grid>
             </Grid>
@@ -653,30 +680,16 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
-                name='amount'
-                required
-                label={labels.amount}
-                maxLength={14}
-                decimalScale={2}
+              <CustomTextField
+                name='sourceReference'
+                label={labels.sourceReference}
+                value={formik.values.sourceReference}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('sourceReference', '')}
+                maxLength='20'
                 readOnly={isPosted || isCancelled}
-                value={formik.values.amount}
                 maxAccess={maxAccess}
-                onChange={async e => {
-                  const updatedRateRow = getRate({
-                    amount: e.target.value ?? 0,
-                    exRate: formik.values?.exRate,
-                    baseAmount: 0,
-                    rateCalcMethod: formik.values?.rateCalcMethod,
-                    dirtyField: DIRTYFIELD_RATE
-                  })
-                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-                  formik.setFieldValue('amount', e.target.value)
-                }}
-                onClear={async () => {
-                  formik.setFieldValue('amount', 0)
-                }}
-                error={formik.touched.amount && Boolean(formik.errors.amount)}
+                error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -690,23 +703,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 error={formik.touched.checkNo && Boolean(formik.errors.checkNo)}
                 disabled={formik.values.paymentMethod != 3}
                 required={formik.values.paymentMethod == 3}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={FinancialRepository.PaymentVouchers.pack}
-                reducer={response => response?.record?.checkBooks}
-                name='checkbookId'
-                label={labels.checkbook}
-                valueField='recordId'
-                displayField={'firstCheckNo'}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('checkbookId', newValue?.recordId || null)
-                }}
-                error={formik.touched.checkbookId && Boolean(formik.errors.checkbookId)}
-                disabled={formik.values.paymentMethod != 3}
               />
             </Grid>
             <Grid item xs={6}>
@@ -730,18 +726,23 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField
-                name='sourceReference'
-                label={labels.sourceReference}
-                value={formik.values.sourceReference}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('sourceReference', '')}
-                maxLength='20'
-                readOnly={isPosted || isCancelled}
+              <ResourceComboBox
+                endpointId={FinancialRepository.PaymentVouchers.pack}
+                reducer={response => response?.record?.checkBooks}
+                name='checkbookId'
+                label={labels.checkbook}
+                valueField='recordId'
+                displayField={'firstCheckNo'}
+                values={formik.values}
                 maxAccess={maxAccess}
-                error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('checkbookId', newValue?.recordId || null)
+                }}
+                error={formik.touched.checkbookId && Boolean(formik.errors.checkbookId)}
+                disabled={formik.values.paymentMethod != 3}
               />
             </Grid>
+            
             <Grid item xs={6}>
               <CustomTextArea
                 name='notes'
