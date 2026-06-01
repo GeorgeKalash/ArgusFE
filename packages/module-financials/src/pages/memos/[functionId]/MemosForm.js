@@ -537,7 +537,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                      <CustomButton
                         onClick={() => openMCRForm(formik.values)}
                         image='popup.png'
-                        tooltipText={platformLabels.add}
+                        tooltipText={platformLabels.MultiCurrencyRate}
                         disabled={
                           !formik.values.currencyId ||
                           formik.values.currencyId === currencyId

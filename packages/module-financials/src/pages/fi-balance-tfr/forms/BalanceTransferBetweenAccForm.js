@@ -478,7 +478,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                     error={formik.touched.fromCurrencyId && Boolean(formik.errors.fromCurrencyId)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='fromAmount'
                     label={labels.amount}

@@ -921,7 +921,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                     maxLength={12}
                     decimalScale={3}
                     allowNegative={false}
-                    align='right'
                     onClear={() => {
                       updatePurityRelatedFields(0)
                       formik.setFieldValue('header.purity', '')
@@ -942,7 +941,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                     maxLength={12}
                     decimalScale={3}
                     allowNegative={false}
-                    align='right'
                     readOnly={isPosted}
                     onClear={() => formik.setFieldValue('header.qty', null)}
                     error={formik.touched.header?.qty && Boolean(formik.errors.header?.qty)}
@@ -1040,7 +1038,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                     value={totalDesiredPurity}
                     decimalScale={3}
                     readOnly
-                    align='right'
                   />
                 </Grid>
                 {
@@ -1051,7 +1048,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                       value={totalAlloy}
                       decimalScale={3}
                       readOnly
-                      align='right'
                     />
                   </Grid>
                 }
@@ -1063,21 +1059,20 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                       value={expectedAlloy}
                       decimalScale={3}
                       readOnly
-                      align='right'
                     />
                   </Grid>
                 }
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.qtyIn} value={qtyIn} decimalScale={3} readOnly align='right' />
+                  <CustomNumberField label={labels.qtyIn} value={qtyIn} decimalScale={3} readOnly />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.qtyOut} value={qtyOut} decimalScale={3} readOnly align='right' />
+                  <CustomNumberField label={labels.qtyOut} value={qtyOut} decimalScale={3} readOnly />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.qtyDiff} value={qtyDiff} decimalScale={3} readOnly align='right' />
+                  <CustomNumberField label={labels.qtyDiff} value={qtyDiff} decimalScale={3} readOnly />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.avgPurity} value={avgPurity} decimalScale={3} readOnly align='right' />
+                  <CustomNumberField label={labels.avgPurity} value={avgPurity} decimalScale={3} readOnly />
                 </Grid>
               </Grid>
             </Grid>

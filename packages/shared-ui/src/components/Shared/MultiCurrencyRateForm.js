@@ -119,7 +119,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 readOnly
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomTextField
                 name='rateCalcMethodName'
                 value={formik?.values?.rateCalcMethodName}
@@ -127,7 +127,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 readOnly
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='exRate'
                 value={formik?.values?.exRate}
@@ -167,10 +167,10 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField name='amount' value={formik?.values?.amount} label={labels.amount} readOnly />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='baseAmount'
                 value={formik?.values?.baseAmount}
@@ -214,5 +214,5 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
   )
 }
 
-MultiCurrencyRateForm.width = 500
-MultiCurrencyRateForm.height = 500
+MultiCurrencyRateForm.width = 600
+MultiCurrencyRateForm.height = 400

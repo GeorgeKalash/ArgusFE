@@ -75,13 +75,7 @@ const ExchangeRates = () => {
       field: 'rate',
       headerName: _labels.rate,
       flex: 1,
-      valueFormatter: ({ value }) => {
-        return new Intl.NumberFormat('en-US', {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 5,
-          useGrouping: true
-        }).format(value)
-      }
+      type: { field: 'number', decimal: 5 },
     }
   ]
 

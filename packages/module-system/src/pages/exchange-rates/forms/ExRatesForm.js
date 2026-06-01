@@ -40,17 +40,17 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
   const { formik } = useForm({
     initialValues: {
       recordId: recordId,
-      exId: '',
+      exId: null,
       seqNo: 0,
-      rate: '',
+      rate: null,
       dayId: new Date()
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      exId: yup.string().required(),
+      exId: yup.number().required(),
       dayId: yup.string().required(),
-      rate: yup.string().required()
+      rate: yup.number().required()
     }),
     onSubmit: async obj => {
       const exId = formik.values.exId
@@ -155,16 +155,16 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
                 error={formik.touched.dayId && Boolean(formik.errors.dayId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={5}>
               <CustomNumberField
                 name='rate'
                 label={labels.rate}
-                decimalScale={7}
+                decimalScale={5}
                 value={formik.values?.rate}
                 required
                 maxLength='18'
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('rate', '')}
+                onClear={() => formik.setFieldValue('rate', null)}
                 maxAccess={maxAccess}
                 error={formik.touched.rate && Boolean(formik.errors.rate)}
               />
