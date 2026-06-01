@@ -7,6 +7,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import POSInquiryForm from './Forms/POSInquiryForm'
+import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { PointofSaleRepository } from '@argus/repositories/src/repositories/PointofSaleRepository'
@@ -20,7 +21,7 @@ const POSInquiry = () => {
     if(params){
       const response = await getRequest({
         extension: PointofSaleRepository.POSInquiry.page303,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
       })
 
       return { ...response, _startAt: _startAt }
@@ -79,6 +80,18 @@ const POSInquiry = () => {
         headerName: labels.amount,
         flex: 1,
         type: 'number'
+      },
+      {
+        field: 'tradeDiscount',
+        headerName: labels.tradeDiscount,
+        flex: 1,
+        type: 'number'
+      },
+      {
+        field: 'tradeDiscountAmount',
+        headerName: labels.tradeDiscountAmount,
+        flex: 1,
+        type: 'number'
       }
   ]
 
@@ -92,8 +105,10 @@ const POSInquiry = () => {
       props: {
         labels,
         access,
-        documentTypeId: record.documentTypeId,
-        documentRef: record.documentRef
+        record: {
+          ...record,
+          createdDate: formatDateFromApi(record.createdDate)
+        }
       },
       width: 1100,
       height: 700,
@@ -108,9 +123,10 @@ const POSInquiry = () => {
       </Fixed>
       <Grow>
         <Table
+          name="inquiry"
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['documentTypeId', 'documentRef']}
           onEdit={edit}
           pageSize={50}
           paginationParameters={paginationParameters}
