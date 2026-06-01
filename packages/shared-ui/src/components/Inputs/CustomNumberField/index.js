@@ -88,7 +88,8 @@ const CustomNumberField = ({
   }
 
   const handleNumberValueChange = (values, sourceInfo) => {
-    const parsedValue = values.floatValue ?? null
+    const rawValue = values.value ?? values.formattedValue ?? ''
+    const parsedValue = parseInputValue(rawValue, false)
 
     const event = {
       ...sourceInfo?.event,
