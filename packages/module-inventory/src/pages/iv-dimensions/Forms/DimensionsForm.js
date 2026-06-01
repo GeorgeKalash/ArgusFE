@@ -25,6 +25,7 @@ export default function DimensionsForm({ labels, maxAccess, id }) {
   const { formik } = useForm({
     initialValues: {
       id: null,
+      reference: '',
       name: ''
     },
     validationSchema: yup.object({
@@ -78,6 +79,18 @@ export default function DimensionsForm({ labels, maxAccess, id }) {
                 readOnly={editMode}
                 onClear={() => formik.setFieldValue('id', null)}
                 error={formik.touched.id && Boolean(formik.errors.id)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                maxAccess={maxAccess}
+                maxLength='10'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
             <Grid item xs={12}>
