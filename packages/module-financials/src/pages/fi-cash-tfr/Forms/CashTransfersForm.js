@@ -280,7 +280,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
               filter={!editMode ? item => item.activeStatus === 1 : undefined}
               name='dtId'
               label={labels.documentType}
-              readOnly={isPosted}
+              readOnly={editMode}
               valueField='recordId'
               displayField='name'
               values={formik?.values}

@@ -369,7 +369,7 @@ export default function SaleTransactionForm({
       invalidate()
     }
   })
-
+  
   const itemsUpdate = useRef(formik?.values?.items)
 
   const getResourceMCR = functionId => {

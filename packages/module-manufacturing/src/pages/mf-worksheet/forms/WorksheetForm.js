@@ -15,7 +15,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
@@ -28,7 +27,7 @@ import DamageForm from '@argus/shared-ui/src/components/Shared/Forms/DamageForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 
-export default function WorksheetForm({ labels, maxAccess, setStore, store, joInvalidate }) {
+export default function WorksheetForm({ labels, maxAccess: access, setStore, store, joInvalidate }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
@@ -37,9 +36,9 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
   const resourceId = ResourceIds.Worksheet
   const editMode = !!recordId
 
-  const { documentType, access, changeDT } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
-    access: maxAccess,
+    access,
     enabled: !recordId
   })
 
@@ -82,7 +81,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
       pgItemName: '',
       itemCategoryName: ''
     },
-    maxAccess: access,
+    maxAccess,
     validationSchema: yup.object({
       jobId: yup.number().required(),
       workCenterId: yup.number().required(),
@@ -267,7 +266,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
       resourceId={resourceId}
       functionId={functionId}
       form={formik}
-      maxAccess={access}
+      maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
       previewReport={true}
@@ -292,7 +291,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
@@ -310,7 +309,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         value={formik.values.reference}
                         readOnly={editMode}
                         maxLength='15'
-                        maxAccess={!editMode && access}
+                        maxAccess={!editMode && maxAccess}
                         onChange={formik.handleChange}
                         onClear={() => formik.setFieldValue('reference', '')}
                         error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -369,7 +368,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                           }
                         }}
                         errorCheck={'jobId'}
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -383,7 +382,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         displayField={['reference', 'name']}
                         values={formik.values}
                         required
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                         error={formik.touched.workCenterId && formik.errors.workCenterId}
                       />
                     </Grid>
@@ -394,7 +393,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         name='laborId'
                         label={labels.labor}
                         required
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                         readOnly={!formik.values.workCenterId || isPosted}
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
@@ -416,7 +415,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         readOnly={isPosted || editMode}
                         label={labels.qty}
                         value={formik?.values?.wipQty}
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                         onChange={formik.handleChange}
                         onClear={() => formik.setFieldValue('wipQty', 0)}
                         error={formik.touched.wipQty && Boolean(formik.errors.wipQty)}
@@ -429,7 +428,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         readOnly={isPosted || editMode}
                         label={labels.pcs}
                         value={formik?.values?.wipPcs}
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                         onChange={formik.handleChange}
                         onClear={() => formik.setFieldValue('wipPcs', 0)}
                         error={formik.touched.wipPcs && Boolean(formik.errors.wipPcs)}
@@ -442,7 +441,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         readOnly
                         label={labels.rmQty}
                         value={formik?.values?.rmQty}
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -451,7 +450,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         readOnly
                         label={labels.damagedPcs}
                         value={formik?.values?.damagedPcs}
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -460,7 +459,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         readOnly
                         label={labels.eopQty}
                         value={formik?.values?.eopQty}
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -469,7 +468,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         readOnly
                         label={labels.endPcs}
                         value={(formik?.values?.wipPcs || 0) - (formik?.values?.damagedPcs || 0)}
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -481,7 +480,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         rows={3}
                         maxLength='100'
                         editMode={editMode}
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                         onChange={e => formik.setFieldValue('notes', e.target.value)}
                         onClear={() => formik.setFieldValue('notes', '')}
                       />
@@ -496,7 +495,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         label={labels.pgItem}
                         value={formik.values.pgItemName}
                         readOnly
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -505,7 +504,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         label={labels.itemCategory}
                         value={formik.values.itemCategoryName}
                         readOnly
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -514,7 +513,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         label={labels.jobCategory}
                         value={formik.values.category}
                         readOnly
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -527,7 +526,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         readOnly
                         values={formik.values}
                         displayField='name'
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                         error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                       />
                     </Grid>
@@ -537,7 +536,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         label={labels.designRef}
                         value={formik.values.designRef}
                         readOnly
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -547,7 +546,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         value={formik.values.jobQty}
                         required
                         readOnly
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -556,7 +555,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         label={labels.jobPcs}
                         value={formik.values.jobPcs}
                         readOnly
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
 
@@ -566,7 +565,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         readOnly={isPosted}
                         label={labels.wgtBefore}
                         value={formik?.values?.wgtBefore}
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                         onChange={formik.handleChange}
                         onClear={() => formik.setFieldValue('wgtBefore', '')}
                         error={formik.touched.wgtBefore && Boolean(formik.errors.wgtBefore)}
@@ -579,7 +578,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         readOnly={isPosted}
                         label={labels.wgtAfter}
                         value={formik?.values?.wgtAfter}
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                         onChange={formik.handleChange}
                         onClear={() => formik.setFieldValue('wgtAfter', '')}
                         error={formik.touched.wgtAfter && Boolean(formik.errors.wgtAfter)}
@@ -610,7 +609,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     readOnly
                     label={labels.date}
                     value={formik.values.date}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -619,7 +618,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     readOnly
                     label={labels.startTime}
                     value={formik.values?.startTime}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -628,7 +627,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     readOnly
                     label={labels.endTime}
                     value={formik.values?.endTime}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -637,7 +636,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     reducer={response => response?.record?.shifts}
                     name='shiftId'
                     label={labels.shift}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     readOnly={isPosted}
                     valueField='recordId'
                     displayField={'name'}

@@ -56,7 +56,7 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
         const { controlId, accessLevel } = obj
         if (accessLevel === MANDATORY)
           if (controlId?.indexOf('.') < 0) {
-            const keys = Object.keys(formik.values)
+            const keys = Object.keys(values)
             if (!values[controlId] && keys?.indexOf(controlId) > -1)
               maxAccessErrors = {
                 ...maxAccessErrors,
@@ -97,10 +97,10 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
               }
               if (
                 !maxAccessErrors[gridName][fieldName] &&
-                formik.values[gridName] &&
-                !formik.values[gridName][fieldName] &&
-                formik.values[gridName][fieldName] !== 0 &&
-                formik.values[gridName][fieldName] !== '0'
+                values[gridName] &&
+                !values[gridName][fieldName] &&
+                values[gridName][fieldName] !== 0 &&
+                values[gridName][fieldName] !== '0'
               ) {
                 maxAccessErrors[gridName][fieldName] = `${fieldName} is required.`
               }
