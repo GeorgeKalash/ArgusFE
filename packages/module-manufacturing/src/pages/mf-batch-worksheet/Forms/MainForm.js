@@ -129,22 +129,26 @@ export default function MainForm({ labels, access, store, setStore, window }) {
         extension: ManufacturingRepository.BatchWorksheet.get2,
         parameters: `_recordId=${recordId}`
       })
+
+      if (!res?.record) {
+        return
+      }
       formik.resetForm({
         values: {
-          recordId: res.record.header.recordId,
+          recordId: res?.record?.header?.recordId,
           header: {
-            ...res.record.header,
-            date: formatDateFromApi(res.record.header.date)
+            ...res?.record?.header,
+            date: formatDateFromApi(res?.record?.header?.date)
           },
           batchWorksheetJobs:
-            res.record?.batchWorksheetJobs?.length > 0
-              ? res.record?.batchWorksheetJobs?.map((item, index) => ({
+            res?.record?.batchWorksheetJobs?.length > 0
+              ? res?.record?.batchWorksheetJobs?.map((item, index) => ({
                   ...item,
                   id: index + 1
                 }))
               : initialValues?.batchWorksheetJobs,
-          batchWSRM: res.record?.batchWorksheetRawMaterials.length
-            ? res.record?.batchWorksheetRawMaterials?.map((item, index) => ({
+          batchWSRM: res?.record?.batchWorksheetRawMaterials?.length
+            ? res?.record?.batchWorksheetRawMaterials?.map((item, index) => ({
                 ...item,
                 id: index + 1
               }))
@@ -152,8 +156,8 @@ export default function MainForm({ labels, access, store, setStore, window }) {
         }
       })
       setStore({
-        recordId: res.record.header.recordId,
-        batchWorksheetDistributions: res.record?.batchWorksheetDistributions
+        recordId: res?.record?.header?.recordId,
+        batchWorksheetDistributions: res?.record?.batchWorksheetDistributions
       })
     }
   }
