@@ -46,6 +46,11 @@ export default function BTFixing() {
       parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
+    response.list = (response?.list || []).map(item => ({
+      ...item,
+      commodityPair: item?.metalRef && item?.currencyRef ? `${item.metalRef}/${item.currencyRef}` : ''
+    }))
+
     return { ...response, _startAt: _startAt }
   }
 
@@ -133,6 +138,17 @@ export default function BTFixing() {
       headerName: labels.qty,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'amount',
+      headerName: labels.amount,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'commodityPair',
+      headerName: labels.cmp,
+      flex: 1
     },
     {
       field: 'rsName',

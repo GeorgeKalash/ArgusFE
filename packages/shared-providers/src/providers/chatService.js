@@ -21,22 +21,16 @@ export async function parseChatStream(
       { stream: true }
     );
 
-    const parts =
-      buffer.split("\n");
+    const parts = buffer.split("\n");
 
     buffer = parts.pop();
 
     for (const part of parts) {
-      let trimmed =
-        part.trim();
+      let trimmed = part.trim();
 
       if (!trimmed) continue;
 
-      if (
-        trimmed.startsWith(
-          "data:"
-        )
-      ) {
+      if (trimmed.startsWith("data:")) {
         trimmed = trimmed
           .replace(
             /^data:\s*/,
@@ -45,10 +39,7 @@ export async function parseChatStream(
           .trim();
       }
 
-      if (
-        trimmed ===
-        "[DONE]"
-      ) {
+      if (trimmed ==="[DONE]") {
         onEvent({
           type: "done"
         });
@@ -57,15 +48,9 @@ export async function parseChatStream(
       }
 
       try {
-        const json =
-          JSON.parse(
-            trimmed
-          );
+        const json =JSON.parse(trimmed);
 
-        if (
-          json.type ===
-          "conversationId"
-        ) {
+        if (json.type === "conversationId") {
           onEvent({
             type:
               "conversationId",
@@ -76,10 +61,7 @@ export async function parseChatStream(
           continue;
         }
 
-        if (
-          json.type ===
-          "text"
-        ) {
+        if (json.type === "text") {
           onEvent({
             type: "chunk",
             text:
@@ -87,9 +69,16 @@ export async function parseChatStream(
           });
         }
 
-        if (
-          json.type === "error"
-        ) {
+        if (json.type === "balance") {
+          onEvent({
+            type: "balance",
+            content: json.content
+          });
+
+          continue;
+        }
+
+        if (json.type === "error") {
           onEvent({
             type: "error",
             message:
@@ -107,7 +96,5 @@ export async function parseChatStream(
     }
   }
 
-  onEvent({
-    type: "done"
-  });
+  onEvent({type: "done"});
 }

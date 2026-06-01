@@ -37,6 +37,8 @@ const CurrenciesTable = ({ labels, maxAccess, store }) => {
 
   useEffect(() => {
     ;(async function () {
+      if (!recordId) return
+      
       const res = await getRequest({
         extension: SystemRepository.Currency.qry,
         parameters: `_startAt=0&_pageSize=1000&_filter=`
