@@ -188,6 +188,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
         itemName: '',
         seqNo: 1,
         siteId: '',
+        isVatable: false,
         muId: null,
         qty: 0,
         volume: 0,
@@ -715,19 +716,10 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 4,
-        allowClear: false
+        displayFieldWidth: 4
       },
       async onChange({ row: { update, newRow, oldRow } }) {
-        if (!newRow?.taxId && oldRow?.taxId) {
-          update({
-            taxId: oldRow.taxId,
-            taxName: oldRow.taxName
-          })
-          return
-        }
         setReCal(true)
-
         const { header, recordId } = formik.values
         const isVattable = header?.isVattable
 
@@ -797,7 +789,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
         })
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: formik.values?.header?.taxId || !row?.taxId }
+        return { ...props, readOnly: !(formik.values?.header?.isVattable && row?.isVatable) }
       }
     },
     {
@@ -1353,7 +1345,8 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       trackBy: itemInfo?.trackBy,
       taxId: effectiveTaxId,
       taxName: effectiveTaxName,
-      taxDetails: null
+      taxDetails: null,
+      isVatable: Boolean(effectiveTaxId)
     }
     let data = getItemPriceRow(updatedRowValues, DIRTYFIELD_QTY)
 
