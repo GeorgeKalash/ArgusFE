@@ -104,7 +104,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
   ]
 
   const totalAmount = formik.values?.costCenters?.reduce((amount, row) => {
-    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+    const amountValue = row.amount || 0
 
     return amount + amountValue
   }, 0)
