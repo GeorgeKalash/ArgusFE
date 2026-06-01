@@ -733,5 +733,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'commission.png',
     main: false
+  },
+   {
+    key: 'RV',
+    label: platformLabels.RV,
+    color: '#373957',
+    image: 'invoice.png',
+    main: false
   }
 ]
