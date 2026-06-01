@@ -1290,7 +1290,7 @@ export default function PuQtnForm({ recordId, window }) {
                     handleButtonClick={handleDiscountButtonClick}
                     ShowDiscountIcons={true}
                     onChange={e => {
-                      let discount = Number(e.target.value.replace(/,/g, ''))
+                      let discount = e.target.value
                       if (formik.values.tdType == 1) {
                         if (discount < 0 || subtotal < discount) {
                           discount = 0
@@ -1304,9 +1304,9 @@ export default function PuQtnForm({ recordId, window }) {
                     }}
                     onBlur={async e => {
                       setReCal(true)
-                      let discountAmount = Number(e.target.value.replace(/,/g, ''))
-                      let tdPct = Number(e.target.value.replace(/,/g, ''))
-                      let tdAmount = Number(e.target.value.replace(/,/g, ''))
+                      let discountAmount = e.target.value
+                      let tdPct = e.target.value
+                      let tdAmount = e.target.value
                       if (formik.values.tdType == 1) {
                         tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
                         formik.setFieldValue('tdPct', tdPct)
