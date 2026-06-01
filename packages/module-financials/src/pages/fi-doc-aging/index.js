@@ -233,7 +233,7 @@ const DocumentAging = () => {
   }
 
   const totalAmount = formik.values?.agingTree?.reduce((amount, row) => {
-    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || null
+    const amountValue = row.amount || null
 
     return amount + amountValue
   }, null)
