@@ -104,7 +104,7 @@ const POSInquiry = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} maxAccess={access} filterBy={filterBy} paramsRequired={true} reportName={'PS303'} />
+        <RPBGridToolbar hasSearch={false} maxAccess={access} filterBy={filterBy} paramsRequired={true} reportName={'POS303'} />
       </Fixed>
       <Grow>
         <Table
