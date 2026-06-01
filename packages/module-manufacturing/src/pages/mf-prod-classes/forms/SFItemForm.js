@@ -1,9 +1,6 @@
-import { Box } from '@mui/material'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import toast from 'react-hot-toast'
-import InlineEditGrid from '@argus/shared-ui/src/components/Shared/InlineEditGrid'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
@@ -12,142 +9,137 @@ import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 
-const SFItemForm = ({ labels, maxAccess, recordId }) => {
+const SFItemForm = ({ labels, maxAccess, store }) => {
+  const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [itemStore, setItemStore] = useState([])
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionClassSemiFinished.qry
   })
 
-  const formik = useFormik({
-    validateOnChange: true,
+
+  const { formik } = useForm({
+    maxAccess,
+    initialValues: {
+      classId: recordId || null,
+      items: [{
+        id: 1,
+        classId: recordId || null,
+        sfItemId: null,
+        itemName: '',
+        sku: ''
+      }]
+    },
     validationSchema: yup.object({
-      rows: yup.array().of(
+      items: yup.array().of(
         yup.object({
-          sfItemId: yup.string().required()
+          sfItemId: yup.number().required()
         })
       )
     }),
-    initialValues: {
-      rows: [
-        {
-          classId: recordId || '',
-          sfItemId: null,
-          itemName: '',
-          sku: ''
-        }
-      ]
-    },
-    onSubmit: async obj => {
-      const resultObject = {
-        classId: recordId,
-        items: formik.values.rows
-      }
-
-      const response = await postRequest({
+    onSubmit: async values => {
+      await postRequest({
         extension: ManufacturingRepository.ProductionClassSemiFinished.set2,
-        record: JSON.stringify(resultObject)
+        record: JSON.stringify({
+          classId: recordId,
+          items: values.items
+            ?.filter(row => row.sfItemId)
+            ?.map(row => ({
+              ...row,
+              classId: recordId
+            }))
+        })
       })
 
-      !recordId &&
-        setInitialData({
-          ...obj,
-          recordId: response.recordId
-        })
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      toast.success(platformLabels.Edited)
       invalidate()
     }
   })
 
-  const lookupItem = inp => {
-    const input = inp
-
-    if (input) {
-      var parameters = `_size=30&_startAt=0&_filter=${input}&_categoryId=0&_msId=0`
-
-      getRequest({
-        extension: InventoryRepository.Item.snapshot,
-        parameters: parameters
-      }).then(res => {
-        setItemStore(res.list)
-      })
-    }
-  }
-
   const columns = [
     {
-      field: 'lookup',
-      header: labels.semiFinishedItemRef,
-      nameId: 'sfItemId',
+      component: 'resourcelookup',
+      label: labels.semiFinishedItemRef,
       name: 'sku',
-      mandatory: true,
-      store: itemStore,
-      valueField: 'recordId',
-      displayField: 'sku',
-      widthDropDown: 200,
-      fieldsToUpdate: [{ from: 'name', to: 'itemName' }],
-      columnsInDropDown: [
-        { key: 'sku', value: 'Reference' },
-        { key: 'name', value: 'Name' }
-      ],
-      onLookup: lookupItem
+      flex: 1,
+      props: {
+        endpointId: InventoryRepository.Item.snapshot,
+        parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
+        displayField: 'sku',
+        valueField: 'sku',
+        mapping: [
+          { from: 'recordId', to: 'sfItemId' },
+          { from: 'sku', to: 'sku' },
+          { from: 'name', to: 'itemName' }
+        ],
+        columnsInDropDown: [
+          { key: 'sku', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 2
+      }
     },
     {
-      field: 'textfield',
-      header: labels.semiFinishedItemName,
+      component: 'textfield',
+      label: labels.semiFinishedItemName,
       name: 'itemName',
-      mandatory: true,
-      readOnly: true
+      flex: 1,
+      props: {
+        readOnly: true
+      }
     }
   ]
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: ManufacturingRepository.ProductionClassSemiFinished.qry,
-          parameters: `_classId=${recordId}`
-        })
+      if (!recordId) return
 
-        if (res.list.length > 0) {
-          formik.setValues({ rows: res.list })
-        } else {
-          formik.setValues({
-            rows: [
-              {
-                classId: recordId || '',
-                sfItemId: null,
-                itemName: '',
-                sku: ''
-              }
-            ]
-          })
-        }
-      }
+      const res = await getRequest({
+        extension: ManufacturingRepository.ProductionClassSemiFinished.qry,
+        parameters: `_classId=${recordId}`
+      })
+
+      const items =
+        res.list?.length > 0
+          ? res.list.map((row, index) => ({
+              ...row,
+              id: row.id || row.seqNo || index + 1,
+              classId: recordId
+            }))
+          : formik.initialValues.items
+
+      formik.setValues({
+        classId: recordId,
+        items
+      })
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell resourceId={ResourceIds.ProductionClass} form={formik} editMode={true} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', marginTop: -5 }}>
-            <InlineEditGrid
-              gridValidation={formik}
-              maxAccess={maxAccess}
-              columns={columns}
-              defaultRow={{
-                classId: recordId || '',
-                sfItemId: null,
-                itemName: '',
-                sku: ''
-              }}
-              width={500}
-            />
-          </Box>
+          <DataGrid
+            name='items'
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={columns}
+            initialValues={formik?.initialValues?.items?.[0]}
+            onChange={value => {
+              formik.setFieldValue(
+                'items', value?.map(row => ({
+                  ...row,
+                  classId: recordId
+                }))
+              )
+            }}
+            maxAccess={maxAccess}
+          />
         </Grow>
       </VertLayout>
     </FormShell>
