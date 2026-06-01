@@ -129,7 +129,7 @@ const GenerateOutboundTransportation = () => {
       formik?.values?.data?.list.reduce((amountSum, row) => {
         let amountValue = 0
         if (row.checked) {
-          amountValue = parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0
+          amountValue = row?.amount || 0
         }
 
         return amountSum + amountValue
@@ -143,7 +143,7 @@ const GenerateOutboundTransportation = () => {
         let volumeValue = 0
 
         if (row.checked) {
-          volumeValue = parseFloat(row?.volume?.toString().replace(/,/g, '')) || 0
+          volumeValue = row?.volume || 0
         }
 
         return volumeSum + volumeValue
