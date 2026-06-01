@@ -17,7 +17,7 @@ import { calculateFixed } from '@argus/shared-utils/src/utils/Payroll'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
-import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
+import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function EntitlementForm({
   labels,
@@ -242,7 +242,7 @@ export default function EntitlementForm({
                   onBlur={e => {
                     let pctValue = Number(e.target.value)
                     const amount = calculateFixed(pctValue, 1, salaryInfo.header.basicAmount, salaryInfo.header.eAmount)
-                    formik.setFieldValue('fixedAmount', parseFloat(amount || 0).toFixed(2))
+                    formik.setFieldValue('fixedAmount', roundTo(amount || 0))
                     formik.setFieldValue('pct', pctValue)
                   }}
                   maxAccess={maxAccess}
@@ -257,10 +257,7 @@ export default function EntitlementForm({
                   value={formik.values.fixedAmount}
                   onBlur={e =>
                     formik.setFieldValue(
-                      'fixedAmount',
-                      parseFloat(
-                        String(e?.target?.value || 0).replace(/,/g, '')
-                      ).toFixed(2)
+                      'fixedAmount', roundTo(e?.target?.value || 0)
                     )
                   }
                   required={!formik.values?.isFormula}
