@@ -127,7 +127,7 @@ const GeneratePurchaseInvoice = () => {
         .reduce((amountSum, row) => {
           let amountValue = 0
           if (row.checked) {
-            amountValue = parseFloat(row?.amountAfterVat?.toString().replace(/,/g, '')) || 0
+            amountValue = row?.amountAfterVat || 0
           }
 
           return amountSum + amountValue
