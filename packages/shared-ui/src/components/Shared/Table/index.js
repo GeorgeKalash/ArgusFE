@@ -1489,6 +1489,33 @@ const Table = ({
           line-height: 1;
         }
 
+        .agGridContainer :global(.ag-pinned-left-header),
+        .agGridContainer :global(.ag-pinned-left-cols-container) {
+          background-color: #fafafa;
+        }
+
+        .agGridContainer :global(.ag-pinned-right-header),
+        .agGridContainer :global(.ag-pinned-right-cols-container) {
+          background-color: #fafafa;
+        }
+
+        /* Divider */
+        .agGridContainer :global(.ag-pinned-left-header) {
+          border-right: 4px solid #b6bac2;
+        }
+
+        .agGridContainer :global(.ag-pinned-left-cols-container) {
+          border-right: 4px solid #b6bac2;
+        }
+
+        .agGridContainer :global(.ag-pinned-right-header) {
+          border-left: 4px solid #b6bac2;
+        }
+
+        .agGridContainer :global(.ag-pinned-right-cols-container) {
+          border-left: 4px solid #b6bac2;
+        }
+          
         @media (min-width: 1025px) and (max-width: 1600px) {
           .agGridContainer:global(.ag-theme-alpine) {
             --ag-font-size: 12px;
