@@ -5,8 +5,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
-import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
@@ -121,7 +120,7 @@ const SFItemForm = ({ labels, maxAccess, store }) => {
   }, [recordId])
 
   return (
-    <FormShell resourceId={ResourceIds.ProductionClass} form={formik} editMode={true} maxAccess={maxAccess}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={true} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -142,7 +141,7 @@ const SFItemForm = ({ labels, maxAccess, store }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
