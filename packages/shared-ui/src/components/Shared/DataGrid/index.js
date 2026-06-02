@@ -637,7 +637,7 @@ export function DataGrid({
     )
   }
 
-  const CustomCellEditor = params => {
+  const CustomCellEditor = React.forwardRef((params, ref) => {
     const { column, data, maxAccess } = params
     const [currentValue, setCurrentValue] = useState(params?.node?.data)
 
@@ -706,7 +706,7 @@ export function DataGrid({
         </Box>
       </Box>
     )
-  }
+  })
 
   const cellClassRules = {
     'cell-error': params => !!error?.[params.node.rowIndex]?.[params.colDef.field]
