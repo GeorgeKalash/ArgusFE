@@ -105,11 +105,12 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
+              <CustomTextField
                 name='accountNo'
                 label={labels.accountNo}
                 value={formik.values.accountNo}
                 required
+                maxLength='20'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('accountNo', '')}
@@ -176,8 +177,8 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
                 endpointId={FinancialRepository.Account.snapshot}
                 valueField='recordId'
                 displayField='name'
-                name='reference'
-                secondValueShow='name'
+                name='accountId'
+                secondValueShow='accountName'
                 label={labels.accountName}
                 form={formik}
                 firstValue={formik.values.accountRef}
