@@ -448,7 +448,7 @@ export default function RubberForm({ labels, access, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={ManufacturingRepository.Labor.qry}
-                parameters={`_startAt=0&_pageSize=200&_params=`}
+                parameters={`_startAt=0&_pageSize=10000&_params=`}
                 name='laborId'
                 required
                 readOnly={isReleased || isPosted}

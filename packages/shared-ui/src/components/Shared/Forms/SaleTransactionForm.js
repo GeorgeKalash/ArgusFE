@@ -67,6 +67,8 @@ import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import CommissionDetailsForm from '@argus/module-sales/src/pages/sa-trx/[functionId]/Forms/CommissionDetailsForm'
+import FIReceiptVoucherForm from './FIReceiptVoucherForm'
 
 export default function SaleTransactionForm({
   recordId,
@@ -579,7 +581,7 @@ export default function SaleTransactionForm({
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
+        imgSrc: '/images/TableIcons/imgSerials.png',
         hidden: false
       }
     } else {
@@ -907,7 +909,7 @@ export default function SaleTransactionForm({
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {
@@ -954,7 +956,7 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'saTrx',
       props: {
-        imgSrc:  require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src,
+        imgSrc:  '/images/buttonsIcons/popup-black.png',
         onCondition: row => {
           return {
             disabled: !row.itemId
@@ -1129,6 +1131,30 @@ export default function SaleTransactionForm({
     invalidate()
   }
 
+  const onCommissionClick = () => {
+    stack({
+      Component: CommissionDetailsForm,
+      props: {
+        header: formik.values.header,
+        labels,
+        maxAccess
+      },
+      width: 500,
+      height: 350,
+      title: labels.CommissionDetails
+    })
+  }
+
+  const onReceiptVoucher = () => {
+    stack({
+      Component: FIReceiptVoucherForm,
+      props: {
+        header: formik.values.header
+      }
+    })
+  }
+
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -1218,6 +1244,18 @@ export default function SaleTransactionForm({
       condition: formik.values.header.isVerified,
       onClick: verifyRecord,
       disabled: !formik.values.header.isVerified
+    },
+    {
+      key: 'Commission',
+      condition: true,
+      onClick: onCommissionClick,
+      disabled: !isPosted
+    },
+    {
+      key: 'RV',
+      condition: true,
+      onClick: onReceiptVoucher,
+      disabled: !isPosted
     }
   ]
 
@@ -2302,13 +2340,14 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={formik?.values?.header?.clientId && SaleRepository.Contact.qry}
+                endpointId={formik?.values?.header?.clientId && SaleRepository.Contact.contact}
                 parameters={`_clientId=${formik?.values?.header?.clientId}`}
                 name='header.contactId'
                 label={labels.contact}
                 valueField='recordId'
                 readOnly={isPosted}
                 displayField={['reference', 'name']}
+                displayFieldWidth={2}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }

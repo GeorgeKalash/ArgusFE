@@ -50,6 +50,9 @@ export default function FiscalPeriodList ({fiscalYear, labels, maxAccess}) {
     {
       field: 'statusName',
       headerName: '',
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 2
     }
   ]

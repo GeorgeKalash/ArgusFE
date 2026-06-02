@@ -107,9 +107,6 @@ export const PayrollRepository = {
     get: service + 'getPE',
     set: service + 'setPE'
   },
-  Formula: {
-    qry: service + 'qryFLA'
-  },
   PayrollConstant: {
     set: service + 'setCON',
     del: service + 'delCON',
@@ -117,6 +114,7 @@ export const PayrollRepository = {
     page: service + 'pageCON'
   },
   Formula: {
+    qry: service + 'qryFLA',
     page: service + 'pageFLA',
     get: service + 'getFLA',
     getPack: service + 'getPackFLA',

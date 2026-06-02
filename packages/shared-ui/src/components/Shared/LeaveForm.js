@@ -467,7 +467,7 @@ export const LeaveForm = ({ recordId, window }) => {
                 readOnly={isClosed}
               />
               <ResourceComboBox
-                endpointId={LoanManagementRepository.IndemnityAccuralsFilters.qry}
+                endpointId={LoanManagementRepository.LeaveTypes.qry}
                 name='ltId'
                 label={labels.leaveType}
                 valueField='recordId'

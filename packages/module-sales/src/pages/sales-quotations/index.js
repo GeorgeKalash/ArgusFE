@@ -50,6 +50,9 @@ const SalesQuotations = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -103,6 +106,9 @@ const SalesQuotations = () => {
     {
       field: 'wipName',
       headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     }
   ]
@@ -193,7 +199,6 @@ const SalesQuotations = () => {
           refetch={refetch}
           onDelete={delSQ}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

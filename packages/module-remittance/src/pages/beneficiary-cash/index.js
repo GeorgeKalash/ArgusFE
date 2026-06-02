@@ -170,7 +170,6 @@ const BeneficiaryCash = () => {
           rowId={['beneficiaryId', 'clientId', 'seqNo']}
           onEdit={editBenCash}
           onDelete={delBenCash}
-          isLoading={false}
           pageSize={50}
           paginationType='client'
           maxAccess={access}

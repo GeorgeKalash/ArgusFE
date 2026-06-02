@@ -111,7 +111,6 @@ const LotForm = ({ labels, categoryId, itemId, maxAccess }) => {
           columns={columns}
           gridData={data}
           rowId={['lotId', 'siteId']}
-          isLoading={false}
           pagination={false}
           maxAccess={maxAccess}
           name='avaLot'

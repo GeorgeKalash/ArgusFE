@@ -138,7 +138,6 @@ const OpenOutwardsReturn = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={50}
           onEdit={edit}
           paginationType='api'

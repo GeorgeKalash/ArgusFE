@@ -82,7 +82,6 @@ const PlantSettings = () => {
           gridData={data}
           rowId={['dtId']}
           onEdit={edit}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationType='api'

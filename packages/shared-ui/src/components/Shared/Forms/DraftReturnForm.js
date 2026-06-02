@@ -548,7 +548,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src, 
+              imgSrc: '/images/buttonsIcons/tax-icon.png', 
               hidden: false
             }
           } else {
@@ -1187,7 +1187,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                     form={formik}
                     required
                     readOnly={isClosed}
-                    displayFieldWidth={2}
+                    displayFieldWidth={5}
                     firstFieldWidth={3}
                     valueShow='clientRef'
                     secondValueShow='clientName'

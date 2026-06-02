@@ -115,6 +115,9 @@ const IvMaterialsTransfer = () => {
     {
       field: 'wipName',
       headerName: _labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     }
   ]
@@ -154,7 +157,6 @@ const IvMaterialsTransfer = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

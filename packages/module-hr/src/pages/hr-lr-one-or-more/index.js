@@ -130,6 +130,9 @@ const LeaveRequestOneDayOrMore = () => {
     {
       field: 'statusName',
       headerName: labels.statusName,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -140,6 +143,9 @@ const LeaveRequestOneDayOrMore = () => {
     {
       field: 'wipName',
       headerName: labels.wipName,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     }
   ]

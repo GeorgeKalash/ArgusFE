@@ -78,11 +78,6 @@ const IvSerials = () => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
-    },
-    {
       field: 'weight',
       headerName: labels.weight,
       flex: 1,
@@ -190,7 +185,6 @@ const IvSerials = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

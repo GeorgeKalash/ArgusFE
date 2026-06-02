@@ -97,6 +97,9 @@ const JobOrder = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -225,7 +228,6 @@ const JobOrder = () => {
           refetch={refetch}
           onDelete={delJOB}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

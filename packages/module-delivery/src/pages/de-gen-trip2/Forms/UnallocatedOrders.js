@@ -49,7 +49,6 @@ export default function UnallocatedOrdersForm({ data, labels, access }) {
           columns={columnsUnallocatedOrders}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           pagination={false}
           maxAccess={access}
         />

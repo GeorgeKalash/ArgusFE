@@ -110,6 +110,9 @@ const PaymentOrders = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -120,6 +123,9 @@ const PaymentOrders = () => {
     {
       field: 'wipName',
       headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     }
   ]
@@ -168,7 +174,6 @@ const PaymentOrders = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'

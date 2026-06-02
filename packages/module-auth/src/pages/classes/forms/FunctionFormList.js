@@ -98,7 +98,6 @@ const FunctionFormList = ({ labels, store, maxAccess }) => {
           rowId={['functionId']}
           onEdit={editFunction}
           onDelete={delFunction}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

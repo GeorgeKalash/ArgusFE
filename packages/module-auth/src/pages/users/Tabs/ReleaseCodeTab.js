@@ -97,7 +97,6 @@ const ReleaseCodeTab = ({ labels, maxAccess, storeRecordId }) => {
           gridData={data ? data : { list: [] }}
           rowId={['codeId', 'userId']}
           onDelete={del}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

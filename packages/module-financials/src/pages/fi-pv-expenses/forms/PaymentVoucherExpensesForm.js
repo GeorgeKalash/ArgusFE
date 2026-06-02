@@ -511,7 +511,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       component: 'button',
       name: 'hasCostCenters',
       props: {
-        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/costCenter.png').default.src
+        imgSrc: '/images/buttonsIcons/costCenter.png'
       },
       label: labels.costCenter,
       onClick: (e, row, update, updateRow) => {
@@ -711,6 +711,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
@@ -757,6 +758,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                         ]}
                         readOnly={isPosted || isCancelled}
                         values={formik.values}
+                        maxAccess={maxAccess}
                         onChange={async (_, newValue) => {
                           await getMultiCurrencyFormData(
                             newValue?.recordId,
@@ -867,6 +869,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     valueField='recordId'
                     displayField={'firstCheckNo'}
                     values={formik.values}
+                    maxAccess={maxAccess}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('checkbookId', newValue ? newValue?.recordId : '')
                     }}

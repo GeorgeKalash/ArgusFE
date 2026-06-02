@@ -129,7 +129,6 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
           gridData={filteredData}
           rowId={['userId', 'functionId']}
           onEdit={edit}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

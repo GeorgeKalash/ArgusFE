@@ -119,7 +119,6 @@ const Classes = () => {
           refetch={refetch}
           onEdit={popup}
           onDelete={delClasses}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />

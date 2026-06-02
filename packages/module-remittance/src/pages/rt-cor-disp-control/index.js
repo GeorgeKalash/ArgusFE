@@ -72,7 +72,6 @@ const CorrespondentDispersal = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          isLoading={false}
           maxAccess={access}
           pagination={false}
         />

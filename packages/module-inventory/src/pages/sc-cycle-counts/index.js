@@ -71,11 +71,17 @@ const CycleCounts = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
       field: 'wipName',
       headerName: _labels.workInProgress,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     },
     {
@@ -153,7 +159,6 @@ const CycleCounts = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

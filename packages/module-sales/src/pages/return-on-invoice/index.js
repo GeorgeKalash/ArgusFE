@@ -95,6 +95,9 @@ const ReturnOnInvoice = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -175,7 +178,6 @@ const ReturnOnInvoice = () => {
           refetch={refetch}
           onDelete={delRET}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

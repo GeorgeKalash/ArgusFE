@@ -11,7 +11,6 @@ import BenificiaryBankForm from '@argus/shared-ui/src/components/Shared/Benifici
 import BenificiaryHistoryForm from '@argus/shared-ui/src/components/Shared/Forms/BenificiaryHistoryForm'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
-import historyIcon from '@argus/shared-ui/src/components/images/TableIcons/history.png'
 
 const BeneficiaryWindow = ({ clientId }) => {
   const { stack } = useWindow()
@@ -99,7 +98,7 @@ const BeneficiaryWindow = ({ clientId }) => {
       cellRenderer: row => (
         <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
           <IconButton size='small' onClick={() => beneficiaryHistory(row)}>
-            <Image src={historyIcon} alt='History' width={18} height={18} />
+            <Image src={'/images/TableIcons/history.png'} alt='History' width={18} height={18} />
           </IconButton>
         </Box>
       )
@@ -165,7 +164,6 @@ const BeneficiaryWindow = ({ clientId }) => {
       columns={columns}
       gridData={data}
       rowId={['beneficiaryId']}
-      isLoading={false}
       pagination={false}
       maxAccess={access}
       onEdit={editBeneficiary}
