@@ -993,15 +993,26 @@ const Table = ({
       languageId
     ])
 
-  const gridOptions = {
-    rowClassRules: {
-      'even-row': params => params.node.rowIndex % 2 === 0,
-      'highlighted-row': params => {
-        if (!highlightRow) return false
-        return highlightRow.condition?.(params.data)
-      }
+  const columnDefsRef = useRef(null)
+
+  useEffect(() => {
+    if (!columnDefsRef.current) {
+      columnDefsRef.current = columnDefs
     }
-  }
+  }, [columnDefs])
+
+  const gridOptions = useMemo(
+    () => ({
+      rowClassRules: {
+        'even-row': params => params.node.rowIndex % 2 === 0,
+        'highlighted-row': params => {
+          if (!highlightRow) return false
+          return highlightRow.condition?.(params.data)
+        }
+      }
+    }),
+    [highlightRow]
+  )
 
 
   useEffect(() => {
@@ -1161,11 +1172,12 @@ const Table = ({
             </Box>
           )}
           <AgGridReact
+            key="grid"
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
             ensureDomOrder={true}
             enableRangeSelection={true}
-            columnDefs={columnDefs}
+            columnDefs={columnDefsRef.current || columnDefs}
             maintainColumnOrder={true}
             domLayout={domLayout}
             {...(hasRowId && {
