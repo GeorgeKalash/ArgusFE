@@ -177,8 +177,8 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
                 endpointId={FinancialRepository.Account.snapshot}
                 valueField='recordId'
                 displayField='name'
-                name='reference'
-                secondValueShow='name'
+                name='accountId'
+                secondValueShow='accountName'
                 label={labels.accountName}
                 form={formik}
                 firstValue={formik.values.accountRef}
