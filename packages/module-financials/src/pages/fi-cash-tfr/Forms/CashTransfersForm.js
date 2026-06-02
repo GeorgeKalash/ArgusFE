@@ -142,11 +142,9 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
         DatasetIdAccess: ResourceIds.MCRCashTransfers,
         data,
         onOk: childFormikValues => {
-          formik.resetForm({
-            values: {
-              ...formik.values, 
-              ...childFormikValues
-            }
+          formik.setValues({
+            ...formik.values,
+            ...childFormikValues
           })
         }
       }

@@ -121,26 +121,24 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         DatasetIdAccess: ResourceIds.MCRIncreaseDecreaseAdj,
         data,
         onOk: childFormikValues => {
-          formik.resetForm({
-            values: {
-              ...formik.values, 
-              ...childFormikValues
-            }
+          formik.setValues({
+            ...formik.values,
+            ...childFormikValues
           })
         }
       }
     })
   }
 
-  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
-    if (currencyId && date && rateType) {
+  async function getMultiCurrencyFormData(currencyId, date) {
+    if (currencyId && date) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${rateType}`
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${RateDivision.FINANCIALS}`
       })
 
       const updatedRateRow = getRate({
-        amount: amount === 0 ? 0 : amount ?? formik.values.amount,
+        amount: formik.values.amount,
         exRate: res.record?.exRate,
         baseAmount: 0,
         rateCalcMethod: res.record?.rateCalcMethod,
@@ -392,7 +390,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
-                  await getMultiCurrencyFormData(formik.values.currencyId, newValue, RateDivision.FINANCIALS)
+                  await getMultiCurrencyFormData(formik.values.currencyId, newValue)
                 }}
                 required
                 maxAccess={maxAccess}
@@ -419,7 +417,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                     required
                     maxAccess={maxAccess}
                     onChange={async (event, newValue) => {
-                      await getMultiCurrencyFormData(newValue?.recordId, formik.values.date, RateDivision.FINANCIALS)
+                      await getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
                       formik.setFieldValue('currencyId', newValue?.recordId || null)
                       formik.setFieldValue('currencyName', newValue?.name)
                     }}

@@ -174,7 +174,7 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     if (value instanceof Date) return value.dateOnly ? value.toDateString() : value.valueOf()
     if (Array.isArray(value)) return value.map(normalized)
     if (value && typeof value === 'object')
-      return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, normalized(v)]))
+      return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, normalized(v)]).filter(([, v]) => v !== null && v !== undefined))
 
     return value
   }

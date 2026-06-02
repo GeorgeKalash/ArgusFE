@@ -186,11 +186,9 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
         DatasetIdAccess: ResourceIds.MCRFIPaymentVoucher,
         data,
         onOk: childFormikValues => {
-          formik.resetForm({
-            values: {
-              ...formik.values, 
-              ...childFormikValues
-            }
+          formik.setValues({
+            ...formik.values,
+            ...childFormikValues
           })
         }
       }

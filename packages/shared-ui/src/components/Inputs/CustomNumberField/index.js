@@ -88,6 +88,8 @@ const CustomNumberField = ({
   }
 
   const handleNumberValueChange = (values, sourceInfo) => {
+    if (sourceInfo?.source !== 'event') return
+
     const rawValue = values.value ?? values.formattedValue ?? ''
     const parsedValue = parseInputValue(rawValue, false)
 
