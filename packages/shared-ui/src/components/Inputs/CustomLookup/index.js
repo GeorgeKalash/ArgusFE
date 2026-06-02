@@ -168,6 +168,7 @@ const CustomLookup = ({
             props.renderOption && <Paper style={{ width: 'max-content' }}>{children}</Paper>
           }
           renderOption={(propsOption, option) => {
+            const { key, ...liProps } = propsOption
             if (columnsInDropDown?.length > 0) {
               const columnsWithGrid = columnsInDropDown.map(col => ({
                 ...col,
@@ -176,12 +177,12 @@ const CustomLookup = ({
               const totalGrid = columnsWithGrid.reduce((sum, col) => sum + col.grid, 0)
 
               return (
-                <Box>
-                  {propsOption.id.endsWith('-0') && (
-                    <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
+                <Box key={key}>
+                  {liProps.id.endsWith('-0') && (
+                    <li className={`${liProps.className} ${dropdownStyles.dropdownHeaderRow}`}>
                       {columnsWithGrid.map((header, i) => (
                         <Box
-                          key={i}
+                          key={header.key}
                           className={dropdownStyles.dropdownHeaderCell}
                           style={{ width: `${(header.grid / totalGrid) * 100}%` }}
                         >
@@ -192,8 +193,8 @@ const CustomLookup = ({
                   )}
 
                   <li
-                    {...propsOption}
-                    className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}
+                    {...liProps}
+                    className={`${liProps.className} ${dropdownStyles.dropdownOptionRow}`}
                   >
                     {columnsWithGrid.map((header, i) => {
                       let displayValue = option[header.key]
@@ -202,7 +203,7 @@ const CustomLookup = ({
                       }
                       return (
                         <Box
-                          key={i}
+                          key={header.key}
                           className={dropdownStyles.dropdownOptionCell}
                           style={{ width: `${(header.grid / totalGrid) * 100}%` }}
                         >
@@ -216,9 +217,9 @@ const CustomLookup = ({
             }
 
             return (
-              <Box>
-                {propsOption.id.endsWith('-0') && (
-                  <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
+              <Box key={key}>
+                {liProps.id.endsWith('-0') && (
+                  <li className={`${liProps.className} ${dropdownStyles.dropdownHeaderRow}`}>
                     {secondDisplayField && (
                       <Box className={dropdownStyles.dropdownHeaderCellMain}>
                         {valueField.toUpperCase()}
@@ -233,8 +234,8 @@ const CustomLookup = ({
                 )}
 
                 <li
-                  {...propsOption}
-                  className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}
+                  {...liProps}
+                  className={`${liProps.className} ${dropdownStyles.dropdownOptionRow}`}
                 >
                   <Box className={dropdownStyles.dropdownOptionCellMain}>{option[valueField]}</Box>
 
