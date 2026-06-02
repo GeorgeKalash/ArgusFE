@@ -71,6 +71,18 @@ const Table = ({
 
   const { width } = useWindowDimensions()
 
+  useEffect(() => {
+    if (paginationType !== 'api' && props?.gridData) {
+      const calculatedPage = Math.ceil(
+        props.gridData.count
+          ? (startAt === 0 ? 1 : (startAt + 1) / pageSize)
+          : 1
+      )
+
+      setPage(prev => (prev === calculatedPage ? prev : calculatedPage))
+    }
+  }, [props?.gridData, startAt, pageSize, paginationType])
+
   const rowHeight =
     width <= 768 ? 36 : width <= 1024 ? 32 : width <= 1280 ? 30 : width <= 1366 ? 32 : width < 1600 ? 34 : 36
 
@@ -448,7 +460,6 @@ const Table = ({
 
         if (gridData && gridData?.list) {
           const originalGridData = gridData && gridData.list
-          setPage(Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1))
 
           var _gridData = gridData?.list
           const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
