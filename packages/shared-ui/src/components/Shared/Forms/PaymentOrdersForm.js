@@ -1,10 +1,10 @@
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
@@ -22,17 +22,13 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
-import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
-import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
-import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
@@ -133,56 +129,6 @@ export default function PaymentOrdersForm({ recordId, window }) {
     } else {
       return null
     }
-  }
-
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    datasetId: ResourceIds.MultiCurrencyRate
-  })
-
-  async function getMultiCurrencyFormData(currencyId, date) {
-    if (currencyId && date) {
-      const res = await getRequest({
-        extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${
-          RateDivision.FINANCIALS
-        }`
-      })
-
-      const updatedRateRow = getRate({
-        amount: formik.values.amount,
-        exRate: res.record?.exRate,
-        baseAmount: 0,
-        rateCalcMethod: res.record?.rateCalcMethod,
-        dirtyField: DIRTYFIELD_RATE
-      })
-
-      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
-      formik.setFieldValue('exRate', res.record?.exRate)
-      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
-    }
-  }
-
-  function openMCRForm(data) {
-    stack({
-      Component: MultiCurrencyRateForm,
-      props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
-        data,
-        onOk: childFormikValues => {
-          formik.resetForm({
-            values: {
-              ...formik.values, 
-              ...childFormikValues
-            }
-          })
-        }
-      },
-      width: 500,
-      height: 500,
-      title: platformLabels.MultiCurrencyRate
-    })
   }
 
   const isCancelled = formik.values.status === -1
@@ -377,68 +323,54 @@ export default function PaymentOrdersForm({ recordId, window }) {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={6}>
-              <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={7}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
-                    name='currencyId'
-                    label={labels.currency}
-                    filter={item => item.currencyType === 1}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    required
-                    readOnly={isClosed || isCancelled}
-                    values={formik.values}
-                    onChange={(_, newValue) => {
-                      getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
-                      formik.setFieldValue('currencyName', newValue?.name || '')
-                    }}
-                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <CustomButton
-                    onClick={() => openMCRForm(formik.values)}
-                    image='popup.png'
-                    tooltipText={platformLabels.MultiCurrencyRate}
-                    disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <CustomNumberField
-                    name='amount'
-                    required
-                    label={labels.amount}
-                    maxLength={'10'}
-                    decimalScale={2}
-                    readOnly={isClosed || isCancelled}
-                    value={formik.values.amount}
-                    maxAccess={maxAccess}
-                    onChange={async e => {
-                      const updatedRateRow = getRate({
-                        amount: e.target.value ?? 0,
-                        exRate: formik.values?.exRate,
-                        baseAmount: 0,
-                        rateCalcMethod: formik.values?.rateCalcMethod,
-                        dirtyField: DIRTYFIELD_RATE
-                      })
-                      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
-                      formik.setFieldValue('amount', e.target.value)
-                    }}
-                    onClear={() => {
-                      formik.setFieldValue('amount', '')
-                    }}
-                    error={formik.touched.amount && Boolean(formik.errors.amount)}
-                  />
-                </Grid>
-              </Grid>
-            
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='currencyId'
+                label={labels.currency}
+                filter={item => item.currencyType === 1}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                required
+                readOnly={isClosed || isCancelled}
+                values={formik.values}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
+                  formik.setFieldValue('currencyName', newValue?.name || '')
+                }}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomNumberField
+                name='amount'
+                required
+                label={labels.amount}
+                maxLength={'10'}
+                decimalScale={2}
+                readOnly={isClosed || isCancelled}
+                value={formik.values.amount}
+                maxAccess={maxAccess}
+                onChange={async e => {
+                  const updatedRateRow = getRate({
+                    amount: e.target.value ?? 0,
+                    exRate: formik.values?.exRate,
+                    baseAmount: 0,
+                    rateCalcMethod: formik.values?.rateCalcMethod,
+                    dirtyField: DIRTYFIELD_RATE
+                  })
+                  formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
+                  formik.setFieldValue('amount', e.target.value)
+                }}
+                onClear={() => {
+                  formik.setFieldValue('amount', '')
+                }}
+                error={formik.touched.amount && Boolean(formik.errors.amount)}
+              />
             </Grid>
             <Grid item xs={6}>
               <CustomTextField
@@ -481,7 +413,6 @@ export default function PaymentOrdersForm({ recordId, window }) {
                 required
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
-                  await getMultiCurrencyFormData(formik.values.currencyId, newValue)
                 }}
                 onClear={() => formik.setFieldValue('date', null)}
                 readOnly={isClosed || isCancelled}
