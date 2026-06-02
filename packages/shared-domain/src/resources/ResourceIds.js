@@ -673,6 +673,7 @@ export const ResourceIds = {
   GLRetailInvoiceReturn: 54601,
   GLRetailPurchase: 54602,
   GLRetailPurchaseReturn: 54603,
+  POSInquiry: 54605,
   GLOutwardReturnSettlement: 36606,
   GLRemittanceReceiptVoucher: 36607,
   GLShipments: 50609,
