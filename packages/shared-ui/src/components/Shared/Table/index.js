@@ -1113,7 +1113,9 @@ const Table = ({
   const onReset = async () => {
     await deleteFromDB(storeName, tableName)
 
-    const defaultState = columnDefs.map(col => ({
+    gridApiRef.current?.columnApi?.resetColumnState()
+
+    const defaultState = props.columns.map(col => ({
       colId: col.field,
       width: col.width,
       pinned: null,
