@@ -105,11 +105,12 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
+              <CustomTextField
                 name='accountNo'
                 label={labels.accountNo}
                 value={formik.values.accountNo}
                 required
+                maxLength='20'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('accountNo', '')}
