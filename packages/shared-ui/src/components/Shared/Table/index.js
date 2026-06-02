@@ -71,6 +71,7 @@ const Table = ({
   const [menuAnchor, setMenuAnchor] = useState(null)
   const [selectedColId, setSelectedColId] = useState(null)
   const [hoveredTable, setHoveredTable] = useState(false)
+  const columnDefsRef = useRef(null)
 
   const { width } = useWindowDimensions()
 
@@ -992,8 +993,6 @@ const Table = ({
       checked,
       languageId
     ])
-
-  const columnDefsRef = useRef(null)
 
   useEffect(() => {
     if (!columnDefsRef.current) {
