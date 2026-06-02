@@ -100,7 +100,6 @@ const CashEnquiry = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}

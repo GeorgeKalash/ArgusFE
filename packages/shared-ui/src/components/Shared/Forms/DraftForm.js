@@ -545,7 +545,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {
@@ -591,6 +591,20 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   ]
 
   async function onClose() {
+    const metalGridWeight = (formik.values.metalGridData || []).reduce((sum, row) => {
+      return sum + (parseFloat(row?.totalWeight) || 0)
+    }, 0)
+    const headerWeight = parseFloat(formik.values.header?.weight) || 0
+
+    const hasWeightMismatch = parseFloat(metalGridWeight.toFixed(2)) !== parseFloat(headerWeight.toFixed(2))
+
+    if (hasWeightMismatch) {
+      stackError({
+        message: platformLabels.Recalculate
+      })
+      return
+    }
+
     const { serials, ...restValues } = formik.values
 
     await postRequest({
@@ -647,6 +661,12 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       }
     })
   }
+  const reCalculateWeight = () => {
+    const totals = calculateDraftTotals(formik.values.items)
+    formik.setFieldValue('header.weight', parseFloat(totals.weight).toFixed(2))
+
+    setReCal(true)
+  }
 
   const actions = [
     {
@@ -686,6 +706,12 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         })
       },
       disabled: !formik.values.header?.clientId || !formik.values.header?.date
+    },
+    {
+      key: 'Recalculate',
+      condition: true,
+      onClick: reCalculateWeight,
+      disabled: !editMode
     }
   ]
 
@@ -713,7 +739,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       recordId: pack.header.recordId || null,
       header: {
         ...pack.header,
-        plId: defplId,
         date : formatDateFromApi(pack.header?.date)
       },
       items: modifiedList,
@@ -759,10 +784,10 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
     const calculatedTotals = calculateDraftTotals(formik.values.items)
 
-    const amount = reCal ? calculatedTotals.amount : formik.values?.header.amount || 0
-    const weight = reCal ? calculatedTotals.weight : formik.values?.header.weight || 0
-    const subtotal = reCal ? calculatedTotals.subtotal.toFixed(2) : formik.values?.header.subtotal || 0
-    const vatAmount = reCal ? calculatedTotals.vatAmount : formik.values?.header.vatAmount || 0
+    const amount = reCal ? calculatedTotals.amount : formik.values?.header?.amount || 0
+    const weight = reCal ? calculatedTotals.weight : formik.values?.header?.weight || 0
+    const subtotal = reCal ? calculatedTotals.subtotal.toFixed(2) : formik.values?.header?.subtotal || 0
+    const vatAmount = reCal ? calculatedTotals.vatAmount : formik.values?.header?.vatAmount || 0
   
 
   useEffect(() => {
@@ -818,16 +843,8 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (!defplId)
-        stackError({
-          message: labels.noSelectedplId
-        })
-
+      if (recordId) await refetchForm(recordId)
       await loadTaxDetails()
-
-      if (recordId) {
-        await refetchForm(recordId)
-      }
     })()
   }, [])
 
@@ -1066,7 +1083,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                   form={formik}
                   required
                   readOnly={isClosed}
-                  displayFieldWidth={2}
+                  displayFieldWidth={5}
                   firstFieldWidth={3}
                   valueShow='clientRef'
                   secondValueShow='clientName'
@@ -1080,12 +1097,31 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                     { key: 'cgName', value: 'Client Group' }
                   ]}
                   onChange={async (_, newValue) => {
-                    formik.setFieldValue('header.clientName', newValue?.name || '')
-                    formik.setFieldValue('header.clientRef', newValue?.reference || '')
-                    formik.setFieldValue('header.accountId', newValue?.accountId || null)
-                    formik.setFieldValue('header.isVattable', newValue?.isSubjectToVAT || false)
-                    formik.setFieldValue('header.taxId', newValue?.taxId || null)
-                    formik.setFieldValue('header.clientId', newValue?.recordId || null)
+                    if (!newValue?.plId && !defplId && newValue?.recordId) {
+                      formik.setFieldValue('header.clientName', '')
+                      formik.setFieldValue('header.clientRef', null)
+                      formik.setFieldValue('header.clientId', null)
+
+                      stackError({
+                        message: labels.noPriceLevelDefined
+                      })
+
+                      return
+                    }
+
+                    formik.setValues({
+                      ...formik.values,
+                      header: {
+                        ...formik.values.header,
+                        clientName: newValue?.name || '',
+                        clientRef: newValue?.reference || '',
+                        accountId: newValue?.accountId || null,
+                        isVattable: newValue?.isSubjectToVAT || false,
+                        taxId: newValue?.taxId || null,
+                        plId: newValue?.plId || defplId || null,
+                        clientId: newValue?.recordId || null
+                      }
+                    })
                   }}
                   errorCheck={'header.clientId'}
                   secondFieldName={'header.clientName'}

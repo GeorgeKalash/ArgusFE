@@ -95,7 +95,6 @@ const LegalStatus = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           onEdit={edit}
           onDelete={del}
           pageSize={50}

@@ -122,7 +122,6 @@ const PeriodsTab = ({ store, labels, maxAccess, window }) => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          pageSize={50}
           onEdit={edit}
           onDelete={del}
           pagination={false}

@@ -912,7 +912,7 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
-  [ResourceIds.AttendanceScheduleFilter]: {
+  [ResourceIds.AttendanceSchedule]: {
     type: COMBOBOX,
     endpoint: TimeAttendanceRepository.AttendanceScheduleFilters.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId&_scId=0`,
@@ -923,9 +923,9 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.IndemnityAccuralsFilter]: {
+  [ResourceIds.LeaveTypes]: {
     type: COMBOBOX,
-    endpoint: LoanManagementRepository.IndemnityAccuralsFilters.qry,
+    endpoint: LoanManagementRepository.LeaveTypes.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -945,8 +945,12 @@ export const apiMappings = {
     endpoint: PayrollRepository.Payroll.qry,
     parameters: `_year=0&_salaryType=5&_status=0`,
     valueField: 'recordId',
-    displayField: ['reference'],
-    columnsInDropDown: [{ key: 'reference', value: 'Reference' }]
+    displayField: ['reference', 'fiscalYear', 'periodName'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'fiscalYear', value: 'Fiscal Year' },
+      { key: 'periodName', value: 'Period' }
+    ]
   },
   [ResourceIds.BankTransferFilter]: {
     type: COMBOBOX,

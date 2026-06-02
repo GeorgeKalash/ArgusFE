@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
@@ -14,23 +13,21 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import DocumentTypeDefaultForm from './form/DocumentTypeDefaultForm'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
-const CAadjustment = () => {
+const SalesTrxDefaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
-
   const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
-    const {
-      pagination: { _startAt = 0 }
-    } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: SaleRepository.DocumentTypeDefault.qry,
-      parameters: `_sortBy=reference&_functionId=${functionId}`
+      extension: SaleRepository.DocumentTypeDefault.page,
+      parameters: `_sortBy=reference&_functionId=${functionId}&_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -38,45 +35,51 @@ const CAadjustment = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    filterBy,
+    refetch,
+    labels,
     access,
-    invalidate,
-    refetch
+    paginationParameters,
+    invalidate
   } = useResourceQuery({
-    endpointId: SaleRepository.DocumentTypeDefault.qry,
+    queryFn: fetchGridData,
+    endpointId: SaleRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.DocumentTypeDefault,
-
     filter: {
-      filterFn: fetchGridData,
+      filterFn: fetchWithFilter,
       default: { functionId }
     }
   })
 
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   const columns = [
     {
       field: 'commitItems',
-      headerName: _labels.commitItems,
+      headerName: labels.commitItems,
       flex: 1
     },
     {
       field: 'dtName',
-      headerName: _labels.documentType,
+      headerName: labels.documentType,
       flex: 1
     },
 
     {
       field: 'plantName',
-      headerName: _labels.plant,
+      headerName: labels.plant,
       flex: 1
     },
     {
       field: 'siteRef',
-      headerName: _labels.siteRef,
+      headerName: labels.siteRef,
       flex: 1
     },
     {
       field: 'siteName',
-      headerName: _labels.site,
+      headerName: labels.site,
       flex: 1
     }
   ]
@@ -89,14 +92,14 @@ const CAadjustment = () => {
     stack({
       Component: DocumentTypeDefaultForm,
       props: {
-        labels: _labels,
+        labels,
         recordId: record?.dtId,
         maxAccess: access,
         functionId
       },
       width: 800,
       height: 600,
-      title: _labels.dtDefault
+      title: labels.dtDefault
     })
   }
 
@@ -118,22 +121,25 @@ const CAadjustment = () => {
     toast.success(platformLabels.Deleted)
   }
 
+  const reportName = functionId == SystemFunction.SalesReturn ? 'SADTD_2' : 'SADTD_1'
+  
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} reportName={reportName} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['dtId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
+          paginationParameters={paginationParameters}
           refetch={refetch}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
@@ -141,4 +147,4 @@ const CAadjustment = () => {
   )
 }
 
-export default CAadjustment
+export default SalesTrxDefaults

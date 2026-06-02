@@ -56,6 +56,8 @@ export default function FormShell({
 
   const { stack: stackError } = useError()
 
+  const dtId = form?.values?.dtId || form?.values?.header?.dtId
+
   useEffect(() => {
     if (!form?.values?.recordId) {
       return
@@ -405,6 +407,7 @@ export default function FormShell({
       onPrint={onPrint}
       fullSize={fullSize}
       reportSize={reportSize}
+      dtId={dtId}
     >
       {children}
     </Form>

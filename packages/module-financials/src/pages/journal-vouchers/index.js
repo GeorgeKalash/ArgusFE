@@ -1,10 +1,8 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
-import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
@@ -14,7 +12,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import { responsiveFontSizes } from '@material-ui/core'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const JournalVoucher = () => {
@@ -63,6 +60,11 @@ const JournalVoucher = () => {
 
   const columns = [
     {
+      field: 'dtRef',
+      headerName: _labels.documentType,
+      flex: 1
+    },
+    {
       field: 'reference',
       headerName: _labels.reference,
       flex: 1
@@ -81,8 +83,16 @@ const JournalVoucher = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
-    }
+    },
+    {
+      field: 'isVerified',
+      headerName: _labels.isVerified,
+      type: 'checkbox'
+    },
   ]
 
   const openForm = recordId => {
@@ -134,8 +144,8 @@ const JournalVoucher = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          refetch={refetch}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

@@ -126,6 +126,9 @@ const FoCastings = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -201,7 +204,6 @@ const FoCastings = () => {
           refetch={refetch}
           onDelete={delCAS}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

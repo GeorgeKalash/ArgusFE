@@ -26,10 +26,12 @@ export default function InboundTransp() {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: DeliveryRepository.InboundTransp.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
+    
+    return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithSearch({ qry }) {
@@ -100,6 +102,9 @@ export default function InboundTransp() {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {

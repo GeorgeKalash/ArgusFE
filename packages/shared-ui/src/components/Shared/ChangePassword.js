@@ -126,7 +126,7 @@ const ChangePassword = ({
               onChange={formik.handleChange}
               error={formik.touched.password && formik.errors.password}
               startIcons={ [ <div  className={inputs.iconButton}   >
-              <img  className={inputs.iconImage} src= {require('@argus/shared-ui/src/components/images/password/forgotPWD1.png').default.src}/>
+              <img  className={inputs.iconImage} src= {'/images/password/forgotPWD1.png'}/>
               </div>]}
               endIcons={ [ 
                 <IconButton className={inputs.iconButton} 

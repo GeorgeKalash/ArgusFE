@@ -98,6 +98,9 @@ const MaterialsAdjustment = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -168,7 +171,6 @@ const MaterialsAdjustment = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}

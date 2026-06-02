@@ -177,7 +177,6 @@ const ProductsWindow = ({
             gridData={gridData}
             rowId={['productId']}
             rowSelection='single'
-            isLoading={false}
             maxAccess={maxAccess}
             pagination={false}
             showCheckboxColumn={true}

@@ -103,6 +103,9 @@ const BatchTransfer = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]

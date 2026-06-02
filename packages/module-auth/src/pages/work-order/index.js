@@ -75,6 +75,9 @@ const WorkOrder = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {

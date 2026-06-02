@@ -12,6 +12,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import NewPassword from '@argus/shared-ui/src/components/Shared/NewPassword'
 import axios from 'axios'
 import { useRouter } from 'next/router'
+import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
 
 const ResetPassForm = ({ labels, username = '' }) => {
   const [score, setScore] = useState(0)
@@ -72,11 +73,14 @@ const ResetPassForm = ({ labels, username = '' }) => {
               onChange={formik.handleChange}
               error={formik.touched.code && formik.errors.code}
               startIcons={[
-                <img
-                  key='forgot-icon'
-                  src={require('@argus/shared-ui/src/components/images/password/forgotPWD1.png').default.src}
-                  alt='icon'
-                />
+                <div key='forgot-icon'>
+                  <img
+                    key='forgot-icon'
+                    src='/images/password/forgotPWD1.png'
+                    alt='forgot-icon'
+                    class={inputs.iconImage}
+                  />
+                </div>
               ]}
             />
           </Grid>

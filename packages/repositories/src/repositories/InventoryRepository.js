@@ -10,6 +10,7 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotIT',
     snapshot3: service + 'snapshotIT3',
     snapshot4: service + 'snapshotIT4',
+    snapshot5: service + 'snapshotIT5',
     get: service + 'getIT',
     quickView: service + 'quickViewIT',
     clone: service + 'cloneIT'
@@ -143,7 +144,8 @@ export const InventoryRepository = {
   },
   ItemProduction: {
     get: service + 'getMFR',
-    set: service + 'setMFR'
+    getPack: service + 'getPackMFR',
+    set: service + 'setPackMFR',
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
@@ -151,6 +153,7 @@ export const InventoryRepository = {
   MaterialsTransfer: {
     page: service + 'pageTFR',
     snapshot: service + 'snapshotTFR',
+    snapshot2: service + 'snapshotTFR2',
     get: service + 'getTFR',
     get2: service + 'getTFR2',
     set2: service + 'set2TFR',
@@ -267,7 +270,8 @@ export const InventoryRepository = {
     get2: service + 'get2SRL',
     set: service + 'setSRL',
     get: service + 'getSRL',
-    del: service + 'delSRL'
+    del: service + 'delSRL',
+    clone: service + 'cloneSerial'
   },
   MaterialTransferSerial: {
     qry: service + 'qryTFS'
@@ -367,5 +371,27 @@ export const InventoryRepository = {
   QtyOpeningSerials: {
     qry: service + 'qryOQS',
     set2: service + 'set2OQS'
+  },
+  DimensionGroup: {
+    qry: service + 'qryDIG',
+    set2: service + 'set2DIG',
+    del: service + 'delDIG',
+    page: service + 'pageDIG',
+    get2: service + 'get2DIG',
+    get: service + 'getDIG'
+  },
+  Dimensions: {
+    qry: service + 'qryDIM',
+    set: service + 'setDIM',
+    get: service + 'getDIM',
+    del: service + 'delDIM',
+    page: service + 'pageDIM',
+    qry: service + 'qryDIM'
+  },
+  DimensionGroupElement: {
+    qry: service + 'qryDIGE',
+  },
+  ItemRawMaterial: {
+    qry: service + 'qryIRM',
   }
 }

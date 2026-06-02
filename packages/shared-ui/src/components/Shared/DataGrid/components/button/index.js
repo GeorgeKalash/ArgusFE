@@ -18,7 +18,7 @@ function DataGridButton({ data, column: { props, field, ...column }, update, upd
         disabled={checkCondition?.disabled}
       >
         <img
-          src={imgSrc || require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src}
+          src={imgSrc || '/images/buttonsIcons/popup.png'}
           className={styles.gridButtonImage}
           alt='popup'
         />

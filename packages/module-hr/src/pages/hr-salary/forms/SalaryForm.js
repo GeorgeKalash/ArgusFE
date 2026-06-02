@@ -25,7 +25,6 @@ export default function SalaryForm({ employeeInfo, maxAccess, labels }) {
 
   const {
     query: { data },
-    refetch,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -194,7 +193,6 @@ export default function SalaryForm({ employeeInfo, maxAccess, labels }) {
           onEdit={edit}
           onDelete={del}
           pagination={false}
-          refetch={refetch}
           maxAccess={maxAccess}
         />
       </Grow>

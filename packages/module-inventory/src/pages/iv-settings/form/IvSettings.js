@@ -13,13 +13,15 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 const IvSettings = ({ _labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
-  const { postRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const arrayAllow = ['itemSearchStyle', 'itemSearchFields', 'iv_minSerialSize', 'minItemSearchTextSize']
+  const arrayAllow = ['itemSearchStyle', 'itemSearchFields', 'iv_minSerialSize', 'minItemSearchTextSize','iv_clone_srl_nra', 'iv_dmgId']
 
   const { formik } = useForm({
     maxAccess: access,
@@ -43,14 +45,34 @@ const IvSettings = ({ _labels, access }) => {
     }
   })
 
+  async function fillNbInfo(nraId){
+    if (!nraId) return
+
+    const res = await getRequest({
+      extension: SystemRepository.NumberRange.get,
+      parameters: `_recordId=${nraId}`
+    })
+
+    formik.setFieldValue('nraRef', res?.record?.reference || '')
+    formik.setFieldValue('nraDescription', res?.record?.description || '')
+  }
+
   useEffect(() => {
+  ;(async function () {
     const myObject = {}
+
     systemDefaults?.list?.forEach(obj => {
       if (arrayAllow.includes(obj.key)) {
-        myObject[obj.key] = obj.value ? parseFloat(obj.value) : null
-        formik.setFieldValue(obj.key, myObject[obj.key])
+        const parsedValue = obj.value ? parseFloat(obj.value) : null
+        myObject[obj.key] = parsedValue
+        formik.setFieldValue(obj.key, parsedValue)
+
+        if (obj.key === 'iv_clone_srl_nra' && parsedValue) {
+          fillNbInfo(parsedValue)
+        }
       }
     })
+  })()
   }, [systemDefaults])
 
   return (
@@ -105,6 +127,42 @@ const IvSettings = ({ _labels, access }) => {
                 required
                 onClear={() => formik.setFieldValue('minItemSearchTextSize', '')}
                 error={formik.touched.minItemSearchTextSize && Boolean(formik.errors.minItemSearchTextSize)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={SystemRepository.NumberRange.snapshot}
+                form={formik}
+                valueField='reference'
+                displayField='description'
+                name='nraRef'
+                label={_labels.serialNbRange}
+                valueShow='nraRef'
+                secondValueShow='nraDescription'
+                displayFieldWidth={2}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'description', value: 'Description' }
+                ]}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('iv_clone_srl_nra', newValue?.recordId || null )
+                  formik.setFieldValue('nraRef', newValue?.reference || '')
+                  formik.setFieldValue('nraDescription', newValue?.description || '')
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+             <ResourceComboBox
+                endpointId={InventoryRepository.DimensionGroup.qry}
+                name='iv_dmgId'
+                label={_labels.dimensionGroup}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={access}
+                onChange={(_, newValue) => formik.setFieldValue('iv_dmgId', newValue?.recordId || null)}
+                onClear={() => formik.setFieldValue('iv_dmgId', null)}
+                error={formik.touched.iv_dmgId && Boolean(formik.errors.iv_dmgId)}
               />
             </Grid>
           </Grid>

@@ -45,6 +45,8 @@ import { LockedScreensProvider } from '@argus/shared-providers/src/providers/Loc
 import GlobalErrorHandlers from '@argus/shared-providers/src/providers/GlobalErrorHandlers'
 import RootBoundary from '@argus/shared-ui/src/components/Shared/RootBoundary'
 import { DefaultsProvider } from '@argus/shared-providers/src/providers/DefaultsContext'
+import 'mathlive'
+import { LayoutProvider } from '@argus/shared-providers/src/providers/LayoutContext'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -107,6 +109,7 @@ const App = props => {
   const authGuard = Component.authGuard ?? true
   const guestGuard = Component.guestGuard ?? false
   const aclAbilities = Component.acl ?? defaultACLObj
+  const hasNavbar = Component.hasNavbar ?? true
 
   return (
     <Provider store={store}>
@@ -143,52 +146,56 @@ const App = props => {
                                               authGuard={authGuard}
                                             >
                                               <PrimeReactProvider>
-                                                {getLayout(
-                                                  <RootBoundary
-                                                    resetKey={
-                                                      typeof window !== 'undefined' ? window.location.pathname : ''
-                                                    }
-                                                  >
-                                                    <ErrorProvider
-                                                      key={
+                                                <LayoutProvider value={{ hasNavbar }}>
+                                                  {getLayout(
+                                                    <RootBoundary
+                                                      resetKey={
                                                         typeof window !== 'undefined' ? window.location.pathname : ''
                                                       }
                                                     >
-                                                      <RequestsProvider
-                                                        showLoading
+                                                      <ErrorProvider
                                                         key={
                                                           typeof window !== 'undefined' ? window.location.pathname : ''
                                                         }
                                                       >
-                                                        <CommonProvider
+                                                        <RequestsProvider
+                                                          showLoading
                                                           key={
                                                             typeof window !== 'undefined'
                                                               ? window.location.pathname
                                                               : ''
                                                           }
                                                         >
-                                                          <ControlProvider
+                                                          <CommonProvider
                                                             key={
                                                               typeof window !== 'undefined'
                                                                 ? window.location.pathname
                                                                 : ''
                                                             }
                                                           >
-                                                            <WindowProvider
+                                                            <ControlProvider
                                                               key={
                                                                 typeof window !== 'undefined'
                                                                   ? window.location.pathname
                                                                   : ''
                                                               }
                                                             >
-                                                              <Component {...pageProps} />
-                                                            </WindowProvider>
-                                                          </ControlProvider>
-                                                        </CommonProvider>
-                                                      </RequestsProvider>
-                                                    </ErrorProvider>
-                                                  </RootBoundary>
-                                                )}
+                                                              <WindowProvider
+                                                                key={
+                                                                  typeof window !== 'undefined'
+                                                                    ? window.location.pathname
+                                                                    : ''
+                                                                }
+                                                              >
+                                                                <Component {...pageProps} />
+                                                              </WindowProvider>
+                                                            </ControlProvider>
+                                                          </CommonProvider>
+                                                        </RequestsProvider>
+                                                      </ErrorProvider>
+                                                    </RootBoundary>
+                                                  )}
+                                                </LayoutProvider>
                                               </PrimeReactProvider>
                                             </AclGuard>
                                           </Guard>

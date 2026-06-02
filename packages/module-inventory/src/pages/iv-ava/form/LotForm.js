@@ -104,8 +104,6 @@ const LotForm = ({ labels, obj }) => {
           columns={columns}
           gridData={data}
           rowId={['lotId']}
-          isLoading={false}
-          pageSize={50}
           pagination={false}
           maxAccess={maxAccess}
         />

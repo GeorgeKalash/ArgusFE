@@ -18,7 +18,7 @@ const FallbackSpinner = ({ sx }) => {
     >
       <Box
         component="img"
-        src= {require('@argus/shared-ui/src/components/images/logos/geryA.png').default.src}
+        src='/images/logos/geryA.png'
         sx={{
           height: '50px',
           width: 'auto', 

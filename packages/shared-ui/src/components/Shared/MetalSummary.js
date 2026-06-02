@@ -132,7 +132,6 @@ const MetalSummary = ({ handleMetalClick, window }) => {
           columns={columns}
           gridData={gridData}
           rowId={['metalRef']}
-          isLoading={!gridData}
           maxAccess={access}
           pagination={false}
         />

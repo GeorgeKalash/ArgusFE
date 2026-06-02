@@ -96,6 +96,9 @@ const CAadjustment = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -156,7 +159,6 @@ const CAadjustment = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           refetch={refetch}

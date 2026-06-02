@@ -111,7 +111,6 @@ const Agent = () => {
           refetch={refetch}
           paginationType='api'
           paginationParameters={paginationParameters}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />

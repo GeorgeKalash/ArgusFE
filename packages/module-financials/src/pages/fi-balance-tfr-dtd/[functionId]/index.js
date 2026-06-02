@@ -114,7 +114,6 @@ const BalanceTransferDTD = () => {
           rowId={['dtId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           refetch={refetch}

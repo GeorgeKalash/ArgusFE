@@ -52,5 +52,9 @@ export const PointofSaleRepository = {
   },
   PUItems: {
     snapshot: service + 'snapshotIT'
+  },
+  POSInquiry: {
+    page303: service + 'page303',
+    qry304: service + 'qry304'
   }
 }
