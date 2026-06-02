@@ -523,19 +523,19 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
         {items?.map(item => {
           if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {
-            return <GetLookup key={item.fieldId} formik={formik} field={item} />
+            return <GetLookup key={item.id} formik={formik} field={item} />
           } else if (item.controlType === 5 && item.apiDetails?.type === COMBOBOX) {
-            return <GetComboBox key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
+            return <GetComboBox key={item.id} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 4) {
-            return <GetDate key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
+            return <GetDate key={item.id} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 1) {
-            return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
+            return <GetTextField key={item.id} formik={formik} field={item} apiDetails={item.apiDetails} />
           } else if (item.controlType === 2) {
-            return <GetNumberField key={item.fieldId} formik={formik} field={item} decimalScale={2} />
+            return <GetNumberField key={item.id} formik={formik} field={item} decimalScale={2} />
           } else if (item.controlType === 3) {
-            return <GetNumberField key={item.fieldId} formik={formik} field={item} decimalScale={0} />
+            return <GetNumberField key={item.id} formik={formik} field={item} decimalScale={0} />
           } else if (item.controlType === 7) {
-            return <GetDateTimePicker key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
+            return <GetDateTimePicker key={item.id} formik={formik} field={item} rpbParams={rpbParams} />
           }
         })}
       </Grid>
