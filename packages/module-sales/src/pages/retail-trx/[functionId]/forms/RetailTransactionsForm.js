@@ -35,7 +35,7 @@ import {
   MDTYPE_PCT,
   MDTYPE_AMOUNT
 } from '@argus/shared-utils/src/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
+import { calcVatAmountPerTaxDetail, getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
 import { getFooterTotals, getSubtotal } from '@argus/shared-utils/src/utils/FooterCalculator'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -336,6 +336,11 @@ export default function RetailTransactionsForm({
 
     const taxDetailsInfo = await getTaxDetails(taxId)
 
+    const itemTaxDetails =  taxDetailsInfo?.length ? taxDetailsInfo.map(tax => ({
+      ...tax,
+      taxScheduleAmount: tax.amount ?? 0
+    })) : null
+
     const result = {
       id: row?.id,
       barcode: row?.barcode,
@@ -358,12 +363,9 @@ export default function RetailTransactionsForm({
       mdAmount: 0,
       mdValue: 0,
       taxId,
-      taxDetails: taxDetailsInfo ? taxDetailsInfo.map(tax => ({
-        ...tax,
-        taxScheduleAmount: tax.amount ?? 0
-      })) : null
-
+      taxDetails: itemTaxDetails
     }
+
     let finalResult = result
     if (result?.basePrice) finalResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
     if (result?.unitPrice) {
@@ -555,9 +557,18 @@ export default function RetailTransactionsForm({
 
     const modifiedItemsList = await Promise.all(
       retailTrxItems?.map(async (item, index) => { 
-        const itemTaxDetails = taxDetails.filter(
-          tax => tax?.taxId === item?.taxId
-        ).map(tax => ({
+       const itemTaxDetails = taxDetails
+        .filter(
+          (tax, index, arr) =>
+            tax?.taxId === item?.taxId &&
+            index ===
+              arr.findIndex(
+                t =>
+                  t.taxId === tax.taxId &&
+                  t.seqNo === tax.seqNo
+              )
+        )
+        .map(tax => ({
           ...tax,
           taxScheduleAmount: tax.amount ?? 0
         }))
@@ -970,12 +981,13 @@ export default function RetailTransactionsForm({
       },
       label: labels.tax,
       onClick: (_, row) => {
+        const modifiedTaxDetails = buildCalculatedTaxDetails(row, row?.taxDetails) 
         stack({
           Component: TaxDetails,
           props: {
             taxId: row?.taxId,
             obj: row,
-            taxes: row?.taxDetails || []
+            taxes: editMode ? modifiedTaxDetails : []
           }
         })
       }
@@ -1137,6 +1149,38 @@ export default function RetailTransactionsForm({
     })
   }
 
+  function buildCalculatedTaxDetails(row, taxDetailsList = []) {
+    return (taxDetailsList || []).map(td => {
+      const singleTaxDetail = {
+        ...td,
+        taxScheduleAmount: td.amount || 0
+      }
+      
+      const calculatedAmount = calcVatAmountPerTaxDetail(
+        {
+          priceType: row?.priceType,
+          basePrice: row?.basePrice,
+          unitPrice: parseFloat(row?.unitPrice || 0),
+          qty: parseFloat(row?.qty || 0),
+          weight: parseFloat(row?.weight || 0),
+          extendedPrice: parseFloat(row?.extendedPrice || 0),
+          baseLaborPrice: row?.baseLaborPrice,
+          vatAmount: parseFloat(row?.vatAmount || 0),
+          tdPct: 0,
+          taxDetails: singleTaxDetail
+        },
+        singleTaxDetail
+      )
+
+      return {
+        ...td,
+        taxSeqNo: td.seqNo,
+        taxScheduleAmount: td.amount || 0,
+        amount: parseFloat(calculatedAmount || 0)
+      }
+    })
+  }
+
   async function getPosInfo() {
     if (!posUser?.posId) return
 
@@ -1242,16 +1286,16 @@ export default function RetailTransactionsForm({
     const modifiedItemsList = await Promise.all(
       retailTrxItems?.items?.map(async (item, index) => {
         const taxDetails = await getTaxDetails(item?.taxId)
+        const itemTaxDetails = (taxDetails || []).map(tax => ({
+          ...tax,
+          taxScheduleAmount: tax.amount ?? 0
+        }))
 
         return {
           ...item,
           id: index + 1,
           priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
-          taxDetails: (taxDetails || []).map(tax => ({
-            ...tax,
-            taxScheduleAmount: tax.amount ?? 0
-          }))
-
+          taxDetails: itemTaxDetails
         }
       })
     )
