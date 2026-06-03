@@ -29,12 +29,23 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 
-export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
+export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+
+  
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.ReceiptVoucher,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.receiptVoucher, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ReceiptVoucher,
@@ -59,20 +70,19 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       reference: '',
       accountId: null,
       date: new Date(),
-      currencyId,
-      currencyName: '',
+      currencyId: header?.currencyId || currencyId,
       dtId: null,
       spId: null,
       sptId: null,
       dgId: '',
-      amount: '',
+      amount: header?.amount || '',
       baseAmount: '',
       checkNo: null,
-      notes: '',
+      notes: header?.reference || '',
       oDocId: '',
       printStatus: '',
       status: 1,
-      paymentMethod: '1',
+      paymentMethod: 1,
       cashAccountId: null,
       plantId: plantId,
       exRate: 1.0,
@@ -89,7 +99,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       cashAccountId: yup.string().required(),
       date: yup.date().required(),
       amount: yup.string().required(),
-      paymentMethod: yup.string().required(),
+      paymentMethod: yup.number().required(),
       checkNo: yup
         .string()
         .nullable()
@@ -120,11 +130,11 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     }
   })
 
-  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
-    if (currencyId && date && rateType) {
+  async function getMultiCurrencyFormData(currencyId, date, amount) {
+    if (currencyId && date) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${rateType}`
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${RateDivision.FINANCIALS}`
       })
 
       const updatedRateRow = getRate({
@@ -196,20 +206,49 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     formik.setFieldValue('cashAccountName', cashAccountResult?.name || '')
   }
 
+  async function getBalance (accId, currencyId) {
+    if (!accId || !currencyId) return 
+
+    const res = await getRequest({
+      extension: FinancialRepository.AccountCreditBalance.get,
+      parameters: `_accountId=${accId}&_currencyId=${currencyId}`
+    })
+
+    return res?.record?.balance
+  }
+
   useEffect(() => {
     ;(async function () {
-      if (recordId) await getData(recordId)
-      else getCashAccount(defaultAccountId)
+      if (recordId) {
+        await getData(recordId)
+      } else {
+        getCashAccount(defaultAccountId)
+
+        if (header?.clientId) {
+          const { record: client } = await getRequest({
+            extension: SaleRepository.Client.get,
+            parameters: `_recordId=${header.clientId}`
+          })
+
+          formik.setFieldValue('accountId', client?.accountId || null)
+          formik.setFieldValue('accountRef', client?.accountRef || '')
+          formik.setFieldValue('accountName', client?.accountName || '')
+        }
+        if (header?.currencyId) await getMultiCurrencyFormData(header?.currencyId, formik.values.date)
+      }
     })()
   }, [])
 
   async function getData(recordId) {
     if (recordId) {
       const res = await getRequest({
-        extension: FinancialRepository.ReceiptVouchers.get,
+        extension: FinancialRepository.ReceiptVouchers.get2,
         parameters: `_recordId=${recordId}`
       })
-      formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
+      formik.setValues({ ...res.record.receiptVoucher, 
+        date: formatDateFromApi(res.record.receiptVoucher.date),
+        accountBalance: res.record?.accountBalance?.balance || 0
+      })
     }
   }
 
@@ -376,8 +415,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 displayField='name'
                 values={formik.values}
                 onChange={async (_, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
+                  
+                  formik.setFieldValue('dtId', newValue?.recordId || null)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}
@@ -389,7 +429,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 label={labels.date}
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
-                  await getMultiCurrencyFormData(formik.values.currencyId, newValue, RateDivision.FINANCIALS)
+                  await getMultiCurrencyFormData(formik.values.currencyId, newValue)
                 }}
                 autoFocus={!editMode}
                 readOnly={isCancelled || isPosted}
@@ -453,7 +493,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 ]}
                 displayFieldWidth={4}
                 filter={{ isInactive: val => val !== true }}
-                onChange={(_, newValue) => {
+                onChange={async (_, newValue) => {
+                  const balance = await getBalance(newValue?.recordId, formik.values.currencyId)
+                  formik.setFieldValue('accountBalance', balance || 0)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('spId', newValue?.spId || '')
@@ -578,7 +620,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={8}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={FinancialRepository.ReceiptVouchers.pack}
                     reducer={response => response?.record?.currencies}
@@ -596,14 +638,16 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
-                      await getMultiCurrencyFormData(newValue?.recordId, formik.values.date, RateDivision.FINANCIALS)
-                      formik.setFieldValue('currencyId', newValue?.recordId)
+                      await getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
+                      const balance = await getBalance(formik.values.accountId, newValue?.recordId)
+                      formik.setFieldValue('accountBalance', balance || 0)
                       formik.setFieldValue('currencyName', newValue?.name)
+                      formik.setFieldValue('currencyId', newValue?.recordId)
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={1}>
                   <CustomButton
                     onClick={() => openMCRForm(formik.values)}
                     image='popup.png'
@@ -612,6 +656,15 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                       !formik.values.currencyId ||
                       formik.values.currencyId === currencyId
                     }
+                  />
+                </Grid>
+                <Grid item xs={5}>
+                  <CustomNumberField
+                    name='accountBalance'
+                    label={labels.balance}
+                    value={formik.values.accountBalance}
+                    readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
@@ -720,3 +773,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     </FormShell>
   )
 }
+
+FIReceiptVoucherForm.width = 1100
+FIReceiptVoucherForm.height = 700

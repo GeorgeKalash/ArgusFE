@@ -40,6 +40,10 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const passwordExpiryDays = systemDefaults?.list?.find(({ key }) => key === 'passwordExpiryDays')?.value
   const { config } = useClientConfig()
 
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.Users.page
+  })
+
   const { formik } = useForm({
     maxAccess,
     initialValues: {
@@ -158,10 +162,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
 
     return shuffledString.toUpperCase()
   }
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.Users.qry
-  })
 
   const checkFieldDirect = async email => {
     try {
