@@ -202,6 +202,19 @@ const formatTimeToApi = time => {
   })
 }
 
+// Format date as 'yyyymmdd'
+const formatDateToDayId = date => {
+  if (!date) return null
+
+  const d = new Date(date)
+
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+
+  return `${year}${month}${day}`
+}
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -211,6 +224,7 @@ export {
   formatDateFromApiInline,
   getTimeInTimeZone,
   formatDate,
+  formatDateToDayId,
   formatDateTimeDefault,
   formatDateFromISO,
   formatDateToISO,
