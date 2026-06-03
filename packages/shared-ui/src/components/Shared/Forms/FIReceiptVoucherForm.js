@@ -206,6 +206,17 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
     formik.setFieldValue('cashAccountName', cashAccountResult?.name || '')
   }
 
+  async function getBalance (accId, currencyId) {
+    if (!accId || !currencyId) return 
+
+    const res = await getRequest({
+      extension: FinancialRepository.AccountCreditBalance.get,
+      parameters: `_accountId=${accId}&_currencyId=${currencyId}`
+    })
+
+    return res?.record?.balance
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -231,10 +242,13 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
   async function getData(recordId) {
     if (recordId) {
       const res = await getRequest({
-        extension: FinancialRepository.ReceiptVouchers.get,
+        extension: FinancialRepository.ReceiptVouchers.get2,
         parameters: `_recordId=${recordId}`
       })
-      formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
+      formik.setValues({ ...res.record.receiptVoucher, 
+        date: formatDateFromApi(res.record.receiptVoucher.date),
+        accountBalance: res.record?.accountBalance?.balance || 0
+      })
     }
   }
 
@@ -479,7 +493,9 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 ]}
                 displayFieldWidth={4}
                 filter={{ isInactive: val => val !== true }}
-                onChange={(_, newValue) => {
+                onChange={async (_, newValue) => {
+                  const balance = await getBalance(newValue?.recordId, formik.values.currencyId)
+                  formik.setFieldValue('accountBalance', balance || 0)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('spId', newValue?.spId || '')
@@ -604,7 +620,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={8}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={FinancialRepository.ReceiptVouchers.pack}
                     reducer={response => response?.record?.currencies}
@@ -623,13 +639,15 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       await getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
-                      formik.setFieldValue('currencyId', newValue?.recordId)
+                      const balance = await getBalance(formik.values.accountId, newValue?.recordId)
+                      formik.setFieldValue('accountBalance', balance || 0)
                       formik.setFieldValue('currencyName', newValue?.name)
+                      formik.setFieldValue('currencyId', newValue?.recordId)
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={1}>
                   <CustomButton
                     onClick={() => openMCRForm(formik.values)}
                     image='popup.png'
@@ -638,6 +656,15 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                       !formik.values.currencyId ||
                       formik.values.currencyId === currencyId
                     }
+                  />
+                </Grid>
+                <Grid item xs={5}>
+                  <CustomNumberField
+                    name='accountBalance'
+                    label={labels.balance}
+                    value={formik.values.accountBalance}
+                    readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
