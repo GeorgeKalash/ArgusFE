@@ -203,7 +203,7 @@ const formatTimeToApi = time => {
 }
 
 // Format date as 'yyyymmdd'
-const formatDateToDayId = date => {
+const formatDateToYYYYMMDD = date => {
   if (!date) return null
 
   const d = new Date(date)
@@ -215,6 +215,15 @@ const formatDateToDayId = date => {
   return `${year}${month}${day}`
 }
 
+// Format date as 'yyyy/mm/dd'
+const formatDateToSlashDate = dateStr => {
+  if (!dateStr) return null
+
+  const value = String(dateStr)
+
+  return `${value.substring(0, 4)}/${value.substring(4, 6)}/${value.substring(6, 8)}`
+}
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -224,7 +233,8 @@ export {
   formatDateFromApiInline,
   getTimeInTimeZone,
   formatDate,
-  formatDateToDayId,
+  formatDateToYYYYMMDD,
+  formatDateToSlashDate,
   formatDateTimeDefault,
   formatDateFromISO,
   formatDateToISO,

@@ -9,7 +9,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { formatDateToDayId } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateToSlashDate, formatDateToYYYYMMDD } from '@argus/shared-domain/src/lib/date-helper'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
@@ -19,16 +19,8 @@ export default function ExchangeRatesGridForm({ labels, maxAccess, store }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: MultiCurrencyRepository.ExchangeRates.page
+    endpointId: MultiCurrencyRepository.ExchangeTable.page
   })
-
-  const formatDate = dateStr => {
-    if (!dateStr) return null
-
-    const value = String(dateStr)
-
-    return `${value.substring(0, 4)}/${value.substring(4, 6)}/${value.substring(6, 8)}`
-  }
 
   const conditions = {
     dayId: row => row?.dayId,
@@ -62,7 +54,7 @@ export default function ExchangeRatesGridForm({ labels, maxAccess, store }) {
             ...row,
             exId: recordId,
             seqNo: index + 1,
-            dayId: formatDateToDayId(row.dayId),
+            dayId: formatDateToYYYYMMDD(row.dayId),
           }))
         })
       })
@@ -105,7 +97,7 @@ export default function ExchangeRatesGridForm({ labels, maxAccess, store }) {
             ...row,
             id: index + 1,
             exId: recordId,
-            dayId: row.dayId ? new Date(formatDate(row.dayId)) : null
+            dayId: row.dayId ? new Date(formatDateToSlashDate(row.dayId)) : null
           })) : formik.initialValues.rows
         })
       })()
