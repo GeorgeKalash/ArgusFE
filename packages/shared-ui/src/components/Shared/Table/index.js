@@ -71,7 +71,6 @@ const Table = ({
   const [menuAnchor, setMenuAnchor] = useState(null)
   const [selectedColId, setSelectedColId] = useState(null)
   const [hoveredTable, setHoveredTable] = useState(false)
-  const columnDefsRef = useRef(null)
 
   const { width } = useWindowDimensions()
 
@@ -85,7 +84,8 @@ const Table = ({
   const badgeFont = Math.max(10, Math.round(rowHeight * 0.33));
   const badgeRadius = Math.round(badgeHeight / 3);
 
-  const columns = props?.columns
+  const columns = useMemo(() => {
+  return props?.columns
     .filter(
       ({ field }) =>
         accessLevel({
@@ -249,7 +249,12 @@ const Table = ({
           fontWeight: params.data?.isBold ? 'bold' : 'normal'
         })
       }
-    })
+    }
+  )}, [
+    props?.columns,
+    languageId,
+    disableSorting
+  ])
 
   function dateComparator(date1, date2) {
     if (date1 == null && date2 == null) return 0
@@ -275,7 +280,11 @@ const Table = ({
 
     return match && match.accessLevel === ControlAccessLevel.Hidden
   }
-  const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
+  const filteredColumns = useMemo(
+    () => columns.filter(column => !shouldRemoveColumn(column)),
+    [columns, columnsAccess]
+  )
+
 
   useEffect(() => {
     const areAllValuesTrue =
@@ -819,7 +828,7 @@ const Table = ({
     enabled: !!tableName
   })
 
-  const checkboxColumn = {
+  const checkboxColumn = useMemo(() => ({
     headerName: '',
     field: 'checked',
     flex: checkboxFlex,
@@ -848,10 +857,11 @@ const Table = ({
         />
       ),
     suppressMenu: true
-  }
+  }), [checked, showSelectAll, rowSelection])
 
   const columnDefs = useMemo(() => {
     return [
+      ...(showCheckboxColumn ? [checkboxColumn] : []),
       ...filteredColumns.map(column => {
         const isLinkedColumn = column.type === 'link' || !!column.linkOpen
 
@@ -988,16 +998,10 @@ const Table = ({
       filteredColumns,
       additionalWidth,
       languageId,
-      tableSettings
+      tableSettings,
+      checkboxColumn,
+      showCheckboxColumn
     ])
-
-  const dataColumnsRef = useRef(null)
-
-  useEffect(() => {
-    if (!dataColumnsRef.current) {
-      dataColumnsRef.current = columnDefs
-    }
-  }, [columnDefs])
 
   const gridOptions = useMemo(
     () => ({
@@ -1011,7 +1015,6 @@ const Table = ({
     }),
     [highlightRow]
   )
-
 
   useEffect(() => {
     if (!tableSettings || !gridApiRef.current?.columnApi) return
@@ -1155,18 +1158,18 @@ const Table = ({
   }
 
 
-  const state = gridApiRef.current?.columnApi?.getColumnState?.() || []
+  const isLastUnpinnedColumn = useMemo(() => {
+    const state = gridApiRef.current?.columnApi?.getColumnState?.() || []
 
-  const unpinnedColumns = state.filter(col => !col.pinned)
+    const unpinnedColumns = state.filter(col => !col.pinned)
 
-  const isLastUnpinnedColumn = unpinnedColumns.length === 1 && unpinnedColumns[0].colId === selectedColId?.colId
+    return (
+      unpinnedColumns.length === 1 &&
+      unpinnedColumns[0]?.colId === selectedColId?.colId
+    )
+  }, [selectedColId])
 
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
-
-  const gridColumns = [
-    ...(showCheckboxColumn ? [checkboxColumn] : []),
-    ...(dataColumnsRef.current || columnDefs)
-  ]
 
   return (
     <VertLayout>
@@ -1200,7 +1203,7 @@ const Table = ({
             enableClipboard={true}
             ensureDomOrder={true}
             enableRangeSelection={true}
-            columnDefs={gridColumns}
+            columnDefs={columnDefs}
             maintainColumnOrder={true}
             domLayout={domLayout}
             {...(hasRowId && {
