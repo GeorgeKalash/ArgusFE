@@ -358,7 +358,11 @@ export default function RetailTransactionsForm({
       mdAmount: 0,
       mdValue: 0,
       taxId,
-      taxDetails: taxDetailsInfo || null
+      taxDetails: taxDetailsInfo ? taxDetailsInfo.map(tax => ({
+        ...tax,
+        taxScheduleAmount: tax.amount ?? 0
+      })) : null
+
     }
     let finalResult = result
     if (result?.basePrice) finalResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
@@ -546,11 +550,17 @@ export default function RetailTransactionsForm({
     const retailTrxHeader = retailTrxPack?.header || {}
     const retailTrxItems = retailTrxPack?.items || []
     const retailTrxCash = retailTrxPack?.cash || []
+    const taxDetails =  retailTrxPack?.taxDetails || []
     const addressObj = await getAddress(retailTrxHeader?.addressId || null)
 
     const modifiedItemsList = await Promise.all(
-      retailTrxItems?.map(async (item, index) => {
-        const taxDetails = await getTaxDetails(item?.taxId)
+      retailTrxItems?.map(async (item, index) => { 
+        const itemTaxDetails = taxDetails.filter(
+          tax => tax?.taxId === item?.taxId
+        ).map(tax => ({
+          ...tax,
+          taxScheduleAmount: tax.amount ?? 0
+        }))
 
         return {
           ...item,
@@ -560,7 +570,7 @@ export default function RetailTransactionsForm({
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
           totPricePerG: getTotPricePerG(retailTrxHeader, item, DIRTYFIELD_BASE_PRICE),
-          taxDetails
+          taxDetails: itemTaxDetails
         }
       })
     )
@@ -964,7 +974,8 @@ export default function RetailTransactionsForm({
           Component: TaxDetails,
           props: {
             taxId: row?.taxId,
-            obj: row
+            obj: row,
+            taxes: row?.taxDetails || []
           }
         })
       }
@@ -1236,7 +1247,11 @@ export default function RetailTransactionsForm({
           ...item,
           id: index + 1,
           priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
-          taxDetails
+          taxDetails: (taxDetails || []).map(tax => ({
+            ...tax,
+            taxScheduleAmount: tax.amount ?? 0
+          }))
+
         }
       })
     )
