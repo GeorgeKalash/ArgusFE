@@ -819,42 +819,39 @@ const Table = ({
     enabled: !!tableName
   })
 
+  const checkboxColumn = {
+    headerName: '',
+    field: 'checked',
+    flex: checkboxFlex,
+    width: 70,
+    cellRenderer: checkboxCellRenderer,
+    headerComponent: params =>
+      rowSelection !== 'single' &&
+      showSelectAll && (
+        <Checkbox
+          checked={checked}
+          disabled={props?.disableCheckBox}
+          onChange={e => {
+              e.stopPropagation()
+
+            const colId = params.column.getColId()
+            params.api.ensureColumnVisible(colId)
+
+            const root = params.api.getGui && params.api.getGui()
+            const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
+            const cell = headerRoot && headerRoot.querySelector('.ag-header-cell[col-id="' + colId + '"]')
+            const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
+            focusable && focusable.focus && focusable.focus()
+            selectAll(params, e)
+          }}
+          className={'fullSizeCheckbox'}
+        />
+      ),
+    suppressMenu: true
+  }
+
   const columnDefs = useMemo(() => {
     return [
-      ...(showCheckboxColumn
-        ? [
-            {
-              headerName: '',
-              field: 'checked',
-              flex: checkboxFlex,
-              width: 70,
-              cellRenderer: checkboxCellRenderer,
-              headerComponent: params =>
-                rowSelection !== 'single' &&
-                showSelectAll && (
-                  <Checkbox
-                    checked={checked}
-                    disabled={props?.disableCheckBox}
-                    onChange={e => {
-                        e.stopPropagation()
-
-                      const colId = params.column.getColId()
-                      params.api.ensureColumnVisible(colId)
-
-                      const root = params.api.getGui && params.api.getGui()
-                      const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
-                      const cell = headerRoot && headerRoot.querySelector('.ag-header-cell[col-id="' + colId + '"]')
-                      const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
-                      focusable && focusable.focus && focusable.focus()
-                      selectAll(params, e)
-                    }}
-                    className={'fullSizeCheckbox'}
-                  />
-                ),
-              suppressMenu: true
-            }
-          ]
-        : []),
       ...filteredColumns.map(column => {
         const isLinkedColumn = column.type === 'link' || !!column.linkOpen
 
@@ -990,13 +987,15 @@ const Table = ({
     }, [
       filteredColumns,
       additionalWidth,
-      checked,
-      languageId
+      languageId,
+      tableSettings
     ])
 
+  const dataColumnsRef = useRef(null)
+
   useEffect(() => {
-    if (!columnDefsRef.current) {
-      columnDefsRef.current = columnDefs
+    if (!dataColumnsRef.current) {
+      dataColumnsRef.current = columnDefs
     }
   }, [columnDefs])
 
@@ -1114,12 +1113,22 @@ const Table = ({
 
     gridApiRef.current?.columnApi?.resetColumnState()
 
-    const defaultState = props.columns.map(col => ({
-      colId: col.field,
-      width: col.width,
-      pinned: null,
-      sort: null
-    }))
+    const defaultState = [
+      ...(showCheckboxColumn
+        ? [{
+            colId: checkboxColumn.field,
+            width: checkboxColumn.width,
+            pinned: null,
+            sort: null
+          }]
+        : []),
+      ...props.columns.map(col => ({
+        colId: col.field,
+        width: col.width,
+        pinned: null,
+        sort: null
+      }))
+    ]
 
     gridApiRef.current?.columnApi?.applyColumnState({
       state: defaultState,
@@ -1152,8 +1161,13 @@ const Table = ({
 
   const isLastUnpinnedColumn = unpinnedColumns.length === 1 && unpinnedColumns[0].colId === selectedColId?.colId
 
-
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
+
+  const gridColumns = [
+    ...(showCheckboxColumn ? [checkboxColumn] : []),
+    ...(dataColumnsRef.current || columnDefs)
+  ]
+
   return (
     <VertLayout>
       <Grow>
@@ -1186,7 +1200,7 @@ const Table = ({
             enableClipboard={true}
             ensureDomOrder={true}
             enableRangeSelection={true}
-            columnDefs={columnDefsRef.current || columnDefs}
+            columnDefs={gridColumns}
             maintainColumnOrder={true}
             domLayout={domLayout}
             {...(hasRowId && {
