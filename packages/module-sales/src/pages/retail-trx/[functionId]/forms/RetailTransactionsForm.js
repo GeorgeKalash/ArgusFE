@@ -336,11 +336,6 @@ export default function RetailTransactionsForm({
 
     const taxDetailsInfo = await getTaxDetails(taxId)
 
-    const itemTaxDetails =  taxDetailsInfo?.length ? taxDetailsInfo.map(tax => ({
-      ...tax,
-      taxScheduleAmount: tax.amount ?? 0
-    })) : null
-
     const result = {
       id: row?.id,
       barcode: row?.barcode,
@@ -363,7 +358,7 @@ export default function RetailTransactionsForm({
       mdAmount: 0,
       mdValue: 0,
       taxId,
-      taxDetails: itemTaxDetails
+      taxDetails: taxDetailsInfo?.length ? taxDetailsInfo : null
     }
 
     let finalResult = result
@@ -568,10 +563,6 @@ export default function RetailTransactionsForm({
                   t.seqNo === tax.seqNo
               )
         )
-        .map(tax => ({
-          ...tax,
-          taxScheduleAmount: tax.amount ?? 0
-        }))
 
         return {
           ...item,
@@ -1286,16 +1277,12 @@ export default function RetailTransactionsForm({
     const modifiedItemsList = await Promise.all(
       retailTrxItems?.items?.map(async (item, index) => {
         const taxDetails = await getTaxDetails(item?.taxId)
-        const itemTaxDetails = (taxDetails || []).map(tax => ({
-          ...tax,
-          taxScheduleAmount: tax.amount ?? 0
-        }))
 
         return {
           ...item,
           id: index + 1,
           priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
-          taxDetails: itemTaxDetails
+          taxDetails
         }
       })
     )
