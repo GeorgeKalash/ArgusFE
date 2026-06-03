@@ -1145,6 +1145,14 @@ const Table = ({
     }
   }
 
+
+  const state = gridApiRef.current?.columnApi?.getColumnState?.() || []
+
+  const unpinnedColumns = state.filter(col => !col.pinned)
+
+  const isLastUnpinnedColumn = unpinnedColumns.length === 1 && unpinnedColumns[0].colId === selectedColId?.colId
+
+
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
   return (
     <VertLayout>
@@ -1220,13 +1228,13 @@ const Table = ({
             }
           >
             {selectedColId?.pinned !== 'left' && (
-              <MenuItem onClick={() => pinColumn(selectedColId.colId, 'left')}>
+              <MenuItem disabled={isLastUnpinnedColumn} onClick={() => pinColumn(selectedColId.colId, 'left')}>
                 {platformLabels.freezeLeft}
               </MenuItem>
             )}
 
             {selectedColId?.pinned !== 'right' && (
-              <MenuItem onClick={() => pinColumn(selectedColId.colId, 'right')}>
+              <MenuItem disabled={isLastUnpinnedColumn} onClick={() => pinColumn(selectedColId.colId, 'right')}>
                 {platformLabels.freezeRight}
               </MenuItem>
             )}
