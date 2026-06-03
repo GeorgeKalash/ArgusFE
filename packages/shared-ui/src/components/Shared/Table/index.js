@@ -1125,12 +1125,14 @@ const Table = ({
             sort: null
           }]
         : []),
-      ...props.columns.map(col => ({
-        colId: col.field,
-        width: col.width,
-        pinned: null,
-        sort: null
-      }))
+      ...props.columns
+          .filter(col => col?.field)
+          .map(col => ({
+            colId: col.field,
+            width: col.width,
+            pinned: null,
+            sort: null
+          }))
     ]
 
     gridApiRef.current?.columnApi?.applyColumnState({
