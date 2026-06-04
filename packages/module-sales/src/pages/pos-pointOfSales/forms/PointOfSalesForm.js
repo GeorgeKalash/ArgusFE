@@ -71,10 +71,9 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
         })
     }),
     onSubmit: async obj => {
-      const date = new Date(obj.maxEndTime)
-      const hours = date.getUTCHours().toString().padStart(2, '0')
-      const minutes = date.getUTCMinutes().toString().padStart(2, '0')
-      const formattedMaxEndTime = `${hours}:${minutes}`
+      const formattedMaxEndTime = obj.maxEndTime
+        ? dayjs(obj.maxEndTime).format('HH:mm')
+        : null
 
       const updatedObj = {
         ...obj,
