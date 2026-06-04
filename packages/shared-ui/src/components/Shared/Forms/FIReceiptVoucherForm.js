@@ -158,7 +158,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
         parameters: `_dtId=${dtId}`
       })
       formik.setFieldValue('plantId', record?.plantId || plantId)
-      getCashAccount(record?.cashAccountId || defaultAccountId)
+      getDefaultFields(record?.cashAccountId || defaultAccountId)
     }
   }
 
@@ -187,11 +187,12 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const isPosted = formik.values.status === 3
   const isVerified = formik.values.isVerified
 
-  const getCashAccount = async cashAccountId => {
+  const getDefaultFields = async cashAccountId => {
     if (!cashAccountId) {
       formik.setFieldValue('cashAccountId', null)
       formik.setFieldValue('cashAccountRef', '')
       formik.setFieldValue('cashAccountName', '')
+      formik.setFieldValue('accountBalance', 0)
 
       return
     }
@@ -200,7 +201,9 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
       extension: CashBankRepository.CbBankAccounts.get,
       parameters: `_recordId=${cashAccountId}`
     })
-
+    
+    const balance = await getBalance(cashAccountResult?.accountId, formik.values.currencyId)
+    formik.setFieldValue('accountBalance', balance || 0)
     formik.setFieldValue('cashAccountId', cashAccountResult?.recordId || null)
     formik.setFieldValue('cashAccountRef', cashAccountResult?.reference || '')
     formik.setFieldValue('cashAccountName', cashAccountResult?.name || '')
@@ -222,7 +225,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
       if (recordId) {
         await getData(recordId)
       } else {
-        getCashAccount(defaultAccountId)
+        if (!documentType?.dtId) await getDefaultFields(defaultAccountId)
 
         if (header?.clientId) {
           const { record: client } = await getRequest({
@@ -494,14 +497,12 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 displayFieldWidth={4}
                 filter={{ isInactive: val => val !== true }}
                 onChange={async (_, newValue) => {
-                  const balance = await getBalance(newValue?.recordId, formik.values.currencyId)
-                  formik.setFieldValue('accountBalance', balance || 0)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
-                  formik.setFieldValue('spId', newValue?.spId || '')
-                  formik.setFieldValue('sptId', newValue?.sptId || '')
+                  formik.setFieldValue('spId', newValue?.spId || null)
+                  formik.setFieldValue('sptId', newValue?.sptId || null)
                   formik.setFieldValue('accountGroupName', newValue?.groupName || '')
-                  formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('accountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
@@ -530,7 +531,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 ]}
                 values={formik.values}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('spId', newValue?.recordId)
+                  formik.setFieldValue('spId', newValue?.recordId || null)
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
                 maxAccess={maxAccess}
@@ -592,6 +593,9 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
+                  const balance = await getBalance(newValue?.accountId, formik.values.currencyId)
+                  formik.setFieldValue('currentAccountId', newValue?.accountId || null)
+                  formik.setFieldValue('accountBalance', balance || 0)
                   formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
@@ -639,7 +643,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       await getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
-                      const balance = await getBalance(formik.values.accountId, newValue?.recordId)
+                      const balance = await getBalance(formik.values.currentAccountId, newValue?.recordId)
                       formik.setFieldValue('accountBalance', balance || 0)
                       formik.setFieldValue('currencyName', newValue?.name)
                       formik.setFieldValue('currencyId', newValue?.recordId)
@@ -697,7 +701,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 ]}
                 values={formik.values}
                 onChange={async (_, newValue) => {
-                  formik.setFieldValue('collectorId', newValue?.recordId || '')
+                  formik.setFieldValue('collectorId', newValue?.recordId || null)
                 }}
                 error={formik.touched.collectorId && Boolean(formik.errors.collectorId)}
                 maxAccess={maxAccess}
