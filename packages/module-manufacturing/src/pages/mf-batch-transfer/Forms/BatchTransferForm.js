@@ -191,7 +191,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       label: labels.jobOrder,
       name: 'jobRef',
       disableDuplicate: true,
-      flex: 1,
+      flex: 2,
       props: {
         endpointId: ManufacturingRepository.MFJobOrder.snapshot4,
         parameters: {
@@ -204,6 +204,11 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           { from: 'reference', to: 'jobRef' },
           { from: 'itemName', to: 'itemName' },
           { from: 'itemCategoryName', to: 'itemCategoryName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'sku', value: 'SKU' },
+          { key: 'designName', value: 'Design Name' },
         ],
         displayFieldWidth: 4,
         readOnly: !formik.values?.header?.fromWCId

@@ -124,7 +124,7 @@ const BatchTransfer = () => {
       },
       width: 1350,
       height: 750,
-      title: labels.batchTransfer
+      title: labels.batchJobTransfer
     })
   }
 
