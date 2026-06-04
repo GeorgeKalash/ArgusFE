@@ -216,9 +216,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
       invalidate()
-      const res2 = await getPaymentVouchers(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
+      refetchForm(res.recordId)
     }
   }
 
@@ -231,9 +229,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     if (res?.recordId) {
       toast.success(platformLabels.Unposted)
       invalidate()
-      const res2 = await getPaymentVouchers(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
+      refetchForm(res.recordId)
     }
   }
 
@@ -254,23 +250,23 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     if (formik.values?.dtId && !recordId) getDTD(formik.values?.dtId)
   }, [formik.values?.dtId])
 
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: FinancialRepository.PaymentVouchers.get2,
-          parameters: `_recordId=${recordId}`
-        })
+  const refetchForm = async recordId => {
+    const res = await getRequest({
+      extension: FinancialRepository.PaymentVouchers.get2,
+      parameters: `_recordId=${recordId}`
+    })
 
-        formik.resetForm({
-          values: {
-            ...res.record?.header,
-            date: formatDateFromApi(res.record?.header?.date),
-            accountBalance: res.record?.accountBalance?.balance || 0
-          }
-        })
+    formik.resetForm({
+      values: {
+        ...res.record?.header,
+        date: formatDateFromApi(res.record?.header?.date),
+        accountBalance: res.record?.accountBalance?.balance || 0
       }
-    })()
+    })
+  }
+
+  useEffect(() => {
+    if (recordId) refetchForm(recordId)
   }, [])
 
   const onWorkFlowClick = async () => {
