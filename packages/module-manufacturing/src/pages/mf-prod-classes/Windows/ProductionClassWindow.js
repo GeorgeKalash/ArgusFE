@@ -1,55 +1,32 @@
-import Window from '@argus/shared-ui/src/components/Shared/Window'
+import { useState } from 'react'
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import ProductionClassForm from '../forms/ProductionClassForm'
 import SFItemForm from '../forms/SFItemForm'
 
-const ProductionClassWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId,
-  setErrorMessage,
-  tabs,
-  activeTab,
-  setActiveTab,
-  editMode,
-  setEditMode,
-  setSelectedRecordId
-}) => {
+export default function ProductionClassWindow({ labels, maxAccess, recordId }) {
+  const [activeTab, setActiveTab] = useState(0)
+
+  const [store, setStore] = useState({
+    recordId
+  })
+
+  const tabs = [
+    { label: labels.class },
+    { label: labels.semiFinishedItem, disabled: !store.recordId }
+  ]
+
   return (
-    <Window
-      id='productionClass'
-      Title={labels.prodClass}
-      controlled={true}
-      onClose={onClose}
-      width={600}
-      height={400}
-      tabs={tabs}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-    >
-      <CustomTabPanel index={0} value={activeTab}>
-        <ProductionClassForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-          setErrorMessage={setErrorMessage}
-          editMode={editMode}
-          setEditMode={setEditMode}
-          setSelectedRecordId={setSelectedRecordId}
-        />
+    <>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
+        <ProductionClassForm labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
-        <SFItemForm
-          labels={labels}
-          setErrorMessage={setErrorMessage}
-          maxAccess={maxAccess}
-          recordId={recordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
+
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
+        <SFItemForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-    </Window>
+    </>
   )
 }
-
-export default ProductionClassWindow
