@@ -258,14 +258,15 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: FinancialRepository.PaymentVouchers.get,
+          extension: FinancialRepository.PaymentVouchers.get2,
           parameters: `_recordId=${recordId}`
         })
 
         formik.resetForm({
           values: {
-            ...res.record,
-            date: formatDateFromApi(res.record.date)
+            ...res.record?.header,
+            date: formatDateFromApi(res.record?.header?.date),
+            accountBalance: res.record?.accountBalance?.balance || 0
           }
         })
       }
@@ -405,6 +406,17 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       disabled: !formik.values.accountId || !formik.values.date
     }
   ]
+
+  async function getBalance (accId, currencyId) {
+    if (!accId || !currencyId) return
+
+    const res = await getRequest({
+      extension: FinancialRepository.AccountCreditBalance.get,
+      parameters: `_accountId=${accId}&_currencyId=${currencyId}`
+    })
+
+    return res?.record?.balance
+  }
 
   return (
     <FormShell
@@ -553,7 +565,9 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 firstFieldWidth={4}
                 displayFieldWidth={4}
                 filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
-                onChange={(event, newValue) => {
+                onChange={async (event, newValue) => {
+                  const balance = await getBalance(newValue?.recordId, formik.values.currencyId)
+                  formik.setFieldValue('accountBalance', balance || 0)
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
@@ -613,52 +627,63 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                     readOnly={isPosted || isCancelled}
                     values={formik.values}
                     onChange={async (event, newValue) => {
+                      const balance = await getBalance(formik.values.accountId, newValue?.recordId)
                       await getMultiCurrencyFormData(newValue?.recordId, formik.values.date, RateDivision.FINANCIALS)
-                      formik.setFieldValue('currencyId', newValue ? newValue?.recordId : null)
                       formik.setFieldValue('currencyName', newValue?.name)
+                      formik.setFieldValue('accountBalance', balance || 0)
+                      formik.setFieldValue('currencyId', newValue ? newValue?.recordId : null)
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
                 <Grid item xs={1}>
                  <CustomButton
-                  onClick={() => openMCRForm(formik.values)}
-                  image='popup.png'
-                  tooltipText={platformLabels.MultiCurrencyRate}
-                  disabled={
-                    !formik.values.currencyId ||
-                    formik.values.currencyId === currencyId
-                  }
-                />
-                </Grid>
-                <Grid item xs={4}>
-                  <CustomNumberField
-                    name='amount'
-                    required
-                    label={labels.amount}
-                    maxLength={14}
-                    decimalScale={2}
-                    readOnly={isPosted || isCancelled}
-                    value={formik.values.amount}
-                    maxAccess={maxAccess}
-                    onChange={async e => {
-                      const updatedRateRow = getRate({
-                        amount: e.target.value ?? 0,
-                        exRate: formik.values?.exRate,
-                        baseAmount: 0,
-                        rateCalcMethod: formik.values?.rateCalcMethod,
-                        dirtyField: DIRTYFIELD_RATE
-                      })
-                      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
-                      formik.setFieldValue('amount', e.target.value)
-                    }}
-                    onClear={async () => {
-                      formik.setFieldValue('amount', 0)
-                    }}
-                    error={formik.touched.amount && Boolean(formik.errors.amount)}
+                    onClick={() => openMCRForm(formik.values)}
+                    image='popup.png'
+                    tooltipText={platformLabels.MultiCurrencyRate}
+                    disabled={
+                      !formik.values.currencyId ||
+                      formik.values.currencyId === currencyId
+                    }
                   />
                 </Grid>
               </Grid>
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='amount'
+                required
+                label={labels.amount}
+                maxLength={14}
+                decimalScale={2}
+                readOnly={isPosted || isCancelled}
+                value={formik.values.amount}
+                maxAccess={maxAccess}
+                onChange={async e => {
+                  const updatedRateRow = getRate({
+                    amount: e.target.value ?? 0,
+                    exRate: formik.values?.exRate,
+                    baseAmount: 0,
+                    rateCalcMethod: formik.values?.rateCalcMethod,
+                    dirtyField: DIRTYFIELD_RATE
+                  })
+                  formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
+                  formik.setFieldValue('amount', e.target.value)
+                }}
+                onClear={async () => {
+                  formik.setFieldValue('amount', 0)
+                }}
+                error={formik.touched.amount && Boolean(formik.errors.amount)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='accountBalance'
+                label={labels.balance}
+                value={formik.values.accountBalance}
+                readOnly
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
