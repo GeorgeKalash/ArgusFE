@@ -197,7 +197,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
         label: labels.sku,
         name: 'rmItemSku',
         props: {
-          endpointId: InventoryRepository.RMSKU.snapshot,
+          endpointId: InventoryRepository.Item.snapshot4,
           displayField: 'sku',
           valueField: 'sku',
           columnsInDropDown: [
