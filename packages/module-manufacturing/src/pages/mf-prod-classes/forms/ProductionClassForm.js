@@ -63,7 +63,7 @@ export default function ProductionClassForm({ labels, maxAccess, store, setStore
           parameters: `_recordId=${recordId}`
         })
 
-        formik.setValues({ ...res.record })
+        formik.setValues(res?.record || {})
       }
     })()
   }, [])

@@ -1,8 +1,6 @@
-import * as yup from 'yup'
 import { useEffect, useContext } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
@@ -17,10 +15,6 @@ const SFItemForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.ProductionClassSemiFinished.qry
-  })
-
 
   const { formik } = useForm({
     maxAccess,
@@ -34,13 +28,6 @@ const SFItemForm = ({ labels, maxAccess, store }) => {
         sku: ''
       }]
     },
-    validationSchema: yup.object({
-      items: yup.array().of(
-        yup.object({
-          sfItemId: yup.number().required()
-        })
-      )
-    }),
     onSubmit: async values => {
       await postRequest({
         extension: ManufacturingRepository.ProductionClassSemiFinished.set2,
@@ -56,7 +43,6 @@ const SFItemForm = ({ labels, maxAccess, store }) => {
       })
 
       toast.success(platformLabels.Edited)
-      invalidate()
     }
   })
 
@@ -66,6 +52,7 @@ const SFItemForm = ({ labels, maxAccess, store }) => {
       label: labels.semiFinishedItemRef,
       name: 'sku',
       flex: 1,
+      disableDuplicate: true,
       props: {
         endpointId: InventoryRepository.Item.snapshot,
         parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
@@ -107,7 +94,7 @@ const SFItemForm = ({ labels, maxAccess, store }) => {
         res.list?.length > 0
           ? res.list.map((row, index) => ({
               ...row,
-              id: row.id || row.seqNo || index + 1,
+              id: index + 1,
               classId: recordId
             }))
           : formik.initialValues.items
