@@ -52,7 +52,6 @@ export default function DamageReturnForm({ labels, access, recordId }) {
       seqNo: 0,
       pcs: 0,
       workCenterId: null,
-      maxPcs: null,
       type: null,
       damageId: null
     },
@@ -62,15 +61,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
       jobId: yup.string().required(),
       date: yup.string().required(),
       type: yup.string().required(),
-      pcs: yup.lazy((_, { parent }) =>
-        parent.maxPcs !== null
-          ? yup
-              .number()
-              .min(1)
-              .max(parent.maxPcs, ({ max }) => labels.max + ` ${max}`)
-              .required()
-          : yup.number().min(1).required()
-      ),
+      pcs: yup.number().min(1).required(),
       damageId: yup
         .string()
         .nullable()
@@ -107,8 +98,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
           sku: jobRes?.record?.sku,
           itemName: jobRes?.record?.itemName,
           designName: jobRes?.record?.designName,
-          designRef: jobRes?.record?.designRef,
-          maxPcs: res?.record?.pcs
+          designRef: jobRes?.record?.designRef
         })
       })
     })
@@ -180,7 +170,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
                 }}
@@ -212,9 +202,8 @@ export default function DamageReturnForm({ labels, access, recordId }) {
                 valueField='key'
                 displayField='value'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('type', newValue?.key)
-                  formik.setFieldValue('maxPcs', null)
                 }}
                 error={formik.touched.type && Boolean(formik.errors.type)}
               />
@@ -241,7 +230,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'jobRef', value: 'Job Order Ref' }
                 ]}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   if (newValue) {
                     await getRequest({
                       extension: ManufacturingRepository.MFJobOrder.get,
@@ -260,8 +249,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
                         workCenterName: newValue?.wcName || '',
                         workCenterId: newValue?.workCenterId || null,
                         plantId: newValue?.plantId || null,
-                        pcs: newValue?.pcs || 0,
-                        maxPcs: newValue?.pcs || 0
+                        pcs: isCancellationOfDamage ? newValue?.damagedPcs : 0
                       })
                     })
                   } else {
@@ -277,8 +265,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
                       jobRef: '',
                       workCenterName: '',
                       workCenterId: null,
-                      pcs: 0,
-                      maxPcs: null
+                      pcs: 0
                     })
                   }
                 }}
@@ -306,7 +293,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
                   { key: 'itemName', value: 'Item Name' },
                   { key: 'description', value: 'Description' }
                 ]}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setValues({
                     ...formik.values,
                     jobId: newValue?.recordId || null,
@@ -317,8 +304,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
                     itemName: newValue?.itemName || '',
                     workCenterName: newValue?.wcName || '',
                     workCenterId: newValue?.workCenterId || null,
-                    plantId: newValue?.plantId || null,
-                    maxPcs: 32767
+                    plantId: newValue?.plantId || null
                   })
                 }}
                 errorCheck={'jobId'}
@@ -364,7 +350,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -400,14 +386,13 @@ export default function DamageReturnForm({ labels, access, recordId }) {
               <CustomNumberField
                 name='pcs'
                 required
-                readOnly={editMode}
+                readOnly={editMode || isCancellationOfDamage}
                 label={labels.pcs}
                 value={formik.values?.pcs}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('pcs', 0)}
                 maxAccess={maxAccess}
                 error={formik.touched.pcs && Boolean(formik.errors.pcs)}
-                helperText={formik.touched.pcs && formik.errors.pcs}
               />
             </Grid>
             <Grid item xs={7}></Grid>

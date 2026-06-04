@@ -35,7 +35,7 @@ import {
   MDTYPE_PCT,
   MDTYPE_AMOUNT
 } from '@argus/shared-utils/src/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
+import { calcVatAmountPerTaxDetail, getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
 import { getFooterTotals, getSubtotal } from '@argus/shared-utils/src/utils/FooterCalculator'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -358,8 +358,9 @@ export default function RetailTransactionsForm({
       mdAmount: 0,
       mdValue: 0,
       taxId,
-      taxDetails: taxDetailsInfo || null
+      taxDetails: taxDetailsInfo?.length ? taxDetailsInfo : null
     }
+
     let finalResult = result
     if (result?.basePrice) finalResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
     if (result?.unitPrice) {
@@ -546,11 +547,22 @@ export default function RetailTransactionsForm({
     const retailTrxHeader = retailTrxPack?.header || {}
     const retailTrxItems = retailTrxPack?.items || []
     const retailTrxCash = retailTrxPack?.cash || []
+    const taxDetails =  retailTrxPack?.taxDetails || []
     const addressObj = await getAddress(retailTrxHeader?.addressId || null)
 
     const modifiedItemsList = await Promise.all(
-      retailTrxItems?.map(async (item, index) => {
-        const taxDetails = await getTaxDetails(item?.taxId)
+      retailTrxItems?.map(async (item, index) => { 
+       const itemTaxDetails = taxDetails
+        .filter(
+          (tax, index, arr) =>
+            tax?.taxId === item?.taxId &&
+            index ===
+              arr.findIndex(
+                t =>
+                  t.taxId === tax.taxId &&
+                  t.seqNo === tax.seqNo
+              )
+        )
 
         return {
           ...item,
@@ -560,7 +572,7 @@ export default function RetailTransactionsForm({
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
           totPricePerG: getTotPricePerG(retailTrxHeader, item, DIRTYFIELD_BASE_PRICE),
-          taxDetails
+          taxDetails: itemTaxDetails
         }
       })
     )
@@ -960,11 +972,13 @@ export default function RetailTransactionsForm({
       },
       label: labels.tax,
       onClick: (_, row) => {
+        const modifiedTaxDetails = buildCalculatedTaxDetails(row, row?.taxDetails) 
         stack({
           Component: TaxDetails,
           props: {
             taxId: row?.taxId,
-            obj: row
+            obj: row,
+            taxes: editMode ? modifiedTaxDetails : []
           }
         })
       }
@@ -1122,6 +1136,38 @@ export default function RetailTransactionsForm({
         setAddress: setAddress,
         isCleared: false,
         datasetId: ResourceIds.ADDRetailInvoice
+      }
+    })
+  }
+
+  function buildCalculatedTaxDetails(row, taxDetailsList = []) {
+    return (taxDetailsList || []).map(td => {
+      const singleTaxDetail = {
+        ...td,
+        taxScheduleAmount: td.amount || 0
+      }
+      
+      const calculatedAmount = calcVatAmountPerTaxDetail(
+        {
+          priceType: row?.priceType,
+          basePrice: row?.basePrice,
+          unitPrice: parseFloat(row?.unitPrice || 0),
+          qty: parseFloat(row?.qty || 0),
+          weight: parseFloat(row?.weight || 0),
+          extendedPrice: parseFloat(row?.extendedPrice || 0),
+          baseLaborPrice: row?.baseLaborPrice,
+          vatAmount: parseFloat(row?.vatAmount || 0),
+          tdPct: 0,
+          taxDetails: singleTaxDetail
+        },
+        singleTaxDetail
+      )
+
+      return {
+        ...td,
+        taxSeqNo: td.seqNo,
+        taxScheduleAmount: td.amount || 0,
+        amount: parseFloat(calculatedAmount || 0)
       }
     })
   }
