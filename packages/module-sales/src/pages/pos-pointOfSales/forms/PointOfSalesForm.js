@@ -59,7 +59,6 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
       currencyId: yup.string().required(),
       reference: yup.string().required(),
       plantId: yup.string().required(),
-      maxEndTime: yup.string().required(),
       status: yup.string().required(),
       plId: yup.string().required(),
       siteId: yup
@@ -72,14 +71,13 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
         })
     }),
     onSubmit: async obj => {
-      const date = new Date(obj.maxEndTime)
-      const hours = date.getUTCHours().toString().padStart(2, '0')
-      const minutes = date.getUTCMinutes().toString().padStart(2, '0')
-      const formattedMaxEndTime = `${hours}:${minutes}`
+      const formattedMaxEndTime = obj.maxEndTime
+        ? dayjs(obj.maxEndTime).format('HH:mm')
+        : null
 
       const updatedObj = {
         ...obj,
-        maxEndTime: formattedMaxEndTime
+        maxEndTime: obj.maxEndTime ? formattedMaxEndTime : null
       }
 
       const response = await postRequest({
@@ -107,13 +105,17 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
           parameters: `_recordId=${recordId}`
         })
 
-        const [hours, minutes] = res.record.maxEndTime.split(':')
+        let transformedMaxEndTime = null
 
-        const transformedMaxEndTime = dayjs()
-          .set('hour', parseInt(hours, 10))
-          .set('minute', parseInt(minutes, 10))
-          .set('second', 0)
-          .set('millisecond', 0)
+        if(res.record.maxEndTime) {
+          const [hours, minutes] = res.record.maxEndTime.split(':')
+
+          transformedMaxEndTime = dayjs()
+            .set('hour', parseInt(hours, 10))
+            .set('minute', parseInt(minutes, 10))
+            .set('second', 0)
+            .set('millisecond', 0)
+        }
 
         formik.setValues({
           ...res.record,
