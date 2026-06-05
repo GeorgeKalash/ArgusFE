@@ -142,18 +142,22 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     }
   })
 
-  const getCashAccountAndPayment = async cashAccountId => {
+  const getDefaultFields = async cashAccountId => {
     if (cashAccountId) {
       const { record: cashAccountResult } = await getRequest({
         extension: CashBankRepository.CbBankAccounts.get,
         parameters: `_recordId=${cashAccountId}`
       })
+
+      const balance = await getBalance(cashAccountResult?.accountId, formik.values.currencyId)
+      formik.setFieldValue('accountBalance', balance || 0)
       formik.setFieldValue('cashAccountId', cashAccountResult?.recordId)
       formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
       formik.setFieldValue('cashAccountName', cashAccountResult.name)
 
       return cashAccountResult.paymentMethod
     } else {
+      formik.setFieldValue('accountBalance', 0)
       return null
     }
   }
@@ -241,7 +245,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       })
 
       formik.setFieldValue('plantId', res?.record?.plantId || plantId)
-      const payment = await getCashAccountAndPayment(res?.record?.cashAccountId || cashAccountId)
+      const payment = await getDefaultFields(res?.record?.cashAccountId || cashAccountId)
       formik.setFieldValue('paymentMethod', res?.record?.paymentMethod || payment)
     }
   }
@@ -264,6 +268,15 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       }
     })
   }
+
+  useEffect(() => {
+    ;(async function () {
+      if (!recordId && cashAccountId && !documentType?.dtId) {
+        const payment = await getDefaultFields(cashAccountId)
+        formik.setFieldValue('paymentMethod', payment)
+      }
+    })()
+  }, [cashAccountId])
 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
@@ -561,10 +574,8 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 firstFieldWidth={4}
                 displayFieldWidth={4}
                 filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
-                onChange={async (event, newValue) => {
-                  const balance = await getBalance(newValue?.recordId, formik.values.currencyId)
-                  formik.setFieldValue('accountBalance', balance || 0)
-                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('accountId', newValue?.recordId || null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('accountGroupName', newValue?.groupName || '')
@@ -598,6 +609,9 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
+                  const balance = await getBalance(newValue?.accountId, formik.values.currencyId)
+                  formik.setFieldValue('currentAccountId', newValue?.accountId || null)
+                  formik.setFieldValue('accountBalance', balance || 0)
                   formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
@@ -622,8 +636,8 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                     maxAccess={maxAccess}
                     readOnly={isPosted || isCancelled}
                     values={formik.values}
-                    onChange={async (event, newValue) => {
-                      const balance = await getBalance(formik.values.accountId, newValue?.recordId)
+                    onChange={async (_, newValue) => {
+                      const balance = await getBalance(formik.values.currentAccountId, newValue?.recordId)
                       await getMultiCurrencyFormData(newValue?.recordId, formik.values.date, RateDivision.FINANCIALS)
                       formik.setFieldValue('currencyName', newValue?.name)
                       formik.setFieldValue('accountBalance', balance || 0)

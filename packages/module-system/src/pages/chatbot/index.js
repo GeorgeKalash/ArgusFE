@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect, useContext, useMemo } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,7 +14,8 @@ import {
 import {
   Bar,
   Line,
-  Pie
+  Pie,
+  Doughnut
 } from "react-chartjs-2";
 
 import MuiTooltip from "@mui/material/Tooltip";
@@ -44,6 +45,239 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+  const BarChartRenderer = React.memo(({ chart }) => {
+    return (
+      <Bar
+        options={{
+          animation: false
+        }}
+        redraw={false}
+        data={{
+          labels: chart.labels,
+          datasets: chart.datasets.map(ds => ({
+            ...ds,
+            backgroundColor: "rgba(22, 77, 161, 0.65)",
+            borderColor: "rgba(22, 77, 161, 0.85)",
+            borderWidth: 1
+          }))
+        }}
+      />
+    );
+  });
+
+  const LineChartRenderer = React.memo(({ chart }) => {
+    return (
+      <Line
+        options={{
+          animation: false
+        }}
+        redraw={false}
+        data={{
+          labels: chart.labels,
+          datasets: chart.datasets.map(ds => ({
+            ...ds,
+            backgroundColor: "rgba(22, 77, 161, 0.76)",
+            borderColor: "rgba(22, 77, 161, 0.85)",
+          }))
+        }}
+      />
+    );
+  });
+
+  const DoughnutChartRenderer = React.memo(({ chart }) => {
+    return (
+      <Doughnut
+        options={{
+          animation: false
+        }}
+        redraw={false}
+        data={{
+          labels: chart.labels,
+          datasets: chart.datasets.map(ds => ({
+              ...ds,
+              backgroundColor: [
+                "rgba(163,175,30,0.88)",
+                "rgba(37,99,235,0.88)",
+                "rgba(46,138,110,0.88)",
+                "rgba(184,59,246,0.88)",
+                "rgba(246,59,59,0.88)",
+              ],
+              borderColor: [
+                "rgba(163,175,30,0.35)",
+                "rgba(37,99,235,0.35)",
+                "rgba(46,138,110,0.35)",
+                "rgba(184,59,246,0.35)",
+                "rgba(246,59,59,0.35)",
+              ],
+              borderWidth: 0.8
+            }))
+        }}
+        />
+      )
+  });
+
+  const PieChartRenderer = React.memo(({ chart }) => {
+    return (
+      <Pie
+        options={{
+          animation: false
+        }}
+        redraw={false}
+        data={{
+          labels: chart.labels,
+          datasets: chart.datasets.map(ds => ({
+            ...ds,
+            backgroundColor: [
+              "rgba(163,175,30,0.88)",
+              "rgba(37,99,235,0.88)",
+              "rgba(46,138,110,0.88)",
+              "rgba(184,59,246,0.88)",
+              "rgba(246,59,59,0.88)",
+            ],
+            borderColor: [
+              "rgba(163,175,30,0.35)",
+              "rgba(37,99,235,0.35)",
+              "rgba(46,138,110,0.35)",
+              "rgba(184,59,246,0.35)",
+              "rgba(246,59,59,0.35)",
+            ],
+            borderWidth: 0.8
+          }))
+        }}
+      />
+    );
+  });
+
+  const markdownComponents = {
+      p: ({ node, ...props }) => (
+        <p
+          style={{
+            margin: 0,
+            lineHeight: 1.5
+          }}
+          {...props}
+        />
+      ),
+
+      table: ({ node, ...props }) => (
+        <div
+          style={{
+            width: "100%",
+            overflowX: "auto",
+            maxWidth: "100%"
+          }}
+        >
+          <table
+            style={{
+              borderCollapse: "collapse",
+              width: "100%",
+              minWidth: "max-content",
+              marginTop: "10px"
+            }}
+            {...props}
+          />
+        </div>
+      ),
+
+      thead: ({ node, ...props }) => (
+        <thead
+          style={{
+            background: "#e5e7eb"
+          }}
+          {...props}
+        />
+      ),
+
+      th: ({ node, ...props }) => (
+        <th
+          style={{
+            border: "1px solid #d1d5db",
+            padding: "8px",
+            textAlign: "left"
+          }}
+          {...props}
+        />
+      ),
+
+      td: ({ node, ...props }) => (
+        <td
+          style={{
+            border: "1px solid #d1d5db",
+            padding: "8px"
+          }}
+          {...props}
+        />
+      ),
+
+      ul: ({ node, ...props }) => (
+        <ul
+          style={{
+            margin: "6px 0",
+            paddingLeft: "20px"
+          }}
+          {...props}
+        />
+      ),
+
+      ol: ({ node, ...props }) => (
+        <ol
+          style={{
+            margin: "6px 0",
+            paddingLeft: "20px"
+          }}
+          {...props}
+        />
+      ),
+
+      code ({ className, children }) {
+        if (className === "language-chart") {
+          try {
+            const chart = JSON.parse(String(children));
+
+            if (chart.type === "bar") {
+              return (
+                <div style={{ width: "600px", maxWidth: "100%" }}>
+                  <BarChartRenderer chart={chart}/>
+                </div>
+              );
+            }
+
+            if (chart.type === "line") {
+              return (
+                <div style={{ width: "600px", maxWidth: "100%" }}>
+                  <LineChartRenderer chart={chart}/>
+                </div>
+              );
+            }
+
+            if (chart.type === "pie") {
+              return (
+                <div style={{ width: "600px", maxWidth: "100%" }}>
+                  <PieChartRenderer chart={chart}/>
+                </div>
+              );
+            }
+            if (chart.type === "doughnut") {
+              return (
+                <div style={{ width: "600px", maxWidth: "100%" }}>
+                  <DoughnutChartRenderer chart={chart}/>
+                </div>
+              );
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
+        return (
+          <code className={className}>
+            {children}
+          </code>
+        );
+      },
+    }
+  
 
 export default function ChatPage() {
   const { user } = useContext(AuthContext);
@@ -355,14 +589,10 @@ export default function ChatPage() {
   }, [selectedChat?.isLoading]);
 
   const renderMessage = (msg, index) => {
-    const cardStyle = {
-      background: "#fff",
-      border: "1px solid #ddd",
-      borderRadius: "12px",
-      padding: "16px",
-      width: "500px",
-      maxWidth: "95%"
-    };
+    const streamingText = msg.text.replace(
+      /```chart[\s\S]*$/i,
+      "\n\n📊 Generating chart..."
+    );
 
     if (msg.type === "text") {
       return (
@@ -410,7 +640,7 @@ export default function ChatPage() {
             </div>
           ) : msg.isStreaming ? (
             <div style={{ whiteSpace: "pre-wrap" }}>
-              {msg.text}▋
+              {streamingText}▋
             </div>
           ) : ( 
             <>
@@ -464,87 +694,7 @@ export default function ChatPage() {
                     ? []
                     : [remarkGfm]
                 }
-                components={{
-                  p: ({ node, ...props }) => (
-                    <p
-                      style={{
-                        margin: 0,
-                        lineHeight: 1.5
-                      }}
-                      {...props}
-                    />
-                  ),
-
-                  table: ({ node, ...props }) => (
-                    <div
-                      style={{
-                        width: "100%",
-                        overflowX: "auto",
-                        maxWidth: "100%"
-                      }}
-                    >
-                      <table
-                        style={{
-                          borderCollapse: "collapse",
-                          width: "100%",
-                          minWidth: "max-content",
-                          marginTop: "10px"
-                        }}
-                        {...props}
-                      />
-                    </div>
-                  ),
-
-                  thead: ({ node, ...props }) => (
-                    <thead
-                      style={{
-                        background: "#e5e7eb"
-                      }}
-                      {...props}
-                    />
-                  ),
-
-                  th: ({ node, ...props }) => (
-                    <th
-                      style={{
-                        border: "1px solid #d1d5db",
-                        padding: "8px",
-                        textAlign: "left"
-                      }}
-                      {...props}
-                    />
-                  ),
-
-                  td: ({ node, ...props }) => (
-                    <td
-                      style={{
-                        border: "1px solid #d1d5db",
-                        padding: "8px"
-                      }}
-                      {...props}
-                    />
-                  ),
-
-                  ul: ({ node, ...props }) => (
-                    <ul
-                      style={{
-                        margin: "6px 0",
-                        paddingLeft: "20px"
-                      }}
-                      {...props}
-                    />
-                  ),
-
-                  ol: ({ node, ...props }) => (
-                    <ol
-                      style={{
-                        margin: "6px 0",
-                        paddingLeft: "20px"
-                      }}
-                      {...props}
-                    />
-                  )
-                }}
+                components={markdownComponents}
               >
                 {msg.text}
               </ReactMarkdown>
@@ -624,96 +774,6 @@ export default function ChatPage() {
               </tbody>
             </table>
           </div>
-        </div>
-      );
-    }
-
-    if (msg.type === "barChart") {
-      return (
-        <div
-          key={index}
-          style={{
-            background: "#fff",
-            border: "1px solid #ddd",
-            borderRadius: "12px",
-            padding: "16px",
-            width: "500px",
-            maxWidth: "95%"
-          }}
-          className="chat-message-wrapper"
-        >
-          <h4>{msg.title}</h4>
-
-          <Bar
-            data={{
-              labels: msg.labels,
-              datasets: [
-                {
-                  label: msg.title,
-                  data: msg.values,
-                  backgroundColor: "rgba(22, 77, 161, 0.65)",
-                  borderColor: "rgba(22, 77, 161, 0.85)",
-                  borderWidth: 1
-                }
-              ]
-            }}
-          />
-        </div>
-      );
-    }
-
-    if (msg.type === "lineChart") {
-      return (
-        <div key={index} style={cardStyle} className="chat-message-wrapper">
-          <h4>{msg.title}</h4>
-
-          <Line
-            data={{
-              labels: msg.labels,
-              datasets: [
-                {
-                  label: msg.title,
-                  data: msg.values,
-                  backgroundColor: "rgba(22, 77, 161, 0.76)",
-                  borderColor: "rgba(22, 77, 161, 0.85)",
-                }
-              ]
-            }}
-          />
-        </div>
-      );
-    }
-
-    if (msg.type === "pieChart") {
-      return (
-        <div key={index} style={cardStyle} className="chat-message-wrapper">
-          <h4>{msg.title}</h4>
-
-          <Pie
-            data={{
-              labels: msg.labels,
-              datasets: [
-                {
-                  data: msg.values,
-                  backgroundColor: [
-                    "rgba(163,175,30,0.88)",
-                    "rgba(37,99,235,0.88)",
-                    "rgba(46,138,110,0.88)",
-                    "rgba(184,59,246,0.88)",
-                    "rgba(246,59,59,0.88)",
-                  ],
-                  borderColor: [
-                    "rgba(163,175,30,0.35)",
-                    "rgba(37,99,235,0.35)",
-                    "rgba(46,138,110,0.35)",
-                    "rgba(184,59,246,0.35)",
-                    "rgba(246,59,59,0.35)",
-                  ],
-                  borderWidth: 0.8
-                }
-              ]
-            }}
-          />
         </div>
       );
     }
