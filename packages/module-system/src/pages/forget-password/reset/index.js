@@ -15,11 +15,13 @@ import ResetPassForm from '../forms/ResetPassForm'
 import styles from './Reset.module.css'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
+import { useClientConfig } from '@argus/shared-hooks/src/hooks/useClientConfig'
 
 const Reset = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const auth = useAuth()
+  const { config } = useClientConfig()
   const { stack: stackError } = useError()
 
   const { formik } = useForm({
@@ -31,7 +33,7 @@ const Reset = () => {
       bodyFormData.append('record', JSON.stringify(values))
 
       axios
-        .post(`${process.env.NEXT_PUBLIC_AuthURL}MA.asmx/generateCode`, bodyFormData)
+        .post(`${config?.authUrl}MA.asmx/generateCode`, bodyFormData)
         .then(res => {
           const mailCode = {
             userName: values.username,
@@ -45,7 +47,7 @@ const Reset = () => {
           bodyFormData2.append('record', JSON.stringify(mailCode))
 
           axios
-            .post(`${process.env.NEXT_PUBLIC_AuthURL}MA.asmx/mailCode`, bodyFormData2, {
+            .post(`${config?.authUrl}MA.asmx/mailCode`, bodyFormData2, {
               headers: { AccountId: auth?.getAC?.data?.record?.accountId }
             })
             .then(() => openForm(values.username))

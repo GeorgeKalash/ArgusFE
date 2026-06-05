@@ -14,7 +14,8 @@ export const generateReport = async ({
   scId,
   siteId,
   controllerId,
-  previewBtnClicked
+  previewBtnClicked,
+  reportUrl
 }) => {
   const buildParameters = () => {
     switch (resourceId) {
@@ -41,7 +42,7 @@ export const generateReport = async ({
   }
 
   const response = await postRequest({
-    url: process.env.NEXT_PUBLIC_REPORT_URL,
+    url: reportUrl,
     extension: DevExpressRepository.generate,
     record: JSON.stringify(payload)
   })

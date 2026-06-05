@@ -8,6 +8,7 @@ import PreviewReport from './PreviewReport'
 import { generateReport } from '@argus/shared-utils/src/utils/ReportUtils'
 import CustomButton from '../Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useClientConfig } from '@argus/shared-hooks/src/hooks/useClientConfig'
 
 const ReportGenerator = ({
   previewReport,
@@ -25,6 +26,7 @@ const ReportGenerator = ({
   const { platformLabels } = useContext(ControlContext)
   const { exportFormat } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const { config } = useClientConfig()
   const [formatIndex, setFormatIndex] = useState(0)
   const [report, setReport] = useState({
     selectedFormat: '',
@@ -89,7 +91,8 @@ const ReportGenerator = ({
       siteId: form?.values?.siteId || null,
       controllerId: form?.values?.controllerId || null,
       recordId: recordId || null,
-      previewBtnClicked
+      previewBtnClicked,
+      reportUrl: config?.reportUrl
     })
 
     switch (parseInt(report.selectedFormat.key)) {

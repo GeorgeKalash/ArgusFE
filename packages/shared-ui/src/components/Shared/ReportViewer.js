@@ -10,6 +10,7 @@ import { generateReport } from '@argus/shared-utils/src/utils/ReportUtils'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useClientConfig } from '@argus/shared-hooks/src/hooks/useClientConfig'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,6 +21,7 @@ const ReportViewer = ({ resourceId }) => {
   const [pdf, setPDF] = useState(null)
   const [formatIndex, setFormatIndex] = useState(0)
   const { width } = useWindowDimensions()
+  const { config } = useClientConfig()
 
   const getExportFormats = async () => {
     if (!exportFormat.length) return
@@ -106,7 +108,8 @@ const ReportViewer = ({ resourceId }) => {
       params: rpbParams,
       resourceId,
       selectedReport: report.selectedReport,
-      selectedFormat: report.selectedFormat.key
+      selectedFormat: report.selectedFormat.key,
+      reportUrl: config?.reportUrl
     })
     switch (parseInt(report.selectedFormat.key)) {
       case 1:
