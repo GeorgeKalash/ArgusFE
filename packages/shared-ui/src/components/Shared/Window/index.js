@@ -329,12 +329,7 @@ const Window = React.memo(
                         {children}
                       </Box>
                     ) : (
-                      React.Children.map(children, child =>
-                        React.cloneElement(child, {
-                          fill: true,
-                          expanded
-                        })
-                      )
+                      children
                     )}
                   </Box>
 

@@ -5,7 +5,7 @@ import TaxSchedulesForm from '../forms/TaxSchedulesForm'
 
 import DetailsForm from '../forms/DetailsForm'
 
-const TaxSchedulesWindow = ({ recordId, labels, maxAccess, expanded }) => {
+const TaxSchedulesWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -29,7 +29,6 @@ const TaxSchedulesWindow = ({ recordId, labels, maxAccess, expanded }) => {
           setStore={setStore}
           maxAccess={maxAccess}
           store={store}
-          expanded={expanded}
           editMode={editMode}
         />
       </CustomTabPanel>

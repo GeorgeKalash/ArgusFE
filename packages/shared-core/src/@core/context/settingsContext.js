@@ -6,7 +6,6 @@ import themeConfig from '@argus/shared-configs/src/configs/themeConfig'
 
 // ** Hooks
 import { useAuth } from '@argus/shared-hooks/src/hooks/useAuth'
-import { useTranslation } from 'react-i18next'
 
 const initialSettings = {
   themeColor: 'primary',
@@ -71,7 +70,6 @@ export const SettingsContext = createContext({
 export const SettingsProvider = ({ children, pageSettings }) => {
   // ** State
   const [settings, setSettings] = useState({ ...initialSettings })
-  const { i18n } = useTranslation()
 
   const auth = useAuth()
 
@@ -99,15 +97,12 @@ export const SettingsProvider = ({ children, pageSettings }) => {
   useEffect(() => {
     switch (auth?.user?.languageId) {
       case 1:
-        i18n.changeLanguage('en')
         saveSettings({ ...settings, direction: 'ltr' })
         break
       case 2:
-        i18n.changeLanguage('ar')
         saveSettings({ ...settings, direction: 'rtl' })
         break
       case 3:
-        i18n.changeLanguage('fr')
         saveSettings({ ...settings, direction: 'ltr' })
         break
 

@@ -31,7 +31,7 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 't
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
           variant='scrollable'
-          scrollButtons={_tabs.length > 3 ? 'auto' : 'off'}
+          scrollButtons={_tabs.length > 3 ? 'auto' : false}
           aria-label='scrollable tabs'
           classes={{ indicator: 'tabsIndicator' }}
           className={'tabs'}
@@ -49,17 +49,18 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 't
               label={
                 <Box display='flex' alignItems='center'>
                   <span>{tab.label}</span>
+
                   {tab.id === activeTab && tab?.onRefetch && (
-                    <IconButton
-                      size='small'
-                      className={'refreshButton'}
+                    <span
+                      className='refreshButton'
                       onClick={e => {
                         e.stopPropagation()
                         tab.onRefetch()
                       }}
+                      style={{ display: 'flex', cursor: 'pointer' }}
                     >
-                      <RefreshIcon className={'refreshIcon'} />
-                    </IconButton>
+                      <RefreshIcon className='refreshIcon' />
+                    </span>
                   )}
                 </Box>
               }

@@ -194,6 +194,7 @@ const WindowToolbar = ({
               return (
                 isVisible && (
                   <CustomButton
+                    key={button.key} 
                     onClick={handleClick}
                     label={button.label}
                     color={button.color}
@@ -218,6 +219,7 @@ const WindowToolbar = ({
             return (
               isVisible && (
                 <CustomButton
+                  key={button.key} 
                   onClick={handleClick}
                   label={button.label}
                   color={button.color}

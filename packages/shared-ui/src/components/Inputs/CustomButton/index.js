@@ -16,6 +16,7 @@ const CustomButton = ({
   style,
   ...props
 }) => {
+  
   const [tooltip, setTooltip] = useState(null)
   const buttonRef = useRef(null)
 
@@ -41,7 +42,7 @@ const CustomButton = ({
   return (
     <>
       <div
-        className={!props.fullWidth && styles.buttonContainer}
+        className={!props.fullWidth ? styles.buttonContainer : undefined}
         onMouseEnter={handleButtonMouseEnter}
         onMouseLeave={handleButtonMouseLeave}
       >

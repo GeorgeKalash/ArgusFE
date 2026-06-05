@@ -9,7 +9,6 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import * as yup from 'yup'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import i18n from '@argus/shared-configs/src/configs/i18n'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
@@ -64,7 +63,6 @@ const PersonalSettings = ({ _labels, access }) => {
     window.localStorage.setItem('languageId', obj.languageId)
 
     const currentSettings = JSON.parse(window.localStorage.getItem('settings')) || {}
-    changeLang(obj.languageId)
 
     const newSettings = {
       ...currentSettings,
@@ -72,23 +70,6 @@ const PersonalSettings = ({ _labels, access }) => {
     }
 
     window.localStorage.setItem('settings', JSON.stringify(newSettings))
-  }
-
-  const changeLang = id => {
-    switch (id) {
-      case 1:
-        i18n.changeLanguage('en')
-        break
-      case 2:
-        i18n.changeLanguage('ar')
-        break
-      case 3:
-        i18n.changeLanguage('fr')
-        break
-
-      default:
-        break
-    }
   }
 
   return (

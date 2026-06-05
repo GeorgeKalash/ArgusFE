@@ -46,11 +46,13 @@ const CustomComboBox = ({
   onOpen,
   onBlur = () => {},
   linkOpen,
+  maxAccess,
+  onClear,
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
     fullName,
-    props.maxAccess,
+    maxAccess,
     required,
     readOnly,
     hidden,
@@ -235,6 +237,7 @@ const CustomComboBox = ({
       }}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(propsOption, option) => {
+        const { key, ...liProps } = propsOption
         if (columnsInDropDown && columnsInDropDown.length > 0) {
           const columnsWithGrid = columnsInDropDown.map(col => ({
             ...col,
@@ -244,21 +247,21 @@ const CustomComboBox = ({
           const totalGrid = columnsWithGrid.reduce((sum, col) => sum + col.grid, 0)
 
           return (
-            <Box>
-              {propsOption.id.endsWith('-0') && (
-                <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
+            <Box key={key}>
+              {liProps.id.endsWith('-0') && (
+                <li className={`${liProps.className} ${dropdownStyles.dropdownHeaderRow}`}>
                   {columnsWithGrid.map((header, i) => {
                     const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                     return (
-                      <Box key={i} className={dropdownStyles.dropdownHeaderCell} style={{ width: widthPercent }}>
+                      <Box key={header.key} className={dropdownStyles.dropdownHeaderCell} style={{ width: widthPercent }}>
                         {header.value.toUpperCase()}
                       </Box>
                     )
                   })}
                 </li>
               )}
-              <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
+              <li {...liProps} className={`${liProps.className} ${dropdownStyles.dropdownOptionRow}`}>
                 {option.icon && (
                   <img src={option.icon} alt={option[displayField]} className={dropdownStyles.dropdownOptionIcon} />
                 )}
@@ -270,7 +273,7 @@ const CustomComboBox = ({
                   }
 
                   return (
-                    <Box key={i} className={dropdownStyles.dropdownOptionCell} style={{ width: widthPercent }}>
+                    <Box key={header.key} className={dropdownStyles.dropdownOptionCell} style={{ width: widthPercent }}>
                       {displayValue}
                     </Box>
                   )
@@ -280,8 +283,8 @@ const CustomComboBox = ({
           )
         } else {
           return (
-            <Box>
-              <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
+            <Box key={key}>
+              <li {...liProps} className={`${liProps.className} ${dropdownStyles.dropdownOptionRow}`}>
                 {option.icon && (
                   <img src={option.icon} alt={option[displayField]} className={dropdownStyles.dropdownOptionIcon} />
                 )}
@@ -395,7 +398,7 @@ const CustomComboBox = ({
             autoFocus={focus}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
-            className={[styles.customComboTextField]}
+            className={styles.customComboTextField}
             error={error}
             helperText={helperText}
             onBlur={e => {

@@ -5,7 +5,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useFormik } from 'formik'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
-import { Grow } from '@mui/material'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) => {
   const { getRequest } = useContext(RequestsContext)

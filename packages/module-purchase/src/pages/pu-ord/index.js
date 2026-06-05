@@ -1,4 +1,4 @@
-import { Grow } from '@mui/material'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import React, { useContext } from 'react'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import toast from 'react-hot-toast'

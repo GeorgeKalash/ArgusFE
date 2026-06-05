@@ -1708,7 +1708,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
                     handleButtonClick={handleDiscountButtonClick}
-                    ShowDiscountIcons={true}
                     onChange={e => {
                       let discount = Number(e.target.value.replace(/,/g, ''))
                       if (formik.values.tdType == 1) {

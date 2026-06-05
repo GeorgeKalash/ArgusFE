@@ -1,7 +1,7 @@
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import SearchIcon from '@mui/icons-material/Search'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import inputs from '../Inputs.module.css'
 
@@ -32,13 +32,14 @@ const CustomTextField = ({
   startIcons = [],
   endIcons = [],
   InputLabelProps,
+  maxAccess,
   ...props
 }) => {
   const name = props.name
 
   const { _readOnly, _required, _hidden } = checkAccess(
     name,
-    props.maxAccess,
+    maxAccess,
     props.required,
     readOnly,
     hidden
@@ -164,7 +165,6 @@ const CustomTextField = ({
       inputRef={inputRef}
       type={type}
       variant={variant}
-      defaultValue={value}
       value={value ?? ''}
       size={size}
       fullWidth={fullWidth}
@@ -180,15 +180,15 @@ const CustomTextField = ({
         readOnly: _readOnly,
         ...(phone ? {} : { maxLength }),
         ...(dir ? { dir } : {}),
-        inputMode: numberField && 'numeric',
-        pattern: numberField && '[0-9]*',
+        inputMode: numberField ? 'numeric' : undefined,
+        pattern: numberField ? '[0-9]*' : undefined,
         style: {
-          textAlign: numberField && 'right',
-          '-moz-appearance': 'textfield',
+          textAlign: numberField ? 'right' : undefined,
+          MozAppearance: 'textfield',
           textTransform: forceUpperCase ? 'uppercase' : 'none'
         },
         tabIndex: _readOnly ? -1 : 0,
-        'data-search': search ? 'true' : 'false'
+        'data-search': search || undefined
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
@@ -230,13 +230,28 @@ const CustomTextField = ({
               </IconButton>
             )}
 
-            {endIcons.map((iconBtn, index) =>
-              iconBtn ? (
-                <IconButton key={index} className={inputs.iconButton} tabIndex={-1}>
-                  {iconBtn}
+            {endIcons.map((iconBtn, index) => {
+              if (!iconBtn) return null
+
+              const handleClick = iconBtn.props?.onClick
+
+              return (
+                <IconButton
+                  key={index}
+                  className={inputs.iconButton}
+                  tabIndex={-1}
+                  onClick={handleClick}
+                  onMouseDown={iconBtn.props?.onMouseDown}
+                >
+                  {React.isValidElement(iconBtn)
+                    ? React.cloneElement(iconBtn, {
+                        onClick: undefined,
+                        onMouseDown: undefined
+                      })
+                    : iconBtn}
                 </IconButton>
-              ) : null
-            )}
+              )
+            })}
           </InputAdornment>
         )
       }}
