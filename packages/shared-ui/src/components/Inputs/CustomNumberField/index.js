@@ -138,7 +138,7 @@ const CustomNumberField = ({
       label={label}
       allowLeadingZeros
       allowNegative={allowNegative}
-      thousandSeparator={thousandSeparator}
+      thousandSeparator={thousandSeparator || null}
       decimalSeparator='.'
       decimalScale={decimalScale}
       value={value ?? ''}
