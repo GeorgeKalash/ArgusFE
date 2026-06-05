@@ -134,9 +134,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       })
 
       !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-      const res2 = await getPaymentVouchers(response.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      await getExpenses(res2.record)
+      refetchForm(response.recordId)
       invalidate()
     }
   })
@@ -180,6 +178,35 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     return payload
   }
 
+
+  async function refetchForm (recordId) {
+    const response = await getRequest({
+      extension: FinancialRepository.PaymentVouchers.get2,
+      parameters: `_recordId=${recordId}`
+    }) 
+
+    const expensesList = await Promise.all(
+      response.record.items.map(async item => {
+        const costCenters = await getCostCenters(recordId, item.seqNo)
+
+        return {
+          ...item,
+          id: item.seqNo,
+          isVAT: item.vatAmount != 0,
+          hasCostCenters: false,
+          costCenters: costCenters
+        }
+      })
+    )
+
+    formik.setValues({
+      ...response.record?.header,
+      date: formatDateFromApi(response?.record?.header?.date),
+      accountBalance: response.record?.accountBalance?.balance || 0,
+      expenses: expensesList
+    })
+  }
+
   const totalAmount = formik.values?.expenses?.reduce((amount, row) => {
     const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
 
@@ -191,13 +218,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   const editMode = !!formik.values.recordId
   const isVerified = formik.values.isVerified
 
-  async function getPaymentVouchers(recordId) {
-    return await getRequest({
-      extension: FinancialRepository.PaymentVouchers.get,
-      parameters: `_recordId=${recordId}`
-    })
-  }
-
   const onPost = async () => {
     try {
       const res = await postRequest({
@@ -207,9 +227,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
 
       toast.success(platformLabels.Posted)
       invalidate()
-      const res2 = await getPaymentVouchers(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      await getExpenses(res2.record)
+      refetchForm(res.recordId)
     } catch (exception) {}
   }
   async function getDTD(dtId) {
@@ -220,17 +238,20 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       })
 
       formik.setFieldValue('plantId', res?.record?.plantId || plantId)
-      const payment = await getCashAccountAndPayment(res?.record?.cashAccountId || cashAccountId)
+      const payment = await getDefaultFields(res?.record?.cashAccountId || cashAccountId)
       formik.setFieldValue('paymentMethod', res?.record?.paymentMethod || payment)
     }
   }
 
-  const getCashAccountAndPayment = async cashAccountId => {
+  const getDefaultFields = async cashAccountId => {
     if (cashAccountId) {
       const { record: cashAccountResult } = await getRequest({
         extension: CashBankRepository.CbBankAccounts.get,
         parameters: `_recordId=${cashAccountId}`
       })
+      const balance = await getBalance(cashAccountResult?.accountId, formik.values.currencyId)
+      formik.setFieldValue('accountBalance', balance || 0)
+      formik.setFieldValue('caAccountId', cashAccountResult?.accountId || null)
       formik.setFieldValue('cashAccountId', cashAccountResult?.recordId || null)
       formik.setFieldValue('cashAccountRef', cashAccountResult?.reference || '')
       formik.setFieldValue('cashAccountName', cashAccountResult?.name || '')
@@ -247,18 +268,19 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getPaymentVouchers(recordId)
-          res.record.date = formatDateFromApi(res.record.date)
-          await getExpenses(res.record)
-        } else {
-          getCashAccountAndPayment(cashAccountId)
-        }
+        if (recordId) await refetchForm(recordId)
         await getDefaultVAT()
-      } catch (e) {}
     })()
   }, [])
+  
+  useEffect(() => {
+    ;(async function () {
+      if (!recordId && cashAccountId && !documentType?.dtId) {
+        const payment = await getDefaultFields(cashAccountId)
+        formik.setFieldValue('paymentMethod', payment)
+      }
+    })()
+  }, [cashAccountId])
 
   async function getDefaultVAT() {
     const res = await getRequest({
@@ -289,9 +311,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
 
       toast.success(platformLabels.Cancelled)
       invalidate()
-      const res2 = await getPaymentVouchers(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      await getExpenses(res2.record)
+      refetchForm(res.recordId)
     } catch (e) {}
   }
 
@@ -317,9 +337,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     if (res?.recordId) {
       toast.success(platformLabels.Unposted)
       invalidate()
-      const res2 = await getPaymentVouchers(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      await getExpenses(res2.record)
+      refetchForm(res.recordId)
     }
   }
 
@@ -542,32 +560,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     }))
   }
 
-  const getExpenses = async data => {
-    const res = await getRequest({
-      extension: FinancialRepository.PaymentVoucherExpenses.qry,
-      parameters: `_pvId=${data.recordId}`
-    })
-
-    const expensesList = await Promise.all(
-      res.list.map(async item => {
-        const costCenters = await getCostCenters(data.recordId, item.seqNo)
-
-        return {
-          ...item,
-          id: item.seqNo,
-          isVAT: item.vatAmount != 0,
-          hasCostCenters: false,
-          costCenters: costCenters
-        }
-      })
-    )
-
-    formik.setValues({
-      ...data,
-      expenses: expensesList
-    })
-  }
-
   const subtotalSum = formik.values?.expenses?.reduce((subtotal, row) => {
     const subtotalValue = parseFloat(row.subtotal?.toString().replace(/,/g, '')) || 0
 
@@ -606,6 +598,18 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       if (res.record?.rateCalcMethod) formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
   }
+
+  async function getBalance (accId, currencyId) {
+    if (!accId || !currencyId) return 
+
+    const res = await getRequest({
+      extension: FinancialRepository.AccountCreditBalance.get,
+      parameters: `_accountId=${accId}&_currencyId=${currencyId}`
+    })
+
+    return res?.record?.balance
+  }
+
   useEffect(() => {
     ;(async function () {
       await getMultiCurrencyFormData(formik.values.currencyId, formik.values.date, RateDivision.FINANCIALS)
@@ -736,14 +740,17 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
+                      const balance = await getBalance(newValue?.accountId, formik.values.currencyId)
+                      formik.setFieldValue('accountBalance', balance || 0)
+                      formik.setFieldValue('caAccountId', newValue?.accountId || null)
                       formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                     }}
                     error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={8}>
                   <Grid container spacing={1} alignItems='center'>
-                    <Grid item xs={8}>
+                    <Grid item xs={6}>
                       <ResourceComboBox
                         endpointId={SystemRepository.Currency.qry}
                         name='currencyId'
@@ -765,13 +772,15 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                             formik.values.date,
                             RateDivision.FINANCIALS
                           )
+                          const balance = await getBalance(formik.values.caAccountId, newValue?.recordId)
+                          formik.setFieldValue('accountBalance', balance || 0)
                           formik.setFieldValue('currencyId', newValue ? newValue?.recordId : null)
                           formik.setFieldValue('currencyName', newValue?.name)
                         }}
                         error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                       />
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={1.5} sx={{ml: 2 }}>
                       <CustomButton
                         onClick={() => openMCRForm(formik.values)}
                         image='popup.png'
@@ -782,9 +791,18 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                         }
                       />
                     </Grid>
+                     <Grid item xs={4}>
+                      <CustomNumberField
+                        name='accountBalance'
+                        label={labels.balance}
+                        value={formik.values.accountBalance}
+                        readOnly
+                        maxAccess={maxAccess}
+                      />
+                    </Grid>
                   </Grid>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                   <ResourceComboBox
                     neverPopulate={true}
                     endpointId={FinancialRepository.DescriptionTemplate.qry}

@@ -133,10 +133,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       })
 
       !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-      const res2 = await getPaymentVouchers(response.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
-
+      await refetchForm(response.recordId)
       invalidate()
     }
   })
@@ -147,9 +144,9 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
         extension: CashBankRepository.CbBankAccounts.get,
         parameters: `_recordId=${cashAccountId}`
       })
-
       const balance = await getBalance(cashAccountResult?.accountId, formik.values.currencyId)
       formik.setFieldValue('accountBalance', balance || 0)
+      formik.setFieldValue('caAccountId', cashAccountResult?.accountId || null)
       formik.setFieldValue('cashAccountId', cashAccountResult?.recordId)
       formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
       formik.setFieldValue('cashAccountName', cashAccountResult.name)
@@ -157,6 +154,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       return cashAccountResult.paymentMethod
     } else {
       formik.setFieldValue('accountBalance', 0)
+      formik.setFieldValue('caAccountId', null)
       return null
     }
   }
@@ -203,11 +201,15 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   const editMode = !!formik.values.recordId
   const isVerified = formik.values.isVerified
 
-  async function getPaymentVouchers(recordId) {
-    return await getRequest({
-      extension: FinancialRepository.PaymentVouchers.get,
+  async function refetchForm (recordId) {
+    const response = await getRequest({
+      extension: FinancialRepository.PaymentVouchers.get2,
       parameters: `_recordId=${recordId}`
     })
+    
+    formik.setValues({...response.record.header, 
+      date: formatDateFromApi(response.record?.header?.date),
+      accountBalance: response.record?.accountBalance?.balance || 0})
   }
 
   const onPost = async () => {
@@ -219,9 +221,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
       invalidate()
-      const res2 = await getPaymentVouchers(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
+      refetchForm(res.recordId)
     }
   }
 
@@ -234,9 +234,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     if (res?.recordId) {
       toast.success(platformLabels.Unposted)
       invalidate()
-      const res2 = await getPaymentVouchers(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
+      refetchForm(res.recordId)
     }
   }
 
@@ -267,20 +265,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   }, [cashAccountId])
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: FinancialRepository.PaymentVouchers.get2,
-          parameters: `_recordId=${recordId}`
-        })
-
-        formik.setValues({
-          ...res.record?.header,
-          date: formatDateFromApi(res.record?.header?.date),
-          accountBalance: res.record?.accountBalance?.balance || 0
-        })
-      }
-    })()
+    if (recordId) refetchForm(recordId)
   }, [])
 
   const onWorkFlowClick = async () => {
@@ -302,9 +287,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     if (res?.recordId) {
       toast.success(platformLabels.Cancelled)
       invalidate()
-      const res2 = await getPaymentVouchers(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
+      refetchForm(res.recordId)
     }
   }
 
@@ -611,7 +594,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
                   const balance = await getBalance(newValue?.accountId, formik.values.currencyId)
-                  formik.setFieldValue('currentAccountId', newValue?.accountId || null)
+                  formik.setFieldValue('caAccountId', newValue?.accountId || null)
                   formik.setFieldValue('accountBalance', balance || 0)
                   formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
@@ -638,7 +621,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                     readOnly={isPosted || isCancelled}
                     values={formik.values}
                     onChange={async (_, newValue) => {
-                      const balance = await getBalance(formik.values.currentAccountId, newValue?.recordId)
+                      const balance = await getBalance(formik.values.caAccountId, newValue?.recordId)
                       await getMultiCurrencyFormData(newValue?.recordId, formik.values.date, RateDivision.FINANCIALS)
                       formik.setFieldValue('currencyName', newValue?.name)
                       formik.setFieldValue('accountBalance', balance || 0)
