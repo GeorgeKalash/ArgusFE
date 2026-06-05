@@ -97,8 +97,7 @@ export const ManufacturingRepository = {
     qry: service + 'qryCLS',
     set: service + 'setCLS',
     get: service + 'getCLS',
-    del: service + 'delCLS',
-    snapshot: service + 'qryCLS'
+    del: service + 'delCLS'
   },
   ProductionStandard: {
     qry: service + 'qrySTD',
