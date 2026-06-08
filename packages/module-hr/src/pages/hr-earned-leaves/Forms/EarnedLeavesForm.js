@@ -11,7 +11,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
@@ -27,7 +27,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.EarnedLeave.page
+    endpointId: LeaveManagementRepository.EarnedLeave.page
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -71,7 +71,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
       }
 
       const response = await postRequest({
-        extension: LoanManagementRepository.EarnedLeave.set2,
+        extension: LeaveManagementRepository.EarnedLeave.set2,
         record: JSON.stringify(itemsGridData)
       })
 
@@ -88,7 +88,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
   const getData = async recordId => {
     const res = await getRequest({
-      extension: LoanManagementRepository.EarnedLeave.get2,
+      extension: LeaveManagementRepository.EarnedLeave.get2,
       parameters: `_recordId=${recordId}`
     })
 
@@ -113,7 +113,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
   const onPost = async () => {
     const res = await postRequest({
-      extension: LoanManagementRepository.EarnedLeave.post,
+      extension: LeaveManagementRepository.EarnedLeave.post,
       record: JSON.stringify(formik.values)
     })
 
@@ -142,7 +142,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
     }
 
     const items = await getRequest({
-      extension: LoanManagementRepository.EarnedLeave.preview,
+      extension: LeaveManagementRepository.EarnedLeave.preview,
       parameters: `_lsId=${formik.values.lsId || 0}&_asOfDate=${formatDateForGetApI(formik.values.date)}`
     })
 
@@ -234,7 +234,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.LeaveScheduleFilters.qry}
+                endpointId={LeaveManagementRepository.LeaveScheduleFilters.qry}
                 name='lsId'
                 label={labels.leaveSchedule}
                 values={formik.values}

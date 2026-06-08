@@ -11,7 +11,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
@@ -22,7 +22,7 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.OpeningBalances.page
+    endpointId: LeaveManagementRepository.OpeningBalances.page
   })
 
   const { formik } = useForm({
@@ -42,7 +42,7 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: LoanManagementRepository.OpeningBalances.set,
+        extension: LeaveManagementRepository.OpeningBalances.set,
         record: JSON.stringify(obj)
       })
 
@@ -59,7 +59,7 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
     ;(async function () {
       if (obj?.employeeId && obj?.fiscalYear && obj?.lsId) {
         const { record } = await getRequest({
-          extension: LoanManagementRepository.OpeningBalances.get,
+          extension: LeaveManagementRepository.OpeningBalances.get,
           parameters: `_employeeId=${obj.employeeId}&_fiscalYear=${obj.fiscalYear}&_lsId=${obj.lsId}`
         })
 
@@ -120,7 +120,7 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
 
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.LeaveScheduleFilters.qry}
+                endpointId={LeaveManagementRepository.LeaveScheduleFilters.qry}
                 name='lsId'
                 label={labels.leaveSchedule}
                 values={formik.values}

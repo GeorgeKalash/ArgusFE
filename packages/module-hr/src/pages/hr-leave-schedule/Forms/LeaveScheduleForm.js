@@ -10,7 +10,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -80,7 +80,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.LeaveScheduleFilters.page
+    endpointId: LeaveManagementRepository.LeaveScheduleFilters.page
   })
 
   const { formik } = useForm({
@@ -108,7 +108,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
     }),
     onSubmit: values => {
       postRequest({
-        extension: LoanManagementRepository.LeaveScheduleFilters.set,
+        extension: LeaveManagementRepository.LeaveScheduleFilters.set,
         record: JSON.stringify(values)
       }).then(res => {
         formik.setFieldValue('recordId', res.recordId)
@@ -131,7 +131,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: LoanManagementRepository.LeaveScheduleFilters.get,
+          extension: LeaveManagementRepository.LeaveScheduleFilters.get,
           parameters: `_recordId=${recordId}`
         })
 
@@ -182,7 +182,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
 
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.LeaveTypes.qry}
+                endpointId={LeaveManagementRepository.LeaveTypes.qry}
                 filter={item => item.isPaid}
                 name='ltId'
                 label={labels.ltId}

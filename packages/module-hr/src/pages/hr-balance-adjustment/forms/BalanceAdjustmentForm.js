@@ -11,7 +11,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -35,7 +35,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
   })
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.BalanceAdjustment.page
+    endpointId: LeaveManagementRepository.BalanceAdjustment.page
   })
 
   const { formik } = useForm({
@@ -70,7 +70,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
     }),
     onSubmit: async obj => {
       postRequest({
-        extension: LoanManagementRepository.BalanceAdjustment.set,
+        extension: LeaveManagementRepository.BalanceAdjustment.set,
         record: JSON.stringify({
           ...obj,
           effectiveDate: formatDateToApi(obj.effectiveDate),
@@ -87,7 +87,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
 
   async function refetchForm(recordId) {
     const res = await getRequest({
-      extension: LoanManagementRepository.BalanceAdjustment.get,
+      extension: LeaveManagementRepository.BalanceAdjustment.get,
       parameters: `_recordId=${recordId}`
     })
 
@@ -188,7 +188,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.LeaveScheduleFilters.qry}
+                endpointId={LeaveManagementRepository.LeaveScheduleFilters.qry}
                 name='lsId'
                 label={labels.leaveSchedule}
                 values={formik.values}

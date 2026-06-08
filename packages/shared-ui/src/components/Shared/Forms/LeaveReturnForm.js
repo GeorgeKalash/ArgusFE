@@ -11,7 +11,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
@@ -29,7 +29,7 @@ export default function LeaveReturnForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.LeaveReturn.page
+    endpointId: LeaveManagementRepository.LeaveReturn.page
   })
 
   const { labels, access } = useResourceParams({
@@ -86,7 +86,7 @@ export default function LeaveReturnForm({ recordId, window }) {
       const { minDate, maxDate, employeeName, date, ...rest } = obj
 
       const response = await postRequest({
-        extension: LoanManagementRepository.LeaveReturn.set,
+        extension: LeaveManagementRepository.LeaveReturn.set,
         record: JSON.stringify({
           ...rest,
           date: formatDateToApi(date)
@@ -109,7 +109,7 @@ export default function LeaveReturnForm({ recordId, window }) {
   async function refetchForm(recordId) {
     if (recordId) {
       const { record } = await getRequest({
-        extension: LoanManagementRepository.LeaveReturn.get,
+        extension: LeaveManagementRepository.LeaveReturn.get,
         parameters: `_recordId=${recordId}`
       })
 
@@ -127,7 +127,7 @@ export default function LeaveReturnForm({ recordId, window }) {
 
   const onClose = async () => {
     await postRequest({
-      extension: LoanManagementRepository.LeaveReturn.close,
+      extension: LeaveManagementRepository.LeaveReturn.close,
       record: JSON.stringify({
         ...rest,
         date: formatDateToApi(date)
@@ -141,7 +141,7 @@ export default function LeaveReturnForm({ recordId, window }) {
 
   const onReopen = async () => {
     await postRequest({
-      extension: LoanManagementRepository.LeaveReturn.reopen,
+      extension: LeaveManagementRepository.LeaveReturn.reopen,
       record: JSON.stringify({
         ...rest,
         date: formatDateToApi(date)
@@ -180,7 +180,7 @@ export default function LeaveReturnForm({ recordId, window }) {
     if (!leaveId || !key) return
 
     const { record } = await getRequest({
-      extension: LoanManagementRepository.LeaveRequest.get,
+      extension: LeaveManagementRepository.LeaveRequest.get,
       parameters: `_recordId=${leaveId}`
     })
 
@@ -273,7 +273,7 @@ export default function LeaveReturnForm({ recordId, window }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={formik.values.employeeId && LoanManagementRepository.LeaveRequest.qry}
+                endpointId={formik.values.employeeId && LeaveManagementRepository.LeaveRequest.qry}
                 parameters={`_filter=&_multiDayLeave=2&_params=1|${formik.values.employeeId}&_sortBy=recordId&_startAt=0&_size=100`}
                 filter={item => item.status == 4}
                 displayField={['reference', { name: 'startDate', type: 'date' }, { name: 'endDate', type: 'date' }]}

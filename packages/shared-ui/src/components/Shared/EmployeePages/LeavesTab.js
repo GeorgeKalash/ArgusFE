@@ -7,17 +7,20 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { Typography } from '@mui/material'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { formatDateTimeForGetAPI } from '@argus/shared-domain/src/lib/date-helper'
-import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
+import toast from 'react-hot-toast'
 
 const LeavesTab = ({ labels, maxAccess, store, isActive }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
   async function fetchGridData() {
     const response = await getRequest({
-      extension: LoanManagementRepository.Leaves.qry,
+      extension: LeaveManagementRepository.Leaves.qry,
       parameters: `_filter=&_size=30&_startAt=0&_lsId=0&_employeeId=${recordId}&_asOfDate=${
         store?.date ? formatDateTimeForGetAPI(store?.date) : formatDateTimeForGetAPI(new Date())
       }`
@@ -40,15 +43,32 @@ const LeavesTab = ({ labels, maxAccess, store, isActive }) => {
   }
 
   const {
-    query: { data },
-    invalidate
+    query: { data }
   } = useResourceQuery({
     enabled: !!recordId,
     queryFn: fetchGridData,
-    endpointId: LoanManagementRepository.Leaves.qry,
+    endpointId: LeaveManagementRepository.Leaves.qry,
     datasetId: ResourceIds.EmployeeFilter,
     params: { disabledReqParams: true, maxAccess }
   })
+
+
+  async function handleSubmit() {
+    const records = data.list
+      .filter(item => item.checked)
+      .map(item => ({
+        employeeId: recordId,
+        lastGeneratedEarnedLeave: null,
+        lsId: item?.schedule?.recordId
+      }))
+
+      postRequest({
+        extension: LeaveManagementRepository.EmployeeLeaveSchedule.set2,
+        record: JSON.stringify({ employeeId: recordId, schedules: records })
+      })
+
+      toast.success(platformLabels.Updated)
+  }
 
   const columns = [
     {
@@ -100,49 +120,28 @@ const LeavesTab = ({ labels, maxAccess, store, isActive }) => {
   ]
 
   return (
-    <VertLayout>
-      <Fixed>
-        <Typography variant='h6' padding={2}>
-          {labels.LeaveBalance}
-        </Typography>
-      </Fixed>
-      <Grow>
-        <Table
-          name='leaveBalanceTable'
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          showCheckboxColumn={true}
-          handleCheckboxChange={async (data, checked) => {
-            if (!checked) {
-              await postRequest({
-                extension: EmployeeRepository.Leaves.del,
-                record: JSON.stringify({
-                  employeeId: recordId,
-                  ltId: data?.schedule?.ltId,
-                  lsId: data?.schedule?.recordId
-                })
-              })
-            } else {
-              await postRequest({
-                extension: EmployeeRepository.Leaves.set,
-                record: JSON.stringify({
-                  employeeId: recordId,
-                  ltId: data?.schedule?.ltId,
-                  lsId: data?.schedule?.recordId
-                })
-              })
-            }
-
-            invalidate()
-          }}
-          pagination={false}
-          maxAccess={maxAccess}
-          showSelectAll={false}
-          disableCheckBox={!isActive}
-        />
-      </Grow>
-    </VertLayout>
+    <Form onSave={handleSubmit} disabledSubmit={!isActive} maxAccess={maxAccess} fullSize>
+      <VertLayout>
+        <Fixed>
+          <Typography variant='h6' padding={2}>
+            {labels.LeaveBalance}
+          </Typography>
+        </Fixed>
+        <Grow>
+          <Table
+            name='leaveBalanceTable'
+            columns={columns}
+            gridData={data}
+            rowId={['schedule.recordId']}
+            showCheckboxColumn={true}
+            pagination={false}
+            maxAccess={maxAccess}
+            showSelectAll={false}
+            disableCheckBox={!isActive}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 
