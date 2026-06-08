@@ -476,8 +476,8 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
           } else {
             await addRow(lineObj)
 
-            if (formik.values.header?.recordId) {
-              await refetchForm(formik.values.header.recordId)
+            if (formik.values?.recordId) {
+              await refetchForm(formik.values?.recordId)
             }
           }
         }
@@ -744,8 +744,8 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     if (action === 'delete') {
       setReCal(true)
 
-      if (formik.values.header?.recordId) {
-        await refetchForm(formik.values.header.recordId)
+      if (formik.values?.recordId) {
+        await refetchForm(formik.values.recordId)
       }
 
       return

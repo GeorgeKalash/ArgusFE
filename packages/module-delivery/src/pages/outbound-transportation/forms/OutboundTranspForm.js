@@ -283,12 +283,15 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         mapping: [
           { from: 'recordId', to: 'soId' },
           { from: 'reference', to: 'soRef' },
-          { from: 'date', to: 'date' },
-          { from: 'clientId', to: 'clientId' },
+          { from: 'date', to: 'soDate' },
           { from: 'clientRef', to: 'clientRef' },
           { from: 'clientName', to: 'clientName' },
           { from: 'volume', to: 'soVolume' },
+          { from: 'weight', to: 'soWeight' },
+          { from: 'qty', to: 'soQty' },
           { from: 'szName', to: 'szName' },
+          { from: 'szId', to: 'szId' },
+          { from: 'szRef', to: 'szRef' },
           { from: 'wipName', to: 'soWipStatusName' }
         ],
         columnsInDropDown: [{ key: 'reference', value: 'Reference' }],
@@ -296,7 +299,8 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       },
       onChange({ row: { update, newRow } }) {
         update({
-          soDate: newRow.date ? formatDateFromApi(newRow?.date) : null
+          soDate: newRow.soDate ? formatDateFromApi(newRow.soDate) : null,
+          tripId: formik.values.recordId
         })
       }
     },

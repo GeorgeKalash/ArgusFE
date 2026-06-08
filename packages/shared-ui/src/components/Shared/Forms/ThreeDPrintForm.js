@@ -121,11 +121,13 @@ export default function ThreeDPrintForm({ recordId, window }) {
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res?.record?.date),
-      startDate: formatDateFromApi(res?.record?.startDate),
-      endDate: formatDateFromApi(res?.record?.endDate)
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: formatDateFromApi(res?.record?.date),
+        startDate: formatDateFromApi(res?.record?.startDate),
+        endDate: formatDateFromApi(res?.record?.endDate)
+      }
     })
   }
 
@@ -163,7 +165,13 @@ export default function ThreeDPrintForm({ recordId, window }) {
   const actions = [
     {
       key: 'Locked',
-      condition: true,
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || isPosted || !isReleased
     },
@@ -451,7 +459,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     decimalScale={0}
                     readOnly={isPosted}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('nbOfLayers', '')}
+                    onClear={() => formik.setFieldValue('nbOfLayers', null)}
                     error={formik.touched.nbOfLayers && Boolean(formik.errors.nbOfLayers)}
                   />
                 </Grid>
