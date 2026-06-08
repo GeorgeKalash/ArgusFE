@@ -75,6 +75,7 @@ export default function ProductionOrderForm({ recordId, window }) {
       plantId,
       lineId: null,
       notes: '',
+      periodTitleId: null,
       date: new Date(),
       status: 1,
       rows: [
@@ -471,6 +472,18 @@ export default function ProductionOrderForm({ recordId, window }) {
     invalidate()
   }
 
+
+  const onReopen = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.ProductionOrder.reopen,
+      record: JSON.stringify({ recordId: formik.values.recordId })
+    })
+
+    toast.success(platformLabels.Reopened)
+    await refetchForm(formik.values.recordId)
+    invalidate()
+  }
+
   const onWorkFlowClick = async () => {
     stack({
       Component: WorkFlow,
@@ -508,9 +521,15 @@ export default function ProductionOrderForm({ recordId, window }) {
     },
     {
       key: 'Close',
-      condition: true,
+      condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode
+      disabled: isPosted || isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || isPosted
     },
     {
       key: 'Import',
@@ -621,6 +640,20 @@ export default function ProductionOrderForm({ recordId, window }) {
                       formik.setFieldValue('plantId', newValue?.recordId)
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.FiscalPeriod.qry}
+                    name='periodTitleId'
+                    label={labels.period}
+                    valueField='periodId'
+                    displayField='name'
+                    values={formik.values}
+                    readOnly={isPosted || isClosed}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('periodTitleId', newValue?.periodId || null)}
+                    error={formik.touched.periodTitleId && Boolean(formik.errors.periodTitleId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
