@@ -10,8 +10,16 @@ const SegmentedInput = ({ name, value, onChange, label, error, required, readOnl
 
   const handleInputChange = event => {
     if (!readOnly) {
-      const { value } = event.target
-      onChange({ value, segments: value.split('-') })
+      let { value } = event.target
+
+      if (!/\d/.test(value)) {
+        value = ''
+      }
+
+      onChange({
+        value,
+        segments: value ? value.split('-') : []
+      })
     }
   }
 
