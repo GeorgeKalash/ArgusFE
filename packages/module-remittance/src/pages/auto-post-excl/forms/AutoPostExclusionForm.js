@@ -387,10 +387,7 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
                   columns={rowColumns}
                   gridData={{ list: formik.values.items }}
                   rowId={['plantId']}
-                  pageSize={50}
                   pagination={false}
-                  paginationType='client'
-                  isLoading={false}
                   maxAccess={maxAccess}
                   showCheckboxColumn={true}
                 />

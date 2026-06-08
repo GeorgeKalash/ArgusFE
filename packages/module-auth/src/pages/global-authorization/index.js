@@ -180,7 +180,6 @@ const GlobalAuthorization = () => {
         ]}
         gridData={data ?? { list: [] }}
         rowId={['key']}
-        isLoading={false}
         pageSize={50}
         maxAccess={access}
         refetch={refetch}

@@ -123,7 +123,6 @@ const Routings = () => {
           onEdit={edit}
           onDelete={del}
           refetch={refetch}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           maxAccess={access}

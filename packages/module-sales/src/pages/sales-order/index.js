@@ -205,7 +205,6 @@ const SalesOrder = () => {
           refetch={refetch}
           onDelete={delSO}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

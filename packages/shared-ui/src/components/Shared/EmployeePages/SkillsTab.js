@@ -30,7 +30,6 @@ const SkillsTab = ({ labels, maxAccess, store, isActive }) => {
 
   const {
     query: { data },
-    refetch,
     invalidate
   } = useResourceQuery({
     enabled: !!recordId,
@@ -121,9 +120,7 @@ const SkillsTab = ({ labels, maxAccess, store, isActive }) => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={isActive ? del : null}
-          pageSize={50}
           pagination={false}
-          refetch={refetch}
           maxAccess={maxAccess}
         />
       </Grow>

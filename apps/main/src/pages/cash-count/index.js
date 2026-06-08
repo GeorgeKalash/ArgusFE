@@ -153,7 +153,6 @@ const CashCount = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           refetch={refetch}
           pageSize={50}
           paginationType='client'

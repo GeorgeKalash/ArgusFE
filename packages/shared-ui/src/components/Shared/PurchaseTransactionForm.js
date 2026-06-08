@@ -65,8 +65,9 @@ import Installments from '@argus/shared-ui/src/components/Shared/Installments'
 import { PUSerialsForm } from '@argus/shared-ui/src/components/Shared/PUSerialsForm'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-import useSetWindow from "@argus/shared-hooks/src/hooks/useSetWindow";
-import useResourceParams from "@argus/shared-hooks/src/hooks/useResourceParams";
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import ChangeVendor from '@argus/shared-ui/src/components/Shared/ChangeVendor'
 
 export default function PurchaseTransactionForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -187,6 +188,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
         itemName: '',
         seqNo: 1,
         siteId: '',
+        isVatable: false,
         muId: null,
         qty: 0,
         volume: 0,
@@ -714,19 +716,10 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 4,
-        allowClear: false
+        displayFieldWidth: 4
       },
       async onChange({ row: { update, newRow, oldRow } }) {
-        if (!newRow?.taxId && oldRow?.taxId) {
-          update({
-            taxId: oldRow.taxId,
-            taxName: oldRow.taxName
-          })
-          return
-        }
         setReCal(true)
-
         const { header, recordId } = formik.values
         const isVattable = header?.isVattable
 
@@ -796,7 +789,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
         })
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: formik.values?.header?.taxId || !row?.taxId }
+        return { ...props, readOnly: !(formik.values?.header?.isVattable && row?.isVatable) }
       }
     },
     {
@@ -1352,7 +1345,8 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       trackBy: itemInfo?.trackBy,
       taxId: effectiveTaxId,
       taxName: effectiveTaxName,
-      taxDetails: null
+      taxDetails: null,
+      isVatable: Boolean(effectiveTaxId)
     }
     let data = getItemPriceRow(updatedRowValues, DIRTYFIELD_QTY)
 
@@ -1583,13 +1577,13 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
-      currentDiscount: currentDiscount,
+      currentDiscount, 
       hiddenTdPct: tdPct,
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange: typeChange
     })
-    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
 
+    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
     formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
@@ -1607,7 +1601,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
         extendedPrice: item?.extendedPrice,
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: item?.vatAmount,
-        tdPct: tdPct,
+        tdPct,
         taxDetails: formik.values.header.isVattable === true && item?.taxDetails
           ? item.taxDetails.map(td => ({
               ...td,
@@ -1620,8 +1614,8 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   }
 
   async function recalcGridVat(typeChange, tdPct, tdAmount, currentDiscount) {
-    const currentTdPct = checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
-    recalcNewVat(currentTdPct)
+   const currentTdPct = checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
+   recalcNewVat(currentTdPct)
   }
 
   async function refetchForm(recordId) {
@@ -1925,6 +1919,23 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     })
   }
 
+  async function updateValues(fields) {
+    setReCal(true)
+    let tdAmount = 0
+
+    Object.entries(fields).forEach(([key, val]) => {
+      if (key == 'tdAmount') tdAmount = val || 0
+      formik.setFieldValue(`header.${key}`, val)
+    })
+
+    formik.setFieldValue('header.currentDiscount',tdAmount)
+    recalcGridVat(
+      formik.values.header.tdType,
+      formik.values.header.tdPct,
+      tdAmount,
+      tdAmount
+    )
+  }
 
   return (
     <FormShell
@@ -2157,7 +2168,24 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                 editMode={editMode}
               />
             </Grid>
-            <Grid item xs={2.4}>
+              <Grid item xs={1}>
+              <CustomButton
+                onClick={() => {
+                  stack({
+                    Component: ChangeVendor,
+                    props: {
+                      formValues: formik.values.header,
+                      onSubmit: fields => updateValues(fields)
+                    }
+                  })
+                }}
+                label={platformLabels.ChangeVendor}
+                disabled={!editMode || isPosted}
+                image={'popup.png'}
+                color='#231f20'
+              />
+            </Grid>
+            <Grid item xs={1.4}>
               <CustomCheckBox
                 name='header.isVattable'
                 value={formik.values?.header?.isVattable}

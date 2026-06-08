@@ -206,7 +206,6 @@ const InwardTransfer = () => {
           rowId={['recordId']}
           onEdit={editTransfer}
           onDelete={delTransfer}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationType='client'

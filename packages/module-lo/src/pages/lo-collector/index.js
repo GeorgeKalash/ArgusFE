@@ -101,7 +101,6 @@ const LoCollector = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           refetch={refetch}

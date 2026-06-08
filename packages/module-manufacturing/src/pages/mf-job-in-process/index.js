@@ -20,6 +20,7 @@ import * as yup from 'yup'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 
 const JobInProcess = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -48,7 +49,7 @@ const JobInProcess = () => {
   })
 
   const { formik } = useForm({
-    initialValues: { workCenterId: null, workCenterName: '', workCenterRef: '' },
+    initialValues: { workCenterId: null, workCenterName: '', workCenterRef: '', lineId: null },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -67,7 +68,7 @@ const JobInProcess = () => {
           parameters: `_recordId=${workCenterId}`
         })
 
-        formik.setValues({ workCenterId: workCenterId, workCenterName: record.name, workCenterRef: record.reference })
+        formik.setValues({ ...formik.values, workCenterId: workCenterId, workCenterName: record.name, workCenterRef: record.reference })
       }
     })()
   }, [workCenterId])
@@ -77,7 +78,7 @@ const JobInProcess = () => {
     if (formik.values.workCenterId) {
       const response = await getRequest({
         extension: ManufacturingRepository.MFJobOrder.wip,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_workCenterId=${formik.values.workCenterId}&_params=`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_workCenterId=${formik.values.workCenterId}&_lineId=${formik.values.lineId || 0}&_params=`
       })
 
       return { ...response, _startAt: _startAt }
@@ -212,12 +213,34 @@ const JobInProcess = () => {
               ]}
               onChange={(event, newValue) => {
                 formik.setValues({
+                  ...formik.values,
                   workCenterId: newValue?.recordId || null,
                   workCenterRef: newValue?.reference || '',
                   workCenterName: newValue?.name || ''
                 })
               }}
               error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <ResourceComboBox
+              endpointId={ManufacturingRepository.ProductionLine.qry}
+              parameters='_startAt=0&_pageSize=1000'
+              values={formik.values}
+              name='lineId'
+              label={labels.productionLine}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              displayFieldWidth={1}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              maxAccess={maxAccess}
+              onChange={(_, newValue) => {
+                formik.setFieldValue('lineId', newValue?.recordId || null)
+              }}
+              error={formik.touched.lineId && Boolean(formik.errors.lineId)}
             />
           </Grid>
           <Grid item xs={2}>
@@ -236,7 +259,6 @@ const JobInProcess = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

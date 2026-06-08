@@ -157,7 +157,6 @@ const Correspondent = () => {
           refetch={refetch}
           onEdit={popup}
           onDelete={delCorrespondent}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />

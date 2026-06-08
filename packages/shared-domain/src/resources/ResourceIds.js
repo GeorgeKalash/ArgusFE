@@ -188,7 +188,6 @@ export const ResourceIds = {
   PriceLevels: 51101,
   ProductionRequestLog: 42321,
   CashCountTransaction: 37301,
-  ExchangeRates: 32103,
   CbBankAccounts: 33105,
   Terrapay: 36307,
   CashNote: 37101,
@@ -324,7 +323,7 @@ export const ResourceIds = {
   EmploymentStatusFilter: 71107,
   SponsorFilter: 71108,
   AttendanceSchedule: 72105,
-  IndemnityAccuralsFilter: 73101,
+  LeaveTypes: 73101,
   LeaveScheduleFilter: 73103,
   PayrollFilter: 75201,
   BankTransferFilter: 75111,
@@ -638,6 +637,7 @@ export const ResourceIds = {
   StandardCostUpdate: 42140,
   PayPeriod: 75108,
   EmployeeMissingDetails: 71407,
+  ChangeVendor: 50615,
 
   // GL
   GLSalesInvoice: 51604,
@@ -672,6 +672,7 @@ export const ResourceIds = {
   GLRetailInvoiceReturn: 54601,
   GLRetailPurchase: 54602,
   GLRetailPurchaseReturn: 54603,
+  POSInquiry: 54605,
   GLOutwardReturnSettlement: 36606,
   GLRemittanceReceiptVoucher: 36607,
   GLShipments: 50609,
@@ -685,6 +686,11 @@ export const ResourceIds = {
   GLWorkOrder: 45600,
   GLPayrollList: 75600,
   GLItemDisposal: 42610,
+
+  BtDefaults: 38601,
+  CommodityPair: 38101,
+  FixingSales: 38302,
+  FixingPurchases: 38303,
 
   //MCR
   MCRSalesInvoice: 51607,

@@ -121,7 +121,7 @@ export const FinancialRepository = {
   ReceiptVouchers: {
     pack: service + 'getPackRV',
     qry: service + 'qryRV',
-    get: service + 'getRV',
+    get2: service + 'get2RV',
     set: service + 'setRV',
     del: service + 'delRV',
     page: service + 'pageRV',
@@ -156,6 +156,7 @@ export const FinancialRepository = {
     page2: service + 'pagePV2',
     page3: service + 'pagePV3',
     get: service + 'getPV',
+    get2: service + 'get2PV',
     set2: service + 'set2PV',
     set: service + 'setPV',
     del: service + 'delPV',
@@ -294,5 +295,9 @@ export const FinancialRepository = {
     qry: service + 'qryRCL',
     set: service + 'setRCL',
     del: service + 'delRCL'
+  },
+  AccountCurrencies: {
+    qry: service + 'qryACU',
+    set2: service + 'set2ACU'
   }
 }

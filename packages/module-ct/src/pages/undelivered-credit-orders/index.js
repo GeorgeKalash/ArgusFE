@@ -164,7 +164,6 @@ const UndeliveredCreditOrder = () => {
           gridData={data ?? { list: [] }}
           rowId={['recordId']}
           onEdit={edit}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           refetch={refetch}

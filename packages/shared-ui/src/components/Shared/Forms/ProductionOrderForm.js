@@ -23,7 +23,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import ImportForm from '@argus/shared-ui/src/components/Shared/ImportForm'
@@ -76,6 +75,7 @@ export default function ProductionOrderForm({ recordId, window }) {
       plantId,
       lineId: null,
       notes: '',
+      periodTitleId: null,
       date: new Date(),
       status: 1,
       rows: [
@@ -164,28 +164,6 @@ export default function ProductionOrderForm({ recordId, window }) {
     toast.success(platformLabels.Posted)
     window.close()
     invalidate()
-  }
-
-  async function onGenerateAssembly() {
-    const res = await postRequest({
-      extension: ManufacturingRepository.Assembly.generate,
-      record: JSON.stringify({
-        poId: formik.values.recordId
-      })
-    })
-
-    stack({
-      Component: ConfirmationDialog,
-      props: {
-        DialogText: res?.recordId || platformLabels.NoAssembliesGenerated,
-        fullScreen: false,
-        close: true,
-        okButtonAction: () => window.close()
-      },
-      width: 500,
-      height: 150,
-      title: res?.recordId ? platformLabels.Success : platformLabels.Error
-    })
   }
 
   async function getDTD(dtId) {
@@ -494,6 +472,18 @@ export default function ProductionOrderForm({ recordId, window }) {
     invalidate()
   }
 
+
+  const onReopen = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.ProductionOrder.reopen,
+      record: JSON.stringify({ recordId: formik.values.recordId })
+    })
+
+    toast.success(platformLabels.Reopened)
+    await refetchForm(formik.values.recordId)
+    invalidate()
+  }
+
   const onWorkFlowClick = async () => {
     stack({
       Component: WorkFlow,
@@ -531,21 +521,15 @@ export default function ProductionOrderForm({ recordId, window }) {
     },
     {
       key: 'Close',
-      condition: true,
+      condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode
+      disabled: isPosted || isClosed || !editMode
     },
     {
-      key: 'generate',
-      condition: true,
-      onClick: onGenerateAssembly,
-      disabled: !editMode
-    },
-    {
-      key: 'GenerateJob',
-      condition: true,
-      onClick: generateJob,
-      disabled: !isPosted
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || isPosted
     },
     {
       key: 'Import',
@@ -560,16 +544,6 @@ export default function ProductionOrderForm({ recordId, window }) {
       disabled: isPosted
     }
   ]
-
-  async function generateJob() {
-    const { rows, rsName, statusName, wipName, batchId, date, plantRef, plantName, isVerified, ...rest } = formik.values
-    await postRequest({
-      extension: ManufacturingRepository.JobOrder.gen,
-      record: JSON.stringify({ ...rest, date: formatDateToApi(date) })
-    })
-
-    toast.success(platformLabels.Generated)
-  }
 
   async function sync() {
     await postRequest({
@@ -611,7 +585,7 @@ export default function ProductionOrderForm({ recordId, window }) {
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
@@ -662,10 +636,24 @@ export default function ProductionOrderForm({ recordId, window }) {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('plantId', newValue?.recordId)
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.FiscalPeriod.qry}
+                    name='periodTitleId'
+                    label={labels.period}
+                    valueField='periodId'
+                    displayField='name'
+                    values={formik.values}
+                    readOnly={isPosted || isClosed}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('periodTitleId', newValue?.periodId || null)}
+                    error={formik.touched.periodTitleId && Boolean(formik.errors.periodTitleId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -682,7 +670,7 @@ export default function ProductionOrderForm({ recordId, window }) {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('lineId', newValue?.recordId)
                     }}
                     error={formik.touched.lineId && Boolean(formik.errors.lineId)}

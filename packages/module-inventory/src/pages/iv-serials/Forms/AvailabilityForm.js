@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -9,10 +9,8 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const AvailabilityForm = ({ labels, recordId: srlNo, access }) => {
   const { getRequest } = useContext(RequestsContext)
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-
     const response = await getRequest({
       extension: InventoryRepository.AvailabilitySerial.qry,
       parameters: `_itemId=0&_siteId=0&_srlNo=${srlNo}&_startAt=${_startAt}&_pageSize=${_pageSize}`
@@ -34,7 +32,7 @@ const AvailabilityForm = ({ labels, recordId: srlNo, access }) => {
   })
 
   useEffect(() => {
-    fetchGridData()
+    refetch()
   }, [srlNo])
 
   const columns = [

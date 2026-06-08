@@ -107,7 +107,6 @@ const ModuleDeactivation = () => {
             columns={columns}
             gridData={data}
             rowId={['moduleId']}
-            isLoading={false}
             maxAccess={access}
             showCheckboxColumn={true}
             pagination={false}

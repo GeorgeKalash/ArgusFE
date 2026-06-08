@@ -120,7 +120,7 @@ const DeliveryOrders = () => {
       headerName: _labels.invoice,
       type: "icon",
       family: "invoice",
-      valueField: "invoice",
+      valueField: "invoiceId",
       flex: 1
     }
   ]
@@ -170,7 +170,6 @@ const DeliveryOrders = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

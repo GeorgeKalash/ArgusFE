@@ -64,6 +64,7 @@ export default function JobOrderForm({
     recordId: recordId || null,
     dtId: null,
     reference: null,
+    poRef: null,
     date: new Date(),
     plantId: null,
     designId: null,
@@ -535,10 +536,7 @@ export default function JobOrderForm({
       threeDDId: values?.threeDDId || null,
       threeDDRef: values?.threeDDRef || '',
       rubberId: values?.rubberId || null,
-      rubberRef: values?.rubberRef || '',
-      itemId: values?.itemId || null,
-      itemName: values?.itemName || '',
-      sku: values?.sku || '',
+      rubberRef: values?.rubberRef || ''
     }
 
     if (!isReleased) {
@@ -1084,10 +1082,19 @@ export default function JobOrderForm({
                       recordId={formik.values.recordId}
                       seqNo={0}
                       customWidth={300}
-                      customHeight={180}
+                      customHeight={160}
                       disabled={isCancelled || isPosted}
                       isAbsolutePath={true}
                       parentImage={parentImage}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomTextField
+                      name='poRef'
+                      label={labels.productionOrder}
+                      value={formik?.values?.poRef}
+                      maxAccess={maxAccess}
+                      readOnly
                     />
                   </Grid>
                   <Grid item xs={12}>

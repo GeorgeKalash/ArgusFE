@@ -7,13 +7,13 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-import ReceiptVoucherForm from './forms/ReceiptVoucherForm'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import toast from 'react-hot-toast'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import FIReceiptVoucherForm from '@argus/shared-ui/src/components/Shared/Forms/FIReceiptVoucherForm'
 
 export default function CurrencyTrading() {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,15 +22,10 @@ export default function CurrencyTrading() {
 
   function openForm(recordId) {
     stack({
-      Component: ReceiptVoucherForm,
+      Component: FIReceiptVoucherForm,
       props: {
-        labels,
-        maxAccess: access,
         recordId: recordId || null
       },
-      width: 1100,
-      height: 700,
-      title: labels.receiptVoucher
     })
   }
 
@@ -176,7 +171,6 @@ export default function CurrencyTrading() {
           onDelete={del}
           gridData={data ? data : { list: [] }}
           rowId={['recordId']}
-          isLoading={false}
           refetch={refetch}
           deleteConfirmationType={'strict'}
           paginationParameters={paginationParameters}

@@ -244,7 +244,6 @@ const CashTransfer = () => {
           rowId={['recordId']}
           onEdit={editCashTFR}
           onDelete={delCashTFR}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationType='client'

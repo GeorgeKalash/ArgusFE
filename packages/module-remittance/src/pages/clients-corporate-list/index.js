@@ -146,7 +146,6 @@ const ClientsCorporateList = () => {
           columns={columns}
           gridData={data ? data : { list: [] }}
           rowId={['recordId']}
-          isLoading={false}
           maxAccess={access}
           onEdit={editClient}
           pageSize={50}

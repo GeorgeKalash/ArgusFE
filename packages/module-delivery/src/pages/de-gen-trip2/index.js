@@ -239,7 +239,7 @@ const GenerateOutboundTransportation2 = () => {
     {
       field: 'seqNo',
       headerName: labels.seqNo,
-      width: 100
+      flex: 0.5
     },
     {
       field: 'allocatedVolume',
@@ -264,34 +264,34 @@ const GenerateOutboundTransportation2 = () => {
     {
       field: 'szName',
       headerName: labels.saleZone,
-      width: 130
+      flex: 1
     },
     {
       field: 'orderRef',
       headerName: labels.reference,
-      width: 130
+      flex: 1
     },
     {
       field: 'orderDate',
       headerName: labels.orderDate,
       type: 'date',
-      width: 130
+      flex: 1
     },
     {
       field: 'clientName',
       headerName: labels.clientName,
-      width: 130
+      flex: 2
     },
     {
       field: 'volume',
       headerName: labels.volume,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'notes',
       headerName: labels.notes,
-      flex: 1,
+      flex: 3,
       wrapText: true,
       autoHeight: true
     }
@@ -302,24 +302,24 @@ const GenerateOutboundTransportation2 = () => {
       field: 'date',
       headerName: labels.date,
       type: 'date',
-      width: 120
+      flex: 1
     },
     {
       field: 'reference',
       headerName: labels.reference,
-      width: 130
+      flex: 1
     },
     {
       field: 'spName',
       headerName: labels.salesPerson,
-      flex: 1,
+      flex: 2,
       wrapText: true,
       autoHeight: true
     },
     {
       field: 'szName',
       headerName: labels.zone,
-      flex: 1,
+      flex: 2,
       wrapText: true,
       autoHeight: true
     },
@@ -328,23 +328,33 @@ const GenerateOutboundTransportation2 = () => {
       headerName: labels.client,
       wrapText: true,
       autoHeight: true,
-      flex: 1
+      flex: 2
     },
     {
       field: 'amount',
       headerName: labels.amount,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'volume',
       headerName: labels.volume,
       type: 'number',
-      width: 130
+      flex: 1
     }
   ]
 
-  const onSaleZoneChange = async (szId, itemCategoryId) => {
+  const onSaleZoneChange = async (szId, itemCategoryId, preserveChecks = false) => {
+    const selectedZoneIds = new Set(
+      (selectedSaleZones?.list || []).map(zone => zone.szId)
+    )
+
+    const checkedZoneIds = new Set(
+      (formik.values.salesZones?.list || [])
+        .filter(zone => zone.checked)
+        .map(zone => zone.szId)
+    )
+
     if (szId) {
       const response = await getRequest({
         extension: DeliveryRepository.Volume.vol,
@@ -363,6 +373,7 @@ const GenerateOutboundTransportation2 = () => {
         return {
           ...zone,
           name: zone.zoneName,
+          checked: preserveChecks && checkedZoneIds.has(zone.szId),
           orders: zoneOrders
         }
       })
@@ -371,6 +382,21 @@ const GenerateOutboundTransportation2 = () => {
         ...response.record,
         list: updatedSalesZones
       })
+
+      if (preserveChecks) {
+        setSelectedSaleZones({
+          list: updatedSalesZones
+            .filter(zone => selectedZoneIds.has(zone.szId))
+            .map(zone => ({
+              ...zone,
+              checked: true,
+              orders: zone.orders?.map(order => ({
+                ...order,
+                checked: true
+              })) || []
+            }))
+        })
+      }
     } else {
       formik.setFieldValue('salesZones', { list: [] })
     }
@@ -572,17 +598,9 @@ const GenerateOutboundTransportation2 = () => {
                 ]}
                 maxAccess={access}
                 onChange={(_, newValue) => {
-                  onSaleZoneChange(formik.values.szId, newValue?.recordId)
-                  
-                  formik.setFieldValue('itemCategoryId', newValue?.recordId || null)
+                  onSaleZoneChange(formik.values.szId, newValue?.recordId, true)
 
-                  formik.setFieldValue('data', { list: [] })
-                  formik.setFieldValue('orders', { list: [] })
-                  formik.setFieldValue('selectedTrucks', [])
-                  formik.setFieldValue('vehicleAllocations', { list: [] })
-                  formik.setFieldValue('salesZones', { list: [] })
-                  setFilteredOrders([])
-                  setSelectedSaleZones([])
+                  formik.setFieldValue('itemCategoryId', newValue?.recordId || null)
                 }}
                 error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
               />
@@ -659,7 +677,6 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsZones}
                     gridData={filteredData}
                     rowId={['recordId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     disableSorting={true}
@@ -673,7 +690,6 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsOrders}
                     gridData={formik?.values?.orders}
                     rowId={['recordId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     showCheckboxColumn={true}
@@ -689,7 +705,6 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsSelectedZones}
                     gridData={selectedSaleZones}
                     rowId={['recordId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     rowDragManaged={true}
@@ -710,7 +725,6 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsVehicleAllocations}
                     gridData={formik?.values?.vehicleAllocations}
                     rowId={['recordId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     onSelectionChange={row => {
@@ -737,7 +751,6 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsSalesOrders}
                     gridData={filteredOrders}
                     rowId={['vehicleId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                   />

@@ -299,7 +299,7 @@ export default function LeaveRequestForm({ recordId , window}) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.IndemnityAccuralsFilters.qry}
+                endpointId={LoanManagementRepository.LeaveTypes.qry}
                 name='ltId'
                 label={labels.leaveType}
                 valueField='recordId'

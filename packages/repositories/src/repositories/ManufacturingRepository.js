@@ -97,8 +97,7 @@ export const ManufacturingRepository = {
     qry: service + 'qryCLS',
     set: service + 'setCLS',
     get: service + 'getCLS',
-    del: service + 'delCLS',
-    snapshot: service + 'qryCLS'
+    del: service + 'delCLS'
   },
   ProductionStandard: {
     qry: service + 'qrySTD',
@@ -274,7 +273,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotPO',
     post: service + 'postPO',
     gen: service + 'genPO',
-    close: service + 'closePO'
+    close: service + 'closePO',
+    reopen: service + 'reopenPO',
   },
   BillOfMaterials: {
     get: service + 'getBMA',
@@ -299,8 +299,7 @@ export const ManufacturingRepository = {
     page: service + 'pageASM',
     snapshot: service + 'snapshotASM',
     post: service + 'postASM',
-    unpost: service + 'unpostASM',
-    generate: service + 'genASM'
+    unpost: service + 'unpostASM'
   },
   AssemblyItems: {
     qry: service + 'qryASC'
@@ -405,9 +404,6 @@ export const ManufacturingRepository = {
   IssueOfMaterialDimension: {
     set: service + 'setIMD',
     qry: service + 'qryIMD'
-  },
-  JobOrder: {
-    gen: service + 'genORD'
   },
   RefreshPoItem: {
     refresh: service + 'refreshPOI'

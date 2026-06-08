@@ -281,7 +281,6 @@ const YearlyComparativeSales = () => {
           columns={columns}
           gridData={data}
           rowId={['year']}
-          isLoading={false}
           maxAccess={access}
           pagination={false}
           height={'250px'}
@@ -305,7 +304,6 @@ const YearlyComparativeSales = () => {
                   gridData={{ list: fiscalYears }}
                   rowId={['year']}
                   showCheckboxColumn={true}
-                  isLoading={false}
                   maxAccess={access}
                   pagination={false}
                   height='300px'

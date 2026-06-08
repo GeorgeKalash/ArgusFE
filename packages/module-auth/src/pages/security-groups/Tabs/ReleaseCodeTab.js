@@ -79,7 +79,6 @@ const ReleaseCodeTab = ({ labels, maxAccess, recordId }) => {
           gridData={data}
           rowId={['codeId']}
           onDelete={del}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

@@ -17,8 +17,7 @@ const SalesTrxForm = ({ functionId, recordId, itemId, clientId, window }) => {
 
   const {
     query: { data },
-    labels: labels,
-    refetch,
+    labels,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -104,7 +103,6 @@ const SalesTrxForm = ({ functionId, recordId, itemId, clientId, window }) => {
           rowId={['itemId']}
           pagination={false}
           maxAccess={access}
-          refetch={refetch}
         />
       </Grow>
     </VertLayout>

@@ -133,6 +133,12 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
       headerName: labels.days,
       type: 'date',
       flex: 1
+    },
+    {
+      field: 'units',
+      headerName: labels.units,
+      type: 'number',
+      flex: 1
     }
   ]
 

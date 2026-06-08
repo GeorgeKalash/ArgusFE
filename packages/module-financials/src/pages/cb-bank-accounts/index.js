@@ -159,7 +159,6 @@ const CbBankAccounts = () => {
           rowId={['recordId']}
           onEdit={popup}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'

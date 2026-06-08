@@ -724,5 +724,27 @@ export const getButtons = platformLabels => [
     color: '#bf1e2e',
     image: 'undoIcon.png',
     main: false
-  }
+  },
+  {
+    key: 'Commission',
+    label: platformLabels.Commission,
+    color: '#231f20',
+    image: 'commission.png',
+    main: false
+  },
+  {
+    key: 'RV',
+    label: platformLabels.RV,
+    color: '#373957',
+    image: 'invoice.png',
+    main: false
+  },
+  {
+    key: 'Reverse',
+    label: platformLabels.ReverseClone,
+    color: '#373957',
+    image: 'undo-arrow-icon.png',
+    main: false
+  },
+  
 ]
