@@ -47,7 +47,8 @@ const SystemDefaults = () => {
         obj.key === 'cityName' ||
         obj.key === 'buildingNumber' ||
         obj.key === 'streetName' ||
-        obj.key === 'citySubdivisionName'
+        obj.key === 'citySubdivisionName' ||
+        obj.key === 'addressPhoneMask'
       )
     })
 
@@ -61,7 +62,8 @@ const SystemDefaults = () => {
         obj.key === 'cityName' ||
         obj.key === 'buildingNumber' ||
         obj.key === 'streetName' ||
-        obj.key === 'citySubdivisionName'
+        obj.key === 'citySubdivisionName' ||
+        obj.key === 'addressPhoneMask'
 
       if (isStringLike) {
         myObject[obj.key] = obj.value || ''
@@ -93,7 +95,8 @@ const SystemDefaults = () => {
       cityName: '',
       buildingNumber: '',
       streetName: '',
-      citySubdivisionName: ''
+      citySubdivisionName: '',
+      addressPhoneMask: ''
     },
     validationSchema: yup.object({
       baseCurrencyId: yup.string().required(' '),
@@ -329,6 +332,17 @@ const SystemDefaults = () => {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('citySubdivisionName', '')}
                     error={formik.touched.citySubdivisionName && Boolean(formik.errors.citySubdivisionName)}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='addressPhoneMask'
+                    label={_labels.addressPhoneMask}
+                    value={formik.values.addressPhoneMask}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('addressPhoneMask', '')}
+                    error={formik.touched.addressPhoneMask && Boolean(formik.errors.addressPhoneMask)}
                     maxAccess={access}
                   />
                 </Grid>
