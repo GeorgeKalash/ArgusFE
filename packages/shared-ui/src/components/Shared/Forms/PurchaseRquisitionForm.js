@@ -393,7 +393,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={isClosed || isCancelled}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}

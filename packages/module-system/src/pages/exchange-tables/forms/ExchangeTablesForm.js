@@ -15,7 +15,8 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function ExchangeTablesForm({ labels, maxAccess, recordId, invalidate }) {
+export default function ExchangeTablesForm({ labels, maxAccess, store, setStore, invalidate }) {
+  const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -24,21 +25,21 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
       recordId: recordId || null,
       reference: '',
       name: '',
-      currencyId: '',
+      currencyId: null,
       rateCalcMethod: '',
       rateAgainst: '',
-      rateAgainstCurrencyId: ''
+      rateAgainstCurrencyId: null
     },
     maxAccess: maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required(),
-      currencyId: yup.string().required(),
+      currencyId: yup.number().required(),
       rateCalcMethod: yup.string().required(),
       rateAgainst: yup.string().required(),
       rateAgainstCurrencyId: yup
-        .string()
+        .number()
         .nullable()
         .test('is-rateAgainstCurrencyId-required', ' ', function (value) {
           const { rateAgainst } = this.parent
@@ -52,13 +53,14 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      } else toast.success(platformLabels.Edited)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+
+      !obj.recordId && formik.setFieldValue('recordId', response?.recordId)
+
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: response?.recordId
+      }))
 
       invalidate()
     }
@@ -123,7 +125,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
@@ -139,7 +141,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('rateCalcMethod', newValue?.key || null)
                 }}
                 error={formik.touched.rateCalcMethod && Boolean(formik.errors.rateCalcMethod)}
@@ -155,7 +157,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('rateAgainst', newValue?.key || null)
                 }}
                 error={formik.touched.rateAgainst && Boolean(formik.errors.rateAgainst)}
@@ -176,7 +178,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
                 values={formik.values}
                 required={formik.values.rateAgainst === '2'}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('rateAgainstCurrencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.rateAgainstCurrencyId && Boolean(formik.errors.rateAgainstCurrencyId)}

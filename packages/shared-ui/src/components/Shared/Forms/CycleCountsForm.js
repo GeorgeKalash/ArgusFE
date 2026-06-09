@@ -282,7 +282,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.StockCount}`}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
-                readOnly={editMode || isPosted || isClosed}
+                readOnly={editMode}
                 label={labels.documentType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },

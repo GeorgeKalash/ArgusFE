@@ -549,7 +549,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isClosed || isCancelled}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}

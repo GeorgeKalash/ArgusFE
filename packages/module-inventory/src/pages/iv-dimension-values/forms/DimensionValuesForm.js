@@ -25,6 +25,7 @@ export default function DimensionValuesForm({ labels, maxAccess, dimNum, id, win
     initialValues: {
       id: id || null,
       dimension: dimNum,
+      reference: '',
       name: ''
     },
     maxAccess,
@@ -74,6 +75,18 @@ export default function DimensionValuesForm({ labels, maxAccess, dimNum, id, win
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('id', '')}
                 error={formik.touched.id && Boolean(formik.errors.id)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                maxAccess={maxAccess}
+                maxLength='10'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
             <Grid item xs={12}>

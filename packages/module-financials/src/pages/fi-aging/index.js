@@ -141,7 +141,6 @@ const FiAging = () => {
           labels={_labels}
           maxAccess={access}
           filterBy={filterBy}
-          mandatoryParams={true}
           reportName={'FI04'}
           hasSearch={false}
         />

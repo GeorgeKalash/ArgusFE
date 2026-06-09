@@ -502,7 +502,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.docType}
-                    readOnly={editMode || isCancelled}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}

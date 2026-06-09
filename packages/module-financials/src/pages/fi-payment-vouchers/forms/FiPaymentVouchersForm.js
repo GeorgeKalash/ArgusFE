@@ -257,13 +257,14 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: FinancialRepository.PaymentVouchers.get,
+          extension: FinancialRepository.PaymentVouchers.get2,
           parameters: `_recordId=${recordId}`
         })
 
         formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
+          ...res.record?.header,
+          date: formatDateFromApi(res.record?.header?.date),
+          accountBalance: res.record?.accountBalance?.balance || 0
         })
       }
     })()
@@ -402,6 +403,17 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       disabled: !formik.values.accountId || !formik.values.date
     }
   ]
+
+  async function getBalance (accId, currencyId) {
+    if (!accId || !currencyId) return
+
+    const res = await getRequest({
+      extension: FinancialRepository.AccountCreditBalance.get,
+      parameters: `_accountId=${accId}&_currencyId=${currencyId}`
+    })
+
+    return res?.record?.balance
+  }
 
   return (
     <FormShell
@@ -550,7 +562,9 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 firstFieldWidth={4}
                 displayFieldWidth={4}
                 filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
-                onChange={(event, newValue) => {
+                onChange={async (event, newValue) => {
+                  const balance = await getBalance(newValue?.recordId, formik.values.currencyId)
+                  formik.setFieldValue('accountBalance', balance || 0)
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
@@ -592,7 +606,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={8}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={FinancialRepository.PaymentVouchers.pack}
                     reducer={response => response?.record?.currencies}
@@ -610,14 +624,16 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                     readOnly={isPosted || isCancelled}
                     values={formik.values}
                     onChange={async (event, newValue) => {
+                      const balance = await getBalance(formik.values.accountId, newValue?.recordId)
                       await getMultiCurrencyFormData(newValue?.recordId, formik.values.date, RateDivision.FINANCIALS)
-                      formik.setFieldValue('currencyId', newValue ? newValue?.recordId : null)
                       formik.setFieldValue('currencyName', newValue?.name)
+                      formik.setFieldValue('accountBalance', balance || 0)
+                      formik.setFieldValue('currencyId', newValue ? newValue?.recordId : null)
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={1}>
                  <CustomButton
                   onClick={() => openMCRForm(formik.values)}
                   image='popup.png'
@@ -627,6 +643,15 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                     formik.values.currencyId === currencyId
                   }
                 />
+                </Grid>
+                <Grid item xs={5}>
+                  <CustomNumberField
+                    name='accountBalance'
+                    label={labels.balance}
+                    value={formik.values.accountBalance}
+                    readOnly
+                    maxAccess={maxAccess}
+                  />
                 </Grid>
               </Grid>
             </Grid>
