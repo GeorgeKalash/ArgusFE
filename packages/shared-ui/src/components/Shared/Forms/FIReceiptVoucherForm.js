@@ -194,6 +194,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
       formik.setFieldValue('cashAccountRef', '')
       formik.setFieldValue('cashAccountName', '')
       formik.setFieldValue('accountBalance', 0)
+      formik.setFieldValue('caAccountId', null)
 
       return
     }
@@ -202,9 +203,10 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
       extension: CashBankRepository.CbBankAccounts.get,
       parameters: `_recordId=${cashAccountId}`
     })
-    
+
     const balance = await getBalance(cashAccountResult?.accountId, formik.values.currencyId)
     formik.setFieldValue('accountBalance', balance || 0)
+    formik.setFieldValue('caAccountId', cashAccountResult?.accountId || null)
     formik.setFieldValue('cashAccountId', cashAccountResult?.recordId || null)
     formik.setFieldValue('cashAccountRef', cashAccountResult?.reference || '')
     formik.setFieldValue('cashAccountName', cashAccountResult?.name || '')
@@ -598,7 +600,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
                   const balance = await getBalance(newValue?.accountId, formik.values.currencyId)
-                  formik.setFieldValue('currentAccountId', newValue?.accountId || null)
+                  formik.setFieldValue('caAccountId', newValue?.accountId || null)
                   formik.setFieldValue('accountBalance', balance || 0)
                   formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
@@ -647,7 +649,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       await getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
-                      const balance = await getBalance(formik.values.currentAccountId, newValue?.recordId)
+                      const balance = await getBalance(formik.values.caAccountId, newValue?.recordId)
                       formik.setFieldValue('accountBalance', balance || 0)
                       formik.setFieldValue('currencyName', newValue?.name)
                       formik.setFieldValue('currencyId', newValue?.recordId)

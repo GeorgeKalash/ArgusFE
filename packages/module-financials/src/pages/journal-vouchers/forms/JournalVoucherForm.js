@@ -136,6 +136,29 @@ export default function JournalVoucherForm({ labels, access, recordId, window })
     }
   }
 
+  const onClone = async () => {
+    const res = await postRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.clone,
+      record: JSON.stringify({ recordId: formik.values.recordId })
+    })
+
+    toast.success(platformLabels.Copied)
+    invalidate()
+    await getData(res?.recordId)
+  }
+
+  const onReverse = async () => {
+    const res = await postRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.reverseClone,
+      record: JSON.stringify({ recordId: formik.values.recordId })
+    })
+
+    toast.success(platformLabels.Reversed)
+    invalidate()
+    await getData(res?.recordId)
+  }
+
+
   const actions = [
     {
       key: 'GL',
@@ -174,7 +197,19 @@ export default function JournalVoucherForm({ labels, access, recordId, window })
       condition: true,
       onClick: 'onClickAttachment',
       disabled: !editMode
-    }
+    },
+    {
+      key: 'Copy',
+      condition: true,
+      onClick: onClone,
+      disabled: !editMode
+    },
+    {
+      key: 'Reverse',
+      condition: true,
+      onClick: onReverse,
+      disabled: !editMode
+    },
   ]
 
   return (

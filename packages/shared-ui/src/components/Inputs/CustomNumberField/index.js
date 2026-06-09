@@ -45,7 +45,7 @@ const CustomNumberField = ({
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
 
   const handleKeyPress = e => {
-    const regex = /[0-9.-]/
+    const regex = decimalScale > 0 ? /[0-9.-]/ : /[0-9-]/
     const key = String.fromCharCode(e.which || e.keyCode)
     if (!regex.test(key)) {
       e.preventDefault()
@@ -151,7 +151,7 @@ const CustomNumberField = ({
       label={label}
       allowLeadingZeros
       allowNegative={allowNegative}
-      thousandSeparator={thousandSeparator}
+      thousandSeparator={thousandSeparator || null}
       decimalSeparator='.'
       decimalScale={decimalScale}
       value={value ?? ''}

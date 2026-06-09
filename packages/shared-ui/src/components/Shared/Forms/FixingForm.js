@@ -576,11 +576,16 @@ useEffect(() => {
                       onChange={async (_, newValue) => {
                         const res = await getMetalPurity(newValue?.metalId)
 
+                        setReCalc(true)
                         formik.setValues({
                           ...formik.values,
                           purity: res?.purity ?? null,
                           currencyId: newValue?.currencyId || null,
                           metalId: newValue?.metalId || null,
+                          qty_muId: newValue?.defQtyMUId || null,
+                          qty_muQty: newValue?.defQtyMuQty || null,
+                          unitPrice_muId: newValue?.defUnitPriceMUId || null,
+                          unitPrice_muQty: newValue?.defUnitPriceMUQty || null,
                           currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null
                         })
                         

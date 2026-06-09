@@ -8,6 +8,8 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import * as yup from 'yup'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import SegmentedInput from '@argus/shared-ui/src/components/Inputs/SegmentedInput'
 
 const AddressTab = ({
   address,
@@ -20,6 +22,7 @@ const AddressTab = ({
   ...props
 }) => {
   const { getRequest } = useContext(RequestsContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address,
@@ -59,6 +62,25 @@ const AddressTab = ({
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+  const phoneMask = (systemDefaults?.list?.find(obj => obj.key === 'addressPhoneMask')?.value)
+
+  const isMaskedPhoneValid = (value, mask) => {
+    if (!value) return true
+
+    const requiredDigits = (mask.match(/9/g) || []).length
+    const enteredDigits = (value.match(/\d/g) || []).length
+
+    return enteredDigits === requiredDigits
+  }
+
+  const phoneValidation = phoneMask
+    ? yup.string().test(
+        'phone-mask',
+        'Phone number is incomplete',
+        value => isMaskedPhoneValid(value, phoneMask)
+      )
+    : yup.string()
+
   const requiredFields = (maxAccess?.record?.controls || [])
     .filter(control => control.accessLevel === 2)
     .map(control => control.controlId)
@@ -76,12 +98,15 @@ const AddressTab = ({
   const validate = options && {
     name: yup.string().required(),
     street1: yup.string().required(),
-    phone: yup.string().required(),
+    phone: phoneValidation.required(),
+    phone2: phoneValidation,
+    phone3: phoneValidation,
     countryId: yup.number().required(),
     city: yup.string().required(),
     email1: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true }),
     email2: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true })
   }
+
   useEffect(() => {
     if (address?.recordId !== lastRecordIdRef.current) {
       lastRecordIdRef.current = address?.recordId
@@ -376,47 +401,87 @@ const AddressTab = ({
       <FormGrid item hideonempty xs={12}>
         <FormGrid container hideonempty spacing={2}>
           <FormGrid item hideonempty xs={4}>
-            <CustomTextField
-              name='phone'
-              label={labels.phone}
-              value={addressValidation.values.phone}
-              readOnly={readOnly}
-              maxLength='40'
-              required={required}
-              phone={true}
-              onChange={addressValidation.handleChange}
-              onClear={() => addressValidation.setFieldValue('phone', '')}
-              error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
-              maxAccess={maxAccess}
-            />
+            {phoneMask ? (
+              <SegmentedInput
+                name='phone'
+                mask={phoneMask}
+                value={addressValidation.values.phone}
+                readOnly={readOnly}
+                label={labels.phone}
+                required={required}
+                maxAccess={maxAccess}
+                error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
+                onChange={({ value }) => addressValidation.setFieldValue('phone', value)}
+              />
+            ) : (
+              <CustomTextField
+                name='phone'
+                label={labels.phone}
+                value={addressValidation.values.phone}
+                readOnly={readOnly}
+                maxLength='40'
+                required={required}
+                phone={true}
+                onChange={addressValidation.handleChange}
+                onClear={() => addressValidation.setFieldValue('phone', '')}
+                error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
+                maxAccess={maxAccess}
+              />
+            )}
           </FormGrid>
           <FormGrid item hideonempty xs={4}>
-            <CustomTextField
-              name='phone2'
-              label={labels.phone2}
-              value={addressValidation.values.phone2}
-              maxLength='40'
-              phone={true}
-              readOnly={readOnly}
-              onChange={addressValidation.handleChange}
-              onClear={() => addressValidation.setFieldValue('phone2', '')}
-              error={addressValidation.touched.phone2 && Boolean(addressValidation.errors.phone2)}
-              maxAccess={maxAccess}
-            />
+            {phoneMask ? (
+              <SegmentedInput
+                name='phone2'
+                mask={phoneMask}
+                value={addressValidation.values.phone2}
+                readOnly={readOnly}
+                label={labels.phone2}
+                maxAccess={maxAccess}
+                error={addressValidation.touched.phone2 && Boolean(addressValidation.errors.phone2)}
+                onChange={({ value }) => addressValidation.setFieldValue('phone2', value)}
+              />
+            ) : (
+              <CustomTextField
+                name='phone2'
+                label={labels.phone2}
+                value={addressValidation.values.phone2}
+                maxLength='40'
+                phone={true}
+                readOnly={readOnly}
+                onChange={addressValidation.handleChange}
+                onClear={() => addressValidation.setFieldValue('phone2', '')}
+                error={addressValidation.touched.phone2 && Boolean(addressValidation.errors.phone2)}
+                maxAccess={maxAccess}
+              />
+            )}
           </FormGrid>
           <FormGrid item hideonempty xs={4}>
-            <CustomTextField
-              name='phone3'
-              label={labels.phone3}
-              value={addressValidation.values.phone3}
-              maxLength='15'
-              phone={true}
-              readOnly={readOnly}
-              onChange={addressValidation.handleChange}
-              onClear={() => addressValidation.setFieldValue('phone3', '')}
-              error={addressValidation.touched.phone3 && Boolean(addressValidation.errors.phone3)}
-              maxAccess={maxAccess}
-            />
+            {phoneMask ? (
+              <SegmentedInput
+                name='phone3'
+                mask={phoneMask}
+                value={addressValidation.values.phone3}
+                readOnly={readOnly}
+                label={labels.phone3}
+                maxAccess={maxAccess}
+                error={addressValidation.touched.phone3 && Boolean(addressValidation.errors.phone3)}
+                onChange={({ value }) => addressValidation.setFieldValue('phone3', value)}
+              />
+            ) : (
+              <CustomTextField
+                name='phone3'
+                label={labels.phone3}
+                value={addressValidation.values.phone3}
+                maxLength='15'
+                phone={true}
+                readOnly={readOnly}
+                onChange={addressValidation.handleChange}
+                onClear={() => addressValidation.setFieldValue('phone3', '')}
+                error={addressValidation.touched.phone3 && Boolean(addressValidation.errors.phone3)}
+                maxAccess={maxAccess}
+              />
+            )}
           </FormGrid>
         </FormGrid>
       </FormGrid>
