@@ -147,6 +147,7 @@ export const LeaveForm = ({ recordId, window }) => {
   }
 
   const isClosed = formik.values.wip == 2
+  const isReleased = formik.values.status == 4
   const isPosted = formik.values.status === 3
 
   const columns = [
@@ -353,7 +354,7 @@ export const LeaveForm = ({ recordId, window }) => {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !isClosed
+      disabled: !editMode || !isReleased
     },
     {
       key: 'Close',
