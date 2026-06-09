@@ -60,12 +60,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     endpointId: PurchaseRepository.PUDraftReturn.page
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
   const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
@@ -126,7 +120,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
 
   const { formik } = useForm({
     maxAccess,
-    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -961,9 +955,8 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
-                      await onChangeDtId(newValue?.recordId)
-                      changeDT(newValue)
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
+                      changeDT(newValue)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
