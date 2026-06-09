@@ -1,10 +1,14 @@
 import { useContext } from 'react'
 import * as yup from 'yup'
 import { Grid } from '@mui/material'
+import * as yup from 'yup'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
@@ -31,11 +35,15 @@ export default function GenerateAMCForm({ _labels, access }) {
       toast.success(platformLabels.Generated)
     }
   })
+      toast.success(platformLabels.Generated)
+    }
+  })
 
   const actions = [
     {
       key: 'generate',
       condition: true,
+      onClick: () => formik.handleSubmit(),
       onClick: () => formik.handleSubmit(),
       disabled: false
     }
