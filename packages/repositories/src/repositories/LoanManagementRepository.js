@@ -53,7 +53,8 @@ export const LoanManagementRepository = {
     close: service + 'closeLR',
     reopen: service + 'reopenLR',
     set2: service + 'set2LR',
-    get2: service + 'get2LR'
+    get2: service + 'get2LR',
+    post: service + 'postLR',
   },
   LeaveReturn: {
     page: service + 'pageRE',
