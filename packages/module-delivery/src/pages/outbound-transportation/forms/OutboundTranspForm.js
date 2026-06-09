@@ -81,7 +81,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   const { formik } = useForm({
     initialValues, 
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validationSchema: yup.object({
       header: yup.object({
         departureTime: yup.string().required(),

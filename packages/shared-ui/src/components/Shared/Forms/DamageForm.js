@@ -54,7 +54,7 @@ export default function DamageForm({ recordId, lockRecord }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {
@@ -157,8 +157,8 @@ export default function DamageForm({ recordId, lockRecord }) {
       parameters: `_recordId=${damageId}`
     }).then(async res => {
       if (!res?.record?.header) return
-
-      const genJobFromDamage = await getDTD(res?.record?.header?.dtId)
+      
+      const genJobFromDamage = await onChangeDT(res?.record?.header?.dtId)
 
       const header = res?.record?.header || {}
 
@@ -327,7 +327,7 @@ export default function DamageForm({ recordId, lockRecord }) {
 
   const hasItems = formik?.values?.items?.length > 0
 
-  async function getDTD(dtId) {
+  async function onChangeDT(dtId) {
     if (dtId) {
       const res = await getRequest({
         extension: ManufacturingRepository.DocumentTypeDefault.get,
@@ -353,6 +353,11 @@ export default function DamageForm({ recordId, lockRecord }) {
     return res?.list?.[0]?.seqNo || null
   }
 
+  
+  useEffect(() => {
+    if (formik.values?.header?.dtId && !recordId) onChangeDT(formik.values?.header?.dtId)
+  }, [formik.values?.header?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.Damages}
@@ -376,6 +381,7 @@ export default function DamageForm({ recordId, lockRecord }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Damage}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -388,10 +394,8 @@ export default function DamageForm({ recordId, lockRecord }) {
                     displayFieldWidth={2}
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       await changeDT(newValue)
-                      await getDTD(newValue?.recordId)
-
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik?.touched?.header?.dtId && Boolean(formik?.errors?.header?.dtId)}

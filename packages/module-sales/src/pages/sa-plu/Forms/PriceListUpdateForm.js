@@ -41,7 +41,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
   const { formik } = useForm({
     maxAccess,
     validateOnChange: true,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       reference: '',

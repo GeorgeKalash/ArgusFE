@@ -65,7 +65,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const { formik } = useForm({
     maxAccess: maxAccess,
     validateOnChange: true,
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       reference: '',

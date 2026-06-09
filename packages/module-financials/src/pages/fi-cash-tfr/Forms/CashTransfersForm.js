@@ -87,7 +87,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
@@ -283,7 +283,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
               filter={!editMode ? item => item.activeStatus === 1 : undefined}
               name='dtId'
               label={labels.documentType}
-              readOnly={isPosted}
+              readOnly={editMode}
               valueField='recordId'
               displayField='name'
               values={formik?.values}

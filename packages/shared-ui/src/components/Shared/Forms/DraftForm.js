@@ -54,12 +54,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     objectName: 'header'
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
   const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const defplId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'plId')?.value)
   const defspId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
@@ -124,7 +118,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validationSchema: yup.object({
       header: yup.object({
@@ -779,7 +773,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     formik.setFieldValue('items', value)
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     if (recordId) {
       const dtd = await getRequest({
         extension: SaleRepository.DocumentTypeDefault.get,
@@ -792,13 +786,17 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   }
 
-    const calculatedTotals = calculateDraftTotals(formik.values.items)
-
-    const amount = reCal ? calculatedTotals.amount : formik.values?.header?.amount || 0
-    const weight = reCal ? calculatedTotals.weight : formik.values?.header?.weight || 0
-    const subtotal = reCal ? roundTo(calculatedTotals.subtotal) : formik.values?.header?.subtotal || 0
-    const vatAmount = reCal ? calculatedTotals.vatAmount : formik.values?.header?.vatAmount || 0
+  useEffect(() => {
+    if (formik.values?.header?.dtId && !recordId) onChangeDT(formik.values?.header?.dtId)
+  }, [formik.values?.header?.dtId])
   
+  const calculatedTotals = calculateDraftTotals(formik.values.items)
+
+  const amount = reCal ? calculatedTotals.amount : formik.values?.header?.amount || 0
+  const weight = reCal ? calculatedTotals.weight : formik.values?.header?.weight || 0
+  const subtotal = reCal ? roundTo(calculatedTotals.subtotal) : formik.values?.header?.subtotal || 0
+  const vatAmount = reCal ? calculatedTotals.vatAmount : formik.values?.header?.vatAmount || 0
+ 
 
   function getSummaryGridData(items = []) {
     const metalMap = items.reduce((acc, { metalId, weight, metalRef }) => {
@@ -899,6 +897,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
               <ResourceComboBox
                 endpointId={SaleRepository.DraftInvoice.pack}
                 reducer={response => response?.record?.documentTypes}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -912,9 +911,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  await onChangeDtId(newValue?.recordId)
                   changeDT(newValue)
-                  
                   formik.setFieldValue('header.dtId', newValue?.recordId || null)
                 }}
                 error={formik?.touched?.header?.dtId && Boolean(formik?.errors?.header?.dtId)}

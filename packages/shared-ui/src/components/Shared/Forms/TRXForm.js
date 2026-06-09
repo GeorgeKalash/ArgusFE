@@ -59,7 +59,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
       date: new Date()
     },
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -252,6 +252,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.doctype}
                 columnsInDropDown={[
@@ -262,8 +263,9 @@ export default function TRXForm({ labels, access, setStore, store }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId || ''), changeDT(newValue)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('dtId', newValue?.recordId || null)
+                  changeDT(newValue)
                 }}
                 readOnly={editMode}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}

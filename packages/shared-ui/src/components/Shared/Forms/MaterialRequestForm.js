@@ -88,7 +88,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
   }
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       functionId: SystemFunction.MaterialRequest,
@@ -551,7 +551,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isClosed || isCancelled}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}

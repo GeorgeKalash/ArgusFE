@@ -3,7 +3,7 @@ import { useEffect, useRef, useLayoutEffect } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from '@argus/shared-utils/src/utils/maxAccess'
 import * as yup from 'yup'
 
-export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
+export function useForm({ behavior, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
   function explode(str) {
     const parts = str.split('.')
 
@@ -68,7 +68,7 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
         const { controlId, accessLevel } = obj
         if (accessLevel === MANDATORY)
           if (controlId?.indexOf('.') < 0) {
-            const keys = Object.keys(formik.values)
+            const keys = Object.keys(values)
             if (!values[controlId] && keys?.indexOf(controlId) > -1)
               maxAccessErrors = {
                 ...maxAccessErrors,
@@ -109,10 +109,10 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
               }
               if (
                 !maxAccessErrors[gridName][fieldName] &&
-                formik.values[gridName] &&
-                !formik.values[gridName][fieldName] &&
-                formik.values[gridName][fieldName] !== 0 &&
-                formik.values[gridName][fieldName] !== '0'
+                values[gridName] &&
+                !values[gridName][fieldName] &&
+                values[gridName][fieldName] !== 0 &&
+                values[gridName][fieldName] !== '0'
               ) {
                 maxAccessErrors[gridName][fieldName] = `${fieldName} is required.`
               }
@@ -156,7 +156,8 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 
-  const { key, value, reference } = documentType
+  const { key, value, fieldBehavior } = behavior || {}
+  const { isEmpty, fieldName } = fieldBehavior || {}
 
   useLayoutEffect(() => {
     if (!key || value == null || formik.values[key] === value) return
@@ -165,10 +166,8 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
   }, [value])
 
   useEffect(() => {
-    if (reference?.isEmpty) {
-      formik.setFieldValue(reference?.fieldName, '')
-    }
-  }, [reference?.isEmpty])
+    if (isEmpty) formik.setFieldValue(fieldName, '')
+  }, [isEmpty])
 
   const normalized = value => {
     if (value instanceof Date) return value.dateOnly ? value.toDateString() : value.valueOf()

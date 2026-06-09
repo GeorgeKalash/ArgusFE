@@ -53,7 +53,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       wip: 1,
@@ -224,6 +224,47 @@ const ThreeDDesignForm = ({ recordId, window }) => {
     }
   ]
 
+  async function onChangeDT (dtId) {
+    const { record } = await getRequest({
+      extension: ProductModelingRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    if (!record || record?.productionLineId)
+      formik.setValues({
+        ...formik.values,
+        dtId,
+        productionLineId: record?.productionLineId,
+        sketchId: null,
+        sketchRef: '',
+        sketchName: '',
+        itemGroupId: null,
+        itemGroupRef: '',
+        itemGroupName: '',
+        productionClassId: null,
+        productionClassRef: '',
+        productionClassName: '',
+        productionStandardId: null,
+        productionStandardRef: '',
+        productionStandardName: '',
+        collectionId: null,
+        metalPurity: null,
+        metalId: null,
+        designGroupId: null,
+        designFamilyId: null
+      })
+    else formik.setFieldValue('productionLineId', null)
+  }
+
+  useEffect(() => {
+   ;(async function () {
+    if (!recordId) {
+      if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
+      else formik.setFieldValue('productionLineId', null)
+    }
+    })()
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.ThreeDDesign}
@@ -243,6 +284,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.doctype}
                     columnsInDropDown={[
@@ -253,43 +295,9 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || '')
                       changeDT(newValue)
-
-                      formik.setFieldValue('productionLineId', null)
-
-                      if (newValue?.recordId) {
-                        const { record } = await getRequest({
-                          extension: ProductModelingRepository.DocumentTypeDefault.get,
-                          parameters: `_dtId=${newValue?.recordId}`
-                        })
-
-                        if (record?.productionLineId) {
-                          formik.setValues({
-                            ...formik.values,
-                            dtId: newValue?.recordId,
-                            productionLineId: record?.productionLineId,
-                            sketchId: null,
-                            sketchRef: '',
-                            sketchName: '',
-                            itemGroupId: null,
-                            itemGroupRef: '',
-                            itemGroupName: '',
-                            productionClassId: null,
-                            productionClassRef: '',
-                            productionClassName: '',
-                            productionStandardId: null,
-                            productionStandardRef: '',
-                            productionStandardName: '',
-                            collectionId: null,
-                            metalPurity: null,
-                            metalId: null,
-                            designGroupId: null,
-                            designFamilyId: null
-                          })
-                        }
-                      }
                     }}
                     readOnly={editMode}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}

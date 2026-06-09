@@ -196,7 +196,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['items'],
     initialValues,
     validateOnChange: true,
@@ -1254,7 +1254,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return { userDefaultsList: userObject, systemDefaultsList: systemObject }
   }
 
-  async function onChangeDtId(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) return
 
     const res = await getRequest({
@@ -1296,7 +1296,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }, [subtotal])
 
   useEffect(() => {
-    if (formik.values?.dtId & !recordId) onChangeDtId(formik.values?.dtId)
+    if (formik.values?.dtId & !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {

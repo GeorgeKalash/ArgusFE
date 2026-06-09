@@ -98,7 +98,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   }
   
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     maxAccess,
     validateOnChange: true,
@@ -219,7 +219,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     return res.record
   }
 
-  async function getDTD(dtId) {
+  async function onChangeDT(dtId) {
     if (dtId) {
       const res = await getRequest({
         extension: FinancialRepository.FIDocTypeDefaults.get,
@@ -233,7 +233,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   }
 
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) getDTD(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {

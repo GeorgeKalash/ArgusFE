@@ -169,107 +169,106 @@ export default function SaleTransactionForm({
   }
 
   const initialValues =  {
-    recordId: recordId || null,
-    header: {
-      dgId: functionId,
-      recordId: null,
-      dtId: null,
-      reference: '',
-      date: new Date(),
-      dueDate: new Date(),
-      plantId: null,
-      clientId: null,
-      clientName: '',
-      clientRef: '',
-      currencyId: null,
-      currencyName: '',
-      szId: null,
-      spId: null,
-      siteId: null,
-      description: '',
-      status: 1,
-      isVattable: false,
-      taxId: null,
-      subtotal: 0,
-      miscAmount: 0,
-      amount: 0,
-      vatAmount: 0,
-      tdAmount: 0,
-      plId: null,
-      ptId: null,
-      billAddressId: null,
-      billAddress: '',
-      maxDiscount: '',
-      currentDiscount: 0,
-      exRate: 1,
-      rateCalcMethod: 1,
-      tdType: DIRTYFIELD_TDPCT,
-      tdPct: 0,
-      baseAmount: 0,
-      volume: 0,
-      weight: 0,
-      qty: 0,
-      isVerified: false,
-      contactId: null,
-      commitItems: false,
-      postMetalToFinancials: false,
-      metalPrice: 0,
-      KGmetalPrice: 0,
-      balance: 0,
-      accountId: 0,
-      serializedAddress: '',
-    },
-    items: [
-      {
-        id: 1,
-        orderId: recordId || 0,
-        barcode: '',
-        itemId: '',
-        sku: '',
-        itemName: '',
-        seqNo: 1,
+      recordId: recordId || null,
+      header: {
+        dgId: functionId,
+        recordId: null,
+        dtId: null,
+        reference: '',
+        date: new Date(),
+        dueDate: new Date(),
+        plantId: null,
+        clientId: null,
+        clientName: '',
+        clientRef: '',
+        currencyId: null,
+        currencyName: '',
+        szId: null,
+        spId: null,
         siteId: null,
-        muId: null,
-        qty: 0,
-        defaultQty: null,
+        description: '',
+        status: 1,
+        isVattable: false,
+        taxId: null,
+        subtotal: 0,
+        miscAmount: 0,
+        amount: 0,
+        vatAmount: 0,
+        tdAmount: 0,
+        plId: null,
+        ptId: null,
+        billAddressId: null,
+        billAddress: '',
+        maxDiscount: '',
+        currentDiscount: 0,
+        exRate: 1,
+        rateCalcMethod: 1,
+        tdType: DIRTYFIELD_TDPCT,
+        tdPct: 0,
+        baseAmount: 0,
         volume: 0,
         weight: 0,
-        isMetal: false,
-        metalId: null,
-        metalPurity: 0,
-        msId: 0,
-        muRef: '',
-        muQty: 0,
-        minPrice: 0,
-        baseQty: 0,
-        mdType: MDTYPE_PCT,
-        basePrice: 0,
-        baseLaborPrice: 0,
-        totalWeightPerG: 0,
-        mdValue: 0,
-        unitPrice: 0,
-        unitCost: 0,
-        overheadId: '',
-        vatAmount: 0,
-        mdAmount: 0,
-        upo: 0,
-        extendedPrice: 0,
-        priceType: 0,
-        applyVat: false,
-        taxId: null,
-        taxDetails: null,
-        notes: '',
-        totalWeight: 0
-      }
-    ],
-    serials: [],
-    lots: [],
-    taxes: []
-  }
+        qty: 0,
+        isVerified: false,
+        contactId: null,
+        commitItems: false,
+        postMetalToFinancials: false,
+        metalPrice: 0,
+        KGmetalPrice: 0,
+        balance: 0,
+        accountId: 0
+      },
+      items: [
+        {
+          id: 1,
+          orderId: recordId || 0,
+          barcode: '',
+          itemId: '',
+          sku: '',
+          itemName: '',
+          seqNo: 1,
+          siteId: null,
+          muId: null,
+          qty: 0,
+          defaultQty: null,
+          volume: 0,
+          weight: 0,
+          isMetal: false,
+          metalId: null,
+          metalPurity: 0,
+          msId: 0,
+          muRef: '',
+          muQty: 0,
+          minPrice: 0,
+          baseQty: 0,
+          mdType: MDTYPE_PCT,
+          basePrice: 0,
+          baseLaborPrice: 0,
+          totalWeightPerG: 0,
+          mdValue: 0,
+          unitPrice: 0,
+          unitCost: 0,
+          overheadId: '',
+          vatAmount: 0,
+          mdAmount: 0,
+          upo: 0,
+          extendedPrice: 0,
+          priceType: 0,
+          applyVat: false,
+          taxId: null,
+          taxDetails: null,
+          notes: '',
+          totalWeight: 0
+        }
+      ],
+      serials: [],
+      lots: [],
+      taxes: []
+    }
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -373,7 +372,7 @@ export default function SaleTransactionForm({
       invalidate()
     }
   })
-
+  
   const itemsUpdate = useRef(formik?.values?.items)
 
   const getResourceMCR = functionId => {
@@ -1890,7 +1889,7 @@ export default function SaleTransactionForm({
     return res?.record?.reference
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
       setMetalPriceOperations()
@@ -1968,7 +1967,7 @@ export default function SaleTransactionForm({
   }, [])
 
   useEffect(() => {
-    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+    if (formik.values?.header.dtId && !recordId) onChangeDT(formik.values?.header.dtId)
   }, [formik.values?.header.dtId])
 
   useEffect(() => {
@@ -2059,6 +2058,7 @@ export default function SaleTransactionForm({
                 endpointId={SaleRepository.SaleTransaction.pack}
                 parameters={`_functionId=${functionId}`}
                 reducer={response => response?.record?.documentTypes}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 readOnly={editMode || formik.values.items?.some(item => item.sku)}
                 label={labels.documentType}

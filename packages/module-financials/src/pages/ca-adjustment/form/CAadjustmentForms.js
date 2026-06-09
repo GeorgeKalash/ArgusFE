@@ -49,7 +49,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       reference: '',
@@ -330,6 +330,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${formik.values.functionId}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 readOnly={editMode}
                 label={labels.doctype}

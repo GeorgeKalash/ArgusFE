@@ -51,12 +51,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     objectName: 'header'
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
   const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const defplId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'plId')?.value)
   const defspId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
@@ -128,7 +122,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -760,7 +754,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     formik.setFieldValue('items', value)
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     if (recordId) {
       const dtd = await getRequest({
         extension: SaleRepository.DocumentTypeDefault.get,
@@ -772,6 +766,10 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       formik.setFieldValue('header.siteId', dtd?.record?.siteId || defSiteId || null)
     }
   }
+  
+  useEffect(() => {
+    if (formik.values?.header?.dtId && !recordId) onChangeDT(formik.values?.header?.dtId)
+  }, [formik.values?.header?.dtId])
 
   function getSummaryGridData(items = []) {
     const metalMap = items.reduce((acc, { metalId, weight, metalRef }) => {
@@ -1000,6 +998,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               <ResourceComboBox
                 endpointId={SaleRepository.DraftReturn.pack}
                 reducer={response => response?.record?.documentTypes}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -1013,7 +1012,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  await onChangeDtId(newValue?.recordId)
                   changeDT(newValue)
                   formik.setFieldValue('header.dtId', newValue?.recordId || null)
                 }}

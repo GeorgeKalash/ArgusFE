@@ -180,7 +180,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['items'],
     initialValues,
     validationSchema: yup.object({
@@ -1202,7 +1202,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     })
   }
 
-  async function onChangeDtId(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) return
 
     const res = await getRequest({
@@ -1241,7 +1241,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     }
   }, [subtotal])
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) onChangeDtId(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {
@@ -1294,6 +1294,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.SalesQuotation}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[

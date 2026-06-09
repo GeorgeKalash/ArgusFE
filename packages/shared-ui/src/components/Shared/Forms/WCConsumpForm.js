@@ -79,42 +79,42 @@ export default function WCConsumpForm({ recordId, window }) {
   })
 
   const initialValues = {
-      recordId,
-      header: {
-        recordId: null,
-        reference: '',
-        dtId: null,
-        date: new Date(),
-        plantId: null,
-        siteId: null,
-        workCenterId: null,
-        WcRef: '',
-        WcName: '',
-        weight: 0,
-        totalQty: 0,
-        description: '',
-        status: 1,
-        wip: 1
-      },
-      items: [
-        {
-          id: 1,
-          seqNo: 1,
-          itemId: null,
-          consumptionId: recordId,
-          qty: 0,
-          unitCost: 0,
-          muId: null,
-          msId: null,
-          itemName: '',
-          totalCost: 0,
-          baseQty: null
-        }
-      ]
-    }
+    recordId,
+    header: {
+      recordId: null,
+      reference: '',
+      dtId: null,
+      date: new Date(),
+      plantId: null,
+      siteId: null,
+      workCenterId: null,
+      WcRef: '',
+      WcName: '',
+      weight: 0,
+      totalQty: 0,
+      description: '',
+      status: 1,
+      wip: 1
+    },
+    items: [
+      {
+        id: 1,
+        seqNo: 1,
+        itemId: null,
+        consumptionId: recordId,
+        qty: 0,
+        unitCost: 0,
+        muId: null,
+        msId: null,
+        itemName: '',
+        totalCost: 0,
+        baseQty: null
+      }
+    ]
+  }
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     maxAccess,
     validateOnChange: true,
@@ -530,6 +530,7 @@ export default function WCConsumpForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.WorkCenterConsumption}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
                     columnsInDropDown={[

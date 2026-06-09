@@ -109,7 +109,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     initialValues,
     maxAccess,
     validateOnChange: true,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validationSchema: yup.object({
       accountType: yup.string().required(),
       currencyId: yup.number().required(),
@@ -239,7 +239,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       refetchForm(res.recordId)
     } catch (exception) {}
   }
-  async function getDTD(dtId) {
+  async function onChangeDT(dtId) {
     if (dtId) {
       const res = await getRequest({
         extension: FinancialRepository.FIDocTypeDefaults.get,
@@ -272,7 +272,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   }
 
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) getDTD(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {

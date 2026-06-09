@@ -81,7 +81,7 @@ export default function FixingForm({ recordId, functionId, window }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       functionId,
       plantId: null,

@@ -105,7 +105,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   }
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     maxAccess,
     validateOnChange: true,
