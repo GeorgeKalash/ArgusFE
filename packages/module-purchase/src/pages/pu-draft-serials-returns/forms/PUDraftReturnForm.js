@@ -269,21 +269,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.header?.status === 3
 
-  const assignStoreTaxDetails = serials => {
-    if (serials.length) {
-      const updatedSer = serials?.map(serial => {
-        return serial.taxId != null
-          ? {
-              ...serial,
-              extendedPrice: serial.unitPrice,
-              taxDetails: FilteredListByTaxId(taxDetailsCacheRef.current, serial.taxId)
-            }
-          : serial
-      })
-      formik.setFieldValue('serials', updatedSer)
-    }
-  }
-
   const FilteredListByTaxId = (store, taxId) => {
     if (Array.isArray(store)) {
       return store.filter(obj => obj.taxId === taxId)
@@ -347,8 +332,9 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
       const resp = autoSaveProcess(header, lastLine)
       if (resp) {
         toast.success(platformLabels.Saved)
+        await refetchForm(header.recordId)
 
-        return true
+        return header.recordId
       } else {
         return false
       }
@@ -383,12 +369,10 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     if (success) {
       toast.success(platformLabels.Saved)
 
-      const diHeader = await getDraftReturn(diRes.recordId)
-      const diItems = await getDraftReturnItems(diRes.recordId)
-      await fillForm(diHeader, diItems)
+      await refetchForm(diRes.recordId)
       invalidate()
 
-      return true
+      return diRes.recordId
     } else {
       return false
     }
@@ -469,17 +453,16 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
 
           if (!successSave) {
             update({
-              ...initialValues?.serials,
+              ...initialValues?.serials?.[0],
               id: newRow?.id,
               srlNo: ''
             })
-          } else {
-            await addRow(lineObj)
-
-            if (formik.values?.recordId) {
-              await refetchForm(formik.values?.recordId)
-            }
+            return
           }
+
+          await addRow(lineObj)
+
+          await refetchForm(successSave)
         }
       }
     },
@@ -710,7 +693,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
 
     const summaryGridData = getSummaryGridData(diItems.list)
 
-    await formik.resetForm({
+    formik.resetForm({
       values: {
         ...formik.values,
         recordId: diHeader.record.recordId,
@@ -840,7 +823,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     formik.setFieldValue('header.vatAmount', vatAmount)
     formik.setFieldValue('header.weight', weight)
     formik.setFieldValue('header.amount', amount)
-  }, [weight, subTotal, vatAmount, amount])
+  }, [reCal, weight, subTotal, vatAmount, amount])
 
   useEffect(() => {
     ;(async function () {
