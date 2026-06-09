@@ -49,7 +49,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
   const defaultSP = userDefaults?.list?.find(({ key }) => key === 'spId')?.value
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || '',
       dtId: null,
@@ -225,6 +225,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.BalanceTransfer}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.docType}
                     columnsInDropDown={[

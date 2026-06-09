@@ -54,7 +54,7 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
   const invalidate = refetch ?? hookInvalidate;
 
   const { formik } = useForm({
-    documentType: { key: 'transfer.dtId', value: documentType?.dtId },
+    behavior: { key: 'transfer.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId,
       transfer: {
@@ -338,6 +338,7 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
                       <ResourceComboBox
                         endpointId={SystemRepository.DocumentType.qry}
                         parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.JTCheckOut}`}
+                        filter={!editMode ? item => item.activeStatus === 1 : undefined}
                         name='transfer.dtId'
                         label={labels.documentType}
                         columnsInDropDown={[
@@ -348,9 +349,9 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
                         displayField={['reference', 'name']}
                         values={formik.values.transfer}
                         maxAccess
-                        onChange={async (event, newValue) => {
-                          formik.setFieldValue('transfer.dtId', newValue?.recordId || null)
+                        onChange={async (_, newValue) => {
                           changeDT(newValue)
+                          formik.setFieldValue('transfer.dtId', newValue?.recordId || null)
                         }}
                         readOnly={editMode}
                         required

@@ -61,7 +61,7 @@ export default function MainForm({ labels, access, store, setStore, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['batchWorksheetJobs', 'batchWSRM'],
     initialValues: {
       recordId: null,

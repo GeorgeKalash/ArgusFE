@@ -61,7 +61,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       reference: '',
@@ -238,7 +238,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     }
   }
 
-  async function getDTD(dtId) {
+  async function onChangeDT(dtId) {
     if (dtId) {
       const res = await getRequest({
         extension: FinancialRepository.FIDocTypeDefaults.get,
@@ -252,7 +252,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   }
 
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) getDTD(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {

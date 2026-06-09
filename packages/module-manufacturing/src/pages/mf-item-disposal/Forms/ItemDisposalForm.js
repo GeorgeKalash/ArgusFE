@@ -47,7 +47,7 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       header: {

@@ -51,7 +51,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       reference: '',

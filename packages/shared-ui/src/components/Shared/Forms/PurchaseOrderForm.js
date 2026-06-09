@@ -202,7 +202,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['items'],
     initialValues: initialValues,
     validateOnChange: true,
@@ -252,7 +252,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
     return res
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     const dtd = await getDTD(recordId)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId || defPlId)
   }
@@ -1156,7 +1156,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
   }, [])
 
   useEffect(() => {
-    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+    if (formik.values?.header.dtId && !recordId) onChangeDT(formik.values?.header.dtId)
   }, [formik.values?.header.dtId])
 
   useEffect(() => {
@@ -1297,6 +1297,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseOrder}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     readOnly={editMode}
                     label={labels.documentType}

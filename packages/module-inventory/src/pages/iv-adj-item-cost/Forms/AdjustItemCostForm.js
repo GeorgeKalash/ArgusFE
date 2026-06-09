@@ -38,7 +38,7 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       header: {
@@ -125,24 +125,19 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
     }
   }
 
-  async function getDTD(dtId) {
+  async function onChangeDT(dtId) {
     if (dtId) {
       const res = await getRequest({
         extension: InventoryRepository.DocumentTypeDefaults.get,
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue(
-        'header.plantId',
-        res?.record?.plantId ? res?.record?.plantId : formik?.values?.header?.plantId
-      )
-
-      return res
+      formik.setFieldValue('header.plantId', res?.record?.plantId || formik?.values?.header?.plantId)
     }
   }
 
   useEffect(() => {
-    getDTD(formik?.values?.header?.dtId)
+    if (formik.values?.header?.dtId && !recordId) onChangeDT(formik?.values?.header?.dtId)
   }, [formik.values?.header?.dtId])
 
   const getUnitCost = async itemId => {
@@ -297,6 +292,7 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.AdjustmentCost}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[

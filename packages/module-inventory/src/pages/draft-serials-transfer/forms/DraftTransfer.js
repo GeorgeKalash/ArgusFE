@@ -55,7 +55,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       header: {
@@ -476,7 +476,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     }
   ]
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     const dtd = await getRequest({
       extension: InventoryRepository.DocumentTypeDefaults.get,
       parameters: `_dtId=${recordId}`
@@ -565,7 +565,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   }, [])
 
   useEffect(() => {
-    if (!recordId && formik?.values?.header?.dtId) onChangeDtId(formik?.values?.header?.dtId)
+    if (!recordId && formik?.values?.header?.dtId) onChangeDT(formik?.values?.header?.dtId)
   }, [formik?.values?.header?.dtId])
 
   async function onValidationRequired() {
@@ -608,6 +608,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                     endpointId={InventoryRepository.DraftTransfer.pack}
                     reducer={response => response?.record?.documentTypes}
                     name='header.dtId'
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },

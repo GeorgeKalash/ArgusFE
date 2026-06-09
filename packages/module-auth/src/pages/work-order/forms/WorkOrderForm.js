@@ -39,7 +39,7 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: store.recordId,
       dtId: null,

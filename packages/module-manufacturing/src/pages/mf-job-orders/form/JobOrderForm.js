@@ -108,7 +108,7 @@ export default function JobOrderForm({
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -679,6 +679,7 @@ export default function JobOrderForm({
                 <ResourceComboBox
                   endpointId={ManufacturingRepository.MFJobOrder.pack}
                   reducer={response => response?.record?.documentTypes}
+                  filter={!editMode ? item => item.activeStatus === 1 : undefined}
                   name='dtId'
                   label={labels.documentType}
                   columnsInDropDown={[

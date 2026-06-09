@@ -79,7 +79,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       dueDate: new Date()
     },
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validateOnChange: true,
     validationSchema: yup.object({
       amount: yup.number().required(),
@@ -420,6 +420,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${formik.values.functionId}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     readOnly={editMode}
                     label={labels.doctype}

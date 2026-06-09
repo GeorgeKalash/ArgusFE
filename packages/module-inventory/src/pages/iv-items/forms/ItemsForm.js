@@ -15,7 +15,6 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import { useRefBehavior } from '@argus/shared-hooks/src/hooks/useReferenceProxy'
 import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
@@ -26,6 +25,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 import PrintConfirmationDialog from './PrintConfirmationDialog'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -47,10 +47,11 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   })
   const imageUploadRef = useRef(null)
 
-  const { changeDT, maxAccess } = useRefBehavior({
-    access: access,
-    readOnlyOnEditMode: store.recordId,
-    name: 'sku'
+  const { onFieldChange, maxAccess, fieldBehavior} = useFieldBehavior({
+    access,
+    fieldName: 'sku',
+    editMode: recordId,
+    enableClearing: !recordId
   })
 
   const { formik } = useForm({
@@ -88,6 +89,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       isInactive: false,
       isExternal: false
     },
+    behavior: { fieldBehavior },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -352,7 +354,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     required
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      changeDT(newValue)
+                      onFieldChange(newValue?.nraId)
                       setShowLotCategories(newValue?.trackBy === '2' || newValue?.trackBy === 2)
                       setShowSerialProfiles(newValue?.trackBy === '1' || newValue?.trackBy === 1)
                       setStore(prevStore => ({
@@ -410,10 +412,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={8}>
                   <CustomTextField
                     name='sku'
-                    required
                     label={labels.reference}
                     value={formik.values.sku}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('sku', '')}

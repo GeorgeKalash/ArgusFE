@@ -66,7 +66,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
             status: 1,
             items: []
         },
-        documentType: { key: 'dtId', value: documentType?.dtId },
+        behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
         validationSchema: yup.object({
             vehicleId: yup.number().required(),
             driverId: yup.number().required(),

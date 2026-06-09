@@ -48,7 +48,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       dtId: null,
@@ -355,6 +355,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                     <ResourceComboBox
                       endpointId={SystemRepository.DocumentType.qry}
                       parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Casting}`}
+                      filter={!editMode ? item => item.activeStatus === 1 : undefined}
                       name='dtId'
                       label={labels.docType}
                       columnsInDropDown={[

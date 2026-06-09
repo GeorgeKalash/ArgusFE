@@ -78,7 +78,7 @@ export default function WCConsumpForm({ recordId, window }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       header: {
@@ -524,6 +524,7 @@ export default function WCConsumpForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.WorkCenterConsumption}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
                     columnsInDropDown={[

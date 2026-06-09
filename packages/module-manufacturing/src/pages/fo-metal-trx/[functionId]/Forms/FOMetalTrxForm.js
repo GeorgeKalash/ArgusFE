@@ -72,7 +72,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const { schema, requiredFields } = createConditionalSchema(scrapsConditions, true, maxAccess, 'scraps')
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {
@@ -355,7 +355,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
       return
     }
 
-    const dtInfo = await selectedDocTypeInfo(record?.header?.dtId || null)
+    const dtInfo = await onChangeDT(record?.header?.dtId || null)
 
     const itemsList = (record?.items || []).map((item, index) => ({
       ...item,
@@ -637,7 +637,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     return res?.record?.metalId || null
   }
 
-  async function selectedDocTypeInfo(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) {
       formik.setFieldValue('header.smeltingMaxAllowedVariation', null)
 
@@ -672,7 +672,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
-        const dtInfo = await selectedDocTypeInfo(formik?.values?.header?.dtId)
+        const dtInfo = await onChangeDT(formik?.values?.header?.dtId)
         formik.setFieldValue('header.siteId', dtInfo?.siteId || null)
         formik.setFieldValue('header.workCenterId', dtInfo?.workCenterId || null)
         formik.setFieldValue('header.smeltingMaxAllowedVariation', dtInfo?.smeltingMaxAllowedVariation || null)

@@ -193,7 +193,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -1461,7 +1461,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return res
   }
 
-  async function onChangeDtId(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) return
     const res = await getDTD(dtId)
     if (res?.record != null) {
@@ -1550,7 +1550,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }, [subtotal])
 
   useEffect(() => {
-    if (formik?.values?.header?.dtId && !recordId) onChangeDtId(formik?.values?.header?.dtId)
+    if (formik?.values?.header?.dtId && !recordId) onChangeDT(formik?.values?.header?.dtId)
   }, [formik?.values?.header?.dtId])
 
   useEffect(() => {
@@ -1596,6 +1596,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.SalesReturn}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
                     columnsInDropDown={[

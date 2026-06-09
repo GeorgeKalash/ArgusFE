@@ -61,7 +61,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['items'],
     initialValues: {
       recordId: null,
@@ -368,8 +368,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   ]
 
   useEffect(() => {
-    if (!recordId && documentType?.dtId) onChangeDT(documentType.dtId)
-  }, [documentType?.dtId])
+    if (!recordId && formik.values?.dtId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
@@ -397,6 +397,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.BatchTransfer}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
                     columnsInDropDown={[
@@ -411,7 +412,6 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       changeDT(newValue)
-                      await onChangeDT(newValue?.recordId)
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}

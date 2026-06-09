@@ -35,7 +35,7 @@ export default function JournalVoucherForm({ labels, access, recordId, window })
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     maxAccess,
     initialValues: {
       recordId: null,

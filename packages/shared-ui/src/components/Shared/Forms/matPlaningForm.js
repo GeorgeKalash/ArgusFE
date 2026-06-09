@@ -52,7 +52,7 @@ export default function MatPlaningForm({ recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       header: {
@@ -406,6 +406,7 @@ export default function MatPlaningForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MRP}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[

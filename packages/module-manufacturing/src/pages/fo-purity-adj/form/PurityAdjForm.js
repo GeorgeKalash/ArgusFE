@@ -60,7 +60,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {
@@ -462,7 +462,7 @@ const calculateTotal = key =>
     }
   ]
 
-  async function selectedDocTypeInfo(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) return
 
     const res = await getRequest({
@@ -487,7 +487,7 @@ const calculateTotal = key =>
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
-        const dtInfo = await selectedDocTypeInfo(formik?.values?.header?.dtId)
+        const dtInfo = await onChangeDT(formik?.values?.header?.dtId)
         formik.setFieldValue('header.siteId', dtInfo?.siteId || null)
         formik.setFieldValue('header.workCenterId', dtInfo?.workCenterId || null)
       }

@@ -202,7 +202,7 @@ export default function RetailTransactionsForm({
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -1391,6 +1391,7 @@ export default function RetailTransactionsForm({
                         : response?.record?.documentTypes?.filter(item => item.activeStatus == 1)
                     }}
                     parameters={`_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     readOnly={isPosted || formik?.values?.items?.some(item => item.sku)}
                     label={labels.documentType}

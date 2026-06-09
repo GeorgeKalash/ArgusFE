@@ -59,7 +59,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       accountId: null,
       paymentReasonId: null,
