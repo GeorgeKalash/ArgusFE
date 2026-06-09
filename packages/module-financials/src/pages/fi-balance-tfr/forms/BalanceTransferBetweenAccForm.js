@@ -29,7 +29,6 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
-import { getDirtyFields } from '@argus/shared-utils/src/utils/getDirtyFields'
 
 export default function BalanceTransferForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -206,14 +205,6 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
       disabled: !editMode
     }
   ]
-
-  useEffect(() => {
-    if (formik.dirty) {
-      console.log(
-        getDirtyFields(formik.values, formik.initialValues)
-      )
-    }
-  }, [formik.values])
 
   return (
     <FormShell

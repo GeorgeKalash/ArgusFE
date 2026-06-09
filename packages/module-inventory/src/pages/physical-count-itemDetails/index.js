@@ -22,7 +22,6 @@ import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearG
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ImportForm from '@argus/shared-ui/src/components/Shared/ImportForm'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import { getDirtyFields } from '@argus/shared-utils/src/utils/getDirtyFields'
 
 const PhysicalCountItemDe = () => {
   const { stack } = useWindow()
@@ -247,13 +246,6 @@ const PhysicalCountItemDe = () => {
 
   const defaultQty = !jumpToNextLine && !showDefaultQty ? 0 : 1
 
-    useEffect(() => {
-    if (formik.dirty) {
-      console.log(
-        getDirtyFields(formik.values, formik.initialValues)
-      )
-    }
-  }, [formik.values])
 
   const columns = [
     {

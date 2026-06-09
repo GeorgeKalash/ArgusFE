@@ -28,7 +28,6 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { getDirtyFields } from '@argus/shared-utils/src/utils/getDirtyFields'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function BalanceTransferMultiForm({ labels, access, recordId, window }) {
@@ -340,14 +339,6 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
     if (recordId) refetchForm(recordId)
   }, [])
 
-  useEffect(() => {
-    if (formik.dirty) {
-      console.log(
-        getDirtyFields(formik.values, formik.initialValues)
-      )
-    }
-  }, [formik.values])
-
   const actions = [
     {
       key: 'GL',
@@ -397,14 +388,6 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
 
     return amount + amountValue
   }, 0)
-
-    useEffect(() => {
-    if (formik.dirty) {
-      console.log(
-        getDirtyFields(formik.values, formik.initialValues)
-      )
-    }
-  }, [formik.values])
 
   return (
     <FormShell

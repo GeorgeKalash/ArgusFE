@@ -23,7 +23,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { getDirtyFields } from '@argus/shared-utils/src/utils/getDirtyFields'
 
 export default function MainForm({ labels, access, store, setStore, window }) {
   const { recordId } = store
@@ -283,14 +282,6 @@ export default function MainForm({ labels, access, store, setStore, window }) {
       props: { readOnly: true }
     }
   ]
-  
-    useEffect(() => {
-    if (formik.dirty) {
-      console.log(
-        getDirtyFields(formik.values, formik.initialValues)
-      )
-    }
-  }, [formik.values])
 
   const onClose = async () => {
     await postRequest({
