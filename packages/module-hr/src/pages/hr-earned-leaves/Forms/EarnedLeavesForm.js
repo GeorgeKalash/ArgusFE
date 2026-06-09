@@ -20,7 +20,7 @@ import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
-import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 
 export default function EarnedLeavesForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -99,8 +99,9 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
       date: res?.record?.header?.date ? formatDateFromApi(res?.record?.header.date) : null,
       items:
         res?.record?.items?.map((item, index) => ({
+          ...item,
           id: index + 1,
-          ...item
+          effectiveDate: item?.effectiveDate ? formatDateFromApi(item?.effectiveDate) : null,
         })) || []
     })
   }
@@ -124,21 +125,32 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
   const columns = [
     {
-      field: 'employeeName',
-      headerName: labels.employee,
-      flex: 1
+      component: 'textfield',
+      name: 'employeeRef',
+      label: labels.employeeRef,
+      flex: 1,
+      props: { readOnly: true }
     },
     {
-      field: 'effectiveDate',
-      headerName: labels.days,
-      type: 'date',
-      flex: 1
+      component: 'textfield',
+      name: 'employeeName',
+      label: labels.employee,
+      flex: 2,
+      props: { readOnly: true }
     },
     {
-      field: 'units',
-      headerName: labels.units,
-      type: 'number',
-      flex: 1
+      component: 'date',
+      name: 'effectiveDate',
+      label: labels.date,
+      flex: 1,
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      name: 'units',
+      label: labels.units,
+      flex: 1,
+      props: { readOnly: true }
     }
   ]
 
@@ -155,10 +167,22 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
     formik.setFieldValue(
       'items',
       items?.list.map((item, index) => ({
+        ...item,
         id: index + 1,
-        ...item
+        effectiveDate: item?.effectiveDate ? formatDateFromApi(item?.effectiveDate) : null,
       })) || []
     )
+  }
+
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: LoanManagementRepository.EarnedLeave.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Posted)
+    invalidate()
+    getData(res?.recordId)
   }
 
   const actions = [
@@ -172,7 +196,8 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
       key: 'Locked',
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
-      disabled: true
+      onSuccess: onUnpost,
+      disabled: !editMode
     }
   ]
 
@@ -270,13 +295,16 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
           </Grid>
         </Fixed>
         <Grow>
-          <Table
-            name='earnedLeaves'
+         <DataGrid
+            name='items'
             columns={columns}
-            gridData={{ list: formik.values.items }}
-            rowId={['recordId']}
-            pagination={false}
+            value={formik.values.items}
+            error={formik.errors.items}
+            onChange={value => formik.setFieldValue('items', value)}
+            allowDelete={false}
+            allowAddNewLine={false}
             maxAccess={maxAccess}
+            enableFilters
           />
         </Grow>
       </VertLayout>

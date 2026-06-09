@@ -36,6 +36,7 @@ export const LoanManagementRepository = {
     del: service + 'delEL',
     preview: service + 'previewEL',
     post: service + 'postEL',
+    unpost: service + 'unpostEL'
   },
   LeavePeriod: {
     qry: service + 'qryLP',
