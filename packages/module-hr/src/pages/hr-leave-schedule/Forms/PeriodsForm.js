@@ -44,7 +44,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
       carryOver: yup.number().required(),
       accrualActivation: yup.number().required(),
       carryOverMax: yup.number().when('carryOver', {
-        is: value => value != 1,
+        is: value => value != 1 && value != 3,
         then: schema => schema.required(),
         otherwise: schema => schema.nullable()
       })
@@ -238,7 +238,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
               maxLength={4}
               allowNegative={false}
               decimalScale={0}
-              readOnly={formik.values.carryOver == 1}
+              readOnly={formik.values.carryOver == 1 || formik.values.carryOver == 3}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('carryOverMax', '')}
               error={formik.touched.carryOverMax && Boolean(formik.errors.carryOverMax)}
