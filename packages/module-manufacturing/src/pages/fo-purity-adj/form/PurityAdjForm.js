@@ -677,7 +677,7 @@ const calculateTotal = key =>
                 readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.notes', e.target.value)}
-                onClear={() => formik.setFieldValue('header.notes', '')}
+                onClear={() => formik.setFieldValue('header.notes', null)}
                 error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
               />
             </Grid>

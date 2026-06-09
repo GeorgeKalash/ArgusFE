@@ -702,7 +702,10 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.clientId && !isCancelled && !isPosted}
                     onChange={e => formik.setFieldValue('address', e.target.value)}
-                    onClear={() => formik.setFieldValue('address', '')}
+                    onClear={() => {
+                      formik.setFieldValue('address', null)
+                      formik.setFieldValue('addressId', null)
+                    }}
                     onDropDown={() => openAddressFilterForm(true)}
                   />
                 </Grid>

@@ -813,7 +813,7 @@ export default function ShipmentsForm({ recordId, window }) {
                     readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('header.notes', '')}
+                    onClear={() => formik.setFieldValue('header.notes', null)}
                     error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
                   />
                 </Grid>
