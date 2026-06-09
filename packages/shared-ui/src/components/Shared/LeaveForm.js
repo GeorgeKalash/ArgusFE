@@ -147,6 +147,7 @@ export const LeaveForm = ({ recordId, window }) => {
   }
 
   const isClosed = formik.values.wip == 2
+  const isPosted = formik.values.status === 3
 
   const columns = [
     {
@@ -202,6 +203,17 @@ export const LeaveForm = ({ recordId, window }) => {
       res?.record?.leave?.ltId,
       formatDateFromApi(res?.record?.leave?.date)
     )
+  }
+
+  const onPost = async () => {
+    await postRequest({
+      extension: LoanManagementRepository.LeaveRequest.post,
+      record: JSON.stringify({ recordId: formik.values.recordId })
+    })
+
+    toast.success(platformLabels.Posted)
+    invalidate()
+    window.close()
   }
 
   const onClose = async () => {
@@ -332,6 +344,18 @@ export const LeaveForm = ({ recordId, window }) => {
 
   const actions = [
     {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !isClosed
+    },
+    {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
@@ -341,7 +365,7 @@ export const LeaveForm = ({ recordId, window }) => {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed
+      disabled: !isClosed || isPosted
     },
     {
       key: 'Approval',
