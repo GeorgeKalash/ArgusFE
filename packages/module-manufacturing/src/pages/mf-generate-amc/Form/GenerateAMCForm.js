@@ -35,9 +35,6 @@ export default function GenerateAMCForm({ _labels, access }) {
       toast.success(platformLabels.Generated)
     }
   })
-      toast.success(platformLabels.Generated)
-    }
-  })
 
   const actions = [
     {
