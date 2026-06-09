@@ -202,17 +202,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   const editMode = !!formik.values.recordId
   const isVerified = formik.values.isVerified
 
-  async function refetchForm (recordId) {
-    const response = await getRequest({
-      extension: FinancialRepository.PaymentVouchers.get2,
-      parameters: `_recordId=${recordId}`
-    })
-    
-    formik.setValues({...response.record.header, 
-      date: formatDateFromApi(response.record?.header?.date),
-      accountBalance: response.record?.accountBalance?.balance || 0})
-  }
-
   const onPost = async () => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentVouchers.post,
