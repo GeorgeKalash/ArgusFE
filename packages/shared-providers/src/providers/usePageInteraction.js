@@ -9,7 +9,7 @@ const usePageInteraction = () => {
   const openTabs = menuContext?.openTabs || []
   const currentTabIndex = menuContext?.currentTabIndex
 
-  const currentPageResourceId = currentTabIndex &&
+  const currentPageResourceId = (currentTabIndex != null || currentTabIndex != '' || currentTabIndex != undefined)  &&
     openTabs?.[currentTabIndex]?.resourceId
       ? openTabs[currentTabIndex].resourceId
       : null
@@ -26,11 +26,10 @@ const usePageInteraction = () => {
     [track, currentPageResourceId]
   )
 
-  trackInteraction.trackPageFields = fieldValues => {
-    console.log('currentPageResourceId',currentPageResourceId)
+  trackInteraction.trackPageFields = (fieldValues, initialValues = null) => {
     if (!currentPageResourceId) return false
 
-    trackFieldState(currentPageResourceId, fieldValues)
+    trackFieldState(currentPageResourceId, fieldValues, initialValues)
     return true
   }
 

@@ -45,27 +45,27 @@ export const InteractionTrackerProvider = ({ children }) => {
   }, [])
 
 
-  const trackFieldState = useCallback((pageId, fieldValues) => {
+  const trackFieldState = useCallback((pageId, fieldValues, initials) => {
     if (!pageId || !fieldValues) return
 
     let pageBecameDirty = false
     setFieldStates(prev => {
       const safePrev = Array.isArray(prev) ? prev : []
       const existingItem = safePrev.find(item => item.pageId === pageId)
+      const initialValues = initials || existingItem.initialValues
+      const isDirty = !isEqual(initialValues, fieldValues)
       if (!existingItem) {
+        if (isDirty) track(pageId, 'gridToolbar')
         return [
-          ...safePrev,
           {
             pageId,
-            initialValues: fieldValues,
+            initialValues: initials || fieldValues,
             currentValues: fieldValues,
-            isDirty: false
+            isDirty
           }
         ]
       }
 
-      const initialValues = existingItem.initialValues
-      const isDirty = !isEqual(initialValues, fieldValues)
       pageBecameDirty = isDirty
 
       if (!isDirty) {
@@ -73,6 +73,7 @@ export const InteractionTrackerProvider = ({ children }) => {
           item.pageId === pageId
             ? {
                 ...item,
+                 initialValues: initials || fieldValues,
                 currentValues: fieldValues,
                 isDirty: false
               }
@@ -85,7 +86,7 @@ export const InteractionTrackerProvider = ({ children }) => {
           ? {
               ...item,
               currentValues: fieldValues,
-              isDirty: true
+              isDirty
             }
           : item
       )

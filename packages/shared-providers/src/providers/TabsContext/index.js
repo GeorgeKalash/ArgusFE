@@ -814,6 +814,7 @@ const TabsProvider = ({ children }) => {
                         e.stopPropagation()
                       }}
                       onClick={e => {
+                        clearPageInteractions(activeTab.resourceId) 
                         e.preventDefault()
                         e.stopPropagation()
                         setReloadOpenedPage({
