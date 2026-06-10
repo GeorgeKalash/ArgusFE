@@ -1,6 +1,6 @@
-import React, { useContext, useRef, useState, useEffect } from 'react'
+import React, { useContext, useRef, useState, useEffect, useMemo } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, IconButton, TextField } from '@mui/material'
+import { Box, IconButton, TextField, Menu, MenuItem } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
@@ -30,7 +30,7 @@ import { getStatusIcon } from "@argus/shared-utils/src/utils/status-icon";
 import Chip from "@mui/material/Chip";
 
 const Table = ({
-  name,
+  name = 'table',
   paginationType = '',
   globalStatus = true,
   viewCheckButtons = false,
@@ -67,6 +67,9 @@ const Table = ({
   const hasRowId = gridData?.list?.[0]?.id
   const storeName = 'tableSettings'
   const gridRef = useRef(null)
+  const gridApiRef = useRef(null)
+  const [menuAnchor, setMenuAnchor] = useState(null)
+  const [selectedColId, setSelectedColId] = useState(null)
   const [hoveredTable, setHoveredTable] = useState(false)
 
   const { width } = useWindowDimensions()
@@ -81,7 +84,8 @@ const Table = ({
   const badgeFont = Math.max(10, Math.round(rowHeight * 0.33));
   const badgeRadius = Math.round(badgeHeight / 3);
 
-  const columns = props?.columns
+  const columns = useMemo(() => {
+  return props?.columns
     .filter(
       ({ field }) =>
         accessLevel({
@@ -245,7 +249,12 @@ const Table = ({
           fontWeight: params.data?.isBold ? 'bold' : 'normal'
         })
       }
-    })
+    }
+  )}, [
+    props?.columns,
+    languageId,
+    disableSorting
+  ])
 
   function dateComparator(date1, date2) {
     if (date1 == null && date2 == null) return 0
@@ -271,7 +280,11 @@ const Table = ({
 
     return match && match.accessLevel === ControlAccessLevel.Hidden
   }
-  const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
+  const filteredColumns = useMemo(
+    () => columns.filter(column => !shouldRemoveColumn(column)),
+    [columns, columnsAccess]
+  )
+
 
   useEffect(() => {
     const areAllValuesTrue =
@@ -806,160 +819,8 @@ const Table = ({
       )
     }
 
-  const columnDefs = [
-    ...(showCheckboxColumn
-      ? [
-          {
-            headerName: '',
-            field: 'checked',
-            flex: checkboxFlex,
-            width: 70,
-            cellRenderer: checkboxCellRenderer,
-            headerComponent: params =>
-              rowSelection !== 'single' &&
-              showSelectAll && (
-                <Checkbox
-                  checked={checked}
-                  disabled={props?.disableCheckBox}
-                  onChange={e => {
-                    e.stopPropagation()
 
-                    const colId = params.column.getColId()
-                    params.api.ensureColumnVisible(colId)
-
-                    const root = params.api.getGui && params.api.getGui()
-                    const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
-                    const cell = headerRoot && headerRoot.querySelector('.ag-header-cell[col-id="' + colId + '"]')
-                    const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
-                    focusable && focusable.focus && focusable.focus()
-                    selectAll(params, e)
-                  }}
-                  className={'fullSizeCheckbox'}
-                />
-              ),
-            suppressMenu: true
-          }
-        ]
-      : []),
-    ...filteredColumns.map(column => {
-      const isLinkedColumn = column.type === 'link' || !!column.linkOpen
-
-      return {
-        ...column,
-        width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
-        flex: column.flex,
-        sort: column.sort || '',
-        cellRenderer:
-          column.type === 'image'
-            ? imageRenderer(column)
-            : isLinkedColumn
-            ? params => (
-                <LinkCellRenderer
-                  data={params.data}
-                  field={column.field}
-                  value={params.value}
-                  params={params}
-                  wrapText={column.wrapText}
-                  onClick={column.onClick}
-                  linkOpen={column.linkOpen}
-                />
-              )
-            : column.isTree
-            ? IndentedCellRenderer
-            : column.cellRenderer
-            ? column.cellRenderer
-            : FieldWrapper
-      }
-    })
-  ]
-
-  if (props?.onEdit || props?.onDelete) {
-    const deleteBtnVisible = maxAccess
-      ? props?.onDelete && maxAccess[accessMap[TrxType.DEL]]
-      : props?.onDelete
-      ? true
-      : false
-
-    if (!columnDefs?.some(column => column.field === 'actions'))
-      columnDefs?.push({
-        field: 'actions',
-        headerName: '',
-        width: 100,
-        cellRenderer: params => {
-          const { data } = params
-          const isStatus3 = data.status === 3
-          const isStatusCanceled = data.status === -1
-          const isWIP = data.wip === 2
-
-          return (
-            <Box className={'actionsBox'}>
-              {props?.onEdit && (!props?.actionCondition || props?.actionCondition(data, 'edit')) && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    props?.onEdit(data)
-                  }}
-                  className={'actionIconButton'}
-                >
-                  <Image src={'/images/TableIcons/edit.png'} width={18} height={18} alt='Edit' className={'actionIcon'} />
-                </IconButton>
-              )}
-
-              {!globalStatus && deleteBtnVisible && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    if (props.deleteConfirmationType == 'strict') {
-                      openDeleteConfirmation(data)
-                    } else {
-                      openDelete(data)
-                    }
-                  }}
-                  color='error'
-                  className={'actionIconButton'}
-                >
-                  <Image src={'/images/TableIcons/delete.png'} width={18} height={18} alt={platformLabels.Delete} className={'actionIcon'} />
-                </IconButton>
-              )}
-              {globalStatus &&
-                !isStatus3 &&
-                !isStatusCanceled &&
-                deleteBtnVisible &&
-                !isWIP &&
-                (!props?.actionCondition || props?.actionCondition(data, 'delete')) && (
-                  <IconButton
-                    size='small'
-                    onClick={e => {
-                      if (props?.deleteConfirmationType == 'strict') {
-                        openDeleteConfirmation(data)
-                      } else {
-                        openDelete(data)
-                      }
-                    }}
-                    color='error'
-                    className={'actionIconButton'}
-                  >
-                    <Image src={'/images/TableIcons/delete.png'} width={18} height={18} alt={platformLabels.Delete} className={'actionIcon'} />
-                  </IconButton>
-                )}
-            </Box>
-          )
-        }
-      })
-  }
-
-  const gridOptions = {
-    rowClassRules: {
-      'even-row': params => params.node.rowIndex % 2 === 0,
-      'highlighted-row': params => {
-        if (!highlightRow) return false
-        return highlightRow.condition?.(params.data)
-      }
-    }
-  }
-
-  const tableName =
-    name && name !== 'table' ? `${name}.${props?.maxAccess?.record?.resourceId}` : props?.maxAccess?.record?.resourceId
+  const tableName = name && `${name}.${props?.maxAccess?.record?.resourceId}`
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
     queryKey: [tableName],
@@ -967,12 +828,270 @@ const Table = ({
     enabled: !!tableName
   })
 
+  const checkboxColumn = useMemo(() => ({
+    headerName: '',
+    field: 'checked',
+    flex: checkboxFlex,
+    width: 70,
+    cellRenderer: checkboxCellRenderer,
+    headerComponent: params =>
+      rowSelection !== 'single' &&
+      showSelectAll && (
+        <Checkbox
+          checked={checked}
+          disabled={props?.disableCheckBox}
+          onChange={e => {
+              e.stopPropagation()
+
+            const colId = params.column.getColId()
+            params.api.ensureColumnVisible(colId)
+
+            const root = params.api.getGui && params.api.getGui()
+            const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
+            const cell = headerRoot && headerRoot.querySelector('.ag-header-cell[col-id="' + colId + '"]')
+            const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
+            focusable && focusable.focus && focusable.focus()
+            selectAll(params, e)
+          }}
+          className={'fullSizeCheckbox'}
+        />
+      ),
+    suppressMenu: true
+  }), [checked, showSelectAll, rowSelection])
+
+  const columnDefs = useMemo(() => {
+    return [
+      ...(showCheckboxColumn ? [checkboxColumn] : []),
+      ...filteredColumns.map(column => {
+        const isLinkedColumn = column.type === 'link' || !!column.linkOpen
+
+        const savedColumn = tableSettings?.find(
+          item => item.colId === column.field
+        )
+
+        return {
+          ...column,
+          width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
+          flex: column.flex,
+          sort: column.sort || '',
+          cellRenderer:
+            column.type === 'image'
+              ? imageRenderer(column)
+              : isLinkedColumn
+              ? params => (
+                  <LinkCellRenderer
+                    data={params.data}
+                    field={column.field}
+                    value={params.value}
+                    params={params}
+                    wrapText={column.wrapText}
+                    onClick={column.onClick}
+                    linkOpen={column.linkOpen}
+                  />
+                )
+              : column.isTree
+              ? IndentedCellRenderer
+              : column.cellRenderer
+              ? column.cellRenderer
+              : FieldWrapper
+        }
+      }),
+    ...(props?.onEdit || props?.onDelete
+      ? [
+          {
+            field: 'actions',
+            headerName: '',
+            width: 100,
+            cellRenderer: params => {
+              const { data } = params
+              const isStatus3 = data.status === 3
+              const isStatusCanceled = data.status === -1
+              const isWIP = data.wip === 2
+              const deleteBtnVisible = maxAccess
+                ? props?.onDelete && maxAccess[accessMap[TrxType.DEL]]
+                : props?.onDelete
+                ? true
+                : false
+
+              return (
+                <Box className={'actionsBox'}>
+                  {props?.onEdit &&
+                    (!props?.actionCondition ||
+                      props?.actionCondition(data, 'edit')) && (
+                      <IconButton
+                        size='small'
+                        onClick={() => {
+                          props?.onEdit(data)
+                        }}
+                        className={'actionIconButton'}
+                      >
+                        <Image
+                          src={'/images/TableIcons/edit.png'} width={18} height={18}
+                          alt='Edit'
+                          className={'actionIcon'}
+                        />
+                      </IconButton>
+                    )}
+
+                  {!globalStatus &&
+                    deleteBtnVisible && (
+                      <IconButton
+                        size='small'
+                        onClick={() => {
+                          if (
+                            props.deleteConfirmationType ==
+                            'strict'
+                          ) {
+                            openDeleteConfirmation(data)
+                          } else {
+                            openDelete(data)
+                          }
+                        }}
+                        color='error'
+                        className={'actionIconButton'}
+                      >
+                        <Image
+                          src={'/images/TableIcons/delete.png'} width={18} height={18}
+                          alt={platformLabels.Delete}
+                          className={'actionIcon'}
+                        />
+                      </IconButton>
+                    )}
+
+                  {globalStatus &&
+                    !isStatus3 &&
+                    !isStatusCanceled &&
+                    deleteBtnVisible &&
+                    !isWIP &&
+                    (!props?.actionCondition ||
+                      props?.actionCondition(data, 'delete')) && (
+                      <IconButton
+                        size='small'
+                        onClick={() => {
+                          if (
+                            props?.deleteConfirmationType ==
+                            'strict'
+                          ) {
+                            openDeleteConfirmation(data)
+                          } else {
+                            openDelete(data)
+                          }
+                        }}
+                        color='error'
+                        className={'actionIconButton'}
+                      >
+                        <Image
+                          src={'/images/TableIcons/delete.png'} width={18} height={18}
+                          alt={platformLabels.Delete}
+                          className={'actionIcon'}
+                        />
+                      </IconButton>
+                    )}
+                </Box>
+              )
+            }
+          }
+        ]
+      : [])
+      ]
+    }, [
+      filteredColumns,
+      additionalWidth,
+      languageId,
+      tableSettings,
+      checkboxColumn,
+      showCheckboxColumn
+    ])
+
+  const gridOptions = useMemo(
+    () => ({
+      rowClassRules: {
+        'even-row': params => params.node.rowIndex % 2 === 0,
+        'highlighted-row': params => {
+          if (!highlightRow) return false
+          return highlightRow.condition?.(params.data)
+        }
+      }
+    }),
+    [highlightRow]
+  )
+
+  useEffect(() => {
+    if (!tableSettings || !gridApiRef.current?.columnApi) return
+
+    gridApiRef.current.columnApi.applyColumnState({
+      state: tableSettings,
+      applyOrder: true
+    })
+  }, [tableSettings])
+
+  const onColumnPinned = params => {
+    const columnState = params.columnApi.getColumnState()
+
+    if (!tableName) return
+
+    saveToDB(storeName, tableName, columnState)
+  }
+
+  const onGridReady = params => {
+    const gridElement = gridRef.current
+
+    if (!gridElement) return
+
+    gridElement.addEventListener('contextmenu', event => {
+      const headerCell = event.target.closest('.ag-header-cell')
+
+      if (!headerCell) return
+
+      event.preventDefault()
+
+      const colId = headerCell.getAttribute('col-id')
+      if (!colId) return
+
+      const column = gridApiRef.current?.columnApi?.getColumn(colId)
+
+      const pinned = column?.getPinned()
+
+      setSelectedColId({
+        colId,
+        pinned
+      })
+
+      setMenuAnchor({
+        mouseX: event.clientX,
+        mouseY: event.clientY
+      })
+    })
+  }
+
+  const pinColumn = async (colId, pinned) => {
+    setMenuAnchor(null)
+
+    const originalOrder = columnDefs.map(col => col.field)
+
+    gridApiRef.current?.columnApi?.applyColumnState({
+      state: [{ colId, pinned }],
+      applyOrder: false
+    })
+
+    if (!pinned) {
+      const targetIndex = originalOrder.indexOf(colId)
+      
+      if (targetIndex > -1) {
+        gridApiRef.current?.columnApi?.moveColumn(colId, targetIndex)
+      }
+    }
+    setTimeout(async () => {
+      const columnState = gridApiRef.current?.columnApi?.getColumnState()
+      
+      await saveToDB(storeName, tableName, columnState)
+    }, 0)
+  }
+
   const onColumnMoved = params => {
     if (params.columnApi && tableName && params.source != 'gridOptionsChanged') {
       const columnState = params.columnApi.getColumnState()
       saveToDB(storeName, tableName, columnState)
-
-      invalidate()
     }
   }
 
@@ -981,7 +1100,6 @@ const Table = ({
       const columnState = params.columnApi.getColumnState()
 
       saveToDB(storeName, tableName, columnState)
-      invalidate()
     }
   }
 
@@ -990,35 +1108,40 @@ const Table = ({
       const columnState = params.columnApi.getColumnState()
 
       saveToDB(storeName, tableName, columnState)
-      invalidate()
     }
   }
 
   const onReset = async () => {
     await deleteFromDB(storeName, tableName)
+
+    gridApiRef.current?.columnApi?.resetColumnState()
+
+    const defaultState = [
+      ...(showCheckboxColumn
+        ? [{
+            colId: checkboxColumn.field,
+            width: checkboxColumn.width,
+            pinned: null,
+            sort: null
+          }]
+        : []),
+      ...props.columns
+          .filter(col => col?.field)
+          .map(col => ({
+            colId: col.field,
+            width: col.width,
+            pinned: null,
+            sort: null
+          }))
+    ]
+
+    gridApiRef.current?.columnApi?.applyColumnState({
+      state: defaultState,
+      applyOrder: true
+    })
+
     invalidate()
   }
-
-  const updatedColumns = tableSettings
-    ? columnDefs.map(({ flex, ...col }, index) => {
-        const savedCol = tableSettings?.find(c => c.colId === col?.field)
-        const indexSort = tableSettings?.findIndex(c => c.colId === col?.field)
-
-        const lastColumn = tableSettings?.length === indexSort + 1
-
-        return {
-          ...col,
-          width: savedCol?.width ?? 120,
-          flex: null,
-          sortColumn: lastColumn ? columnDefs?.length + 1 : indexSort > -1 ? indexSort : index,
-          sort: savedCol?.sort ?? col?.sort
-        }
-      })
-    : columnDefs
-
-  const finalColumns = updatedColumns?.sort((a, b) => {
-    return (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
-  })
 
   const hoverTimeoutRef = useRef(null)
 
@@ -1036,7 +1159,20 @@ const Table = ({
     }
   }
 
+
+  const isLastUnpinnedColumn = useMemo(() => {
+    const state = gridApiRef.current?.columnApi?.getColumnState?.() || []
+
+    const unpinnedColumns = state.filter(col => !col.pinned)
+
+    return (
+      unpinnedColumns.length === 1 &&
+      unpinnedColumns[0]?.colId === selectedColId?.colId
+    )
+  }, [selectedColId])
+
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
+
   return (
     <VertLayout>
       <Grow>
@@ -1064,11 +1200,13 @@ const Table = ({
             </Box>
           )}
           <AgGridReact
+            key="grid"
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
             ensureDomOrder={true}
             enableRangeSelection={true}
-            columnDefs={finalColumns}
+            columnDefs={columnDefs}
+            maintainColumnOrder={true}
             domLayout={domLayout}
             {...(hasRowId && {
               getRowId: params => params?.data?.id
@@ -1085,9 +1223,47 @@ const Table = ({
             onRowDragEnd={onRowDragEnd}
             onColumnMoved={onColumnMoved}
             onColumnResized={onColumnResized}
+            onColumnPinned={onColumnPinned}
             onSortChanged={onSortChanged}
             enableRtl={languageId === 2}
+            suppressContextMenu={false}
+            allowContextMenuWithControlKey={true}
+            onGridReady={params => {
+              gridApiRef.current = params
+              onGridReady(params)
+            }}
           />
+          <Menu
+            open={!!menuAnchor}
+            onClose={() => setMenuAnchor(null)}
+            anchorReference="anchorPosition"
+            anchorPosition={
+              menuAnchor
+                ? {
+                    top: menuAnchor.mouseY,
+                    left: menuAnchor.mouseX
+                  }
+                : undefined
+            }
+          >
+            {selectedColId?.pinned !== 'left' && (
+              <MenuItem disabled={isLastUnpinnedColumn} onClick={() => pinColumn(selectedColId.colId, 'left')}>
+                {platformLabels.freezeLeft}
+              </MenuItem>
+            )}
+
+            {selectedColId?.pinned !== 'right' && (
+              <MenuItem disabled={isLastUnpinnedColumn} onClick={() => pinColumn(selectedColId.colId, 'right')}>
+                {platformLabels.freezeRight}
+              </MenuItem>
+            )}
+
+            {selectedColId?.pinned && (
+              <MenuItem onClick={() => pinColumn(selectedColId.colId, null)}>
+                {platformLabels.unfreeze}
+              </MenuItem>
+            )}
+          </Menu>
         </Box>
       </Grow>
 
@@ -1339,6 +1515,33 @@ const Table = ({
           line-height: 1;
         }
 
+        .agGridContainer :global(.ag-pinned-left-header),
+        .agGridContainer :global(.ag-pinned-left-cols-container) {
+          background-color: #fafafa;
+        }
+
+        .agGridContainer :global(.ag-pinned-right-header),
+        .agGridContainer :global(.ag-pinned-right-cols-container) {
+          background-color: #fafafa;
+        }
+
+        /* Divider */
+        .agGridContainer :global(.ag-pinned-left-header) {
+          border-right: 4px solid #b6bac2;
+        }
+
+        .agGridContainer :global(.ag-pinned-left-cols-container) {
+          border-right: 4px solid #b6bac2;
+        }
+
+        .agGridContainer :global(.ag-pinned-right-header) {
+          border-left: 4px solid #b6bac2;
+        }
+
+        .agGridContainer :global(.ag-pinned-right-cols-container) {
+          border-left: 4px solid #b6bac2;
+        }
+          
         @media (min-width: 1025px) and (max-width: 1600px) {
           .agGridContainer:global(.ag-theme-alpine) {
             --ag-font-size: 12px;
