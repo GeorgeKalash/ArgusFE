@@ -13,6 +13,8 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 import FiPaymentVoucherExpensesForm from './forms/PaymentVoucherExpensesForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -126,8 +128,13 @@ const FiPaymentVouchers = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.PaymentVoucher,
+    action: openForm
+  })
+
+  const add = async () => {
+   await proxyAction()
   }
 
   const edit = obj => {
