@@ -120,7 +120,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
 
   const { formik } = useForm({
     maxAccess,
-    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
