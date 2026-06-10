@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import * as yup from 'yup'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -36,6 +35,7 @@ export default function GenerateAMCForm({ _labels, access }) {
     {
       key: 'generate',
       condition: true,
+      onClick: () => formik.handleSubmit(),
       onClick: () => formik.handleSubmit(),
       disabled: false
     }
