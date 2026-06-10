@@ -856,7 +856,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={3}>
                   <CustomNumberField
                     name='subtotal'
                     label={labels.subtotal}
@@ -881,7 +881,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     required={formik.values.paymentMethod == 3}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={3}>
                   <CustomNumberField
                     name='vatAmount'
                     label={labels.vat}
@@ -893,6 +893,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
                   />
                 </Grid>
+                <Grid item xs={3}></Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={CashBankRepository.CACheckbook.qry}
@@ -909,7 +910,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     disabled={formik.values.paymentMethod != 3}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={3}>
                   <CustomNumberField
                     name='amount'
                     label={labels.amount}
@@ -933,7 +934,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
                   />
                 </Grid>
-
+                <Grid item xs={3}></Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
                     name='notes'
