@@ -60,7 +60,7 @@ const JournalVoucher = () => {
 
   const columns = [
     {
-      field: 'dtRef',
+      field: 'dtName',
       headerName: _labels.documentType,
       flex: 1
     },
