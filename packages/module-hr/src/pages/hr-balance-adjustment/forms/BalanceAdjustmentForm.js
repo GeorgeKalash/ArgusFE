@@ -11,7 +11,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -35,7 +35,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
   })
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.BalanceAdjustment.page
+    endpointId: LeaveManagementRepository.BalanceAdjustment.page
   })
 
   const { formik } = useForm({
@@ -48,6 +48,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
       employeeId: null,
       employeeRef: '',
       employeeName: '',
+      ltId: null,
       lsId: null,
       leaveTrackTime: null,
       effectiveDate: new Date(),
@@ -61,7 +62,8 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
     validationSchema: yup.object({
       reference: yup.string().required(),
       employeeId: yup.number().required(),
-      lsId: yup.number().required(),
+      ltId: yup.number().required(),
+      scheduleName: yup.string().required(),
       leaveTrackTime: yup.number().required(),
       effectiveDate: yup.date().required(),
       date: yup.date().required(),
@@ -70,7 +72,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
     }),
     onSubmit: async obj => {
       postRequest({
-        extension: LoanManagementRepository.BalanceAdjustment.set,
+        extension: LeaveManagementRepository.BalanceAdjustment.set,
         record: JSON.stringify({
           ...obj,
           effectiveDate: formatDateToApi(obj.effectiveDate),
@@ -87,7 +89,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
 
   async function refetchForm(recordId) {
     const res = await getRequest({
-      extension: LoanManagementRepository.BalanceAdjustment.get,
+      extension: LeaveManagementRepository.BalanceAdjustment.get,
       parameters: `_recordId=${recordId}`
     })
 
@@ -103,6 +105,17 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
   useEffect(() => {
     recordId && refetchForm(recordId)
   }, [])
+
+  async function getEmployeeSchedule(ltId, employeeId) {
+    if(!ltId || !employeeId) return null
+
+    const res = await getRequest({
+      extension: EmployeeRepository.Leaves.get,
+      parameters: `_employeeId=${employeeId}&_ltId=${ltId}`
+    })
+
+    return res?.record || null
+  }
 
   return (
     <FormShell
@@ -131,7 +144,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
                   changeDT(newValue)
                 }}
@@ -178,7 +191,11 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 secondDisplayField={true}
                 required
                 secondValue={formik.values.employeeName}
-                onChange={(event, newValue) => {
+                onChange={async (_, newValue) => {
+                  const lsRes = await getEmployeeSchedule(newValue?.recordId, formik.values.ltId)
+                  formik.setFieldValue('scheduleName', lsRes?.lsName || null)
+                  formik.setFieldValue('lsId', lsRes?.lsId || null)
+                  
                   formik.setFieldValue('employeeRef', newValue?.reference || '')
                   formik.setFieldValue('employeeName', newValue?.fullName || '')
                   formik.setFieldValue('employeeId', newValue?.recordId || null)
@@ -188,9 +205,9 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.LeaveScheduleFilters.qry}
-                name='lsId'
-                label={labels.leaveSchedule}
+                endpointId={LeaveManagementRepository.LeaveTypes.qry}
+                name='ltId'
+                label={labels.leaveType}
                 values={formik.values}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -200,11 +217,25 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('lsId', newValue?.recordId || null)
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('ltId', newValue?.recordId || null)
+                  const lsRes = await getEmployeeSchedule(newValue?.recordId, formik.values.employeeId)
+                  formik.setFieldValue('scheduleName', lsRes?.lsName || null)
+                  formik.setFieldValue('lsId', lsRes?.lsId || null)
                 }}
-                error={formik.touched.lsId && Boolean(formik.errors.lsId)}
+                error={formik.touched.ltId && Boolean(formik.errors.ltId)}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField 
+                name='scheduleName'
+                label={labels.leaveSchedule}
+                value={formik?.values?.scheduleName}
+                maxAccess={maxAccess}
+                readOnly
+                required
+                error={formik.touched.scheduleName && Boolean(formik.errors.scheduleName)}
+                />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
@@ -216,7 +247,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 displayField='value'
                 maxAccess={maxAccess}
                 required
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('leaveTrackTime', newValue?.key || null)
                 }}
                 error={formik.touched.leaveTrackTime && Boolean(formik.errors.leaveTrackTime)}
