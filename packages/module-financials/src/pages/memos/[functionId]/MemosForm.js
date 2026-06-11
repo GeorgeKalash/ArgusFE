@@ -552,7 +552,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
             <Grid item xs={6}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='subtotal'
                     readOnly={isPosted || isCancelled}
@@ -568,7 +568,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     error={formik.touched.subtotal && Boolean(formik.errors.subtotal)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}></Grid>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='vatPct'
                     readOnly
@@ -580,7 +581,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     error={formik.touched.vatPct && Boolean(formik.errors.vatPct)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}></Grid>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='vatAmount'
                     readOnly={!formik.values.isSubjectToVAT || isPosted || isCancelled}
@@ -606,7 +608,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+
+                <Grid item xs={6}></Grid>
+                <Grid item xs={6}>
                   <CustomCheckBox
                     name='isSubjectToVAT'
                     value={formik.values?.isSubjectToVAT}
@@ -618,7 +622,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     readOnly={postedOrCanceled}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}></Grid>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='amount'
                     label={labels.amount}

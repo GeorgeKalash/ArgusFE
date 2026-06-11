@@ -196,7 +196,7 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='amount'
                 label={labels.amount}
@@ -210,7 +210,7 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 decimalScale={2}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='baseAmount'
                 required

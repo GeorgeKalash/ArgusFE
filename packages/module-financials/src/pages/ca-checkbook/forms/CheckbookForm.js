@@ -132,7 +132,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
                 error={formik.touched.lastCheckNo && Boolean(formik.errors.lastCheckNo)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='size'
                 required
@@ -147,7 +147,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
                 allowNegative={false}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomDatePicker
                 name='issueDate'
                 label={labels.issueDate}
