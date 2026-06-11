@@ -193,7 +193,7 @@ const GLSettings = () => {
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid item xs={3}>
               <CustomNumberField
                 name='GLACSegments'
                 label={labels.segments}
@@ -215,7 +215,7 @@ const GLSettings = () => {
 
               return (
                 <Grid key={idx} container item xs={12} columnSpacing={2} rowSpacing={1} alignItems='flex-start'>
-                  <Grid item xs={12} lg={6}>
+                  <Grid item xs={12} lg={3}>
                     <CustomNumberField
                       name={segKey}
                       label={labels['segment' + idx]}
