@@ -1,6 +1,6 @@
 import { Grid, DialogActions } from '@mui/material'
 import CustomTextField from '../../Inputs/CustomTextField'
-import { useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useRef, useMemo } from 'react'
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { getButtons } from '../Buttons'
@@ -8,6 +8,8 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import ReportGenerator from '../ReportGenerator'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
+import isEqual from 'lodash/isEqual'
 
 const styles = {
   dialogActions: 'dialogActions',
@@ -43,8 +45,98 @@ const GridToolbar = ({
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
   const [reportStore, setReportStore] = useState([])
+  const trackInteraction = usePageInteraction()
+  const initialFieldValuesRef = useRef(null)
+  const previousFieldValuesRef = useRef(null)
+
+  const extractFieldValues = React.useCallback(element => {
+    const fields = new Map()
+
+    const walk = node => {
+      if (!React.isValidElement(node)) return
+
+      const { name, value, values, formObject, form, children } = node.props || {}
+
+      if (name && !fields.has(name)) {
+        fields.set(
+          name,
+          value ?? values?.[name] ?? formObject?.[name] ?? form?.values?.[name]
+        )
+      }
+
+      if (children) {
+        React.Children.forEach(children, walk)
+      }
+    }
+
+    walk(element)
+    return Object.fromEntries(fields)
+  }, [])
+
+  const attachTrackingToClicks = React.useCallback(node => {
+    if (!React.isValidElement(node)) return node
+
+    const { children, onClick } = node.props || {}
+
+    const newProps = {}
+
+    if (onClick) {
+      newProps.onClick = (...args) => {
+        trackInteraction('gridToolbar')
+
+        return onClick(...args)
+      }
+    }
+
+    if (children) {
+      newProps.children = React.Children.map(
+        children,
+        attachTrackingToClicks
+      )
+    }
+
+    return React.cloneElement(node, newProps)
+  }, [trackInteraction])
+
+  const trackedLeftSection = useMemo(() => attachTrackingToClicks(leftSection), [leftSection, attachTrackingToClicks])
+  const trackedMiddleSection = useMemo(() => attachTrackingToClicks(middleSection), [middleSection, attachTrackingToClicks])
+  const trackedRightSection = useMemo(() => attachTrackingToClicks(rightSection), [rightSection, attachTrackingToClicks])
+ 
+  useEffect(() => {
+    if (!trackInteraction.isReady) return
+
+    const leftValues = extractFieldValues(leftSection)
+    const middleValues = extractFieldValues(middleSection)
+    const rightValues = extractFieldValues(rightSection)
+    const currentValues = {...leftValues, ...middleValues, ...rightValues}
+
+    if (Object.keys(currentValues).length === 0) return
+
+    const lastValues = previousFieldValuesRef.current
+
+    if (!lastValues) {
+      previousFieldValuesRef.current = currentValues
+      initialFieldValuesRef.current = currentValues
+      trackInteraction.trackPageFields(currentValues, currentValues)
+
+      return
+    }
+    
+    if (!isEqual(lastValues, currentValues)) {
+      previousFieldValuesRef.current = currentValues
+      trackInteraction.trackPageFields(currentValues, initialFieldValuesRef.current)
+    }
+  }, [
+    leftSection,
+    middleSection,
+    rightSection,
+    extractFieldValues,
+    trackInteraction.isReady,
+    trackInteraction.currentPageResourceId
+  ])
 
   const clear = () => {
+    trackInteraction()
     setSearchValue('')
     onSearch('')
     if (onSearchClear) onSearchClear()
@@ -312,7 +404,7 @@ const GridToolbar = ({
                 </Grid>
               )}
 
-              {leftSection}
+              {trackedLeftSection}
 
               {inputSearch && (
                 <Grid item className={styles.searchFieldWrapper}>
@@ -325,13 +417,16 @@ const GridToolbar = ({
                       setSearchValue(e.target.value)
                       if (onSearchChange) onSearchChange(e.target.value)
                     }}
-                    onSearch={onSearch}
+                     onSearch={value => {
+                        trackInteraction('gridToolbar')
+                        onSearch(value)
+                      }}
                     search={true}
                   />
                 </Grid>
               )}
 
-              {middleSection}
+              {trackedMiddleSection}
 
               <Grid item className={actionButtonsClassName}>
                 {buttons
@@ -346,7 +441,11 @@ const GridToolbar = ({
                       isVisible && (
                         <CustomButton
                           key={button.key || index}
-                          onClick={handleClick}
+                          onClick={() => {
+                            if (button.key == 'GO' ? searchValue?.trim() || props?.reportParams : false) trackInteraction('gridToolbar')
+                            handleClick()
+                           }
+                          }
                           image={button.image}
                           tooltip={button.label}
                           label={button.label}
@@ -370,7 +469,7 @@ const GridToolbar = ({
 
           {rightSection && (
             <Grid item xs={3}>
-              {rightSection}
+              {trackedRightSection}
             </Grid>
           )}
         </Grid>

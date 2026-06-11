@@ -148,12 +148,12 @@ const ReportViewer = ({ resourceId }) => {
                   values={report}
                   required
                   fullWidth
-                  onChange={(e, newValue) =>
+                  onChange={(e, newValue) => {
                     setReport(prevState => ({
                       ...prevState,
                       selectedReport: newValue
                     }))
-                  }
+                  }}
                 />
               </Grid>
           

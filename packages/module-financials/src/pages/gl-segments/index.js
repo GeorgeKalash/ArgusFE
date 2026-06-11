@@ -25,7 +25,6 @@ const Segments = () => {
   const [store, setStore] = useState([])
   const { stack: stackError } = useError()
   const { systemDefaults } = useContext(DefaultsContext)
-
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
