@@ -11,7 +11,7 @@ import toast from 'react-hot-toast'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { formatDateFromApi, formatDateTimeForGetAPI, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { SelfServiceRepository } from '@argus/repositories/src/repositories/SelfServiceRepository'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
@@ -95,7 +95,7 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
     const lsIdValue = res?.record?.lsId
 
     const res2 = await getRequest({
-      extension: LoanManagementRepository.Leaves.qry,
+      extension: LeaveManagementRepository.Leaves.qry,
       parameters: `_recordId=${recordId}&_employeeId=${employeeId}&_lsId=${lsIdValue || 0}&_asOfDate=${
         asOfDate ? formatDateTimeForGetAPI(asOfDate) : formatDateTimeForGetAPI(new Date())
       }`
@@ -241,7 +241,7 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.LeaveTypes.qry}
+                endpointId={LeaveManagementRepository.LeaveTypes.qry}
                 name='ltId'
                 label={labels.leaveType}
                 valueField='recordId'
