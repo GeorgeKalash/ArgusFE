@@ -22,8 +22,7 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
 
 
   const conditions = {
-    lastGeneratedEarnedLeave: row => row?.lastGeneratedEarnedLeave != null,
-    scheduleName: row => row?.scheduleName != null
+    lsName: row => row?.lastGeneratedEarnedLeave != null
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
@@ -41,7 +40,7 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
     }),
     onSubmit: async obj => {
       const updatedRows = formik.values.items
-        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .filter(row => row.lsId != null && row.lsId !== '')
         .map(scheduleRow => ({
           employeeId: row.recordId,
           ltId: scheduleRow.ltId,
@@ -60,7 +59,6 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
       window.close()
     }
   })
-
 
   const columns = [
     {
