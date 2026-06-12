@@ -119,6 +119,11 @@ const BalanceAdjustment = () => {
       field: 'notes',
       headerName: labels.notes,
       flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     }
   ]
 

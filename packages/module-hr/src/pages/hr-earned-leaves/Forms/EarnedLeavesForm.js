@@ -155,7 +155,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   ]
 
   const onPreview = async () => {
-    if (!formik.values.ltId && !formik.values.date) {
+    if (!formik.values.ltId || !formik.values.date) {
       return
     }
 
@@ -289,7 +289,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
                 onClick={onPreview}
                 image={'preview.png'}
                 tooltipText={platformLabels.Preview}
-                disabled={isPosted}
+                disabled={isPosted || !formik.values.ltId || !formik.values.date}
               />
             </Grid>
           </Grid>

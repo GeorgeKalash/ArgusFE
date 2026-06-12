@@ -149,7 +149,7 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
   }
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={!isActive}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -160,7 +160,6 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
                 value={formik.values.reference}
                 maxAccess={maxAccess}
                 readOnly
-                helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
             <Grid item xs={12}>
@@ -170,13 +169,14 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
                 value={formik.values.fullName}
                 maxAccess={maxAccess}
                 readOnly
-                helperText={formik.touched.fullName && formik.errors.fullName}
               />
             </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <DataGrid
+            name='items'
+            maxAccess={maxAccess}
             onChange={value => handleRowsChange(value)}
             value={formik.values.items}
             error={formik.errors.items}

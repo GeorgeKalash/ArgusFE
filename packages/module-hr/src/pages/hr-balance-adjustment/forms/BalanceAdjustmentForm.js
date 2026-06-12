@@ -50,6 +50,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
       employeeName: '',
       ltId: null,
       lsId: null,
+      scheduleName: '',
       leaveTrackTime: null,
       effectiveDate: new Date(),
       date: new Date(),
@@ -101,6 +102,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
   }
 
   const editMode = !!formik.values.recordId
+  const isPosted = formik?.values?.status === 3
 
   useEffect(() => {
     recordId && refetchForm(recordId)
@@ -117,12 +119,39 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
     return res?.record || null
   }
 
+  const onPost = async () => {
+    await postRequest({
+      extension: LeaveManagementRepository.BalanceAdjustment.post,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Posted)
+    window.close()
+    invalidate()
+  }
+
+  const actions = [
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode
+    },
+  ]
+
   return (
     <FormShell
       resourceId={ResourceIds.BalanceAdjustment}
       functionId={SystemFunction.BalanceAdjustment}
       form={formik}
       maxAccess={maxAccess}
+      actions={actions}
       previewReport={editMode}
       editMode={editMode}
     >

@@ -147,7 +147,7 @@ const EmployeeList = () => {
               })
             }}
           >
-            <Image src={'/images/buttonsIcons/popup-black.png'} alt={platformLabels.History} width={18} height={18} />
+            <Image src={'/images/buttonsIcons/popup-black.png'} width={18} height={18} />
           </IconButton>
         </Box>
       )
