@@ -19,12 +19,12 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [schedules, setSchedules] = useState([])
   const { platformLabels } = useContext(ControlContext)
-
+  const isActive = row?.activeStatus ? row?.activeStatus == 1 : true
 
   const conditions = {
     lsName: row => row?.lastGeneratedEarnedLeave != null
   }
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+  const { schema } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
 
   const { formik } = useForm({
@@ -182,6 +182,7 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
             error={formik.errors.items}
             enableFilters
             columns={columns}
+            disabled={!isActive}
             allowDelete={false}
             allowAddNewLine={false}
           />
