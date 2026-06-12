@@ -142,7 +142,7 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
     const updatedRows = formik.values.items.map(row => {
       const newValue = newValues.find(newRow => newRow.id === row.id)
 
-      return newValue ? newValue : row
+      return newValue || row
     })
 
     formik.setFieldValue('items', updatedRows)

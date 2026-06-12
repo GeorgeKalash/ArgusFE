@@ -95,15 +95,15 @@ const BalanceAdjustment = () => {
       flex: 1
     },
     {
-      field: 'leaveTrackTimeName',
-      headerName: labels.leaveTrackTime,
-      flex: 1
-    },
-    {
       field: 'effectiveDate',
       headerName: labels.effectiveDate,
       flex: 1,
       type: 'date'
+    },
+    {
+      field: 'days',
+      headerName: labels.days,
+      flex: 1
     },
     {
       field: 'hours',

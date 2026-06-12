@@ -51,11 +51,10 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
       ltId: null,
       lsId: null,
       scheduleName: '',
-      leaveTrackTime: null,
       effectiveDate: new Date(),
       date: new Date(),
-      hours: null,
-      duration: null,
+      hours: 0,
+      days: 0,
       notes: '',
       status: 1
     },
@@ -65,10 +64,10 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
       employeeId: yup.number().required(),
       ltId: yup.number().required(),
       scheduleName: yup.string().required(),
-      leaveTrackTime: yup.number().required(),
       effectiveDate: yup.date().required(),
       date: yup.date().required(),
       hours: yup.number().required(),
+      days: yup.number().required(),
       notes: yup.string().required()
     }),
     onSubmit: async obj => {
@@ -77,8 +76,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
         record: JSON.stringify({
           ...obj,
           effectiveDate: formatDateToApi(obj.effectiveDate),
-          date: formatDateToApi(obj.date),
-          duration: obj.hours
+          date: formatDateToApi(obj.date)
         })
       }).then(async res => {
         toast.success(obj?.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -235,7 +233,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={LeaveManagementRepository.LeaveTypes.qry}
                 name='ltId'
@@ -259,7 +257,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomTextField 
                 name='scheduleName'
                 label={labels.leaveSchedule}
@@ -270,24 +268,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 error={formik.touched.scheduleName && Boolean(formik.errors.scheduleName)}
                 />
             </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.LEAVE_TRACK_TIME}
-                label={labels.leaveTrackTime}
-                name='leaveTrackTime'
-                values={formik.values}
-                valueField='key'
-                displayField='value'
-                maxAccess={maxAccess}
-                required
-                readOnly={isPosted}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('leaveTrackTime', newValue?.key || null)
-                }}
-                error={formik.touched.leaveTrackTime && Boolean(formik.errors.leaveTrackTime)}
-              />
-            </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomDatePicker
                 name='effectiveDate'
                 label={labels.effectiveDate}
@@ -300,7 +281,23 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 error={formik.touched.effectiveDate && Boolean(formik.errors.effectiveDate)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='days'
+                label={labels.days}
+                value={formik.values.days}
+                onChange={formik.handleChange}
+                maxLength={5}
+                decimalScale={2}
+                allowNegative={false}
+                maxAccess={maxAccess}
+                required
+                readOnly={isPosted}
+                onClear={() => formik.setFieldValue('days', 0)}
+                error={formik.touched.days && Boolean(formik.errors.days)}
+              />
+            </Grid>
+            <Grid item xs={3}>
               <CustomNumberField
                 name='hours'
                 label={labels.hours}

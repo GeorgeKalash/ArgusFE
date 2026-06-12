@@ -91,6 +91,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
       reference: '',
       ltId: null,
       firstAccrual: null,
+      leaveTrackTime: null,
       coDate: null,
       accrualActivation: null,
       dayType: null,
@@ -101,6 +102,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
       name: yup.string().required(),
       reference: yup.string().required(),
       ltId: yup.number().required(),
+      leaveTrackTime: yup.number().required(),
       firstAccrual: yup.number().required(),
       coDate: yup.number().required(),
       accrualActivation: yup.number().required(),
@@ -191,10 +193,27 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
                 displayField='name'
                 values={formik.values}
                 readOnly={editMode}
-                onChange={(event, newValue) => {
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('ltId', newValue?.recordId || null)
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.LEAVE_TRACK_TIME}
+                label={labels.leaveTrackTime}
+                name='leaveTrackTime'
+                values={formik.values}
+                maxAccess={maxAccess}
+                valueField='key'
+                displayField='value'
+                required
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('leaveTrackTime', newValue?.key || null)
+                }}
+                error={formik.touched.leaveTrackTime && Boolean(formik.errors.leaveTrackTime)}
               />
             </Grid>
             <Grid item xs={12}>
