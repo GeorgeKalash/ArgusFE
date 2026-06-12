@@ -66,7 +66,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
       })
 
       return false
-    } else if (formValues?.isVattable != values?.isSubjectToVAT) {
+    } else if (formValues?.isVattable != Boolean(values?.isSubjectToVAT)) {
       stackError({
         message: labels.mismatchVat
       })
