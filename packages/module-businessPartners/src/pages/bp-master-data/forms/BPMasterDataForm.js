@@ -131,6 +131,12 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
       condition: true,
       onClick: 'onRecordRemarks',
       disabled: !editMode
+    },
+    {
+      key: 'Attachment',
+      condition: true,
+      onClick: 'onClickAttachment',
+      disabled: !editMode
     }
   ]
 
