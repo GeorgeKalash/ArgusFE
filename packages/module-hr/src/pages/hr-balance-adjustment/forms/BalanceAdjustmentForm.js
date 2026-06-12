@@ -154,6 +154,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
       actions={actions}
       previewReport={editMode}
       editMode={editMode}
+      disabledSubmit={isPosted}
     >
       <VertLayout>
         <Grow>
@@ -200,6 +201,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 onChange={formik.setFieldValue}
                 disabledDate={'>='}
                 required
+                readOnly={isPosted}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -215,6 +217,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 maxAccess={maxAccess}
                 valueField='reference'
                 displayField='fullName'
+                readOnly={isPosted}
                 name='employeeRef'
                 label={labels.employee}
                 secondDisplayField={true}
@@ -241,6 +244,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 required
+                readOnly={isPosted}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -276,6 +280,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 displayField='value'
                 maxAccess={maxAccess}
                 required
+                readOnly={isPosted}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('leaveTrackTime', newValue?.key || null)
                 }}
@@ -289,6 +294,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 value={formik.values.effectiveDate}
                 onChange={formik.setFieldValue}
                 required
+                readOnly={isPosted}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('effectiveDate', null)}
                 error={formik.touched.effectiveDate && Boolean(formik.errors.effectiveDate)}
@@ -305,6 +311,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 allowNegative={false}
                 maxAccess={maxAccess}
                 required
+                readOnly={isPosted}
                 onClear={() => formik.setFieldValue('hours', 0)}
                 error={formik.touched.hours && Boolean(formik.errors.hours)}
               />
@@ -317,6 +324,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 maxLength='200'
                 rows={3}
                 required
+                readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('notes', '')}
