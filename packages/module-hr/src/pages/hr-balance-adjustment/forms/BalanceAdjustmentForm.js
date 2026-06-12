@@ -24,7 +24,7 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 
-export default function BalanceAdjustmentForm({ labels, access, recordId }) {
+export default function BalanceAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
