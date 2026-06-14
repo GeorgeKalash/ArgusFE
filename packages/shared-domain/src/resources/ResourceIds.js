@@ -638,6 +638,7 @@ export const ResourceIds = {
   PayPeriod: 75108,
   EmployeeMissingDetails: 71407,
   ChangeVendor: 50615,
+  EventOrder: 38304,
 
   // GL
   GLSalesInvoice: 51604,
