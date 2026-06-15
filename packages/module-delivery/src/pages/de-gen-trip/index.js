@@ -129,7 +129,7 @@ const GenerateOutboundTransportation = () => {
       formik?.values?.data?.list.reduce((amountSum, row) => {
         let amountValue = 0
         if (row.checked) {
-          amountValue = parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0
+          amountValue = row?.amount || 0
         }
 
         return amountSum + amountValue
@@ -143,7 +143,7 @@ const GenerateOutboundTransportation = () => {
         let volumeValue = 0
 
         if (row.checked) {
-          volumeValue = parseFloat(row?.volume?.toString().replace(/,/g, '')) || 0
+          volumeValue = row?.volume || 0
         }
 
         return volumeSum + volumeValue
@@ -460,7 +460,7 @@ const GenerateOutboundTransportation = () => {
               />
             </Grid>
             <Grid item xs={2}>
-              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
+              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly />
             </Grid>
             <Grid item xs={5}></Grid>
             <Grid item xs={3}>
@@ -498,7 +498,6 @@ const GenerateOutboundTransportation = () => {
                 label={labels.capacity}
                 value={formik.values.capacity}
                 readOnly
-                align='right'
               />
             </Grid>
             <Grid item xs={4}></Grid>
@@ -551,7 +550,6 @@ const GenerateOutboundTransportation = () => {
                         label={labels.amount}
                         value={formik.values.totalAmount}
                         readOnly
-                        align='right'
                       />
                     </Grid>
                     <Grid item xs={2}>
@@ -560,7 +558,6 @@ const GenerateOutboundTransportation = () => {
                         label={labels.volume}
                         value={formik.values.totalVolume}
                         readOnly
-                        align='right'
                       />
                     </Grid>
                   </Grid>
@@ -594,10 +591,10 @@ const GenerateOutboundTransportation = () => {
             </Grid>
             <Grid item xs={7}></Grid>
             <Grid item xs={1.5}>
-              <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly align='right' />
+              <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly />
             </Grid>
             <Grid item xs={1.5}>
-              <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly align='right' />
+              <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly />
             </Grid>
           </Grid>
         </Fixed>

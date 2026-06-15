@@ -145,6 +145,7 @@ export const getButtons = platformLabels => [
     image: 'close.png',
     border: '1px solid #01a437',
     main: false,
+    checkDirty: true,
     access: accessMap[TrxType.CLOSE]
   },
   {
@@ -532,6 +533,7 @@ export const getButtons = platformLabels => [
     label: platformLabels.Unlocked,
     color: '#231f20',
     image: 'unlock.png',
+    checkDirty: true,
     main: false,
     access: accessMap[TrxType.POST]
   },

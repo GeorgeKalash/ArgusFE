@@ -35,7 +35,7 @@ export default function JournalVoucherForm({ labels, access, recordId, window })
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     maxAccess,
     initialValues: {
       recordId: null,
@@ -92,9 +92,11 @@ export default function JournalVoucherForm({ labels, access, recordId, window })
         parameters: `_recordId=${recordId}`
       })
 
-      formik.setValues({
-        ...res.record,
-        date: formatDateFromApi(res.record.date)
+      formik.resetForm({
+        values: {
+          ...res.record,
+          date: formatDateFromApi(res.record.date)
+        }
       })
     }
   }

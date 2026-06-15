@@ -24,7 +24,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
+import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
@@ -146,7 +146,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
@@ -193,8 +193,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
           ...restDetails,
           seqNo: index + 1,
           transferId: formik.values.recordId || 0,
-          unitCost: parseFloat(transferDetails.unitCost),
-          totalCost: parseFloat(transferDetails.totalCost)
+          unitCost: transferDetails.unitCost,
+          totalCost: transferDetails.totalCost
         }
       })
 
@@ -268,9 +268,9 @@ export default function MaterialsTransferForm({ recordId, window }) {
   }
 
   function calcTotalCost(rec) {
-    if (rec.priceType === 1) return (Math.round(rec.qty * rec.unitCost * 100) / 100).toFixed(2)
-    else if (rec.priceType === 2) return (Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100).toFixed(2)
-    else if (rec.priceType === 3) return (Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100).toFixed(2)
+    if (rec.priceType === 1) return roundTo(Math.round(rec.qty * rec.unitCost * 100) / 100)
+    else if (rec.priceType === 2) return roundTo(Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100)
+    else if (rec.priceType === 3) return roundTo(Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100)
     else return 0
   }
 
@@ -306,13 +306,13 @@ export default function MaterialsTransferForm({ recordId, window }) {
 
   const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
     (acc, row) => {
-      const qtyValue = parseFloat(row?.qty) || 0
-      const totalCostValue = parseFloat(row?.totalCost) || 0
-      const weightValue = parseFloat(row?.weight) || 0
+      const qtyValue = row?.qty || 0
+      const totalCostValue = row?.totalCost || 0
+      const weightValue = row?.weight || 0
 
       return {
         totalQty: acc?.totalQty + qtyValue,
-        totalCost: (Math.round((parseFloat(acc?.totalCost) + totalCostValue) * 100) / 100).toFixed(2),
+        totalCost: roundTo(Math.round((acc?.totalCost + totalCostValue) * 100) / 100),
         totalWeight: acc?.totalWeight + weightValue
       }
     },
@@ -382,8 +382,9 @@ export default function MaterialsTransferForm({ recordId, window }) {
         caName: itemInfo?.categoryName,
         muRef: filteredMeasurements?.[0]?.reference,
         muId: filteredMeasurements?.[0]?.recordId,
-        metalId,
-        metalRef,
+        muQty: filteredMeasurements?.[0]?.qty,
+        metalId: metalId ?? null,
+        metalRef: metalRef ?? null,
         priceType: newRow?.priceType
       }
 
@@ -438,7 +439,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       async onChange({ row: { update, newRow, oldRow, addRow } }) {
         const resetRow = () => {
          update({
-            ...formik.initialValues.transfers[0],
+            ...initialValues.transfers[0],
             id: newRow.id
           })
         }
@@ -559,7 +560,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
           const totalCost = calcTotalCost(newRow)
-          const qtyInBase = newRow?.qty * newRow?.muQty ?? 0
+          const qtyInBase = newRow?.muQty ? newRow.qty * newRow.muQty : newRow?.qty
 
           update({
             totalCost,
@@ -628,45 +629,53 @@ export default function MaterialsTransferForm({ recordId, window }) {
     if (!!formik.values.notificationGroupId) handleNotificationSubmission(recordId, res.record.reference, formik, 1)
     const updatedTransfers = await fillDetails(recordId, refetchSerials)
 
-    formik.setValues({
-      ...res.record,
-      recordId,
-      disableSKULookup: formik.values.disableSKULookup,
-      transfers: updatedTransfers,
-      notificationGroupId: formik.values.notificationGroupId,
-      serials: serials?.current?.list
+    formik.resetForm({
+      values: {
+        ...res.record,
+        recordId,
+        transfers: updatedTransfers,
+        disableSKULookup: formik.values.disableSKULookup,
+        notificationGroupId: formik.values.notificationGroupId,
+        serials: serials?.current?.list
+      }
     })
   }
 
   async function fillDetails(recordId, refetchSerials){
     const detailsResp = await getDataGrid(recordId, refetchSerials)
+    const allSerials = serials.current?.list || []
 
     return await Promise.all(
       detailsResp?.list.map(async item => {
-        return {
+        const row = {
           ...item,
           id: item.seqNo,
           totalCost: calcTotalCost(item),
-          serials: serials?.current?.list
-            ?.filter(row => row.seqNo == item.seqNo)
-            ?.map((serialDetail, index) => {
-              return {
-                ...serialDetail,
-                id: index
-              }
-            }),
-          unitCost: item.unitCost ?? 0
+          unitCost: item.unitCost ?? 0,
+          weight: item.weight ?? 0,
+          isInactive: item.isInactive ?? false
         }
+        if (item.trackBy === 1) {
+          row.serials = allSerials
+            .filter(row => row.seqNo == item.seqNo)
+            .map((serialDetail, index) => ({
+              ...serialDetail,
+              id: index
+            }))
+        }
+        return row
       })
     )
   }
 
   async function onImport(recordId, refetchSerials){
     const transfers = await fillDetails(recordId, refetchSerials)
-    formik.setValues({
-      ...formik.values,
-      transfers,
-      serials: serials?.current?.list
+   formik.resetForm({
+      values: {
+        ...formik.values,
+        transfers,
+        serials: serials?.current?.list
+      }
     })
   }
 
@@ -953,13 +962,27 @@ export default function MaterialsTransferForm({ recordId, window }) {
       parameters: `_transferId=${recordId}&_functionId=${SystemFunction.MaterialTransfer}`
     })
 
-    if (response?.list && refetchSerials) {
+    if (refetchSerials) {
       const response2 = await getSerials(recordId)
-      if (response2?.count) serials.current = response2
-      else serials.current = []
+
+      serials.current = {
+        ...response2,
+        list: response2?.list || []
+      }
     }
 
     return response
+  }
+
+  async function getPlId(toSiteId) {
+    if (!toSiteId) return null
+
+    const res = await getRequest({
+      extension: InventoryRepository.Site.get,
+      parameters: `_recordId=${toSiteId}`
+    })
+
+    return res?.record?.plId || null
   }
 
   useEffect(() => {
@@ -982,13 +1005,17 @@ export default function MaterialsTransferForm({ recordId, window }) {
       if (recordId) {
         const res = await getData(recordId)
         const resNotification = await getNotificationData(recordId)
+        const plId = await getPlId(res.record.toSiteId)
         const updatedTransfers = await fillDetails(recordId, true)
 
-        formik.setValues({
-          ...res.record,
-          transfers: updatedTransfers,
-          notificationGroupId: resNotification?.record?.notificationGroupId,
-          serials: serials?.current?.list
+        formik.resetForm({
+          values: {
+            ...res.record,
+            plId,
+            transfers: updatedTransfers,
+            notificationGroupId: resNotification?.record?.notificationGroupId,
+            serials: serials?.current?.list
+          }
         })
       }
     })()
@@ -996,16 +1023,14 @@ export default function MaterialsTransferForm({ recordId, window }) {
 
   useEffect(() => {
     ;(async function () {
-      if (!!formik.values.toSiteId) {
-        const res2 = await getRequest({
-          extension: InventoryRepository.Site.get,
-          parameters: `_recordId=${formik.values.toSiteId}`
-        })
+      if (!formik.values.toSiteId) return
+      const plId = await getPlId(formik.values.toSiteId)
 
-        formik.setFieldValue('plId', res2.record.plId)
+      if (formik.values.plId !== plId) {
+        formik.setFieldValue('plId', plId)
       }
     })()
-  }, [recordId, measurements, formik.values.toSiteId])
+  }, [formik.values.toSiteId])
 
   async function previewBtnClicked() {
     const data = { printStatus: 2, recordId: formik.values.recordId }
@@ -1258,19 +1283,17 @@ export default function MaterialsTransferForm({ recordId, window }) {
           </Grid>
           <DataGrid
             onChange={value => {
-              const data = value?.map(transfer => {
-                return {
-                  ...transfer,
-                  qtyInBase: 0
-                }
-              })
+              const data = value?.map(transfer => ({
+                ...transfer,
+                qtyInBase: transfer.muQty ? transfer.qty * transfer.muQty : transfer.qty
+              }))
 
-              formik?.setFieldValue('transfers', data)
+              formik.setFieldValue('transfers', data)
             }}
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
-            initialValues={formik?.initialValues?.transfers[0]}
+            initialValues={initialValues?.transfers[0]}
             enableFilters
             name='transfers'
             maxAccess={maxAccess}
@@ -1291,7 +1314,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
                 <CustomTextField
                   name='totalQty'
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(Number(totalQty).toFixed(2))}
+                  value={getFormattedNumber(roundTo(totalQty))}
                   label={labels.totalQty}
                   readOnly
                 />
@@ -1300,7 +1323,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
                 <CustomTextField
                   name='totalCost'
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(Number(totalCost).toFixed(2))}
+                  value={getFormattedNumber(roundTo(totalCost))}
                   label={labels.totalCost}
                   readOnly
                 />
@@ -1309,7 +1332,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
                 <CustomTextField
                   name='totalWeight'
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(Number(totalWeight).toFixed(2))}
+                  value={getFormattedNumber(roundTo(totalWeight))}
                   label={labels.totalWeight}
                   readOnly
                 />

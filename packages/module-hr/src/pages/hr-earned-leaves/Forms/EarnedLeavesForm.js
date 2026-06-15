@@ -36,7 +36,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       dtId: null,
@@ -93,16 +93,18 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
     })
 
     formik.setFieldValue('items', [])
-    formik.setValues({
-      recordId: res?.record?.header?.recordId,
-      ...res?.record?.header,
-      date: res?.record?.header?.date ? formatDateFromApi(res?.record?.header.date) : null,
-      items:
-        res?.record?.items?.map((item, index) => ({
+    formik.resetForm({
+      values: {
+        recordId: res?.record?.header?.recordId,
+        ...res?.record?.header,
+        date: res?.record?.header?.date ? formatDateFromApi(res?.record?.header.date) : null,
+        items:
+          res?.record?.items?.map((item, index) => ({
           ...item,
-          id: index + 1,
-          effectiveDate: item?.effectiveDate ? formatDateFromApi(item?.effectiveDate) : null,
-        })) || []
+            id: index + 1,
+            effectiveDate: item?.effectiveDate ? formatDateFromApi(item?.effectiveDate) : null,
+          })) || []
+      }
     })
   }
 
@@ -218,6 +220,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.EarnedLeaves}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
                 columnsInDropDown={[

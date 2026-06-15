@@ -104,11 +104,13 @@ export default function LeaveRequestForm({ recordId , window}) {
         extension: LeaveManagementRepository.LeaveRequest.get,
         parameters: `_recordId=${recordId}`
       })
-      formik.setValues({
-        ...record,
-        date: formatDateFromApi(record.date),
-        startDate: formatDateFromApi(record.startDate),
-        endDate: formatDateFromApi(record.endDate)
+      formik.resetForm({
+        values: {
+          ...record,
+          date: formatDateFromApi(record.date),
+          startDate: formatDateFromApi(record.startDate),
+          endDate: formatDateFromApi(record.endDate)
+        }
       })
     }
   }
@@ -175,6 +177,7 @@ export default function LeaveRequestForm({ recordId , window}) {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Grow>

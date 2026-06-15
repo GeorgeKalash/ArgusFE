@@ -53,7 +53,7 @@ export default function PayrollListForm({ recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       dtId: null,
@@ -103,14 +103,16 @@ export default function PayrollListForm({ recordId, window }) {
         parameters: `_recordId=${recordId}`
       })
 
-      formik.setValues({
-        ...res.record,
-        date: formatDateFromApi(res.record.date),
-        payDate: formatDateFromApi(res.record.payDate),
-        startDate: formatDateFromApi(res.record.startDate),
-        endDate: formatDateFromApi(res.record.endDate),
-        taStartDate: formatDateFromApi(res.record.taStartDate),
-        taEndDate: formatDateFromApi(res.record.taEndDate)
+      formik.resetForm({
+        values: {
+          ...res.record,
+          date: formatDateFromApi(res.record.date),
+          payDate: formatDateFromApi(res.record.payDate),
+          startDate: formatDateFromApi(res.record.startDate),
+          endDate: formatDateFromApi(res.record.endDate),
+          taStartDate: formatDateFromApi(res.record.taStartDate),
+          taEndDate: formatDateFromApi(res.record.taEndDate)
+        }
       })
     }
   }
@@ -277,6 +279,7 @@ export default function PayrollListForm({ recordId, window }) {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PayrollList}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.docType}
                 columnsInDropDown={[

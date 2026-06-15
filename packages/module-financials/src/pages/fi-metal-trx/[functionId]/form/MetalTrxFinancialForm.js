@@ -28,6 +28,7 @@ import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, getGLResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -58,52 +59,54 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
   const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
+  const initialValues = {
+    accountId: null,
+    paymentReasonId: null,
+    batchId: null,
+    collectorId: null,
+    contactId: null,
+    creditAmount: null,
+    date: new Date(),
+    description: '',
+    dtId: null,
+    functionId: functionId,
+    isVerified: false,
+    plantId,
+    qty: null,
+    pcs: null,
+    recordId: null,
+    reference: '',
+    releaseStatus: null,
+    siteId: siteId || null,
+    status: 1,
+    accountGroupName: '',
+    items: [
+      {
+        id: 1,
+        baseMetalQty: null,
+        creditAmount: 0,
+        stdPurity: null,
+        itemId: null,
+        sku: '',
+        itemName: '',
+        metalId: null,
+        purity: 0,
+        qty: 0,
+        seqNo: 1,
+        purityFromItem: false,
+        metalValue: null,
+        totalCredit: 0,
+        trackBy: null,
+        pcs: 0,
+        trxId: recordId || 0,
+        qtyOnHand: 0
+      }
+    ]
+  }
+
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
-    initialValues: {
-      accountId: null,
-      paymentReasonId: null,
-      batchId: null,
-      collectorId: null,
-      contactId: null,
-      creditAmount: null,
-      date: new Date(),
-      description: '',
-      dtId: null,
-      functionId: functionId,
-      isVerified: false,
-      plantId,
-      qty: null,
-      pcs: null,
-      recordId: null,
-      reference: '',
-      releaseStatus: null,
-      siteId: siteId || null,
-      status: 1,
-      accountGroupName: '',
-      items: [
-        {
-          id: 1,
-          baseMetalQty: null,
-          creditAmount: 0,
-          stdPurity: null,
-          itemId: null,
-          sku: '',
-          itemName: '',
-          metalId: null,
-          purity: 0,
-          qty: 0,
-          seqNo: 1,
-          purityFromItem: false,
-          metalValue: null,
-          totalCredit: 0,
-          trackBy: null,
-          pcs: 0,
-          trxId: recordId || 0,
-          qtyOnHand: 0
-        }
-      ]
-    },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    initialValues,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -157,7 +160,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       purity: item.purity / 1000,
       totalCredit: item.totalCredit,
       trackBy: item.trackBy || 0,
-      baseSalesMetalValue: item.baseSalesMetalValue,
+      baseSalesMetalValue: item?.baseSalesMetalValue,
       qtyOnHand: item?.qtyOnHand || 0
     }))
 
@@ -172,7 +175,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.status === 3
   const isVerified = formik.values.isVerified
-  const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
+  const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + ((item[key]) || 0), 0)
   const totalQty = calculateTotal('qty')
   const totalPcs = calculateTotal('pcs')
   const totalLabor = calculateTotal('totalCredit')
@@ -268,7 +271,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           stdPurity: item.stdPurity * 1000,
           metalValue:
             metalInfo?.purity || metal.purity
-              ? ((item.qty * item.purity) / (metalInfo?.purity || metal.purity)).toFixed(2)
+              ? roundTo((item.qty * item.purity) / (metalInfo?.purity || metal.purity))
               : null,
           totalCredit: item?.totalCredit || 0,
           creditAmount: item?.creditAmount || 0,
@@ -279,10 +282,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       })
     )
 
-    formik.setValues({
-      ...res?.record?.header,
-      date: formatDateFromApi(res?.record?.header?.date),
-      items: modifiedList?.length > 0 ? modifiedList : formik.values.items
+    formik.resetForm({
+      values: {
+        ...res?.record?.header,
+        date: formatDateFromApi(res?.record?.header?.date),
+        items: modifiedList?.length > 0 ? modifiedList : formik.values.items
+      }
     })
   }
 
@@ -403,9 +408,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           ? newRow.qty * newRow.creditAmount
           : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
 
-        update({ baseSalesMetalValue, totalCredit: totalCredit.toFixed(2) })
+        update({ totalCredit: roundTo(totalCredit) })
         if (metal) {
-          const metalValue = baseSalesMetalValue.toFixed(2)
+          const metalValue = roundTo(baseSalesMetalValue)
           update({ metalValue: metalValue })
         }
       },
@@ -424,9 +429,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         const totalCredit = newRow.purityFromItem
           ? newRow.qty * newRow.creditAmount
           : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
-        update({ baseSalesMetalValue, totalCredit: totalCredit.toFixed(2) })
+        update({ totalCredit: roundTo(totalCredit) })
         if (metal) {
-          const metalValue = ((newRow.qty * newRow.purity) / (metal.purity * 1000)).toFixed(2)
+          const metalValue = roundTo(((newRow.qty * newRow.purity) / (metal.purity * 1000)))
           update({ metalValue: metalValue })
         }
       }
@@ -441,7 +446,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         const totalCredit = newRow.purityFromItem
           ? newRow.qty * newRow.creditAmount
           : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
-        update({ totalCredit: totalCredit.toFixed(2) })
+        update({ totalCredit: roundTo(totalCredit) })
       }
     },
     {
@@ -776,7 +781,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             error={formik.errors?.items}
             name='items'
             columns={columns}
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={initialValues?.items?.[0]}
             maxAccess={maxAccess}
             disabled={isPosted}
             allowDelete={!isPosted}

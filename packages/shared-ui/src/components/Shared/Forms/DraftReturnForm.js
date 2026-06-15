@@ -33,6 +33,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function DraftReturnForm({ labels, access, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -50,83 +51,79 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     objectName: 'header'
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
   const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const defplId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'plId')?.value)
   const defspId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
   const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
+  const initialValues = {
+    recordId: recordId || null,
+    header: {
+      dtId: null,
+      reference: '',
+      date: new Date(),
+      plantId: null,
+      clientId: null,
+      clientRef: '',
+      clientName: '',
+      currencyId: defCurrencyId || null,
+      spId: defspId || null,
+      siteId: defSiteId || null,
+      description: '',
+      status: 1,
+      wip: 1,
+      isVattable: false,
+      taxId: null,
+      subTotal: 0,
+      amount: 0,
+      vatAmount: 0,
+      plId: defplId || null,
+      ptId: null,
+      weight: 0,
+      accountId: null,
+      disSkuLookup: false,
+      invoiceId: null,
+      invoiceRef: '',
+      returnReasonId: null,
+    },
+    items: [
+      {
+        id: 1,
+        returnId: recordId || 0,
+        srlNo: '',
+        metalId: '',
+        designId: '',
+        itemId: '',
+        sku: '',
+        itemName: '',
+        seqNo: 1,
+        extendedPrice: 0,
+        baseLaborPrice: 0,
+        weight: 0,
+        metalRef: '',
+        designRef: '',
+        vatAmount: 0,
+        vatPct: 0,
+        unitPrice: 0,
+        taxId: null,
+        taxDetails: null,
+        priceType: 0,
+        volume: 0,
+        invoiceReference: '',
+        invoiceTrxId: null,
+        invoiceSeqNo: 1,
+        invoiceComponentSeqNo: 0
+      }
+    ],
+    metalGridData: [],
+    itemGridData: [],
+    taxDetailsStore: []
+  }
+
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
-    initialValues: {
-      recordId: recordId || null,
-      header: {
-        dtId: null,
-        reference: '',
-        date: new Date(),
-        plantId: null,
-        clientId: null,
-        clientRef: '',
-        clientName: '',
-        currencyId: defCurrencyId || null,
-        spId: defspId || null,
-        siteId: defSiteId || null,
-        description: '',
-        status: 1,
-        wip: 1,
-        isVattable: false,
-        taxId: null,
-        subTotal: 0,
-        amount: 0,
-        vatAmount: 0,
-        plId: defplId || null,
-        ptId: null,
-        weight: 0,
-        accountId: null,
-        disSkuLookup: false,
-        invoiceId: null,
-        invoiceRef: '',
-        returnReasonId: null,
-      },
-      items: [
-        {
-          id: 1,
-          returnId: recordId || 0,
-          srlNo: '',
-          metalId: '',
-          designId: '',
-          itemId: '',
-          sku: '',
-          itemName: '',
-          seqNo: 1,
-          extendedPrice: 0,
-          baseLaborPrice: 0,
-          weight: 0,
-          metalRef: '',
-          designRef: '',
-          vatAmount: 0,
-          vatPct: 0,
-          unitPrice: 0,
-          taxId: null,
-          taxDetails: null,
-          priceType: 0,
-          volume: 0,
-          invoiceReference: '',
-          invoiceTrxId: null,
-          invoiceSeqNo: 1,
-          invoiceComponentSeqNo: 0
-        }
-      ],
-      metalGridData: [],
-      itemGridData: [],
-      taxDetailsStore: []
-    },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -194,12 +191,12 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         {
           priceType: row?.priceType,
           basePrice: 0,
-          unitPrice: parseFloat(row?.baseLaborPrice || 0),
-          qty: parseFloat(row?.weight || 0),
-          weight: parseFloat(row?.weight || 0),
-          extendedPrice: parseFloat(row?.unitPrice || 0),
+          unitPrice: row?.baseLaborPrice || 0,
+          qty: row?.weight || 0,
+          weight: row?.weight || 0,
+          extendedPrice: row?.unitPrice || 0,
           baseLaborPrice: 0,
-          vatAmount: parseFloat(row?.vatAmount || 0),
+          vatAmount: row?.vatAmount || 0,
           tdPct: 0,
           taxDetails: singleTaxDetail
         },
@@ -211,7 +208,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         invoiceId: formik.values?.header?.recordId || 0,
         taxSeqNo: td.seqNo,
         taxScheduleAmount: td.amount || 0,
-        amount: parseFloat(calculatedAmount || 0)
+        amount: calculatedAmount || 0
       }
     })
   }
@@ -243,12 +240,12 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     const itemPriceRow = getIPR({
       priceType: 3,
       basePrice: 0,
-      volume: parseFloat(newRow?.volume || 0),
+      volume: newRow?.volume || 0,
       weight: 1,
-      unitPrice: parseFloat(newRow?.baseLaborPrice),
+      unitPrice: newRow?.baseLaborPrice,
       upo: 0,
-      qty: parseFloat(newRow?.weight),
-      extendedPrice: parseFloat(newRow?.unitPrice).toFixed(2),
+      qty: newRow?.weight,
+      extendedPrice: roundTo(newRow?.unitPrice, 2),
       mdAmount: 0,
       mdType: 0,
       baseLaborPrice: 0,
@@ -261,18 +258,18 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
       basePrice: 0,
-      qty: parseFloat(newRow?.weight),
-      weight: parseFloat(newRow?.weight),
-      extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
+      qty: newRow?.weight,
+      weight: newRow?.weight,
+      extendedPrice: itemPriceRow?.extendedPrice,
       tdPct: 0,
       baseLaborPrice: 0,
-      taxDetails: parseFloat(newRow?.taxDetails)
+      taxDetails: newRow?.taxDetails
     })
 
     return {
-      unitPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
-      baseLaborPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(2),
-      vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
+      unitPrice: roundTo(itemPriceRow?.extendedPrice, 2),
+      baseLaborPrice: roundTo(itemPriceRow?.unitPrice, 2),
+      vatAmount: roundTo(vatCalcRow?.vatAmount, 2)
     }
   }
 
@@ -433,9 +430,9 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               invoiceReference: res?.record?.invoiceRef,
               volume: res?.record?.volume || 0,
               baseLaborPrice: res?.record?.laborPrice || 0,
-              unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
+              unitPrice: roundTo(res?.record?.unitPrice, 2) || 0,
               vatPct: res?.record?.vatPct || 0,
-              vatAmount: parseFloat(res?.record?.vatAmount).toFixed(2) || 0,
+              vatAmount: roundTo(res?.record?.vatAmount, 2) || 0,
               invoiceTrxId: res?.record?.trxId || null,
               invoiceDate: formatDateFromApi(res?.record?.invoiceDate) || null,
               taxId: effectiveTaxId
@@ -463,12 +460,16 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
 
           if (!successSave) {
             update({
-              ...formik?.initialValues?.items?.[0],
+              ...initialValues?.items?.[0],
               id: newRow?.id,
               srlNo: ''
             })
           } else {
             await addRow(lineObj)
+
+            if (formik.values.header?.recordId) {
+              await refetchForm(formik.values.header.recordId)
+            }
           }
         }
       }
@@ -702,25 +703,32 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         return {
           ...item,
           id: item.seqNo,
-          baseLaborPrice: parseFloat(item.baseLaborPrice).toFixed(2),
-          unitPrice: parseFloat(item.unitPrice).toFixed(2),
-          vatAmount: parseFloat(item.vatAmount).toFixed(2),
-          amount: parseFloat(item.amount).toFixed(2),
+          baseLaborPrice: roundTo((item.baseLaborPrice), 2),
+          unitPrice: roundTo((item.unitPrice), 2),
+          vatAmount: roundTo((item.vatAmount), 2),
+          amount: roundTo((item.amount), 2),
           invoiceDate: formatDateFromApi(item.invoiceDate),
           taxDetails: calculatedTaxDetails
         }
       }) || []
     )
 
-    await formik.setValues({
-      recordId: pack.header?.recordId || null,
-      header: {
-        ...pack.header,
-        plId: defplId || pack.header?.plId || null,
-        date: formatDateFromApi(pack.header?.date)
-      },
-      items: modifiedList.length ? modifiedList : formik?.initialValues?.items,
-      taxDetails: pack.taxDetails
+    const items = modifiedList.length ? modifiedList : initialValues?.items
+    const summaryGridData = getSummaryGridData(items)
+
+    formik.resetForm({
+      values: {
+        recordId: pack.header?.recordId || null,
+        header: {
+          ...pack.header,
+          plId: defplId || pack.header?.plId || null,
+          date: formatDateFromApi(pack.header?.date)
+        },
+        items,
+        ...summaryGridData,
+        taxDetails: pack.taxDetails,
+        taxDetailsStore: []
+      }
     })
 
   }
@@ -732,18 +740,21 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     return taxDetails ? taxDetails?.filter(td => td.taxId === taxId) : []
   }
 
-  const handleGridChange = (value, action, row) => {
+  const handleGridChange = async (value, action, row) => {
     if (action === 'delete') {
-      let updatedItems = formik.values.items
-      updatedItems = updatedItems.filter(item => item.id !== row.id)
-      formik.setFieldValue('items', updatedItems)
       setReCal(true)
-    } else {
-      formik.setFieldValue('items', value)
+
+      if (formik.values.header?.recordId) {
+        await refetchForm(formik.values.header.recordId)
+      }
+
+      return
     }
+
+    formik.setFieldValue('items', value)
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     if (recordId) {
       const dtd = await getRequest({
         extension: SaleRepository.DocumentTypeDefault.get,
@@ -755,63 +766,70 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       formik.setFieldValue('header.siteId', dtd?.record?.siteId || defSiteId || null)
     }
   }
+  
+  useEffect(() => {
+    if (formik.values?.header?.dtId && !recordId) onChangeDT(formik.values?.header?.dtId)
+  }, [formik.values?.header?.dtId])
+
+  function getSummaryGridData(items = []) {
+    const metalMap = items.reduce((acc, { metalId, weight, metalRef }) => {
+      if (metalId) {
+        if (!acc[metalId]) {
+          acc[metalId] = { metal: metalRef, pcs: 0, totalWeight: 0 }
+        }
+
+        acc[metalId].pcs += 1
+        acc[metalId].totalWeight += weight || 0
+      }
+
+      return acc
+    }, {})
+
+    Object.keys(metalMap).forEach(metalId => {
+      metalMap[metalId].totalWeight = roundTo(metalMap[metalId].totalWeight, 2)
+    })
+
+    let seqNo = 0
+
+    const itemMap = items.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
+      if (itemId) {
+        if (!acc[itemId]) {
+          seqNo++
+          acc[itemId] = { sku, pcs: 0, weight: 0, itemName, seqNo, categoryName }
+        }
+
+        acc[itemId].pcs += 1
+        acc[itemId].weight = roundTo(acc[itemId].weight + roundTo((weight || 0), 2), 2)
+      }
+
+      return acc
+    }, {})
+
+    return {
+      metalGridData: Object.values(metalMap),
+      itemGridData: Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo)
+    }
+  }
 
   useEffect(() => {
-    if (formik?.values?.items?.length) {
-      const items = formik?.values?.items
+    const summaryGridData = getSummaryGridData(formik.values.items)
 
-      const metalMap = items.reduce((acc, { metalId, weight, metalRef }) => {
-        if (metalId) {
-          if (!acc[metalId]) {
-            acc[metalId] = { metal: metalRef, pcs: 0, totalWeight: 0 }
-          }
-          acc[metalId].pcs += 1
-          acc[metalId].totalWeight += parseFloat(weight || 0)
-        }
-
-        return acc
-      }, {})
-
-      Object.keys(metalMap).forEach(metalId => {
-        metalMap[metalId].totalWeight = parseFloat(metalMap[metalId].totalWeight.toFixed(2))
-      })
-
-      formik.setFieldValue('metalGridData', Object.values(metalMap))
-
-      let seqNo = 0
-
-      const itemMap = items.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
-        if (itemId) {
-          if (!acc[itemId]) {
-            seqNo++
-            acc[itemId] = { sku, pcs: 0, weight: 0, itemName, seqNo, categoryName }
-          }
-          acc[itemId].pcs += 1
-          acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
-        }
-
-        return acc
-      }, {})
-
-      formik.setFieldValue(
-        'itemGridData',
-        Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo)
-      )
-    }
+    formik.setFieldValue('metalGridData', summaryGridData.metalGridData)
+    formik.setFieldValue('itemGridData', summaryGridData.itemGridData)
   }, [formik?.values?.items])
 
   const { subTotal, vatAmount, weight, amount } = formik?.values?.items?.reduce(
     (acc, row) => {
-      const subTot = parseFloat(row?.unitPrice) || 0
-      const vatAmountTot = parseFloat(row?.vatAmount) || 0
-      const weight = parseFloat(row?.weight) || 0
+      const subTot = row?.unitPrice || 0
+      const vatAmountTot = row?.vatAmount || 0
+      const weight = row?.weight || 0
 
       return {
-        subTotal: reCal ? parseFloat((acc?.subTotal + subTot).toFixed(2)) : formik.values?.header?.subTotal || 0,
-        vatAmount: reCal ? parseFloat((acc?.vatAmount + vatAmountTot).toFixed(2)) : formik.values?.header?.vatAmount || 0,
+        subTotal: reCal ? roundTo(acc?.subTotal + subTot, 2) : formik.values?.header?.subTotal || 0,
+        vatAmount: reCal ? roundTo(acc?.vatAmount + vatAmountTot, 2) : formik.values?.header?.vatAmount || 0,
         weight: reCal ? acc?.weight + weight : formik.values?.header?.weight || 0,
         amount: reCal
-          ? parseFloat((acc?.subTotal + subTot + acc?.vatAmount + vatAmountTot).toFixed(2))
+          ? roundTo(acc?.subTotal + subTot + acc?.vatAmount + vatAmountTot, 2)
           : formik.values?.header?.amount || 0
       }
     },
@@ -980,6 +998,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               <ResourceComboBox
                 endpointId={SaleRepository.DraftReturn.pack}
                 reducer={response => response?.record?.documentTypes}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -993,7 +1012,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  await onChangeDtId(newValue?.recordId)
                   changeDT(newValue)
                   formik.setFieldValue('header.dtId', newValue?.recordId || null)
                 }}
@@ -1292,7 +1310,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             onChange={(value, action, row) => handleGridChange(value, action, row)}
             value={formik.values.items || []}
             error={formik.errors.items}
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={initialValues?.items?.[0]}
             columns={serialsColumns}
             showCounterColumn={true}
             name='items'

@@ -641,7 +641,6 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.trucksVolume}
                 value={totalTrucksVolume}
                 readOnly
-                align='right'
               />
             </Grid>
             <Grid item xs={1.33}>
@@ -650,11 +649,10 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.ordersVolume}
                 value={ordersVolume}
                 readOnly
-                align='right'
               />
             </Grid>
             <Grid item xs={1.33}>
-              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
+              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly />
             </Grid>
             <Grid item xs={1.33}>
               <CustomNumberField
@@ -662,7 +660,6 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.zonesVolume}
                 value={formik.values.zonesVolume}
                 readOnly
-                align='right'
               />
             </Grid>
           </Grid>

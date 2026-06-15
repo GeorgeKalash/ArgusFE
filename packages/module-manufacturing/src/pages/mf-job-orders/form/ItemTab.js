@@ -266,7 +266,7 @@ export default function ItemTab({ labels, maxAccess, store }) {
   const totalCost =
     formik?.values?.items?.length > 0
       ? formik.values.items.reduce((extendedSum, row) => {
-          const extendedValue = parseFloat(row.extendedCost?.toString().replace(/,/g, '')) || 0
+          const extendedValue = row.extendedCost || 0
 
           return extendedSum + extendedValue
         }, 0)
