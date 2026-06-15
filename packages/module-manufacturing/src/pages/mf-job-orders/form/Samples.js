@@ -72,7 +72,7 @@ export default function Samples({ labels, maxAccess, recordId }) {
   const validRows = formik.values.data.filter(row => row.itemWeight > 0)
 
   const totWeight = validRows.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row?.itemWeight?.toString().replace(/,/g, '')) || 0
+    const weightValue = row?.itemWeight || 0
 
     return weightSum + weightValue
   }, 0)

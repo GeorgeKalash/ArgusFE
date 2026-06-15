@@ -45,36 +45,41 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
     endpointId: ManufacturingRepository.Disposal.page
   })
 
+  const initialValues = {
+    recordId: null,
+    header: {
+      recordId: null,
+      reference: '',
+      dtId: null,
+      date: new Date(),
+      siteId: null,
+      notes: '',
+      status: 1,
+      wip: 1,
+      totalCost: 0,
+      totalQty: 0,
+      totalPcs: 0
+    },
+    items: [
+      {
+        id: 1,
+        trxId: null,
+        seqNo: null,
+        itemId: null,
+        itemName: '',
+        sku: '',
+        qty: 0,
+        trackby: null,
+        serialCount: 0
+      }
+    ],
+    serials: []
+  }
+  
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
-    initialValues: {
-      recordId: null,
-      header: {
-        recordId: null,
-        reference: '',
-        dtId: null,
-        date: new Date(),
-        siteId: null,
-        notes: '',
-        status: 1,
-        wip: 1
-      },
-      items: [
-        {
-          id: 1,
-          trxId: null,
-          seqNo: null,
-          itemId: null,
-          itemName: '',
-          sku: '',
-          qty: 0,
-          trackby: null,
-          serialCount: 0
-        }
-      ],
-      serials: []
-    },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    initialValues,
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required(),
@@ -126,16 +131,21 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
   const editMode = !!formik.values.recordId
   const isPosted = formik?.values?.header?.status === 3
 
+  const calculateTotals = items => {
+    return (items || []).reduce(
+      (acc, item) => {
+        acc.totalCost += parseFloat(item.totalCost || 0)
+        acc.totalQty += parseFloat(item.qty || 0)
+        acc.totalPcs += parseFloat(item.serialCount || 0)
+
+        return acc
+      },
+      { totalCost: 0, totalQty: 0, totalPcs: 0 }
+    )
+  }
+
   const totals = reCal
-    ? (formik?.values?.items || []).reduce(
-        (acc, item) => {
-          acc.totalCost += parseFloat(item.totalCost || 0)
-          acc.totalQty += parseFloat(item.qty || 0)
-          acc.totalPcs += parseFloat(item.serialCount || 0)
-          return acc
-        },
-        { totalCost: 0, totalQty: 0, totalPcs: 0 }
-      )
+    ? calculateTotals(formik?.values?.items)
     : {
         totalCost: formik?.values?.header?.totalCost || 0,
         totalQty: formik?.values?.header?.totalQty || 0,
@@ -217,7 +227,7 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
       async onChange({ row: { update, newRow } }) {
         if (newRow?.isInactive) {
           update({
-            ...formik.initialValues.items[0],
+            ...initialValues.items[0],
             id: newRow.id
           })
           stackError({
@@ -399,7 +409,7 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
 
     return res?.list?.length
       ? res.list.map((item, index) => ({ ...item, id: index + 1 }))
-      : formik?.initialValues?.items
+      : initialValues?.items
   }
 
   async function getDisposalSerials(recordId) {
@@ -412,7 +422,7 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
 
     return res?.list?.length
       ? res.list.map((serial, index) => ({ ...serial, id: index + 1 }))
-      : formik?.initialValues?.serials
+      : initialValues?.serials
   }
 
   async function refetchForm(recordId) {
@@ -435,15 +445,27 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
 
       return {
         ...item,
+        totalCost: item.totalCost || 0,
         serials: list,
         serialCount: list?.length || 0
       }
     })
 
-    formik.setValues({
-      header,
-      recordId: header.recordId || null,
-      items: mappedItems
+    const headerTotals = calculateTotals(mappedItems)
+
+    formik.resetForm({
+      values: {
+        ...initialValues,
+        header: {
+          ...header,
+          totalCost: headerTotals.totalCost,
+          totalQty: headerTotals.totalQty,
+          totalPcs: headerTotals.totalPcs
+        },
+        recordId: header.recordId || null,
+        items: mappedItems,
+        serials
+      }
     })
 
     setReCal(false)

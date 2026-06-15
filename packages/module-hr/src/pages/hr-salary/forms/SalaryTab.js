@@ -281,7 +281,7 @@ export default function SalaryTab({
               name='basicAmount'
               label={labels.basicAmount}
               value={formik?.values?.basicAmount}
-              onChange={e => updateAmountFields(e?.target?.value ? Number(e.target.value.replace(/,/g, '')) : null)}
+              onChange={e => updateAmountFields(e?.target?.value || null)}
               required
               maxLength={10}
               maxAccess={maxAccess}

@@ -160,13 +160,13 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
   }, [])
 
   const totalPcs = formik.values.items.reduce((sum, row) => {
-    const value = parseFloat(row?.pcs?.toString().replace(/,/g, '')) || 0
+    const value = row?.pcs || 0
 
     return sum + value
   }, 0)
 
   const totalWgt = formik.values.items.reduce((sum, row) => {
-    const Value = parseFloat(row?.weight?.toString().replace(/,/g, '')) || 0
+    const Value = row?.weight || 0
 
     return sum + Value
   }, 0)

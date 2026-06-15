@@ -117,7 +117,7 @@ const MaterialsTab = ({ store }) => {
   }
 
   const totQty = data?.list?.reduce((qtySum, row) => {
-    const qtyValue = parseFloat(row?.qty?.toString().replace(/,/g, '')) || 0
+    const qtyValue = row?.qty || 0
 
     return qtySum + qtyValue
   }, 0)

@@ -233,7 +233,7 @@ const DocumentAging = () => {
   }
 
   const totalAmount = formik.values?.agingTree?.reduce((amount, row) => {
-    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || null
+    const amountValue = row.amount || null
 
     return amount + amountValue
   }, null)
@@ -288,7 +288,7 @@ const DocumentAging = () => {
             />
           </Grid>
 
-          <Grid item xs={6}>
+          <Grid item xs={3}>
             <CustomNumberField
               name='amountDue'
               label={labels.amountDue}
@@ -317,13 +317,24 @@ const DocumentAging = () => {
               error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={3}>
             <CustomNumberField
               name='amountApplied'
               label={labels.amountApplied}
               value={amountAppliedRef.current}
               maxAccess={access}
               readOnly
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <CustomNumberField
+              name='balance'
+              label={labels.balance}
+              value={balance}
+              maxAccess={access}
+              readOnly
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('balance', null)}
             />
           </Grid>
           <Grid item xs={0.5}>
@@ -367,17 +378,6 @@ const DocumentAging = () => {
             />
           </Grid>
           <Grid item xs={4.5}></Grid>
-          <Grid item xs={6}>
-            <CustomNumberField
-              name='balance'
-              label={labels.balance}
-              value={balance}
-              maxAccess={access}
-              readOnly
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('balance', null)}
-            />
-          </Grid>
         </Grid>
       </Fixed>
       <Grow>

@@ -44,7 +44,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       reference: null,
@@ -255,9 +255,11 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
           isClosed: res.record.wip === 2
         }))
 
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
+        formik.resetForm({
+          values: {
+            ...res.record,
+            date: formatDateFromApi(res.record.date)
+          }
         })
       }
     })()
@@ -280,8 +282,9 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.StockCount}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
-                readOnly={editMode || isPosted || isClosed}
+                readOnly={editMode}
                 label={labels.documentType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },

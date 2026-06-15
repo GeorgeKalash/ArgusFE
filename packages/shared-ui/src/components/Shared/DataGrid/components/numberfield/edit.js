@@ -65,8 +65,14 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
           value: null
         })
       }}
-      onBlur={() => {
+      onBlur={(e, value) => {
         typing.current = false
+
+        update({
+          id,
+          field,
+          value
+        })
       }}
       handleButtonClick={handleIconClick}
       {...props}

@@ -7,7 +7,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
@@ -24,7 +24,7 @@ const LeaveReturn = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: LoanManagementRepository.LeaveReturn.page,
+      extension: LeaveManagementRepository.LeaveReturn.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=50&_params=${params || ''}`
     })
 
@@ -41,7 +41,7 @@ const LeaveReturn = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: LoanManagementRepository.LeaveReturn.page,
+    endpointId: LeaveManagementRepository.LeaveReturn.page,
     datasetId: ResourceIds.LeaveReturn
   })
 
@@ -125,7 +125,7 @@ const LeaveReturn = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: LoanManagementRepository.LeaveReturn.del,
+      extension: LeaveManagementRepository.LeaveReturn.del,
       record: JSON.stringify(obj)
     })
     invalidate()

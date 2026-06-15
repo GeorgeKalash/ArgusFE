@@ -47,7 +47,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       reference: '',
@@ -103,34 +103,30 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
   }
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        await getData(recordId)
-
-        const res2 = await getRequest({
-          extension: FixedAssetsRepository.AssetsTableData.qry,
-          parameters: `_depId=${recordId}`
-        })
-
-        formik.setFieldValue('asset', res2)
-      }
-    })()
+    if (recordId) getData(recordId)
   }, [])
 
   const getData = async recordId => {
-    try {
-      if (recordId) {
-        const res = await getRequest({
-          extension: FixedAssetsRepository.AssetsDescription.get,
-          parameters: `_recordId=${recordId}`
-        })
+    if (recordId) {
+      const res = await getRequest({
+        extension: FixedAssetsRepository.AssetsDescription.get,
+        parameters: `_recordId=${recordId}`
+      })
 
-        formik.setValues({
+      const res2 = await getRequest({
+        extension: FixedAssetsRepository.AssetsTableData.qry,
+        parameters: `_depId=${recordId}`
+      })
+
+      formik.resetForm({
+        values: {
+          ...formik.values,
           ...res.record,
-          date: formatDateFromApi(res.record.date)
-        })
-      }
-    } catch (exception) {}
+          date: formatDateFromApi(res.record.date),
+          asset: res2
+        }
+      })
+    }
   }
 
   const columns = [
@@ -232,6 +228,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${SystemFunction.AssetsDepreciation}&_startAt=${0}&_pageSize=${50}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.dtName}
                     readOnly={editMode}

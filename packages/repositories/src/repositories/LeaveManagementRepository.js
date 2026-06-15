@@ -1,6 +1,6 @@
 const service = 'LM.asmx/'
 
-export const LoanManagementRepository = {
+export const LeaveManagementRepository = {
   LeaveTypes: {
     qry: service + 'qryLT',
     page: service + 'pageLT',
@@ -27,6 +27,7 @@ export const LoanManagementRepository = {
     set: service + 'setBA',
     get: service + 'getBA',
     del: service + 'delBA',
+    post: service + 'postBA',
     snapshot: service + 'snapshotBA'
   },
   EarnedLeave: {

@@ -13,7 +13,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 
@@ -22,7 +22,7 @@ export default function LeaveTypeForm({ labels, maxAccess, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.LeaveTypes.page
+    endpointId: LeaveManagementRepository.LeaveTypes.page
   })
 
   const { formik } = useForm({
@@ -52,7 +52,7 @@ export default function LeaveTypeForm({ labels, maxAccess, recordId, window }) {
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: LoanManagementRepository.LeaveTypes.set,
+        extension: LeaveManagementRepository.LeaveTypes.set,
         record: JSON.stringify(obj)
       })
 
@@ -68,7 +68,7 @@ export default function LeaveTypeForm({ labels, maxAccess, recordId, window }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: LoanManagementRepository.LeaveTypes.get,
+          extension: LeaveManagementRepository.LeaveTypes.get,
           parameters: `_recordId=${recordId}`
         })
 

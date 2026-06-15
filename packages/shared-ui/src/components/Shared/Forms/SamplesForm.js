@@ -63,7 +63,7 @@ export default function SamplesForm({ recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['rows'],
     initialValues: {
       recordId,
@@ -234,13 +234,16 @@ export default function SamplesForm({ recordId, window }) {
         }))
       : formik.initialValues.rows
 
-    formik.setValues({
-      recordId: res?.record?.header?.recordId,
-      header: {
-        ...res?.record?.header,
-        date: formatDateFromApi(res?.record?.header?.date)
-      },
-      rows: modifiedList
+    formik.resetForm({
+      values: {
+        recordId: res?.record?.header?.recordId,
+        imageDirty: false,
+        header: {
+          ...res?.record?.header,
+          date: formatDateFromApi(res?.record?.header?.date)
+        },
+        rows: modifiedList
+      }
     })
 
     return res?.record
@@ -325,6 +328,7 @@ export default function SamplesForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Samples}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[

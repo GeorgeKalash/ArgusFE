@@ -11,7 +11,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
@@ -27,7 +27,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.EarnedLeave.page
+    endpointId: LeaveManagementRepository.EarnedLeave.page
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -36,20 +36,20 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       dtId: null,
       reference: '',
       date: new Date(),
-      lsId: null,
+      ltId: null,
       status: 1,
       items: []
     },
     maxAccess,
     validationSchema: yup.object({
       date: yup.date().required(),
-      lsId: yup.number().required()
+      ltId: yup.number().required()
     }),
     onSubmit: async obj => {
       const copy = {
@@ -71,7 +71,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
       }
 
       const response = await postRequest({
-        extension: LoanManagementRepository.EarnedLeave.set2,
+        extension: LeaveManagementRepository.EarnedLeave.set2,
         record: JSON.stringify(itemsGridData)
       })
 
@@ -88,21 +88,23 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
   const getData = async recordId => {
     const res = await getRequest({
-      extension: LoanManagementRepository.EarnedLeave.get2,
+      extension: LeaveManagementRepository.EarnedLeave.get2,
       parameters: `_recordId=${recordId}`
     })
 
     formik.setFieldValue('items', [])
-    formik.setValues({
-      recordId: res?.record?.header?.recordId,
-      ...res?.record?.header,
-      date: res?.record?.header?.date ? formatDateFromApi(res?.record?.header.date) : null,
-      items:
-        res?.record?.items?.map((item, index) => ({
+    formik.resetForm({
+      values: {
+        recordId: res?.record?.header?.recordId,
+        ...res?.record?.header,
+        date: res?.record?.header?.date ? formatDateFromApi(res?.record?.header.date) : null,
+        items:
+          res?.record?.items?.map((item, index) => ({
           ...item,
-          id: index + 1,
-          effectiveDate: item?.effectiveDate ? formatDateFromApi(item?.effectiveDate) : null,
-        })) || []
+            id: index + 1,
+            effectiveDate: item?.effectiveDate ? formatDateFromApi(item?.effectiveDate) : null,
+          })) || []
+      }
     })
   }
 
@@ -114,7 +116,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
   const onPost = async () => {
     const res = await postRequest({
-      extension: LoanManagementRepository.EarnedLeave.post,
+      extension: LeaveManagementRepository.EarnedLeave.post,
       record: JSON.stringify(formik.values)
     })
 
@@ -155,18 +157,18 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   ]
 
   const onPreview = async () => {
-    if (!formik.values.lsId && !formik.values.date) {
+    if (!formik.values.ltId || !formik.values.date) {
       return
     }
 
     const items = await getRequest({
-      extension: LoanManagementRepository.EarnedLeave.preview,
-      parameters: `_lsId=${formik.values.lsId || 0}&_asOfDate=${formatDateForGetApI(formik.values.date)}`
+      extension: LeaveManagementRepository.EarnedLeave.preview,
+      parameters: `_ltId=${formik.values.ltId}&_asOfDate=${formatDateForGetApI(formik.values.date)}`
     })
 
     formik.setFieldValue(
       'items',
-      items?.list.map((item, index) => ({
+      items?.list?.map((item, index) => ({
         ...item,
         id: index + 1,
         effectiveDate: item?.effectiveDate ? formatDateFromApi(item?.effectiveDate) : null,
@@ -176,7 +178,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: LoanManagementRepository.EarnedLeave.unpost,
+      extension: LeaveManagementRepository.EarnedLeave.unpost,
       record: JSON.stringify(formik.values)
     })
 
@@ -218,6 +220,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.EarnedLeaves}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -265,9 +268,9 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.LeaveScheduleFilters.qry}
-                name='lsId'
-                label={labels.leaveSchedule}
+                endpointId={LeaveManagementRepository.LeaveTypes.qry}
+                name='ltId'
+                label={labels.leaveType}
                 values={formik.values}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -278,10 +281,10 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
                 ]}
                 readOnly={isPosted || preview}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('lsId', newValue?.recordId || null)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('ltId', newValue?.recordId || null)
                 }}
-                error={formik.touched.lsId && Boolean(formik.errors.lsId)}
+                error={formik.touched.ltId && Boolean(formik.errors.ltId)}
               />
             </Grid>
             <Grid item xs={4}>
@@ -289,7 +292,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
                 onClick={onPreview}
                 image={'preview.png'}
                 tooltipText={platformLabels.Preview}
-                disabled={isPosted}
+                disabled={isPosted || !formik.values.ltId || !formik.values.date}
               />
             </Grid>
           </Grid>

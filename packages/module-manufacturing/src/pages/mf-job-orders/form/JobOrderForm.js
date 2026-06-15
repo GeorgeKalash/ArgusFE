@@ -108,7 +108,7 @@ export default function JobOrderForm({
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -383,12 +383,14 @@ export default function JobOrderForm({
       parameters: `_recordId=${recordId}`
     })
     const { jobOrder, ...rest } = res?.record || {}
-    formik.setValues({
-      ...jobOrder,
-      date: formatDateFromApi(jobOrder?.date),
-      endingDT: formatDateFromApi(jobOrder?.endingDT),
-      startingDT: formatDateFromApi(jobOrder?.startingDT),
-      deliveryDate: formatDateFromApi(jobOrder?.deliveryDate)
+    formik.resetForm({
+      values: {
+        ...jobOrder,
+        date: formatDateFromApi(jobOrder?.date),
+        endingDT: formatDateFromApi(jobOrder?.endingDT),
+        startingDT: formatDateFromApi(jobOrder?.startingDT),
+        deliveryDate: formatDateFromApi(jobOrder?.deliveryDate)
+      }
     })
 
     setStore(prevStore => ({
@@ -679,6 +681,7 @@ export default function JobOrderForm({
                 <ResourceComboBox
                   endpointId={ManufacturingRepository.MFJobOrder.pack}
                   reducer={response => response?.record?.documentTypes}
+                  filter={!editMode ? item => item.activeStatus === 1 : undefined}
                   name='dtId'
                   label={labels.documentType}
                   columnsInDropDown={[
@@ -931,6 +934,7 @@ export default function JobOrderForm({
                         label={labels.standardCost}
                         value={formik.values.standardCost}
                         readOnly
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>
