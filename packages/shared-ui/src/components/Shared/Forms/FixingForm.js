@@ -32,6 +32,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function FixingForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -80,7 +81,7 @@ export default function FixingForm({ recordId, functionId, window }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       functionId,
       plantId: null,
@@ -173,19 +174,21 @@ export default function FixingForm({ recordId, functionId, window }) {
 
     setReCalc(false)
 
-    formik.setValues({
-      ...res?.record,
-      date: formatDateFromApi(res?.record?.date),
-      dueDate: formatDateFromApi(res?.record?.dueDate),
-      currencyId_metalId:
-        res?.record?.currencyId && res?.record?.metalId
-          ? `${res.record.currencyId}${res.record.metalId}`
-          : null,
-      netAmount: getNetAmount({
-        amount: res.record?.amount,
-        exRate: res.record?.exRate,
-        rateCalcMethod: res.record?.rateCalcMethod
-      })
+    formik.resetForm({
+      values: {
+        ...res?.record,
+        date: formatDateFromApi(res?.record?.date),
+        dueDate: formatDateFromApi(res?.record?.dueDate),
+        currencyId_metalId:
+          res?.record?.currencyId && res?.record?.metalId
+            ? `${res.record.currencyId}${res.record.metalId}`
+            : null,
+        netAmount: getNetAmount({
+          amount: res.record?.amount,
+          exRate: res.record?.exRate,
+          rateCalcMethod: res.record?.rateCalcMethod
+        })
+      }
     })
   }
 
@@ -230,7 +233,7 @@ export default function FixingForm({ recordId, functionId, window }) {
         dirtyField: DIRTYFIELD_RATE
       })
 
-      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
 
       formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
@@ -273,25 +276,25 @@ export default function FixingForm({ recordId, functionId, window }) {
 
   const getNetAmount = ({ amount, exRate, rateCalcMethod }) => {
     const updatedRateRow = getRate({
-      amount: parseFloat(amount).toFixed(2) || 0,
+      amount: roundTo(amount) || 0,
       exRate,
       baseAmount: 0,
       rateCalcMethod,
       dirtyField: DIRTYFIELD_RATE
     })
 
-    return parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0
+    return roundTo(updatedRateRow?.baseAmount) || 0
   }
 
 
   useEffect(() => {
     if (!reCalc) return
 
-    const baseQty = parseFloat(parseFloat(formik?.values?.qty) * parseFloat(formik?.values?.qty_muQty)).toFixed(2) || 0
-    const baseUnitPrice = parseFloat(parseFloat(formik?.values?.unitPrice) / parseFloat(formik?.values?.unitPrice_muQty)).toFixed(2) || 0
-    const subtotal = parseFloat(parseFloat(baseQty) * parseFloat(baseUnitPrice)).toFixed(2) || 0
-    const taxAmount = (subtotal + parseFloat(formik?.values?.miscAmount)) * vatPct / 100
-    const amount = parseFloat(subtotal) + parseFloat(formik?.values?.miscAmount) + parseFloat(taxAmount)
+    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty) || 0
+    const baseUnitPrice = roundTo(formik?.values?.unitPrice / formik?.values?.unitPrice_muQty) || 0
+    const subtotal = roundTo(baseQty * baseUnitPrice) || 0
+    const taxAmount = roundTo((subtotal + roundTo(formik?.values?.miscAmount)) * vatPct / 100)
+    const amount = roundTo(subtotal) + roundTo(formik?.values?.miscAmount) + roundTo(taxAmount)
 
     formik.setValues({
       ...formik.values,
@@ -573,11 +576,16 @@ useEffect(() => {
                       onChange={async (_, newValue) => {
                         const res = await getMetalPurity(newValue?.metalId)
 
+                        setReCalc(true)
                         formik.setValues({
                           ...formik.values,
                           purity: res?.purity ?? null,
                           currencyId: newValue?.currencyId || null,
                           metalId: newValue?.metalId || null,
+                          qty_muId: newValue?.defQtyMUId || null,
+                          qty_muQty: newValue?.defQtyMuQty || null,
+                          unitPrice_muId: newValue?.defUnitPriceMUId || null,
+                          unitPrice_muQty: newValue?.defUnitPriceMUQty || null,
                           currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null
                         })
                         

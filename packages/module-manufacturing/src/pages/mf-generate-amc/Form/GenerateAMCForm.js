@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import * as yup from 'yup'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -10,6 +9,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 export default function GenerateAMCForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
@@ -17,12 +17,10 @@ export default function GenerateAMCForm({ _labels, access }) {
 
   const { formik } = useForm({
     initialValues: {
+      itemCategoryId: null,
       productionLevel: null
     },
     maxAccess: access,
-    validationSchema: yup.object({
-      productionLevel: yup.string().required()
-    }),
     onSubmit: async obj => {
       await postRequest({
         extension: ManufacturingRepository.GenerateAMC.generate,
@@ -38,6 +36,7 @@ export default function GenerateAMCForm({ _labels, access }) {
       key: 'generate',
       condition: true,
       onClick: () => formik.handleSubmit(),
+      onClick: () => formik.handleSubmit(),
       disabled: false
     }
   ]
@@ -48,13 +47,32 @@ export default function GenerateAMCForm({ _labels, access }) {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <ResourceComboBox
+              endpointId={InventoryRepository.Category.qry}
+              parameters='_name=&_pageSize=1000&_startAt=0'
+              values={formik.values}
+              name='itemCategoryId'
+              label={_labels.itemCategory}
+              valueField='recordId'
+              displayField={['caRef', 'name']}
+              columnsInDropDown={[
+                { key: 'caRef', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              maxAccess={access}
+              onChange={(_, newValue) => {
+                formik.setFieldValue('itemCategoryId', newValue?.recordId || null)
+              }}
+              error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
               datasetId={DataSets.PRODUCTION_LEVEL}
               name='productionLevel'
               label={_labels.productionLevel}
               valueField='key'
               displayField='value'
               values={formik.values}
-              required
               onChange={(_, newValue) => formik.setFieldValue('productionLevel', newValue?.key || null)}
               maxAccess={access}
               error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}

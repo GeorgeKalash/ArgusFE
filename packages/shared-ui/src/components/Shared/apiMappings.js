@@ -20,7 +20,7 @@ import { RemittanceSettingsRepository } from '@argus/repositories/src/repositori
 import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
 import { CTCLRepository } from '@argus/repositories/src/repositories/CTCLRepository'
@@ -925,7 +925,7 @@ export const apiMappings = {
   },
   [ResourceIds.LeaveTypes]: {
     type: COMBOBOX,
-    endpoint: LoanManagementRepository.LeaveTypes.qry,
+    endpoint: LeaveManagementRepository.LeaveTypes.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -935,7 +935,7 @@ export const apiMappings = {
   },
   [ResourceIds.LeaveScheduleFilter]: {
     type: COMBOBOX,
-    endpoint: LoanManagementRepository.LeaveScheduleFilters.qry,
+    endpoint: LeaveManagementRepository.LeaveScheduleFilters.qry,
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]

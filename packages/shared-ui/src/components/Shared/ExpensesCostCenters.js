@@ -104,7 +104,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
   ]
 
   const totalAmount = formik.values?.costCenters?.reduce((amount, row) => {
-    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+    const amountValue = row.amount || 0
 
     return amount + amountValue
   }, 0)
@@ -118,7 +118,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid item xs={4}>
               <CustomNumberField
                 name='amount'
                 label={labels.amount}
@@ -130,7 +130,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={4}>
               <CustomNumberField
                 name='amountAssigned'
                 label={labels.amountAssigned}
@@ -139,7 +139,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
                 readOnly
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={4}>
               <CustomNumberField
                 name='balance'
                 label={labels.balance}

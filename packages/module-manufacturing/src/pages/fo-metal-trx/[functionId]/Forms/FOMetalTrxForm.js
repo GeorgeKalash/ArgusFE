@@ -29,6 +29,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function FOMetalTrxForm({ labels, access, recordId, functionId, getResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -70,55 +71,57 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   }
 
   const { schema, requiredFields } = createConditionalSchema(scrapsConditions, true, maxAccess, 'scraps')
+  
+  const initialValues = {
+    recordId: recordId || null,
+    header: {
+      recordId,
+      functionId,
+      date: new Date(),
+      dtId: null,
+      plantId,
+      reference: '',
+      siteId,
+      status: 1,
+      workCenterId: null,
+      itemId: null,
+      qty: null,
+      extendedAlloy: 0,
+      totalAlloy: 0,
+      purity: null,
+      metalId: null,
+      smeltingMaxAllowedVariation: null,
+      notes: '',
+      baseSalesMetalPurity: 0,
+      baseSalesMetalRef: '',
+      avgPurity: 0,
+      qtyIn: 0,
+      qtyOut: 0,
+      deltaQty: 0
+    },
+    items: [
+      {
+        id: 1,
+        itemId: null,
+        sku: '',
+        itemName: '',
+        metalId: null,
+        purity: null,
+        qty: 0,
+        seqNo: 1,
+        trxId: recordId || 0,
+        type: isMetalSmelting ? 1 : null,
+        currentCost: 0,
+        qtyAtPurity: 0,
+        expectedAlloyQty: 0
+      }
+    ],
+    scraps: [{ id: 1, itemId: null, sku: '', itemName: '', qty: null }]
+  }
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
-    initialValues: {
-      recordId: recordId || null,
-      header: {
-        recordId,
-        functionId,
-        date: new Date(),
-        dtId: null,
-        plantId,
-        reference: '',
-        siteId,
-        status: 1,
-        workCenterId: null,
-        itemId: null,
-        qty: null,
-        extendedAlloy: 0,
-        totalAlloy: 0,
-        purity: null,
-        metalId: null,
-        smeltingMaxAllowedVariation: null,
-        notes: '',
-        baseSalesMetalPurity: 0,
-        baseSalesMetalRef: '',
-        avgPurity: 0,
-        qtyIn: 0,
-        qtyOut: 0,
-        deltaQty: 0
-      },
-      items: [
-        {
-          id: 1,
-          itemId: null,
-          sku: '',
-          itemName: '',
-          metalId: null,
-          purity: null,
-          qty: 0,
-          seqNo: 1,
-          trxId: recordId || 0,
-          type: isMetalSmelting ? 1 : null,
-          currentCost: 0,
-          qtyAtPurity: 0,
-          expectedAlloyQty: 0
-        }
-      ],
-      scraps: [{ id: 1, itemId: null, sku: '', itemName: '', qty: null }]
-    },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    initialValues,
     maxAccess,
     conditionSchema: ['scraps'],
     validationSchema: yup.object({
@@ -207,7 +210,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const isPosted = formik.values.header.status === 3
 
   const scrapQty = formik?.values?.scraps?.reduce((sum, item) => {
-    return sum + (parseFloat(item.qty) || 0)
+    return sum + (item.qty || 0)
   }, 0)
 
   
@@ -220,10 +223,10 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     let totalDesiredPurity = 0
 
     items.forEach(item => {
-      const qty = parseFloat(item.qty) || 0
-      const rmQty = parseFloat(item.rmQty) || 0
-      const expectedAlloyQty = parseFloat(item.expectedAlloyQty) || 0
-      const purity = parseFloat(item.purity) || 0
+      const qty = item.qty || 0
+      const rmQty = item.rmQty || 0
+      const expectedAlloyQty = item.expectedAlloyQty || 0
+      const purity = item.purity || 0
 
       qtyOut += qty
       qtyOutConverted += rmQty
@@ -250,31 +253,31 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   }
 
   
-  const headerPurity = parseFloat(formik.values?.header?.purity)
-  const baseSalesMetalPurity = parseFloat(formik.values?.header?.baseSalesMetalPurity) || 0
+  const headerPurity = formik.values?.header?.purity
+  const baseSalesMetalPurity = formik.values?.header?.baseSalesMetalPurity || 0
   const totals = calculateGridTotals(formik.values?.items || [], headerPurity)
   
   
-  const qtyIn = parseFloat(formik.values?.header?.qty || 0) + parseFloat(scrapQty || 0)
+  const qtyIn = formik.values?.header?.qty || 0 + scrapQty || 0
   const qtyOut = totals.qtyOut
 
-  const qtyDiff = recalc ? parseFloat(qtyOut || 0) - parseFloat(qtyIn || 0) : formik.values?.header?.qtyDiff || 0
+  const qtyDiff = recalc ? (qtyOut || 0) - (qtyIn || 0) : formik.values?.header?.qtyDiff || 0
   const totalAlloy = totals.totalAlloy
   const expectedAlloy = totals.expectedAlloy
   const totalRmQty = recalc ? totals.totalRmQty : formik.values?.header?.sumRMQty
   
   const avgPurity = recalc
-    ? (((totalRmQty || 0) * baseSalesMetalPurity) / (qtyOut || 1)).toFixed(2)
+    ? roundTo(((totalRmQty || 0) * baseSalesMetalPurity) / (qtyOut || 1))
     : formik.values?.header?.avgPurity || 0
 
   const totalDesiredPurity = totals.totalDesiredPurity
 
   const expectedAlloyQtyPerRow = (qtyAtPurity, qty) => {
-    return parseFloat(qtyAtPurity) - parseFloat(qty)
+    return qtyAtPurity - qty
   }
 
   const qtyAtPurityPerRow = (qty, purity, headerPurity) => {
-    return Boolean(headerPurity)? Math.abs((parseFloat(qty) * parseFloat(purity)) / parseFloat(headerPurity)) : 0
+    return Boolean(headerPurity)? Math.abs((qty * purity) / headerPurity) : 0
   }
 
   const updatePurityRelatedFields = headerPurity => {
@@ -350,18 +353,19 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     })
 
     if (!record) {
-      formik.setValues({ ...formik.initialValues })
+      formik.setValues({ ...initialValues })
 
       return
     }
 
-    const dtInfo = await selectedDocTypeInfo(record?.header?.dtId || null)
+    const dtInfo = await onChangeDT(record?.header?.dtId || null)
 
     const itemsList = (record?.items || []).map((item, index) => ({
       ...item,
       id: index + 1,
       purity: item.purity * 1000,
-      metalId: item.metalId || ''
+      metalId: item.metalId || '',
+      qty: item.qty || 0
     }))
 
     const scrapsList = (record?.scraps || []).map((item, index) => ({
@@ -371,20 +375,22 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
 
     const metalInfo = await getBaseSalesMetalPurity()
 
-    formik.setValues({
-      recordId: record?.header?.recordId,
-      header: {
-        ...(record?.header || {}),
-        qtyIn: record?.header?.qtyIn ?? 0,
-        qtyOut: record?.header?.qtyOut ?? 0,
-        deltaQty: record?.header?.deltaQty ?? 0,
-        date: formatDateFromApi(record?.header?.date),
-        smeltingMaxAllowedVariation: dtInfo?.smeltingMaxAllowedVariation || null,
-        baseSalesMetalPurity: metalInfo?.purity * 1000 || 0,
-        baseSalesMetalRef: metalInfo?.reference || 0
-      },
-      items: itemsList?.length ? itemsList : formik.initialValues.items,
-      scraps: scrapsList?.length ? scrapsList : formik.initialValues?.scraps
+    formik.resetForm({
+      values: {
+        recordId: record?.header?.recordId,
+        header: {
+          ...(record?.header || {}),
+          qtyIn: record?.header?.qtyIn ?? 0,
+          qtyOut: record?.header?.qtyOut ?? 0,
+          deltaQty: record?.header?.deltaQty ?? 0,
+          date: formatDateFromApi(record?.header?.date),
+          smeltingMaxAllowedVariation: dtInfo?.smeltingMaxAllowedVariation || null,
+          baseSalesMetalPurity: metalInfo?.purity * 1000 || 0,
+          baseSalesMetalRef: metalInfo?.reference || 0
+        },
+        items: itemsList?.length ? itemsList : initialValues.items,
+        scraps: scrapsList?.length ? scrapsList : initialValues?.scraps
+      }
     })
     setRecalc(false)
   }
@@ -459,7 +465,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
         if (!newRow?.itemId) return
         const currentCost = await getUnitCost(newRow?.itemId)
         update({
-          currentCost
+          currentCost: currentCost || 0,
         })
       },
       flex: 1.5
@@ -490,7 +496,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
           const expectedAlloyQty = expectedAlloyQtyPerRow(qtyAtPurity || 0, newRow?.qty || 0)
           
           const rmQty = formik.values?.header?.baseSalesMetalPurity
-          ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          ? roundTo(((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity)
           : 0
 
           update({ expectedAlloyQty, qtyAtPurity, rmQty, qty: newRow?.qty || 0 })
@@ -514,7 +520,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
           const expectedAlloyQty = expectedAlloyQtyPerRow(qtyAtPurity || 0, newRow?.qty || 0)
           
           const rmQty = formik.values?.header?.baseSalesMetalPurity
-          ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          ? roundTo(((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity)
           : 0
 
           update({ expectedAlloyQty, qtyAtPurity, rmQty})
@@ -637,7 +643,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     return res?.record?.metalId || null
   }
 
-  async function selectedDocTypeInfo(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) {
       formik.setFieldValue('header.smeltingMaxAllowedVariation', null)
 
@@ -672,7 +678,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
-        const dtInfo = await selectedDocTypeInfo(formik?.values?.header?.dtId)
+        const dtInfo = await onChangeDT(formik?.values?.header?.dtId)
         formik.setFieldValue('header.siteId', dtInfo?.siteId || null)
         formik.setFieldValue('header.workCenterId', dtInfo?.workCenterId || null)
         formik.setFieldValue('header.smeltingMaxAllowedVariation', dtInfo?.smeltingMaxAllowedVariation || null)
@@ -711,12 +717,12 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const qtyOutConverted = totals.qtyOutConverted
   const qtyInConverted = qtyIn * headerPurity / baseSalesMetalPurity
 
-  const deltaQty = parseFloat(qtyInConverted) - parseFloat(qtyOutConverted)
+  const deltaQty = qtyInConverted - qtyOutConverted
 
   useEffect(() => {
     formik.setFieldValue('header.qtyIn', qtyInConverted)
-    formik.setFieldValue('header.qtyOut', qtyOutConverted)
-    formik.setFieldValue('header.deltaQty', deltaQty)
+    formik.setFieldValue('header.qtyOut', roundTo(qtyOutConverted))
+    formik.setFieldValue('header.deltaQty', roundTo(deltaQty))
   }, [qtyInConverted, qtyOutConverted, deltaQty])
 
   return (
@@ -907,7 +913,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                     label={labels.purity}
                     readOnly={isPosted}
                     onBlur={e => {
-                      let value = Number(e.target.value.replace(/,/g, ''))
+                      let value = e.target.value
                       updatePurityRelatedFields(value)
                       formik.setFieldValue('header.purity', value)
                     }}
@@ -915,7 +921,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                     maxLength={12}
                     decimalScale={3}
                     allowNegative={false}
-                    align='right'
                     onClear={() => {
                       updatePurityRelatedFields(0)
                       formik.setFieldValue('header.purity', '')
@@ -929,16 +934,15 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                     label={labels.qty}
                     onBlur={e => {
                       setRecalc(true)
-                      let value = Number(e.target.value.replace(/,/g, ''))
+                      let value = e.target.value
                       formik.setFieldValue('header.qty', value)
                     }}
                     value={formik.values.header?.qty}
                     maxLength={12}
                     decimalScale={3}
                     allowNegative={false}
-                    align='right'
                     readOnly={isPosted}
-                    onClear={() => formik.setFieldValue('header.qty', '')}
+                    onClear={() => formik.setFieldValue('header.qty', null)}
                     error={formik.touched.header?.qty && Boolean(formik.errors.header?.qty)}
                   />
                 </Grid>
@@ -954,7 +958,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
             name='items'
             columns={columns}
             showCounterColumn={true}
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={initialValues?.items?.[0]}
             maxAccess={maxAccess}
             disabled={isPosted}
             allowDelete={!isPosted}
@@ -1034,7 +1038,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                     value={totalDesiredPurity}
                     decimalScale={3}
                     readOnly
-                    align='right'
                   />
                 </Grid>
                 {
@@ -1045,7 +1048,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                       value={totalAlloy}
                       decimalScale={3}
                       readOnly
-                      align='right'
                     />
                   </Grid>
                 }
@@ -1057,21 +1059,20 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                       value={expectedAlloy}
                       decimalScale={3}
                       readOnly
-                      align='right'
                     />
                   </Grid>
                 }
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.qtyIn} value={qtyIn} decimalScale={3} readOnly align='right' />
+                  <CustomNumberField label={labels.qtyIn} value={qtyIn} decimalScale={3} readOnly />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.qtyOut} value={qtyOut} decimalScale={3} readOnly align='right' />
+                  <CustomNumberField label={labels.qtyOut} value={qtyOut} decimalScale={3} readOnly />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.qtyDiff} value={qtyDiff} decimalScale={3} readOnly align='right' />
+                  <CustomNumberField label={labels.qtyDiff} value={qtyDiff} decimalScale={3} readOnly />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.avgPurity} value={avgPurity} decimalScale={3} readOnly align='right' />
+                  <CustomNumberField label={labels.avgPurity} value={avgPurity} decimalScale={3} readOnly />
                 </Grid>
               </Grid>
             </Grid>

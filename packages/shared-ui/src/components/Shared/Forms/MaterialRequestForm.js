@@ -88,7 +88,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
   }
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       functionId: SystemFunction.MaterialRequest,
@@ -518,9 +518,11 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
         const res = await getData(recordId)
         const res3 = await getDataGrid(recordId)
 
-        formik.setValues({
-          ...res.record,
-          items: res3
+        formik.resetForm({
+          values: {
+            ...res.record,
+            items: res3
+          }
         })
       }
     })()
@@ -549,7 +551,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isClosed || isCancelled}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
@@ -617,6 +619,8 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
                     secondValueShow='wcName'
                     displayFieldWidth={2}
                     form={formik}
+                    readOnly={isClosed || isCancelled}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('workCenterId', newValue?.recordId || null)
                       formik.setFieldValue('wcRef', newValue?.reference || '')

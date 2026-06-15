@@ -9,16 +9,6 @@ function conditionalField(fieldValidators, fieldKey, allowNoLines) {
 
     const allRows = this.options.context?.[arrayKey] || []
     if (allowNoLines || (!allowNoLines && allRows.length > 1)) {
-      if (
-        row[fieldKey] !== null &&
-        row[fieldKey] !== undefined &&
-        row[fieldKey] !== 0 &&
-        fieldValidators[fieldKey] !== '' &&
-        !fieldValidators[fieldKey](row)
-      ) {
-        return false
-      }
-
       const isAnyFieldFilled = Object.entries(fieldValidators).some(([, fn]) => {
         return !!fn(row)
       })
@@ -26,7 +16,13 @@ function conditionalField(fieldValidators, fieldKey, allowNoLines) {
       if (!isAnyFieldFilled) return true
     }
 
-    return !!fieldValidators[fieldKey](row) && value !== undefined
+    const isRequired = fieldValidators[fieldKey](row)
+
+    if (!isRequired) {
+      return true
+    }
+
+    return value != null && value !== ''
   }
 }
 

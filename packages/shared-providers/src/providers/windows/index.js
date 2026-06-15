@@ -110,7 +110,14 @@ export function WindowProvider({ children }) {
 
   function closeWindow() {
     if (currentTab?.resourceId) clearPageInteractions(currentTab.resourceId, 'Window')
-    unlockRecord()
+    const closingWindow = stack[stack.length - 1]
+
+    if (
+      lockProps &&
+      closingWindow?.props?.recordId === lockProps.recordId
+    ) {
+      unlockRecord()
+    }
     setStack(stack => stack.slice(0, stack.length - 1))
   }
 

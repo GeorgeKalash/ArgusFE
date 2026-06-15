@@ -17,7 +17,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import toast from 'react-hot-toast'
-import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
+import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearGridConfirmation'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ImportForm from '@argus/shared-ui/src/components/Shared/ImportForm'
@@ -48,28 +48,30 @@ const PhysicalCountItemDe = () => {
     return res?.record
   }
 
+  const initialValues = {
+    stockCountId: null,
+    siteId: null,
+    controllerId: null,
+    status: 1,
+    SCStatus: null,
+    SCWIP: null,
+    EndofSiteStatus: null,
+    rows: [
+      {
+        id: 1,
+        sku: '',
+        itemId: null,
+        itemName: '',
+        countedQty: 0,
+        weight: 0,
+        metalPurity: 0
+      }
+    ]
+  }
+
   const { formik } = useForm({
     maxAccess: access,
-    initialValues: {
-      stockCountId: null,
-      siteId: null,
-      controllerId: null,
-      status: 1,
-      SCStatus: null,
-      SCWIP: null,
-      EndofSiteStatus: null,
-      rows: [
-        {
-          id: 1,
-          sku: '',
-          itemId: null,
-          itemName: '',
-          countedQty: 0,
-          weight: 0,
-          metalPurity: 0
-        }
-      ]
-    },
+    initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
       stockCountId: yup.string().required(),
@@ -134,26 +136,31 @@ const PhysicalCountItemDe = () => {
 
     getDTDsku(stockCountId)
 
-    await getRequest({
+    const res = await getRequest({
       extension: SCRepository.StockCountItemDetail.qry,
       parameters: `_stockCountId=${stockCountId}&_siteId=${formik.values.siteId}&_controllerId=${controllerId}`
-    }).then(res => {
-      if (res.list) {
-        const modifiedList = res.list?.map((item, index) => ({
-          ...item,
-          id: index + 1,
-          metalPurity: item?.metalPurity || 0,
-          weight: item?.weight || 0,
-          countedQty: item?.countedQty || 0
-        }))
-        if (modifiedList.length > 0) {
-          formik.setFieldValue('rows', modifiedList)
-          rowsUpdate.current = modifiedList
-        }
-      }
-
-      setEditMode(res?.list?.length > 0)
     })
+
+    const modifiedList =
+      res.list?.length > 0
+        ? res.list.map((item, index) => ({
+            ...item,
+            id: index + 1,
+            metalPurity: item?.metalPurity || 0,
+            weight: item?.weight || 0,
+            countedQty: item?.countedQty || 0
+          }))
+        : initialValues.rows
+
+    const nextValues = {
+      ...formik.values,
+      controllerId,
+      rows: modifiedList
+    }
+
+    formik.resetForm({ values: nextValues })
+    rowsUpdate.current = modifiedList
+    setEditMode(res?.list?.length > 0)
   }
 
   useEffect(() => {
@@ -238,6 +245,7 @@ const PhysicalCountItemDe = () => {
   }
 
   const defaultQty = !jumpToNextLine && !showDefaultQty ? 0 : 1
+
 
   const columns = [
     {
@@ -352,8 +360,8 @@ const PhysicalCountItemDe = () => {
   ]
 
   const clearGrid = () => {
-    formik.setFieldValue('rows', formik.initialValues.rows)
-    rowsUpdate.current = formik.initialValues.rows
+    formik.setFieldValue('rows', initialValues.rows)
+    rowsUpdate.current = initialValues.rows
 
     setEditMode(false)
   }
@@ -432,8 +440,7 @@ const PhysicalCountItemDe = () => {
         open: { flag: true },
         fullScreen: false,
         onConfirm: () => {
-          formik.resetForm()
-          formik.setFieldValue('rows', [])
+          formik.resetForm({ values: initialValues })
 
           setEditMode(false)
         },
@@ -497,13 +504,13 @@ const PhysicalCountItemDe = () => {
   ]
 
   const totalQty = formik.values.rows.reduce((qtySum, row) => {
-    const qtyValue = parseFloat(row.countedQty?.toString().replace(/,/g, '')) || 0
+    const qtyValue = row.countedQty || 0
 
     return qtySum + qtyValue
   }, 0)
 
   const totalWeight = formik.values.rows.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
+    const weightValue = row.weight || 0
 
     return weightSum + weightValue
   }, 0)
@@ -615,7 +622,7 @@ const PhysicalCountItemDe = () => {
             }}
             value={formik.values.controllerId && typeof disSkuLookup === 'boolean' ? formik.values?.rows : []}
             error={formik.errors?.rows}
-            initialValues={formik?.initialValues?.rows?.[0]}
+            initialValues={initialValues?.rows?.[0]}
             columns={columns}
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
             allowDelete={formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
@@ -635,7 +642,7 @@ const PhysicalCountItemDe = () => {
               <CustomNumberField
                 name='totalQty'
                 label={labels.totalQty}
-                value={getFormattedNumber(totalQty.toFixed(2))}
+                value={getFormattedNumber(roundTo(totalQty))}
                 readOnly
                 hidden={!formik.values.controllerId}
                 maxAccess={access}
@@ -645,7 +652,7 @@ const PhysicalCountItemDe = () => {
               <CustomNumberField
                 name='totalWeight'
                 label={labels.totalWeight}
-                value={getFormattedNumber(totalWeight.toFixed(2))}
+                value={getFormattedNumber(roundTo(totalWeight))}
                 readOnly
                 hidden={!formik.values.controllerId}
                 maxAccess={access}

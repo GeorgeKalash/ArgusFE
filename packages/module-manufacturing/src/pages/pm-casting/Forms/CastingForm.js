@@ -42,7 +42,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       reference: '',
@@ -156,6 +156,26 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
     })
   }
 
+  async function onChangeDT (dtId) {
+    if (!dtId) return
+    
+    const { record } = await getRequest({
+      extension: ProductModelingRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    return record || {}
+  }
+
+  useEffect(() => {
+    ;(async function () {
+     if (!recordId) {
+      const response = await onChangeDT(formik.values?.dtId)
+      formik.setFieldValue('productionLineId', response?.productionLineId || null)
+     }
+    })()
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.Casting}
@@ -180,22 +200,9 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik?.values}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
                   changeDT(newValue)
-
-                  formik.setFieldValue('productionLineId', null)
-
-                  if (newValue?.recordId) {
-                    const { record } = await getRequest({
-                      extension: ProductModelingRepository.DocumentTypeDefault.get,
-                      parameters: `_dtId=${newValue?.recordId}`
-                    })
-
-                    formik.setFieldValue('productionLineId', record?.productionLineId)
-                  } else {
-                    formik.setFieldValue('productionLineId', null)
-                  }
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}
