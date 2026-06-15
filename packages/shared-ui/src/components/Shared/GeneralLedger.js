@@ -128,7 +128,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
           extension: GeneralLedgerRepository.GeneralLedger.set2,
           record: JSON.stringify(data)
         }).then(res => {
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
         })
       }
     }

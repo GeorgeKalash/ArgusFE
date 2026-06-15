@@ -11,9 +11,11 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 export default function ReleaseCodeForm({ labels, maxAccess, recordId, window }) {
   const { postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: AccessControlRepository.SGReleaseCode.qry
@@ -34,7 +36,7 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId, window })
         extension: AccessControlRepository.SGReleaseCode.set,
         record: JSON.stringify(obj)
       })
-      toast.success('Record Added Successfully')
+      toast.success(platformLabels.Added)
       invalidate()
       window.close()
     }
@@ -53,7 +55,7 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId, window })
               valueField='recordId'
               displayField='name'
               values={formik.values}
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 formik.setFieldValue('codeId', newValue ? newValue.recordId : null)
               }}
               error={formik.touched.codeId && Boolean(formik.errors.codeId)}

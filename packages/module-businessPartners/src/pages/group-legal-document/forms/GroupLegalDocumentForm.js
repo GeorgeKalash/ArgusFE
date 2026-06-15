@@ -12,10 +12,11 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, record }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const invalidate = useInvalidate({
     endpointId: BusinessPartnerRepository.GroupLegalDocument.page
   })
@@ -23,8 +24,8 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
-      groupId: '',
-      incId: '',
+      groupId: null,
+      incId: null,
       required: false,
       mandatory: false
     },
@@ -43,9 +44,8 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
         record: JSON.stringify(obj)
       })
 
-      if (!groupId && !incId) {
-        toast.success('Record Added Successfully')
-      } else toast.success('Record Edited Successfully')
+      (!groupId && !incId) ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+
       formik.setFieldValue('recordId', obj.groupId * 10000 + obj.incId)
 
       invalidate()
@@ -99,7 +99,7 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('groupId', newValue?.recordId)
+                  formik && formik.setFieldValue('groupId', newValue?.recordId || null)
                 }}
                 error={formik.touched.groupId && Boolean(formik.errors.groupId)}
               />
@@ -116,7 +116,7 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('incId', newValue?.recordId)
+                  formik && formik.setFieldValue('incId', newValue?.recordId || null)
                 }}
                 error={formik.touched.incId && Boolean(formik.errors.incId)}
               />

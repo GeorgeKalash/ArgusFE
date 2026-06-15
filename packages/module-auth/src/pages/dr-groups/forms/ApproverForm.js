@@ -11,9 +11,11 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const ApproverForm = ({ labels, editMode, maxAccess, recordId, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { recordId: grId } = store
 
   const invalidate = useInvalidate({
@@ -58,7 +60,7 @@ const ApproverForm = ({ labels, editMode, maxAccess, recordId, store }) => {
       extension: DocumentReleaseRepository.GroupCode.set,
       record: JSON.stringify(obj)
     })
-    toast.success('Record Successfully Updated')
+    toast.success(platformLabels.Updated)
     invalidate()
   }
 
