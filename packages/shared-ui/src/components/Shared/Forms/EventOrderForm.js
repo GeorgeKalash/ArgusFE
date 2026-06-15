@@ -30,6 +30,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function EventOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -143,14 +144,16 @@ export default function EventOrderForm({ recordId, window }) {
 
     setReCalc(false)
 
-    formik.setValues({
-      ...res?.record,
-      date: formatDateFromApi(res?.record?.date),
-      expiryDate: formatDateFromApi(res?.record?.expiryDate),
-      currencyId_metalId:
-        res?.record?.currencyId && res?.record?.metalId
-          ? `${res.record.currencyId}${res.record.metalId}`
-          : null
+    formik.resetForm({
+      values: {
+        ...res?.record,
+        date: formatDateFromApi(res?.record?.date),
+        expiryDate: formatDateFromApi(res?.record?.expiryDate),
+        currencyId_metalId:
+          res?.record?.currencyId && res?.record?.metalId
+            ? `${res.record.currencyId}${res.record.metalId}`
+            : null
+      }
     })
   }
 
@@ -219,9 +222,9 @@ export default function EventOrderForm({ recordId, window }) {
   useEffect(() => {
     if (!reCalc) return
 
-    const baseQty = parseFloat(parseFloat(formik?.values?.qty) * parseFloat(formik?.values?.qty_muQty)).toFixed(2) || 0
-    const baseTargetPrice = parseFloat(parseFloat(formik?.values?.targetPrice) / parseFloat(formik?.values?.targetPrice_muQty)).toFixed(2) || 0
-    const amount = parseFloat(parseFloat(baseQty) * parseFloat(baseTargetPrice)).toFixed(2) || 0
+    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty || 0)
+    const baseTargetPrice = roundTo(formik?.values?.targetPrice / formik?.values?.targetPrice_muQty || 0)
+    const amount = roundTo(baseQty * baseTargetPrice) || 0
 
     formik.setValues({
       ...formik.values,
