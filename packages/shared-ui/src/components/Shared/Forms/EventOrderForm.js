@@ -63,7 +63,6 @@ export default function EventOrderForm({ recordId, window }) {
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
-      functionId,
       plantId: null,
       accountId: null,
       direction: null,
@@ -119,7 +118,7 @@ export default function EventOrderForm({ recordId, window }) {
       const values = {
         ...obj,
         date: formatDateToApi(obj?.date),
-        expiryDate: formatDateToApi(obj?.expiryDate)
+        expiryDate: obj?.expiryDate ? formatDateToApi(obj?.expiryDate) : null
       }
       const response = await postRequest({
         extension: BrokerageTradingRepository.EventOrder.set,
@@ -291,7 +290,7 @@ useEffect(() => {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
+                parameters={msId && `_msId=${msId}`}
                 reducer={response => response?.record?.plants}
                 name='plantId'
                 label={labels.plant}
@@ -328,7 +327,7 @@ useEffect(() => {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
+                parameters={msId && `_msId=${msId}`}
                 reducer={response => response?.record?.currencies}
                 name='fi_currencyId'
                 filter={item => item.currencyType === 1}
@@ -375,7 +374,7 @@ useEffect(() => {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
+                parameters={msId && `_msId=${msId}`}
                 reducer={response => response?.record?.salesPeople}
                 name='spId'
                 label={labels.spName}
@@ -469,7 +468,7 @@ useEffect(() => {
                   <Grid item xs={6}>
                     <ResourceComboBox
                       endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                      parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
+                      parameters={msId && `_msId=${msId}`}
                       name='currencyId_metalId'
                       label={labels.cmp}
                       valueField='recordId'
@@ -544,7 +543,7 @@ useEffect(() => {
                   <Grid item xs={3}>
                     <ResourceComboBox
                       endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                      parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
+                      parameters={msId && `_msId=${msId}`}
                       reducer={response => response?.record?.measurementUnits}
                       name='qty_muId'
                       label={labels.mu}
@@ -598,7 +597,7 @@ useEffect(() => {
                   <Grid item xs={3}>
                     <ResourceComboBox
                       endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                      parameters={msId && `_dgId=${functionId}&_msId=${msId}`}
+                      parameters={msId && `_msId=${msId}`}
                       reducer={response => response?.record?.measurementUnits}
                       name='targetPrice_muId'
                       label={labels.mu}
