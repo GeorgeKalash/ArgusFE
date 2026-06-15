@@ -346,9 +346,9 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
             />
           </Grid>
 
-          <Grid item xs={8}>
+          <Grid item xs={12}>
             <Grid container spacing={1} alignItems='center'>
-              <Grid item xs={8}>
+              <Grid item xs={7}>
                 <ResourceComboBox
                   endpointId={SystemRepository.Currency.qry}
                   name='currencyId'
@@ -372,15 +372,39 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
                   error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={1}>
                 <CustomButton
                   onClick={() => openMCRForm(formik.values)}
-                  disabled={
-                    !formik.values.currencyId ||
-                    formik.values.currencyId === getDefaultsData()?.currencyId
-                  }
+                  disabled={!formik.values.currencyId || formik.values.currencyId === getDefaultsData()?.currencyId}
                   tooltipText={platformLabels.MultiCurrencyRate}
                   image={'popup.png'}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <CustomNumberField
+                  name='amount'
+                  required
+                  label={labels.amount}
+                  value={formik.values.amount}
+                  maxAccess={maxAccess}
+                  readOnly={isPosted}
+                  onChange={async e => {
+                    formik.setFieldValue('amount', e.target.value)
+
+                    const updatedRateRow = getRate({
+                      amount: e.target.value ?? 0,
+                      exRate: formik.values?.exRate,
+                      baseAmount: 0,
+                      rateCalcMethod: formik.values?.rateCalcMethod,
+                      dirtyField: DIRTYFIELD_RATE
+                    })
+
+                    formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount))
+                  }}
+                  onClear={async () => {
+                    formik.setFieldValue('amount', 0)
+                  }}
+                  error={formik.touched.amount && Boolean(formik.errors.amount)}
                 />
               </Grid>
             </Grid>
@@ -427,32 +451,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
                 formik.setFieldValue('toCashAccountId', newValue?.recordId || null)
               }}
               error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='amount'
-              required
-              label={labels.amount}
-              value={formik.values.amount}
-              maxAccess={maxAccess}
-              readOnly={isPosted}
-              onChange={async e => {
-                formik.setFieldValue('amount', e.target.value)
-
-                const updatedRateRow = getRate({
-                  amount: e.target.value ?? 0,
-                  exRate: formik.values?.exRate,
-                  baseAmount: 0,
-                  rateCalcMethod: formik.values?.rateCalcMethod,
-                  dirtyField: DIRTYFIELD_RATE
-                })
-                formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount))
-              }}
-              onClear={async () => {
-                formik.setFieldValue('amount', 0)
-              }}
-              error={formik.touched.amount && Boolean(formik.errors.amount)}
             />
           </Grid>
           <Grid item xs={12}>
