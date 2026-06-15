@@ -34,7 +34,7 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
       metalId: null,
       defQtyMUId: null,
       defUnitPriceMUId: null,
-      eo_defQtyMuId: null,
+      eo_defQtyMUId: null,
       eo_defTargetPriceMUId: null
     },
     maxAccess,
@@ -152,7 +152,7 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
               <ResourceComboBox
                 endpointId={msId && InventoryRepository.MeasurementUnit.qry}
                 parameters={msId && `_msId=${msId}`}
-                name='eo_defQtyMuId'
+                name='eo_defQtyMUId'
                 label={labels.eo_defQtyMu}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -163,9 +163,9 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('eo_defQtyMuId', newValue?.recordId || null)
+                  formik.setFieldValue('eo_defQtyMUId', newValue?.recordId || null)
                 }}
-                error={formik.touched.eo_defQtyMuId && Boolean(formik.errors.eo_defQtyMuId)}
+                error={formik.touched.eo_defQtyMUId && Boolean(formik.errors.eo_defQtyMUId)}
               />
             </Grid>
             <Grid item xs={12}>
