@@ -931,6 +931,7 @@ export default function JobOrderForm({
                         label={labels.standardCost}
                         value={formik.values.standardCost}
                         readOnly
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>
