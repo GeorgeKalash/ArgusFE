@@ -25,7 +25,7 @@ export default function BTFixing() {
 
     const response = await getRequest({
       extension: BrokerageTradingRepository.EventOrder.page,
-      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_functionId=${SystemFunction.EventOrder}`
+      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}`
     })
 
     response.list = (response?.list || []).map(item => ({
@@ -58,7 +58,7 @@ export default function BTFixing() {
     if (filters?.qry) {
       return await getRequest({
         extension: BrokerageTradingRepository.EventOrder.snapshot,
-        parameters: `_filter=${filters.qry}&_functionId=${SystemFunction.EventOrder}`
+        parameters: `_filter=${filters.qry}`
       })
     } else {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
