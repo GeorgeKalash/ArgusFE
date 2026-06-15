@@ -830,9 +830,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             </Grid>
             <Grid item xs={4}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly />
-                </Grid>
+                <Grid item xs={6}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}></Grid>
@@ -860,7 +862,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly />
+                </Grid>
+            </Grid>
+            <Grid item xs={2}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={2} readOnly />

@@ -102,7 +102,7 @@ const OpeningBalance = () => {
           : null
       },
       width: 600,
-      height: 430,
+      height: 400,
       title: _labels.openingBalance
     })
   }
