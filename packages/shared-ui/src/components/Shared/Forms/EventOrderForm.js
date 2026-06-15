@@ -222,8 +222,8 @@ export default function EventOrderForm({ recordId, window }) {
   useEffect(() => {
     if (!reCalc) return
 
-    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty || 0)
-    const baseTargetPrice = roundTo(formik?.values?.targetPrice / formik?.values?.targetPrice_muQty || 0)
+    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty) || 0
+    const baseTargetPrice = roundTo(formik?.values?.targetPrice / formik?.values?.targetPrice_muQty) || 0
     const amount = roundTo(baseQty * baseTargetPrice) || 0
 
     formik.setValues({
@@ -500,7 +500,7 @@ useEffect(() => {
                           currencyId: newValue?.currencyId || null,
                           metalId: newValue?.metalId || null,
                           qty_muId: newValue?.eo_defQtyMUId || null,
-                          qty_muQty: newValue?.eo_defQtyMuQty || null,
+                          qty_muQty: newValue?.eo_defQtyMUQty || null,
                           targetPrice_muId: newValue?.eo_defTargetPriceMUId || null,
                           targetPrice_muQty: newValue?.eo_defTargetPriceMUQty || null,
                           currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null
