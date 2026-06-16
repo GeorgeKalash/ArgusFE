@@ -45,9 +45,10 @@ const BtDefaults = ({ _labels, access }) => {
       if (arrayAllow.includes(obj.key)) {
         const parsedValue = obj.value ? parseFloat(obj.value) : null
         myObject[obj.key] = parsedValue
-        formik.setFieldValue(obj.key, parsedValue)
       }
     })
+
+    formik.resetForm({ values: myObject })
   })()
   }, [systemDefaults])
 

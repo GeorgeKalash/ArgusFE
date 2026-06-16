@@ -76,11 +76,12 @@ export default function MobileSystem() {
           fetchedValues[obj.key] = val ?? null
         }
       })
-
-    formik.setValues(prev => ({
-      ...prev,
-      ...fetchedValues
-    }))
+      formik.resetForm({
+        values: {
+          ...formik.values,
+          ...fetchedValues
+        }
+      })
   }
 
   return (

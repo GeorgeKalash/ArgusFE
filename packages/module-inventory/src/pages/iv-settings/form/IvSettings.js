@@ -45,35 +45,43 @@ const IvSettings = ({ _labels, access }) => {
     }
   })
 
-  async function fillNbInfo(nraId){
-    if (!nraId) return
+  async function fillNbInfo(nraId) {
+    if (!nraId) return 
 
     const res = await getRequest({
       extension: SystemRepository.NumberRange.get,
       parameters: `_recordId=${nraId}`
     })
 
-    formik.setFieldValue('nraRef', res?.record?.reference || '')
-    formik.setFieldValue('nraDescription', res?.record?.description || '')
+    return {
+      nraRef: res?.record?.reference || '',
+      nraDescription: res?.record?.description || ''
+    }
   }
 
   useEffect(() => {
   ;(async function () {
     const myObject = {}
+    const nbPromises = []
 
     systemDefaults?.list?.forEach(obj => {
-      if (arrayAllow.includes(obj.key)) {
-        const parsedValue = obj.value ? parseFloat(obj.value) : null
-        myObject[obj.key] = parsedValue
-        formik.setFieldValue(obj.key, parsedValue)
+      if (!arrayAllow.includes(obj.key)) return
 
-        if (obj.key === 'iv_clone_srl_nra' && parsedValue) {
-          fillNbInfo(parsedValue)
-        }
-      }
+      const parsedValue = obj.value ? parseFloat(obj.value) : null
+      myObject[obj.key] = parsedValue
+
+      if (obj.key === 'iv_clone_srl_nra' && parsedValue)
+        nbPromises.push(fillNbInfo(parsedValue))
     })
+
+    const nbResults = await Promise.all(nbPromises)
+    nbResults.forEach(result => {
+      Object.assign(myObject, result)
+    })
+
+    formik.resetForm({ values: {...formik.values, ...myObject} })
   })()
-  }, [systemDefaults])
+}, [systemDefaults])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={access}>

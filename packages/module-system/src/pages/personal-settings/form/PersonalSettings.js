@@ -27,7 +27,7 @@ const PersonalSettings = ({ _labels, access }) => {
         parameters: `_recordId=${_userId}`
       })
 
-      formik.setValues(res.record)
+      formik.resetForm({ values: res.record })
     })()
   }, [])
 

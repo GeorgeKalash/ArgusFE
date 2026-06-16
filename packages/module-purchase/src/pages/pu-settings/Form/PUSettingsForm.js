@@ -68,13 +68,12 @@ const PUSettingsForm = () => {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        systemDefaults.list.forEach(obj => {
-          if (arrayAllow.includes(obj.key)) {
-            formik.setFieldValue(obj.key, parseInt(obj.value))
-          }
-        })
-      } catch (error) {}
+      const myObject = {}
+      systemDefaults.list.forEach(obj => {
+        if (arrayAllow.includes(obj.key)) 
+          myObject[obj.key] = parseInt(obj.value)
+      })
+      formik.resetForm({ values: myObject })
     })()
   }, [])
 
