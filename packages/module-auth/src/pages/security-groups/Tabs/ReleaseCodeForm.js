@@ -54,6 +54,7 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId, window })
               label={labels.code}
               valueField='recordId'
               displayField='name'
+              required
               values={formik.values}
               onChange={(_, newValue) => {
                 formik.setFieldValue('codeId', newValue ? newValue.recordId : null)

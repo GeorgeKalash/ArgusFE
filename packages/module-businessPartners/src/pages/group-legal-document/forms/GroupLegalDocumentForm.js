@@ -36,15 +36,12 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
       incId: yup.string().required()
     }),
     onSubmit: async obj => {
-      const groupId = formik.values.groupId
-      const incId = formik.values.incId
-
       await postRequest({
         extension: BusinessPartnerRepository.GroupLegalDocument.set,
         record: JSON.stringify(obj)
       })
 
-      (!groupId && !incId) ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+      !obj.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
 
       formik.setFieldValue('recordId', obj.groupId * 10000 + obj.incId)
 
