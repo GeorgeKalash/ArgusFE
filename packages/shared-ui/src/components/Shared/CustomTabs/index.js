@@ -119,6 +119,7 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 't
           display: flex;
           align-items: center;
           transition: background-color 0.2s ease, color 0.2s ease;
+          text-transform: none !important;
         }
 
         .tabRoot:hover {
