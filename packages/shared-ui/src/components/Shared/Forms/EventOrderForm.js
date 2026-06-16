@@ -423,6 +423,7 @@ useEffect(() => {
                 displayField='value'
                 maxAccess={maxAccess}
                 values={formik.values}
+                readOnly={isClosed}
                 onClear={() => formik.setFieldValue('direction', null)}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('direction', newValue?.key || null)
@@ -440,6 +441,7 @@ useEffect(() => {
                 displayField='value'
                 values={formik.values}
                 maxAccess={maxAccess}
+                readOnly={isClosed}
                 onClear={() => {
                   formik.setFieldValue('validityType', null)
                   formik.setFieldValue('expiryDate', null)
@@ -457,6 +459,7 @@ useEffect(() => {
                 required={formik.values.validityType == 2}
                 label={labels.expiryDate}
                 value={formik.values.expiryDate}
+                min={formik.values.date}
                 onChange={(e, newValue) => {
                   formik.setFieldValue('expiryDate', newValue)
                 }}
