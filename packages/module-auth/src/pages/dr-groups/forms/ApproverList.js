@@ -1,9 +1,8 @@
 import { useContext } from 'react'
-import { toast } from '@mui/material'
+import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import ApproverForm from './ApproverForm'
 import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -12,20 +11,19 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import ApproverForm from './ApproverForm'
 
 const ApproverList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
+  const { recordId } = store
   const { stack } = useWindow()
 
   async function fetchGridData() {
-    const response = await getRequest({
+    return await getRequest({
       extension: DocumentReleaseRepository.GroupCode.qry,
       parameters: `_filter=&_groupId=${recordId}`
     })
-
-    return response
   }
 
   const {
@@ -43,31 +41,37 @@ const ApproverList = ({ store, labels, maxAccess }) => {
     { field: 'codeName', headerName: labels.name, flex: 1 }
   ]
 
-  const openForm = (recordId = null) => {
+  const add = () => openForm()
+
+  const del = async obj => {
+    await postRequest({
+      extension: DocumentReleaseRepository.GroupCode.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
+  function openForm(record) {
     stack({
       Component: ApproverForm,
-      props: { labels, recordId, maxAccess, store },
+      props: {
+        labels,
+        record,
+        maxAccess,
+        store,
+        invalidate
+      },
       width: 500,
       height: 400,
       title: labels.approver
     })
   }
 
-  const delApprover = async obj => {
-    try {
-      await postRequest({
-        extension: DocumentReleaseRepository.GroupCode.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={openForm} maxAccess={maxAccess} />
+        <GridToolbar onAdd={add} maxAccess={maxAccess} />
       </Fixed>
       <Grow>
         <Table
@@ -76,7 +80,8 @@ const ApproverList = ({ store, labels, maxAccess }) => {
           gridData={data}
           rowId={['codeId']}
           pagination={false}
-          onDelete={delApprover}
+          onDelete={del}
+          onEdit={obj => openForm(obj)}
           maxAccess={maxAccess}
         />
       </Grow>

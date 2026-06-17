@@ -1,8 +1,9 @@
-import React, { useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { Grid } from '@mui/material'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -11,66 +12,57 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-const ApproverForm = ({ labels, editMode, maxAccess, recordId, store }) => {
+const ApproverForm = ({ labels, maxAccess, record, store, invalidate }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { recordId: grId } = store
-
-  const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.GroupCode.qry
-  })
+  const { platformLabels } = useContext(ControlContext)
+  const { recordId: groupId } = store
 
   const { formik } = useForm({
     initialValues: {
-      codeId: '',
-      groupId: grId
+      codeId: record?.codeId || '',
+      groupId
     },
+    maxAccess,
+    validateOnChange: true,
     validationSchema: yup.object({
       codeId: yup.string().required()
     }),
-    onSubmit: async values => {
-      await postGroups(values)
-    },
-    validateOnChange: true,
-    maxAccess
+    onSubmit: async obj => {
+      await postRequest({
+        extension: DocumentReleaseRepository.GroupCode.set,
+        record: JSON.stringify(obj)
+      })
+      toast.success(!record?.codeId ? platformLabels.Added : platformLabels.Edited)
+      invalidate()
+    }
   })
 
   useEffect(() => {
-    if (recordId) {
-      getGroupId(recordId)
-    }
-  }, [recordId])
-
-  const getGroupId = async () => {
-    const res = await getRequest({
-      extension: DocumentReleaseRepository.GroupCode.get,
-      parameters: `_groupId=${recordId}`
-    })
-    formik.setValues({
-      ...formik.values,
-      codeId: res.record.codeId,
-      groupId: res.record.groupId
-    })
-  }
-
-  const postGroups = async obj => {
-    const res = await postRequest({
-      extension: DocumentReleaseRepository.GroupCode.set,
-      record: JSON.stringify(obj)
-    })
-    toast.success('Record Successfully Updated')
-    invalidate()
-  }
+    ;(async function () {
+      if (record?.codeId) {
+        const res = await getRequest({
+          extension: DocumentReleaseRepository.GroupCode.get,
+          parameters: `_groupId=${groupId}&_codeId=${record.codeId}`
+        })
+        formik.setValues({
+          codeId: res.record.codeId,
+          groupId: res.record.groupId
+        })
+      }
+    })()
+  }, [record?.codeId])
 
   return (
-    <FormShell form={formik} isInfo={false} resourceId={ResourceIds.DRGroups} maxAccess={maxAccess} editMode={editMode}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={DocumentReleaseRepository.ReleaseCode.qry}
-                parameters={`_startAt=${0}&_pageSize=${100}`}
+                parameters={`_startAt=0&_pageSize=100`}
                 name='codeId'
                 label={labels.code}
                 valueField='recordId'
@@ -81,7 +73,7 @@ const ApproverForm = ({ labels, editMode, maxAccess, recordId, store }) => {
                 ]}
                 values={formik.values}
                 required
-                readOnly={editMode}
+                readOnly={!!record?.codeId}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('codeId', newValue?.recordId)
@@ -92,7 +84,7 @@ const ApproverForm = ({ labels, editMode, maxAccess, recordId, store }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
