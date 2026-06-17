@@ -30,7 +30,7 @@ const BranchInfoTab = ({ labels, maxAccess, store, setStore }) => {
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
-      reference: '',
+      branchRef: '',
       name: '',
       scId: null,
       scName: '',
@@ -40,17 +40,21 @@ const BranchInfoTab = ({ labels, maxAccess, store, setStore }) => {
       supervisorId: null,
       supervisorName: '',
       parentId: null,
-      type: null
+      type: null,
+      timeZone: 0
     },
     maxAccess,
     validationSchema: yup.object({
-      reference: yup.string().required(),
+      branchRef: yup.string().required(),
       name: yup.string().required()
     }),
     onSubmit: async obj => {
       const res = await postRequest({
         extension: companyStructureRepository.Branches.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify({
+          ...obj,
+          activeStatus: obj.isInactive ? 1 : -1
+        })
       })
 
       if (!obj.recordId) formik.setFieldValue('recordId', res?.recordId)
@@ -92,15 +96,15 @@ const BranchInfoTab = ({ labels, maxAccess, store, setStore }) => {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
-                name='reference'
+                name='branchRef'
                 label={labels.reference}
-                value={formik.values.reference}
+                value={formik.values.branchRef}
                 required
                 maxLength='10'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                onClear={() => formik.setFieldValue('branchRef', '')}
+                error={formik.touched.branchRef && Boolean(formik.errors.branchRef)}
               />
             </Grid>
             <Grid item xs={12}>

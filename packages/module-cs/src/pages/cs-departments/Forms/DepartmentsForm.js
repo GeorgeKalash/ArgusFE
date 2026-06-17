@@ -40,7 +40,7 @@ export default function DepartmentsForm({ labels, maxAccess, recordId }) {
       ccId: null,
       scId: null,
       type: null,
-      activeStatus: 1,
+      activeStatus: null,
       costCenterId: null,
       isInactive: false
     },
@@ -54,7 +54,10 @@ export default function DepartmentsForm({ labels, maxAccess, recordId }) {
   async function handleSubmit(obj) {
     const response = await postRequest({
       extension: companyStructureRepository.Departments.set,
-      record: JSON.stringify(obj)
+      record: JSON.stringify({
+        ...obj,
+        activeStatus: obj.isInactive ? 1 : -1
+      })
     })
 
     if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
@@ -126,16 +129,16 @@ export default function DepartmentsForm({ labels, maxAccess, recordId }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'firstName', value: 'Name' }
                 ]}
-                valueField='supervisorRef'
+                valueField='managerRef'
                 displayField='name'
                 maxAccess={maxAccess}
                 displayFieldWidth={2}
                 form={formik}
-                valueShow='supervisorRef'
-                secondValueShow='supervisorName'
+                valueShow='managerRef'
+                secondValueShow='managerName'
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('supervisorRef', newValue.reference || '')
-                  formik.setFieldValue('supervisorName', newValue.fullName || '')
+                  formik.setFieldValue('managerRef', newValue.reference || '')
+                  formik.setFieldValue('managerName', newValue.fullName || '')
                   
                   formik.setFieldValue('supervisorId', newValue.recordId || null)
                 }}
