@@ -1019,10 +1019,29 @@ const Table = ({
   useEffect(() => {
     if (!tableSettings || !gridApiRef.current?.columnApi) return
 
+    const hasFlex = columnDefs.some(col => col.flex)
+
+    const stateToApply = hasFlex
+      ? tableSettings.map(col => ({
+          colId: col.colId,
+          pinned: col.pinned,
+          sort: col.sort,
+          sortIndex: col.sortIndex,
+        }))
+      : tableSettings
+
     gridApiRef.current.columnApi.applyColumnState({
-      state: tableSettings,
+      state: stateToApply,
       applyOrder: true
     })
+
+    if (hasFlex) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          gridApiRef.current?.api?.sizeColumnsToFit?.()
+        })
+      })
+    }
   }, [tableSettings])
 
   const onColumnPinned = params => {
@@ -1097,8 +1116,20 @@ const Table = ({
 
   const onColumnResized = params => {
     if (tableName && params?.source === 'uiColumnResized') {
-      const columnState = params.columnApi.getColumnState()
+      const hasFlex = columnDefs.some(col => col.flex)
+      
+      if (hasFlex) {
+        const columnState = params.columnApi.getColumnState().map(col => ({
+          colId: col.colId,
+          pinned: col.pinned,
+          sort: col.sort,
+          sortIndex: col.sortIndex,
+        }))
+        saveToDB(storeName, tableName, columnState)
+        return
+      }
 
+      const columnState = params.columnApi.getColumnState()
       saveToDB(storeName, tableName, columnState)
     }
   }
