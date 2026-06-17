@@ -61,8 +61,9 @@ export default function DimValuesForm({ labels, maxAccess, recordId, dimValue })
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <CustomNumberField
+              <CustomTextField
                 name='id'
+                type='number'
                 label={labels.id}
                 value={formik.values.id}
                 required

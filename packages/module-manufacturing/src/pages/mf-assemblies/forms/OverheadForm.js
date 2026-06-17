@@ -96,7 +96,7 @@ export default function OverheadForm({ labels, maxAccess, store, setTotalOverhea
   })
 
   const totAmount = formik.values.items.reduce((amountSum, row) => {
-    const amountValue = parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0
+    const amountValue = row?.amount || 0
 
     return amountSum + amountValue
   }, 0)

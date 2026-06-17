@@ -188,7 +188,6 @@ export const ResourceIds = {
   PriceLevels: 51101,
   ProductionRequestLog: 42321,
   CashCountTransaction: 37301,
-  ExchangeRates: 32103,
   CbBankAccounts: 33105,
   Terrapay: 36307,
   CashNote: 37101,

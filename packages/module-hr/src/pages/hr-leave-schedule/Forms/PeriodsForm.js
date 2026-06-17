@@ -7,7 +7,7 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
@@ -18,7 +18,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.LeavePeriod.qry
+    endpointId: LeaveManagementRepository.LeavePeriod.qry
   })
 
   const { formik } = useForm({
@@ -44,7 +44,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
       carryOver: yup.number().required(),
       accrualActivation: yup.number().required(),
       carryOverMax: yup.number().when('carryOver', {
-        is: value => value != 1,
+        is: value => value != 1 && value != 3,
         then: schema => schema.required(),
         otherwise: schema => schema.nullable()
       })
@@ -54,7 +54,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
 
       if (!values.lsId && !values.seqNo) {
         const listRes = await getRequest({
-          extension: LoanManagementRepository.LeavePeriod.qry,
+          extension: LeaveManagementRepository.LeavePeriod.qry,
           parameters: `_lsId=${recordId}`
         })
 
@@ -69,7 +69,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
       }
 
       postRequest({
-        extension: LoanManagementRepository.LeavePeriod.set,
+        extension: LeaveManagementRepository.LeavePeriod.set,
         record: JSON.stringify({
           ...values,
           lsId: recordId,
@@ -92,7 +92,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
   useEffect(() => {
     ;(async function () {
       const listRes = await getRequest({
-        extension: LoanManagementRepository.LeavePeriod.qry,
+        extension: LeaveManagementRepository.LeavePeriod.qry,
         parameters: `_lsId=${recordId}`
       })
 
@@ -104,7 +104,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
 
       if (recordId && seqNo) {
         const res = await getRequest({
-          extension: LoanManagementRepository.LeavePeriod.get,
+          extension: LeaveManagementRepository.LeavePeriod.get,
           parameters: `_lsId=${recordId}&_seqNo=${seqNo}`
         })
         formik.setValues({
@@ -238,7 +238,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
               maxLength={4}
               allowNegative={false}
               decimalScale={0}
-              readOnly={formik.values.carryOver == 1}
+              readOnly={formik.values.carryOver == 1 || formik.values.carryOver == 3}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('carryOverMax', '')}
               error={formik.touched.carryOverMax && Boolean(formik.errors.carryOverMax)}

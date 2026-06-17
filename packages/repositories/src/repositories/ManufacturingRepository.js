@@ -97,8 +97,7 @@ export const ManufacturingRepository = {
     qry: service + 'qryCLS',
     set: service + 'setCLS',
     get: service + 'getCLS',
-    del: service + 'delCLS',
-    snapshot: service + 'qryCLS'
+    del: service + 'delCLS'
   },
   ProductionStandard: {
     qry: service + 'qrySTD',
@@ -274,7 +273,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotPO',
     post: service + 'postPO',
     gen: service + 'genPO',
-    close: service + 'closePO'
+    close: service + 'closePO',
+    reopen: service + 'reopenPO',
   },
   BillOfMaterials: {
     get: service + 'getBMA',

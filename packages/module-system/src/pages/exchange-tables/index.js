@@ -10,8 +10,8 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import ExchangeTablesForm from './forms/ExchangeTablesForm'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import ExchangeTablesWindow from './Windows/ExchangeTableWindow'
 
 const ExchangeTables = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,7 +31,7 @@ const ExchangeTables = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     refetch,
     paginationParameters,
     access
@@ -48,17 +48,17 @@ const ExchangeTables = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'currencyRef',
-      headerName: _labels.currencyId,
+      headerName: labels.currencyId,
       flex: 1
     }
   ]
@@ -72,28 +72,26 @@ const ExchangeTables = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: MultiCurrencyRepository.ExchangeTable.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: MultiCurrencyRepository.ExchangeTable.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
     stack({
-      Component: ExchangeTablesForm,
+      Component: ExchangeTablesWindow,
       props: {
-        labels: _labels,
-        recordId: recordId ? recordId : null,
+        labels,
+        recordId: recordId || null,
         maxAccess: access,
-        invalidate: invalidate
+        invalidate
       },
-      width: 600,
-      height: 450,
-      title: _labels.ExchangeTables
+      width: 650,
+      height: 500,
+      title: labels.ExchangeTables
     })
   }
 
@@ -104,6 +102,7 @@ const ExchangeTables = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

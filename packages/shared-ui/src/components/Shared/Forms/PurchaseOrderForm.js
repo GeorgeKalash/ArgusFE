@@ -59,6 +59,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function PurchaseOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -202,9 +203,9 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['items'],
-    initialValues: initialValues,
+    initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -252,7 +253,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
     return res
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     const dtd = await getDTD(recordId)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId || defPlId)
   }
@@ -309,7 +310,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
         }
         if (newRow.isInactive) {
           update({
-            ...formik.initialValues.items[0],
+            ...initialValues.items[0],
             id: newRow.id
           })
           stackError({
@@ -349,7 +350,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
           const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
-          const qtyInBase = newRow?.qty * filteredItems?.muQty
+          const qtyInBase = filteredItems?.muQty ? newRow?.qty * filteredItems?.muQty : newRow?.qty
 
           update({
             qtyInBase,
@@ -531,7 +532,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
   ]
 
   function checkMinMaxAmount(amount, type, modType) {
-    let currentAmount = parseFloat(amount) || 0
+    let currentAmount = amount || 0
 
     if (type === modType) {
       if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
@@ -567,7 +568,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
       }
     })
   }
-  console.log(formik)
 
   const confirmation = () => {
     stack({
@@ -762,19 +762,23 @@ export default function PurchaseOrderForm({ recordId, window }) {
       })
     )
 
-    formik.setValues({
-      recordId: puTrxHeader.recordId || null,
-      dtId: puTrxHeader.dtId || null,
-      currentDiscount:
-        puTrxHeader?.tdType == 1 || puTrxHeader?.tdType == null ? puTrxHeader?.tdAmount : puTrxHeader?.tdPct,
-      header: {
-        ...formik.values.header,
-        ...puTrxHeader,
-        amount: parseFloat(puTrxHeader?.amount).toFixed(2),
-        date: formatDateFromApi(puTrxHeader?.date),
-        deliveryDate: puTrxHeader?.deliveryDate && formatDateFromApi(puTrxHeader?.deliveryDate)
-      },
-      items: modifiedList.length > 0 ? modifiedList : formik?.initialValues?.items
+    formik.resetForm({
+      values: {
+        recordId: puTrxHeader.recordId || null,
+        dtId: puTrxHeader.dtId || null,
+        currentDiscount:
+          puTrxHeader?.tdType == 1 || puTrxHeader?.tdType == null ? puTrxHeader?.tdAmount : puTrxHeader?.tdPct,
+        header: {
+          ...formik.values.header,
+          ...puTrxHeader,
+          amount: roundTo(puTrxHeader?.amount),
+          date: formatDateFromApi(puTrxHeader?.date),
+          weight: puTrxHeader?.weight || 0,
+          volume: puTrxHeader?.volume || 0,
+          deliveryDate: puTrxHeader?.deliveryDate && formatDateFromApi(puTrxHeader?.deliveryDate)
+        },
+        items: modifiedList.length > 0 ? modifiedList : initialValues?.items
+      }
     })
   }
 
@@ -952,7 +956,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
     if (cycleButtonState.value == 1) {
       currentPctAmount = currentDiscount < 0 || currentDiscount > 100 ? 0 : currentDiscount
-      currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(subtotal)) / 100
+      currentTdAmount = (currentPctAmount * subtotal) / 100
       currentDiscountAmount = currentPctAmount
 
       formik.setFieldValue('header.tdAmount', currentTdAmount)
@@ -960,7 +964,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       formik.setFieldValue('currentDiscount', currentPctAmount)
     } else {
       currentTdAmount = currentDiscount < 0 || subtotal < currentDiscount ? 0 : currentDiscount
-      currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(subtotal)) * 100
+      currentPctAmount = (currentTdAmount / subtotal) * 100
       currentDiscountAmount = currentTdAmount
 
       formik.setFieldValue('header.tdPct', currentPctAmount)
@@ -996,11 +1000,9 @@ export default function PurchaseOrderForm({ recordId, window }) {
       mdValue: newRow?.mdValue,
       baseLaborPrice: 0,
       totalWeightPerG: newRow?.totalWeightPerG || 0,
-      tdPct: formik?.values?.header?.tdPct || 0,
+      tdPct: roundTo(formik?.values?.header?.tdPct) || 0,
       dirtyField: dirtyField
     })
-
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
 
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
@@ -1011,11 +1013,11 @@ export default function PurchaseOrderForm({ recordId, window }) {
       extendedPrice: itemPriceRow?.extendedPrice,
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: itemPriceRow?.vatAmount || 0,
-      tdPct: formik?.values?.header?.tdPct,
+      tdPct: roundTo(formik?.values?.header?.tdPct),
       taxDetails: formik.values.header.isVattable === true ? newRow.taxDetails : null
     })
 
-    const qtyInBase = itemPriceRow?.qty * newRow?.muQty
+    const qtyInBase = newRow?.muQty ? itemPriceRow?.qty * newRow?.muQty : itemPriceRow?.qty
 
     let commonData = {
       ...newRow,
@@ -1050,15 +1052,15 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
   const subTotal = getSubtotal(parsedItemsArray)
 
-  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.header.miscAmount)
+  const miscValue = formik.values.miscAmount == 0 ? 0 : formik.values.header.miscAmount
 
   const _footerSummary = getFooterTotals(parsedItemsArray, {
     totalQty: 0,
     totalWeight: 0,
     totalVolume: 0,
     sumVat: 0,
-    sumExtended: parseFloat(subTotal),
-    tdAmount: parseFloat(formik.values.header.tdAmount),
+    sumExtended: subTotal,
+    tdAmount: formik.values.header.tdAmount,
     net: 0,
     miscAmount: miscValue || 0
   })
@@ -1072,28 +1074,27 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
-      tdAmount: parseFloat(currentDiscount),
+      tdAmount: currentDiscount,
       tdPlain: typeChange == 1,
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
       currentDiscount: currentDiscount,
       hiddenTdPct: tdPct,
-      hiddenTdAmount: parseFloat(tdAmount),
+      hiddenTdAmount: tdAmount,
       typeChange: typeChange
     })
 
-    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
+    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? roundTo(_discountObj?.hiddenTdAmount) : 0)
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
-    formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct || 0)
+    formik.setFieldValue('currentDiscount', roundTo(_discountObj?.currentDiscount || 0))
+    formik.setFieldValue('header.tdPct', roundTo(_discountObj?.hiddenTdPct) || 0)
 
-    return _discountObj?.hiddenTdPct
+    return roundTo(_discountObj?.hiddenTdPct || 0)
   }
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
-      if (item?.taxDetails?.length > 0) item.taxDetails = [item.taxDetails[0]]
       if (!item.requestId) {
         const vatCalcRow = getVatCalc({
           priceType: item?.priceType,
@@ -1101,7 +1102,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
           qty: item?.qty,
           weight: item?.weight,
           extendedPrice: item?.extendedPrice,
-          baseLaborPrice: parseFloat(item?.baseLaborPrice),
+          baseLaborPrice: item?.baseLaborPrice,
           vatAmount: item?.vatAmount,
           tdPct: tdPct,
           taxDetails: formik.values.header.isVattable === true ? item.taxDetails : null
@@ -1124,20 +1125,20 @@ export default function PurchaseOrderForm({ recordId, window }) {
   }
 
   useEffect(() => {
-    formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
-    formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
-    formik.setFieldValue('header.volume', parseFloat(totalVolume).toFixed(2))
-    formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
-    formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
+    formik.setFieldValue('header.qty', roundTo(totalQty))
+    formik.setFieldValue('header.weight', roundTo(totalWeight))
+    formik.setFieldValue('header.volume', roundTo(totalVolume))
+    formik.setFieldValue('header.amount', roundTo(amount))
+    formik.setFieldValue('header.subtotal', roundTo(subtotal))
+    formik.setFieldValue('header.vatAmount', roundTo(vatAmount))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
     if (reCal) {
       let currentTdAmount =
         formik.values.header.tdType === 2
-          ? (parseFloat(formik.values.header.tdPct) * parseFloat(subtotal)) / 100
-          : parseFloat(formik.values.header.tdAmount)
+          ? (formik.values.header.tdPct * subtotal) / 100
+          : formik.values.header.tdAmount
 
       recalcGridVat(
         formik.values.header.tdType,
@@ -1156,7 +1157,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
   }, [])
 
   useEffect(() => {
-    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+    if (formik.values?.header.dtId && !recordId) onChangeDT(formik.values?.header.dtId)
   }, [formik.values?.header.dtId])
 
   useEffect(() => {
@@ -1176,8 +1177,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
     const unitPriceLookup = response.list?.reduce((acc, data) => {
       acc[data.requestSeqNo] = {
-        unitPrice: parseFloat(data.unitPrice)?.toFixed(2),
-        basePrice: parseFloat(data.unitPrice)?.toFixed(2)
+        unitPrice: roundTo(data.unitPrice),
+        basePrice: roundTo(data.unitPrice)
       }
 
       return acc
@@ -1297,6 +1298,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseOrder}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     readOnly={editMode}
                     label={labels.documentType}
@@ -1586,7 +1588,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik?.values?.items}
-            initialValues={formik.initialValues.items[0]}
+            initialValues={initialValues.items[0]}
             error={formik.errors.items}
             allowDelete={!isClosed}
             name='items'
@@ -1613,7 +1615,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                 readOnly={isClosed}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.description', e.target.value)}
-                onClear={() => formik.setFieldValue('header.description', '')}
+                onClear={() => formik.setFieldValue('header.description', null)}
                 error={formik.touched.header?.description && Boolean(formik.errors.header?.description)}
               />
             </Grid>
@@ -1656,7 +1658,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                   iconKey={cycleButtonState.text}
                   handleButtonClick={handleButtonClick}
                   onChange={e => {
-                    let discount = Number(e.target.value.replace(/,/g, ''))
+                    let discount = e.target.value
                     if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
                       if (discount < 0 || discount > 100) discount = 0
                       formik.setFieldValue('header.tdPct', discount)
@@ -1669,16 +1671,16 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     formik.setFieldValue('currentDiscount', discount)
                   }}
                   onBlur={async e => {
-                    let discountAmount = Number(e.target.value.replace(/,/g, ''))
-                    let tdPct = Number(e.target.value.replace(/,/g, ''))
-                    let tdAmount = Number(e.target.value.replace(/,/g, ''))
+                    let discountAmount = e.target.value
+                    let tdPct = e.target.value
+                    let tdAmount = e.target.value
                     if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
-                      tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
-                      formik.setFieldValue('header.tdPct', tdPct)
+                      tdPct = (discountAmount / subtotal) * 100
+                      formik.setFieldValue('header.tdPct', roundTo(tdPct))
                     }
                     if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
-                      tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
-                      formik.setFieldValue('header.tdAmount', tdAmount)
+                      tdAmount = (discountAmount * subtotal) / 100
+                      formik.setFieldValue('header.tdAmount', roundTo(tdAmount))
                     }
                     setReCal(true)
                     await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)

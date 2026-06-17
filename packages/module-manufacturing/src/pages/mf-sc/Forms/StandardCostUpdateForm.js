@@ -40,7 +40,7 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
   })
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {
@@ -161,13 +161,15 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
       record?.header?.recordId || 0
     )
 
-    formik.setValues({
-      recordId: record?.header?.recordId,
-      header: {
-        ...(record?.header || {}),
-        date: formatDateFromApi(record?.header?.date),
-      },
-      items
+    formik.resetForm({
+      values: {
+        recordId: record?.header?.recordId,
+        header: {
+          ...(record?.header || {}),
+          date: formatDateFromApi(record?.header?.date),
+        },
+        items
+      }
     })
 
     setReCal(false)
@@ -195,7 +197,7 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
   ]
 
   const totalAmount = reCal ? (formik.values?.items || []).reduce((sum, item) => {
-      return sum + (parseFloat(item?.value) || 0)
+      return sum + item?.value
     }, 0) 
     : (formik.values?.header?.amount || 0)
 

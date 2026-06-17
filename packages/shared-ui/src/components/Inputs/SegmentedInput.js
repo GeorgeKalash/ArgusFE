@@ -4,14 +4,22 @@ import { useContext, useEffect, useState } from 'react'
 import inputs from './Inputs.module.css'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
-const SegmentedInput = ({ name, value, onChange, label, error, required, readOnly }) => {
+const SegmentedInput = ({ name, value, onChange, label, error, required, readOnly, mask: providedMask }) => {
   const [mask, setMask] = useState('')
   const { systemDefaults } = useContext(DefaultsContext)
 
   const handleInputChange = event => {
     if (!readOnly) {
-      const { value } = event.target
-      onChange({ value, segments: value.split('-') })
+      let { value } = event.target
+
+      if (!/\d/.test(value)) {
+        value = ''
+      }
+
+      onChange({
+        value,
+        segments: value ? value.split('-') : []
+      })
     }
   }
 
@@ -25,6 +33,11 @@ const SegmentedInput = ({ name, value, onChange, label, error, required, readOnl
   }
 
   const getSegmentsValues = () => {
+    if (providedMask) {
+      setMask(providedMask)
+      return
+    }
+
     if (value) {
       setMask(
         createMaskFromSegments(
@@ -42,13 +55,14 @@ const SegmentedInput = ({ name, value, onChange, label, error, required, readOnl
           value: parseInt(obj.value)
         }))
         .filter(obj => obj.value)
+
       setMask(createMaskFromSegments(defaultSegments))
     }
   }
 
   useEffect(() => {
     getSegmentsValues()
-  }, [value])
+  }, [value, providedMask])
 
   return (
     <TextField

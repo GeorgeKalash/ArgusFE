@@ -45,41 +45,43 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     endpointId: DeliveryRepository.Trip.page
   })
 
-  const { formik } = useForm({
-    initialValues: {
+  const initialValues = {
+    recordId: null,
+    header: {
       recordId: null,
-      header: {
-        recordId: null,
-        reference: '',
-        plantId,
-        vehicleId: null,
-        driverId: null,
-        date: new Date(),
-        departureTime: new Date(),
-        departureTimeField: null,
-        arrivalTime: null,
-        arrivalTimeField: null,
-        notes: '',
-        dtId: null,
-        status: 1,
-        capacityVolume: null,
-        wip: 1
-      },
-      tripOrders: [
-        {
-          id: 1,
-          soRef: null,
-          soId: null,
-          soDate: null,
-          clientName: null,
-          soVolume: null,
-          soWeight: null,
-          soWipStatusName: null
-        }
-      ]
+      reference: '',
+      plantId,
+      vehicleId: null,
+      driverId: null,
+      date: new Date(),
+      departureTime: new Date(),
+      departureTimeField: null,
+      arrivalTime: null,
+      arrivalTimeField: null,
+      notes: '',
+      dtId: null,
+      status: 1,
+      capacityVolume: null,
+      wip: 1
     },
+    tripOrders: [
+      {
+        id: 1,
+        soRef: null,
+        soId: null,
+        soDate: null,
+        clientName: null,
+        soVolume: null,
+        soWeight: null,
+        soWipStatusName: null
+      }
+    ]
+  }
+
+  const { formik } = useForm({
+    initialValues, 
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validationSchema: yup.object({
       header: yup.object({
         departureTime: yup.string().required(),
@@ -101,12 +103,12 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
       const data = {
         header,
-        tripOrders: formik.values.tripOrders?.some(order => order.soId)
-          ? formik.values.tripOrders.map((order, index) => ({
-              ...order,
-              id: index + 1
-            }))
-          : []
+        tripOrders: formik.values.tripOrders
+          ?.filter(order => order.soId)
+          .map((order, index) => ({
+            ...order,
+            id: index + 1
+          }))
       }
 
       const response = await postRequest({
@@ -133,13 +135,13 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   }
 
   const totalVol = formik.values.tripOrders.reduce((volSum, row) => {
-    const volValue = parseFloat(row.soVolume) || 0
+    const volValue = row.soVolume || 0
 
     return volSum + volValue
   }, 0)
 
   const totalWeight = formik.values.tripOrders.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row.soWeight) || 0
+    const weightValue = row.soWeight || 0
 
     return weightSum + weightValue
   }, 0)
@@ -153,7 +155,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     const formattedDepDate = formatDateFromApi(res.record.header.departureTime)
     const formattedArrDate = formatDateFromApi(res.record.header.arrivalTime)
 
-     let tripOrders = res.record?.tripOrders ? await Promise.all(
+     let tripOrders = res.record?.tripOrders?.length ? await Promise.all(
       (res.record?.tripOrders || []).map((item, index) => {
         return {
           ...item,
@@ -161,19 +163,21 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           soDate: formatDateFromApi(item.soDate)
         }
       })
-    ) : formik.initialValues.tripOrders
+    ) : initialValues.tripOrders
 
-    formik.setValues({
-      recordId: res.record.header.recordId,
-      header: {
-        ...res.record.header,
-        date: formatDateFromApi(res.record.header.date),
-        departureTime: formattedDepDate,
-        departureTimeField: formattedDepDate ? dayjs(dayjs(formattedDepDate), 'hh:mm A') : null,
-        arrivalTime: formattedArrDate,
-        arrivalTimeField: formattedArrDate ? dayjs(dayjs(formattedArrDate), 'hh:mm A') : null
-      },
-      tripOrders
+    formik.resetForm({
+      values: {
+        recordId: res.record.header.recordId,
+        header: {
+          ...res.record.header,
+          date: formatDateFromApi(res.record.header.date),
+          departureTime: formattedDepDate,
+          departureTimeField: formattedDepDate ? dayjs(dayjs(formattedDepDate), 'hh:mm A') : null,
+          arrivalTime: formattedArrDate,
+          arrivalTimeField: formattedArrDate ? dayjs(dayjs(formattedArrDate), 'hh:mm A') : null
+        },
+        tripOrders
+      }
     })
   }
 
@@ -279,12 +283,15 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         mapping: [
           { from: 'recordId', to: 'soId' },
           { from: 'reference', to: 'soRef' },
-          { from: 'date', to: 'date' },
-          { from: 'clientId', to: 'clientId' },
+          { from: 'date', to: 'soDate' },
           { from: 'clientRef', to: 'clientRef' },
           { from: 'clientName', to: 'clientName' },
           { from: 'volume', to: 'soVolume' },
+          { from: 'weight', to: 'soWeight' },
+          { from: 'qty', to: 'soQty' },
           { from: 'szName', to: 'szName' },
+          { from: 'szId', to: 'szId' },
+          { from: 'szRef', to: 'szRef' },
           { from: 'wipName', to: 'soWipStatusName' }
         ],
         columnsInDropDown: [{ key: 'reference', value: 'Reference' }],
@@ -292,7 +299,8 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       },
       onChange({ row: { update, newRow } }) {
         update({
-          soDate: newRow.date ? formatDateFromApi(newRow?.date) : null
+          soDate: newRow.soDate ? formatDateFromApi(newRow.soDate) : null,
+          tripId: formik.values.recordId
         })
       }
     },
@@ -557,6 +565,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
             }}
             value={formik?.values?.tripOrders}
             error={formik?.errors?.tripOrders}
+            initialValue={initialValues.tripOrders[0]}
             columns={columns}
             maxAccess={maxAccess}
             allowDelete={!isClosed}
