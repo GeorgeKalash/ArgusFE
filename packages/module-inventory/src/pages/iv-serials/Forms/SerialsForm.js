@@ -223,7 +223,7 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
                     maxAccess={maxAccess}
                     readOnly={editMode}
                     maxLength={10}
-                    decimalScale={3}
+                    decimalScale={2}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('weight', 0)}
                     error={formik.touched.weight && Boolean(formik.errors.weight)}

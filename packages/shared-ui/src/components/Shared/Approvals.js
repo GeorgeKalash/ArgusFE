@@ -39,8 +39,8 @@ const Approvals = props => {
     },
     ,
     {
-      field: 'date',
-      headerName: _labels.date,
+      field: 'responseDate',
+      headerName: _labels.responseDate,
       flex: 1,
       type: 'date'
     },
