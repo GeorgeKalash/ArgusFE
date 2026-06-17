@@ -8,6 +8,12 @@ export const companyStructureRepository = {
     set: service + 'setBR',
     page: service + 'pageBR',
   },
+  BranchLegalRef: {
+    set: service + 'setBL',
+    qry: service + 'qryBL',
+    get: service + 'getBL',
+    del: service + 'delBL'
+  },
   CompanyPositions: {
     qry: service + 'qryPO',
     get: service + 'getPO',

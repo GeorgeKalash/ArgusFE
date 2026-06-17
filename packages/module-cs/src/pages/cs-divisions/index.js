@@ -27,6 +27,12 @@ const Divisions = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=30&_sortBy=name`
     })
 
+    response.list = (response?.list || []).map(item => ({
+      ...item,
+      activeStatus: item?.activeStatus ? 'True' : 'False'
+    }))
+    
+
     return { ...response, _startAt }
   }
 

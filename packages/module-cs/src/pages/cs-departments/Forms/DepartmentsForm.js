@@ -94,7 +94,7 @@ export default function DepartmentsForm({ labels, maxAccess, recordId }) {
                 label={labels.reference}
                 value={formik.values.departmentRef}
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('departmentRef', '')}
                 error={formik.touched.departmentRef && Boolean(formik.errors.departmentRef)}
@@ -106,7 +106,7 @@ export default function DepartmentsForm({ labels, maxAccess, recordId }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                maxLength='50'
+                maxLength='200'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}

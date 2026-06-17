@@ -71,7 +71,7 @@ export default function PositionsForm({ labels, maxAccess, recordId }) {
                 label={labels.reference}
                 value={formik.values.positionRef}
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('positionRef', '')}
                 error={formik.touched.positionRef && Boolean(formik.errors.positionRef)}
@@ -96,6 +96,7 @@ export default function PositionsForm({ labels, maxAccess, recordId }) {
                 label={labels.description}
                 value={formik.values.description}
                 maxAccess={maxAccess}
+                maxLength='510'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('description', '')}
                 error={formik.touched.description && Boolean(formik.errors.description)}
