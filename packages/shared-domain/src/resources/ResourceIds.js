@@ -314,10 +314,6 @@ export const ResourceIds = {
   MaterialsTransfer: 41208,
   InventoryTransaction: 41209,
   SalesDefaults: 51114,
-  DivisionFilter: 70101,
-  BranchFilter: 70102,
-  CompanyPosition: 70103,
-  DepartmentFilter: 70104,
   HRDocTypeFilter: 71104,
   SalaryChangeReasonFilter: 71105,
   EmploymentStatusFilter: 71107,
@@ -638,6 +634,10 @@ export const ResourceIds = {
   PayPeriod: 75108,
   EmployeeMissingDetails: 71407,
   ChangeVendor: 50615,
+  CompanyPositions: 70103,
+  Divisions: 70101,
+  Branches: 70102,
+  Departments: 70104,
 
   // GL
   GLSalesInvoice: 51604,
