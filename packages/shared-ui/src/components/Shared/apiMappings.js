@@ -651,6 +651,13 @@ export const apiMappings = {
       { key: 'lineName', value: 'Production Line' }
     ]
   },
+  [ResourceIds.FoCastings]: {
+    type: LOOKUP,
+    endpoint: FoundryRepository.Casting.snapshot,
+    firstField: 'reference',
+    valueOnSelection: 'recordId',
+    secondDisplayField: false
+  },
   [ResourceIds.PointOfSale]: {
     type: COMBOBOX,
     endpoint: PointofSaleRepository.PointOfSales.qry,
