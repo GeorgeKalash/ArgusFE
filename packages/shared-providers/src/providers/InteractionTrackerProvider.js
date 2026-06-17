@@ -7,6 +7,20 @@ export const InteractionTrackerProvider = ({ children }) => {
   const [interactions, setInteractions] = useState([])
   const [fieldStates, setFieldStates] = useState([])
   
+  const normalized = value => {
+    if (value instanceof Date) return value.dateOnly ? value.toDateString() : value.valueOf()
+    if (Array.isArray(value)) return value.map(normalized)
+    if (value && typeof value === 'object')
+      return Object.fromEntries(
+        Object.entries(value)
+          .filter(([, v]) => v !== null && v !== undefined)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => [k, normalized(v)])
+      )
+    
+    return value
+  }
+
   const track = useCallback((pageId, source) => {
     setInteractions(prev => {
       const safePrev = Array.isArray(prev) ? prev : []
@@ -48,65 +62,34 @@ export const InteractionTrackerProvider = ({ children }) => {
   const trackFieldState = useCallback((pageId, fieldValues, initials) => {
     if (!pageId || !fieldValues) return
 
-    let pageBecameDirty = false
     setFieldStates(prev => {
       const safePrev = Array.isArray(prev) ? prev : []
       const existingItem = safePrev.find(item => item.pageId === pageId)
-      const initialValues = initials || existingItem.initialValues
+      const initialValues = initials ?? existingItem?.initialValues ?? fieldValues
       const isDirty = !isEqual(initialValues, fieldValues)
+
       if (!existingItem) {
-        if (isDirty) track(pageId, 'gridToolbar')
-        return [
-          {
-            pageId,
-            initialValues: initials || fieldValues,
-            currentValues: fieldValues,
-            isDirty
-          }
-        ]
+        if (isDirty) {
+          setInteractions(p => [...p, { pageId, source: ['gridToolbar'] }])
+        }
+        return [...safePrev, { pageId, initialValues, currentValues: fieldValues, isDirty }]
       }
 
-      pageBecameDirty = isDirty
-
       if (!isDirty) {
-        return safePrev.map(item =>
-          item.pageId === pageId
-            ? {
-                ...item,
-                 initialValues: initials || fieldValues,
-                currentValues: fieldValues,
-                isDirty: false
-              }
-            : item
-        )
+        setInteractions(p => p.filter(item => item.pageId !== pageId))
+      } else {
+        setInteractions(p => {
+          if (p.find(item => item.pageId === pageId)) return p
+          return [...p, { pageId, source: ['gridToolbar'] }]
+        })
       }
 
       return safePrev.map(item =>
         item.pageId === pageId
-          ? {
-              ...item,
-              currentValues: fieldValues,
-              isDirty
-            }
+          ? { ...item, currentValues: fieldValues, isDirty }
           : item
       )
     })
-
-    if (pageBecameDirty) {
-      setInteractions(prev => {
-        const safePrev = Array.isArray(prev) ? prev : []
-        const existingItem = safePrev.find(item => item.pageId === pageId)
-        if (existingItem) return safePrev
-
-        return [
-          ...safePrev,
-          {
-            pageId,
-            source: ['ToolbarSections']
-          }
-        ]
-      })
-    }
   }, [])
   
   const getPageState = useCallback(

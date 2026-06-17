@@ -126,6 +126,8 @@ const ReportViewer = ({ resourceId }) => {
       ...prev,
       selectedFormat: exportFormat[nextIndex]
     }))
+
+    return exportFormat[nextIndex]?.key
   }
 
   return (
@@ -160,6 +162,9 @@ const ReportViewer = ({ resourceId }) => {
               <Grid item>
                 <CustomButton
                   onClick={cycleFormat}
+                  name='formatBtn'
+                  initialValue={exportFormat[0]?.key}
+                  value={report.selectedFormat?.key}
                   image={`${report.selectedFormat?.value || 'PDF'}.png`}
                   disabled={exportFormat.length == 0 || !report.selectedReport}
                 />

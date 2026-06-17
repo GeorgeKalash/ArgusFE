@@ -12,19 +12,7 @@ import { LockedScreensContext } from '../LockedScreensContext'
 import styles from './TabsProvider.module.css'
 import { useInteractionTracker } from '../InteractionTrackerProvider'
 import { ControlContext } from '../ControlContext'
-
-const overlayStyle = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 9999
-}
+import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
 
 const modalStyle = {
   background: '#fff',
@@ -45,14 +33,6 @@ const headerStyle = {
   justifyContent: 'space-between',
   alignItems: 'center',
   fontWeight: 'bold'
-}
-
-const closeButtonStyle = {
-  background: 'transparent',
-  border: 'none',
-  color: '#fff',
-  fontSize: 16,
-  cursor: 'pointer'
 }
 
 const messageStyle = {
@@ -196,6 +176,28 @@ const TabsProvider = ({ children }) => {
   const userId = userDataParsed?.userId
   const open = Boolean(menuPosition)
   const hasHomeTab = Boolean(dashboardId)
+  const { settings } = useSettings()
+  const { navCollapsed } = settings
+  const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 100
+  const menuWidth =
+      screenWidth <= 768 ? 180 :
+      screenWidth <= 1024 ? 200 :
+      screenWidth <= 1280 ? 210 :
+      screenWidth <= 1366 ? 220 :
+      screenWidth <= 1600 ? 240 : 300
+
+  const getOverlayStyle = () => ({
+    position: 'fixed',
+    top: 0,
+    left: navCollapsed ? 10 : menuWidth,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999
+  })
 
   const normalizeRoute = useCallback(route => {
     if (!route) return ''
@@ -921,7 +923,7 @@ const TabsProvider = ({ children }) => {
       </Menu>
 
       {closeDialog.open && (
-        <div style={overlayStyle}>
+        <div style={getOverlayStyle()}>
           <div style={modalStyle}>
             <div style={headerStyle}>
               {platformLabels?.Confirmation}

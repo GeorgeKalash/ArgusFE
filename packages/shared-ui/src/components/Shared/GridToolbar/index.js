@@ -48,6 +48,7 @@ const GridToolbar = ({
   const trackInteraction = usePageInteraction()
   const initialFieldValuesRef = useRef(null)
   const previousFieldValuesRef = useRef(null)
+  const currentValuesRef = useRef(null)
 
   const extractFieldValues = React.useCallback(element => {
     const fields = new Map()
@@ -75,28 +76,45 @@ const GridToolbar = ({
 
   const attachTrackingToClicks = React.useCallback(node => {
     if (!React.isValidElement(node)) return node
-
-    const { children, onClick } = node.props || {}
-
+    const { children, onClick, initialValue, value, name } = node.props || {}
     const newProps = {}
 
     if (onClick) {
       newProps.onClick = (...args) => {
-        trackInteraction('gridToolbar')
+        const result = onClick(...args)
 
-        return onClick(...args)
+        if (value !== undefined && initialValue !== undefined) {
+          const leftValues = extractFieldValues(leftSection)
+          const middleValues = extractFieldValues(middleSection)
+          const rightValues = extractFieldValues(rightSection)
+
+          const currentValues = {
+            ...leftValues,
+            ...middleValues,
+            ...rightValues,
+            ...(name ? { [name]: value } : { value })
+          }
+
+          const initialValues = {
+            ...initialFieldValuesRef.current,
+            ...(name ? { [name]: initialValue } : { value: initialValue })
+          }
+
+          trackInteraction.trackPageFields(initialValues, currentValues)
+        } else {
+          trackInteraction('gridToolbar')
+        }
+
+        return result
       }
     }
 
     if (children) {
-      newProps.children = React.Children.map(
-        children,
-        attachTrackingToClicks
-      )
+      newProps.children = React.Children.map(children, attachTrackingToClicks)
     }
 
     return React.cloneElement(node, newProps)
-  }, [trackInteraction])
+  }, [trackInteraction, leftSection, middleSection, rightSection, extractFieldValues])
 
   const trackedLeftSection = useMemo(() => attachTrackingToClicks(leftSection), [leftSection, attachTrackingToClicks])
   const trackedMiddleSection = useMemo(() => attachTrackingToClicks(middleSection), [middleSection, attachTrackingToClicks])
@@ -126,7 +144,6 @@ const GridToolbar = ({
 
       return
     }
-    
     if (!isEqual(lastValues, currentValues)) {
       previousFieldValuesRef.current = currentValues
       trackInteraction.trackPageFields(currentValues, initialFieldValuesRef.current)
