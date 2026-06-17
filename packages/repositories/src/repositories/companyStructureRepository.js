@@ -29,5 +29,6 @@ export const companyStructureRepository = {
     del: service + 'delDE',
     set: service + 'setDE',
     page: service + 'pageDE',
+    snapshot: service + 'snapshotDE'
   }
 }
