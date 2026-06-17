@@ -58,7 +58,7 @@ const LegalReferenceTab = ({ labels, maxAccess, store }) => {
 
     return await getRequest({
       extension: companyStructureRepository.BranchLegalRef.qry,
-      parameters: `_filter=&_branchId=${recordId}`
+      parameters: `_branchId=${recordId}`
     })
   }
 

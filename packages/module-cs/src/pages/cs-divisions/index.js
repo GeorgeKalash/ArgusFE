@@ -13,7 +13,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
 import DivisionsForm from './Forms/DivisionsForm'
 
-
 const Divisions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)

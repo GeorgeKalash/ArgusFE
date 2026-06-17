@@ -28,7 +28,6 @@ export default function LegalReferenceForm({ labels, maxAccess, branchId, record
     },
     maxAccess,
     validationSchema: yup.object({
-      goName: yup.string().required(),
       reference: yup.string().required(),
       releaseDate: yup.date().required(),
       expiryDate: yup.date().required(),
@@ -38,8 +37,8 @@ export default function LegalReferenceForm({ labels, maxAccess, branchId, record
         extension: companyStructureRepository.BranchLegalRef.set,
         record: JSON.stringify({
           ...obj,
-          releaseDate: obj.releaseDate ? formatDateToApi(obj.releaseDate) : null,
-          expiryDate: obj.expiryDate ? formatDateToApi(obj.expiryDate) : null
+          releaseDate: formatDateToApi(obj.releaseDate),
+          expiryDate: formatDateToApi(obj.expiryDate)
         })
       })
       toast.success(obj.goId ? platformLabels.Edited : platformLabels.Added)
@@ -79,9 +78,6 @@ export default function LegalReferenceForm({ labels, maxAccess, branchId, record
                 value={formik.values.goName}
                 readOnly
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('goName', '')}
-                error={formik.touched.goName && Boolean(formik.errors.goName)}
               />
             </Grid>
             <Grid item xs={12}>

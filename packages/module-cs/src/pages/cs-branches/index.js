@@ -23,8 +23,8 @@ const Branches = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: companyStructureRepository.Branches.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      extension: companyStructureRepository.Branches.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=30&_sortBy=name desc`
     })
 
     return { ...response, _startAt: _startAt }
@@ -39,7 +39,7 @@ const Branches = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: companyStructureRepository.Branches.qry,
+    endpointId: companyStructureRepository.Branches.page,
     datasetId: ResourceIds.Branches
   })
 

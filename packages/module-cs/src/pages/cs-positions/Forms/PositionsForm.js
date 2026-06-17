@@ -112,8 +112,9 @@ export default function PositionsForm({ labels, maxAccess, recordId }) {
                 displayField='name'
                 values={formik.values}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('referToPositionId', newValue?.recordId || null)
                   formik.setFieldValue('referToPositionName', newValue?.name || '')
+                  
+                  formik.setFieldValue('referToPositionId', newValue?.recordId || null)
                 }}
                 error={formik.touched.referToPositionId && Boolean(formik.errors.referToPositionId)}
                 maxAccess={maxAccess}

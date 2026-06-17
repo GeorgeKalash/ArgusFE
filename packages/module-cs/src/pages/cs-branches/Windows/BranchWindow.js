@@ -5,7 +5,7 @@ import BranchInfoTab from '../Forms/BranchInfoTab'
 import AddressTab from '../Forms/AddressTab'
 import LegalReferenceTab from '../Forms/LegalReferenceTab'
 
-const BranchWindow = ({ labels, maxAccess, recordId, height }) => {
+const BranchWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -22,7 +22,7 @@ const BranchWindow = ({ labels, maxAccess, recordId, height }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
-      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <BranchInfoTab labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>

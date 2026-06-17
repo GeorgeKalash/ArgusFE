@@ -142,7 +142,6 @@ const Departments = () => {
           previewReport={ResourceIds.Departments}
         />
       </Fixed>
-
       <Grow>
         <Table
           name='table'

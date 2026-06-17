@@ -91,7 +91,7 @@ export default function DivisionsForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 required
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('activeStatus', newValue?.key ?? null)
+                  formik.setFieldValue('activeStatus', newValue?.key || null)
                 }}
                 error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
                 maxAccess={maxAccess}

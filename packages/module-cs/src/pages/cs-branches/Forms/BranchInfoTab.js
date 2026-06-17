@@ -24,7 +24,7 @@ const BranchInfoTab = ({ labels, maxAccess, store, setStore }) => {
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: companyStructureRepository.Branches.qry
+    endpointId: companyStructureRepository.Branches.page
   })
 
   const { formik } = useForm({
@@ -72,7 +72,7 @@ const BranchInfoTab = ({ labels, maxAccess, store, setStore }) => {
         setStore(prev => ({
           ...prev,
           recordId: res.record.recordId,
-          addressId: res.record.addressId ?? null
+          addressId: res.record.addressId || null
         }))
       }
     })()
@@ -126,8 +126,8 @@ const BranchInfoTab = ({ labels, maxAccess, store, setStore }) => {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('scId', newValue?.recordId ?? null)
-                  formik.setFieldValue('scName', newValue?.name ?? '')
+                  formik.setFieldValue('scId', newValue?.recordId || null)
+                  formik.setFieldValue('scName', newValue?.name || '')
                 }}
                 error={formik.touched.scId && Boolean(formik.errors.scId)}
               />
