@@ -402,7 +402,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metal.purity * 1000)
 
-        const totalCredit = newRow.isOpenMetalPurity ? newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity) : newRow.qty * newRow.creditAmount
+        const totalCredit = newRow.isOpenMetalPurity ? newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity) : newRow.qty * newRow.creditAmount
 
         update({ totalCredit: roundTo(totalCredit) })
         if (metal) {
