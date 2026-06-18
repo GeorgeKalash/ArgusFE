@@ -61,7 +61,8 @@ const BranchWindow = ({ labels, maxAccess, recordId, height }) => {
       const updatedBranch = {
         ...store.branch,
         addressId,
-        recordId: store.recordId
+        recordId: store.recordId,
+        activeStatus: store.isInactive ? 1 : -1
       }
 
       await postRequest({

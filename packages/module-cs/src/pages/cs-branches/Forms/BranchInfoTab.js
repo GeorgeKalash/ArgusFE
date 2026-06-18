@@ -59,7 +59,11 @@ const BranchInfoTab = ({ labels, maxAccess, store, setStore }) => {
 
       if (!obj.recordId) formik.setFieldValue('recordId', res?.recordId)
 
-      setStore(prev => ({ ...prev, recordId: res?.recordId }))
+      setStore(prevStore => ({
+        ...prevStore,
+        branch: obj,
+        recordId: res.recordId
+      }))
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
@@ -73,10 +77,10 @@ const BranchInfoTab = ({ labels, maxAccess, store, setStore }) => {
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res.record)
-        setStore(prev => ({
-          ...prev,
+        setStore(prevStore => ({
+          ...prevStore,
           recordId: res.record.recordId,
-          addressId: res.record.addressId || null
+          branch: res.record
         }))
       }
     })()
