@@ -23,8 +23,8 @@ const CustomCheckBox = ({
   const { _readOnly, _required, _hidden } = checkAccess(name, maxAccess, required, readOnly, hidden)
 
   const _disabled = _readOnly || _hidden || disabled
+  const isDisabled = !!_disabled
 
-  // ✅ label should turn red when required + submitted (editMode) OR parent sets error
   const isLabelError = _required && !value && (editMode || error)
 
   const handleChange = event => {
@@ -39,12 +39,12 @@ const CustomCheckBox = ({
           checked={!!value}
           required={false}
           onChange={handleChange}
-          disabled={_disabled}
+          disabled={isDisabled}
           inputProps={{ 'aria-label': label }}
           className={[
             styles.checkbox,
             error ? styles.errorCheckbox : '',
-            _disabled ? styles.disabledCheckbox : ''
+            isDisabled ? styles.disabledCheckbox : ''
           ].join(' ')}
           {...props}
         />
@@ -63,7 +63,7 @@ const CustomCheckBox = ({
         </div>
       }
       className={inputs.outlinedRoot}
-      disabled={_disabled}
+      disabled={isDisabled}
     />
   )
 }

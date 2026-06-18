@@ -63,7 +63,6 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
   }
 
   const onDelete = async obj => {
-    console.log(obj)
     await postRequest({
       extension: SystemRepository.RecordRemarks.del,
       record: JSON.stringify(obj)

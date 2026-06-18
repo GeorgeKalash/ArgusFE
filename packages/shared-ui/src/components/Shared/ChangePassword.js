@@ -29,7 +29,6 @@ const ChangePassword = ({
 }) => {
   const [score, setScore] = useState(0)
   const [showPassword, setShowPassword] = useState(false)
-  const { stack: stackError } = useError()
   const auth = useAuth()
   const { encryptePWD, getAccessToken } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)

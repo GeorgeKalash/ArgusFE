@@ -1777,7 +1777,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
                     handleButtonClick={handleButtonClick}
-                    ShowDiscountIcons={true}
                     onChange={e => {
                       let discount = e.target.value
                       if (formik.values.tdType == 1) {

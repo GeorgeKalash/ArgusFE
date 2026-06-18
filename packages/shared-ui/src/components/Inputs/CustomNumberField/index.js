@@ -38,11 +38,12 @@ const CustomNumberField = ({
   handleButtonClick,
   cycleButtonLabel = '',
   iconMapIndex = 0,
+  maxAccess,
   ...props
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
-  const name = props.name
-  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
+  const { iconKey, name, ...rest } = props
+  const { _readOnly, _required, _hidden } = checkAccess(name, maxAccess, rest.required, readOnly, hidden)
 
   const handleKeyPress = e => {
     const regex = decimalScale > 0 ? /[0-9.-]/ : /[0-9-]/
@@ -138,7 +139,7 @@ const CustomNumberField = ({
     }
   }
 
-  const displayButtons = (!_readOnly || allowClear) && !props.disabled && (value || value === 0)
+  const displayButtons = (!_readOnly || allowClear) && !rest.disabled && (value || value === 0)
 
   useEffect(() => {
     if (value) formatNumber({ target: { value } })
@@ -200,11 +201,11 @@ const CustomNumberField = ({
           notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
           input: inputs.inputBase
         },
-        endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
+        endAdornment: (!_readOnly || allowClear) && !unClearable && !rest.disabled && (
           <div position='end' className={inputs.inputAdornment}>
-            {iconMap[props?.iconKey] && (
+            {iconMap[iconKey] && (
               <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick} className={inputs.iconButton}>
-                {iconMap[props?.iconKey]}
+                {iconMap[iconKey]}
               </IconButton>
             )}
 
@@ -225,7 +226,7 @@ const CustomNumberField = ({
       customInput={TextField}
       onValueChange={handleNumberValueChange}
       onMouseLeave={e => handleNumberMouseLeave(e)}
-      {...props}
+      {...rest}
     />
   )
 }

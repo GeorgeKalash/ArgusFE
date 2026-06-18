@@ -1657,7 +1657,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
                   readOnly={isClosed}
                   iconKey={cycleButtonState.text}
                   handleButtonClick={handleButtonClick}
-                  ShowDiscountIcons={true}
                   onChange={e => {
                     let discount = e.target.value
                     if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {

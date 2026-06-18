@@ -666,7 +666,7 @@ const TabsProvider = ({ children }) => {
           value={currentTabIndex}
           onChange={handleChange}
           variant='scrollable'
-          scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
+          scrollButtons={openTabs.length > 3 ? 'auto' : false}
           aria-label='scrollable auto tabs example'
           classes={{ indicator: styles.tabsIndicator }}
           className={styles.tabs}
@@ -679,40 +679,32 @@ const TabsProvider = ({ children }) => {
                 <Box display='flex' alignItems='center'>
                   <span>{activeTab.label}</span>
                   {i === currentTabIndex && activeTab.route !== '/no-access/'&& (
-                    <IconButton
-                      size='small'
+                    <span
                       className={styles.svgIcon}
-                      onMouseDown={e => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                      }}
                       onClick={e => {
                         e.preventDefault()
                         e.stopPropagation()
                         setReloadOpenedPage({ path: openTabs[i].route.replace(/\/$/, ''), name: openTabs[i].label })
                       }}
+                      style={{ display: 'flex', cursor: 'pointer' }}
                     >
                       <RefreshIcon className={styles.svgIcon} />
-                    </IconButton>
+                    </span>
                   )}
 
                   {activeTab.route !== '/default/' && (
-                    <IconButton
-                      size='small'
+                    <span
                       className={styles.svgIcon}
-                      onMouseDown={e => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                      }}
                       onClick={async e => {
                         e.preventDefault()
                         e.stopPropagation()
                         if (activeTab) unlockIfLocked(activeTab)
                         await closeTab(activeTab.route)
                       }}
+                      style={{ display: 'flex', cursor: 'pointer' }}
                     >
                       <CloseIcon className={styles.svgIcon} />
-                    </IconButton>
+                    </span>
                   )}
                 </Box>
               }

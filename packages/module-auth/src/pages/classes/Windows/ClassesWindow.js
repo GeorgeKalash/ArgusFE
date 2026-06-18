@@ -5,7 +5,7 @@ import ClassesForm from '../forms/ClassesForm'
 import CharacteristicsFormList from '../forms/CharacteristicsFormList'
 import FunctionsFormList from '../forms/FunctionFormList'
 
-const ClassesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
+const ClassesWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
 
@@ -40,7 +40,6 @@ const ClassesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
           setStore={setStore}
           maxAccess={maxAccess}
           store={store}
-          expanded={expanded}
           height={height}
         />
       </CustomTabPanel>
@@ -51,7 +50,6 @@ const ClassesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
           setStore={setStore}
           maxAccess={maxAccess}
           store={store}
-          expanded={expanded}
           height={height}
         />
       </CustomTabPanel>
