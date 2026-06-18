@@ -12,6 +12,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
 import DepartmentsForm from './Forms/DepartmentsForm'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import Tree from '@argus/shared-ui/src/components/Shared/Tree'
 
 const Departments = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,7 +24,7 @@ const Departments = () => {
 
     const response = await getRequest({
       extension: companyStructureRepository.Departments.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_size=30&_type=0&_activeStatus=0&_sortBy=recordId`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return {
@@ -129,6 +130,22 @@ const Departments = () => {
     })
   }
 
+  function onTreeClick() {
+    stack({
+      Component: Tree,
+      props: {
+        data
+      }
+    })
+  }
+
+  const actions = [{
+    key: 'Tree',
+    condition: true,
+    onClick: onTreeClick,
+    disabled: false
+  }]
+
   return (
     <VertLayout>
       <Fixed>
@@ -140,6 +157,7 @@ const Departments = () => {
           labels={labels}
           inputSearch={true}
           previewReport={ResourceIds.Departments}
+          actions={actions}
         />
       </Fixed>
       <Grow>

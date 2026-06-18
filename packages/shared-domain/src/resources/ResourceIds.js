@@ -723,5 +723,6 @@ export const ResourceIds = {
   ADDCorrespondentAgentBranch: 36608,
   ADDNationalClientMaster: 35601,
   ADDWorkClientMaster: 35602,
-  ADDClientCorporate: 35603
+  ADDClientCorporate: 35603,
+  ADDBranches: 35603
 }

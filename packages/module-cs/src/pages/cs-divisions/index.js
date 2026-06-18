@@ -23,12 +23,12 @@ const Divisions = () => {
 
     const response = await getRequest({
       extension: companyStructureRepository.Divisions.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=30&_sortBy=name`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     response.list = (response?.list || []).map(item => ({
       ...item,
-      activeStatus: item?.activeStatus ? 'True' : 'False'
+      activeStatusName: item?.activeStatus ? 'True' : 'False'
     }))
     
 
@@ -55,7 +55,7 @@ const Divisions = () => {
       flex: 1
     },
     {
-      field: 'activeStatus',
+      field: 'activeStatusName',
       headerName: labels.activeStatus,
       flex: 1
     }

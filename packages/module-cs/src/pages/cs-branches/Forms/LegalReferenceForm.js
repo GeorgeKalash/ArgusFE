@@ -100,6 +100,7 @@ export default function LegalReferenceForm({ labels, maxAccess, branchId, record
                 value={formik.values.releaseDate}
                 required
                 onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('releaseDate', null)}
                 error={formik.touched.releaseDate && Boolean(formik.errors.releaseDate)}
               />
@@ -111,6 +112,7 @@ export default function LegalReferenceForm({ labels, maxAccess, branchId, record
                 value={formik.values.expiryDate}
                 onChange={formik.setFieldValue}
                 required
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('expiryDate', null)}
                 error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
               />

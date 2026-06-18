@@ -24,7 +24,7 @@ const Branches = () => {
 
     const response = await getRequest({
       extension: companyStructureRepository.Branches.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=30&_sortBy=name desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }

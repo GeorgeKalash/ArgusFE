@@ -23,7 +23,7 @@ const Positions = () => {
 
     const response = await getRequest({
       extension: companyStructureRepository.CompanyPositions.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_size=40&_sortBy=positionRef`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
