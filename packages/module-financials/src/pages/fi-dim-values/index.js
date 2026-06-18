@@ -35,7 +35,7 @@ const DimensionsValues = () => {
     access
   } = useResourceQuery({
     datasetId: ResourceIds.DimensionsValues,
-    endpointId: FinancialRepository.DimensionValue.qry,
+    endpointId: FinancialRepository.DimensionValue.page,
     filter: {
       filterFn: fetchWithSearch
     }
@@ -43,7 +43,7 @@ const DimensionsValues = () => {
 
   async function fetchWithSearch({ filters }) {
     const data = await getRequest({
-      extension: FinancialRepository.DimensionValue.qry,
+      extension: FinancialRepository.DimensionValue.page,
       parameters: `_filter=${filters.qry}&_dimension=${filters.qry.match(/\d+/)?.[0]}`
     })
 

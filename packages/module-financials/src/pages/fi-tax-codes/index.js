@@ -21,7 +21,7 @@ const TaxCodes = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.TaxCodes.qry,
+      extension: FinancialRepository.TaxCodes.page,
 
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
@@ -38,7 +38,7 @@ const TaxCodes = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.TaxCodes.qry,
+    endpointId: FinancialRepository.TaxCodes.page,
     datasetId: ResourceIds.TaxCodes
   })
 

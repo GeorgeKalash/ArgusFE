@@ -35,7 +35,7 @@ const AddressBook = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.Address.qry,
+    endpointId: SystemRepository.Address.page,
     datasetId: ResourceIds.Address,
     search: {
       searchFn: fetchWithSearch
@@ -49,7 +49,7 @@ const AddressBook = () => {
     var parameters = defaultParams
 
     const response = await getRequest({
-      extension: SystemRepository.Address.qry,
+      extension: SystemRepository.Address.page,
       parameters: parameters
     })
 

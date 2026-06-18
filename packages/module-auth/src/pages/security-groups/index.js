@@ -22,7 +22,7 @@ const SecurityGroup = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: AccessControlRepository.SecurityGroup.qry,
+      extension: AccessControlRepository.SecurityGroup.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -40,7 +40,7 @@ const SecurityGroup = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: AccessControlRepository.SecurityGroup.qry,
+    endpointId: AccessControlRepository.SecurityGroup.page,
     datasetId: ResourceIds.SecurityGroup,
     search: {
       endpointId: AccessControlRepository.SecurityGroup.snapshotGRP,

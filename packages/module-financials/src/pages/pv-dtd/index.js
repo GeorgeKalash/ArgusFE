@@ -24,7 +24,7 @@ const RVDocTypeDefaults = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.FIDocTypeDefaults.qry,
+      extension: FinancialRepository.FIDocTypeDefaults.page,
 
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_functionId=${SystemFunction.PaymentVoucher}`
     })
@@ -40,12 +40,12 @@ const RVDocTypeDefaults = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.FIDocTypeDefaults.qry,
+    endpointId: FinancialRepository.FIDocTypeDefaults.page,
     datasetId: ResourceIds.FIDocTypeDefaults
   })
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.FIDocTypeDefaults.qry
+    endpointId: FinancialRepository.FIDocTypeDefaults.page
   })
 
   const columns = [

@@ -23,7 +23,7 @@ const NumberRange = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SystemRepository.NumberRange.qry,
+      extension: SystemRepository.NumberRange.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -40,7 +40,7 @@ const NumberRange = () => {
     clear
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.NumberRange.qry,
+    endpointId: SystemRepository.NumberRange.page,
     datasetId: ResourceIds.NumberRange,
     search: {
       endpointId: SystemRepository.NumberRange.snapshot,
@@ -57,7 +57,7 @@ const NumberRange = () => {
   }
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.NumberRange.qry
+    endpointId: SystemRepository.NumberRange.page
   })
 
   const columns = [

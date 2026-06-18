@@ -24,7 +24,7 @@ const BankBranches = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: CashBankRepository.BankBranches.qry,
+      extension: CashBankRepository.BankBranches.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -38,7 +38,7 @@ const BankBranches = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CashBankRepository.BankBranches.qry,
+    endpointId: CashBankRepository.BankBranches.page,
     datasetId: ResourceIds.BankBranches,
     filter: {
       filterFn: fetchWithFilter
@@ -59,7 +59,7 @@ const BankBranches = () => {
   }
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.BankBranches.qry
+    endpointId: CashBankRepository.BankBranches.page
   })
 
   const columns = [

@@ -55,7 +55,7 @@ const SaTrx = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesTransaction.qry,
+    endpointId: SaleRepository.SalesTransaction.page,
     datasetId: ResourceIds.SalesInvoice,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
@@ -157,7 +157,7 @@ const SaTrx = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: SaleRepository.SalesTransaction.qry,
+      extension: SaleRepository.SalesTransaction.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&_dgId=${functionId}`
     })
 

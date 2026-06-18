@@ -50,6 +50,7 @@ export const CashBankRepository = {
     qry: service + 'qryTFC'
   },
   CbBankAccounts: {
+    page: service + 'pageACC',
     qry: service + 'qryACC',
     get: service + 'getACC',
     set: service + 'setBAC',
@@ -91,6 +92,7 @@ export const CashBankRepository = {
     del: service + 'delCBK'
   },
   BankBranches: {
+    page: service + 'pageBNB',
     qry: service + 'qryBNB',
     qry2: service + 'qryBNB2',
     get: service + 'getBNB',
@@ -112,6 +114,7 @@ export const CashBankRepository = {
     qry: service + 'qryCCS'
   },
   CashTransfers: {
+    page: service + 'pageTFR',
     qry: service + 'qryTFR',
     del: service + 'delTFR',
     get: service + 'getTFR',

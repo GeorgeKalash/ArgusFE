@@ -22,7 +22,7 @@ const TaxSchedules = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.TaxSchedules.qry,
+      extension: FinancialRepository.TaxSchedules.page,
 
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
@@ -38,12 +38,12 @@ const TaxSchedules = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.TaxSchedules.qry,
+    endpointId: FinancialRepository.TaxSchedules.page,
     datasetId: ResourceIds.TaxSchedules
   })
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.TaxSchedules.qry
+    endpointId: FinancialRepository.TaxSchedules.page
   })
 
   const columns = [
