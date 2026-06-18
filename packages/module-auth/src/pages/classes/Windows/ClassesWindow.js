@@ -2,16 +2,14 @@ import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPane
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import ClassesForm from '../forms/ClassesForm'
-import CharacteristicsFormList from '../forms/CharacteristicsFormList'
-import FunctionsFormList from '../forms/FunctionFormList'
+import CharacteristicsTab from '../forms/CharacteristicsTab'
+import FunctionsTab from '../forms/FunctionTab'
 
-const ClassesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
+const ClassesWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
-  const [editMode, setEditMode] = useState(recordId)
 
   const [store, setStore] = useState({
-    recordId: recordId || null,
-    countries: []
+    recordId: recordId || null
   })
 
   const tabs = [
@@ -24,36 +22,13 @@ const ClassesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
       <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
-        <ClassesForm
-          labels={labels}
-          setEditMode={setEditMode}
-          setStore={setStore}
-          store={store}
-          editMode={editMode}
-          maxAccess={maxAccess}
-        />
+        <ClassesForm labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
-        <CharacteristicsFormList
-          labels={labels}
-          setEditMode={setEditMode}
-          setStore={setStore}
-          maxAccess={maxAccess}
-          store={store}
-          expanded={expanded}
-          height={height}
-        />
+        <CharacteristicsTab labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={2} value={activeTab} maxAccess={maxAccess}>
-        <FunctionsFormList
-          labels={labels}
-          setEditMode={setEditMode}
-          setStore={setStore}
-          maxAccess={maxAccess}
-          store={store}
-          expanded={expanded}
-          height={height}
-        />
+        <FunctionsTab labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )
