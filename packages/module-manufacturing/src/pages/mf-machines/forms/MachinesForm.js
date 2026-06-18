@@ -120,6 +120,7 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
                 decimalScale={0}
                 onClear={() => formik.setFieldValue('minLoadQty', 0)}
                 error={formik.touched.minLoadQty && Boolean(formik.errors.minLoadQty)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>

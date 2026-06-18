@@ -125,6 +125,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                     formik.setFieldValue('displayType', newValue?.key || '')
                   }}
                   error={formik.touched.displayType && Boolean(formik.errors.displayType)}
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -150,6 +151,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                     formik.setFieldValue('printDirection', newValue?.key)
                   }}
                   error={formik.touched.printDirection && Boolean(formik.errors.printDirection)}
+                  maxAccess={maxAccess}
                 />
               </Grid>
 

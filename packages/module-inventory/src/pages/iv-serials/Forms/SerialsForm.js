@@ -346,6 +346,7 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('warrantyEndDate', null)}
                     error={formik.touched.warrantyEndDate && Boolean(formik.errors.warrantyEndDate)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 

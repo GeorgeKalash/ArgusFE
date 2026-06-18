@@ -520,6 +520,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 label={labels.accountGroup}
                 value={formik.values.accountGroupName}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>

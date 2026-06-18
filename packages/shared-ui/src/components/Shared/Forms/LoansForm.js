@@ -338,6 +338,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
                   formik.setFieldValue('ltId', newValue?.recordId || null)
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

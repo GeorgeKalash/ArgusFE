@@ -107,6 +107,7 @@ export default function BusinessRulesForm({ labels, obj, window, maxAccess }) {
                   formik.setFieldValue('ruleId', '')
                 }}
                 error={formik.touched.moduleId && Boolean(formik.errors.moduleId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -125,6 +126,7 @@ export default function BusinessRulesForm({ labels, obj, window, maxAccess }) {
                   formik.setFieldValue('trxType', newValue ? newValue.key : '')
                 }}
                 error={formik.touched.resourceId && Boolean(formik.errors.resourceId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -159,6 +161,7 @@ export default function BusinessRulesForm({ labels, obj, window, maxAccess }) {
                   formik.setFieldValue('ruleEndPoint', newValue?.key || null)
                 }}
                 error={formik.touched.ruleEndPoint && Boolean(formik.errors.ruleEndPoint)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -175,6 +178,7 @@ export default function BusinessRulesForm({ labels, obj, window, maxAccess }) {
                   formik.setFieldValue('trxType', newValue?.key || null)
                 }}
                 error={formik.touched.trxType && Boolean(formik.errors.trxType)}
+                maxAccess={maxAccess}
               />
             </Grid>
 
