@@ -27,7 +27,7 @@ const Characteristics = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.qry,
+    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.page,
     datasetId: ResourceIds.Characteristics
   })
 
@@ -38,7 +38,7 @@ const Characteristics = () => {
     var parameters = defaultParams
 
     const response = await getRequest({
-      extension: DocumentReleaseRepository.CharacteristicsGeneral.qry,
+      extension: DocumentReleaseRepository.CharacteristicsGeneral.page,
       parameters: parameters
     })
 

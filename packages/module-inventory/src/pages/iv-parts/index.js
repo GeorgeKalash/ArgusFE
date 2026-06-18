@@ -23,7 +23,7 @@ const IvParts = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.Parts.qry,
+      extension: InventoryRepository.Parts.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -39,7 +39,7 @@ const IvParts = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Parts.qry,
+    endpointId: InventoryRepository.Parts.page,
     datasetId: ResourceIds.IVparts
   })
 

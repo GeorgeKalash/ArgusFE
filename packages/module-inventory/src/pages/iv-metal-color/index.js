@@ -22,7 +22,7 @@ const MetalColor = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.MetalColor.qry,
+      extension: InventoryRepository.MetalColor.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -38,7 +38,7 @@ const MetalColor = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.MetalColor.qry,
+    endpointId: InventoryRepository.MetalColor.page,
     datasetId: ResourceIds.MetalColor
   })
 

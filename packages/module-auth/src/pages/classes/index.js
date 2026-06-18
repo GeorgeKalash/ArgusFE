@@ -27,7 +27,7 @@ const Classes = () => {
     clear
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.Class.qry,
+    endpointId: DocumentReleaseRepository.Class.page,
     datasetId: ResourceIds.Classes,
     search: {
       endpointId: DocumentReleaseRepository.Class.snapshot,
@@ -50,7 +50,7 @@ const Classes = () => {
     var parameters = defaultParams
 
     const response = await getRequest({
-      extension: DocumentReleaseRepository.Class.qry,
+      extension: DocumentReleaseRepository.Class.page,
       parameters: parameters
     })
 

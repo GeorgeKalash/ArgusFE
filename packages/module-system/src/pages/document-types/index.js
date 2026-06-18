@@ -22,7 +22,7 @@ const DocumentTypes = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SystemRepository.DocumentType.qry,
+      extension: SystemRepository.DocumentType.page,
       parameters: `_dgId=0&_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
@@ -46,7 +46,7 @@ const DocumentTypes = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.DocumentType.qry,
+    endpointId: SystemRepository.DocumentType.page,
     datasetId: ResourceIds.DocumentTypes,
     search: {
       endpointId: SystemRepository.DocumentType.snapshot,
@@ -55,7 +55,7 @@ const DocumentTypes = () => {
   })
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.DocumentType.qry
+    endpointId: SystemRepository.DocumentType.page
   })
 
   const columns = [

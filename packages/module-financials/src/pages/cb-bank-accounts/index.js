@@ -20,7 +20,7 @@ const CbBankAccounts = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: CashBankRepository.CbBankAccounts.qry,
+      extension: CashBankRepository.CbBankAccounts.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_type=1&_params=`
     })
 
@@ -28,7 +28,7 @@ const CbBankAccounts = () => {
   }
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CbBankAccounts.qry
+    endpointId: CashBankRepository.CbBankAccounts.page
   })
 
   const {
@@ -41,7 +41,7 @@ const CbBankAccounts = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CashBankRepository.CbBankAccounts.qry,
+    endpointId: CashBankRepository.CbBankAccounts.page,
     datasetId: ResourceIds.CbBankAccounts,
     filter: {
       filterFn: fetchWithSearch
