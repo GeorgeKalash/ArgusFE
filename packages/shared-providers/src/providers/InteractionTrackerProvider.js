@@ -59,7 +59,7 @@ export const InteractionTrackerProvider = ({ children }) => {
   }, [])
 
 
-  const trackFieldState = useCallback((pageId, fieldValues, initials) => {
+  const trackFieldState = useCallback((pageId, fieldValues, initials, source) => {
     if (!pageId || !fieldValues) return
 
     setFieldStates(prev => {
@@ -70,7 +70,7 @@ export const InteractionTrackerProvider = ({ children }) => {
 
       if (!existingItem) {
         if (isDirty) {
-          setInteractions(p => [...p, { pageId, source: ['gridToolbar'] }])
+          setInteractions(p => [...p, { pageId, source: [source || 'gridToolbar'] }])
         }
         return [...safePrev, { pageId, initialValues, currentValues: fieldValues, isDirty }]
       }
@@ -80,7 +80,7 @@ export const InteractionTrackerProvider = ({ children }) => {
       } else {
         setInteractions(p => {
           if (p.find(item => item.pageId === pageId)) return p
-          return [...p, { pageId, source: ['gridToolbar'] }]
+          return [...p, { pageId, source: [source || 'gridToolbar'] }]
         })
       }
 
@@ -100,7 +100,6 @@ export const InteractionTrackerProvider = ({ children }) => {
   const clearPageInteractions = useCallback((pageId, source = null) => {
     setInteractions(prev => {
       const safePrev = Array.isArray(prev) ? prev : []
-      if (!source) return safePrev.filter(item => item.pageId !== pageId)
 
       const existingItem = safePrev.find(item => item.pageId === pageId)
       if (!existingItem) return safePrev
@@ -111,11 +110,31 @@ export const InteractionTrackerProvider = ({ children }) => {
           ? [existingItem.source]
           : []
 
-      const updatedSources = existingSources.filter(s => s !== source)
+      if (source === 'Window') {
+        const remainingSources = existingSources.filter(s => s !== 'Window')
+        const pageState = fieldStates.find(item => item.pageId === pageId)
 
-      if (updatedSources.length === 0) {
-        return safePrev.filter(item => item.pageId !== pageId)
+        const valuesEqual = pageState
+          ? isEqual(
+              normalized(pageState.initialValues),
+              normalized(pageState.currentValues)
+            )
+          : true
+          
+        if (
+          remainingSources.length === 1 &&
+          remainingSources[0] === 'reportGenerator' &&
+          valuesEqual
+        ) {
+          return safePrev.filter(item => item.pageId !== pageId)
+        }
       }
+
+      if (!source) return safePrev.filter(item => item.pageId !== pageId)
+
+      const updatedSources = existingSources.filter(s => s !== source)
+      
+      if (updatedSources.length === 0) return safePrev.filter(item => item.pageId !== pageId)
 
       return safePrev.map(item =>
         item.pageId === pageId
@@ -132,7 +151,7 @@ export const InteractionTrackerProvider = ({ children }) => {
         prev.filter(item => item.pageId !== pageId)
       )
     }
-  }, [])
+  }, [fieldStates])
 
   console.log('interactions', interactions)
   console.log('fieldStates', fieldStates)

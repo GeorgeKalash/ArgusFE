@@ -62,6 +62,7 @@ export function WindowProvider({ children }) {
   const currentTab = tabsContext?.currentTab || null
 
   const currentValue = { ...stack[stack.length - 1] }
+  const isImmediateWindow = currentValue?.isImmediateWindow ?? false
 
   function lockRecord(obj) {
     getRequest({
@@ -171,7 +172,7 @@ export function WindowProvider({ children }) {
   }
 
   return (
-    <WindowContext.Provider value={{ stack: addToStack, lockRecord }}>
+    <WindowContext.Provider value={{ stack: addToStack, lockRecord, isImmediateWindow, isInsideWindow: stack.length > 0 }}>
       {children}
       {stack.map(
         ({
@@ -306,6 +307,7 @@ export function ImmediateWindow({
       width,
       height,
       trackPage: false,
+      isImmediateWindow: true,
       title: _labels[labelKey] || titleName
     })
   }

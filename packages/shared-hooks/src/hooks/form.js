@@ -5,8 +5,13 @@ import * as yup from 'yup'
 import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
 import { MenuContext } from '@argus/shared-providers/src/providers/MenuContext'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
-export function useForm({ behavior, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
+export function useForm({ behavior, conditionSchema = [], maxAccess, validate = () => {}, isParentLevel = false, ...formikProps }) {
+  const windowContext = useWindow()
+  const isImmediateWindow = windowContext?.isImmediateWindow ?? false
+  const isInsideWindow = windowContext?.isInsideWindow ?? false
+const isMainLevel = !isInsideWindow
   const trackInteraction = usePageInteraction()
   const { clearPageInteractions } = useInteractionTracker()
   const {
@@ -195,9 +200,12 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
   }
 
   const dirty = JSON.stringify(normalized(formik.values)) !== JSON.stringify(normalized(formik.initialValues))
-  console.log('dirty',dirty ,'\n ',formik.initialValues,' \n ',formik.values)
+ 
+  console.log('dirty',dirty ,'\n ',formik.initialValues,' \n ',formik.values,isMainLevel)
 
   useEffect(() => {
+    if (!isImmediateWindow && !isMainLevel) return
+    
     if (dirty) trackInteraction('form')
     else clearPageInteractions(currentTab?.resourceId)
   }, [dirty])

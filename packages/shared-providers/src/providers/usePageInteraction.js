@@ -26,10 +26,11 @@ const usePageInteraction = () => {
     [track, currentPageResourceId]
   )
 
-  trackInteraction.trackPageFields = (fieldValues, initialValues = null) => {
+  trackInteraction.trackPageFields = (fieldValues, initialValues = null, source = null) => {
     if (!currentPageResourceId) return false
 
-    trackFieldState(currentPageResourceId, fieldValues, initialValues)
+    trackFieldState(currentPageResourceId, fieldValues, initialValues, source)
+    
     return true
   }
 

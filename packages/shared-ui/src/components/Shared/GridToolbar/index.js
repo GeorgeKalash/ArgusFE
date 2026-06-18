@@ -36,6 +36,7 @@ const GridToolbar = ({
   actions = [],
   previewReport,
   disableActionsPadding,
+  resetKey,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess?.record?.accessFlags
@@ -48,7 +49,6 @@ const GridToolbar = ({
   const trackInteraction = usePageInteraction()
   const initialFieldValuesRef = useRef(null)
   const previousFieldValuesRef = useRef(null)
-  const currentValuesRef = useRef(null)
 
   const extractFieldValues = React.useCallback(element => {
     const fields = new Map()
@@ -114,7 +114,7 @@ const GridToolbar = ({
     }
 
     return React.cloneElement(node, newProps)
-  }, [trackInteraction, leftSection, middleSection, rightSection, extractFieldValues])
+  }, [trackInteraction])
 
   const trackedLeftSection = useMemo(() => attachTrackingToClicks(leftSection), [leftSection, attachTrackingToClicks])
   const trackedMiddleSection = useMemo(() => attachTrackingToClicks(middleSection), [middleSection, attachTrackingToClicks])
@@ -132,8 +132,6 @@ const GridToolbar = ({
 
     const lastValues = previousFieldValuesRef.current
     if (!lastValues) {
-      if (Object.values(currentValues).some(value => value === undefined || value === '')) return
-
       previousFieldValuesRef.current = currentValues
       initialFieldValuesRef.current = currentValues
 
@@ -144,6 +142,7 @@ const GridToolbar = ({
 
       return
     }
+  
     if (!isEqual(lastValues, currentValues)) {
       previousFieldValuesRef.current = currentValues
       trackInteraction.trackPageFields(currentValues, initialFieldValuesRef.current)
@@ -156,6 +155,11 @@ const GridToolbar = ({
     trackInteraction.isReady,
     trackInteraction.currentPageResourceId
   ])
+
+  useEffect(() => {
+    previousFieldValuesRef.current = null
+    initialFieldValuesRef.current = null
+  }, [resetKey])
 
   const clear = () => {
     trackInteraction()
@@ -439,10 +443,10 @@ const GridToolbar = ({
                       setSearchValue(e.target.value)
                       if (onSearchChange) onSearchChange(e.target.value)
                     }}
-                     onSearch={value => {
-                        trackInteraction('gridToolbar')
-                        onSearch(value)
-                      }}
+                    onSearch={value => {
+                      trackInteraction('gridToolbar')
+                      onSearch(value)
+                    }}
                     search={true}
                   />
                 </Grid>
