@@ -484,6 +484,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 readOnly
                 required
                 error={formik?.touched?.header?.workCenterName && Boolean(formik?.errors?.header?.workCenterName)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={4}>
@@ -558,6 +559,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 maxLength={9}
                 required
                 error={formik?.touched?.header?.pcs && Boolean(formik?.errors?.header?.pcs)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={4}>
@@ -787,6 +789,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                     label={labels.totalIssued}
                     value={totalIssued}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>

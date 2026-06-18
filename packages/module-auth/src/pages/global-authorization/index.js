@@ -23,7 +23,6 @@ const GlobalAuthorization = () => {
   const { stack } = useWindow()
 
   async function fetchWithFilter({ filters }) {
-    // used for both qry and filter since we have same api
     if (filters.moduleId)
       return await getRequest({
         extension: SystemRepository.ModuleClassRES.qry,
@@ -121,6 +120,7 @@ const GlobalAuthorization = () => {
                     datasetId={DataSets.MODULE}
                     name='moduleId'
                     values={{ moduleId: filters.moduleId }}
+                    maxAccess={access}
                     valueField='key'
                     displayField='value'
                     onChange={(_, newValue) => {

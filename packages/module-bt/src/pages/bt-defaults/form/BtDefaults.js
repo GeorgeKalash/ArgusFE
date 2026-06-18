@@ -63,6 +63,7 @@ const BtDefaults = ({ _labels, access }) => {
                 name='fixing_msId'
                 label={_labels.measurementSchedule}
                 valueField='recordId'
+                maxAccess={access}
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },

@@ -145,6 +145,7 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
                 decimalScale={0}
                 onClear={() => formik.setFieldValue('maxLoadQty', 0)}
                 error={formik.touched.maxLoadQty && Boolean(formik.errors.maxLoadQty)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -164,6 +165,7 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
                   formik.setFieldValue('workCenterId', newValue?.recordId || null)
                 }}
                 error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -196,6 +198,7 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('defaultLoadQty', 0)}
                 error={formik.touched.defaultLoadQty && Boolean(formik.errors.defaultLoadQty)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -215,6 +218,7 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
                   formik.setFieldValue('operationId', newValue?.recordId || null)
                 }}
                 error={formik.touched.operationId && Boolean(formik.errors.operationId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -229,10 +233,11 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('lineId', newValue?.recordId || null)
                 }}
                 error={formik.touched.lineId && Boolean(formik.errors.lineId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -248,10 +253,11 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('laborId', newValue?.recordId || null)
                 }}
                 error={formik.touched.laborId && Boolean(formik.errors.laborId)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

@@ -370,7 +370,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       displayField={['reference', 'name']}
                       values={formik.values}
                       maxAccess={maxAccess}
-                      onChange={async (event, newValue) => {
+                      onChange={async (_, newValue) => {
                         await changeDT(newValue)
                         formik.setFieldValue('dtId', newValue?.recordId || null)
                       }}
@@ -419,7 +419,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         { key: 'prodLineName', value: 'Production Line' }
                       ]}
                       form={formik}
-                      onChange={async (event, newValue) => {
+                      onChange={async (_, newValue) => {
                         setRecal(true)
                         const factorStdLoss = await getfactorStdLoss(newValue?.metalId, newValue?.metalColorId)
                         const waxInfo = await getWaxInfo(newValue?.recordId)
@@ -454,7 +454,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       displayField={'reference'}
                       values={formik.values}
                       maxAccess={maxAccess}
-                      onChange={(event, newValue) => {
+                      onChange={(_, newValue) => {
                         formik.setFieldValue('mouldId', newValue?.recordId || null)
                       }}
                       error={formik.touched?.mouldId && Boolean(formik.errors?.mouldId)}
@@ -469,7 +469,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       displayField={'reference'}
                       readOnly
                       values={formik.values}
-                      onChange={(event, newValue) => {
+                      onChange={(_, newValue) => {
                         formik.setFieldValue('metalId', newValue?.recordId || null)
                       }}
                       required
@@ -488,7 +488,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       displayField={'reference'}
                       values={formik.values}
                       maxAccess={maxAccess}
-                      onChange={async (event, newValue) => {
+                      onChange={async (_, newValue) => {
                         formik.setFieldValue('metalColorId', newValue?.recordId || null)
                       }}
                       error={formik.touched?.metalColorId && Boolean(formik.errors?.metalColorId)}
@@ -504,6 +504,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       onChange={e => {
                         formik.setFieldValue('factor', e.target.value)
                       }}
+                      maxAccess={maxAccess}
                       onClear={() => formik.setFieldValue('factor', 0)}
                       error={formik.touched.factor && Boolean(formik.errors.factor)}
                     />
@@ -515,6 +516,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.stdLossRate}
                       required
                       readOnly
+                      maxAccess={maxAccess}
                       onChange={e => {
                         formik.setFieldValue('stdLossRate', e.target.value)
                       }}
@@ -533,12 +535,13 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
+                      maxAccess={maxAccess}
                       displayField={['reference', 'name']}
                       readOnly={isPosted || isCancelled}
                       valueField='recordId'
                       required
                       values={formik.values}
-                      onChange={(event, newValue) => {
+                      onChange={(_, newValue) => {
                         formik.setFieldValue('laborId', newValue?.recordId || null)
                       }}
                       error={formik.touched.laborId && Boolean(formik.errors.laborId)}
@@ -559,7 +562,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         { key: 'name', value: 'Name' }
                       ]}
                       maxAccess={maxAccess}
-                      onChange={(event, newValue) => {
+                      onChange={(_, newValue) => {
                         formik.setFieldValue('lineId', newValue?.recordId || null)
                       }}
                       error={formik.touched.lineId && formik.errors.lineId}
@@ -577,6 +580,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       readOnly
                       maxLength={11}
+                      maxAccess={maxAccess}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('grossWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('grossWgt', 0)}
@@ -591,6 +595,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       readOnly
                       maxLength={11}
+                      maxAccess={maxAccess}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('rmWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('rmWgt', 0)}
@@ -605,6 +610,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       readOnly
                       maxLength={11}
+                      maxAccess={maxAccess}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('mouldWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('mouldWgt', 0)}
@@ -619,6 +625,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       readOnly
                       maxLength={11}
+                      maxAccess={maxAccess}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('netWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('netWgt', 0)}
@@ -632,6 +639,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.suggestedWgt}
                       required
                       readOnly
+                      maxAccess={maxAccess}
                       maxLength={11}
                       decimalScale={3}
                       onChange={e => formik.setFieldValue('suggestedWgt', e.target.value)}
@@ -647,6 +655,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       decimalScale={3}
                       readOnly={isPosted || isCancelled}
+                      maxAccess={maxAccess}
                       onChange={e => {
                         let value = Number(e.target.value) > 32767 ? 0 : Number(e.target.value)
                         formik.setFieldValue('inputWgt', value)
@@ -671,6 +680,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.netInputWgt}
                       required
                       readOnly
+                      maxAccess={maxAccess}
                       decimalScale={3}
                       onChange={e => {
                         formik.setFieldValue('netInputWgt', e.target.value)
@@ -686,6 +696,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.outputWgt}
                       required
                       decimalScale={3}
+                      maxAccess={maxAccess}
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
                         setRecal(true)
@@ -751,6 +762,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       maxLength={11}
                       decimalScale={3}
                       readOnly
+                      maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('loss', e.target.value)}
                       onClear={() => formik.setFieldValue('loss', 0)}
                       error={formik.touched.loss && Boolean(formik.errors.loss)}
@@ -765,6 +777,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       maxLength={3}
                       readOnly
                       decimalScale={3}
+                      maxAccess={maxAccess}
                       onChange={e => {
                         formik.setFieldValue('lossPct', e.target.value)
                       }}
@@ -780,6 +793,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       maxLength={5}
                       readOnly
+                      maxAccess={maxAccess}
                       decimalScale={3}
                       onChange={e => formik.setFieldValue('lossVariationPct', e.target.value)}
                       onClear={() => formik.setFieldValue('lossVariationPct', 0)}
@@ -793,6 +807,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.scrapWgt}
                       readOnly
                       decimalScale={3}
+                      maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('scrapWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('scrapWgt', 0)}
                       error={formik.touched.scrapWgt && Boolean(formik.errors.scrapWgt)}

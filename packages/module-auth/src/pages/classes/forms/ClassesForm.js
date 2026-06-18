@@ -99,11 +99,12 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
                 name='characteristicOperator'
                 label={labels.characteristicOperator}
                 required
+                maxAccess={maxAccess}
                 valueField='key'
                 displayField='value'
                 values={formik.values}
                 onClear={() => formik.setFieldValue('name', '')}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('characteristicOperator', newValue?.key || '')
                 }}
                 error={formik.touched.characteristicOperator && Boolean(formik.errors.characteristicOperator)}

@@ -167,6 +167,7 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
             required
             readOnly
             error={formik.touched.nodeRef && Boolean(formik.errors.nodeRef)}
+            maxAccess={maxAccess}
           />
           <DataGrid
             name='ledgerTable'

@@ -140,7 +140,7 @@ const TrxDetails = () => {
               valueField='key'
               displayField='value'
               values={formik.values}
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 formik.setFieldValue('moduleId', newValue?.key || null)
                 !newValue && formik.setFieldValue('resourceId', null)
               }}
@@ -157,7 +157,7 @@ const TrxDetails = () => {
               readOnly={!formik.values.moduleId}
               valueField='key'
               displayField='value'
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 formik.setFieldValue('resourceId', newValue?.key || null)
               }}
               maxAccess={access}
@@ -190,11 +190,12 @@ const TrxDetails = () => {
             <ResourceComboBox
               datasetId={DataSets.TRX_TYPE}
               name='trxType'
+              maxAccess={access}
               label={labels.ttype}
               valueField='key'
               displayField='value'
               values={formik.values}
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 formik.setFieldValue('trxType', newValue?.key || null)
               }}
             />
@@ -211,11 +212,12 @@ const TrxDetails = () => {
               displayFieldWidth={2}
               valueShow='username'
               secondValueShow='email'
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 formik.setFieldValue('userId', newValue ? newValue.recordId : '')
                 formik.setFieldValue('email', newValue ? newValue.email : '')
                 formik.setFieldValue('username', newValue ? newValue.username : '')
               }}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={2}>

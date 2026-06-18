@@ -303,7 +303,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 valueShow='modelRef'
                 secondDisplayField={false}
                 readOnly={isReleased || isPosted}
-                maxAccess={access}
+                maxAccess={maxAccess}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Ref' },
                   { key: 'date', value: 'Date', type: 'date' }
@@ -444,7 +444,7 @@ export default function RubberForm({ labels, access, recordId }) {
                   valueField='recordId'
                   displayField={['reference']}
                   values={formik.values}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik.setFieldValue('metalId', newValue?.recordId || null)
                     formik.setFieldValue('metalPurity', newValue?.purity || null)
                   }}
@@ -470,7 +470,8 @@ export default function RubberForm({ labels, access, recordId }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('laborId', newValue?.recordId || null)
                 }}
                 error={formik.touched.laborId && Boolean(formik.errors.laborId)}

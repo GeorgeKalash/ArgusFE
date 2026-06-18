@@ -130,6 +130,7 @@ const MfSettingForm = ({ _labels, access }) => {
               values={formik.values}
               onChange={(_, newValue) => formik.setFieldValue('mf_jo_pic_source', newValue?.key || null)}
               error={formik.touched.mf_jo_pic_source && Boolean(formik.errors.mf_jo_pic_source)}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
@@ -165,6 +166,7 @@ const MfSettingForm = ({ _labels, access }) => {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('max_btfr_lines_allowed', null)}
                 error={formik.touched.max_btfr_lines_allowed && Boolean(formik.errors.max_btfr_lines_allowed)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>

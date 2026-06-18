@@ -151,10 +151,10 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
         <Grow>
           <Grid container spacing={1}>
             <Grid item xs={12}>
-              <CustomTextField label={labels.name} value={obj.name} readOnly />
+              <CustomTextField label={labels.name} value={obj.name} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField label={labels.sku} value={obj.sku} readOnly />
+              <CustomTextField label={labels.sku} value={obj.sku} readOnly maxAccess={maxAccess} />
             </Grid>
           </Grid>
 

@@ -123,13 +123,13 @@ const AvailabilityList = ({ obj, labels, access }) => {
       <Fixed>
         <Grid container spacing={1.5} m={1}>
           <Grid item xs={7}>
-            <CustomTextField label={labels.sku} value={obj.sku} readOnly />
+            <CustomTextField label={labels.sku} value={obj.sku} readOnly maxAccess={access}/>
           </Grid>
           <Grid item xs={7}>
-            <CustomTextField label={labels.name} value={obj.name} readOnly />
+            <CustomTextField label={labels.name} value={obj.name} readOnly maxAccess={access}/>
           </Grid>
           <Grid item xs={7}>
-            <CustomNumberField label={labels.onHand} value={obj.qty} readOnly />
+            <CustomNumberField label={labels.onHand} value={obj.qty} readOnly maxAccess={access}/>
           </Grid>
         </Grid>
       </Fixed>

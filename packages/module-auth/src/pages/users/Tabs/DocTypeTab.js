@@ -114,6 +114,7 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
               name='search'
               value={formik.values.search}
               label={labels.search}
+              maxAccess={maxAccess}
               onClear={() => {
                 formik.setFieldValue('search', '')
               }}

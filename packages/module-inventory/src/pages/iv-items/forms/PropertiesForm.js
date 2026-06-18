@@ -175,6 +175,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
                               label={dimension.dimensionName}
                               valueField='id'
                               displayField='name'
+                              maxAccess={maxAccess}
                               values={formik.values}
                               onChange={(_, newValue) => formik.setFieldValue(`${dimension.dimensionId}`, newValue?.id || null)}
                             />
