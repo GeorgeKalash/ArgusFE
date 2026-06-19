@@ -17,7 +17,6 @@ export const DocumentReleaseRepository = {
     snapshot: service + 'snapshotCOD'
   },
   DRGroup: {
-    page: service + 'pageGRP',
     qry: service + 'qryGRP',
     get: service + 'getGRP',
     set: service + 'setGRP',

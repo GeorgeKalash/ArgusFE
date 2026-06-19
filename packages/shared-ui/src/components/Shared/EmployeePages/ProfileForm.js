@@ -511,7 +511,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={AccessControlRepository.SecurityGroup.qry}
-                    parameters={`_startAt=0&_pageSize=1000&filter=`}
+                    parameters={`_startAt=0&_pageSize=1000`}
                     name='sgId'
                     label={labels.securityGrp}
                     values={formik.values}

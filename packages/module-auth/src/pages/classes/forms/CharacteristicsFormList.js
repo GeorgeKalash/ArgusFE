@@ -69,11 +69,9 @@ const CharacteristicsForm = ({ labels, store, maxAccess, height  }) => {
 
   const getCharacteristicGridData = classId => {
     setCharacteristicGridData([])
-    const defaultParams = `_classId=${classId}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.ClassCharacteristics.qry,
-      parameters: parameters
+      parameters: `_classId=${classId}`
     })
       .then(res => {
         setCharacteristicGridData(res)

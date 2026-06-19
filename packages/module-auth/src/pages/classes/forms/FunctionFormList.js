@@ -68,11 +68,9 @@ const FunctionFormList = ({ labels, store, maxAccess }) => {
 
   const getFunctionGridData = classId => {
     setFunctionGridData([])
-    const defaultParams = `_classId=${classId}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.ClassFunction.qry,
-      parameters: parameters
+      parameters: `_classId=${classId}`
     })
       .then(res => {
         setFunctionGridData(res)

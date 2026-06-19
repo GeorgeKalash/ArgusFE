@@ -29,7 +29,7 @@ const Strategies2 = () => {
 
     return await getRequest({
       extension: DocumentReleaseRepository.Strategy.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
   }
 

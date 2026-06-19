@@ -240,10 +240,6 @@ export const InventoryRepository = {
   GenerateFiscalYear: {
     gen: service + 'genFIS'
   },
-  IVMDParts: {
-    page: service + 'pageIT',
-    qry: service + 'qryIT'
-  },
   ItemParts: {
     qry: service + 'qryITP',
     set2: service + 'set2ITP'

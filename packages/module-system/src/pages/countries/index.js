@@ -23,7 +23,7 @@ const Countries = () => {
 
     const response = await getRequest({
       extension: SystemRepository.Country.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }

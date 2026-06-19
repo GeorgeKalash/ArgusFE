@@ -64,11 +64,9 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
   }, [recordId])
 
   const getClassesById = recordId => {
-    const defaultParams = `_recordId=${recordId}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.Class.get,
-      parameters: parameters
+      parameters: `_recordId=${recordId}`
     }).then(res => {
       formik.setValues(res.record)
       setEditMode(true)

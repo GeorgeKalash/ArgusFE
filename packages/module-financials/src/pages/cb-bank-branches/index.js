@@ -25,7 +25,7 @@ const BankBranches = () => {
 
     return await getRequest({
       extension: CashBankRepository.BankBranches.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
   }
 

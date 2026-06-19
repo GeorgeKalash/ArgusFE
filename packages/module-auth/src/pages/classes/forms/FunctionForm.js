@@ -54,11 +54,9 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
   }, [recordId])
 
   const getFunctionsById = (recordId, functionId) => {
-    const defaultParams = `_classId=${recordId}&&_functionId=${functionId}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.ClassFunction.get,
-      parameters: parameters
+      parameters: `_classId=${recordId}&&_functionId=${functionId}`
     }).then(res => {
       console.log(res.record)
       formik.setValues(res.record)

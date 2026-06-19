@@ -39,9 +39,9 @@ const DRGroups = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: DocumentReleaseRepository.DRGroup.page,
+      extension: DocumentReleaseRepository.DRGroup.qry,
 
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
   }
 
@@ -53,12 +53,12 @@ const DRGroups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.DRGroup.page,
+    endpointId: DocumentReleaseRepository.DRGroup.qry,
     datasetId: ResourceIds.DRGroups
   })
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.DRGroup.page
+    endpointId: DocumentReleaseRepository.DRGroup.qry
   })
 
   const columns = [

@@ -23,7 +23,7 @@ const States = () => {
 
     const response = await getRequest({
       extension: SystemRepository.State.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_countryId=${_countryId}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_countryId=${_countryId}`
     })
 
     return { ...response, _startAt: _startAt }

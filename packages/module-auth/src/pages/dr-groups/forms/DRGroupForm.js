@@ -64,11 +64,9 @@ const DRGroupForm = ({ labels, editMode, maxAccess, setStore, store }) => {
   }, [recordId])
 
   const getGroupId = recordId => {
-    const defaultParams = `_recordId=${recordId}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.DRGroup.get,
-      parameters: parameters
+      parameters: `_recordId=${recordId}`
     }).then(res => {
       formik.setValues(res.record)
     })

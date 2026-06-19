@@ -78,10 +78,9 @@ const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   }, [])
 
   const getStrategyId = recordId => {
-    const defaultParams = `_recordId=${recordId}`
     getRequest({
       extension: DocumentReleaseRepository.Strategy.get,
-      parameters: defaultParams
+      parameters: `_recordId=${recordId}`
     }).then(res => {
       formik.setValues(res.record)
     })
