@@ -96,7 +96,7 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('groupId', newValue?.recordId || null)
+                  formik.setFieldValue('groupId', newValue?.recordId || null)
                 }}
                 error={formik.touched.groupId && Boolean(formik.errors.groupId)}
               />
@@ -113,7 +113,7 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('incId', newValue?.recordId || null)
+                  formik.setFieldValue('incId', newValue?.recordId || null)
                 }}
                 error={formik.touched.incId && Boolean(formik.errors.incId)}
               />

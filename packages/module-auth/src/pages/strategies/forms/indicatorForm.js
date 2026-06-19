@@ -10,7 +10,6 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const IndicatorForm = ({ labels, editMode, maxAccess, store }) => {
-  const [setValueGridData] = useState([])
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { getRequest } = useContext(RequestsContext)
@@ -83,7 +82,6 @@ const IndicatorForm = ({ labels, editMode, maxAccess, store }) => {
           ...item,
           strategyId: item.strategyId
         }))
-        setValueGridData(gridData)
         formik.setValues({ indicatorData: gridData })
       })
       .catch(error => {
