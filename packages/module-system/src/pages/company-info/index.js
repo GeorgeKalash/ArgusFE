@@ -21,32 +21,8 @@ const CompanyInfo = () => {
     datasetId: ResourceIds.CompanyInfo
   })
 
-  useEffect(() => {
-    getData()
-  }, [])
-
-  async function getData() {
-    const res = await getRequest({
-      extension: SystemRepository.CompanyInfo.get,
-      parameters: `_filter=`
-    })
-
-    formik.setValues({
-      ...formik.values,
-      name: res.record.name,
-      webSite: res.record.taxNo,
-      taxNo: res.record.taxNo,
-      licenseNo: res.record.licenseNo,
-      plantId: res.record.plantId,
-      crNo: res.record.crNo,
-      logoUrl: res.record.logoUrl,
-      flName: res.record.flName
-    })
-  }
-
   const { formik } = useForm({
     maxAccess,
-    validateOnChange: true,
     initialValues: {
       plantId: '',
       accountId: getStorageData('userData')?.accountId,
@@ -62,6 +38,31 @@ const CompanyInfo = () => {
       await post(values)
     }
   })
+
+  useEffect(() => {
+    getData()
+  }, [])
+
+  async function getData() {
+    const res = await getRequest({
+      extension: SystemRepository.CompanyInfo.get,
+      parameters: `_filter=`
+    })
+
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        name: res.record.name,
+        webSite: res.record.taxNo,
+        taxNo: res.record.taxNo,
+        licenseNo: res.record.licenseNo,
+        plantId: res.record.plantId,
+        crNo: res.record.crNo,
+        logoUrl: res.record.logoUrl,
+        flName: res.record.flName
+      }
+    })
+  }
 
   const post = async obj => {
     await postRequest({

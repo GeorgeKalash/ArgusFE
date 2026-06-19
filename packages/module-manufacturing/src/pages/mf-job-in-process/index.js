@@ -68,7 +68,7 @@ const JobInProcess = () => {
           parameters: `_recordId=${workCenterId}`
         })
 
-        formik.setValues({ ...formik.values, workCenterId: workCenterId, workCenterName: record.name, workCenterRef: record.reference })
+        formik.resetForm({ values: { ...formik.values, workCenterId: workCenterId, workCenterName: record.name, workCenterRef: record.reference} })
       }
     })()
   }, [workCenterId])

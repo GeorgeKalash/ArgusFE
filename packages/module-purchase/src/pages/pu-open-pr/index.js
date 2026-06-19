@@ -119,7 +119,7 @@ const OpenPurchaseRequisition = () => {
       balance: item.qty - item.orderedQty
     }))
 
-    formik.setFieldValue('items', res || [])
+    formik.resetForm({ values: {...formik.values, items: res || []} })
   }
 
   const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)

@@ -11,7 +11,7 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
   const windowContext = useWindow()
   const isImmediateWindow = windowContext?.isImmediateWindow ?? false
   const isInsideWindow = windowContext?.isInsideWindow ?? false
-const isMainLevel = !isInsideWindow
+
   const trackInteraction = usePageInteraction()
   const { clearPageInteractions } = useInteractionTracker()
   const {
@@ -201,10 +201,10 @@ const isMainLevel = !isInsideWindow
 
   const dirty = JSON.stringify(normalized(formik.values)) !== JSON.stringify(normalized(formik.initialValues))
  
-  console.log('dirty',dirty ,'\n ',formik.initialValues,' \n ',formik.values,isMainLevel)
+  console.log('dirty',dirty ,'\n ',formik.initialValues,' \n ',formik.values,isInsideWindow)
 
   useEffect(() => {
-    if (!isImmediateWindow && !isMainLevel) return
+    if (!isImmediateWindow && isInsideWindow) return
     
     if (dirty) trackInteraction('form')
     else clearPageInteractions(currentTab?.resourceId)

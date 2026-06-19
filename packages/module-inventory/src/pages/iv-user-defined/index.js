@@ -71,7 +71,7 @@ const UserTextForm = () => {
         fetchedValues[obj.key] = obj.value
       }
     })
-    formik.setValues(fetchedValues)
+    formik.resetForm({ values: fetchedValues })
   }
 
   const postDimensionSettings = async obj => {
