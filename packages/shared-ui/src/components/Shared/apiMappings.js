@@ -842,16 +842,16 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
-  [ResourceIds.DivisionFilter]: {
+  [ResourceIds.Divisions]: {
     type: COMBOBOX,
-    endpoint: companyStructureRepository.DivisionFilters.qry,
+    endpoint: companyStructureRepository.Divisions.qry,
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
-  [ResourceIds.BranchFilter]: {
+  [ResourceIds.Branches]: {
     type: COMBOBOX,
-    endpoint: companyStructureRepository.BranchFilters.qry,
+    endpoint: companyStructureRepository.Branches.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -859,7 +859,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.CompanyPosition]: {
+  [ResourceIds.CompanyPositions]: {
     type: COMBOBOX,
     endpoint: companyStructureRepository.CompanyPositions.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId`,
@@ -870,9 +870,9 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.DepartmentFilter]: {
+  [ResourceIds.Departments]: {
     type: COMBOBOX,
-    endpoint: companyStructureRepository.DepartmentFilters.qry,
+    endpoint: companyStructureRepository.Departments.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`,
     valueField: 'recordId',
     displayField: ['departmentRef', 'name'],

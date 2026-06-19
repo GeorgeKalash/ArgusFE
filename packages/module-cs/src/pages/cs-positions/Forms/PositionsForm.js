@@ -1,85 +1,80 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
-import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 
-export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
+export default function PositionsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: TimeAttendanceRepository.BiometricDevices.page
+    endpointId: companyStructureRepository.CompanyPositions.page
   })
 
   const { formik } = useForm({
     initialValues: {
       recordId: null,
-      reference: '',
+      positionRef: '',
       name: '',
-      divisionId: null,
-      branchId: null
+      description: '',
+      referToPositionId: null
     },
-    validateOnChange: true,
+    maxAccess,
     validationSchema: yup.object({
-      reference: yup.string().required(),
-      name: yup.string().required(),
-      branchId: yup.number().required()
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: TimeAttendanceRepository.BiometricDevices.set,
+        extension: companyStructureRepository.CompanyPositions.set,
         record: JSON.stringify(obj)
       })
 
-      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-      formik.setFieldValue('recordId', response?.recordId)
-
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      !obj?.recordId && formik.setFieldValue('recordId', response.recordId)
       invalidate()
     }
   })
+
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: TimeAttendanceRepository.BiometricDevices.get,
+          extension: companyStructureRepository.CompanyPositions.get,
           parameters: `_recordId=${recordId}`
         })
-        formik.setValues({ ...res.record })
+        formik.setValues(res.record)
       }
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.BiometricDevices} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.CompanyPositions} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
-                name='reference'
+                name='positionRef'
                 label={labels.reference}
-                value={formik.values.reference}
-                required
+                value={formik.values.positionRef}
                 maxAccess={maxAccess}
-                maxLength='20'
+                maxLength='10'
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                onClear={() => formik.setFieldValue('positionRef', '')}
+                error={formik.touched.positionRef && Boolean(formik.errors.positionRef)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -87,8 +82,8 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
-                maxLength='30'
                 required
+                maxLength='50'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
@@ -96,38 +91,37 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={companyStructureRepository.Divisions.qry}
-                name='divisionId'
-                label={labels.division}
-                valueField='recordId'
-                displayField={'name'}
+              <CustomTextField
+                name='description'
+                label={labels.description}
+                value={formik.values.description}
                 maxAccess={maxAccess}
-                values={formik.values}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('divisionId', newValue?.recordId || null)
-                }}
-                error={formik.touched.divisionId && Boolean(formik.errors.divisionId)}
+                maxLength='510'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('description', '')}
+                error={formik.touched.description && Boolean(formik.errors.description)}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.Branches.qry}
-                name='branchId'
-                label={labels.branch}
+                endpointId={companyStructureRepository.CompanyPositions.qry}
+                parameters='_filter=&_size=40&_startAt=0&_sortBy=positionRef'
+                name='referToPositionId'
+                label={labels.referrerName}
+                valueField='recordId'
+                displayField={['positionRef', 'name']}
                 columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
+                  { key: 'positionRef', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                valueField='recordId'
-                displayField={['reference', 'name']}
                 values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('branchId', newValue?.recordId || null)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('referToPositionName', newValue?.name || '')
+                  
+                  formik.setFieldValue('referToPositionId', newValue?.recordId || null)
                 }}
-                required
-                error={formik.touched.branchId && Boolean(formik.errors.branchId)}
+                error={formik.touched.referToPositionId && Boolean(formik.errors.referToPositionId)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
