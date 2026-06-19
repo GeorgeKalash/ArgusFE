@@ -12,16 +12,15 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate }) => {
+const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
 
   const { formik } = useForm({
     initialValues: {
       classId,
       functionId: record?.functionId || null,
-      strategyId: null
+      strategyId: record?.strategyId || null
     },
     maxAccess,
     validationSchema: yup.object({
@@ -34,7 +33,7 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate }
         record: JSON.stringify(obj)
       })
 
-      toast.success(platformLabels.Edited)
+      toast.success(!editMode ? platformLabels.Added : platformLabels.Edited)
       invalidate()
       window.close()
     }
@@ -42,7 +41,7 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate }
 
   useEffect(() => {
     ;(async function () {
-      if (record.functionId && classId) {
+      if (editMode) {
         const res = await getRequest({
           extension: DocumentReleaseRepository.ClassFunction.get,
           parameters: `_classId=${classId}&_functionId=${record.functionId}`
@@ -66,7 +65,7 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate }
                 required
                 valueField='key'
                 displayField='value'
-                readOnly
+                readOnly={editMode}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('functionId', '')}

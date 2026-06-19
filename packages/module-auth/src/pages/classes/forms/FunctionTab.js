@@ -62,7 +62,7 @@ const FunctionsTab = ({ labels, maxAccess, store }) => {
 
   const add = () => openForm()
 
-  const edit = obj => openForm(obj)
+  const edit = obj => openForm(obj, true)
 
   function openForm(record) {
     stack({

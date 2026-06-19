@@ -18,7 +18,7 @@ const ApproverForm = ({ labels, maxAccess, record, store }) => {
   const { recordId: groupId } = store
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.GroupCode.page
+    endpointId: DocumentReleaseRepository.GroupCode.qry
   })
 
   const { formik } = useForm({
@@ -76,7 +76,7 @@ const ApproverForm = ({ labels, maxAccess, record, store }) => {
                 required
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('codeId', newValue?.recordId)
+                  formik.setFieldValue('codeId', newValue?.recordId || null)
                 }}
                 error={formik.touched.codeId && Boolean(formik.errors.codeId)}
               />

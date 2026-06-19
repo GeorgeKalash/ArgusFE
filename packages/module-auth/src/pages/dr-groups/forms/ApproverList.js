@@ -37,8 +37,16 @@ const ApproverList = ({ store, labels, maxAccess }) => {
   })
 
   const columns = [
-    { field: 'codeRef', headerName: labels.reference, flex: 1 },
-    { field: 'codeName', headerName: labels.name, flex: 1 }
+    { 
+      field: 'codeRef', 
+      headerName: labels.reference, 
+      flex: 1 
+    },
+    { 
+      field: 'codeName', 
+      headerName: labels.name, 
+      flex: 1 
+    }
   ]
 
   const add = () => openForm()
@@ -59,11 +67,10 @@ const ApproverList = ({ store, labels, maxAccess }) => {
         labels,
         record,
         maxAccess,
-        store,
-        invalidate
+        store
       },
       width: 500,
-      height: 400,
+      height: 300,
       title: labels.approver
     })
   }

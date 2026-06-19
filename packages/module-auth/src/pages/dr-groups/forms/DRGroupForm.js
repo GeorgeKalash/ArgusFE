@@ -62,12 +62,14 @@ const DRGroupForm = ({ labels, maxAccess, store, setStore }) => {
     })()
   }, [recordId])
 
+  const editMode = !!formik.values.recordId
+
   return (
     <FormShell
       form={formik}
       resourceId={ResourceIds.DRGroups}
       maxAccess={maxAccess}
-      editMode={!!recordId || !!formik.values.recordId}
+      editMode={editMode}
     >
       <VertLayout>
         <Grow>

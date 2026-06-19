@@ -71,7 +71,7 @@ const DRGroups = () => {
       Component: DRGroupWindow,
       props: {
         labels,
-        recordId: recordId || null,
+        recordId,
         maxAccess: access
       },
       width: 600,
