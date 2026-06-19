@@ -31,6 +31,7 @@ export const BrokerageTradingRepository = {
     set: service + 'setEO',
     del: service + 'delEO',
     close: service + 'closeEO',
+    reopen: service + 'reopenEO',
     get: service + 'getEO',
     snapshot: service + 'snapshotEO',
     pack: service + 'getPackEO'

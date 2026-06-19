@@ -91,7 +91,9 @@ export default function EventOrderForm({ recordId, window }) {
       reference: '',
       releaseStatus: 1,
       status: 1,
-      currencyId_metalId: ''
+      currencyId_metalId: '',
+      sourceId: null,
+      sourceNo: ''
     },
     maxAccess,
     validationSchema: yup.object({
@@ -114,7 +116,12 @@ export default function EventOrderForm({ recordId, window }) {
       qty_muId: yup.number().required(),
       baseQty: yup.number().required(),
       targetPrice_muId: yup.number().required(),
-      baseTargetPrice: yup.number().required()
+      baseTargetPrice: yup.number().required(),
+      sourceNo: yup.string().nullable().test( function (value) {
+        const { sourceId } = this.parent
+        return !(sourceId && !value)
+        }
+      ),
     }),
     onSubmit: async obj => {
       const values = {
@@ -184,6 +191,18 @@ export default function EventOrderForm({ recordId, window }) {
     refetchForm(res.recordId)
   }
 
+  const onReopen = async () => {
+    const res = await postRequest({
+      extension: BrokerageTradingRepository.EventOrder.reopen,
+      record: JSON.stringify({ recordId: formik.values?.recordId })
+    })
+
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    refetchForm(res.recordId)
+  }
+
+
 
   const actions = [
     {
@@ -195,7 +214,8 @@ export default function EventOrderForm({ recordId, window }) {
     {
       key: 'Reopen',
       condition: isClosed,
-      disabled: true
+      onClick: onReopen,
+      disabled: !isClosed
     },
     {
       key: 'Approval',
@@ -568,6 +588,7 @@ useEffect(() => {
                         setReCalc(true)
                         formik.setFieldValue('qty_muId', newValue?.recordId || null)
                         formik.setFieldValue('qty_muQty', newValue?.qty || null)
+                        formik.setFieldValue('qty', 0)
                       }}
                       error={formik.touched.qty_muId && Boolean(formik.errors.qty_muId)}
                     />
@@ -642,17 +663,59 @@ useEffect(() => {
               
             </Grid>
             <Grid item xs={6}>
-              <CustomTextArea
-                name='notes'
-                label={labels.notes}
-                value={formik.values.notes}
-                rows={4}
-                maxAccess={maxAccess}
-                readOnly={isClosed}
-                onChange={e => formik.setFieldValue('notes', e.target.value)}
-                onClear={() => formik.setFieldValue('notes', '')}
-                error={formik.touched.notes && Boolean(formik.errors.notes)}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
+                    parameters={msId && `_msId=${msId}`}
+                    reducer={response => response?.record?.salesOrderSources}
+                    name='sourceId'
+                    label={labels.source}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    readOnly={isClosed}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    value={formik.values.sourceId}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('sourceNo', null)
+                      formik.setFieldValue('sourceId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.sourceId && Boolean(formik.errors.sourceId)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='sourceNo'
+                    label={labels.sourceNo}
+                    value={formik.values.sourceNo}
+                    maxLength={20}
+                    onChange={formik.handleChange}
+                    readOnly={!formik.values.sourceId || isClosed}
+                    required={formik.values.sourceId}
+                    maxAccess={maxAccess}
+                    error={formik.touched.sourceNo && Boolean(formik.errors.sourceNo)}
+                  />
+                </Grid>           
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='notes'
+                    label={labels.notes}
+                    value={formik.values.notes}
+                    rows={4}
+                    maxAccess={maxAccess}
+                    readOnly={isClosed}
+                    onChange={e => formik.setFieldValue('notes', e.target.value)}
+                    onClear={() => formik.setFieldValue('notes', '')}
+                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={6}>
               <CustomNumberField
