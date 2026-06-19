@@ -1,0 +1,1 @@
+export { default } from '@argus/module-cs/src/pages/cs-divisions';

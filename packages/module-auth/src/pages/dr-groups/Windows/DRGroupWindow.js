@@ -31,8 +31,6 @@ const DRGroupWindow = ({ height, recordId, labels, maxAccess }) => {
       <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <ApproverList
           labels={labels}
-          setEditMode={setEditMode}
-          setStore={setStore}
           maxAccess={maxAccess}
           store={store}
         />
