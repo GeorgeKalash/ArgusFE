@@ -11,9 +11,11 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functionId, window, editMode }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     functionId: null,
@@ -41,9 +43,7 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
     })
       .then(res => {
         getFunctionGridData(classId)
-        if (!editMode) {
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Editted Successfully')
+        !editMode ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
         window.close()
       })
       .catch(error => {})

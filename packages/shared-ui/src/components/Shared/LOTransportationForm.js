@@ -62,7 +62,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode, window })
         record: JSON.stringify(values)
       })
 
-      toast.success('Record Updated Successfully')
+      toast.success(platformLabels.Updated)
     }
   })
 

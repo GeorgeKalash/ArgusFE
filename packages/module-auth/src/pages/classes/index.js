@@ -11,10 +11,12 @@ import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const Classes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -70,7 +72,7 @@ const Classes = () => {
       extension: DocumentReleaseRepository.Class.del,
       record: JSON.stringify(obj)
     }).then(res => {
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
       invalidate()
     })
   }
