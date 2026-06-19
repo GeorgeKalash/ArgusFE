@@ -1,23 +1,25 @@
 import { useContext, useEffect } from 'react'
 import { Grid } from '@mui/material'
-import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-const ApproverForm = ({ labels, maxAccess, record, store, invalidate }) => {
+const ApproverForm = ({ labels, maxAccess, record, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId: groupId } = store
+
+  const invalidate = useInvalidate({
+    endpointId: DocumentReleaseRepository.GroupCode.page
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -25,7 +27,6 @@ const ApproverForm = ({ labels, maxAccess, record, store, invalidate }) => {
       groupId
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       codeId: yup.string().required()
     }),
@@ -73,9 +74,8 @@ const ApproverForm = ({ labels, maxAccess, record, store, invalidate }) => {
                 ]}
                 values={formik.values}
                 required
-                readOnly={!!record?.codeId}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('codeId', newValue?.recordId)
                 }}
                 error={formik.touched.codeId && Boolean(formik.errors.codeId)}

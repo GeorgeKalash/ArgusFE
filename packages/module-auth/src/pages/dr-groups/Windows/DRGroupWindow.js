@@ -23,7 +23,11 @@ const DRGroupWindow = ({ height, recordId, labels, maxAccess }) => {
         <DRGroupForm labels={labels} store={store} setStore={setStore} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
-        <ApproverList labels={labels} store={store} setStore={setStore} maxAccess={maxAccess} />
+        <ApproverList
+          labels={labels}
+          maxAccess={maxAccess}
+          store={store}
+        />
       </CustomTabPanel>
     </>
   )

@@ -16,16 +16,14 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate }
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const editMode = !!record?.functionId
 
   const { formik } = useForm({
     initialValues: {
       classId,
       functionId: record?.functionId || null,
-      strategyId: record?.strategyId || null
+      strategyId: null
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       functionId: yup.string().required(),
       strategyId: yup.string().required()
@@ -36,7 +34,7 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate }
         record: JSON.stringify(obj)
       })
 
-      toast.success(!editMode ? platformLabels.Added : platformLabels.Edited)
+      toast.success(platformLabels.Edited)
       invalidate()
       window.close()
     }
@@ -44,7 +42,7 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate }
 
   useEffect(() => {
     ;(async function () {
-      if (editMode) {
+      if (record.functionId && classId) {
         const res = await getRequest({
           extension: DocumentReleaseRepository.ClassFunction.get,
           parameters: `_classId=${classId}&_functionId=${record.functionId}`
@@ -68,12 +66,12 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate }
                 required
                 valueField='key'
                 displayField='value'
-                readOnly={editMode}
+                readOnly
                 values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('functionId', '')}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('functionId', newValue?.key ?? '')
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('functionId', newValue?.key || null)
                 }}
                 error={formik.touched.functionId && Boolean(formik.errors.functionId)}
               />
@@ -90,8 +88,8 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate }
                 required
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('strategyId', '')}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('strategyId', newValue?.recordId ?? '')
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('strategyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.strategyId && Boolean(formik.errors.strategyId)}
               />
