@@ -281,6 +281,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     label={labels.email}
                     value={formik.values.email}
                     type='email'
+                    maxAccess={maxAccess}
                     required
                     placeholder='johndoe@email.com'
                     readOnly={editMode}

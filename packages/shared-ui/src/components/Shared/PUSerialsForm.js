@@ -136,6 +136,7 @@ export const PUSerialsForm = ({ row, siteId, window, updateRow, disabled }) => {
                 secondValueShow='itemName'
                 form={formik}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

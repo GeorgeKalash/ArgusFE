@@ -156,6 +156,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
               label={labels.dmgName}
               value={_dmgName}
               readOnly
+              maxAccess={maxAccess}
             />
             {
               dimensions && dimensions.length > 0 && (
@@ -175,6 +176,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
                               label={dimension.dimensionName}
                               valueField='id'
                               displayField='name'
+                              maxAccess={maxAccess}
                               values={formik.values}
                               onChange={(_, newValue) => formik.setFieldValue(`${dimension.dimensionId}`, newValue?.id || null)}
                             />

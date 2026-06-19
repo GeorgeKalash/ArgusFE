@@ -2216,6 +2216,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                 value={formik.values.header.KGmetalPrice}
                 readOnly
                 hidden={!metalPriceVisibility}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

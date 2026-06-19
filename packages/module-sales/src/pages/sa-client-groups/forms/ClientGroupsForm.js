@@ -113,6 +113,7 @@ export default function ClientGroupsForm({ labels, maxAccess, recordId }) {
                     nraDescription: description || ''
                   })
                 }}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

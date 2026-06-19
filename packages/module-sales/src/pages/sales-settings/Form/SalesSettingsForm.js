@@ -187,6 +187,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('maxReturnDays', '')}
                       error={formik.touched.maxReturnDays && Boolean(formik.errors.maxReturnDays)}
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={12}>

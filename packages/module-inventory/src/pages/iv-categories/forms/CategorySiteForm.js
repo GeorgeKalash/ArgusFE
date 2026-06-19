@@ -121,10 +121,10 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={6.01}>
-              <CustomTextField name='reference' label={labels.reference} value={store.ref} readOnly={true} />
+              <CustomTextField name='reference' label={labels.reference} value={store.ref} readOnly={true} maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={6.01}>
-              <CustomTextField name='name' label={labels.name} value={store.name} readOnly={true} />
+              <CustomTextField name='name' label={labels.name} value={store.name} readOnly={true} maxAccess={maxAccess}/>
             </Grid>
           </Grid>
           <DataGrid

@@ -579,6 +579,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 label={labels.accountGroup}
                 value={formik.values.accountGroupName}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>

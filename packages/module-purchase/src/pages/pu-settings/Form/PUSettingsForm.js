@@ -147,6 +147,7 @@ const PUSettingsForm = () => {
                 decimalScale={0}
                 onClear={() => formik.setFieldValue('POSHPVarPct', '')}
                 error={formik.touched.POSHPVarPct && Boolean(formik.errors.POSHPVarPct)}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

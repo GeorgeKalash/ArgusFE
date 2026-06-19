@@ -42,6 +42,7 @@ export default function CopyToClipboardForm({ barcode, window }) {
             <CustomTextField
               name='barcode'
               label={labels.label}
+              maxAccess={maxAccess}
               value={formik.values.barcode}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('barcode', '')}

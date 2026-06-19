@@ -358,7 +358,8 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('laborId', newValue?.recordId || null)
                 }}
                 error={formik.touched.laborId && Boolean(formik.errors.laborId)}
@@ -387,7 +388,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                   { key: 'reference', value: 'Ref' },
                   { key: 'date', value: 'Date', type: 'date' }
                 ]}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   if (newValue?.recordId) {
                     const res = await getProduct(newValue?.recordId)
                     const res2 = await getDesign(newValue?.threeDDId)

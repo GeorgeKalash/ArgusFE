@@ -142,7 +142,7 @@ const MaterialsTab = ({ store }) => {
       <Fixed>
         <Grid container padding={4}>
           <Grid item xs={2}>
-            <CustomNumberField name='totalQty' label={labels.totalQty} value={totQty} readOnly />
+            <CustomNumberField name='totalQty' label={labels.totalQty} value={totQty} readOnly maxAccess={access}/>
           </Grid>
         </Grid>
       </Fixed>

@@ -336,6 +336,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                       formik.setFieldValue('civilStatus', newValue?.key || null)
                     }}
                     error={formik.touched.civilStatus && Boolean(formik.errors.civilStatus)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -351,6 +352,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                       formik.setFieldValue('otpId', newValue?.recordId || null)
                     }}
                     error={formik.touched.otpId && Boolean(formik.errors.otpId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
@@ -367,6 +369,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('birthDate', null)}
                     error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -382,6 +385,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                       formik.setFieldValue('religion', newValue?.key || null)
                     }}
                     error={formik.touched.religion && Boolean(formik.errors.religion)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>

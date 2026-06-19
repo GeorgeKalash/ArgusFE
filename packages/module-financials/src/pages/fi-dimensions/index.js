@@ -150,6 +150,7 @@ const FiDimensions = () => {
                 numberField={true}
                 clearable={true}
                 type='number'
+                maxAccess={access}
                 error={formik.touched.DimCount && Boolean(formik.errors.DimCount)}
                 inputProps={{
                   min: 1,
@@ -173,6 +174,7 @@ const FiDimensions = () => {
                       value={formik.values[`tpaDimension${index + 1}`]}
                       onClear={() => formik.setFieldValue(`tpaDimension${index + 1}`, '')}
                       onChange={formik.handleChange}
+                      maxAccess={access}
                       error={formik.values.DimCount > index && Boolean(formik.errors[`tpaDimension${index + 1}`])}
                       inputProps={{
                         readOnly: formik.values.DimCount <= index || formik.values.DimCount === 'null'
@@ -194,6 +196,7 @@ const FiDimensions = () => {
                       value={formik.values[`tpaDimension${index + 11}`]}
                       onClear={() => formik.setFieldValue(`tpaDimension${index + 11}`, '')}
                       onChange={formik.handleChange}
+                      maxAccess={access}
                       error={formik.errors[`tpaDimension${index + 11}`]}
                       inputProps={{
                         readOnly: formik.values.DimCount <= index + 10 || formik.values.DimCount === 'null'

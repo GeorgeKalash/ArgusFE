@@ -148,6 +148,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, f
                   }
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

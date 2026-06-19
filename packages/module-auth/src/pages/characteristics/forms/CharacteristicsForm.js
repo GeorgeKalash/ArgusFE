@@ -121,8 +121,9 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
                 valueField='key'
                 displayField='value'
                 values={formik.values}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('dataType', '')}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('dataType', newValue?.key || '')
                 }}
                 error={formik.touched.dataType && Boolean(formik.errors.dataType)}

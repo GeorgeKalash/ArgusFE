@@ -165,7 +165,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueShow='GLDOEGainAccountref'
                 secondValueShow='GLDOEGainAccountname'
                 maxAccess={access}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   const { recordId = '', accountRef = '', name = '' } = newValue || {}
                   handleChange([
                     { name: 'GLDOEGainAccountId', value: recordId },
@@ -189,7 +189,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueShow='GLDOELossAccountref'
                 secondValueShow='GLDOELossAccountname'
                 maxAccess={access}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   const { recordId = '', accountRef = '', name = '' } = newValue || {}
                   handleChange([
                     { name: 'GLDOELossAccountId', value: recordId },
@@ -212,7 +212,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueShow='GLRoundingAccountDbref'
                 secondValueShow='GLRoundingAccountDbname'
                 maxAccess={access}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   const { recordId = '', accountRef = '', name = '' } = newValue || {}
                   handleChange([
                     { name: 'GLRoundingAccountDb', value: recordId },
@@ -235,7 +235,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueShow='GLRoundingAccountCrref'
                 secondValueShow='GLRoundingAccountCrname'
                 maxAccess={access}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   const { recordId = '', accountRef = '', name = '' } = newValue || {}
                   handleChange([
                     { name: 'GLRoundingAccountCr', value: recordId },
@@ -254,6 +254,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 label={_labels.glDoeSegStart}
                 value={formik.values.GLDOESeg0Start}
                 error={formik.touched.GLDOESeg0Start && Boolean(formik.errors.GLDOESeg0Start)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -264,6 +265,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 label={_labels.glDoeSegEnd}
                 value={formik.values.GLDOESeg0End}
                 error={formik.touched.GLDOESeg0End && Boolean(formik.errors.GLDOESeg0End)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -275,7 +277,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('GLDOEDTId', newValue?.recordId)
                 }}
                 error={formik.touched.GLDOEDTId && Boolean(formik.errors.GLDOEDTId)}
@@ -295,7 +297,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueShow='GLFYCGainAccountref'
                 secondValueShow='GLFYCGainAccountname'
                 maxAccess={access}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   const { recordId = '', accountRef = '', name = '' } = newValue || {}
                   handleChange([
                     { name: 'GLFYCGainAccountId', value: recordId },
@@ -319,7 +321,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueShow='GLFYCLossAccountref'
                 secondValueShow='GLFYCLossAccountname'
                 maxAccess={access}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   const { recordId = '', accountRef = '', name = '' } = newValue || {}
                   handleChange([
                     { name: 'GLFYCLossAccountId', value: recordId },
@@ -338,6 +340,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 label={_labels.glFycStart}
                 value={formik.values.GLFYCSeg0Start}
                 error={formik.touched.GLFYCSeg0Start && Boolean(formik.errors.GLFYCSeg0Start)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -348,6 +351,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 label={_labels.glFycEnd}
                 value={formik.values.GLFYCSeg0End}
                 error={formik.touched.GLFYCSeg0End && Boolean(formik.errors.GLFYCSeg0End)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -359,7 +363,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('GLFYCDTId', newValue?.recordId)
                 }}
                 error={formik.touched.GLFYCDTId && Boolean(formik.errors.GLFYCDTId)}

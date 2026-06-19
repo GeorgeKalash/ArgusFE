@@ -269,21 +269,22 @@ const PostWorkCenterJob = () => {
                 label={labels.documentTypeID}
                 value={formik.values.documentTypeID}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomTextField name='sku' label={labels.sku} value={formik.values.sku} readOnly />
+              <CustomTextField name='sku' label={labels.sku} value={formik.values.sku} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField name='itemName' label={labels.itemName} value={formik.values.itemName} readOnly />
+              <CustomTextField name='itemName' label={labels.itemName} value={formik.values.itemName} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomTextField name='routingRef' label={labels.routing} value={formik.values.routingRef} readOnly />
+              <CustomTextField name='routingRef' label={labels.routing} value={formik.values.routingRef} readOnly maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField name='routingName' label={labels.name} value={formik.values.routingName} readOnly />
+              <CustomTextField name='routingName' label={labels.name} value={formik.values.routingName} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={6}>
@@ -357,21 +358,21 @@ const PostWorkCenterJob = () => {
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='qtyIn' label={labels.qtyIn} value={formik.values.qtyIn} readOnly />
+              <CustomNumberField name='qtyIn' label={labels.qtyIn} value={formik.values.qtyIn} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='qty' label={labels.qtyOut} value={formik.values.qty} readOnly />
-            </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={3}>
-              <CustomNumberField name='pcsIn' label={labels.pcsIn} value={formik.values.pcsIn} readOnly />
-            </Grid>
-            <Grid item xs={3}>
-              <CustomNumberField name='pcs' label={labels.pcsOut} value={formik.values.pcs} readOnly />
+              <CustomNumberField name='qty' label={labels.qtyOut} value={formik.values.qty} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomTextField name='statusName' label={labels.status} value={formik.values.statusName} readOnly />
+              <CustomNumberField name='pcsIn' label={labels.pcsIn} value={formik.values.pcsIn} readOnly maxAccess={maxAccess} />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField name='pcs' label={labels.pcsOut} value={formik.values.pcs} readOnly maxAccess={maxAccess} />
+            </Grid>
+            <Grid item xs={6}></Grid>
+            <Grid item xs={3}>
+              <CustomTextField name='statusName' label={labels.status} value={formik.values.statusName} readOnly maxAccess={maxAccess} />
             </Grid>
           </Grid>
         </Fixed>

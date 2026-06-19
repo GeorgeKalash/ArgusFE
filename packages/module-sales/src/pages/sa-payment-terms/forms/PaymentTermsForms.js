@@ -129,6 +129,7 @@ export default function PaymentTermsForms({ labels, maxAccess, recordId }) {
                 value={formik.values.discountDays}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('discountDays', '')}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -138,6 +139,7 @@ export default function PaymentTermsForms({ labels, maxAccess, recordId }) {
                 value={formik.values.days}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('days', '')}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -147,6 +149,7 @@ export default function PaymentTermsForms({ labels, maxAccess, recordId }) {
                 value={formik.values.discount}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('discount', '')}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
