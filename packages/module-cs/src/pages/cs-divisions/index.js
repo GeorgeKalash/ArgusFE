@@ -26,12 +26,6 @@ const Divisions = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
-    response.list = (response?.list || []).map(item => ({
-      ...item,
-      activeStatusName: item?.activeStatus ? 'True' : 'False'
-    }))
-    
-
     return { ...response, _startAt }
   }
 
@@ -55,9 +49,10 @@ const Divisions = () => {
       flex: 1
     },
     {
-      field: 'activeStatusName',
+      field: 'activeStatus',
       headerName: labels.activeStatus,
-      flex: 1
+      flex: 1,
+      type: 'checkbox'
     }
   ]
 

@@ -109,7 +109,11 @@ export default function PositionsForm({ labels, maxAccess, recordId }) {
                 name='referToPositionId'
                 label={labels.referrerName}
                 valueField='recordId'
-                displayField='name'
+                displayField={['positionRef', 'name']}
+                columnsInDropDown={[
+                  { key: 'positionRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 values={formik.values}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('referToPositionName', newValue?.name || '')
