@@ -73,7 +73,7 @@ const WorkCenterGroupsList = () => {
   function openForm(recordId) {
     stack({
       Component: WorkCenterGroupsForm,
-      props: { labels, recordId: recordId || null, maxAccess, invalidate },
+      props: { labels, recordId, maxAccess, invalidate },
       width: 500,
       height: 300,
       title: labels.workCenterGroup

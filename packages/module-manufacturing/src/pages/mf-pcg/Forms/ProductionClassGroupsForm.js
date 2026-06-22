@@ -73,6 +73,7 @@ const ProductionClassGroupsForm = ({ labels, recordId, maxAccess, invalidate }) 
                 label={labels.reference}
                 value={formik.values.reference}
                 required
+                maxLength='10'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
@@ -85,6 +86,7 @@ const ProductionClassGroupsForm = ({ labels, recordId, maxAccess, invalidate }) 
                 label={labels.name}
                 value={formik.values.name}
                 required
+                maxLength='30'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}

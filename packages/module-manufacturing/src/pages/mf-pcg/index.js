@@ -73,10 +73,10 @@ const ProductionClassGroupsList = () => {
   function openForm(recordId) {
     stack({
       Component: ProductionClassGroupsForm,
-      props: { labels, recordId: recordId || null, maxAccess, invalidate },
+      props: { labels, recordId, maxAccess, invalidate },
       width: 500,
       height: 300,
-      title: labels.ProductionClassGroup
+      title: labels.productionClassGroup
     })
   }
 

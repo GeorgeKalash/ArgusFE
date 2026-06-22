@@ -27,7 +27,7 @@ const WorkCenterGroupsForm = ({ labels, recordId, maxAccess, invalidate }) => {
     maxAccess,
     validationSchema: yup.object({
       reference: yup.string().required(),
-      name: yup.string().required()
+      name: yup.string().required().min(3)
     }),
     onSubmit: handleSubmit
   })
@@ -73,6 +73,7 @@ const WorkCenterGroupsForm = ({ labels, recordId, maxAccess, invalidate }) => {
                 label={labels.reference}
                 value={formik.values.reference}
                 required
+                maxLength='10'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
@@ -85,6 +86,7 @@ const WorkCenterGroupsForm = ({ labels, recordId, maxAccess, invalidate }) => {
                 label={labels.name}
                 value={formik.values.name}
                 required
+                maxLength='30'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
