@@ -7,7 +7,6 @@ import CustomTextField from '../Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
-import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
@@ -26,23 +25,35 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { DataGrid } from './DataGrid'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
+import { SelfServiceRepository } from '@argus/repositories/src/repositories/SelfServiceRepository'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 
-export const LeaveForm = ({ recordId, window }) => {
+export const LeaveForm = ({ recordId, resourceId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
+  const { user } = useContext(AuthContext)
+  const employeeId = user?.employeeId
   const { stack: stackError } = useError()
   const editMode = !!recordId
 
+  const getEndpoint = {
+    [ResourceIds.SSLeaveRequest]: {set: SelfServiceRepository.SSLeaveRequest.set2, page: SelfServiceRepository.SSLeaveRequest.page},
+    [ResourceIds.LeaveRequestODOM]: {set: LeaveManagementRepository.LeaveRequest.set2, page: LeaveManagementRepository.LeaveRequest.page}
+  }
+
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.LeaveRequestODOM,
+    DatasetIdAccess: resourceId,
     editMode
   })
 
-  useSetWindow({ title: platformLabels.LeaveRequestODOM, window })
+  useSetWindow({ title: resourceId ==  ResourceIds.LeaveRequestODOM ? 
+    labels.LeaveRequestODOM :
+    labels.leaveRequest, window })
 
   const invalidate = useInvalidate({
-    endpointId: LeaveManagementRepository.LeaveRequest.page
+    endpointId: getEndpoint[resourceId]?.page
   })
 
   const { formik } = useForm({
@@ -52,7 +63,7 @@ export const LeaveForm = ({ recordId, window }) => {
       startDate: new Date(),
       endDate: new Date(),
       date: new Date(),
-      employeeId: null,
+      employeeId: resourceId === ResourceIds.SSLeaveRequest ? parseInt(employeeId) : null,
       justification: '',
       reference: '',
       destination: '',
@@ -107,7 +118,7 @@ export const LeaveForm = ({ recordId, window }) => {
       }
 
       const res = await postRequest({
-        extension: LeaveManagementRepository.LeaveRequest.set2,
+        extension: getEndpoint[resourceId].set,
         record: JSON.stringify(payload)
       })
 
@@ -351,37 +362,43 @@ export const LeaveForm = ({ recordId, window }) => {
     formik.setFieldValue('leaveDays', totalDays)
   }, [formik.values.items])
 
+  const actionsMap = {
+    [ResourceIds.LeaveRequestODOM]: [
+      {
+        key: 'Locked',
+        condition: isPosted,
+        onClick: 'onUnpostConfirmation',
+        disabled: true
+      },
+      {
+        key: 'Unlocked',
+        condition: !isPosted,
+        onClick: onPost,
+        disabled: !editMode || !isReleased
+      },
+      {
+        key: 'Close',
+        condition: !isClosed,
+        onClick: onClose,
+        disabled: isClosed || !editMode
+      },
+      {
+        key: 'Reopen',
+        condition: isClosed,
+        onClick: onReopen,
+        disabled: !isClosed || isPosted
+      },
+      {
+        key: 'Approval',
+        condition: true,
+        onClick: 'onApproval',
+        disabled: !isClosed
+      }
+    ]
+  } 
+
   const actions = [
-    {
-      key: 'Locked',
-      condition: isPosted,
-      onClick: 'onUnpostConfirmation',
-      disabled: true
-    },
-    {
-      key: 'Unlocked',
-      condition: !isPosted,
-      onClick: onPost,
-      disabled: !editMode || !isReleased
-    },
-    {
-      key: 'Close',
-      condition: !isClosed,
-      onClick: onClose,
-      disabled: isClosed || !editMode
-    },
-    {
-      key: 'Reopen',
-      condition: isClosed,
-      onClick: onReopen,
-      disabled: !isClosed || isPosted
-    },
-    {
-      key: 'Approval',
-      condition: true,
-      onClick: 'onApproval',
-      disabled: !isClosed
-    },
+    ...(actionsMap[resourceId] || []),
     {
       key: 'Preview',
       condition: true,
@@ -391,7 +408,7 @@ export const LeaveForm = ({ recordId, window }) => {
 
   return (
     <FormShell
-      resourceId={ResourceIds.LeaveRequestODOM}
+      resourceId={resourceId}
       functionId={SystemFunction.LeaveRequest}
       actions={actions}
       form={formik}
@@ -430,28 +447,30 @@ export const LeaveForm = ({ recordId, window }) => {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={EmployeeRepository.Employee.snapshot}
-                parameters={{ _branchId: 0 }}
-                form={formik}
-                maxAccess={maxAccess}
-                valueField='reference'
-                readOnly={isClosed}
-                displayField='fullName'
-                name='employeeRef'
-                label={labels.employee}
-                required
-                secondValue={formik.values.employeeName}
-                onChange={async (_, newValue) => {
-                  formik.setFieldValue('employeeRef', newValue?.reference || '')
-                  formik.setFieldValue('employeeName', newValue?.fullName || '')
-                  formik.setFieldValue('employeeId', newValue?.recordId || null)
-                  await getLeaveBalance(recordId, newValue?.recordId, formik?.values?.ltId, formik.values.date)
-                }}
-                error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
-              />
+            {resourceId === ResourceIds.LeaveRequestODOM && (
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={EmployeeRepository.Employee.snapshot}
+                  parameters={{ _branchId: 0 }}
+                  form={formik}
+                  maxAccess={maxAccess}
+                  valueField='reference'
+                  readOnly={isClosed}
+                  displayField='fullName'
+                  name='employeeRef'
+                  label={labels.employee}
+                  required
+                  secondValue={formik.values.employeeName}
+                  onChange={async (_, newValue) => {
+                    formik.setFieldValue('employeeRef', newValue?.reference || '')
+                    formik.setFieldValue('employeeName', newValue?.fullName || '')
+                    await getLeaveBalance(recordId, newValue?.recordId, formik?.values?.ltId, formik.values.date)
+                    formik.setFieldValue('employeeId', newValue?.recordId || null)
+                  }}
+                  error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
+                />
             </Grid>
+            )}
             <Grid item xs={12}>
               <CustomTextField
                 name='justification'
@@ -597,4 +616,4 @@ export const LeaveForm = ({ recordId, window }) => {
 }
 
 LeaveForm.width = 1000
-LeaveForm.height = 650
+LeaveForm.height =680
