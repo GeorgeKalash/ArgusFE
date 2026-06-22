@@ -493,4 +493,13 @@ export const ManufacturingRepository = {
     close: service + 'closeSCU',
     reopen: service + 'reopenSCU'
   },
+  ProductionRequest: {
+    page: service + 'pagePR',
+    get2: service + 'get2PR',
+    set2: service + 'set2PR',
+    del: service + 'delPR',
+    page: service + 'pagePR',
+    snapshot: service + 'snapshotPR',
+    post: service + 'postPR'
+  },
 }
