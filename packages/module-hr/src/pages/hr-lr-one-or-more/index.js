@@ -158,7 +158,8 @@ const LeaveRequestOneDayOrMore = () => {
     stack({
       Component: LeaveForm,
       props: {
-        recordId
+        recordId,
+        resourceId: ResourceIds.LeaveRequestODOM
       }
     })
   }
