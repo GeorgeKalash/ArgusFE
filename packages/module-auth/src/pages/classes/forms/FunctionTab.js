@@ -39,7 +39,8 @@ const FunctionsTab = ({ labels, maxAccess, store }) => {
     queryFn: fetchGridData,
     enabled: !!recordId,
     endpointId: DocumentReleaseRepository.ClassFunction.qry,
-    datasetId: ResourceIds.Classes
+    datasetId: ResourceIds.Classes,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   async function fetchGridData() {
@@ -62,7 +63,7 @@ const FunctionsTab = ({ labels, maxAccess, store }) => {
 
   const add = () => openForm()
 
-  const edit = obj => openForm(obj, true)
+  const edit = obj => openForm(obj)
 
   function openForm(record) {
     stack({
@@ -71,8 +72,7 @@ const FunctionsTab = ({ labels, maxAccess, store }) => {
         labels,
         classId: recordId,
         record,
-        maxAccess,
-        invalidate
+        maxAccess
       },
       width: 400,
       height: 350,

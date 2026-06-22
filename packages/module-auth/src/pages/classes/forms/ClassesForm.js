@@ -21,7 +21,7 @@ const ClassesForm = ({ labels, maxAccess, store, setStore }) => {
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.Class.qry
+    endpointId: DocumentReleaseRepository.Class.page
   })
 
   const { formik } = useForm({
@@ -93,9 +93,9 @@ const ClassesForm = ({ labels, maxAccess, store, setStore }) => {
                 displayField='value'
                 values={formik.values}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('characteristicOperator', '')}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('characteristicOperator', newValue?.key ?? '')
+                onClear={() => formik.setFieldValue('characteristicOperator', null)}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('characteristicOperator', newValue?.key || null)
                 }}
                 error={formik.touched.characteristicOperator && Boolean(formik.errors.characteristicOperator)}
               />

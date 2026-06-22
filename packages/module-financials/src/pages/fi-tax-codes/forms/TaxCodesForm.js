@@ -61,9 +61,10 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store }) {
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res.record)
+        setStore(prev => ({ ...prev, recordId: res.record.recordId }))
       }
     })()
-  }, [recordId])
+  }, [])
 
   const actions = [
     {

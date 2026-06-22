@@ -11,10 +11,17 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 
-const FunctionForm = ({ labels, maxAccess, classId, record, window, invalidate, editMode }) => {
+const FunctionForm = ({ labels, maxAccess, classId, record, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: DocumentReleaseRepository.ClassFunction.qry
+  })
+
+  const editMode = !!record?.functionId
 
   const { formik } = useForm({
     initialValues: {

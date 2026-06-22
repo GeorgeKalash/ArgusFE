@@ -22,7 +22,7 @@ const Classes = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: DocumentReleaseRepository.Class.qry,
+      extension: DocumentReleaseRepository.Class.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
@@ -40,7 +40,7 @@ const Classes = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     paginationParameters,
     invalidate,
     refetch,
@@ -49,7 +49,7 @@ const Classes = () => {
     clear
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.Class.qry,
+    endpointId: DocumentReleaseRepository.Class.page,
     datasetId: ResourceIds.Classes,
     search: {
       endpointId: DocumentReleaseRepository.Class.snapshot,
@@ -60,7 +60,7 @@ const Classes = () => {
   const columns = [
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
@@ -69,13 +69,13 @@ const Classes = () => {
     stack({
       Component: ClassesWindow,
       props: {
-        labels: _labels,
-        recordId: recordId || null,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 600,
       height: 400,
-      title: _labels.class
+      title: labels.class
     })
   }
 
@@ -103,6 +103,7 @@ const Classes = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

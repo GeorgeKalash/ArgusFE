@@ -5,7 +5,7 @@ import ClassesForm from '../forms/ClassesForm'
 import CharacteristicsTab from '../forms/CharacteristicsTab'
 import FunctionsTab from '../forms/FunctionTab'
 
-const ClassesWindow = ({ height, recordId, labels, maxAccess }) => {
+const ClassesWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -21,13 +21,13 @@ const ClassesWindow = ({ height, recordId, labels, maxAccess }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
-      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <ClassesForm labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <CharacteristicsTab labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
         <FunctionsTab labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>

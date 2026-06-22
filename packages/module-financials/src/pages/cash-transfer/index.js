@@ -17,6 +17,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -38,35 +39,35 @@ const CashTransfer = () => {
     return { ...response, _startAt }
   }
 
-  async function fetchWithSearch({ filters }) {
-    return await getRequest({
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
       extension: CashBankRepository.CashTransfer.snapshot,
-      parameters: `_filter=${filters.qry}`
+      parameters: `_filter=${qry}`
     })
+
+    return response
   }
 
   const {
     query: { data },
-    filterBy,
-    clearFilter,
     labels,
     refetch,
     access,
     invalidate,
-    paginationParameters
+    paginationParameters,
+    search,
+    clear
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashBankRepository.CashTransfer.page,
     datasetId: ResourceIds.CashTransfer,
-    filter: {
+    search: {
       endpointId: CashBankRepository.CashTransfer.snapshot,
-      filterFn: fetchWithSearch
+      searchFn: fetchWithSearch
     }
   })
 
-  const userData = window.sessionStorage.getItem('userData')
-    ? JSON.parse(window.sessionStorage.getItem('userData'))
-    : null
+  const userData = getStorageData('userData')
 
   const getDefaultDT = async () => {
     const res = await getRequest({
@@ -74,7 +75,7 @@ const CashTransfer = () => {
       parameters: `_userId=${userData?.userId}&_functionId=${SystemFunction.CashTransfer}`
     })
 
-    return res.record?.dtId || ''
+    return res.record?.dtId || null
   }
 
   async function openForm(recordId) {
@@ -95,7 +96,7 @@ const CashTransfer = () => {
       return
     }
 
-    openStack(recordId, dtId)
+    openStack(null, dtId)
   }
 
   function openStack(recordId, dtId) {
@@ -188,8 +189,8 @@ const CashTransfer = () => {
         <GridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={value => filterBy('qry', value)}
-          onSearchClear={() => clearFilter('qry')}
+          onSearch={search} 
+          onSearchClear={clear}
           labels={labels}
           inputSearch={true}
         />

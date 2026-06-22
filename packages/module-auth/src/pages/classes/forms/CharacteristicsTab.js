@@ -44,7 +44,8 @@ const CharacteristicsTab = ({ labels, maxAccess, store }) => {
     queryFn: fetchGridData,
     enabled: !!recordId,
     endpointId: DocumentReleaseRepository.ClassCharacteristics.qry,
-    datasetId: ResourceIds.Classes
+    datasetId: ResourceIds.Classes,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   async function fetchGridData() {

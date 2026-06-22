@@ -33,7 +33,8 @@ const ApproverList = ({ store, labels, maxAccess }) => {
     enabled: !!recordId,
     datasetId: ResourceIds.DRGroups,
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.GroupCode.qry
+    endpointId: DocumentReleaseRepository.GroupCode.qry,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   const columns = [
@@ -51,6 +52,8 @@ const ApproverList = ({ store, labels, maxAccess }) => {
 
   const add = () => openForm()
 
+  const edit = (obj) => openForm(obj?.codeId)
+
   const del = async obj => {
     await postRequest({
       extension: DocumentReleaseRepository.GroupCode.del,
@@ -60,12 +63,12 @@ const ApproverList = ({ store, labels, maxAccess }) => {
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(record) {
+  function openForm(codeId) {
     stack({
       Component: ApproverForm,
       props: {
         labels,
-        record,
+        codeId,
         maxAccess,
         store
       },
@@ -88,7 +91,7 @@ const ApproverList = ({ store, labels, maxAccess }) => {
           rowId={['codeId']}
           pagination={false}
           onDelete={del}
-          onEdit={obj => openForm(obj)}
+          onEdit={edit}
           maxAccess={maxAccess}
         />
       </Grow>

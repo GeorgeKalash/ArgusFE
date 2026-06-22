@@ -58,15 +58,15 @@ const CashTransferTab = ({ recordId, dtId, refetch, window }) => {
       dtId: parseInt(dtId),
       reference: '',
       date: new Date(),
-      toPlantId: parseInt(plantId),
-      fromPlantId: parseInt(plantId),
+      toPlantId: plantId,
+      fromPlantId: plantId,
       fromCashAccountId: parseInt(cashAccountId),
       toCashAccountId: null,
       baseAmount: null,
       notes: '',
       wip: 1,
       status: 1,
-      releaseStatus: 1,
+      releaseStatus: null,
     },
     transfers: [
       {
@@ -405,7 +405,7 @@ const CashTransferTab = ({ recordId, dtId, refetch, window }) => {
                   maxLength='15'
                   readOnly={editMode}
                   onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('reference', '')}
+                  onClear={() => formik.setFieldValue('header.reference', '')}
                   error={formik.touched?.header?.reference && Boolean(formik.errors?.header?.reference)}
                 />
               </Grid>

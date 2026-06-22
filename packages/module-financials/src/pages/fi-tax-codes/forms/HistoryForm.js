@@ -38,7 +38,7 @@ const HistoryForm = ({ store, setStore, maxAccess, labels }) => {
       ]
     },
     onSubmit: async obj => {
-      const items = obj.items.map((item, index) => ({
+      const items = obj?.items?.map((item, index) => ({
         ...item,
         seqNo: index + 1,
         date: formatDateToApi(item.date),
@@ -63,19 +63,32 @@ const HistoryForm = ({ store, setStore, maxAccess, labels }) => {
           parameters: `_taxCodeId=${recordId}`
         })
 
-        if (res?.list?.length > 0) {
-          const items = res.list.map((item, index) => ({
-            ...item,
-            id: index + 1,
-            date: formatDateFromApi(item.date)
-          }))
+        const items = (res?.list || []).map((item, index) => ({
+          ...item,
+          id: index + 1,
+          date: formatDateFromApi(item.date)
+        }))
 
-          formik.setValues({ items })
-          setStore(prev => ({ ...prev, items: items }))
-        }
+        formik.setValues({ items })
+        setStore(prev => ({ ...prev, items }))
+        
       }
     })()
-  }, [recordId])
+  }, [])
+
+  const columns = [
+    {
+      component: 'date',
+      label: labels.date,
+      name: 'date'
+    },
+    {
+      component: 'numberfield',
+      label: labels.amount,
+      name: 'amount',
+      decimalScale: 2
+    }
+  ]
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
@@ -85,19 +98,7 @@ const HistoryForm = ({ store, setStore, maxAccess, labels }) => {
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
-            columns={[
-              {
-                component: 'date',
-                label: labels.date,
-                name: 'date'
-              },
-              {
-                component: 'numberfield',
-                label: labels.amount,
-                name: 'amount',
-                decimalScale: 2
-              }
-            ]}
+            columns={columns}
           />
         </Grow>
       </VertLayout>

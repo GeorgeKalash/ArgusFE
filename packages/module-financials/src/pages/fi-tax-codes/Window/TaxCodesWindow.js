@@ -8,8 +8,7 @@ const TaxCodesWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId || null,
-    TaxHistoryViewList: []
+    recordId: recordId || null
   })
 
   const tabs = [

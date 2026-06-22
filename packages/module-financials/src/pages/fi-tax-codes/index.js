@@ -73,7 +73,7 @@ const TaxCodes = () => {
       Component: TaxCodesWindow,
       props: {
         labels,
-        recordId: recordId || null,
+        recordId,
         maxAccess: access
       },
       width: 800,

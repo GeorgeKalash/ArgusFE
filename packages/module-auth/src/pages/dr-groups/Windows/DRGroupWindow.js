@@ -4,7 +4,7 @@ import { useState } from 'react'
 import DRGroupForm from '../forms/DRGroupForm'
 import ApproverList from '../forms/ApproverList'
 
-const DRGroupWindow = ({ height, recordId, labels, maxAccess }) => {
+const DRGroupWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -19,10 +19,10 @@ const DRGroupWindow = ({ height, recordId, labels, maxAccess }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
-      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <DRGroupForm labels={labels} store={store} setStore={setStore} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <ApproverList
           labels={labels}
           maxAccess={maxAccess}

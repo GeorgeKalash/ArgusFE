@@ -23,9 +23,8 @@ const DRGroupForm = ({ labels, maxAccess, store, setStore }) => {
   })
 
   const { formik } = useForm({
-    validateOnChange: true,
     initialValues: {
-      recordId: recordId || null,
+      recordId,
       name: '',
       reference: ''
     },
@@ -58,9 +57,10 @@ const DRGroupForm = ({ labels, maxAccess, store, setStore }) => {
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res.record)
+        setStore(prev => ({ ...prev, recordId: res.record.recordId }))
       }
     })()
-  }, [recordId])
+  }, [])
 
   const editMode = !!formik.values.recordId
 

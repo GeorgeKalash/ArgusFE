@@ -49,7 +49,7 @@ const CharacteristicForm = ({ labels, maxAccess, classId, window, invalidate }) 
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={DocumentReleaseRepository.CharacteristicsGeneral.qry}
-                parameters={`_startAt=0&_pageSize=50`}
+                parameters={`_startAt=0&_pageSize=1000`}
                 name='chId'
                 label={labels.characteristics}
                 valueField='recordId'
@@ -58,7 +58,9 @@ const CharacteristicForm = ({ labels, maxAccess, classId, window, invalidate }) 
                 required
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('chId', null)}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('seqNo', null)
+                  
                   formik.setFieldValue('chId', newValue?.recordId || null)
                 }}
                 error={formik.touched.chId && Boolean(formik.errors.chId)}
@@ -74,8 +76,8 @@ const CharacteristicForm = ({ labels, maxAccess, classId, window, invalidate }) 
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('oper', '')}
-                onChange={(event, newValue) => {
+                onClear={() => formik.setFieldValue('oper', null)}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('oper', newValue?.key || null)
                 }}
                 error={formik.touched.oper && Boolean(formik.errors.oper)}
@@ -92,8 +94,8 @@ const CharacteristicForm = ({ labels, maxAccess, classId, window, invalidate }) 
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('seqNo', '')}
-                onChange={(event, newValue) => {
+                onClear={() => formik.setFieldValue('seqNo', null)}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('seqNo', newValue?.seqNo || null)
                 }}
                 error={formik.touched.seqNo && Boolean(formik.errors.seqNo)}
