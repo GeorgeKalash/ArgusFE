@@ -93,7 +93,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         purity: 0,
         qty: 0,
         seqNo: 1,
-        isOpenMetalPurity: false,
+        purityFromItem: false,
         metalValue: null,
         totalCredit: 0,
         trackBy: null,
@@ -323,7 +323,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       onChange: async ({ row: { update, newRow } }) => {
         getFilteredMetal(newRow?.metalId)
         if (newRow.purity)
-          update({ purity: newRow.purity * 1000, stdPurity: newRow.stdPurity * 1000 })
+          update({ purity: newRow.purity * 1000, stdPurity: newRow.stdPurity * 1000, purityFromItem: true })
       }
     },
     {
@@ -369,11 +369,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         })
 
         if (!purityValue) return
-        const totalCredit = isOpenMetalPurity ? newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity) : newRow.qty * newRow.creditAmount
+        const totalCredit = newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity)
         update({
           purity: purityValue,
           totalCredit,
           trackBy: res.record.trackBy,
+          purityFromItem: true,
           qtyOnHand: res2?.record?.onhand || 0,
           isOpenMetalPurity
         })
@@ -401,8 +402,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       label: labels.purity,
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metal.purity * 1000)
+        update({ purityFromItem: false })
 
-        const totalCredit = newRow.isOpenMetalPurity ? newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity) : newRow.qty * newRow.creditAmount
+        const totalCredit = newRow.purityFromItem
+          ? newRow.qty * newRow.creditAmount
+          : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
 
         update({ totalCredit: roundTo(totalCredit) })
         if (metal) {
@@ -422,9 +426,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metal.purity * 1000)
 
-        const totalCredit = newRow.isOpenMetalPurity
-          ? newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
-          : newRow.qty * newRow.creditAmount
+        const totalCredit = newRow.purityFromItem
+          ? newRow.qty * newRow.creditAmount
+          : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
         update({ totalCredit: roundTo(totalCredit) })
         if (metal) {
           const metalValue = roundTo(((newRow.qty * newRow.purity) / (metal.purity * 1000)))
@@ -439,9 +443,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       defaultValue: 0,
       props: { allowNegative: false },
       onChange: ({ row: { update, newRow } }) => {
-        const totalCredit = newRow.isOpenMetalPurity
-          ? newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
-          : newRow.qty * newRow.creditAmount
+        const totalCredit = newRow.purityFromItem
+          ? newRow.qty * newRow.creditAmount
+          : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
         update({ totalCredit: roundTo(totalCredit) })
       }
     },

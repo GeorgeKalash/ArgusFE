@@ -6,7 +6,7 @@ export const SelfServiceRepository = {
     get: service + 'getUS'
   },
   SSLeaveRequest: {
-    set: service + 'setLR',
+    set2: service + 'set2LR',
     get: service + 'getLR',
     page: service + 'pageLR',
     del: service + 'delLR'

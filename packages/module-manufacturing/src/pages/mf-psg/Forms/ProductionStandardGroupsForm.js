@@ -53,9 +53,9 @@ const ProductionStandardGroupsForm = ({ labels, recordId, maxAccess, invalidate 
       }
     }
     fetchRecord()
-  }, [recordId])
+  }, [])
 
-  const editMode = !!recordId || !!formik.values.recordId
+  const editMode = !!formik.values.recordId
 
   return (
     <FormShell
