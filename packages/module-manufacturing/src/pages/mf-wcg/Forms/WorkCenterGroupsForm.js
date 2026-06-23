@@ -1,73 +1,66 @@
-import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { Grid } from '@mui/material'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
-import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-const DRGroupForm = ({ labels, maxAccess, store, setStore }) => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+const WorkCenterGroupsForm = ({ labels, recordId, maxAccess, invalidate }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { recordId } = store
 
-  const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.DRGroup.page
-  })
+  const initialValues = {
+    recordId: null,
+    reference: '',
+    name: ''
+  }
 
   const { formik } = useForm({
-    initialValues: {
-      recordId,
-      name: '',
-      reference: ''
-    },
+    initialValues,
     maxAccess,
     validationSchema: yup.object({
       reference: yup.string().required(),
-      name: yup.string().required()
+      name: yup.string().required().min(3)
     }),
-    onSubmit: async obj => {
-      const res = await postRequest({
-        extension: DocumentReleaseRepository.DRGroup.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!obj.recordId) {
-        formik.setFieldValue('recordId', res.recordId)
-        setStore(prev => ({ ...prev, recordId: res.recordId }))
-      }
-
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-      invalidate()
-    }
+    onSubmit: handleSubmit
   })
 
+  async function handleSubmit(obj) {
+    const response = await postRequest({
+      extension: ManufacturingRepository.WorkCenterGroups.set,
+      record: JSON.stringify(obj)
+    })
+    if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
+    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+    invalidate()
+  }
+
   useEffect(() => {
-    ;(async function () {
+    const fetchRecord = async () => {
       if (recordId) {
         const res = await getRequest({
-          extension: DocumentReleaseRepository.DRGroup.get,
+          extension: ManufacturingRepository.WorkCenterGroups.get,
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res.record)
-        setStore(prev => ({ ...prev, recordId: res.record.recordId }))
       }
-    })()
+    }
+    fetchRecord()
   }, [])
 
   const editMode = !!formik.values.recordId
 
   return (
     <FormShell
+      resourceId={ResourceIds.WorkCenterGroups}
       form={formik}
-      resourceId={ResourceIds.DRGroups}
       maxAccess={maxAccess}
       editMode={editMode}
     >
@@ -80,9 +73,9 @@ const DRGroupForm = ({ labels, maxAccess, store, setStore }) => {
                 label={labels.reference}
                 value={formik.values.reference}
                 required
-                onChange={formik.handleChange}
                 maxLength='10'
                 maxAccess={maxAccess}
+                onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
@@ -93,7 +86,7 @@ const DRGroupForm = ({ labels, maxAccess, store, setStore }) => {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                maxLength='50'
+                maxLength='30'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
@@ -107,4 +100,4 @@ const DRGroupForm = ({ labels, maxAccess, store, setStore }) => {
   )
 }
 
-export default DRGroupForm
+export default WorkCenterGroupsForm

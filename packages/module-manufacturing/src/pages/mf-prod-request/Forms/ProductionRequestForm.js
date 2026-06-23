@@ -36,9 +36,8 @@ export default function ProductionRequestForm({ recordId, labels, access, window
   })
 
   const conditions = {
-    itemId: row => row?.itemId,
-    qty: row => row?.qty != null,
-    pcs: row => row?.pcs != null && row?.pcs <= 2147483647
+    itemId: row => row?.qty != null,
+    qty: row => row?.itemId != null
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
@@ -238,7 +237,8 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       name: 'pcs',
       flex: 1,
       props: {
-        decimalScale: 0
+        decimalScale: 0,
+        maxLength: 9
       }
     }
   ]
@@ -273,38 +273,38 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                     readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    values={formik.values.header}
+                    values={formik?.values?.header}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
-                    error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='header.date'
-                    label={labels.date}
-                    value={formik.values?.header.date}
-                    readOnly={isPosted}
-                    required
-                    onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('header.date', null)}
-                    error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
-                    maxAccess={maxAccess}
+                    error={formik?.touched?.header?.dtId && Boolean(formik?.errors?.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
                     name='header.reference'
                     label={labels.reference}
-                    value={formik?.values?.header.reference}
+                    value={formik?.values?.header?.reference}
                     maxAccess={!editMode && maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
-                    error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
+                    error={formik?.touched?.header?.reference && Boolean(formik?.errors?.header?.reference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='header.date'
+                    label={labels.date}
+                    value={formik?.values?.header?.date}
+                    readOnly={isPosted}
+                    required
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('header.date', null)}
+                    error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -318,14 +318,14 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    values={formik.values.header}
+                    values={formik?.values?.header}
                     readOnly={isPosted}
                     required
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('header.plantId', newValue?.recordId || null)
                     }}
-                    error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
+                    error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
                   />
                 </Grid>
               </Grid>
@@ -334,13 +334,13 @@ export default function ProductionRequestForm({ recordId, labels, access, window
               <CustomTextArea
                 name='header.notes'
                 label={labels.notes}
-                value={formik.values.header.notes}
+                value={formik?.values?.header?.notes}
                 rows={3}
                 readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.notes', e.target.value)}
                 onClear={() => formik.setFieldValue('header.notes', '')}
-                error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
+                error={formik?.touched?.header?.notes && Boolean(formik?.errors?.header?.notes)}
               />
             </Grid>
           </Grid>
