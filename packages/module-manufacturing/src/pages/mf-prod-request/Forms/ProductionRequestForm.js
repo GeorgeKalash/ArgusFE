@@ -22,7 +22,6 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 export default function ProductionRequestForm({ recordId, labels, access, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -35,12 +34,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     objectName: 'header'
   })
 
-  const conditions = {
-    itemId: row => row?.qty != null,
-    qty: row => row?.itemId != null
-  }
 
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionRequest.page
@@ -48,7 +42,6 @@ export default function ProductionRequestForm({ recordId, labels, access, window
 
   const { formik } = useForm({
     maxAccess,
-    conditionSchema: ['items'],
     behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
@@ -68,7 +61,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         itemId: null,
         sku: '',
         itemName: '',
-        qty: null,
+        qty: 0,
         pcs: null,
         itemWeight: null
       }]
@@ -78,14 +71,13 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         date: yup.date().required(),
         plantId: yup.number().required()
       }),
-      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const res = await postRequest({
         extension: ManufacturingRepository.ProductionRequest.set2,
         record: JSON.stringify({
           header: { ...obj.header, date: formatDateToApi(obj.header.date) },
-          items: obj.items.filter(row => Object.values(requiredFields)?.every(fn => fn(row))).map((item, index) => ({
+          items: obj.items?.filter(item => item.itemId).map((item, index) => ({
             ...item,
             requestId: recordId,
             seqNo: index + 1
@@ -225,10 +217,12 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       component: 'numberfield',
       label: labels.qty,
       name: 'qty',
+      defaultValue: 0,
       flex: 1,
       props: {
         decimalScale: 2,
-        maxLength: 10
+        maxLength: 10,
+        allowNegative: false
       }
     },
     {
@@ -238,7 +232,8 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       flex: 1,
       props: {
         decimalScale: 0,
-        maxLength: 9
+        maxLength: 9,
+        allowNegative: false
       }
     }
   ]
