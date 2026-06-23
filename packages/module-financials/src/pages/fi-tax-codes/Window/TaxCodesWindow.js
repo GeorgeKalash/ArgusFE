@@ -23,7 +23,7 @@ const TaxCodesWindow = ({ recordId, labels, maxAccess }) => {
         <TaxCodesForm labels={labels} store={store} setStore={setStore} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
-        <HistoryForm labels={labels} store={store} setStore={setStore} maxAccess={maxAccess} />
+        <HistoryForm labels={labels} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>
   )

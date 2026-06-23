@@ -12,32 +12,34 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
-const HistoryForm = ({ store, setStore, maxAccess, labels }) => {
+const HistoryForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const conditions = {
-    amount: row => row?.date && !row?.amount,
-    date: row => !row?.date && row.amount
+    amount: row => !!row?.date,
+    date: row => !!row?.amount 
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
+  const initialValues = {
+    items: [
+      {
+        id: 1,
+        taxCodeId: recordId || null,
+        date: null,
+        amount: null,
+        seqNo: 1
+      }
+    ]
+  }
+
   const { formik } = useForm({
     maxAccess,
     conditionSchema: ['items'],
-    initialValues: {
-      items: [
-        {
-          id: 1,
-          taxCodeId: recordId || null,
-          date: null,
-          amount: null,
-          seqNo: 1
-        }
-      ]
-    },
+    initialValues,
     validationSchema: yup.object({
       items: yup.array().of(schema)
     }),
@@ -55,7 +57,6 @@ const HistoryForm = ({ store, setStore, maxAccess, labels }) => {
       })
 
       toast.success(platformLabels.Edited)
-      setStore(prev => ({ ...prev, items }))
     }
   })
 
@@ -103,7 +104,7 @@ const HistoryForm = ({ store, setStore, maxAccess, labels }) => {
             name='items'
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
-             initialValues={formik.initialValues.items[0]}
+             initialValues={initialValues.items[0]}
             error={formik.errors.items}
             columns={columns}
             maxAccess={maxAccess}
