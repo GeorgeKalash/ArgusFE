@@ -23,7 +23,6 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
-import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 export default function ProductionSummaryForm({ recordId, labels, access, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -36,23 +35,12 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
     objectName: 'header'
   })
 
-    const conditions = {
-      itemId: row => row?.qty != null || row?.pcs != null,
-      qty: row => row?.itemId != null,
-      pcs: row =>
-          row?.itemId != null &&
-          (row?.pcs == null || Number(row.pcs) <= 2147483647)
-    }
-
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
-
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionSummary.page
   })
 
   const { formik } = useForm({
     maxAccess,
-    conditionSchema: ['items'],
     behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
@@ -84,14 +72,13 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       header: yup.object({
         date: yup.date().required()
       }),
-      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const res = await postRequest({
         extension: ManufacturingRepository.ProductionSummary.set2,
         record: JSON.stringify({
-          header: { ...obj.header, date: formatDateToApi(obj.header.date) },
-          items: obj.items.filter(row => Object.values(requiredFields)?.every(fn => fn(row))).map((item, index) => ({
+          header: { ...obj?.header, date: formatDateToApi(obj?.header?.date) },
+          items: obj?.items?.filter(item => item.itemId)?.map((item, index) => ({
             ...item,
             rsId: recordId,
             seqNo: index + 1
@@ -272,8 +259,11 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       label: labels.qty,
       name: 'qty',
       flex: 1,
+      defaultValue: 0,
       props: {
-        decimalScale: 2
+        decimalScale: 2,
+        maxLength: 10,
+        allowNegative: false
       }
     },
     {
@@ -282,7 +272,9 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       name: 'pcs',
       flex: 1,
       props: {
-        decimalScale: 0
+        decimalScale: 0,
+        maxLength: 9,
+        allowNegative: false
       }
     }
   ]
