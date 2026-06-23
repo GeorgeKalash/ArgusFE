@@ -75,7 +75,7 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window }) => {
                 readOnly={editMode}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('functionId', '')}
+                onClear={() => formik.setFieldValue('functionId', null)}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('functionId', newValue?.key || null)
                 }}
@@ -93,7 +93,7 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window }) => {
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('strategyId', '')}
+                onClear={() => formik.setFieldValue('strategyId', null)}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('strategyId', newValue?.recordId || null)
                 }}

@@ -93,6 +93,7 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store }) {
                 label={labels.reference}
                 value={formik.values.reference}
                 required
+                maxLength='10'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}

@@ -10,35 +10,39 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 const HistoryForm = ({ store, setStore, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const conditions = {
+    amount: row => row?.date && !row?.amount,
+    date: row => !row?.date && row.amount
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
-    validationSchema: yup.object({
-      items: yup.array().of(
-        yup.object().shape({
-          amount: yup.string().required(),
-          date: yup.string().required()
-        })
-      ).required()
-    }),
+    conditionSchema: ['items'],
     initialValues: {
       items: [
         {
           id: 1,
           taxCodeId: recordId || null,
-          date: '',
-          amount: '',
-          seqNo: ''
+          date: null,
+          amount: null,
+          seqNo: 1
         }
       ]
     },
+    validationSchema: yup.object({
+      items: yup.array().of(schema)
+    }),
     onSubmit: async obj => {
-      const items = obj?.items?.map((item, index) => ({
+      const items = obj?.items?.filter(row => Object.values(requiredFields)?.every(fn => fn(row))).map((item, index) => ({
         ...item,
         seqNo: index + 1,
         date: formatDateToApi(item.date),
@@ -63,14 +67,13 @@ const HistoryForm = ({ store, setStore, maxAccess, labels }) => {
           parameters: `_taxCodeId=${recordId}`
         })
 
-        const items = (res?.list || []).map((item, index) => ({
+        const items = res?.list?.length > 0 ? res?.list.map((item, index) => ({
           ...item,
           id: index + 1,
           date: formatDateFromApi(item.date)
-        }))
+        })) : formik.initialValues.items
 
         formik.setValues({ items })
-        setStore(prev => ({ ...prev, items }))
         
       }
     })()
@@ -86,7 +89,9 @@ const HistoryForm = ({ store, setStore, maxAccess, labels }) => {
       component: 'numberfield',
       label: labels.amount,
       name: 'amount',
-      decimalScale: 2
+      props: {
+        decimalScale: 2
+      },
     }
   ]
 
@@ -95,10 +100,13 @@ const HistoryForm = ({ store, setStore, maxAccess, labels }) => {
       <VertLayout>
         <Grow>
           <DataGrid
+            name='items'
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
+             initialValues={formik.initialValues.items[0]}
             error={formik.errors.items}
             columns={columns}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>
