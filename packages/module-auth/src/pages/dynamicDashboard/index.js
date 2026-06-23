@@ -22,6 +22,7 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
+import HeadcountHistoryApplet from '@argus/shared-ui/src/components/Shared/HeadcountHistoryApplet'
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
@@ -546,6 +547,10 @@ const DashboardLayout = () => {
               </Box>
             </div>
           </div>
+        )}
+        
+        {containsApplet(ResourceIds.HeadcountHistory) && (
+          <HeadcountHistoryApplet labels={labels} />
         )}
       </div>
     </div>
