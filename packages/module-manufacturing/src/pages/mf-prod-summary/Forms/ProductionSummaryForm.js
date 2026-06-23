@@ -23,6 +23,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 export default function ProductionSummaryForm({ recordId, labels, access, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -35,12 +36,19 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
     objectName: 'header'
   })
 
+  const conditions = {
+    itemId: row => row?.qty != null || row?.pcs != null || row?.clientId != null,
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionSummary.page
   })
 
   const { formik } = useForm({
     maxAccess,
+    conditionSchema: ['items'],
     behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
@@ -72,13 +80,14 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       header: yup.object({
         date: yup.date().required()
       }),
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const res = await postRequest({
         extension: ManufacturingRepository.ProductionSummary.set2,
         record: JSON.stringify({
           header: { ...obj?.header, date: formatDateToApi(obj?.header?.date) },
-          items: obj?.items?.filter(item => item.itemId)?.map((item, index) => ({
+          items: obj?.items?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))?.map((item, index) => ({
             ...item,
             rsId: recordId,
             seqNo: index + 1
@@ -108,11 +117,11 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
           ...record.header,
           date: formatDateFromApi(record.header?.date)
         },
-        items: record.items?.map((item, index) => ({
+        items: record.items.length > 0 ? record.items?.map((item, index) => ({
           ...item,
           id: index + 1,
           seqNo: index + 1
-        }))
+        })) : formik.initialValues.items
       }
     })
   }
@@ -136,10 +145,10 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
 
     formik.setValues({
       ...formik.values,
-      items: res.list?.map((item, index) => ({
+      items: res.list.length > 0 ? res.list?.map(({ requestId, ...item }, index) => ({
         ...item,
-        id: index + 1
-      }))
+        id: index + 1,
+      })) : formik.initialValues.items
     })
   }
 
@@ -251,7 +260,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
           { from: 'reference', to: 'clientRef' },
           { from: 'name', to: 'clientName' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 4
       }
     },
     {
