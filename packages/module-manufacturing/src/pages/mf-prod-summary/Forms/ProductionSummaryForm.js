@@ -251,7 +251,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
           { from: 'reference', to: 'clientRef' },
           { from: 'name', to: 'clientName' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 4
       }
     },
     {
