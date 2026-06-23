@@ -493,4 +493,25 @@ export const ManufacturingRepository = {
     close: service + 'closeSCU',
     reopen: service + 'reopenSCU'
   },
+  WorkCenterGroups: {
+    get: service + 'getWCG',
+    set: service + 'setWCG',
+    del: service + 'delWCG',
+    page: service + 'pageWCG',
+    snapshot: service + 'snapshotWCG'
+  },
+  ProductionClassGroups: {
+    get: service + 'getPCG',
+    set: service + 'setPCG',
+    del: service + 'delPCG',
+    page: service + 'pagePCG',
+    snapshot: service + 'snapshotPCG'
+  },
+  ProductionStandardGroups: {
+    get: service + 'getPSG',
+    set: service + 'setPSG',
+    del: service + 'delPSG',
+    page: service + 'pagePSG',
+    snapshot: service + 'snapshotPSG'
+  }
 }
