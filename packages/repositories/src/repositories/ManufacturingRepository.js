@@ -504,6 +504,14 @@ export const ManufacturingRepository = {
   ProductionRequestItems: {
     import: service + 'mergedPRI',
   },
+  ProductionRequest: {
+    page: service + 'pagePR',
+    get2: service + 'get2PR',
+    set2: service + 'set2PR',
+    del: service + 'delPR',
+    snapshot: service + 'snapshotPR',
+    post: service + 'postPR'
+  },
   WorkCenterGroups: {
     get: service + 'getWCG',
     set: service + 'setWCG',
