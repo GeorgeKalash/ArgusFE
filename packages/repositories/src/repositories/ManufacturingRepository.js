@@ -493,6 +493,17 @@ export const ManufacturingRepository = {
     close: service + 'closeSCU',
     reopen: service + 'reopenSCU'
   },
+  ProductionSummary: {
+    get2: service + 'get2PRS',
+    set2: service + 'set2PRS',
+    del: service + 'delPRS',
+    page: service + 'pagePRS',
+    snapshot: service + 'snapshotPRS',
+    post: service + 'postPRS',
+  },
+  ProductionRequestItems: {
+    import: service + 'mergedPRI',
+  },
   WorkCenterGroups: {
     get: service + 'getWCG',
     set: service + 'setWCG',
