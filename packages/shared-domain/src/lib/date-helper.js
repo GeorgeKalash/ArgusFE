@@ -224,6 +224,23 @@ const formatDateToSlashDate = dateStr => {
   return `${value.substring(0, 4)}/${value.substring(4, 6)}/${value.substring(6, 8)}`
 }
 
+const formatEEEEMMMDDYY = (apiDate) => {
+  const date = formatDateFromApi(apiDate)
+
+  if (!date) return ''
+
+  return format(date, 'EEEE - MMM dd,yy')
+}
+
+const formatMMMDDYY = (apiDate) => {
+  const date = formatDateFromApi(apiDate)
+
+  if (!date) return ''
+
+  return format(date, 'MMMM dd, yy')
+}
+
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -240,5 +257,7 @@ export {
   formatDateToISO,
   formatDateTimeForGetAPI,
   formatDayId,
-  formatTimeToApi
+  formatTimeToApi,
+  formatEEEEMMMDDYY,
+  formatMMMDDYY
 }

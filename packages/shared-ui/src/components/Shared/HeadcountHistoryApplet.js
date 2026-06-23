@@ -1,22 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { CompositeBarChartDark } from '@argus/shared-ui/src/components/Shared/dashboardApplets/charts'
 import { ReportRepository } from '@argus/repositories/src/repositories/ReportRepository'
-import { formatDateFromApi, formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
+import { formatEEEEMMMDDYY, formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { format } from 'date-fns'
 import CustomDatePicker from '../Inputs/CustomDatePicker'
 
 const HeadcountHistoryApplet = ({ labels }) => {
   const { getRequest } = useContext(RequestsContext)
   const [headcountToDate, setHeadcountToDate] = useState(new Date())
   const [headCount, setHeadCount] = useState([])
-
-  const formatHeadcountDate = (apiDate) => {
-    const date = formatDateFromApi(apiDate)
-    if (!date) return ''
-
-    return format(date, 'EEEE - MMM dd,yy')
-  }
 
   useEffect(() => {
     const fetchHeadcount = async () => {
@@ -30,7 +22,7 @@ const HeadcountHistoryApplet = ({ labels }) => {
       setHeadCount(
         (res?.list || []).map(item => ({
           ...item,
-          date: item?.date ? formatHeadcountDate(item.date) : null
+          date: item?.date ? formatEEEEMMMDDYY(item.date) : null
         }))
       )
     }

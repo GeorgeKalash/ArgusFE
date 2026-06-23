@@ -34,6 +34,21 @@ const DashboardLayout = () => {
   const _userId = userData.userId
   const _languageId = userData.languageId
 
+  const alertsResourceId = {
+    '1': ResourceIds.RightToWork, 
+    '2': ResourceIds.EmployeeRightToWork,
+    '3': ResourceIds.Probation,
+    '4': ResourceIds.Salaries,
+    '5': ResourceIds.EmploymentReview,
+    '6': ResourceIds.EmployeeChart,
+    '7': ResourceIds.TermEndDate,
+    '8': ResourceIds.WorkAnniversary,
+    '9': ResourceIds.EmployeesBirthday,
+    '10': ResourceIds.LeaveRequestODOM,
+    '11': ResourceIds.LeaveRequestODOM,
+    '12': ResourceIds.CasePleads
+  }
+
   const getRequestRef = React.useRef(getRequest)
   useEffect(() => {
     getRequestRef.current = getRequest
@@ -71,7 +86,7 @@ const DashboardLayout = () => {
         if (cancelled) return
         setApplets(appletsRes.list)
 
-        const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+        const [resDashboard, resSP, resTV, resTimeCode, alerts] = await Promise.all([
           getRequestRef.current({ extension: DashboardRepository.dashboard }),
           getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
           getRequestRef.current({
@@ -81,6 +96,10 @@ const DashboardLayout = () => {
           getRequestRef.current({
             extension: SystemRepository.KeyValueStore,
             parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
+          }),
+          getRequestRef.current({
+            extension: SystemRepository.SystemAlerts.active,
+            parameters: `_params=`
           })
         ])
 
@@ -107,8 +126,14 @@ const DashboardLayout = () => {
           hr: {
             timeVariationDetails: resTV.list || [],
             tabs: filteredTabs,
-            groupedData: groupedData
-          }
+            groupedData,
+          },
+          alerts: (alerts?.list || []).map(item => {
+            return {
+              ...item,
+              alertResourceId: alertsResourceId[item?.alertId] || null
+            }
+          })
         })
 
         if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
@@ -532,6 +557,38 @@ const DashboardLayout = () => {
                   </Box>
                 </CustomTabPanel>
               ))}
+            </div>
+          )}
+
+          {containsApplet(ResourceIds.Alerts) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.alerts}</h2>
+                </div>
+                <Box sx={{ display: 'flex', height: '350px' }}>
+                  <Table
+                    name='alertsTable'
+                    columns={[
+                      { field: 'alertName', headerName: labels.alerts, flex: 3 },
+                      {
+                        field: 'count',
+                        headerName: labels.counts,
+                        flex: 1,
+                        linkOpen: data => ({
+                          resourceId: data.alertResourceId,
+                          props: { value: data }
+                        })
+                      }
+
+                    ]}
+                    gridData={{ list: data?.alerts || [] }}
+                    rowId={['alertId']}
+                    pagination={false}
+                    maxAccess={access}
+                  />
+                </Box>
+              </div>
             </div>
           )}
         </div>

@@ -283,7 +283,8 @@ export const SystemRepository = {
   },
   SystemAlerts: {
     qry: service + 'qryAA',
-    arr: service + 'arrAA'
+    arr: service + 'arrAA',
+    active: service + 'activeAA'
   },
   RightToWork: {
     page: service + 'qryRW',
