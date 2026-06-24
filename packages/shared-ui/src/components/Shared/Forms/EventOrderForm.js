@@ -1,6 +1,7 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
+import dayjs from 'dayjs'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -31,6 +32,8 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import CustomTimePicker from '../../Inputs/CustomTimePicker'
+import CustomDateTimePicker from '../../Inputs/CustomDateTimePicker'
 
 export default function EventOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -93,7 +96,8 @@ export default function EventOrderForm({ recordId, window }) {
       status: 1,
       currencyId_metalId: '',
       sourceId: null,
-      sourceNo: ''
+      sourceNo: '',
+      time: ''
     },
     maxAccess,
     validationSchema: yup.object({
@@ -117,6 +121,7 @@ export default function EventOrderForm({ recordId, window }) {
       baseQty: yup.number().required(),
       targetPrice_muId: yup.number().required(),
       baseTargetPrice: yup.number().required(),
+      time: yup.date().required(),
       sourceNo: yup.string().nullable().test( function (value) {
         const { sourceId } = this.parent
         return !(sourceId && !value)
@@ -127,7 +132,8 @@ export default function EventOrderForm({ recordId, window }) {
       const values = {
         ...obj,
         date: formatDateToApi(obj?.date),
-        expiryDate: obj?.expiryDate ? formatDateToApi(obj?.expiryDate) : null
+        expiryDate: obj?.expiryDate ? formatDateToApi(obj?.expiryDate) : null,
+        time: formatDateToApi(obj.time)
       }
       const response = await postRequest({
         extension: BrokerageTradingRepository.EventOrder.set,
@@ -160,7 +166,8 @@ export default function EventOrderForm({ recordId, window }) {
         currencyId_metalId:
           res?.record?.currencyId && res?.record?.metalId
             ? `${res.record.currencyId}${res.record.metalId}`
-            : null
+            : null,
+        time: formatDateFromApi(res?.record?.time)
       }
     })
   }
@@ -486,6 +493,19 @@ useEffect(() => {
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('expiryDate', null)}
                 error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomDateTimePicker
+                name='time'
+                required
+                label={labels.time}
+                value={formik.values.time}
+                onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
+                readOnly={isClosed}
+                onClear={() => formik.setFieldValue('time', null)}
+                error={formik.touched.time && Boolean(formik.errors.time)}
               />
             </Grid>
             <Grid item xs={12}>
