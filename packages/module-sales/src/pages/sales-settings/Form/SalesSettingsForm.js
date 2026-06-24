@@ -104,7 +104,7 @@ export default function SalesSettingsForm({ _labels, access }) {
 
       return acc
     }, {})
-    if (myObject) formik.setValues(myObject)
+    if (myObject) formik.resetForm({ values: myObject })
   }, [])
 
   return (

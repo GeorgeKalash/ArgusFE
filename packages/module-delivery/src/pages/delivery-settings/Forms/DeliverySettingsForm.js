@@ -67,10 +67,8 @@ export default function DeliverySettingsForm({ _labels, access }) {
   useEffect(() => {
     const updated = {}
     systemDefaults.list?.forEach(obj => {
-     if (defaultKeys.includes(obj.key)) {
-      updated[obj.key] = obj.value ? parseFloat(obj.value) : null
-      formik.setFieldValue(obj.key, updated[obj.key])
-     }
+     if (defaultKeys.includes(obj.key)) updated[obj.key] = obj.value ? parseFloat(obj.value) : null
+     formik.resetForm({ values: updated })
     })
   }, [systemDefaults])
   

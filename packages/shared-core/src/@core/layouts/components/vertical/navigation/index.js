@@ -28,6 +28,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import styles from './Navigation.module.css'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
 
 const SwipeableDrawer = MuiSwipeableDrawer
 
@@ -61,6 +62,7 @@ const Navigation = props => {
 
   const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex, handleBookmark, setTabSwitch } =
     useContext(MenuContext)
+  const { clearPageInteractions } = useInteractionTracker()
   const { platformLabels } = useContext(ControlContext)
   const [filteredMenu, setFilteredMenu] = useState([])
   const [openFolders, setOpenFolders] = useState([])
@@ -231,6 +233,7 @@ const Navigation = props => {
     if (isCurrentTab) {
       setReloadOpenedPage([])
       setReloadOpenedPage(node)
+      clearPageInteractions(openTabs[currentTabIndex]?.resourceId)
     } else if (existingTabIndex !== -1) {
       setTabSwitch(true)
       setCurrentTabIndex(existingTabIndex)

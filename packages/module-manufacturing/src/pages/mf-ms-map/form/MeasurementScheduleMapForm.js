@@ -78,7 +78,7 @@ export default function MeasurementScheduleMapForm({ _labels: labels, maxAccess 
         }
       }) || []
 
-    formik.setFieldValue('rows', rows)
+    formik.resetForm({ values: { rows } })
   }
 
   useEffect(() => {

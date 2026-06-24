@@ -1,9 +1,25 @@
 import { useFormik } from 'formik'
-import { useEffect, useRef, useLayoutEffect } from 'react'
+import { useEffect, useRef, useLayoutEffect, useContext } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from '@argus/shared-utils/src/utils/maxAccess'
 import * as yup from 'yup'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
+import { MenuContext } from '@argus/shared-providers/src/providers/MenuContext'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
-export function useForm({ behavior, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
+export function useForm({ behavior, conditionSchema = [], maxAccess, validate = () => {}, isParentLevel = false, ...formikProps }) {
+  const windowContext = useWindow()
+  const isImmediateWindow = windowContext?.isImmediateWindow ?? false
+  const isInsideWindow = windowContext?.isInsideWindow ?? false
+
+  const trackInteraction = usePageInteraction()
+  const { clearPageInteractions } = useInteractionTracker()
+  const {
+    openTabs,
+    currentTabIndex
+  } = useContext(MenuContext)
+  const currentTab = openTabs?.[currentTabIndex] || null
+
   function explode(str) {
     const parts = str.split('.')
 
@@ -184,7 +200,16 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
   }
 
   const dirty = JSON.stringify(normalized(formik.values)) !== JSON.stringify(normalized(formik.initialValues))
-  
+ 
+  console.log('dirty',dirty ,'\n ',formik.initialValues,' \n ',formik.values,isInsideWindow)
+
+  useEffect(() => {
+    if (!isImmediateWindow && isInsideWindow) return
+    
+    if (dirty) trackInteraction('form')
+    else clearPageInteractions(currentTab?.resourceId)
+  }, [dirty])
+
   return {
     formik: {
       ...formik,

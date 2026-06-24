@@ -24,11 +24,10 @@ const LoDefault = ({ _labels, access }) => {
   useEffect(() => {
     const myObject = {}
     systemDefaults.list.forEach(obj => {
-      if (arrayAllow.includes(obj.key)) {
+      if (arrayAllow.includes(obj.key)) 
         myObject[obj.key] = obj.value ? parseFloat(obj.value) : null
-        formik.setFieldValue(obj.key, myObject[obj.key])
-      }
     })
+    formik.resetForm({ values: myObject })
   }, [systemDefaults])
 
   const { formik } = useForm({

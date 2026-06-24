@@ -1,6 +1,6 @@
 import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
-import { useFormik } from 'formik'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
@@ -17,8 +17,8 @@ const PosDefaultForm = ({ _labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
-  const formik = useFormik({
-    validateOnChange: true,
+ const { formik } = useForm({
+    maxAccess: access,
     initialValues: {
       posItemPK: null
     },
@@ -38,7 +38,7 @@ const PosDefaultForm = ({ _labels, access }) => {
       return obj.key === 'posItemPK'
     })
     filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    formik.setValues(myObject)
+    formik.resetForm({ values: myObject })
   }
 
   const postPosDefault = obj => {

@@ -17,6 +17,7 @@ import CustomDateTimePicker from '../Inputs/CustomDateTimePicker'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 
 const formatDateTo = value => {
   const date = new Date(value)
@@ -401,6 +402,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   const [parameters, setParameters] = useState([])
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const trackInteraction = usePageInteraction()
 
   useSetWindow({ title: platformLabels.ReportParametersBrowser, window })
 
@@ -466,6 +468,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       }, [])
 
       setRpbParams(array)
+      trackInteraction('RPBGridToolbar')
       window.close()
     }
   })

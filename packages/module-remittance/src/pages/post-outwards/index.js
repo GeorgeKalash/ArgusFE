@@ -73,8 +73,8 @@ const Postoutwards = () => {
       fromAmount: '',
       corId: '',
       dispersalType: '',
-      totalFc: '',
-      totalAm: '',
+      totalFc: 0,
+      totalAm: 0,
       fromDate: '',
       toDate: ''
     },

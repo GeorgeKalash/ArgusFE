@@ -21,13 +21,15 @@ const PUFinancialIntegrators = () => {
       extension: PurchaseRepository.FinancialGroup.qry,
       parameters: `_filter=`
     })
-    formik.setValues({
-      ...formik.values,
-      items: res.list.map(({ sameNumber, ...rest }, index) => ({
-        ...rest,
-        id: index + 1,
-        sameNumber: sameNumber || false
-      }))
+    formik.resetForm({ values:
+      {
+        ...formik.values,
+        items: res.list.map(({ sameNumber, ...rest }, index) => ({
+          ...rest,
+          id: index + 1,
+          sameNumber: sameNumber || false
+        }))
+      }
     })
   }
 

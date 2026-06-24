@@ -23,6 +23,7 @@ import { ControlProvider } from '@argus/shared-providers/src/providers/ControlCo
 import { CommonProvider } from '@argus/shared-providers/src/providers/CommonContext'
 import { MenuProvider } from '@argus/shared-providers/src/providers/MenuContext'
 import { TabsProvider } from '@argus/shared-providers/src/providers/TabsContext'
+import { InteractionTrackerProvider } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
 import { SettingsConsumer, SettingsProvider } from '@argus/shared-core/src/@core/context/settingsContext'
 import { PrimeReactProvider } from 'primereact/api'
 import ReactHotToast from '@argus/shared-core/src/@core/styles/libs/react-hot-toast'
@@ -102,7 +103,9 @@ const App = props => {
     (page => (
       <MenuProvider>
         <UserLayout contentHeightFixed={contentHeightFixed}>
-          <TabsProvider pageTitle={Component.pageTitle ?? pageProps.pageTitle}>{page}</TabsProvider>
+          <TabsProvider pageTitle={Component.pageTitle ?? pageProps.pageTitle}>
+              {page}
+          </TabsProvider>
         </UserLayout>
       </MenuProvider>
     ))
@@ -123,12 +126,12 @@ const App = props => {
           <meta name='google' content='notranslate' />
         </Head>
         <AuthProvider>
-          <GlobalErrorHandlers />
-          <GuestGuard fallback={<Spinner />}>
-            <RequestsProvider>
-              <CachedDefaults>
-                <ErrorProvider>
-                  <WindowProvider>
+          <InteractionTrackerProvider>
+            <GlobalErrorHandlers />
+            <GuestGuard fallback={<Spinner />}>
+              <RequestsProvider>
+                <CachedDefaults>
+                  <ErrorProvider>
                     <LockedScreensProvider>
                       <QueryClientProvider client={queryClient}>
                         <LabelsAccessContextProvider>
@@ -217,11 +220,11 @@ const App = props => {
                         </LabelsAccessContextProvider>
                       </QueryClientProvider>
                     </LockedScreensProvider>
-                  </WindowProvider>
-                </ErrorProvider>
-              </CachedDefaults>
-            </RequestsProvider>
-          </GuestGuard>
+                  </ErrorProvider>
+                </CachedDefaults>
+              </RequestsProvider>
+            </GuestGuard>
+          </InteractionTrackerProvider>
         </AuthProvider>
       </CacheProvider>
     </Provider>

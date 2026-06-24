@@ -47,10 +47,10 @@ const MCDefault = ({ _labels, access }) => {
   useEffect(() => {
     const updated = {}
     systemDefaults.list?.forEach(obj => {
-      if (arrayAllow.includes(obj.key)) {
-        updated[obj.key] = obj.value ? parseFloat(obj.value) : null
-        formik.setFieldValue(obj.key, updated[obj.key])
-      }
+      if (arrayAllow.includes(obj.key)) 
+       updated[obj.key] = obj.value ? parseFloat(obj.value) : null
+
+      formik.resetForm({ values: updated })
     })
   }, [systemDefaults])
 

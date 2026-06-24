@@ -4,6 +4,9 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { v4 as uuidv4 } from 'uuid'
+import { TabsContext } from '../TabsContext'
+import usePageInteraction from '../usePageInteraction'
+import { useInteractionTracker } from '../InteractionTrackerProvider'
 
 const WindowContext = React.createContext(null)
 const ClearContext = React.createContext(null)
@@ -52,7 +55,14 @@ export function WindowProvider({ children }) {
       ? JSON.parse(window.sessionStorage.getItem('userData'))?.userId
       : null
 
+  const trackInteraction = usePageInteraction()
+  const { clearPageInteractions } = useInteractionTracker()
+
+  const tabsContext = useContext(TabsContext)
+  const currentTab = tabsContext?.currentTab || null
+
   const currentValue = { ...stack[stack.length - 1] }
+  const isImmediateWindow = currentValue?.isImmediateWindow ?? false
 
   function lockRecord(obj) {
     getRequest({
@@ -100,6 +110,7 @@ export function WindowProvider({ children }) {
   }
 
   function closeWindow() {
+    if (currentTab?.resourceId) clearPageInteractions(currentTab.resourceId, 'Window')
     const closingWindow = stack[stack.length - 1]
 
     if (
@@ -108,11 +119,11 @@ export function WindowProvider({ children }) {
     ) {
       unlockRecord()
     }
-
     setStack(stack => stack.slice(0, stack.length - 1))
   }
 
   function closeWindowById(givenId) {
+    if (currentTab?.resourceId) clearPageInteractions(currentTab.resourceId, 'Window')
     unlockRecord()
     closedWindow.current = currentValue
     setStack(stack => stack.filter(({ id }) => givenId != id))
@@ -123,8 +134,9 @@ export function WindowProvider({ children }) {
   }
 
   function addToStack(options) {
-    const { Component, spacing = true } = options
+    const { Component, spacing = true, trackPage = true } = options
     const dimensions = getWindowDimensions(options.width, options.height, spacing)
+    if (trackPage) trackInteraction('Window')
 
     setStack(stack => [
       ...stack,
@@ -160,7 +172,7 @@ export function WindowProvider({ children }) {
   }
 
   return (
-    <WindowContext.Provider value={{ stack: addToStack, lockRecord }}>
+    <WindowContext.Provider value={{ stack: addToStack, lockRecord, isImmediateWindow, isInsideWindow: stack.length > 0 }}>
       {children}
       {stack.map(
         ({
@@ -294,6 +306,8 @@ export function ImmediateWindow({
       spacing,
       width,
       height,
+      trackPage: false,
+      isImmediateWindow: true,
       title: _labels[labelKey] || titleName
     })
   }

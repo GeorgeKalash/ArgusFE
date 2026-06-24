@@ -5,7 +5,7 @@ import ReportParameterBrowser from '@argus/shared-ui/src/components/Shared/Repor
 import { Grid } from '@mui/material'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 const styles = {
   leftSectionGridItem: 'leftSectionGridItem',
   bottomSectionContainer: 'bottomSectionContainer'
@@ -31,6 +31,7 @@ const RPBGridToolbar = ({
   const [search, setSearch] = useState('')
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const trackInteraction = usePageInteraction()
 
   useEffect(() => {
     setRpbParams([])
@@ -98,6 +99,9 @@ const RPBGridToolbar = ({
       key: 'GO',
       condition: true,
       onClick: () => {
+        const shouldTrack = (search && reportParams) || typeof filterBy !== 'function'
+        if (shouldTrack) trackInteraction('RPBGridToolbar')
+
         if (typeof filterBy === 'function') filters(search, reportParams)
         else
           onApply({
@@ -110,10 +114,17 @@ const RPBGridToolbar = ({
     {
       key: 'Print',
       condition: !!rest?.Print,
-      onClick: () => rest?.Print(rpbParams),
+      onClick: () => {
+        trackInteraction('RPBGridToolbar')
+        rest?.Print(rpbParams)
+      },
       disabled: rest?.disablePrint
     }
   ].filter(item => !item?.hidden)
+
+  useEffect(() => {
+    if (rpbParams.length > 0) trackInteraction('RPBGridToolbar')
+  }, [rpbParams])
 
   return (
     <>
@@ -202,9 +213,13 @@ const RPBGridToolbar = ({
       `}</style>
 
       <GridToolbar
-        onSearch={value => filters(value, reportParams)}
+        onSearch={value => {
+          trackInteraction('RPBGridToolbar')
+          filters(value, reportParams)
+        }}
         reportParams={reportParams}
         onSearchClear={() => {
+          trackInteraction('RPBGridToolbar')
           setSearch('')
           if (typeof filterBy === 'function') filterBy('params', reportParams)
           else onClear(reportParams)
