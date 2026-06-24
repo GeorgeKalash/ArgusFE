@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
-import dayjs from 'dayjs'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -32,7 +31,6 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
-import CustomTimePicker from '../../Inputs/CustomTimePicker'
 import CustomDateTimePicker from '../../Inputs/CustomDateTimePicker'
 
 export default function EventOrderForm({ recordId, window }) {
@@ -97,7 +95,7 @@ export default function EventOrderForm({ recordId, window }) {
       currencyId_metalId: '',
       sourceId: null,
       sourceNo: '',
-      time: ''
+      time: null
     },
     maxAccess,
     validationSchema: yup.object({

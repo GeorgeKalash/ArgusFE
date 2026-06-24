@@ -1,82 +1,72 @@
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-import { useFormik } from 'formik'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
-const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+const ClassesForm = ({ labels, maxAccess, store, setStore }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.Class.qry
+    endpointId: DocumentReleaseRepository.Class.page
   })
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: null,
-    characteristicOperator: null
-  })
-
-  const formik = useFormik({
-    validateOnChange: true,
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: recordId || null,
+      name: '',
+      characteristicOperator: null
+    },
+    maxAccess,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      characteristicOperator: yup.string().required(' ')
+      name: yup.string().required(),
+      characteristicOperator: yup.string().required()
     }),
-    onSubmit: async values => {
-      await postClass(values)
+    onSubmit: async obj => {
+      const res = await postRequest({
+        extension: DocumentReleaseRepository.Class.set,
+        record: JSON.stringify(obj)
+      })
+
+      if (!obj.recordId) formik.setFieldValue('recordId', res?.recordId)
+      setStore(prev => ({ ...prev, recordId: res?.recordId }))
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+
+      invalidate()
     }
   })
 
-  const postClass = async obj => {
-    const recordId = obj.recordId
-    await postRequest({
-      extension: DocumentReleaseRepository.Class.set,
-      record: JSON.stringify(obj)
-    }).then(res => {
-      if (!recordId) {
-        setEditMode(true)
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
-        formik.setFieldValue('recordId', res.recordId)
-        toast.success('Record Added Successfully')
-      } else toast.success('Record Edited Successfully')
-      invalidate()
-    })
-  }
-
   useEffect(() => {
-    recordId && getClassesById(recordId)
-  }, [recordId])
+    ;(async function () {
+      if (recordId) {
+        const res = await getRequest({
+          extension: DocumentReleaseRepository.Class.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-  const getClassesById = recordId => {
-    const defaultParams = `_recordId=${recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.Class.get,
-      parameters: parameters
-    }).then(res => {
-      formik.setValues(res.record)
-      setEditMode(true)
-    })
-  }
+        formik.setValues(res.record)
+        setStore(prev => ({ ...prev, recordId: res.record.recordId }))
+      }
+    })()
+  }, [])
+
+  const editMode = !!recordId
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Classes} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.Classes} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -102,9 +92,10 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
                 valueField='key'
                 displayField='value'
                 values={formik.values}
-                onClear={() => formik.setFieldValue('name', '')}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('characteristicOperator', newValue?.key || '')
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('characteristicOperator', null)}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('characteristicOperator', newValue?.key || null)
                 }}
                 error={formik.touched.characteristicOperator && Boolean(formik.errors.characteristicOperator)}
               />

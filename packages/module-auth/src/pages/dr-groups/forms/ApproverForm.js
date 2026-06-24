@@ -1,22 +1,21 @@
-import React, { useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { Grid } from '@mui/material'
-import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-const ApproverForm = ({ labels, maxAccess, store, window }) => {
-  const { postRequest } = useContext(RequestsContext)
+const ApproverForm = ({ labels, maxAccess, codeId, store, window }) => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { recordId: grId } = store
+  const { recordId: groupId } = store
 
   const invalidate = useInvalidate({
     endpointId: DocumentReleaseRepository.GroupCode.qry
@@ -24,59 +23,64 @@ const ApproverForm = ({ labels, maxAccess, store, window }) => {
 
   const { formik } = useForm({
     initialValues: {
-      codeId: null,
-      groupId: grId
+      codeId,
+      groupId
     },
+    maxAccess,
     validationSchema: yup.object({
       codeId: yup.string().required()
     }),
-    onSubmit: async values => {
-      await postGroups(values)
-    },
-    validateOnChange: true,
-    maxAccess
+    onSubmit: async obj => {
+      await postRequest({
+        extension: DocumentReleaseRepository.GroupCode.set,
+        record: JSON.stringify(obj)
+      })
+      toast.success(!codeId ? platformLabels.Added : platformLabels.Edited)
+      invalidate()
+      window.close()
+    }
   })
 
-  const postGroups = async obj => {
-    await postRequest({
-      extension: DocumentReleaseRepository.GroupCode.set,
-      record: JSON.stringify(obj)
-    })
-    toast.success(platformLabels.Saved)
-    window.close()
-    invalidate()
-  }
+  useEffect(() => {
+    ;(async function () {
+      if (codeId) {
+        const res = await getRequest({
+          extension: DocumentReleaseRepository.GroupCode.get,
+          parameters: `_groupId=${groupId}&_codeId=${codeId}`
+        })
+        formik.setValues(res?.record || {})
+      }
+    })()
+  }, [])
 
   return (
-    <FormShell form={formik} isInfo={false} resourceId={ResourceIds.DRGroups} maxAccess={maxAccess}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={DocumentReleaseRepository.ReleaseCode.qry}
-                parameters={`_startAt=${0}&_pageSize=${100}`}
-                name='codeId'
-                label={labels.code}
-                valueField='recordId'
-                displayField='name'
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                required
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('codeId', newValue?.recordId)
-                }}
-                error={formik.touched.codeId && Boolean(formik.errors.codeId)}
-              />
-            </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={DocumentReleaseRepository.ReleaseCode.qry}
+              parameters={`_startAt=0&_pageSize=100`}
+              name='codeId'
+              label={labels.code}
+              valueField='recordId'
+              displayField='name'
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              required
+              maxAccess={maxAccess}
+              onChange={(_, newValue) => {
+                formik.setFieldValue('codeId', newValue?.recordId || null)
+              }}
+              error={formik.touched.codeId && Boolean(formik.errors.codeId)}
+            />
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -4,77 +4,79 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import FunctionForm from './FunctionForm'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import ApproverForm from './ApproverForm'
 
-const ApproverList = ({ store, labels, maxAccess }) => {
+const FunctionsTab = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
-  const { stack } = useWindow()
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: DocumentReleaseRepository.GroupCode.qry,
-      parameters: `_filter=&_groupId=${recordId}`
-    })
-  }
+  const columns = [
+    {
+      field: 'functionName',
+      headerName: labels.function,
+      flex: 1
+    },
+    {
+      field: 'strategyName',
+      headerName: labels.strategy,
+      flex: 1
+    }
+  ]
 
   const {
     query: { data },
     invalidate
   } = useResourceQuery({
-    enabled: !!recordId,
-    datasetId: ResourceIds.DRGroups,
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.GroupCode.qry,
+    enabled: !!recordId,
+    endpointId: DocumentReleaseRepository.ClassFunction.qry,
+    datasetId: ResourceIds.Classes,
     params: { disabledReqParams: true, maxAccess }
   })
 
-  const columns = [
-    { 
-      field: 'codeRef', 
-      headerName: labels.reference, 
-      flex: 1 
-    },
-    { 
-      field: 'codeName', 
-      headerName: labels.name, 
-      flex: 1 
-    }
-  ]
+  async function fetchGridData() {
+    if (!recordId) return { list: [] }
 
-  const add = () => openForm()
-
-  const edit = (obj) => openForm(obj?.codeId)
+    return await getRequest({
+      extension: DocumentReleaseRepository.ClassFunction.qry,
+      parameters: `_classId=${recordId}`
+    })
+  }
 
   const del = async obj => {
     await postRequest({
-      extension: DocumentReleaseRepository.GroupCode.del,
+      extension: DocumentReleaseRepository.ClassFunction.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
     toast.success(platformLabels.Deleted)
+    invalidate()
   }
 
-  function openForm(codeId) {
+  const add = () => openForm()
+
+  const edit = obj => openForm(obj)
+
+  function openForm(record) {
     stack({
-      Component: ApproverForm,
+      Component: FunctionForm,
       props: {
         labels,
-        codeId,
-        maxAccess,
-        store
+        classId: recordId,
+        record,
+        maxAccess
       },
-      width: 500,
-      height: 300,
-      title: labels.approver
+      width: 400,
+      height: 350,
+      title: labels.functions
     })
   }
 
@@ -85,18 +87,18 @@ const ApproverList = ({ store, labels, maxAccess }) => {
       </Fixed>
       <Grow>
         <Table
-          name='approver'
+          name='functions'
           columns={columns}
           gridData={data}
-          rowId={['codeId']}
-          pagination={false}
-          onDelete={del}
+          rowId={['functionId']}
           onEdit={edit}
+          onDelete={del}
           maxAccess={maxAccess}
+          pagination={false}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default ApproverList
+export default FunctionsTab

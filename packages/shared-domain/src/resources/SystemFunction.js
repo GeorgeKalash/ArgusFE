@@ -137,6 +137,7 @@ export const SystemFunction = {
   FixingSales: Module.BrokerageTrading * 100 + 1,
   FixingPurchases: Module.BrokerageTrading * 100 + 2,
   EventOrder: Module.BrokerageTrading * 100 + 3,
+  ProductionRequest: Module.Manufacturing * 100 + 19,
 }
 
 export const getSystemFunctionModule = functionId => {
