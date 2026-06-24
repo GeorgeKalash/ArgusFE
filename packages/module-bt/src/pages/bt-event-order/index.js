@@ -15,7 +15,7 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
 import EventOrderForm from '@argus/shared-ui/src/components/Shared/Forms/EventOrderForm'
 
-export default function BTFixing() {
+export default function BTEventOrder() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -49,8 +49,7 @@ export default function BTFixing() {
     endpointId: BrokerageTradingRepository.EventOrder.page,
     datasetId: ResourceIds.EventOrder,
     filter: {
-      filterFn: fetchWithSearch,
-      default: { functionId: SystemFunction.EventOrder }
+      filterFn: fetchWithSearch
     }
   })
 

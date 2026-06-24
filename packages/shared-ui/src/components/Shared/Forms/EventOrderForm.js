@@ -62,7 +62,7 @@ export default function EventOrderForm({ recordId, window }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       plantId: null,
       accountId: null,
@@ -89,7 +89,7 @@ export default function EventOrderForm({ recordId, window }) {
       dtId: null,
       recordId: null,
       reference: '',
-      releaseStatus: 1,
+      releaseStatus: null,
       status: 1,
       currencyId_metalId: '',
       sourceId: null,
@@ -156,7 +156,7 @@ export default function EventOrderForm({ recordId, window }) {
       values: {
         ...res?.record,
         date: formatDateFromApi(res?.record?.date),
-        expiryDate: formatDateFromApi(res?.record?.expiryDate),
+        expiryDate: res?.record?.expiryDate ? formatDateFromApi(res?.record?.expiryDate) : null,
         currencyId_metalId:
           res?.record?.currencyId && res?.record?.metalId
             ? `${res.record.currencyId}${res.record.metalId}`
@@ -270,9 +270,6 @@ useEffect(() => {
     stackError({
       message: labels.msIdError
     })
-
-
-    return
   }
 }, [msId, labels?.msIdError])
 
@@ -469,6 +466,8 @@ useEffect(() => {
                 onChange={(_, newValue) => {
                   formik.setFieldValue('validityType', newValue?.key || null)
                   formik.setFieldValue('expiryDate', null)
+
+                  formik.setFieldTouched('expiryDate', false)
                 }}
                 error={formik.touched.validityType && Boolean(formik.errors.validityType)}
               />
