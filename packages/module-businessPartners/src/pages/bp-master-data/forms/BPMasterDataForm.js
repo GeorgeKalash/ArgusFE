@@ -336,6 +336,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
                     label={labels.defaultId}
                     value={formik.values.defaultId}
                     maxAccess={maxAccess}
+                    decimalScale={0}
                     readOnly={!formik.values?.defaultInc}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('defaultId', '')}
