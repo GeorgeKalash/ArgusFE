@@ -23,17 +23,20 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
-
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 export default function LeaveRequestForm({ recordId , window}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
+  const autoClose = systemChecks?.find(item => item.checkId === SystemChecks.AUTO_CLOSE_LEAVE_REQUEST_ONSAVE)?.value || false
+  
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.LeaveRequest,
+    editMode: !!recordId
+  })
 
-    const { labels, access } = useResourceParams({
-      datasetId: ResourceIds.LeaveRequest,
-      editMode: !!recordId
-    })
-
-    useSetWindow({ title: labels.title, window })
+  useSetWindow({ title: labels.title, window })
     
 
   const invalidate = useInvalidate({
@@ -64,7 +67,6 @@ export default function LeaveRequestForm({ recordId , window}) {
       wip: 1
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       hours: yup.number().required(),
       startDate: yup.date().required(),
@@ -86,8 +88,10 @@ export default function LeaveRequestForm({ recordId , window}) {
       })
 
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-      refetchForm(response.recordId)
+      const updatedForm = await refetchForm(response.recordId)
       invalidate()
+
+      if (autoClose) await onClose(updatedForm)
     }
   })
 
@@ -98,36 +102,40 @@ export default function LeaveRequestForm({ recordId , window}) {
     refetchForm(recordId)
   }, [])
 
+
   async function refetchForm(recordId) {
-    if (recordId) {
-      const { record } = await getRequest({
-        extension: LeaveManagementRepository.LeaveRequest.get,
-        parameters: `_recordId=${recordId}`
-      })
-      formik.resetForm({
-        values: {
-          ...record,
-          date: formatDateFromApi(record.date),
-          startDate: formatDateFromApi(record.startDate),
-          endDate: formatDateFromApi(record.endDate)
-        }
-      })
+    if (!recordId) return {}
+
+    const { record } = await getRequest({
+      extension: LoanManagementRepository.LeaveRequest.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    const data = {
+      ...record,
+      date: formatDateFromApi(record.date),
+      startDate: formatDateFromApi(record.startDate),
+      endDate: formatDateFromApi(record.endDate)
     }
+    formik.resetForm({ values: data })
+
+    return data
   }
 
-  const onClose = async () => {
+  const onClose = async (values = null) => {
+    const payload = values || formik.values
     await postRequest({
       extension: LeaveManagementRepository.LeaveRequest.close,
       record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values.date),
-        startDate: formatDateToApi(formik.values.startDate),
-        endDate: formatDateToApi(formik.values.endDate)
+        ...payload,
+        date: formatDateToApi(payload.date),
+        startDate: formatDateToApi(payload.startDate),
+        endDate: formatDateToApi(payload.endDate)
       })
     })
 
     toast.success(platformLabels.Closed)
-    refetchForm(formik.values.recordId)
+    refetchForm(payload.recordId)
     invalidate()
   }
 
@@ -151,7 +159,7 @@ export default function LeaveRequestForm({ recordId , window}) {
     {
       key: 'Close',
       condition: !isClosed,
-      onClick: onClose,
+      onClick: () => onClose(),
       disabled: isClosed || !editMode
     },
     {
