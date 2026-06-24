@@ -26,18 +26,17 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 
-const QtyStepper = ({ id, quantities, onInc, onDec }) => {
-  const q = quantities[id] || 0
+const QtyStepper = ({ id, qty, onInc, onDec }) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
       <IconButton
         size='small'
         onClick={e => { e.stopPropagation(); onDec(id) }}
-        disabled={q === 0}
+        disabled={qty === 0}
         sx={{
           width: 26, height: 26,
           border: '1px solid',
-          borderColor: q === 0 ? 'action.disabled' : 'divider',
+          borderColor: qty === 0 ? 'action.disabled' : 'divider',
           borderRadius: '50%', p: 0,
         }}
       >
@@ -45,7 +44,7 @@ const QtyStepper = ({ id, quantities, onInc, onDec }) => {
       </IconButton>
 
       <Typography variant='body2' sx={{ minWidth: 22, textAlign: 'center', fontWeight: 600, fontSize: 13 }}>
-        {q}
+        {qty}
       </Typography>
 
       <IconButton
@@ -65,11 +64,10 @@ const QtyStepper = ({ id, quantities, onInc, onDec }) => {
   )
 }
 
-const ProductCard = ({ row, quantities, onInc, onDec }) => {
+const ProductCard = ({ row, cart, onInc, onDec }) => {
   const id = row.itemId
-  const q = quantities[id] || 0
+  const q = cart[id]?.qty || 0
   const inCart = q > 0
-  const price = parseFloat(row.price)
 
   return (
     <Box
@@ -114,7 +112,7 @@ const ProductCard = ({ row, quantities, onInc, onDec }) => {
         Price: {row.unitPrice} {row.currencyRef}
       </Typography>
 
-      <QtyStepper id={id} quantities={quantities} onInc={onInc} onDec={onDec} />
+      <QtyStepper id={id} qty={q} onInc={onInc} onDec={onDec} />
 
     </Box>
   )
@@ -125,12 +123,52 @@ const Catalogue = () => {
   const { stack } = useWindow()
 
   const [view, setView] = useState('grid')
-  const [quantities, setQuantities] = useState({})
-    const [values, setValues] = useState({ clientId: null, clientRef: '', clientName: '' })
+  const [cart, setCart] = useState({})
+  const [values, setValues] = useState({ clientId: null, clientRef: '', clientName: '' })
 
-  const inc = useCallback(id => setQuantities(q => ({ ...q, [id]: (q[id] || 0) + 1 })), [])
-  const dec = useCallback(id => setQuantities(q => ({ ...q, [id]: Math.max(0, (q[id] || 0) - 1) })), [])
-  const remove = useCallback(id => setQuantities(q => { const n = { ...q }; delete n[id]; return n }), [])
+  const inc = id => {
+    const product = rows.find(r => r.itemId === id)
+
+    if (!product) return
+
+    setCart(c => ({
+      ...c,
+      [id]: {
+        ...(c[id] || product),
+        qty: (c[id]?.qty || 0) + 1
+      }
+    }))
+  }
+
+  const dec = id => {
+    setCart(c => {
+      const item = c[id]
+
+      if (!item) return c
+
+      if (item.qty === 1) {
+        const copy = { ...c }
+        delete copy[id]
+        return copy
+      }
+
+      return {
+        ...c,
+        [id]: {
+          ...item,
+          qty: item.qty - 1
+        }
+      }
+    })
+  }
+
+  const remove = useCallback(id => {
+    setCart(c => {
+      const n = { ...c }
+      delete n[id]
+      return n
+    })
+  }, [])
 
   const [checkoutOpen, setCheckoutOpen] = useState(false)
 
@@ -237,9 +275,8 @@ const Catalogue = () => {
   const rows = data?.list ?? []
 
   const cartItems = useMemo(
-    () => rows.filter(r => (quantities[r.itemId] || 0) > 0)
-              .map(r => ({ ...r, qty: quantities[r.itemId] })),
-    [rows, quantities]
+    () => Object.values(cart),
+    [cart]
   )
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0)
   const cartTotal = cartItems.reduce((s, i) => s + (parseFloat(i.price) || 0) * i.qty, 0)
@@ -385,7 +422,7 @@ const Catalogue = () => {
                     <ProductCard
                       key={row.itemId}
                       row={row}
-                      quantities={quantities}
+                      cart={cart}
                       onInc={inc}
                       onDec={dec}
                     />
