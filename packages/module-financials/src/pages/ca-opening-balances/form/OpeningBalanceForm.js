@@ -159,7 +159,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
                 onClear={() => formik.setFieldValue('amount', '')}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
-                maxLength={10}
+                maxLength={12}
                 decimalScale={2}
               />
             </Grid>
