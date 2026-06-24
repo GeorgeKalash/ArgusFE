@@ -498,6 +498,7 @@ export const ManufacturingRepository = {
     set: service + 'setWCG',
     del: service + 'delWCG',
     page: service + 'pageWCG',
+    qry: service + 'qryWCG',
     snapshot: service + 'snapshotWCG'
   },
   ProductionClassGroups: {
@@ -505,6 +506,7 @@ export const ManufacturingRepository = {
     set: service + 'setPCG',
     del: service + 'delPCG',
     page: service + 'pagePCG',
+    qry: service + 'qryPCG',
     snapshot: service + 'snapshotPCG'
   },
   ProductionStandardGroups: {
@@ -512,6 +514,7 @@ export const ManufacturingRepository = {
     set: service + 'setPSG',
     del: service + 'delPSG',
     page: service + 'pagePSG',
+    qry: service + 'qryPSG',
     snapshot: service + 'snapshotPSG'
   }
 }
