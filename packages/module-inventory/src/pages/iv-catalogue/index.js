@@ -26,13 +26,13 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 
-const QtyStepper = ({ id, qty, onInc, onDec }) => {
+const QtyStepper = ({ id, qty, onInc, onDec, canAdd }) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
       <IconButton
         size='small'
         onClick={e => { e.stopPropagation(); onDec(id) }}
-        disabled={qty === 0}
+        disabled={qty === 0 || !canAdd}
         sx={{
           width: 26, height: 26,
           border: '1px solid',
@@ -43,13 +43,14 @@ const QtyStepper = ({ id, qty, onInc, onDec }) => {
         <RemoveIcon sx={{ fontSize: 14 }} />
       </IconButton>
 
-      <Typography variant='body2' sx={{ minWidth: 22, textAlign: 'center', fontWeight: 600, fontSize: 13 }}>
+      <Typography variant='body2' sx={{ minWidth: 22, textAlign: 'center', fontWeight: 600, fontSize: 13 }} disabled={!canAdd}>
         {qty}
       </Typography>
 
       <IconButton
         size='small'
         onClick={e => { e.stopPropagation(); onInc(id) }}
+        disabled={!canAdd}
         sx={{
           width: 26, height: 26,
           border: '1px solid', borderColor: 'primary.main',
@@ -64,7 +65,7 @@ const QtyStepper = ({ id, qty, onInc, onDec }) => {
   )
 }
 
-const ProductCard = ({ row, cart, onInc, onDec }) => {
+const ProductCard = ({ row, cart, onInc, onDec, labels, canAdd }) => {
   const id = row.itemId
   const q = cart[id]?.qty || 0
   const inCart = q > 0
@@ -105,14 +106,14 @@ const ProductCard = ({ row, cart, onInc, onDec }) => {
       </Typography>
 
       <Typography variant='caption' sx={{ color: 'text.secondary', fontSize: 10 }}>
-        On Hand: {row.onHand}
+        {labels.onHand}: {row.onHand}
       </Typography>
 
       <Typography variant='caption' sx={{ color: 'text.secondary', fontSize: 10 }}>
-        Price: {row.unitPrice} {row.currencyRef}
+        {labels.price}: {row.unitPrice} {row.currencyRef}
       </Typography>
 
-      <QtyStepper id={id} qty={q} onInc={onInc} onDec={onDec} />
+      <QtyStepper id={id} qty={q} onInc={onInc} onDec={onDec} canAdd={canAdd}/>
 
     </Box>
   )
@@ -204,8 +205,8 @@ const Catalogue = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: InventoryRepository.Catalogue.snapshot,
-        parameters: `_filter=${filters.qry}`
+        extension: view === 'grid' ? InventoryRepository.Catalogue.snapshot : InventoryRepository.CatalogueSummary.snapshot,
+        parameters: view === 'grid' ? `_filter=${filters.qry}` : `_filter=${filters.qry}&_clientId=${values.clientId || 0}`
       })
     } else {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -310,7 +311,7 @@ const Catalogue = () => {
           bgcolor: 'background.paper',
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Tooltip title='Grid view'>
+            <Tooltip title={labels.gridView}>
               <IconButton
                 size='small'
                 onClick={() => setView('grid')}
@@ -320,7 +321,7 @@ const Catalogue = () => {
               </IconButton>
             </Tooltip>
 
-            <Tooltip title='Icons view'>
+            <Tooltip title={labels.iconsView}>
               <IconButton
                 size='small'
                 onClick={() => setView('icons')}
@@ -346,6 +347,7 @@ const Catalogue = () => {
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
+                  readOnly={cartCount > 0}
                   maxAccess={access}
                   onChange={(_, newValue) => {
                     setValues({
@@ -425,6 +427,8 @@ const Catalogue = () => {
                       cart={cart}
                       onInc={inc}
                       onDec={dec}
+                      labels={labels}
+                      canAdd={!!values.clientId}
                     />
                   ))
                 )}
@@ -474,6 +478,7 @@ const Catalogue = () => {
         onConfirm={() => {
           setCheckoutOpen(false)
         }}
+        labels={labels}
       />
     </VertLayout>
   )

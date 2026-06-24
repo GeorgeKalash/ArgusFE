@@ -13,11 +13,12 @@ const CatalogueCheckout = ({
   onDec,
   onRemove,
   onConfirm,
-  currencySymbol = '$',
+  labels
 }) => {
   const total = cartItems.reduce((s, i) => s + (parseFloat(i.unitPrice) || 0) * i.qty, 0)
   const totalQty = cartItems.reduce((s, i) => s + i.qty, 0)
-
+  const currencyRef = cartItems[0]?.currencyRef || ''
+  
   return (
     <Drawer
       anchor='right'
@@ -58,7 +59,7 @@ const CatalogueCheckout = ({
         {cartItems.length === 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8, gap: 1.5 }}>
             <ShoppingCartIcon sx={{ fontSize: 48, color: 'action.disabled' }} />
-            <Typography variant='body2' color='text.secondary'>Your cart is empty</Typography>
+            <Typography variant='body2' color='text.secondary'>{labels.cartEmpty}</Typography>
           </Box>
         ) : (
           cartItems.map((item, idx) => {
@@ -87,7 +88,6 @@ const CatalogueCheckout = ({
                     )}
                   </Box>
 
-                  {/* name + sku */}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant='body2' sx={{ fontWeight: 600, fontSize: 13, lineHeight: 1.3 }} noWrap>
                       {item.name}
@@ -96,7 +96,7 @@ const CatalogueCheckout = ({
                       {item.sku}
                     </Typography>
                     <Typography variant='caption' sx={{ display: 'block', color: 'primary.main', fontWeight: 600, fontSize: 12 }}>
-                    {currencySymbol}{price.toFixed(2)} × {item.qty} = {currencySymbol}{(price * item.qty).toFixed(2)}
+                    {currencyRef} {price.toFixed(2)} × {item.qty} = {currencyRef} {(price * item.qty).toFixed(2)}
                     </Typography>
                     
                   </Box>
@@ -161,7 +161,7 @@ const CatalogueCheckout = ({
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant='body2' color='text.secondary'>Total</Typography>
                 <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
-                {currencySymbol}{total.toFixed(2)}
+                {currencyRef} {total.toFixed(2)}
                 </Typography>
             </Box>
             
@@ -173,7 +173,7 @@ const CatalogueCheckout = ({
                 startIcon={<ShoppingCartIcon />}
                 sx={{ textTransform: 'none', borderRadius: 1.5, fontWeight: 600 }}
                 >
-                Place Order
+                {labels.placeOrder}
             </Button>
 
             <Button
@@ -182,7 +182,7 @@ const CatalogueCheckout = ({
                 onClick={onClose}
                 sx={{ textTransform: 'none', color: 'text.secondary', fontSize: 12 }}
                 >
-                Continue Shopping
+                {labels.continueShopping}
             </Button>
         </Box>
       )}
