@@ -331,12 +331,13 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField
+                  <CustomTextField
                     name='defaultId'
                     label={labels.defaultId}
                     value={formik.values.defaultId}
                     maxAccess={maxAccess}
-                    decimalScale={0}
+                    type='number'
+                    maxLength={20}
                     readOnly={!formik.values?.defaultInc}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('defaultId', '')}
