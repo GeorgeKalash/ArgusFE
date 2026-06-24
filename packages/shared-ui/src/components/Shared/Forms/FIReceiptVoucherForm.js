@@ -692,7 +692,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 value={formik.values.amount}
                 readOnly={isCancelled || isPosted}
                 maxAccess={maxAccess}
-                maxLength={'10'}
+                maxLength={12}
                 decimalScale={2}
                 onChange={async e => {
                   formik.setFieldValue('amount', e.target.value)
