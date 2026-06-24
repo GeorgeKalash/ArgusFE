@@ -22,6 +22,7 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 export default function ProductionRequestForm({ recordId, labels, access, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,8 +41,15 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     endpointId: ManufacturingRepository.ProductionRequest.page
   })
 
+  const conditions = {
+    itemId: row => row?.qty != null || row?.pcs != null,
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
+    conditionSchema: ['items'],
     behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
@@ -71,13 +79,14 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         date: yup.date().required(),
         plantId: yup.number().required()
       }),
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const res = await postRequest({
         extension: ManufacturingRepository.ProductionRequest.set2,
         record: JSON.stringify({
           header: { ...obj.header, date: formatDateToApi(obj.header.date) },
-          items: obj.items?.filter(item => item.itemId).map((item, index) => ({
+          items: obj.items?.filter(row => Object.values(requiredFields)?.every(fn => fn(row))).map((item, index) => ({
             ...item,
             requestId: recordId,
             seqNo: index + 1
