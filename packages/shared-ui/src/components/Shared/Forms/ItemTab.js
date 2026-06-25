@@ -13,8 +13,8 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import { Grid } from '@mui/material'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import SerialsLots from './SerialsLots'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import SerialsLots from './SerialsLots'
 
 export default function ItemTab({ labels, maxAccess, store }) {
   const { postRequest } = useContext(RequestsContext)

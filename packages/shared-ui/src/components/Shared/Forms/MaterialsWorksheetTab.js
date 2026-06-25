@@ -17,7 +17,7 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { Grid } from '@mui/material'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
-const MaterialsTab = ({ store }) => {
+const MaterialsWorksheetTab = ({ store }) => {
   const { platformLabels } = useContext(ControlContext)
   const { recordId, isPosted, values } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -150,4 +150,4 @@ const MaterialsTab = ({ store }) => {
   )
 }
 
-export default MaterialsTab
+export default MaterialsWorksheetTab

@@ -4,9 +4,9 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Grid } from '@mui/material'
-import WorksheetWindow from '../../mf-worksheet/window/WorksheetWindow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import WorksheetWindow from './WorksheetWindow'
 
 export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }) {
 

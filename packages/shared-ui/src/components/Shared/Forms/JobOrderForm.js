@@ -27,11 +27,11 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
 import SerialsLots from './SerialsLots'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
-import Samples from './Samples'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import FormGrid from '@argus/shared-ui/src/components/form'
+import Samples from './Samples'
 
 export default function JobOrderForm({
   labels,
