@@ -1,6 +1,8 @@
 import { useContext, useState, useMemo, useCallback } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
+import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -120,26 +122,38 @@ const ProductCard = ({ row, cart, onInc, onDec, labels, canAdd }) => {
 }
 
 const Catalogue = () => {
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const [view, setView] = useState('grid')
   const [cart, setCart] = useState({})
   const [values, setValues] = useState({ clientId: null, clientRef: '', clientName: '' })
 
   const inc = id => {
-    const product = rows.find(r => r.itemId === id)
+    setCart(c => {
+      const existing = c[id]
+      const product = rows.find(r => r.itemId === id)
+      const base = existing || product
 
-    if (!product) return
+      if (!base) return c  
 
+      return {
+        ...c,
+        [id]: {
+          ...base,
+          qty: (existing?.qty || 0) + 1
+        }
+      }
+    })
+  }
+
+  const note = useCallback((text, id) => {
     setCart(c => ({
       ...c,
-      [id]: {
-        ...(c[id] || product),
-        qty: (c[id]?.qty || 0) + 1
-      }
+      [id]: { ...c[id], notes: text || '' }
     }))
-  }
+  }, [])
 
   const dec = id => {
     setCart(c => {
@@ -280,7 +294,8 @@ const Catalogue = () => {
     [cart]
   )
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0)
-  const cartTotal = cartItems.reduce((s, i) => s + (parseFloat(i.price) || 0) * i.qty, 0)
+  const cartTotal = cartItems.reduce((s, i) => s + (parseFloat(i.unitPrice) || 0) * i.qty, 0)
+  const currencyRef = cartItems[0]?.currencyRef || ''
 
   const handleCheckout = () => setCheckoutOpen(true)
 
@@ -294,6 +309,64 @@ const Catalogue = () => {
   const goPrev  = () => paginationParameters({ _startAt: (page - 2) * pageSize,      _pageSize: pageSize })
   const goNext  = () => paginationParameters({ _startAt: page * pageSize,            _pageSize: pageSize })
   const goLast  = () => paginationParameters({ _startAt: (pageCount - 1) * pageSize, _pageSize: pageSize })
+
+
+  async function handleSaveBasket () {
+    const obj = {
+      header: {
+        clientId: values.clientId,
+        qty: cartCount,
+        amount: cartTotal
+      },
+      items: cartItems
+    }
+    await postRequest({
+      extension: SaleRepository.SalesBasket.set2,
+      record: JSON.stringify(obj)
+    })
+    toast.success(platformLabels.BasketUpdated)
+  }
+
+  async function handleGenerateOrder () {
+    const obj = {
+      header: {
+        clientId: values.clientId,
+        qty: cartCount,
+        amount: cartTotal
+      },
+      items: cartItems
+    }
+    await postRequest({
+      extension: SaleRepository.SalesOrder.generate,
+      record: JSON.stringify(obj)
+    })
+    toast.success(platformLabels.OrderGenerated)
+    setCheckoutOpen(false)
+    setCart({})
+  }
+
+  async function getClientBasket (clientId){
+    if(!clientId) return
+
+    const response = await getRequest({
+        extension: SaleRepository.SalesBasket.get2,
+        parameters: `_clientId=${clientId}`
+      })
+    const list = response?.record?.items
+    if (!list?.length) return
+
+    setCart(
+      list.reduce((acc, item) => {
+        acc[item.itemId] = {
+          ...item,
+          qty: item.qty,
+          name: item.itemName,
+        }
+        return acc
+      }, {})
+    )
+
+  }
 
   return (
     <VertLayout>
@@ -350,11 +423,14 @@ const Catalogue = () => {
                   readOnly={cartCount > 0}
                   maxAccess={access}
                   onChange={(_, newValue) => {
+                    setCart({})
                     setValues({
                       clientId: newValue?.recordId || null,
                       clientRef: newValue?.reference || '',
                       clientName: newValue?.name || ''
                     })
+                    refetch()
+                    getClientBasket(newValue?.recordId || null)
                   }}
                 />
               </Grid>
@@ -366,8 +442,17 @@ const Catalogue = () => {
                 <>
                   <Typography variant='body2' sx={{ fontWeight: 600, fontSize: 13 }}>
                     {cartCount} item{cartCount !== 1 ? 's' : ''}
-                    {cartTotal > 0 && ` · $${cartTotal.toFixed(2)}`}
+                    {cartTotal > 0 && ` · ${currencyRef} ${cartTotal.toFixed(2)}`}
                   </Typography>
+                  <Button
+                    variant='contained'
+                    size='small'
+                    onClick={handleSaveBasket}
+                    startIcon={<ShoppingCartIcon sx={{ fontSize: 16 }} />}
+                    sx={{ textTransform: 'none', borderRadius: 1.5, py: 0.4, fontSize: 12 }}
+                  >
+                    Save Basket
+                  </Button>
                   <Button
                     variant='contained'
                     size='small'
@@ -474,9 +559,10 @@ const Catalogue = () => {
         cartItems={cartItems}
         onInc={inc}
         onDec={dec}
+        onNote={note}
         onRemove={remove}
         onConfirm={() => {
-          setCheckoutOpen(false)
+          handleGenerateOrder()
         }}
         labels={labels}
       />

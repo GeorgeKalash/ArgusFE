@@ -1,9 +1,31 @@
+import { useState, memo } from 'react'
 import { Box, Typography, IconButton, Button, Drawer, Divider, Tooltip } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import CloseIcon from '@mui/icons-material/Close'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
+
+const NoteField = memo(({ itemId, initialValue, onCommit, onClear, label }) => {
+  const [localNote, setLocalNote] = useState(initialValue || '')
+
+  return (
+    <CustomTextArea
+      name='notes'
+      label={label}
+      value={localNote}
+      rows={1.5}
+      maxLength='300'
+      onChange={(e) => setLocalNote(e.target.value)}
+      onBlur={() => onCommit(localNote, itemId)}
+      onClear={() => {
+        setLocalNote('')
+        onClear('', itemId)
+      }}
+    />
+  )
+})
 
 const CatalogueCheckout = ({
   open,
@@ -11,14 +33,15 @@ const CatalogueCheckout = ({
   cartItems = [],
   onInc,
   onDec,
+  onNote,
+  currencyRef,
   onRemove,
   onConfirm,
   labels
 }) => {
   const total = cartItems.reduce((s, i) => s + (parseFloat(i.unitPrice) || 0) * i.qty, 0)
   const totalQty = cartItems.reduce((s, i) => s + i.qty, 0)
-  const currencyRef = cartItems[0]?.currencyRef || ''
-  
+
   return (
     <Drawer
       anchor='right'
@@ -67,27 +90,17 @@ const CatalogueCheckout = ({
 
             return (
               <Box key={item.itemId}>
-                <Box sx={{
-                  display: 'flex', alignItems: 'center', gap: 1.5,
-                  py: 1.25, px: 0.5,
-                }}>
-                  <Box sx={{
-                    width: 52, height: 52, borderRadius: 1.5, flexShrink: 0,
-                    overflow: 'hidden', bgcolor: 'grey.100',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.25, px: 0.5 }}>
+                  {/* image */}
+                  <Box sx={{ width: 52, height: 52, borderRadius: 1.5, flexShrink: 0, overflow: 'hidden', bgcolor: 'grey.100', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {item.pictureUrl ? (
-                      <img
-                        src={item.pictureUrl}
-                        alt={item.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                        onError={e => { e.currentTarget.style.display = 'none' }}
-                      />
+                      <img src={item.pictureUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={e => { e.currentTarget.style.display = 'none' }} />
                     ) : (
                       <ShoppingCartIcon sx={{ fontSize: 22, color: 'grey.400' }} />
                     )}
                   </Box>
 
+                  {/* details */}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant='body2' sx={{ fontWeight: 600, fontSize: 13, lineHeight: 1.3 }} noWrap>
                       {item.name}
@@ -96,21 +109,22 @@ const CatalogueCheckout = ({
                       {item.sku}
                     </Typography>
                     <Typography variant='caption' sx={{ display: 'block', color: 'primary.main', fontWeight: 600, fontSize: 12 }}>
-                    {currencyRef} {price.toFixed(2)} × {item.qty} = {currencyRef} {(price * item.qty).toFixed(2)}
+                      {currencyRef} {price.toFixed(2)} × {item.qty} = {currencyRef} {(price * item.qty).toFixed(2)}
                     </Typography>
-                    
+
+                    <NoteField
+                      key={item.itemId}
+                      itemId={item.itemId}
+                      initialValue={item.notes}
+                      label={labels.notes}
+                      onCommit={onNote}
+                      onClear={onNote}
+                    />
                   </Box>
 
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <IconButton
-                        size='small'
-                        onClick={() => onDec(item.itemId)}
-                        sx={{
-                          width: 24, height: 24, p: 0,
-                          border: '1px solid', borderColor: 'divider', borderRadius: '50%',
-                        }}
-                      >
+                      <IconButton size='small' onClick={() => onDec(item.itemId)} sx={{ width: 24, height: 24, p: 0, border: '1px solid', borderColor: 'divider', borderRadius: '50%' }}>
                         <RemoveIcon sx={{ fontSize: 13 }} />
                       </IconButton>
 
@@ -118,26 +132,13 @@ const CatalogueCheckout = ({
                         {item.qty}
                       </Typography>
 
-                      <IconButton
-                        size='small'
-                        onClick={() => onInc(item.itemId)}
-                        sx={{
-                          width: 24, height: 24, p: 0,
-                          border: '1px solid', borderColor: 'primary.main',
-                          bgcolor: 'primary.main', color: '#fff', borderRadius: '50%',
-                          '&:hover': { bgcolor: 'primary.dark' },
-                        }}
-                      >
+                      <IconButton size='small' onClick={() => onInc(item.itemId)} sx={{ width: 24, height: 24, p: 0, border: '1px solid', borderColor: 'primary.main', bgcolor: 'primary.main', color: '#fff', borderRadius: '50%', '&:hover': { bgcolor: 'primary.dark' } }}>
                         <AddIcon sx={{ fontSize: 13 }} />
                       </IconButton>
                     </Box>
 
                     <Tooltip title='Remove'>
-                      <IconButton
-                        size='small'
-                        onClick={() => onRemove(item.itemId)}
-                        sx={{ color: 'error.main', p: 0.25 }}
-                      >
+                      <IconButton size='small' onClick={() => onRemove(item.itemId)} sx={{ color: 'error.main', p: 0.25 }}>
                         <DeleteOutlineIcon sx={{ fontSize: 16 }} />
                       </IconButton>
                     </Tooltip>
@@ -152,38 +153,21 @@ const CatalogueCheckout = ({
       </Box>
 
       {cartItems.length > 0 && (
-        <Box sx={{
-          px: 2, py: 1.5, flexShrink: 0,
-          borderTop: '1px solid', borderColor: 'divider',
-          display: 'flex', flexDirection: 'column', gap: 1,
-        }}>
-          
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant='body2' color='text.secondary'>Total</Typography>
-                <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
-                {currencyRef} {total.toFixed(2)}
-                </Typography>
-            </Box>
-            
+        <Box sx={{ px: 2, py: 1.5, flexShrink: 0, borderTop: '1px solid', borderColor: 'divider', display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='body2' color='text.secondary'>Total</Typography>
+            <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
+              {currencyRef} {total.toFixed(2)}
+            </Typography>
+          </Box>
 
-            <Button
-                variant='contained'
-                fullWidth
-                onClick={onConfirm}
-                startIcon={<ShoppingCartIcon />}
-                sx={{ textTransform: 'none', borderRadius: 1.5, fontWeight: 600 }}
-                >
-                {labels.placeOrder}
-            </Button>
+          <Button variant='contained' fullWidth onClick={onConfirm} startIcon={<ShoppingCartIcon />} sx={{ textTransform: 'none', borderRadius: 1.5, fontWeight: 600 }}>
+            {labels.placeOrder}
+          </Button>
 
-            <Button
-                variant='text'
-                fullWidth
-                onClick={onClose}
-                sx={{ textTransform: 'none', color: 'text.secondary', fontSize: 12 }}
-                >
-                {labels.continueShopping}
-            </Button>
+          <Button variant='text' fullWidth onClick={onClose} sx={{ textTransform: 'none', color: 'text.secondary', fontSize: 12 }}>
+            {labels.continueShopping}
+          </Button>
         </Box>
       )}
     </Drawer>
