@@ -54,10 +54,10 @@ const CHARTS_CSS = String.raw`
   --chart-radar-fill: rgba(102, 115, 253, 0.2);
   --chart-radar-border: #6673FD;
   --chart-radar-point: #6673FD;
-  --chart-pie-1: #6673FD;
-  --chart-pie-2: #FF6384;
-  --chart-pie-3: #36A2EB;
-  --chart-pie-4: #FFCE56;
+  --chart-pie-1: #6D0F1C; 
+  --chart-pie-2: #585858; 
+  --chart-pie-3: #2e2d2d; 
+  --chart-pie-4: #1F1F1F; 
   --chart-compbar-bg: rgba(0, 123, 255, 0.5);
   --chart-compbar-hover-bg: rgb(255, 255, 0);
   --chart-compbar-axis-color: #000000;             
@@ -74,7 +74,7 @@ const CHARTS_CSS = String.raw`
 }
 
 .chartCanvasDark {
-  --chart-legend-label-color: #f0f0f0;
+  --chart-legend-label-color: #000;
   --chart-title-color: #f0f0f0;
   --chart-axis-color: #f0f0f0;
   --chart-tooltip-bg: #f0f0f0;
@@ -257,7 +257,7 @@ const generateColors = (dataLength, canvas) => {
   return { backgroundColors, borderColors }
 }
 
-const getChartOptions = (label, type, canvas) => {
+const getChartOptions = (label, type, canvas, onLegendClick) => {
   const legendLabelColor = getCssVar(canvas, '--chart-legend-label-color')
   const titleColor = getCssVar(canvas, '--chart-title-color')
   const axisColor = getCssVar(canvas, '--chart-axis-color')
@@ -274,7 +274,23 @@ const getChartOptions = (label, type, canvas) => {
       legend: {
         labels: {
           color: legendLabelColor
-        }
+        },
+        onHover: (event) => {
+          if (onLegendClick) event.native.target.style.cursor = 'pointer'
+        },
+        onLeave: (event) => {
+          if (onLegendClick) event.native.target.style.cursor = 'default'
+        },
+        onClick: (e, legendItem) => {
+          onLegendClick?.({
+            label: legendItem.text,
+            index: legendItem.index,
+            event: e
+          })
+        },
+      },
+      datalabels: {
+        color: '#fff', 
       },
       title: {
         display: true,
@@ -1374,8 +1390,9 @@ const getColorForIndex = (index, canvas) => {
   return colors[index % colors.length]
 }
 
-export const PieChart = memo(({ id, labels, data, label }) => {
+export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendClick  }) => {
   useInjectChartsStyles()
+  Chart.register(ChartDataLabels)
 
   const ref = useRef(null)
   const inst = useRef(null)
@@ -1407,7 +1424,7 @@ export const PieChart = memo(({ id, labels, data, label }) => {
           }
         ]
       },
-      options: getChartOptions(label, 'pie', canvas)
+      options: getChartOptions(label, 'pie', canvas, onLegendClick)
     })
 
     return () => {
@@ -1430,10 +1447,10 @@ export const PieChart = memo(({ id, labels, data, label }) => {
     const c4 = getCssVar(canvas, '--chart-pie-4')
 
     chart.data.labels = labels || []
-    chart.data.datasets[0].label = label
+    chart.data.datasets[0].label = toolTipText || label
     chart.data.datasets[0].data = data || []
     chart.data.datasets[0].backgroundColor = [c1, c2, c3, c4]
-    chart.options = getChartOptions(label, 'pie', canvas)
+    chart.options = getChartOptions(label, 'pie', canvas, onLegendClick)
 
     chart.update('none')
   }, [labels, data, label])

@@ -6,7 +6,8 @@ import {
   HorizontalBarChartDark,
   MixedBarChart,
   MixedColorsBarChartDark,
-  LineChart
+  LineChart,
+  PieChart
 } from '@argus/shared-ui/src/components/Shared/dashboardApplets/charts'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { DashboardRepository } from '@argus/repositories/src/repositories/DashboardRepository'
@@ -23,6 +24,9 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
 import HeadcountHistoryApplet from '@argus/shared-ui/src/components/Shared/HeadcountHistoryApplet'
+import { HRDashboardRepository } from '@argus/repositories/src/repositories/HRDashboardRepository'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import TodaysLeave from '@argus/shared-ui/src/components/Shared/TodaysLeave'
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
@@ -30,6 +34,7 @@ const DashboardLayout = () => {
   const [applets, setApplets] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(0)
+  const { stack } = useWindow()
   const userData = getStorageData('userData')
   const _userId = userData.userId
   const _languageId = userData.languageId
@@ -48,6 +53,9 @@ const DashboardLayout = () => {
     '11': ResourceIds.LeaveRequestODOM,
     '12': ResourceIds.CasePleads
   }
+
+  const TA_PAID_LEAVE = 311
+  const TA_UNPAID_LEAVE = 312
 
   const getRequestRef = React.useRef(getRequest)
   useEffect(() => {
@@ -71,6 +79,8 @@ const DashboardLayout = () => {
     datasetId: ResourceIds.UserDashboard
   })
 
+  const hasApplet = (applets, appletId) => (applets?.list || []).some(a => a.appletId === appletId)
+
   useEffect(() => {
     let cancelled = false
 
@@ -86,7 +96,7 @@ const DashboardLayout = () => {
         if (cancelled) return
         setApplets(appletsRes.list)
 
-        const [resDashboard, resSP, resTV, resTimeCode, alerts] = await Promise.all([
+        const [resDashboard, resSP, resTV, resTimeCode, alerts, todaysLeave] = await Promise.all([
           getRequestRef.current({ extension: DashboardRepository.dashboard }),
           getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
           getRequestRef.current({
@@ -97,10 +107,18 @@ const DashboardLayout = () => {
             extension: SystemRepository.KeyValueStore,
             parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
           }),
-          getRequestRef.current({
-            extension: SystemRepository.SystemAlerts.active,
-            parameters: `_params=`
-          })
+          hasApplet(appletsRes, ResourceIds.Alerts) 
+            ?  getRequestRef.current({
+                extension: SystemRepository.SystemAlerts.active,
+                parameters: `_params=`
+              })
+            : Promise.resolve({ list: [] }),
+          hasApplet(appletsRes, ResourceIds.TodaysLeaves)
+            ? getRequestRef.current({
+                extension: HRDashboardRepository.TodaysLeave.dashboard,
+                parameters: `_params=`
+              })
+            : Promise.resolve({ list: [] })
         ])
 
         if (cancelled) return
@@ -120,6 +138,15 @@ const DashboardLayout = () => {
           return acc
         }, {})
 
+        let paidCount = null
+        let unpaidCount = null
+
+        for (const item of todaysLeave?.list || []) {
+          if (item.itemId === TA_PAID_LEAVE) paidCount = item.count
+
+          if (item.itemId === TA_UNPAID_LEAVE) unpaidCount = item.count
+        }
+
         setData({
           dashboard: resDashboard?.record,
           sp: resSP?.record,
@@ -133,7 +160,8 @@ const DashboardLayout = () => {
               ...item,
               alertResourceId: alertsResourceId[item?.alertId] || null
             }
-          })
+          }),
+          todaysLeaveCount: {paidCount, unpaidCount}
         })
 
         if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
@@ -157,7 +185,6 @@ const DashboardLayout = () => {
     if (!Array.isArray(applets)) return false
     return applets.some(applet => applet.appletId === appletId)
   }
-
   return (
     <>
     <div className='frame'>
@@ -591,6 +618,36 @@ const DashboardLayout = () => {
               </div>
             </div>
           )}
+
+          {containsApplet(ResourceIds.TodaysLeaves) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.todaysLeave}</h2>
+                </div>
+              <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-50px' }}>
+                <div style={{ width: '300px', height: '300px' }}>
+                  <PieChart
+                    id='todaysLeave'
+                    labels={[`${labels.PaidLeave}`, `${labels.UnpaidLeave}`]}
+                    data={[data.todaysLeaveCount.paidCount, data.todaysLeaveCount.unpaidCount]}
+                    toolTipText={labels.counts}
+                    onLegendClick={({ index }) => {
+                      if (index == 0 && data.todaysLeaveCount.paidCount == 0) return
+                      if (index == 1 && data.todaysLeaveCount.unpaidCount == 0) return
+                      
+                      stack({
+                        Component: TodaysLeave,
+                        props: { index }
+                      })
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+            </div>
+          )}
+
         </div>
 
         {containsApplet(ResourceIds.PendingAuthorizationRequests) && (

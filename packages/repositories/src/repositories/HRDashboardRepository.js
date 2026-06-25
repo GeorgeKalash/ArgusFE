@@ -36,5 +36,8 @@ export const HRDashboardRepository = {
   },
   CasePleads: {
     qry: service + 'qryCP'
+  },
+  TodaysLeave: {
+    dashboard: service + 'dashboard'
   }
 }
