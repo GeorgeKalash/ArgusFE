@@ -22,29 +22,30 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
-export default function ProductionSummaryForm({ recordId, labels, access, window }) {
+export default function ProductionRequestForm({ recordId, labels, access, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.ProductionSummary,
+    functionId: SystemFunction.ProductionRequest,
     access,
     enabled: !recordId,
     objectName: 'header'
   })
 
+
+
+  const invalidate = useInvalidate({
+    endpointId: ManufacturingRepository.ProductionRequest.page
+  })
+
   const conditions = {
-    itemId: row => row?.qty != null || row?.pcs != null || row?.clientId != null,
+    itemId: row => row?.qty != null || row?.pcs != null,
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
-
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.ProductionSummary.page
-  })
 
   const { formik } = useForm({
     maxAccess,
@@ -57,44 +58,43 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
         dtId: null,
         reference: '',
         date: new Date(),
+        plantId: null,
         notes: '',
-        status: 1,
-        wip: 1
+        status: 1
       },
-      items: [
-        {
-          id: 1,
-          rsId: recordId || null,
-          seqNo: 1,
-          itemId: null,
-          sku: '',
-          itemName: '',
-          clientId: null,
-          qty: null,
-          pcs: null,
-          itemWeight: null
-        }
-      ]
+      items: [{
+        id: 1,
+        requestId: recordId || null,
+        seqNo: 1,
+        itemId: null,
+        sku: '',
+        itemName: '',
+        qty: 0,
+        pcs: null,
+        itemWeight: null
+      }]
     },
     validationSchema: yup.object({
       header: yup.object({
-        date: yup.date().required()
+        date: yup.date().required(),
+        plantId: yup.number().required()
       }),
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const res = await postRequest({
-        extension: ManufacturingRepository.ProductionSummary.set2,
+        extension: ManufacturingRepository.ProductionRequest.set2,
         record: JSON.stringify({
-          header: { ...obj?.header, date: formatDateToApi(obj?.header?.date) },
-          items: obj?.items?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))?.map((item, index) => ({
+          header: { ...obj.header, date: formatDateToApi(obj.header.date) },
+          items: obj.items?.filter(row => Object.values(requiredFields)?.every(fn => fn(row))).map((item, index) => ({
             ...item,
-            rsId: recordId,
+            requestId: recordId,
             seqNo: index + 1
           }))
         })
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+
       refetchForm(res.recordId)
       invalidate()
     }
@@ -103,13 +103,12 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.header.status === 3
 
-  const isGridEmpty = !formik.values.items?.some(item => item.itemId)
-
-  async function refetchForm(summaryId) {
+  async function refetchForm(requestId) {
     const { record } = await getRequest({
-      extension: ManufacturingRepository.ProductionSummary.get2,
-      parameters: `_recordId=${summaryId}`
+      extension: ManufacturingRepository.ProductionRequest.get2,
+      parameters: `_recordId=${requestId}`
     })
+      
     formik.resetForm({
       values: {
         recordId: record.header.recordId,
@@ -117,65 +116,30 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
           ...record.header,
           date: formatDateFromApi(record.header?.date)
         },
-        items: record.items.length > 0 ? record.items?.map((item, index) => ({
-          ...item,
-          id: index + 1,
-          seqNo: index + 1
-        })) : formik.initialValues.items
+        items: record?.items?.length > 0 ?
+          record?.items?.map((item, index) => {
+            return {
+              ...item,
+              id: index + 1
+            }
+          })
+          : formik.initialValues.items
       }
     })
   }
 
-
   const onPost = async () => {
     await postRequest({
-      extension: ManufacturingRepository.ProductionSummary.post,
+      extension: ManufacturingRepository.ProductionRequest.post,
       record: JSON.stringify({ recordId: formik.values.recordId })
     })
+
     toast.success(platformLabels.Posted)
     window.close()
     invalidate()
   }
 
-  async function onImportClick() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.ProductionRequestItems.import,
-      parameters: ''
-    })
-
-    await postRequest({
-      extension: ManufacturingRepository.ProductionSummary.set2,
-      record: JSON.stringify({
-        header: { ...formik.values?.header, date: formatDateToApi(formik?.values?.header?.date) },
-        items: res.list?.map((item, index) => ({
-          ...item,
-          rsId: recordId,
-          seqNo: index + 1
-        }))
-      })
-    })
-
-    await postRequest({
-      extension: ManufacturingRepository.ProductionSummary.setPRSummary,
-      record: JSON.stringify({ summaryId: formik.values.recordId })
-    })
-
-    formik.setValues({
-      ...formik.values,
-      items: res.list.length > 0 ? res.list?.map(({ requestId, ...item }, index) => ({
-        ...item,
-        id: index + 1,
-      })) : formik.initialValues.items
-    })
-  }
-
   const actions = [
-    {
-      key: 'Import',
-      condition: true,
-      onClick: onImportClick,
-      disabled: !isGridEmpty || isPosted || !formik.values.recordId
-    },
     {
       key: 'RecordRemarks',
       condition: true,
@@ -193,7 +157,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
-    }
+    },
   ]
 
   useEffect(() => {
@@ -215,8 +179,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' },
-          { from: 'weight', to: 'itemWeight' }
+          { from: 'name', to: 'itemName' }
         ],
         displayFieldWidth: 2,
         columnsInDropDown: [
@@ -260,32 +223,11 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       }
     },
     {
-      component: 'resourcelookup',
-      label: labels.client,
-      name: 'clientId',
-      props: {
-        endpointId: SaleRepository.Client.snapshot,
-        valueField: 'reference',
-        displayField: 'name',
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
-          { key: 'szName', value: 'Sales Zone' }
-        ],
-        mapping: [
-          { from: 'recordId', to: 'clientId' },
-          { from: 'reference', to: 'clientRef' },
-          { from: 'name', to: 'clientName' }
-        ],
-        displayFieldWidth: 4
-      }
-    },
-    {
       component: 'numberfield',
       label: labels.qty,
       name: 'qty',
-      flex: 1,
       defaultValue: 0,
+      flex: 1,
       props: {
         decimalScale: 2,
         maxLength: 10,
@@ -307,8 +249,8 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
 
   return (
     <FormShell
-      resourceId={ResourceIds.ProductionSummary}
-      functionId={SystemFunction.ProductionSummary}
+      resourceId={ResourceIds.ProductionRequest}
+      functionId={SystemFunction.ProductionRequest}
       form={formik}
       maxAccess={maxAccess}
       actions={actions}
@@ -324,7 +266,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.ProductionSummary}`}
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.ProductionRequest}`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.documentType}
@@ -369,6 +311,27 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
                     maxAccess={maxAccess}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionLine.qry}
+                    name='header.plantId'
+                    label={labels.plant}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik?.values?.header}
+                    readOnly={isPosted}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('header.plantId', newValue?.recordId || null)
+                    }}
+                    error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={6}>
@@ -376,7 +339,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
                 name='header.notes'
                 label={labels.notes}
                 value={formik?.values?.header?.notes}
-                rows={4}
+                rows={3}
                 readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.notes', e.target.value)}
@@ -388,7 +351,9 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
+            onChange={value => {
+              formik.setFieldValue('items', value)
+            }}
             value={formik?.values?.items}
             error={formik?.errors?.items}
             columns={columns}
