@@ -46,36 +46,38 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
     endpointId: ManufacturingRepository.ProductionSummary.page
   })
 
+  const initialValues = {
+    recordId,
+    header: {
+      recordId,
+      dtId: null,
+      reference: '',
+      date: new Date(),
+      notes: '',
+      status: 1,
+      wip: 1
+    },
+    items: [
+      {
+        id: 1,
+        rsId: recordId || null,
+        seqNo: 1,
+        itemId: null,
+        sku: '',
+        itemName: '',
+        clientId: null,
+        qty: null,
+        pcs: null,
+        itemWeight: null
+      }
+    ]
+  }
+
   const { formik } = useForm({
     maxAccess,
     conditionSchema: ['items'],
     behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
-    initialValues: {
-      recordId,
-      header: {
-        recordId,
-        dtId: null,
-        reference: '',
-        date: new Date(),
-        notes: '',
-        status: 1,
-        wip: 1
-      },
-      items: [
-        {
-          id: 1,
-          rsId: recordId || null,
-          seqNo: 1,
-          itemId: null,
-          sku: '',
-          itemName: '',
-          clientId: null,
-          qty: null,
-          pcs: null,
-          itemWeight: null
-        }
-      ]
-    },
+    initialValues,
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required()
@@ -121,7 +123,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
           ...item,
           id: index + 1,
           seqNo: index + 1
-        })) : formik.initialValues.items
+        })) : initialValues.items
       }
     })
   }
@@ -147,11 +149,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       extension: ManufacturingRepository.ProductionSummary.set2,
       record: JSON.stringify({
         header: { ...formik.values?.header, date: formatDateToApi(formik?.values?.header?.date) },
-        items: res.list?.map((item, index) => ({
-          ...item,
-          rsId: recordId,
-          seqNo: index + 1
-        }))
+        items: res?.list
       })
     })
 
@@ -160,13 +158,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       record: JSON.stringify({ summaryId: formik.values.recordId })
     })
 
-    formik.setValues({
-      ...formik.values,
-      items: res.list.length > 0 ? res.list?.map(({ requestId, ...item }, index) => ({
-        ...item,
-        id: index + 1,
-      })) : formik.initialValues.items
-    })
+    refetchForm(formik.values.recordId)
   }
 
   const actions = [
@@ -174,7 +166,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       key: 'Import',
       condition: true,
       onClick: onImportClick,
-      disabled: !isGridEmpty || isPosted || !formik.values.recordId
+      disabled: !isGridEmpty || !editMode
     },
     {
       key: 'RecordRemarks',
