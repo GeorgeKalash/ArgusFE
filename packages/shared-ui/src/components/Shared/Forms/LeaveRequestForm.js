@@ -107,7 +107,7 @@ export default function LeaveRequestForm({ recordId , window}) {
     if (!recordId) return {}
 
     const { record } = await getRequest({
-      extension: LoanManagementRepository.LeaveRequest.get,
+      extension: LeaveManagementRepository.LeaveRequest.get,
       parameters: `_recordId=${recordId}`
     })
 
