@@ -21,7 +21,7 @@ const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.Strategy.qry
+    endpointId: DocumentReleaseRepository.Strategy.page
   })
 
   const { formik } = useForm({
@@ -78,10 +78,9 @@ const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   }, [])
 
   const getStrategyId = recordId => {
-    const defaultParams = `_recordId=${recordId}`
     getRequest({
       extension: DocumentReleaseRepository.Strategy.get,
-      parameters: defaultParams
+      parameters: `_recordId=${recordId}`
     }).then(res => {
       formik.setValues(res.record)
     })

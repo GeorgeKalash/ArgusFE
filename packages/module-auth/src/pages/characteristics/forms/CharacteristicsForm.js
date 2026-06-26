@@ -24,7 +24,7 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.qry
+    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.page
   })
 
   const formik = useFormik({
@@ -82,11 +82,9 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
   }, [recordId])
 
   const getCharacteristicsById = recordId => {
-    const defaultParams = `_recordId=${recordId}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.get,
-      parameters: parameters
+      parameters: `_recordId=${recordId}`
     }).then(res => {
       res.record.validFrom = formatDateFromApi(res.record.validFrom)
       formik.setValues(res.record)

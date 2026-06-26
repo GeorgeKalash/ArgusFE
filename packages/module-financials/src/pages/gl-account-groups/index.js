@@ -4,7 +4,7 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -23,21 +23,18 @@ const AccountGroups = () => {
 
     const response = await getRequest({
       extension: GeneralLedgerRepository.GLAccountGroups.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
   }
-
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.GLAccountGroups.page
-  })
 
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,

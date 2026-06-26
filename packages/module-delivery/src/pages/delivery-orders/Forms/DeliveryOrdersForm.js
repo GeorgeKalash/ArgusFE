@@ -50,7 +50,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
 
   const invalidate = useInvalidate(
     refresh && {
-      endpointId: DeliveryRepository.DeliveriesOrders.qry
+      endpointId: DeliveryRepository.DeliveriesOrders.page
     }
   )
 

@@ -115,7 +115,7 @@ const DraftSerialsInvoices = () => {
 
     const response = await getRequest({
       extension: SaleRepository.DraftInvoice.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }

@@ -46,7 +46,7 @@ const PostDraftReturn = () => {
 
     const response = await getRequest({
       extension: SaleRepository.DraftReturn.page2,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }

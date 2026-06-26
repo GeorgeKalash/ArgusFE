@@ -36,7 +36,7 @@ const IvSerials = () => {
 
     if (formik.values.itemId || formik.values.srlNo) {
       const response = await getRequest({
-        extension: InventoryRepository.Serial.qry,
+        extension: InventoryRepository.Serial.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${
           formik.values.itemId || 0
         }&_srlNo=${formik.values.srlNo || 0}`
@@ -57,7 +57,7 @@ const IvSerials = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Serial.qry,
+    endpointId: InventoryRepository.Serial.page,
     datasetId: ResourceIds.IVSerials
   })
 
