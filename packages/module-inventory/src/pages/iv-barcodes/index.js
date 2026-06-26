@@ -38,8 +38,6 @@ const IvBarcodes = () => {
     })
   })
 
-  /* ===================== DATA ===================== */
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 

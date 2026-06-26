@@ -20,7 +20,7 @@ export default function DimValuesForm({ labels, maxAccess, recordId, dimValue })
   const formatedRecordId = typeof dimValue == 'string' ? dimValue.match(/\d+/)?.[0] : null
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.DimensionValue.qry
+    endpointId: FinancialRepository.DimensionValue.page
   })
 
   const { formik } = useForm({

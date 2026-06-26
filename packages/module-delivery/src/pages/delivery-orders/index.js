@@ -25,7 +25,7 @@ const DeliveryOrders = () => {
 
     const response = await getRequest({
       extension: DeliveryRepository.DeliveriesOrders.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }

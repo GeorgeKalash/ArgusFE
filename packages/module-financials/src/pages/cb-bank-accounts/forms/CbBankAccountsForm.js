@@ -3,6 +3,7 @@ import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
@@ -10,7 +11,6 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
@@ -19,9 +19,13 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 
-export default function CbBankAccountsForm({ labels, maxAccess, recordId, invalidate }) {
+export default function CbBankAccountsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: CashBankRepository.CbBankAccounts.page
+  })
 
   const { formik } = useForm({
     initialValues: {

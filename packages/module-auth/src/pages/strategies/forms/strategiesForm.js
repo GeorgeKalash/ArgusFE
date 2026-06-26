@@ -21,7 +21,7 @@ const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.Strategy.qry
+    endpointId: DocumentReleaseRepository.Strategy.page
   })
 
   const { formik } = useForm({

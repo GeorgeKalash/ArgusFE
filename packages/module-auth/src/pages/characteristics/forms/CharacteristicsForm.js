@@ -24,7 +24,7 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.qry
+    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.page
   })
 
   const formik = useFormik({

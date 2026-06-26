@@ -44,7 +44,7 @@ const DimensionsValues = () => {
   async function fetchWithSearch({ filters }) {
     const data = await getRequest({
       extension: FinancialRepository.DimensionValue.page,
-      parameters: `_filter=${filters.qry}&_dimension=${filters.qry.match(/\d+/)?.[0]}`
+      parameters: `_dimension=${filters.qry.match(/\d+/)?.[0]}`
     })
 
     return data

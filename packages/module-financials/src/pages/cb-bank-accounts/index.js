@@ -5,7 +5,7 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import CbBankAccountsForm from './forms/CbBankAccountsForm'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -23,15 +23,11 @@ const CbBankAccounts = () => {
 
     const response = await getRequest({
       extension: CashBankRepository.CbBankAccounts.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_type=1&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_type=1`
     })
 
     return { ...response, _startAt: _startAt }
   }
-
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CbBankAccounts.page
-  })
 
   const {
     query: { data },
@@ -40,7 +36,8 @@ const CbBankAccounts = () => {
     clearFilter,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashBankRepository.CbBankAccounts.page,
@@ -128,8 +125,7 @@ const CbBankAccounts = () => {
       props: {
         labels: labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        maxAccess: access
       },
       width: 600,
       height: 500,
