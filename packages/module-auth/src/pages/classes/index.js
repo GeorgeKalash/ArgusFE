@@ -11,14 +11,36 @@ import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const Classes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: DocumentReleaseRepository.Class.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: DocumentReleaseRepository.Class.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     paginationParameters,
     invalidate,
     refetch,
@@ -34,89 +56,63 @@ const Classes = () => {
       searchFn: fetchWithSearch
     }
   })
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: DocumentReleaseRepository.Class.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    const response = await getRequest({
-      extension: DocumentReleaseRepository.Class.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
-    })
-
-    return { ...response, _startAt: _startAt }
-  }
 
   const columns = [
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
-
-  const delClasses = obj => {
-    postRequest({
-      extension: DocumentReleaseRepository.Class.del,
-      record: JSON.stringify(obj)
-    }).then(res => {
-      toast.success('Record Deleted Successfully')
-      invalidate()
-    })
-  }
-
-  const addClasses = () => {
-    openForm('')
-  }
 
   function openForm(recordId) {
     stack({
       Component: ClassesWindow,
       props: {
-        labels: _labels,
-        recordId: recordId ? recordId : null,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 600,
       height: 400,
-      title: _labels.class
+      title: labels.class
     })
   }
 
-  const popup = obj => {
+  const add = () => {
+    openForm()
+  }
+
+  const edit = obj => {
     openForm(obj?.recordId)
+  }
+
+  const del = async obj => {
+    await postRequest({
+      extension: DocumentReleaseRepository.Class.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={addClasses}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
-        />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-          refetch={refetch}
-          onEdit={popup}
-          onDelete={delClasses}
+          onEdit={edit}
+          onDelete={del}
           pageSize={50}
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>

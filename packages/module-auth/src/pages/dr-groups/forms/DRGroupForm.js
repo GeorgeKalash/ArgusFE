@@ -1,79 +1,76 @@
 import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
-import { useFormik } from 'formik'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { useContext, useEffect } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-const DRGroupForm = ({ labels, editMode, maxAccess, setStore, store }) => {
+const DRGroupForm = ({ labels, maxAccess, store, setStore }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
+  const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.DRGroup.qry
+    endpointId: DocumentReleaseRepository.DRGroup.page
   })
 
-  const formik = useFormik({
-    validateOnChange: true,
+  const { formik } = useForm({
     initialValues: {
-      recordId: null,
-      name: null,
-      reference: null
+      recordId,
+      name: '',
+      reference: ''
     },
+    maxAccess,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required()
     }),
-    onSubmit: async values => {
-      await postGroups(values)
+    onSubmit: async obj => {
+      const res = await postRequest({
+        extension: DocumentReleaseRepository.DRGroup.set,
+        record: JSON.stringify(obj)
+      })
+
+      if (!obj.recordId) {
+        formik.setFieldValue('recordId', res.recordId)
+        setStore(prev => ({ ...prev, recordId: res.recordId }))
+      }
+
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      invalidate()
     }
   })
 
-  const postGroups = async obj => {
-    const isNewRecord = !obj?.recordId
-
-    const res = await postRequest({
-      extension: DocumentReleaseRepository.DRGroup.set,
-      record: JSON.stringify(obj)
-    })
-
-    const message = isNewRecord ? platformLabels.Added : platformLabels.Edited
-    toast.success(message)
-
-    if (isNewRecord) {
-      formik.setFieldValue('recordId', res.recordId)
-      setStore(prevStore => ({
-        ...prevStore,
-        recordId: res.recordId
-      }))
-    }
-
-    invalidate()
-  }
   useEffect(() => {
-    recordId && getGroupId(recordId)
-  }, [recordId])
+    ;(async function () {
+      if (recordId) {
+        const res = await getRequest({
+          extension: DocumentReleaseRepository.DRGroup.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+        setStore(prev => ({ ...prev, recordId: res.record.recordId }))
+      }
+    })()
+  }, [])
 
-  const getGroupId = recordId => {
-    getRequest({
-      extension: DocumentReleaseRepository.DRGroup.get,
-      parameters: `_recordId=${recordId}`
-    }).then(res => {
-      formik.setValues(res.record)
-    })
-  }
+  const editMode = !!formik.values.recordId
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.DRGroups} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.DRGroups}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

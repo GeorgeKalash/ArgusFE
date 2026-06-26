@@ -11,10 +11,11 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import ReleaseIndicatorForm from './forms/ReleaseIndicatorForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const ReleaseIndicators = () => {
   const { stack } = useWindow()
-
+  const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   async function fetchGridData(options = {}) {
@@ -96,7 +97,7 @@ const ReleaseIndicators = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (

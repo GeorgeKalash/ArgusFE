@@ -10,11 +10,12 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import TaxCodesWindow from './Window/TaxCodesWindow'
 
 const TaxCodes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -22,16 +23,15 @@ const TaxCodes = () => {
 
     const response = await getRequest({
       extension: FinancialRepository.TaxCodes.page,
-
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
-    return { ...response, _startAt: _startAt }
+    return { ...response, _startAt }
   }
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     paginationParameters,
     invalidate,
     refetch,
@@ -45,23 +45,19 @@ const TaxCodes = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
+  const add = () => openForm()
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
+  const edit = obj => openForm(obj?.recordId)
 
   const del = async obj => {
     await postRequest({
@@ -69,20 +65,20 @@ const TaxCodes = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
     stack({
       Component: TaxCodesWindow,
       props: {
-        labels: _labels,
-        recordId: recordId,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 800,
       height: 460,
-      title: _labels.taxCodes
+      title: labels.taxCodes
     })
   }
 
@@ -93,6 +89,7 @@ const TaxCodes = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
