@@ -6,7 +6,8 @@ import {
   HorizontalBarChartDark,
   MixedBarChart,
   MixedColorsBarChartDark,
-  LineChart
+  LineChart,
+  PieChart
 } from '@argus/shared-ui/src/components/Shared/dashboardApplets/charts'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { DashboardRepository } from '@argus/repositories/src/repositories/DashboardRepository'
@@ -22,6 +23,10 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
+import HeadcountHistoryApplet from '@argus/shared-ui/src/components/Shared/HeadcountHistoryApplet'
+import { HRDashboardRepository } from '@argus/repositories/src/repositories/HRDashboardRepository'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import TodaysLeave from '@argus/shared-ui/src/components/Shared/TodaysLeave'
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
@@ -29,9 +34,28 @@ const DashboardLayout = () => {
   const [applets, setApplets] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(0)
+  const { stack } = useWindow()
   const userData = getStorageData('userData')
   const _userId = userData.userId
   const _languageId = userData.languageId
+
+  const alertsResourceId = {
+    '1': ResourceIds.RightToWork, 
+    '2': ResourceIds.EmployeeRightToWork,
+    '3': ResourceIds.Probation,
+    '4': ResourceIds.Salaries,
+    '5': ResourceIds.EmploymentReview,
+    '6': ResourceIds.EmployeeChart,
+    '7': ResourceIds.TermEndDate,
+    '8': ResourceIds.WorkAnniversary,
+    '9': ResourceIds.EmployeesBirthday,
+    '10': ResourceIds.LeaveRequestODOM,
+    '11': ResourceIds.LeaveRequestODOM,
+    '12': ResourceIds.CasePleads
+  }
+
+  const TA_PAID_LEAVE = 311
+  const TA_UNPAID_LEAVE = 312
 
   const getRequestRef = React.useRef(getRequest)
   useEffect(() => {
@@ -55,6 +79,8 @@ const DashboardLayout = () => {
     datasetId: ResourceIds.UserDashboard
   })
 
+  const hasApplet = (applets, appletId) => (applets?.list || []).some(a => a.appletId === appletId)
+
   useEffect(() => {
     let cancelled = false
 
@@ -70,7 +96,7 @@ const DashboardLayout = () => {
         if (cancelled) return
         setApplets(appletsRes.list)
 
-        const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+        const [resDashboard, resSP, resTV, resTimeCode, alerts, todaysLeave, branchAvailability] = await Promise.all([
           getRequestRef.current({ extension: DashboardRepository.dashboard }),
           getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
           getRequestRef.current({
@@ -80,7 +106,25 @@ const DashboardLayout = () => {
           getRequestRef.current({
             extension: SystemRepository.KeyValueStore,
             parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
-          })
+          }),
+          hasApplet(appletsRes, ResourceIds.Alerts) 
+            ?  getRequestRef.current({
+                extension: SystemRepository.SystemAlerts.active,
+                parameters: `_params=`
+              })
+            : Promise.resolve({ list: [] }),
+          hasApplet(appletsRes, ResourceIds.TodaysLeaves)
+            ? getRequestRef.current({
+                extension: HRDashboardRepository.TodaysLeave.dashboard,
+                parameters: `_params=`
+              })
+            : Promise.resolve({ list: [] }),
+          hasApplet(appletsRes, ResourceIds.BranchAvailability)
+            ? getRequestRef.current({
+                extension: HRDashboardRepository.BranchAvailability.qry,
+                parameters: `_params=`
+              })
+            : Promise.resolve({ list: [] })
         ])
 
         if (cancelled) return
@@ -100,14 +144,31 @@ const DashboardLayout = () => {
           return acc
         }, {})
 
+        let paidCount = null
+        let unpaidCount = null
+
+        for (const item of todaysLeave?.list || []) {
+          if (item.itemId === TA_PAID_LEAVE) paidCount = item.count
+
+          if (item.itemId === TA_UNPAID_LEAVE) unpaidCount = item.count
+        }
+
         setData({
           dashboard: resDashboard?.record,
           sp: resSP?.record,
           hr: {
             timeVariationDetails: resTV.list || [],
             tabs: filteredTabs,
-            groupedData: groupedData
-          }
+            groupedData,
+          },
+          alerts: (alerts?.list || []).map(item => {
+            return {
+              ...item,
+              alertResourceId: alertsResourceId[item?.alertId] || null
+            }
+          }),
+          todaysLeaveCount: {paidCount, unpaidCount},
+          branchAvailability: branchAvailability?.list
         })
 
         if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
@@ -131,7 +192,6 @@ const DashboardLayout = () => {
     if (!Array.isArray(applets)) return false
     return applets.some(applet => applet.appletId === appletId)
   }
-
   return (
     <>
     <div className='frame'>
@@ -533,6 +593,84 @@ const DashboardLayout = () => {
               ))}
             </div>
           )}
+
+          {containsApplet(ResourceIds.Alerts) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.alerts}</h2>
+                </div>
+                <Box sx={{ display: 'flex', height: '350px' }}>
+                  <Table
+                    name='alertsTable'
+                    columns={[
+                      { field: 'alertName', headerName: labels.alerts, flex: 3 },
+                      {
+                        field: 'count',
+                        headerName: labels.counts,
+                        flex: 1,
+                        linkOpen: data => ({
+                          resourceId: data.alertResourceId,
+                          props: { value: data }
+                        })
+                      }
+
+                    ]}
+                    gridData={{ list: data?.alerts || [] }}
+                    rowId={['alertId']}
+                    pagination={false}
+                    maxAccess={access}
+                  />
+                </Box>
+              </div>
+            </div>
+          )}
+
+          {containsApplet(ResourceIds.TodaysLeaves) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.todaysLeave}</h2>
+                </div>
+              <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-50px' }}>
+                <div style={{ width: '300px', height: '300px' }}>
+                  <PieChart
+                    id='todaysLeave'
+                    labels={[`${labels.PaidLeave}`, `${labels.UnpaidLeave}`]}
+                    data={[data.todaysLeaveCount.paidCount, data.todaysLeaveCount.unpaidCount]}
+                    toolTipText={labels.counts}
+                    onLegendClick={({ index }) => {
+                      if (index == 0 && data.todaysLeaveCount.paidCount == 0) return
+                      if (index == 1 && data.todaysLeaveCount.unpaidCount == 0) return
+
+                      stack({
+                        Component: TodaysLeave,
+                        props: { index }
+                      })
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+            </div>
+          )}
+
+          {containsApplet(ResourceIds.BranchAvailability) && (
+          <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.branchAvailability}</h2>
+                </div>
+                <HorizontalBarChartDark           
+                  labels={(data?.branchAvailability || []).map(b => b.branchName)}
+                  data={(data?.branchAvailability || []).map(s => s.scheduled)}
+                  data2={(data?.branchAvailability || []).map(b => b.scheduled - b.present)}
+                  label={labels.present}
+                  label2={labels.absent}
+                  color='#6e87b6'
+                  hoverColor='#e50808'
+                />
+              </div>
+          )}
         </div>
 
         {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
@@ -546,6 +684,10 @@ const DashboardLayout = () => {
               </Box>
             </div>
           </div>
+        )}
+        
+        {containsApplet(ResourceIds.HeadcountHistory) && (
+          <HeadcountHistoryApplet labels={labels} />
         )}
       </div>
     </div>
