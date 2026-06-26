@@ -34,6 +34,7 @@ const CHARTS_CSS = String.raw`
   --chart-bar-1-hover-bg: rgb(113, 27, 26);
   --chart-bar-2-bg: rgb(5, 28, 104);
   --chart-bar-2-hover-bg: rgb(33, 58, 141);
+  --chart-bar-2-hover-bg2: rgb(255, 215, 0);
   --chart-primary-bar-bg: #6673FD;
   --chart-primary-bar-border: #6673FD;
   --chart-mixed-1: rgba(88, 2, 1);
@@ -553,7 +554,7 @@ export const MixedBarChart = memo(({ id, labels, data1, data2, label1, label2, r
   )
 })
 
-export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, hoverColor }) => {
+export const HorizontalBarChartDark = memo(({ id, labels, data, data2, label, label2, color, hoverColor }) => {
   useInjectChartsStyles()
 
   const canvasRef = useRef(null)
@@ -572,6 +573,9 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
   const fullChartHeight = Math.max(320, itemCount * rowHeight + 80)
   const visibleHeight = shouldScroll ? 260 : fullChartHeight
 
+  const isStacked = Array.isArray(data2) && data2.length > 0
+  const getRemainderData = (data, data2) => (data || []).map((v, i) => Math.max(0, v - (data2[i] || 0)))
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -582,6 +586,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
 
     const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
     const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
+    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg2')
 
     const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
     const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
@@ -590,17 +595,41 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
       type: 'bar',
       data: {
         labels: labels || [],
-        datasets: [
-          {
-            label,
-            data: data || [],
-            backgroundColor: barBg,
-            hoverBackgroundColor: barHoverBg,
-            borderWidth: 1,
-            barThickness: Math.max(10, Math.min(18, rowHeight - 4)),
-            maxBarThickness: 20
-          }
-        ]
+        datasets: isStacked
+          ? [
+              {
+                label: '',
+                data: getRemainderData(data, data2),
+                backgroundColor: barBg,
+                hoverBackgroundColor: barHoverBg,
+                borderWidth: 1,
+                barThickness: Math.max(10, Math.min(18, rowHeight - 4)),
+                maxBarThickness: 20,
+                stack: 'stack',
+                datalabels: { display: false }
+              },
+              {
+                label,
+                data: data2 || [],
+                backgroundColor: '#9e9e9e',
+                hoverBackgroundColor: bar2HoverBg,
+                borderWidth: 1,
+                barThickness: Math.max(10, Math.min(18, rowHeight - 4)),
+                maxBarThickness: 20,
+                stack: 'stack'
+              }
+            ]
+          : [
+              {
+                label,
+                data: data || [],
+                backgroundColor: barBg,
+                hoverBackgroundColor: barHoverBg,
+                borderWidth: 1,
+                barThickness: Math.max(10, Math.min(18, rowHeight - 4)),
+                maxBarThickness: 20
+              }
+            ]
       },
       options: {
         indexAxis: 'y',
@@ -616,6 +645,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
         },
         scales: {
           x: {
+            stacked: isStacked,
             beginAtZero: true,
             max: Math.max(...(data || [0]), 0) * 1.15 || 1,
             ticks: {
@@ -631,6 +661,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
             }
           },
           y: {
+            stacked: isStacked,
             ticks: {
               font: { size: chartSize.ticksSize },
               autoSkip: false
@@ -643,11 +674,25 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
         plugins: {
           tooltip: {
             bodyFont: { size: chartSize.tooltipBodySize },
-            titleFont: { size: chartSize.tooltipFontSize }
+            titleFont: { size: chartSize.tooltipFontSize },
+            callbacks: isStacked
+              ? {
+                  label: function (context) {
+                    if (context.datasetIndex === 0) {
+                      return `${label}: ${(data || [])[context.dataIndex] - ((data2 || [])[context.dataIndex] || 0)}`
+                    }
+                    if (context.datasetIndex === 1) {
+                      return `${label2}: ${(data2 || [])[context.dataIndex]}`
+                    }
+                    return null
+                  }
+                }
+              : undefined
           },
           datalabels: {
             clip: false,
             clamp: true,
+            display: isStacked ? context => context.datasetIndex === 1 : true,
             anchor: context => {
               const chart = context.chart
               const dataset = context.dataset
@@ -683,7 +728,9 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
             },
             offset: 4,
             font: { size: chartSize.size },
-            formatter: value => `${Math.ceil(value).toLocaleString()}`
+            formatter: isStacked
+              ? () => ``
+              : value => `${Math.ceil(value).toLocaleString()}`
           },
           legend: { display: false }
         }
@@ -707,16 +754,29 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
 
     const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
     const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
+    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg2')
 
     const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
     const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chart.data.labels = labels || []
-    chart.data.datasets[0].label = label
-    chart.data.datasets[0].data = data || []
-    chart.data.datasets[0].backgroundColor = barBg
-    chart.data.datasets[0].hoverBackgroundColor = barHoverBg
-    chart.data.datasets[0].barThickness = Math.max(10, Math.min(18, rowHeight - 4))
+
+    if (isStacked) {
+      chart.data.datasets[0].data = getRemainderData(data, data2)
+      chart.data.datasets[0].backgroundColor = barBg
+      chart.data.datasets[0].hoverBackgroundColor = barHoverBg
+      chart.data.datasets[0].barThickness = Math.max(10, Math.min(18, rowHeight - 4))
+      chart.data.datasets[1].label = label
+      chart.data.datasets[1].data = data2 || []
+      chart.data.datasets[1].hoverBackgroundColor = bar2HoverBg
+      chart.data.datasets[1].barThickness = Math.max(10, Math.min(18, rowHeight - 4))
+    } else {
+      chart.data.datasets[0].label = label
+      chart.data.datasets[0].data = data || []
+      chart.data.datasets[0].backgroundColor = barBg
+      chart.data.datasets[0].hoverBackgroundColor = barHoverBg
+      chart.data.datasets[0].barThickness = Math.max(10, Math.min(18, rowHeight - 4))
+    }
 
     chart.options.plugins.tooltip.bodyFont.size = chartSize.tooltipBodySize
     chart.options.plugins.tooltip.titleFont.size = chartSize.tooltipFontSize
@@ -739,7 +799,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
 
     chart.resize()
     chart.update('none')
-  }, [id, labels, data, label, color, hoverColor, chartSize, rowHeight])
+  }, [id, labels, data, data2, label, color, hoverColor, chartSize, rowHeight])
 
   return (
     <div

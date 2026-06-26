@@ -96,7 +96,7 @@ const DashboardLayout = () => {
         if (cancelled) return
         setApplets(appletsRes.list)
 
-        const [resDashboard, resSP, resTV, resTimeCode, alerts, todaysLeave] = await Promise.all([
+        const [resDashboard, resSP, resTV, resTimeCode, alerts, todaysLeave, branchAvailability] = await Promise.all([
           getRequestRef.current({ extension: DashboardRepository.dashboard }),
           getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
           getRequestRef.current({
@@ -116,6 +116,12 @@ const DashboardLayout = () => {
           hasApplet(appletsRes, ResourceIds.TodaysLeaves)
             ? getRequestRef.current({
                 extension: HRDashboardRepository.TodaysLeave.dashboard,
+                parameters: `_params=`
+              })
+            : Promise.resolve({ list: [] }),
+          hasApplet(appletsRes, ResourceIds.BranchAvailability)
+            ? getRequestRef.current({
+                extension: HRDashboardRepository.BranchAvailability.qry,
                 parameters: `_params=`
               })
             : Promise.resolve({ list: [] })
@@ -161,7 +167,8 @@ const DashboardLayout = () => {
               alertResourceId: alertsResourceId[item?.alertId] || null
             }
           }),
-          todaysLeaveCount: {paidCount, unpaidCount}
+          todaysLeaveCount: {paidCount, unpaidCount},
+          branchAvailability: branchAvailability?.list
         })
 
         if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
@@ -635,7 +642,7 @@ const DashboardLayout = () => {
                     onLegendClick={({ index }) => {
                       if (index == 0 && data.todaysLeaveCount.paidCount == 0) return
                       if (index == 1 && data.todaysLeaveCount.unpaidCount == 0) return
-                      
+
                       stack({
                         Component: TodaysLeave,
                         props: { index }
@@ -648,6 +655,22 @@ const DashboardLayout = () => {
             </div>
           )}
 
+          {containsApplet(ResourceIds.BranchAvailability) && (
+          <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.branchAvailability}</h2>
+                </div>
+                <HorizontalBarChartDark           
+                  labels={(data?.branchAvailability || []).map(b => b.branchName)}
+                  data={(data?.branchAvailability || []).map(s => s.scheduled)}
+                  data2={(data?.branchAvailability || []).map(b => b.scheduled - b.present)}
+                  label={labels.present}
+                  label2={labels.absent}
+                  color='#6e87b6'
+                  hoverColor='#e50808'
+                />
+              </div>
+          )}
         </div>
 
         {containsApplet(ResourceIds.PendingAuthorizationRequests) && (

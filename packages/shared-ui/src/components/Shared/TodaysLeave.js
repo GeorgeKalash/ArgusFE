@@ -10,14 +10,17 @@ import { HRDashboardRepository } from '@argus/repositories/src/repositories/HRDa
 
 const TodaysLeave = ({index, window }) => {
   const { getRequest } = useContext(RequestsContext)
+  const endpoint = index == 0
+    ? HRDashboardRepository.PaidLeave.qry
+    : HRDashboardRepository.UnpaidLeave.qry
 
   const {
     query: { data },
     labels,
     access
   } = useResourceQuery({
-    // queryFn: fetchGridData,
-    // endpointId: HRDashboardRepository.EmpRTW.qry,
+    queryFn: fetchGridData,
+    endpointId: endpoint,
     datasetId: ResourceIds.TodaysLeaves
   })
 
@@ -56,10 +59,10 @@ const TodaysLeave = ({index, window }) => {
   ]
 
   async function fetchGridData() {
-    // return await getRequest({
-    //     extension: HRDashboardRepository.EmpRTW.qry,
-    //     parameters: `_params=`
-    // })
+    return await getRequest({
+        extension: endpoint,
+        parameters: `_params=`
+    })
   }
 
   return (

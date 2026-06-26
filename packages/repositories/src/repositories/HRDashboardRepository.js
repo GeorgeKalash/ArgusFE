@@ -39,5 +39,14 @@ export const HRDashboardRepository = {
   },
   TodaysLeave: {
     dashboard: service + 'dashboard'
+  },
+  BranchAvailability: {
+    qry: service + 'qryBA'
+  },
+  PaidLeave: {
+    qry: service + 'qryPL'
+  },
+  UnpaidLeave: {
+    qry: service + 'qryUL'
   }
 }
