@@ -5,7 +5,7 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -43,7 +43,8 @@ const DocumentTypes = () => {
     search,
     clear,
     paginationParameters,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.DocumentType.page,
@@ -52,10 +53,6 @@ const DocumentTypes = () => {
       endpointId: SystemRepository.DocumentType.snapshot,
       searchFn: fetchWithSearch
     }
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.DocumentType.page
   })
 
   const columns = [

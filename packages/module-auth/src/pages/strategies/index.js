@@ -37,7 +37,7 @@ const Strategies2 = () => {
     query: { data },
     labels: _labels,
     paginationParameters,
-
+    invalidate,
     search,
     refetch,
     clear,
@@ -58,10 +58,6 @@ const Strategies2 = () => {
       parameters: `_filter=${qry}`
     })
   }
-
-  const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.Strategy.page
-  })
 
   const columns = [
     {

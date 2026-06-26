@@ -33,38 +33,35 @@ const GroupLegalDocument = () => {
     query: { data },
     paginationParameters,
     refetch,
-    labels: _labels,
-    access
+    labels,
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: BusinessPartnerRepository.GroupLegalDocument.page,
     datasetId: ResourceIds.GroupLegalDocument
   })
 
-  const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.GroupLegalDocument.page
-  })
-
   const columns = [
     {
       field: 'groupName',
-      headerName: _labels.group,
+      headerName: labels.group,
       flex: 1
     },
     {
       field: 'incName',
-      headerName: _labels.categoryId,
+      headerName: labels.categoryId,
       flex: 1
     },
     {
       field: 'required',
-      headerName: _labels.required,
+      headerName: labels.required,
       flex: 1,
       type: 'checkbox'
     },
     {
       field: 'mandatory',
-      headerName: _labels.mandatory,
+      headerName: labels.mandatory,
       flex: 1,
       type: 'checkbox'
     }
@@ -82,14 +79,14 @@ const GroupLegalDocument = () => {
     stack({
       Component: GroupLegalDocumentForm,
       props: {
-        labels: _labels,
+        labels,
         record,
         maxAccess: access,
         recordId: record ? record.groupId * 10000 + record.incId : null
       },
       width: 600,
       height: 370,
-      title: _labels.groupLegalDocument
+      title: labels.groupLegalDocument
     })
   }
 

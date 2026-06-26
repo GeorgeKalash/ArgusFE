@@ -4,7 +4,7 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -34,15 +34,12 @@ const States = () => {
     labels: _labels,
     refetch,
     paginationParameters,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.State.page,
     datasetId: ResourceIds.States
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.State.page
   })
 
   const columns = [

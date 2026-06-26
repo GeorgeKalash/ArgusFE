@@ -5,7 +5,7 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import RateTypesForm from './forms/RateTypesForm'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -38,10 +38,6 @@ const RateTypes = () => {
     })
   }
 
-  const invalidate = useInvalidate({
-    endpointId: MultiCurrencyRepository.RateType.page
-  })
-
   const {
     query: { data },
     labels,
@@ -49,7 +45,8 @@ const RateTypes = () => {
     clearFilter,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: MultiCurrencyRepository.RateType.page,
