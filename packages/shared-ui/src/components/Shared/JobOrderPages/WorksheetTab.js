@@ -6,7 +6,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Grid } from '@mui/material'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import WorksheetWindow from './WorksheetWindow'
+import WorksheetWindow from '@argus/shared-ui/src/components/Shared/Forms/WorksheetWindow'
 
 export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }) {
 
