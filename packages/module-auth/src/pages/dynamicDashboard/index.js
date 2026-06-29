@@ -23,10 +23,10 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
-import HeadcountHistoryApplet from '@argus/shared-ui/src/components/Shared/HeadcountHistoryApplet'
 import { HRDashboardRepository } from '@argus/repositories/src/repositories/HRDashboardRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import TodaysLeave from '@argus/shared-ui/src/components/Shared/TodaysLeave'
+import TodaysLeave from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysLeave'
+import HeadcountHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApplets/HeadcountHistoryApplet'
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)

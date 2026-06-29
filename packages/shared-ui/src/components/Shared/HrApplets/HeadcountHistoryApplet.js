@@ -3,7 +3,7 @@ import { CompositeBarChartDark } from '@argus/shared-ui/src/components/Shared/da
 import { ReportRepository } from '@argus/repositories/src/repositories/ReportRepository'
 import { formatEEEEMMMDDYY, formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import CustomDatePicker from '../Inputs/CustomDatePicker'
+import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 
 const HeadcountHistoryApplet = ({ labels }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -13,7 +13,6 @@ const HeadcountHistoryApplet = ({ labels }) => {
   useEffect(() => {
     const fetchHeadcount = async () => {
       const formattedDate = formatDateForGetApI(headcountToDate).replace(/-/g, '')
-      console.log('formattedDate',headcountToDate,formattedDate)
       const res = await getRequest({
         extension: ReportRepository.HeadCount.RT103,
         parameters: `_params=1|19910101^2|${formattedDate}`

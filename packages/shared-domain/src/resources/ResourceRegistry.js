@@ -23,36 +23,36 @@ export const ResourceRegistry = {
     import('@argus/shared-ui/src/components/Shared/Forms/ThreeDPrintForm')
   ),
   [ResourceIds.RightToWork]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/CompanyRightToWork')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/CompanyRightToWork')
   ),
   [ResourceIds.EmployeeRightToWork]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/EmployeeRightToWork')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/EmployeeRightToWork')
   ),
   [ResourceIds.EmployeesBirthday]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/EmployeesBirthday')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/EmployeesBirthday')
   ),
   [ResourceIds.Probation]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/ProbationEnd')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/ProbationEnd')
   ),
   [ResourceIds.Salaries]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/SalaryChange')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/SalaryChange')
   ),
   [ResourceIds.CasePleads]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/CasePleads')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/CasePleads')
   ),
   [ResourceIds.LeaveRequestODOM]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/LeavingSoon')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/LeavingSoon')
   ),
   [ResourceIds.EmploymentReview]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/EmploymentReview')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/EmploymentReview')
   ),
   [ResourceIds.EmployeeChart]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/RetirementAge')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/RetirementAge')
   ),
   [ResourceIds.TermEndDate]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/TermEndDate')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/TermEndDate')
   ),
   [ResourceIds.WorkAnniversary]: createResource(() =>
-    import('@argus/shared-ui/src/components/Shared/WorkAnniversary')
+    import('@argus/shared-ui/src/components/Shared/HrApplets/WorkAnniversary')
   )
 }
