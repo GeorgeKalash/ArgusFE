@@ -509,7 +509,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Collections.qry}
+                    endpointId={InventoryRepository.Items.pack}
+                    reducer={response => {
+                      return response?.record?.collections
+                    }}
                     name='collectionId'
                     label={labels.collection}
                     valueField='recordId'

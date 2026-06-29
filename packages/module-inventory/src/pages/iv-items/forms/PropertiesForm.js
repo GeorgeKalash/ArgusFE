@@ -25,13 +25,10 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
 
   useEffect(() => {
     const loadDimensions = async () => {
-      if (recordId && _dmgId) {
-        const fetchDimensionResult = await getRequest({
-          extension: InventoryRepository.DimensionGroupElement.qry,
-          parameters: `_groupId=${_dmgId}`
-        })
-
-        setDimensions(fetchDimensionResult.list)
+      if (store.packB?.dimensionGroupElements) {
+        setDimensions(store.packB.dimensionGroupElements.filter(
+          item => item.groupId === _dmgId
+        ))
       }
 
       const filteredDimensions2 = systemDefaults?.list
@@ -47,50 +44,44 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
     }
 
     loadDimensions()
-  }, [recordId, _dmgId, systemDefaults])
+  }, [store.packB, _dmgId, recordId, systemDefaults])
+
+    useEffect(() => {
+    if (!store.packB) return
+
+    const newDimensionValues = {}
+
+    store.packB.itemDimensions?.forEach(item => {
+      newDimensionValues[item.dimension] = item.id
+    })
+
+    formik.setValues(prev => ({
+      ...prev,
+      ...newDimensionValues
+    }))
+  }, [store.packB])
 
   useEffect(() => {
     const fetchDimensionsData = async () => {
       if (recordId && dimensions?.length > 0) {
-        const dimensionRequests = dimensions.map(dimension => {
-          const dimensionNumber = dimension.dimensionId
+        if (!store.packB) return
 
-          return getRequest({
-            extension: InventoryRepository.DimensionId.get,
-            parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
-          })
+        const newDimensionValues = {}
+
+        store.packB.itemDimensions?.forEach(item => {
+          newDimensionValues[item.dimension] = item.id
         })
 
-        const dimensionResponses = await Promise.all(dimensionRequests)
+        const newDimensionUDTValues = {}
 
-        const newDimensionValues = dimensionResponses.reduce((acc, res, index) => {
-          const dimensionKey = dimensions[index].dimensionId
-          acc[dimensionKey] = res.record?.id || ''
-
-          return acc
-        }, {})
-
-        const udtRequests = dimensionsUDT
-          .filter(dimension => dimension.dimensionId)
-          .map(dimension => {
-            return getRequest({
-              extension: InventoryRepository.DimensionUDT.get,
-              parameters: `_itemId=${recordId}&_dimension=${dimension.dimensionId}`
-            })
-          })
-
-        const udtResponses = await Promise.all(udtRequests)
-
-        const newUDTValues = udtResponses.reduce((acc, res, index) => {
-          const udtKey = dimensionsUDT.filter(dimension => dimension.dimensionId)[index]?.key
-          acc[udtKey] = res?.record?.value || ''
-
-          return acc
-        }, {})
+        store.packB.userDefinedTexts?.forEach(item => {
+          newDimensionUDTValues[`ivtUDT${item.dimension}`] = item.value
+        })
+        
         formik.setValues(prevValues => ({
           ...prevValues,
           ...newDimensionValues,
-          ...newUDTValues
+          ...newDimensionUDTValues
         }))
       }
     }
@@ -165,18 +156,25 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
                     {dimensions?.map((dimension, index) => {
                       const dimensionNumber = dimension.dimensionId
 
+                      const options =
+                        (store.packB?.dimensions || [])
+                          .filter(d => d.dimension === dimensionNumber)
                       return (
                         <Grid container mt={0.2} spacing={2} key={index}>
                           <Grid item xs={12}>
                             <ResourceComboBox
-                              endpointId={InventoryRepository.Dimension.qry}
-                              parameters={`_dimension=${dimensionNumber}`}
+                              store={options}
                               name={`${dimension.dimensionId}`}
                               label={dimension.dimensionName}
                               valueField='id'
                               displayField='name'
                               values={formik.values}
-                              onChange={(_, newValue) => formik.setFieldValue(`${dimension.dimensionId}`, newValue?.id || null)}
+                              onChange={(_, newValue) =>
+                                formik.setFieldValue(
+                                  `${dimension.dimensionId}`,
+                                  newValue?.id || null
+                                )
+                              }
                             />
                           </Grid>
                         </Grid>

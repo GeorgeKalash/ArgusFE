@@ -4,8 +4,6 @@ import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -13,32 +11,14 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import VendorForm from './VendorForm'
 
-const VendorList = ({ store, labels, maxAccess }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+const VendorList = ({ store, labels, maxAccess, refreshPackB }) => {
+  const { postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
-  async function fetchGridData() {
-    const response = await getRequest({
-      extension: PurchaseRepository.PriceList.qry,
-      parameters: `&_itemId=${recordId}`
-    })
-
-    return response
-  }
-
-  const {
-    query: { data },
-    labels: _labels,
-    invalidate
-  } = useResourceQuery({
-    enabled: !!recordId,
-    datasetId: ResourceIds.PriceList,
-    queryFn: fetchGridData,
-    endpointId: PurchaseRepository.PriceList.qry
-  })
+  const data = { list: store.packB?.priceLists || []}
 
   const columns = [
     {
@@ -88,7 +68,9 @@ const VendorList = ({ store, labels, maxAccess }) => {
       extension: PurchaseRepository.PriceList.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
+
+    await refreshPackB()
+
     toast.success(platformLabels.Deleted)
   }
 
@@ -108,7 +90,8 @@ const VendorList = ({ store, labels, maxAccess }) => {
         recordId: recordId ? recordId : null,
         record: record,
         maxAccess,
-        store
+        store,
+        refreshPackB 
       },
 
       title: labels.vendor
