@@ -3,6 +3,16 @@ import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
+const MULTI_LINE_DEFAULT_COLORS = [
+  '#FF8C00', 
+  '#333333', 
+  '#8B0000',
+  '#90EE90', 
+  '#1F3BB3', 
+  '#800080'
+]
+const MULTI_LINE_POINT_STYLES = ['circle', 'triangle', 'rect', 'rectRot', 'star', 'cross']
+
 const styles = new Proxy(
   {},
   {
@@ -1843,6 +1853,155 @@ export const CompBarChart = memo(({ id, labels, datasets }) => {
   return (
     <div className={styles.chartHeight}>
       <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}></canvas>
+    </div>
+  )
+})
+
+export const MultiLineChart = memo(({ id, labels, datasets }) => {
+  useInjectChartsStyles()
+
+  const canvasRef = useRef(null)
+  const chartRef  = useRef(null)
+
+  const getChart = useCallback(() => chartRef.current, [])
+  useArgusTabActivatedResize(getChart)
+
+  const { width } = useWindowDimensions()
+  const chartSize = width > 1280 ? sizes[1281] : width > 1024 ? sizes[1280] : sizes[1024]
+
+  const buildDatasets = useCallback((canvas) => {
+    return (datasets || []).map((ds, i) => {
+      const color =
+        ds.color ||
+        getCssVar(canvas, `--chart-line-multi-${i + 1}`) ||
+        MULTI_LINE_DEFAULT_COLORS[i % MULTI_LINE_DEFAULT_COLORS.length]
+
+      return {
+        label: ds.label ?? `Series ${i + 1}`,
+        data: ds.data  ?? [],
+        fill: false,
+        borderColor: color,
+        backgroundColor: color,
+        pointBackgroundColor: color,
+        pointStyle: MULTI_LINE_POINT_STYLES[i % MULTI_LINE_POINT_STYLES.length],
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        borderWidth: 2,
+        tension: 0.1,
+        spanGaps: true,
+      }
+    })
+  }, [datasets])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx || chartRef.current) return
+
+    chartRef.current = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels:   labels   || [],
+        datasets: buildDatasets(canvas),
+      },
+      options: {
+        responsive:          true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode:      'index',
+          intersect: false,
+        },
+        plugins: {
+          legend: {
+            display:  true,
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              pointStyle: 'circle',
+              padding: 20,
+              color: getCssVar(canvas, '--chart-legend-label-color', '#f0f0f0'),
+              font: { size: chartSize.size },
+            },
+          },
+          datalabels: { display: false },  
+          tooltip: {
+            backgroundColor: getCssVar(canvas, '--chart-tooltip-bg', '#f0f0f0'),
+            titleColor: getCssVar(canvas, '--chart-tooltip-title-color', '#231F20'),
+            bodyColor: getCssVar(canvas, '--chart-tooltip-body-color', '#231F20'),
+            bodyFont:  { size: chartSize.tooltipBodySize },
+            titleFont: { size: chartSize.tooltipFontSize },
+            callbacks: {
+              label: ctx => ` ${ctx.dataset.label}: ${ctx.raw ?? 0}`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: getCssVar(canvas, '--chart-axis-color', '#f0f0f0'),
+              font: { size: chartSize.ticksSize },
+              maxRotation: 45,
+              minRotation: 45,
+              autoSkip: false,
+            },
+            grid: { display: false },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: getCssVar(canvas, '--chart-axis-color', '#f0f0f0'),
+              font:  { size: chartSize.ticksSize },
+              stepSize: 1,
+            },
+            grid: { display: false },
+          },
+        },
+      },
+      plugins: [ChartDataLabels],
+    })
+
+    return () => {
+      chartRef.current?.destroy()
+      chartRef.current = null
+    }
+  }, []) 
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const chart  = chartRef.current
+    if (!canvas || !chart) return
+
+    const nextHasMeaningful =
+      hasAnyLabel(labels) &&
+      Array.isArray(datasets) &&
+      datasets.some(ds => hasAnyValue(ds?.data))
+
+    if (!nextHasMeaningful && chartHasAnyValue(chart)) return
+
+    chart.data.labels   = labels || []
+    chart.data.datasets = buildDatasets(canvas)
+
+    chart.options.plugins.legend.labels.color =
+      getCssVar(canvas, '--chart-legend-label-color', '#f0f0f0')
+    chart.options.plugins.legend.labels.font.size = chartSize.size
+
+    chart.options.plugins.tooltip.bodyFont.size  = chartSize.tooltipBodySize
+    chart.options.plugins.tooltip.titleFont.size = chartSize.tooltipFontSize
+
+    chart.options.scales.x.ticks.font.size = chartSize.ticksSize
+    chart.options.scales.y.ticks.font.size = chartSize.ticksSize
+
+    chart.update('none')
+  }, [labels, datasets, chartSize, buildDatasets])
+
+  return (
+    <div className={styles.chartHeight} style={{ background: '#ffffff', borderRadius: 8, padding: '8px 4px 4px' }}>
+      <canvas
+        id={id}
+        ref={canvasRef}
+        className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasLight}`}
+      />
     </div>
   )
 })

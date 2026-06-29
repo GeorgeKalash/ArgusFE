@@ -27,6 +27,7 @@ import { HRDashboardRepository } from '@argus/repositories/src/repositories/HRDa
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import TodaysLeave from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysLeave'
 import HeadcountHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApplets/HeadcountHistoryApplet'
+import LatenessHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApplets/LatenessHistoryApplet'
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
@@ -687,7 +688,11 @@ const DashboardLayout = () => {
         )}
         
         {containsApplet(ResourceIds.HeadcountHistory) && (
-          <HeadcountHistoryApplet labels={labels} />
+          <HeadcountHistoryApplet />
+        )}
+
+        {containsApplet(ResourceIds.LatenessHistory) && (
+          <LatenessHistoryApplet />
         )}
       </div>
     </div>

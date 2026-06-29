@@ -48,5 +48,8 @@ export const HRDashboardRepository = {
   },
   UnpaidLeave: {
     qry: service + 'qryUL'
+  },
+  AttendancePeriod: {
+    qry: service + 'qryAP'
   }
 }
