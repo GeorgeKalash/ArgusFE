@@ -24,10 +24,12 @@ import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
 export default function ProductionSummaryForm({ recordId, labels, access, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack: stackError } = useError()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ProductionSummary,
@@ -145,20 +147,26 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       parameters: ''
     })
 
-    await postRequest({
-      extension: ManufacturingRepository.ProductionSummary.set2,
-      record: JSON.stringify({
-        header: { ...formik.values?.header, date: formatDateToApi(formik?.values?.header?.date) },
-        items: res?.list
+    if (res?.list?.length > 0) {
+      await postRequest({
+        extension: ManufacturingRepository.ProductionSummary.set2,
+        record: JSON.stringify({
+          header: { ...formik.values?.header, date: formatDateToApi(formik?.values?.header?.date) },
+          items: res?.list
+        })
       })
-    })
 
-    await postRequest({
-      extension: ManufacturingRepository.ProductionSummary.setPRSummary,
-      record: JSON.stringify({ summaryId: formik.values.recordId })
-    })
+      await postRequest({
+        extension: ManufacturingRepository.ProductionSummary.setPRSummary,
+        record: JSON.stringify({ summaryId: formik.values.recordId })
+      })
 
-    refetchForm(formik.values.recordId)
+      refetchForm(formik.values.recordId)
+    } else {
+      stackError({
+        message: platformLabels.noItemsToImport
+      })
+    }
   }
 
   const actions = [
