@@ -58,7 +58,7 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
     const { _startAt = 0 } = options
 
     const response = await getRequest({
-      extension: DocumentReleaseRepository.DocumentsOnHold.qry,
+      extension: DocumentReleaseRepository.DocumentsOnHold.page,
       parameters: `_startAt=${_startAt}&_reference=&_sortBy=reference desc&_pageSize=${pageSize}`
     })
 
@@ -75,10 +75,10 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.DocumentsOnHold.qry,
+    endpointId: DocumentReleaseRepository.DocumentsOnHold.page,
     datasetId: ResourceIds.DocumentsOnHold,
     filter: {
-      endpointId: DocumentReleaseRepository.DocumentsOnHold.qry,
+      endpointId: DocumentReleaseRepository.DocumentsOnHold.page,
       filterFn: fetchWithSearch
     }
   })
@@ -89,7 +89,7 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
     return (
       filters.qry &&
       (await getRequest({
-        extension: DocumentReleaseRepository.DocumentsOnHold.qry,
+        extension: DocumentReleaseRepository.DocumentsOnHold.page,
         parameters: `&_reference=${filters.qry}&_sortBy=reference desc&_pageSize=${pageSize}&_startAt=${_startAt}`
       }))
     )

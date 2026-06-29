@@ -28,8 +28,8 @@ const Strategies2 = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: DocumentReleaseRepository.Strategy.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: DocumentReleaseRepository.Strategy.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
   }
 
@@ -37,14 +37,14 @@ const Strategies2 = () => {
     query: { data },
     labels: _labels,
     paginationParameters,
-
+    invalidate,
     search,
     refetch,
     clear,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.Strategy.qry,
+    endpointId: DocumentReleaseRepository.Strategy.page,
     datasetId: ResourceIds.Strategies,
     search: {
       endpointId: DocumentReleaseRepository.Strategy.snapshot,
@@ -58,10 +58,6 @@ const Strategies2 = () => {
       parameters: `_filter=${qry}`
     })
   }
-
-  const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.Strategy.qry
-  })
 
   const columns = [
     {

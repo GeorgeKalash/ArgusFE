@@ -38,13 +38,11 @@ const IvBarcodes = () => {
     })
   })
 
-  /* ===================== DATA ===================== */
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.Barcodes.qry,
+      extension: InventoryRepository.Barcodes.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${skuValue || 0}`
     })
 
@@ -71,7 +69,7 @@ const IvBarcodes = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Barcodes.qry,
+    endpointId: InventoryRepository.Barcodes.page,
     datasetId: ResourceIds.Barcodes,
     search: {
       endpointId: InventoryRepository.Barcodes.snapshot,

@@ -25,7 +25,7 @@ const HrProcessedPunches = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: TimeAttendanceRepository.PendingPunches.qry,
+    endpointId: TimeAttendanceRepository.PendingPunches.page,
     datasetId: ResourceIds.ProcessedPunches
   })
 
@@ -33,7 +33,7 @@ const HrProcessedPunches = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: TimeAttendanceRepository.PendingPunches.qry,
+      extension: TimeAttendanceRepository.PendingPunches.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=1|9`
     })
 

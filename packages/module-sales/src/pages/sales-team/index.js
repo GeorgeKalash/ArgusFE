@@ -23,7 +23,7 @@ const SalesTeam = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.SalesTeam.qry,
+        extension: SaleRepository.SalesTeam.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
       })
 
@@ -40,7 +40,7 @@ const SalesTeam = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesTeam.qry,
+    endpointId: SaleRepository.SalesTeam.page,
     datasetId: ResourceIds.SalesTeam
   })
 

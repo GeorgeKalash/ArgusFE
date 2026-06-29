@@ -24,7 +24,7 @@ const AccountGroups = () => {
 
     return await getRequest({
       extension: FinancialRepository.Group.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
   }
 

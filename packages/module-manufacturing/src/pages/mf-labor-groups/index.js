@@ -4,7 +4,7 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -23,7 +23,7 @@ const LaborGroups = () => {
 
     const response = await getRequest({
       extension: ManufacturingRepository.LaborGroup.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -31,16 +31,15 @@ const LaborGroups = () => {
 
   const {
     query: { data },
-    labels: _labels,
-    access
+    labels,
+    refetch,
+    paginationParameters,
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LaborGroup.page,
     datasetId: ResourceIds.LaborGroups
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.LaborGroup.page
   })
 
   const columns = [
@@ -95,14 +94,17 @@ const LaborGroups = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          refetch={refetch}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
           maxAccess={access}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>

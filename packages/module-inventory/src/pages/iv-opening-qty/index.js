@@ -23,7 +23,7 @@ const InventoryOpeningQtys = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     return await getRequest({
-      extension: InventoryRepository.InventoryOpeningQtys.qry,
+      extension: InventoryRepository.InventoryOpeningQtys.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}&_sortBy=year desc`
     })
   }
@@ -42,7 +42,7 @@ const InventoryOpeningQtys = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.InventoryOpeningQtys.qry,
+    endpointId: InventoryRepository.InventoryOpeningQtys.page,
     datasetId: ResourceIds.InventoryOpeningQtys,
     filter: {
       filterFn: fetchWithFilter

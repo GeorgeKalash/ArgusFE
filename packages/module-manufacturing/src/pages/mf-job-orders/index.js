@@ -33,7 +33,7 @@ const JobOrder = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.MFJobOrder.qry,
+    endpointId: ManufacturingRepository.MFJobOrder.page,
     datasetId: ResourceIds.MFJobOrders,
     filter: {
       filterFn: fetchWithFilter
@@ -126,8 +126,8 @@ const JobOrder = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.MFJobOrder.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      extension: ManufacturingRepository.MFJobOrder.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
