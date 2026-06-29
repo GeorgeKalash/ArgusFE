@@ -1,4 +1,4 @@
-import { useContext, useState, useMemo, useCallback } from 'react'
+import { useContext, useState, useMemo, useCallback, useEffect } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -368,6 +368,12 @@ const Catalogue = () => {
 
   }
 
+  useEffect(() => {
+    if (view === 'icons') {
+      refetch()
+    }
+  }, [values.clientId])
+
   return (
     <VertLayout>
       <Fixed>
@@ -429,7 +435,6 @@ const Catalogue = () => {
                       clientRef: newValue?.reference || '',
                       clientName: newValue?.name || ''
                     })
-                    refetch()
                     getClientBasket(newValue?.recordId || null)
                   }}
                 />
