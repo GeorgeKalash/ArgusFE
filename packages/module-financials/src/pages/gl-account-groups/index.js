@@ -78,8 +78,7 @@ const AccountGroups = () => {
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        maxAccess: access
       },
       width: 600,
       height: 300,

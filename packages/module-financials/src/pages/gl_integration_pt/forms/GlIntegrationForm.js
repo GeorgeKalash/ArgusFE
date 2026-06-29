@@ -13,7 +13,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function GlIntegrationForm({ labels, maxAccess, recordId, invalidate }) {
+export default function GlIntegrationForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 

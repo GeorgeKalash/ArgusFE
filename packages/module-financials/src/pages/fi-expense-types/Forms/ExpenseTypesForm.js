@@ -15,7 +15,7 @@ import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalidate }) {
+export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 

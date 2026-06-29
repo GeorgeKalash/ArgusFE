@@ -97,8 +97,7 @@ const ExpenseTypes = () => {
       props: {
         labels: _labels,
         recordId,
-        maxAccess: access,
-        invalidate: invalidate
+        maxAccess: access
       },
       width: 600,
       height: 400,
