@@ -16,7 +16,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function ExchangeTablesForm({ labels, maxAccess, store, setStore, invalidate }) {
+export default function ExchangeTablesForm({ labels, maxAccess, store, setStore }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
