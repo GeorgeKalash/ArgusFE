@@ -372,6 +372,28 @@ const getChartOptions = (label, type, canvas, onLegendClick) => {
   }
 }
 
+const getPieChartOptions = (label, canvas, onLegendClick) => {
+  const base = getChartOptions(label, 'pie', canvas, onLegendClick)
+  return {
+    ...base,
+    plugins: {
+      ...base.plugins,
+      legend: {
+        ...base.plugins.legend,
+        position: 'top',
+        labels: {
+          ...base.plugins.legend.labels,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 8,
+          boxWidth: 10,
+        },
+        maxWidth: 1000
+      },
+    }
+  }
+}
+
 export const MixedBarChart = memo(({ id, labels, data1, data2, label1, label2, ratio = 3, rotation, hasLegend }) => {
   useInjectChartsStyles()
 
@@ -1167,11 +1189,7 @@ export const CompositeBarChart = memo(({ labels, data, label }) => {
           }
         ]
       },
-      options: {
-        ...getChartOptions(label, 'bar', canvas),
-        responsive: true,
-        maintainAspectRatio: false
-      }
+      options: { ...getChartOptions(label, 'bar', canvas), responsive: true, maintainAspectRatio: false }
     })
 
     return () => {
@@ -1460,7 +1478,7 @@ const getColorForIndex = (index, canvas) => {
   return colors[index % colors.length]
 }
 
-export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendClick  }) => {
+export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendClick }) => {
   useInjectChartsStyles()
   Chart.register(ChartDataLabels)
 
@@ -1477,11 +1495,6 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
     if (!ctx) return
     if (inst.current) return
 
-    const c1 = getCssVar(canvas, '--chart-pie-1')
-    const c2 = getCssVar(canvas, '--chart-pie-2')
-    const c3 = getCssVar(canvas, '--chart-pie-3')
-    const c4 = getCssVar(canvas, '--chart-pie-4')
-
     inst.current = new Chart(ctx, {
       type: 'pie',
       data: {
@@ -1490,11 +1503,11 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
           {
             label,
             data: data || [],
-            backgroundColor: [c1, c2, c3, c4]
+            backgroundColor: Array.from({ length: (data || []).length }, (_, i) => getColorForIndex(i, canvas))
           }
         ]
       },
-      options: getChartOptions(label, 'pie', canvas, onLegendClick)
+      options: getPieChartOptions(label, canvas, onLegendClick)
     })
 
     return () => {
@@ -1511,16 +1524,11 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
     const nextHasMeaningful = hasAnyLabel(labels) && hasAnyValue(data)
     if (!nextHasMeaningful && chartHasAnyValue(chart)) return
 
-    const c1 = getCssVar(canvas, '--chart-pie-1')
-    const c2 = getCssVar(canvas, '--chart-pie-2')
-    const c3 = getCssVar(canvas, '--chart-pie-3')
-    const c4 = getCssVar(canvas, '--chart-pie-4')
-
     chart.data.labels = labels || []
     chart.data.datasets[0].label = toolTipText || label
     chart.data.datasets[0].data = data || []
-    chart.data.datasets[0].backgroundColor = [c1, c2, c3, c4]
-    chart.options = getChartOptions(label, 'pie', canvas, onLegendClick)
+    chart.data.datasets[0].backgroundColor = Array.from({ length: (data || []).length }, (_, i) => getColorForIndex(i, canvas))
+    chart.options = getPieChartOptions(label, canvas, onLegendClick)
 
     chart.update('none')
   }, [labels, data, label])

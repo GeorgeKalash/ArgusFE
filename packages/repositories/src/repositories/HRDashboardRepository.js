@@ -37,8 +37,13 @@ export const HRDashboardRepository = {
   CasePleads: {
     qry: service + 'qryCP'
   },
-  TodaysLeave: {
-    dashboard: service + 'dashboard'
+  Dashboard: {
+    dashboard: service + 'dashboard',
+    dashBoardPE: service + 'qryPE',
+    dashBoardLE: service + 'qryLE',
+    dashBoardDO: service + 'qryDO',
+    dashBoardNS: service + 'qryNS',
+    dashBoardCH: service + 'qryCH'
   },
   BranchAvailability: {
     qry: service + 'qryBA'

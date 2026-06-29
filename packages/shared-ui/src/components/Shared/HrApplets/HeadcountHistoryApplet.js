@@ -4,11 +4,17 @@ import { ReportRepository } from '@argus/repositories/src/repositories/ReportRep
 import { formatEEEEMMMDDYY, formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-const HeadcountHistoryApplet = ({ labels }) => {
+const HeadcountHistoryApplet = ({ }) => {
   const { getRequest } = useContext(RequestsContext)
   const [headcountToDate, setHeadcountToDate] = useState(new Date())
   const [headCount, setHeadCount] = useState([])
+
+  const { labels } = useResourceParams({
+    datasetId: ResourceIds.HeadcountHistory
+  })
 
   useEffect(() => {
     const fetchHeadcount = async () => {

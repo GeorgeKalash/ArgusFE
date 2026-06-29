@@ -28,6 +28,8 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import TodaysLeave from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysLeave'
 import HeadcountHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApplets/HeadcountHistoryApplet'
 import LatenessHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApplets/LatenessHistoryApplet'
+import ConstDashboardItem from '@argus/shared-utils/src/utils/ConstDashboardItem'
+import TodaysAttendance from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysAttendance'
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
@@ -39,6 +41,7 @@ const DashboardLayout = () => {
   const userData = getStorageData('userData')
   const _userId = userData.userId
   const _languageId = userData.languageId
+  const { PAID_LEAVE, UNPAID_LEAVE, PENDING, NO_SHOW_UP, CHECKED, LEAVE, DAY_OFF } = ConstDashboardItem
 
   const alertsResourceId = {
     '1': ResourceIds.RightToWork, 
@@ -54,9 +57,6 @@ const DashboardLayout = () => {
     '11': ResourceIds.LeaveRequestODOM,
     '12': ResourceIds.CasePleads
   }
-
-  const TA_PAID_LEAVE = 311
-  const TA_UNPAID_LEAVE = 312
 
   const getRequestRef = React.useRef(getRequest)
   useEffect(() => {
@@ -97,7 +97,7 @@ const DashboardLayout = () => {
         if (cancelled) return
         setApplets(appletsRes.list)
 
-        const [resDashboard, resSP, resTV, resTimeCode, alerts, todaysLeave, branchAvailability] = await Promise.all([
+        const [resDashboard, resSP, resTV, resTimeCode, alerts, dashboard, branchAvailability] = await Promise.all([
           getRequestRef.current({ extension: DashboardRepository.dashboard }),
           getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
           getRequestRef.current({
@@ -114,9 +114,9 @@ const DashboardLayout = () => {
                 parameters: `_params=`
               })
             : Promise.resolve({ list: [] }),
-          hasApplet(appletsRes, ResourceIds.TodaysLeaves)
+          hasApplet(appletsRes, ResourceIds.TodaysLeaves) || hasApplet(appletsRes, ResourceIds.TodaysAttendance)
             ? getRequestRef.current({
-                extension: HRDashboardRepository.TodaysLeave.dashboard,
+                extension: HRDashboardRepository.Dashboard.dashboard,
                 parameters: `_params=`
               })
             : Promise.resolve({ list: [] }),
@@ -147,11 +147,20 @@ const DashboardLayout = () => {
 
         let paidCount = null
         let unpaidCount = null
+        let pending = null
+        let noShowUp = null
+        let checked = null
+        let leave = null
+        let dayOff = null
 
-        for (const item of todaysLeave?.list || []) {
-          if (item.itemId === TA_PAID_LEAVE) paidCount = item.count
-
-          if (item.itemId === TA_UNPAID_LEAVE) unpaidCount = item.count
+        for (const item of dashboard?.list || []) {
+          if (item.itemId === PAID_LEAVE) paidCount = item.count
+          if (item.itemId === UNPAID_LEAVE) unpaidCount = item.count
+          if (item.itemId === DAY_OFF) dayOff = item.count
+          if (item.itemId === LEAVE) leave = item.count
+          if (item.itemId === NO_SHOW_UP) noShowUp = item.count
+          if (item.itemId === PENDING) pending = item.count
+          if (item.itemId === CHECKED) checked = item.count
         }
 
         setData({
@@ -168,8 +177,9 @@ const DashboardLayout = () => {
               alertResourceId: alertsResourceId[item?.alertId] || null
             }
           }),
-          todaysLeaveCount: {paidCount, unpaidCount},
-          branchAvailability: branchAvailability?.list
+          todaysLeaveCount: { paidCount, unpaidCount },
+          branchAvailability: branchAvailability?.list,
+          todaysAttendance: {pending, noShowUp, checked, leave, dayOff}
         })
 
         if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
@@ -641,8 +651,9 @@ const DashboardLayout = () => {
                     data={[data.todaysLeaveCount.paidCount, data.todaysLeaveCount.unpaidCount]}
                     toolTipText={labels.counts}
                     onLegendClick={({ index }) => {
-                      if (index == 0 && data.todaysLeaveCount.paidCount == 0) return
-                      if (index == 1 && data.todaysLeaveCount.unpaidCount == 0) return
+                      const attendanceKeys = ['paidCount', 'unpaidCount']
+                      const key = attendanceKeys[index]
+                      if (!key || data.todaysLeaveCount[key] === 0) return
 
                       stack({
                         Component: TodaysLeave,
@@ -671,6 +682,38 @@ const DashboardLayout = () => {
                   hoverColor='#e50808'
                 />
               </div>
+          )}
+
+          {containsApplet(ResourceIds.TodaysAttendance) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.todaysAttendance}</h2>
+                </div>
+              <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-50px' }}>
+                <div style={{ width: '300px', height: '300px' }}>
+                  <PieChart
+                    id='todaysLeave'
+                    labels={[`${labels.pending}`, `${labels.noShowUp}`, `${labels.checked}`, `${labels.leave}`, `${labels.dayOff}`]}
+                    data={[data.todaysAttendance.pending, data.todaysAttendance.noShowUp, data.todaysAttendance.checked, data.todaysAttendance.leave, data.todaysAttendance.dayOff]}
+                    toolTipText={labels.counts}
+                    onLegendClick={({ index }) => {
+                        const attendanceKeys = ['pending', 'noShowUp', 'checked', 'leave', 'dayOff']
+                        
+                        const key = attendanceKeys[index]
+                        if (!key || data.todaysAttendance[key] === 0) return
+
+                        stack({
+                          Component: TodaysAttendance,
+                          props: { index }
+                        })
+                      }
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+            </div>
           )}
         </div>
 
