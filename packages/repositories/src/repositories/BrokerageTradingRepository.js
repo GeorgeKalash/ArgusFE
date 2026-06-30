@@ -25,5 +25,15 @@ export const BrokerageTradingRepository = {
   },
   Fixing: {
     pack: service + 'getPackFIX',
+  },
+  EventOrder: {
+    page: service + 'pageEO',
+    set: service + 'setEO',
+    del: service + 'delEO',
+    close: service + 'closeEO',
+    reopen: service + 'reopenEO',
+    get: service + 'getEO',
+    snapshot: service + 'snapshotEO',
+    pack: service + 'getPackEO'
   }
 }
