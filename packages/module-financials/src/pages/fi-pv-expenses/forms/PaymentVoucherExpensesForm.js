@@ -35,6 +35,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -630,23 +631,28 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     })()
   }, [])
 
-  function openMCRForm(data) {
-    stack({
-      Component: MultiCurrencyRateForm,
-      props: {
-        DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
-        data: {
-          ...data,
-          amount: amountSum
-        },
-        onOk: childFormikValues => {
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...childFormikValues
-          }))
+  const { openStack } = useStackValueLink({ linkOpen: { resourceId: ResourceIds.MCRPaymentVoucherExpenses } })
+    
+  async function openMCRForm(data) {
+    const hasOpened = await openStack()
+    if(!hasOpened) {
+      stack({
+        Component: MultiCurrencyRateForm,
+        props: {
+          DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
+          data: {
+            ...data,
+            amount: amountSum
+          },
+          onOk: childFormikValues => {
+            formik.setValues(prevValues => ({
+              ...prevValues,
+              ...childFormikValues
+            }))
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   return (

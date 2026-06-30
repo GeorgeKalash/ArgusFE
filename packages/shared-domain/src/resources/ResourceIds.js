@@ -712,6 +712,7 @@ export const ResourceIds = {
   MCRServiceBillReceived: 31621,
   MCRCashTransfers: 33605,
   MCRIncreaseDecreaseAdj: 33606,
+  MCRPaymentOrder: 33606,
   SalaryBatch: 75115,
   PayrollFormulas: 75119,
 
