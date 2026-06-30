@@ -162,6 +162,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       })
 
       refetchForm(formik.values.recordId)
+      toast.success(platformLabels.Saved)
     } else {
       stackError({
         message: platformLabels.noItemsToImport
