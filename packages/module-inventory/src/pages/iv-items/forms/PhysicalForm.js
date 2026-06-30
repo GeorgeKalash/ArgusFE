@@ -16,9 +16,9 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import { DirtyField, GeometricShape, PhysicalPropertyCalculatorCtrl } from '@argus/shared-utils/src/utils/PhysicalPropertyCalc'
 
 const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { recordId } = store
+  const { recordId, physicalProperty } = store
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.snapshot
@@ -78,19 +78,12 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   }
 
   useEffect(() => {
-    const fetchRecord = async () => {
-      if (recordId) {
-        const res = await getRequest({
-          extension: InventoryRepository.Physical.get,
-          parameters: `_itemId=${recordId}`
-        })
-        if (res.record) {
-          formik.setValues({ ...res.record, isMetal: !!res.record.isMetal })
-        }
+    if (recordId) {
+      if (physicalProperty) {
+        formik.setValues({ ...physicalProperty, isMetal: !!physicalProperty.isMetal })
       }
     }
-    fetchRecord()
-  }, [recordId])
+  }, [recordId, physicalProperty])
 
   const handleFieldChange = (fieldName, dirtyField, event) => {
     const newValue = Number(event?.target?.value || 0)
@@ -136,13 +129,10 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <ResourceComboBox
-              endpointId={InventoryRepository.Items.pack}
-              reducer={response => {
-                return response?.record?.shapes?.map(shape => ({
-                  key: parseInt(shape.key),
-                  value: shape.value
-                }))
-              }}
+              store={store?.shapes?.map(item => ({
+                key: parseInt(item.key),
+                value: item.value
+              }))}
               values={formik.values}
               name='shape'
               label={labels.shape}
@@ -259,8 +249,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
-              endpointId={InventoryRepository.Items.pack}
-              reducer={response => response?.record?.metals}
+              store={store.metals}
               values={formik.values}
               name='metalId'
               label={labels.metal}
@@ -280,8 +269,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
-              endpointId={InventoryRepository.Items.pack}
-              reducer={response => response?.record?.metalColors}
+              store={store.metalColors}
               values={formik.values}
               name='metalColorId'
               label={labels.metalColor}

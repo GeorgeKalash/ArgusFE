@@ -26,9 +26,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
   useEffect(() => {
     const loadDimensions = async () => {
       if (store.packB?.dimensionGroupElements) {
-        setDimensions(store.packB.dimensionGroupElements.filter(
-          item => item.groupId === _dmgId
-        ))
+        setDimensions(store.packB.dimensionGroupElements)
       }
 
       const filteredDimensions2 = systemDefaults?.list

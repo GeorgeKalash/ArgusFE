@@ -1,5 +1,5 @@
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -14,10 +14,11 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import toast from 'react-hot-toast'
 
 const BarcodeForm = ({ store, labels }) => {
-  const { recordId } = store
+  const { recordId, barcodes } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const [gridData, setGridData] = useState({ list: [] })
 
   const columns = [
     {
@@ -53,16 +54,11 @@ const BarcodeForm = ({ store, labels }) => {
   }
 
   const {
-    query: { data },
     labels: _labels,
-    invalidate,
     search,
     access
   } = useResourceQuery({
-    enabled: !!recordId,
     datasetId: ResourceIds.Barcodes,
-    queryFn: fetchGridData,
-    endpointId: InventoryRepository.Barcode.qry,
     search: {
       endpointId: InventoryRepository.Barcodes.snapshot,
       searchFn: fetchWithSearch
@@ -84,14 +80,19 @@ const BarcodeForm = ({ store, labels }) => {
         labels: _labels,
         recordId: obj?.recordId,
         barcode: obj?.barcode,
-        access: access,
+        access,
         store,
-        msId: store?._msId
+        msId: store?._msId,
+        setGridData,
+        fetchGridData
       },
-
       title: _labels.Barcodes
     })
   }
+
+  useEffect(() => {
+    setGridData({ list: barcodes || [] })
+  }, [store.recordId, barcodes])
 
   
   async function fetchWithSearch({ options = {}, qry }) {
@@ -110,7 +111,10 @@ const BarcodeForm = ({ store, labels }) => {
       extension: InventoryRepository.Barcodes.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
+
+    const res = await fetchGridData()
+    setGridData(res)
+
     toast.success(platformLabels.Deleted)
   }
 
@@ -127,7 +131,7 @@ const BarcodeForm = ({ store, labels }) => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={gridData}
           rowId={'barcode'}
           onEdit={edit}
           onDelete={del}
