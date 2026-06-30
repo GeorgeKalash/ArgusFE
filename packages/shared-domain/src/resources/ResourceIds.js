@@ -639,6 +639,7 @@ export const ResourceIds = {
   Divisions: 70101,
   Branches: 70102,
   Departments: 70104,
+  ProductionSummary: 42351,
   ProductionRequest: 42350,
   ProductionClassGroups: 42142,
   WorkCenterGroups: 42143,
