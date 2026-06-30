@@ -18,7 +18,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
 

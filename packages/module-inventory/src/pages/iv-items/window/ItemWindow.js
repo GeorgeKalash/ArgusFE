@@ -41,7 +41,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, window }) => {
     packB: null
   })
 
-  const fetchPackB = async () => {
+  const refreshItem = async () => {
     const retailSettings = await new Promise((resolve, reject) =>
       getAllKvsByDataset({
         _dataset: DataSets.IV_ITEM_RETAIL_SETTINGS,
@@ -64,7 +64,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, window }) => {
   useEffect(() => {
     if (!store.recordId || store.packB) return
 
-    fetchPackB()
+    refreshItem()
   }, [store.recordId, store._dmgId])
 
   const tabs = [
@@ -106,7 +106,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, window }) => {
         <PhysicalForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
       </CustomTabPanel>
       <CustomTabPanel index={5} value={activeTab} maxAccess={maxAccess}>
-        <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} refreshPackB={fetchPackB}/>
+        <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} refreshItem={refreshItem}/>
       </CustomTabPanel>
       <CustomTabPanel index={6} value={activeTab} maxAccess={maxAccess}>
         <ItemProductionForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />

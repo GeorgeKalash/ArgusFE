@@ -167,40 +167,35 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   const refetchForm = async (recordId, showTitle) => {
     const res = await getRequest({
-      extension: InventoryRepository.Items.get,
+      extension: InventoryRepository.Items.get2IT,
       parameters: `_recordId=${recordId}`
-    })
+    }) 
+    const { item, category } = res.record
 
-    if (window.setTitle && showTitle) window.setTitle(res.record.sku ? `${labels.items} ${res.record.sku}` : labels.items)
+    if (window.setTitle && showTitle) window.setTitle(item?.sku ? `${labels.items} ${item?.sku}` : labels.items)
 
-    const res2 = await getRequest({
-      extension: InventoryRepository.Category.get,
-      parameters: `_recordId=${res?.record?.categoryId}`
-    })
+    const isExternal = await getData(category?.nraId)
 
-    const isExternal = await getData(res2.record.nraId)
+    setFormikInitial(item)
 
-    res.record.isInactive = res.record.isInactive || false
-
-    setFormikInitial(res.record)
-
-    formik.setValues({ ...res.record, kitItem: !!res.record.kitItem, isExternal })
-    setShowLotCategories(res.record.trackBy === 2)
-    setShowSerialProfiles(res.record.trackBy === 1)
+    formik.setValues({ ...item, kitItem: !!item?.kitItem, isInactive: item?.isInactive || false, isExternal })
+    setShowLotCategories(item?.trackBy === 2)
+    setShowSerialProfiles(item?.trackBy === 1)
 
     setStore(prevStore => ({
       ...prevStore,
-      nraId: res2?.record?.nraId,
-      _msId: res.record.msId,
-      _kit: res.record.kitItem,
-      productionLevel: res.record.productionLevel,
-      measurementId: res.record.defSaleMUId,
-      priceGroupId: res.record.pgId,
-      returnPolicy: res.record.returnPolicyId,
-      _name: res.record.name,
-      _reference: res.record.sku,
-      _dmgId: res.record.dmgId || null,
-      _dmgName: res.record.dmgName || ''
+      ...res.record,
+      nraId: category?.nraId,
+      _msId: item?.msId,
+      _kit: item?.kitItem,
+      productionLevel: item?.productionLevel,
+      measurementId: item?.defSaleMUId,
+      priceGroupId: item?.pgId,
+      returnPolicy: item?.returnPolicyId,
+      _name: item?.name,
+      _reference: item?.sku,
+      _dmgId: item?.dmgId || null,
+      _dmgName: item?.dmgName || '',
     }))
   }
   useEffect(() => {

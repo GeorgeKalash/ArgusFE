@@ -11,7 +11,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import VendorForm from './VendorForm'
 
-const VendorList = ({ store, labels, maxAccess, refreshPackB }) => {
+const VendorList = ({ store, labels, maxAccess, refreshItem }) => {
   const { postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
@@ -69,7 +69,7 @@ const VendorList = ({ store, labels, maxAccess, refreshPackB }) => {
       record: JSON.stringify(obj)
     })
 
-    await refreshPackB()
+    await refreshItem()
 
     toast.success(platformLabels.Deleted)
   }
@@ -91,7 +91,7 @@ const VendorList = ({ store, labels, maxAccess, refreshPackB }) => {
         record: record,
         maxAccess,
         store,
-        refreshPackB 
+        refreshItem 
       },
 
       title: labels.vendor

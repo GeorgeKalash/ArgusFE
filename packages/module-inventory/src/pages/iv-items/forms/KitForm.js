@@ -15,7 +15,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 
 const KitForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
