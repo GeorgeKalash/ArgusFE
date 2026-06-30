@@ -1351,6 +1351,14 @@ export function DataGrid({
           justify-content: flex-end !important;
         }
 
+        .agContainer:dir(ltr) :global(.ag-cell.numberCell) {
+          padding-right: 6px !important;
+        }
+
+        .agContainer:dir(rtl) :global(.ag-cell.numberCell) {
+          padding-left: 6px !important;
+        }
+
         .agContainer :global(.ag-cell .MuiBox-root) {
           display: flex;
           align-items: center;
