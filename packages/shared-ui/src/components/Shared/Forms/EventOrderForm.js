@@ -385,6 +385,7 @@ useEffect(() => {
                 secondValueShow='accountName'
                 form={formik}
                 required
+                displayFieldWidth={2}
                 readOnly={isClosed}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('accountRef', newValue?.reference || '')
