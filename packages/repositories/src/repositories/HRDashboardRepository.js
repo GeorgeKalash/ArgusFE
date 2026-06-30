@@ -56,5 +56,8 @@ export const HRDashboardRepository = {
   },
   AttendancePeriod: {
     qry: service + 'qryAP'
+  },
+  TimeVariations: {
+    qry: service + 'qryTV'
   }
 }

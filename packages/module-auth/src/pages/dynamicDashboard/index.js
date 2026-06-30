@@ -30,6 +30,7 @@ import HeadcountHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApp
 import LatenessHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApplets/LatenessHistoryApplet'
 import ConstDashboardItem from '@argus/shared-utils/src/utils/ConstDashboardItem'
 import TodaysAttendance from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysAttendance'
+import TodaysTimeVariations from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysTimeVariations'
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
@@ -41,7 +42,9 @@ const DashboardLayout = () => {
   const userData = getStorageData('userData')
   const _userId = userData.userId
   const _languageId = userData.languageId
-  const { PAID_LEAVE, UNPAID_LEAVE, PENDING, NO_SHOW_UP, CHECKED, LEAVE, DAY_OFF } = ConstDashboardItem
+  const { PAID_LEAVE, UNPAID_LEAVE, PENDING, NO_SHOW_UP, CHECKED, LEAVE, DAY_OFF,
+    LATE_CHECKIN, DURING_SHIFT_LEAVE, EARLY_LEAVE, EARLY_CHECKIN, OVERTIME
+   } = ConstDashboardItem
 
   const alertsResourceId = {
     '1': ResourceIds.RightToWork, 
@@ -114,7 +117,8 @@ const DashboardLayout = () => {
                 parameters: `_params=`
               })
             : Promise.resolve({ list: [] }),
-          hasApplet(appletsRes, ResourceIds.TodaysLeaves) || hasApplet(appletsRes, ResourceIds.TodaysAttendance)
+          hasApplet(appletsRes, ResourceIds.TodaysLeaves) || hasApplet(appletsRes, ResourceIds.TodaysAttendance) 
+          || hasApplet(appletsRes, ResourceIds.TodaysTimeVariationsSummary)
             ? getRequestRef.current({
                 extension: HRDashboardRepository.Dashboard.dashboard,
                 parameters: `_params=`
@@ -144,23 +148,26 @@ const DashboardLayout = () => {
           acc[tab.timeCode] = { list: (resTV.list || []).filter(d => d.timeCode === tab.timeCode) }
           return acc
         }, {})
-
-        let paidCount = null
-        let unpaidCount = null
-        let pending = null
-        let noShowUp = null
-        let checked = null
-        let leave = null
-        let dayOff = null
+        
+        const COUNT_MAP = {
+          [PAID_LEAVE]: 'paidCount',
+          [UNPAID_LEAVE]: 'unpaidCount',
+          [DAY_OFF]: 'dayOff',
+          [LEAVE]: 'leave',
+          [NO_SHOW_UP]: 'noShowUp',
+          [PENDING]: 'pending',
+          [CHECKED]: 'checked',
+          [LATE_CHECKIN]: 'lateCheckIn',
+          [DURING_SHIFT_LEAVE]: 'duringShiftLeave',
+          [EARLY_LEAVE]: 'earlyLeave',
+          [EARLY_CHECKIN]: 'earlyCheckIn',
+          [OVERTIME]: 'overtime',
+        }
+        const counts = {}
 
         for (const item of dashboard?.list || []) {
-          if (item.itemId === PAID_LEAVE) paidCount = item.count
-          if (item.itemId === UNPAID_LEAVE) unpaidCount = item.count
-          if (item.itemId === DAY_OFF) dayOff = item.count
-          if (item.itemId === LEAVE) leave = item.count
-          if (item.itemId === NO_SHOW_UP) noShowUp = item.count
-          if (item.itemId === PENDING) pending = item.count
-          if (item.itemId === CHECKED) checked = item.count
+          const key = COUNT_MAP[item.itemId]
+          if (key) counts[key] = item.count
         }
 
         setData({
@@ -171,15 +178,29 @@ const DashboardLayout = () => {
             tabs: filteredTabs,
             groupedData,
           },
-          alerts: (alerts?.list || []).map(item => {
-            return {
-              ...item,
-              alertResourceId: alertsResourceId[item?.alertId] || null
-            }
-          }),
-          todaysLeaveCount: { paidCount, unpaidCount },
+          alerts: (alerts?.list || []).map(item => ({
+            ...item,
+            alertResourceId: alertsResourceId[item?.alertId] || null,
+          })),
+          todaysLeaveCount: {
+            paidCount: counts.paidCount ?? null,
+            unpaidCount: counts.unpaidCount ?? null,
+          },
           branchAvailability: branchAvailability?.list,
-          todaysAttendance: {pending, noShowUp, checked, leave, dayOff}
+          todaysAttendance: {
+            pending: counts.pending ?? null,
+            noShowUp: counts.noShowUp ?? null,
+            checked: counts.checked ?? null,
+            leave: counts.leave ?? null,
+            dayOff: counts.dayOff ?? null,
+          },
+          todaysTimeVariations: {
+            lateCheckIn: counts.lateCheckIn ?? null,
+            duringShiftLeave: counts.duringShiftLeave ?? null,
+            earlyLeave: counts.earlyLeave ?? null,
+            earlyCheckIn: counts.earlyCheckIn ?? null,
+            overtime: counts.overtime ?? null,
+          },
         })
 
         if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
@@ -709,6 +730,36 @@ const DashboardLayout = () => {
                         })
                       }
                     }
+                  />
+                </div>
+              </div>
+            </div>
+            </div>
+          )}
+
+          {containsApplet(ResourceIds.TodaysTimeVariationsSummary) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.todaysTimeVariations}</h2>
+                </div>
+              <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-50px' }}>
+                <div style={{ width: '300px', height: '300px' }}>
+                  <PieChart
+                    id='todaysTimeVariations'
+                    labels={[`${labels.earlyCheckIn}`, `${labels.lateCheckIn}`, `${labels.duringShiftLeave}`, `${labels.earlyLeave}`, `${labels.overtime}`]}
+                    data={[data?.todaysTimeVariations.earlyCheckIn, data?.todaysTimeVariations.lateCheckIn, data?.todaysTimeVariations.duringShiftLeave, data?.todaysTimeVariations.earlyLeave, data?.todaysTimeVariations.overtime]}
+                    toolTipText={labels.counts}
+                    onLegendClick={({ index }) => {
+                      const attendanceKeys = ['earlyCheckIn', 'lateCheckIn','duringShiftLeave','earlyLeave','overtime']
+                      const key = attendanceKeys[index]
+                      if (!key || data.todaysTimeVariations[key] === 0) return
+
+                      stack({
+                        Component: TodaysTimeVariations,
+                        props: { index }
+                      })
+                    }}
                   />
                 </div>
               </div>

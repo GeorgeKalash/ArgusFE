@@ -8,11 +8,23 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { HRDashboardRepository } from '@argus/repositories/src/repositories/HRDashboardRepository'
 
-const TodaysLeave = ({index, window }) => {
+const TodaysTimeVariations = ({ index, window }) => {
   const { getRequest } = useContext(RequestsContext)
-  const endpoint = index == 0
-    ? HRDashboardRepository.PaidLeave.qry
-    : HRDashboardRepository.UnpaidLeave.qry
+  const TimeCodes = {
+    EARLY_CHECKIN: 51,
+    LATE_CHECKIN: 31,
+    DURING_SHIFT_LEAVE: 32,
+    EARLY_LEAVE: 33,
+    OVERTIME: 52
+  }
+
+  const TIME_CODE_LIST = [TimeCodes.EARLY_CHECKIN, TimeCodes.LATE_CHECKIN, TimeCodes.DURING_SHIFT_LEAVE, TimeCodes.EARLY_LEAVE, TimeCodes.OVERTIME ]
+  const fetchGridData = async () => {
+    return await getRequest({
+      extension: HRDashboardRepository.TimeVariations.qry,
+      parameters: `_timeCode=${TIME_CODE_LIST[index]}&_params=`
+    })
+  }
 
   const {
     query: { data },
@@ -20,13 +32,12 @@ const TodaysLeave = ({index, window }) => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: endpoint,
-    datasetId: ResourceIds.TodaysLeaves
+    endpointId: HRDashboardRepository.TimeVariations.qry,
+    datasetId: ResourceIds.TodaysTimeVariationsSummary
   })
 
-  useSetWindow({ title: index == 0 
-    ? `${labels.todaysLeave || ''} - ${labels.paidLeave || ''}`
-    : `${labels.todaysLeave || ''} - ${labels.unpaidLeave || ''}`, window })
+  const getTitle = [labels.earlyCheckIn, labels.lateCheckIn, labels.duringShiftLeave, labels.earlyLeave, labels.overtime]
+  useSetWindow({ title: `${labels.todaysTimeVariations || ''} - ${getTitle?.[index] || ''}`, window })
 
   const columns = [
     {
@@ -40,36 +51,22 @@ const TodaysLeave = ({index, window }) => {
       flex: 1
     },
     {
-      field: 'startDate',
-      headerName: labels.from,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'endDate',
-      headerName: labels.to,
-      flex: 1,
-      type: 'date'
-    },
-    {
       field: 'branchName',
       headerName: labels.branch,
       flex: 1
+    },
+    {
+      field: 'clockDuration',
+      headerName: labels.clockDuration,
+      flex: 1
     }
   ]
-
-  async function fetchGridData() {
-    return await getRequest({
-        extension: endpoint,
-        parameters: `_params=`
-    })
-  }
 
   return (
     <VertLayout>
       <Grow>
         <Table
-          name='todaysLeave'
+          name='todaysTimeVariations'
           maxAccess={access}
           columns={columns}
           gridData={data}
@@ -81,7 +78,7 @@ const TodaysLeave = ({index, window }) => {
   )
 }
 
-TodaysLeave.width = 1000
-TodaysLeave.height = 500
+TodaysTimeVariations.width = 1000
+TodaysTimeVariations.height = 500
 
-export default TodaysLeave
+export default TodaysTimeVariations

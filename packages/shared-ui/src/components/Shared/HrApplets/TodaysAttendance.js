@@ -71,7 +71,7 @@ const TodaysAttendance = ({ index, window }) => {
   })
 
   const getTitle = [labels.pending, labels.noShowUp, labels.checked, labels.leave, labels.dayOff]
-  useSetWindow({ title: `${labels.todaysAttendance} - ${getTitle?.[index]}`, window })
+  useSetWindow({ title: `${labels.todaysAttendance || ''} - ${getTitle?.[index] || ''}`, window })
 
   const columns = [
     {
