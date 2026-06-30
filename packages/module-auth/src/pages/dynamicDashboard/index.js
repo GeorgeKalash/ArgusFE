@@ -31,6 +31,7 @@ import LatenessHistoryApplet from '@argus/shared-ui/src/components/Shared/HrAppl
 import ConstDashboardItem from '@argus/shared-utils/src/utils/ConstDashboardItem'
 import TodaysAttendance from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysAttendance'
 import TodaysTimeVariations from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysTimeVariations'
+import PendingPunchesApplet from '@argus/shared-ui/src/components/Shared/HrApplets/PendingPunchesApplet'
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
@@ -787,6 +788,10 @@ const DashboardLayout = () => {
 
         {containsApplet(ResourceIds.LatenessHistory) && (
           <LatenessHistoryApplet />
+        )}
+
+        {containsApplet(ResourceIds.PendingPunches) && (
+          <PendingPunchesApplet />
         )}
       </div>
     </div>
