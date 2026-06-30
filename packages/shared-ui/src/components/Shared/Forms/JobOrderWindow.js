@@ -1,20 +1,30 @@
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
-import JobOrderForm from '../form/JobOrderForm'
-import RoutingTab from '../form/RoutingTab'
-import WorksheetTab from '../form/WorksheetTab'
-import OverheadTab from '../form/OverheadTab'
-import MaterialsTab from '../form/MaterialsTab'
-import SizesTab from '../form/SizesTab'
-import WorkCenterTab from '../form/WorkCenterTab'
-import ItemTab from '../form/ItemTab'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import JobOrderForm from '@argus/shared-ui/src/components/Shared/JobOrderPages/JobOrderForm'
+import RoutingTab from '@argus/shared-ui/src/components/Shared/JobOrderPages/RoutingTab'
+import WorksheetTab from '@argus/shared-ui/src/components/Shared/JobOrderPages/WorksheetTab'
+import OverheadTab from '@argus/shared-ui/src/components/Shared/JobOrderPages/OverheadTab'
+import MaterialsTab from '@argus/shared-ui/src/components/Shared/JobOrderPages/MaterialsTab'
+import SizesTab from '@argus/shared-ui/src/components/Shared/JobOrderPages/SizesTab'
+import WorkCenterTab from '@argus/shared-ui/src/components/Shared/JobOrderPages/WorkCenterTab'
+import ItemTab from '@argus/shared-ui/src/components/Shared/JobOrderPages/ItemTab'
 
-const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lockRecord, window }) => {
+const JobOrderWindow = ({ recordId, jobReference, invalidate, lockRecord, window }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId, jobReference, isPosted: false, isCancelled: false })
   const [refetchRouting, setRefetchRouting] = useState(false)
   const [refetchJob, setRefetchJob] = useState(false)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.MFJobOrders,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.jobOrder, window })
 
   const tabs = [
     { label: labels.jobOrder },
@@ -81,5 +91,8 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
     </>
   )
 }
+
+JobOrderWindow.width = 1150
+JobOrderWindow.height = 720
 
 export default JobOrderWindow
