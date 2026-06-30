@@ -61,6 +61,11 @@ const JobOrder = () => {
       field: 'clientName',
       headerName: labels.client,
       flex: 1
+    },  
+    {
+      field: 'sku',
+      headerName: labels.sku,
+      flex: 1
     },
     {
       field: 'itemName',
