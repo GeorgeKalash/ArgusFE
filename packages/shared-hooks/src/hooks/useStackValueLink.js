@@ -30,10 +30,8 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
 
     try {
       const access = await fetchAccess(resourceId)
-      console.log(access, 'access')
 
       if (hasNoAccess(access)) {
-        console.log('hiii')
         openNoAccessPopup()
         return true
       }
@@ -96,5 +94,5 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
     />
   )
 
-  return { linkStyle, shouldHandleMouseDown, handleClick, TextMeasure, openStack  }
+  return { linkStyle, shouldHandleMouseDown, handleClick, TextMeasure, openStack }
 }

@@ -34,7 +34,6 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 export default function PaymentOrdersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -163,28 +162,24 @@ export default function PaymentOrdersForm({ recordId, window }) {
     }
   }
 
-  const { openStack } = useStackValueLink({ linkOpen: { resourceId: ResourceIds.MCRPaymentOrder } })
-
-  async function openMCRForm(data) {
-    const hasOpened = await openStack()
-    if (!hasOpened) {
-      stack({
-        Component: MultiCurrencyRateForm,
-        props: {
-          DatasetIdAccess: ResourceIds.MCRPaymentOrder,
-          data,
-          onOk: childFormikValues => {
-            formik.setValues(prevValues => ({
-              ...prevValues,
-              ...childFormikValues
-            }))
-          }
-        },
-        width: 500,
-        height: 500,
-        title: platformLabels.MultiCurrencyRate
-      })
-    }
+  function openMCRForm(data) {
+    stack({
+      Component: MultiCurrencyRateForm,
+      props: {
+        labels: _labels,
+        maxAccess: MRCMaxAccess,
+        data,
+        onOk: childFormikValues => {
+          formik.setValues(prevValues => ({
+            ...prevValues,
+            ...childFormikValues
+          }))
+        }
+      },
+      width: 500,
+      height: 500,
+      title: platformLabels.MultiCurrencyRate
+    })
   }
 
   const isCancelled = formik.values.status === -1

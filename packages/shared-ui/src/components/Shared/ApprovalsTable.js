@@ -49,6 +49,7 @@ import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsum
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
 import CycleCountsWindow from '@argus/shared-ui/src/components/Shared/Forms/CycleCountsWindow'
 import FixingForm from '@argus/shared-ui/src/components/Shared/Forms/FixingForm'
+import EventOrderForm from '@argus/shared-ui/src/components/Shared/Forms/EventOrderForm'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -225,6 +226,8 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
       case SystemFunction.FixingSales:
       case SystemFunction.FixingPurchases:
         relevantComponent = FixingForm
+      case SystemFunction.EventOrder:
+        relevantComponent = EventOrderForm
       default:
         break
     }

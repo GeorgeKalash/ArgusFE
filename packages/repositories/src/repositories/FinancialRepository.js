@@ -37,7 +37,8 @@ export const FinancialRepository = {
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP',
-    page: service + 'pageGRP'
+    page: service + 'pageGRP',
+    snapshot: service + 'snapshotGRP'
   },
   AccountCreditLimit: {
     qry: service + 'qryACL',
