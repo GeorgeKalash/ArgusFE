@@ -136,6 +136,7 @@ export const SystemFunction = {
   InboundTransportation: Module.Delivery * 100 + 4,
   FixingSales: Module.BrokerageTrading * 100 + 1,
   FixingPurchases: Module.BrokerageTrading * 100 + 2,
+  ProductionSummary: Module.Manufacturing * 100 + 20,
   ProductionRequest: Module.Manufacturing * 100 + 19,
 }
 
