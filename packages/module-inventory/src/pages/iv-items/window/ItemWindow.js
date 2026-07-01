@@ -1,6 +1,6 @@
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import ItemsForm from '../forms/ItemsForm.js'
 import PhysicalForm from '../forms/PhysicalForm.js'
 import VendorList from '../forms/VendorList.js'
@@ -10,11 +10,18 @@ import BarcodeForm from '../forms/BarcodeForm.js'
 import ItemProductionForm from '../forms/ItemProductionForm.js'
 import KitForm from '../forms/KitForm.js'
 import RetailForm from '../forms/RetailForm.js'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets.js'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext.js'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext.js'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository.js'
 
 const ItemWindow = ({ recordId, labels, msId, maxAccess, window }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
+  const { getAllKvsByDataset } = useContext(CommonContext)
+  const { getRequest } = useContext(RequestsContext)
+  
 
   const [store, setStore] = useState({
     recordId: recordId || null,
@@ -30,8 +37,35 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, window }) => {
     nraId: null,
     productionLevel: null,
     _dmgId: null,
-    _dmgName: null
+    _dmgName: null,
+    packB: null
   })
+
+  const refreshItem = async () => {
+    const retailSettings = await new Promise((resolve, reject) =>
+      getAllKvsByDataset({
+        _dataset: DataSets.IV_ITEM_RETAIL_SETTINGS,
+        callback: result => (result ? resolve(result) : reject())
+      })
+    )
+
+    const response = await getRequest({
+      extension: InventoryRepository.Items.pack_B,
+      parameters: `_itemId=${store.recordId}&_dimGroupId=${store._dmgId || 0}&_dimension=0&_itemRetailCount=${retailSettings?.length}`
+    })
+
+    setStore(prev => ({
+      ...prev,
+      packB: response.record,
+      _retailSettings: retailSettings
+    }))
+  }
+
+  useEffect(() => {
+    if (!store.recordId || store.packB) return
+
+    refreshItem()
+  }, [store.recordId, store._dmgId])
 
   const tabs = [
     { label: labels.items },
@@ -72,7 +106,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, window }) => {
         <PhysicalForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
       </CustomTabPanel>
       <CustomTabPanel index={5} value={activeTab} maxAccess={maxAccess}>
-        <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+        <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} refreshItem={refreshItem}/>
       </CustomTabPanel>
       <CustomTabPanel index={6} value={activeTab} maxAccess={maxAccess}>
         <ItemProductionForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />

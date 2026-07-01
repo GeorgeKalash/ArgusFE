@@ -19,7 +19,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
-const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
+const VendorForm = ({ labels, editMode, maxAccess, store, record, refreshItem }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -71,7 +71,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
 
       formik.setValues(submitData)
 
-      invalidate()
+      await refreshItem()
     }
   })
 

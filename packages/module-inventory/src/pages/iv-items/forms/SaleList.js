@@ -18,7 +18,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
 
@@ -90,16 +90,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     }
   })
 
-  const getItems = async recordId => {
-    if (!recordId) return
-
-    const response = await getRequest({
-      extension: SaleRepository.Sales.qry,
-      parameters: `&_itemId=${recordId}&_currencyId=${0}`
-    })
-
-    return response?.list?.length > 0
-      ? response.list.map((item, index) => {
+  const getItems = () => {
+    const list = store.packB?.prices 
+  
+    return list?.length > 0
+      ? list.map((item, index) => {
           return {
             ...item,
             id: index + 1
@@ -112,16 +107,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   }
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const items = await getItems(recordId)
-        formik.setValues({
-          ...formik.values,
-          items
-        })
-      }
-    })()
-  }, [recordId])
+    if (store?.packB) {
+      const items = getItems()
+      formik.setValues({ ...formik.values, items })
+    }
+  }, [store.packB])
 
   useEffect(() => {
     formik.setFieldValue('defSaleMUId', store.measurementId || null)
@@ -274,7 +264,10 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SaleRepository.PriceGroups.qry}
+                endpointId={InventoryRepository.Items.pack}
+                reducer={response => {
+                  return response?.record?.priceGroups
+                }}
                 name='pgId'
                 label={labels.priceGroups}
                 valueField='recordId'
@@ -289,7 +282,10 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SaleRepository.ReturnPolicy.qry}
+                endpointId={InventoryRepository.Items.pack}
+                reducer={response => {
+                  return response?.record?.returnPolicies
+                }}
                 name='returnPolicyId'
                 label={labels.returnPolicy}
                 valueField='recordId'

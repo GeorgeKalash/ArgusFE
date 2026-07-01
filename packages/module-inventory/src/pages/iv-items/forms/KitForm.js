@@ -15,7 +15,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 
 const KitForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
@@ -144,12 +144,8 @@ const KitForm = ({ store, labels, maxAccess }) => {
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getRequest({
-          extension: InventoryRepository.Kit.qry,
-          parameters: `_kitId=${recordId}`
-        })
-
-        const modifiedList = res.list?.map((kitItems, index) => ({
+        if (!store.packB) return
+        const modifiedList = (store.packB.kits ?? []).map((kitItems, index) => ({
           ...kitItems,
           id: index + 1
         }))
@@ -158,7 +154,7 @@ const KitForm = ({ store, labels, maxAccess }) => {
         }
       }
     })()
-  }, [])
+  }, [store.packB])
 
   return (
     <FormShell
