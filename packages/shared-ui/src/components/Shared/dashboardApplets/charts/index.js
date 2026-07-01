@@ -1533,7 +1533,49 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
     chart.update('none')
   }, [labels, data, label])
 
-  return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}></canvas>
+  const indexRows = (labels || []).map((lbl, i) => ({
+    key: `${lbl}-${i}`,
+    color: getColorForIndex(i, ref.current),
+    label: lbl,
+    value: (data || [])[i],
+  }))
+
+return (
+  <div style={{ display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
+    <div style={{ position: 'relative', flex: '0 0 auto', width: '100%', height: '100%' }}>
+      <canvas
+        id={id}
+        ref={ref}
+        className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}
+      />
+    </div>
+
+    {indexRows.length > 0 && (
+      <div
+        style={{
+          background: 'rgba(0, 0, 0, 0.55)',
+          borderRadius: 6,
+          padding: '8px 10px',
+          maxHeight: '90%',
+          overflowY: 'auto',
+          direction: 'rtl',
+          fontSize: 12,
+          lineHeight: 1.6,
+          marginLeft: 12,
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {indexRows.map((row) => (
+          <div key={row.key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, backgroundColor: row.color, flexShrink: 0 }} />
+            <span style={{ color: '#f0f0f0' }}>{row.label}: {row.value}</span>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)
 })
 
 export const DoughnutChart = memo(({ id, labels, data, label }) => {

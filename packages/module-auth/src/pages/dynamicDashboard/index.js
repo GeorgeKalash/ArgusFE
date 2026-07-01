@@ -627,6 +627,21 @@ const DashboardLayout = () => {
             </div>
           )}
 
+        </div>
+
+        {containsApplet(ResourceIds.HeadcountHistory) && (
+          <HeadcountHistoryApplet />
+        )}
+
+        {containsApplet(ResourceIds.LatenessHistory) && (
+          <LatenessHistoryApplet />
+        )}
+
+        {containsApplet(ResourceIds.PendingPunches) && (
+          <PendingPunchesApplet />
+        )}
+
+        <div className='middleRow'>
           {containsApplet(ResourceIds.Alerts) && (
             <div className='topRow'>
               <div className='chartCard'>
@@ -657,53 +672,6 @@ const DashboardLayout = () => {
                 </Box>
               </div>
             </div>
-          )}
-
-          {containsApplet(ResourceIds.TodaysLeaves) && (
-            <div className='topRow'>
-              <div className='chartCard'>
-                <div className='summaryCard'>
-                  <h2 className='title'>{labels.todaysLeave}</h2>
-                </div>
-              <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-50px' }}>
-                <div style={{ width: '300px', height: '300px' }}>
-                  <PieChart
-                    id='todaysLeave'
-                    labels={[`${labels.PaidLeave}`, `${labels.UnpaidLeave}`]}
-                    data={[data.todaysLeaveCount.paidCount, data.todaysLeaveCount.unpaidCount]}
-                    toolTipText={labels.counts}
-                    onLegendClick={({ index }) => {
-                      const attendanceKeys = ['paidCount', 'unpaidCount']
-                      const key = attendanceKeys[index]
-                      if (!key || data.todaysLeaveCount[key] === 0) return
-
-                      stack({
-                        Component: TodaysLeave,
-                        props: { index }
-                      })
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-            </div>
-          )}
-
-          {containsApplet(ResourceIds.BranchAvailability) && (
-          <div className='chartCard'>
-                <div className='summaryCard'>
-                  <h2 className='title'>{labels.branchAvailability}</h2>
-                </div>
-                <HorizontalBarChartDark           
-                  labels={(data?.branchAvailability || []).map(b => b.branchName)}
-                  data={(data?.branchAvailability || []).map(s => s.scheduled)}
-                  data2={(data?.branchAvailability || []).map(b => b.scheduled - b.present)}
-                  label={labels.present}
-                  label2={labels.absent}
-                  color='#6e87b6'
-                  hoverColor='#e50808'
-                />
-              </div>
           )}
 
           {containsApplet(ResourceIds.TodaysAttendance) && (
@@ -767,32 +735,67 @@ const DashboardLayout = () => {
             </div>
             </div>
           )}
-        </div>
 
-        {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
-          <div className='topRow'>
-            <div className='chartCard'>
-              <div className='summaryCard'>
-                <h2 className='title'>{labels.authorization}</h2>
+          {containsApplet(ResourceIds.TodaysLeaves) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.todaysLeave}</h2>
+                </div>
+              <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-50px' }}>
+                <div style={{ width: '300px', height: '300px' }}>
+                  <PieChart
+                    id='todaysLeave'
+                    labels={[`${labels.PaidLeave}`, `${labels.UnpaidLeave}`]}
+                    data={[data.todaysLeaveCount.paidCount, data.todaysLeaveCount.unpaidCount]}
+                    toolTipText={labels.counts}
+                    onLegendClick={({ index }) => {
+                      const attendanceKeys = ['paidCount', 'unpaidCount']
+                      const key = attendanceKeys[index]
+                      if (!key || data.todaysLeaveCount[key] === 0) return
+
+                      stack({
+                        Component: TodaysLeave,
+                        props: { index }
+                      })
+                    }}
+                  />
+                </div>
               </div>
-              <Box sx={{ display: 'flex', height: '350px' }}>
-                <ApprovalsTable pageSize={10} />
-              </Box>
             </div>
-          </div>
-        )}
-        
-        {containsApplet(ResourceIds.HeadcountHistory) && (
-          <HeadcountHistoryApplet />
-        )}
+            </div>
+          )}
 
-        {containsApplet(ResourceIds.LatenessHistory) && (
-          <LatenessHistoryApplet />
-        )}
+          {containsApplet(ResourceIds.BranchAvailability) && (
+          <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.branchAvailability}</h2>
+                </div>
+                <HorizontalBarChartDark           
+                  labels={(data?.branchAvailability || []).map(b => b.branchName)}
+                  data={(data?.branchAvailability || []).map(s => s.scheduled)}
+                  data2={(data?.branchAvailability || []).map(b => b.scheduled - b.present)}
+                  label={labels.present}
+                  label2={labels.absent}
+                  color='#6e87b6'
+                  hoverColor='#e50808'
+                />
+              </div>
+          )}
 
-        {containsApplet(ResourceIds.PendingPunches) && (
-          <PendingPunchesApplet />
-        )}
+          {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.authorization}</h2>
+                </div>
+                <Box sx={{ display: 'flex', height: '350px' }}>
+                  <ApprovalsTable pageSize={10} />
+                </Box>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
        <style jsx global>{`

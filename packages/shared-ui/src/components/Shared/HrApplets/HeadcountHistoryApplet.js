@@ -38,10 +38,22 @@ const HeadcountHistoryApplet = ({ }) => {
   return (
     <div className='topRow'>
       <div className='chartCard'>
-        <div className='summaryCard'>
+        <div
+          className='summaryCard'
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
+        >
           <h2 className='title'>{labels.headCount}</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingRight: 8 }}>
-            <span style={{ fontSize: 14 }}>To:</span>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              paddingRight: 8,
+              marginTop: 8,
+              marginBottom: 8
+            }}
+          >
             <CustomDatePicker
               name='headcountToDate'
               label={labels.toDate}

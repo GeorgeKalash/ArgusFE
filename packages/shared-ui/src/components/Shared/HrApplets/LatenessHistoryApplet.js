@@ -50,7 +50,8 @@ const LatenessHistoryApplet = ({}) => {
               alignItems: 'center',
               gap: 6,
               paddingRight: 8,
-              marginTop: 8
+              marginTop: 8,
+              marginBottom: 8
             }}
           >
             <CustomDatePicker
