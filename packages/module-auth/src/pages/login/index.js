@@ -11,7 +11,6 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import BlankLayout from '@argus/shared-core/src/@core/layouts/BlankLayout'
 import ErrorWindow from '@argus/shared-ui/src/components/Shared/ErrorWindow'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ChangePassword from '@argus/shared-ui/src/components/Shared/ChangePassword'
 import axios from 'axios'
@@ -19,6 +18,11 @@ import OTPAuthentication from '@argus/shared-ui/src/components/Shared/OTPAuthent
 import styles from './LoginPage.module.css'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
+import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.7rem',
@@ -26,15 +30,23 @@ const LinkStyled = styled(Link)(({ theme }) => ({
   color: theme.palette.primary.main
 }))
 
+let tempLabels = null
 const LoginPage = () => {
+  const { getRequest } = useContext(RequestsContext)
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const theme = useTheme()
   const auth = useAuth()
   const { companyName, setCompanyName, deployHost, validCompanyName } = useContext(AuthContext)
-  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-
+  const { setTempLanguageId } = useSettings()
+  const { platformLabels } = useContext(ControlContext)
+  const translatedLabels = tempLabels || platformLabels
+  const Languages = {
+    ENGLISH: 1,
+    ARABIC: 2,
+    FRENCH: 3
+  }
   const validation = useFormik({
     initialValues: {
       username: '',
@@ -63,6 +75,7 @@ const LoginPage = () => {
           viewOTP(loggedUser)
         } else setErrorMessage(error)
       })
+      tempLabels = null
     }
   })
 
@@ -92,7 +105,7 @@ const LoginPage = () => {
         reopenLogin: true,
         username,
         loggedUser,
-        _labels: platformLabels,
+        _labels: translatedLabels,
         onClose: () => onClose()
       },
       expandable: false,
@@ -129,6 +142,18 @@ const LoginPage = () => {
     }
   }
 
+
+  const mapKeyValueListToObject = (list = []) => Object.fromEntries(list.map(({ key, value }) => [key, value]))
+
+  async function getLanguage(language){
+     const res = await getRequest({
+      extension: KVSRepository.getPlatformLabels,
+      parameters: `_dataset=${ResourceIds.Common}&_language=${language}`
+    })
+    tempLabels = mapKeyValueListToObject(res?.list)
+    setTempLanguageId(language)
+  }
+
   useEffect(() => {
     validation.setFieldValue('companyName', companyName || '')
   }, [companyName])
@@ -160,7 +185,7 @@ const LoginPage = () => {
                   value={validation.values.companyName}
                   readOnly={!deployHost ? true : validCompanyName}
                   allowClear={deployHost}
-                  label={platformLabels?.CompanyName || 'Company Name'}
+                  label={translatedLabels?.CompanyName || 'Company Name'}
                   onChange={validation.handleChange}
                   onKeyDown={e => {
                     if (e.key == 'Enter') e.target.blur()
@@ -187,7 +212,7 @@ const LoginPage = () => {
                       name='username'
                       size='small'
                       fullWidth
-                      label={platformLabels?.Username}
+                      label={translatedLabels?.Username}
                       value={validation.values.username}
                       type='text'
                       onChange={validation.handleChange}
@@ -202,7 +227,7 @@ const LoginPage = () => {
                       name='password'
                       size='small'
                       fullWidth
-                      label={platformLabels?.password}
+                      label={translatedLabels?.password}
                       type={showPassword ? 'text' : 'password'}
                       value={validation.values.password}
                       onChange={validation.handleChange}
@@ -225,7 +250,7 @@ const LoginPage = () => {
             {validCompanyName && (
               <>
                 <LinkStyled href='/forget-password' className={styles.linksRow}>
-                  {platformLabels?.ForgotPass}
+                  {translatedLabels?.ForgotPass}
                 </LinkStyled>
 
                 <CustomButton
@@ -234,7 +259,7 @@ const LoginPage = () => {
                   variant='contained'
                   onClick={validation.handleSubmit}
                   disabled={!validCompanyName}
-                  label={platformLabels?.Login}
+                  label={translatedLabels?.Login}
                 />
               </>
             )}
@@ -245,12 +270,18 @@ const LoginPage = () => {
       <Box className={styles.middleZone}>
         <Box className={styles.languageRow}>
           <Typography variant='body2' className={styles.offered}>
-            {platformLabels?.ArgusOfferedIn}
+            {translatedLabels?.ArgusOfferedIn}
           </Typography>
           <Box className={styles.languageLinks}>
-            <LinkStyled href='/pages/auth/login-en' className={styles.language}>English</LinkStyled>
-            <LinkStyled href='/pages/auth/login-fr' className={styles.language}>Français</LinkStyled>
-            <LinkStyled href='/pages/auth/login-ar' className={styles.language}>عربي</LinkStyled>
+            <span className={styles.language} onClick={() => getLanguage(Languages.ENGLISH)}>
+              English
+            </span>
+            <span className={styles.language} onClick={() => getLanguage(Languages.FRENCH)}>
+              Français
+            </span>
+            <span className={styles.language} onClick={() => getLanguage(Languages.ARABIC)}>
+              عربي
+            </span>          
           </Box>
         </Box>
       </Box>
