@@ -898,6 +898,7 @@ export default function JobOrderForm({
                         label={labels.netSerialsWeight}
                         value={formik.values.netSerialsWeight}
                         readOnly
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                   </Grid>
