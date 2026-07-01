@@ -1,4 +1,5 @@
-import { useState, memo } from 'react'
+import { useState, memo, useContext, useEffect } from 'react'
+import { Grid } from '@mui/material'
 import { Box, Typography, IconButton, Button, Drawer, Divider, Tooltip } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
@@ -6,24 +7,68 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import CloseIcon from '@mui/icons-material/Close'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
+import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 
-const NoteField = memo(({ itemId, initialValue, onCommit, onClear, label }) => {
-  const [localNote, setLocalNote] = useState(initialValue || '')
+const NoteField = memo(({ itemId, initialValues, onCommit, onSpecialNote, onExpectedDeliveryDays, onClear, labels, expectedDeliveryDaysStore }) => {
+  const [localNote, setLocalNote] = useState(initialValues.notes || '')
+  const [localCheck, setLocalCheck] = useState(initialValues.isSpecialOrder || false)
+  const [localExpectedDeliveryDays, setLocalExpectedDeliveryDays] = useState(initialValues.expectedDeliveryDays?.toString() || '')
 
   return (
-    <CustomTextArea
-      name='notes'
-      label={label}
-      value={localNote}
-      rows={1.5}
-      maxLength='300'
-      onChange={(e) => setLocalNote(e.target.value)}
-      onBlur={() => onCommit(localNote, itemId)}
-      onClear={() => {
-        setLocalNote('')
-        onClear('', itemId)
-      }}
-    />
+    <Grid container spacing={2}>
+      <Grid item xs={10}>
+        <CustomCheckBox
+          name='isSpecialOrder'
+          value={localCheck}
+          onChange={(e) => {
+            const checked = e.target.checked
+            setLocalCheck(checked)
+            onSpecialNote(checked, itemId)
+            if (!checked) {
+              setLocalNote('')
+              onCommit('', itemId)
+              setLocalExpectedDeliveryDays('')
+              onExpectedDeliveryDays(null, itemId)
+            }
+          }}
+          label={labels?.isSpecialOrder}
+        />
+      </Grid>
+      <Grid item xs={10}>
+        <CustomTextArea
+          name='notes'
+          label={labels?.notes}
+          value={localNote}
+          rows={1.5}
+          readOnly={!localCheck}
+          maxLength='300'
+          onChange={(e) => setLocalNote(e.target.value)}
+          onBlur={() => onCommit(localNote, itemId)}
+          onClear={() => {
+            setLocalNote('')
+            onClear('', itemId)
+          }}
+        />
+      </Grid>
+      <Grid item xs={10}>
+        <CustomComboBox
+          name='expectedDeliveryDays'
+          label={labels.expectedDeliveryDays}
+          store={expectedDeliveryDaysStore}
+          valueField='key'
+          displayField='value'
+          readOnly={!localCheck}
+          value={localExpectedDeliveryDays}
+          onChange={(_, newValue) => {
+            setLocalExpectedDeliveryDays(newValue?.key?.toString() || '')
+            onExpectedDeliveryDays(newValue?.key || null, itemId)
+          }}
+        />
+      </Grid>
+    </Grid>
   )
 })
 
@@ -34,13 +79,35 @@ const CatalogueCheckout = ({
   onInc,
   onDec,
   onNote,
+  onSpecialNote,
+  onExpectedDeliveryDays,
   currencyRef,
   onRemove,
   onConfirm,
   labels
 }) => {
+  const { getAllKvsByDataset } = useContext(CommonContext)
+  const [expectedDeliveryDaysStore, setExpectedDeliveryDaysStore] = useState([])
   const total = cartItems.reduce((s, i) => s + (parseFloat(i.unitPrice) || 0) * i.qty, 0)
   const totalQty = cartItems.reduce((s, i) => s + i.qty, 0)
+
+  async function loadExpectedDeliveryDays() {
+    const result = await new Promise((resolve, reject) => {
+      getAllKvsByDataset({
+        _dataset: DataSets.EXPECTED_DELIVERY_DAYS,
+        callback: data => {
+          if (data) resolve(data)
+          else reject()
+        }
+      })
+    })
+
+    setExpectedDeliveryDaysStore(result)
+  }
+
+  useEffect(() => {
+    loadExpectedDeliveryDays()
+  }, [])
 
   return (
     <Drawer
@@ -91,7 +158,6 @@ const CatalogueCheckout = ({
             return (
               <Box key={item.itemId}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.25, px: 0.5 }}>
-                  {/* image */}
                   <Box sx={{ width: 52, height: 52, borderRadius: 1.5, flexShrink: 0, overflow: 'hidden', bgcolor: 'grey.100', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {item.pictureUrl ? (
                       <img src={item.pictureUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={e => { e.currentTarget.style.display = 'none' }} />
@@ -100,7 +166,6 @@ const CatalogueCheckout = ({
                     )}
                   </Box>
 
-                  {/* details */}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant='body2' sx={{ fontWeight: 600, fontSize: 13, lineHeight: 1.3 }} noWrap>
                       {item.name}
@@ -115,10 +180,13 @@ const CatalogueCheckout = ({
                     <NoteField
                       key={item.itemId}
                       itemId={item.itemId}
-                      initialValue={item.notes}
-                      label={labels.notes}
+                      initialValues={item}
+                      labels={labels}
                       onCommit={onNote}
+                      onSpecialNote={onSpecialNote}
+                      onExpectedDeliveryDays={onExpectedDeliveryDays}
                       onClear={onNote}
+                      expectedDeliveryDaysStore={expectedDeliveryDaysStore}
                     />
                   </Box>
 

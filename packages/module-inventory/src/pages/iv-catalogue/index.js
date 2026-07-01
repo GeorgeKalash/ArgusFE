@@ -27,6 +27,7 @@ import LastPageIcon from '@mui/icons-material/LastPage'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
+import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 
 const QtyStepper = ({ id, qty, onInc, onDec, canAdd }) => {
   return (
@@ -128,6 +129,7 @@ const Catalogue = () => {
 
   const [view, setView] = useState('grid')
   const [cart, setCart] = useState({})
+  const [orderDate, setOrderDate] = useState(null)
   const [values, setValues] = useState({ clientId: null, clientRef: '', clientName: '' })
 
   const inc = id => {
@@ -152,6 +154,26 @@ const Catalogue = () => {
     setCart(c => ({
       ...c,
       [id]: { ...c[id], notes: text || '' }
+    }))
+  }, [])
+
+  const specialNote = useCallback((checked, id) => {
+    setCart(c => ({
+      ...c,
+      [id]: {
+        ...c[id],
+        isSpecialOrder: checked
+      }
+    }))
+  }, [])
+
+  const expectedDeliveryDays = useCallback((days, id) => {
+    setCart(c => ({
+      ...c,
+      [id]: {
+        ...c[id],
+        expectedDeliveryDays: days
+      }
     }))
   }, [])
 
@@ -316,7 +338,8 @@ const Catalogue = () => {
       header: {
         clientId: values.clientId,
         qty: cartCount,
-        amount: cartTotal
+        amount: cartTotal,
+        date: formatDateToApi(new Date())
       },
       items: cartItems
     }
@@ -328,11 +351,27 @@ const Catalogue = () => {
   }
 
   async function handleGenerateOrder () {
+    const invalidItems = cartItems.filter(
+      item =>
+        item.isSpecialOrder &&
+        (
+          !item.notes?.trim()
+        )
+    )
+
+    if (invalidItems.length > 0) {
+      toast.error(
+        'Please fill notes for all special items'
+      )
+      return
+    }
+
     const obj = {
       header: {
         clientId: values.clientId,
         qty: cartCount,
-        amount: cartTotal
+        amount: cartTotal,
+        date: orderDate || formatDateToApi(new Date())
       },
       items: cartItems
     }
@@ -353,14 +392,14 @@ const Catalogue = () => {
         parameters: `_clientId=${clientId}`
       })
     const list = response?.record?.items
+    setOrderDate(response?.record?.header?.date)
     if (!list?.length) return
 
     setCart(
       list.reduce((acc, item) => {
         acc[item.itemId] = {
           ...item,
-          qty: item.qty,
-          name: item.itemName,
+          qty: item.qty
         }
         return acc
       }, {})
@@ -565,6 +604,8 @@ const Catalogue = () => {
         onInc={inc}
         onDec={dec}
         onNote={note}
+        onSpecialNote={specialNote}
+        onExpectedDeliveryDays={expectedDeliveryDays}
         onRemove={remove}
         onConfirm={() => {
           handleGenerateOrder()

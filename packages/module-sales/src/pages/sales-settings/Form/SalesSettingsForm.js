@@ -37,6 +37,7 @@ export default function SalesSettingsForm({ _labels, access }) {
     'allowSalesNoLinesTrx',
     'salesTD',
     'default_so_dt',
+    'default_special_so_dt',
   ]
 
   const { formik } = useForm({
@@ -52,7 +53,8 @@ export default function SalesSettingsForm({ _labels, access }) {
       sdpUnitPrice: false,
       allowSalesNoLinesTrx: false,
       salesTD: false,
-      default_so_dt: null
+      default_so_dt: null,
+      default_special_so_dt: null
     },
     maxAccess: access,
     validateOnChange: true,
@@ -275,6 +277,26 @@ export default function SalesSettingsForm({ _labels, access }) {
                   formik.setFieldValue('default_so_dt', newValue?.recordId || null)
                 }}
                 error={formik.touched.default_so_dt && Boolean(formik.errors.default_so_dt)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_dgId=${SystemFunction.SalesOrder}&_startAt=${0}&_pageSize=${1000}`}
+                name='default_special_so_dt'
+                label={_labels.defaultSpecialSoDt}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={access}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('default_special_so_dt', newValue?.recordId || null)
+                }}
+                error={formik.touched.default_special_so_dt && Boolean(formik.errors.default_special_so_dt)}
               />
             </Grid>
           </Grid>
