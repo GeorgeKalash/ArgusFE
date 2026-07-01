@@ -493,11 +493,32 @@ export const ManufacturingRepository = {
     close: service + 'closeSCU',
     reopen: service + 'reopenSCU'
   },
+  ProductionSummary: {
+    get2: service + 'get2PRS',
+    set2: service + 'set2PRS',
+    del: service + 'delPRS',
+    page: service + 'pagePRS',
+    snapshot: service + 'snapshotPRS',
+    post: service + 'postPRS',
+    setPRSummary: service + 'setPRSummary'
+  },
+  ProductionRequestItems: {
+    import: service + 'importPRI',
+  },
+  ProductionRequest: {
+    page: service + 'pagePR',
+    get2: service + 'get2PR',
+    set2: service + 'set2PR',
+    del: service + 'delPR',
+    snapshot: service + 'snapshotPR',
+    post: service + 'postPR'
+  },
   WorkCenterGroups: {
     get: service + 'getWCG',
     set: service + 'setWCG',
     del: service + 'delWCG',
     page: service + 'pageWCG',
+    qry: service + 'qryWCG',
     snapshot: service + 'snapshotWCG'
   },
   ProductionClassGroups: {
@@ -505,6 +526,7 @@ export const ManufacturingRepository = {
     set: service + 'setPCG',
     del: service + 'delPCG',
     page: service + 'pagePCG',
+    qry: service + 'qryPCG',
     snapshot: service + 'snapshotPCG'
   },
   ProductionStandardGroups: {
@@ -512,6 +534,7 @@ export const ManufacturingRepository = {
     set: service + 'setPSG',
     del: service + 'delPSG',
     page: service + 'pagePSG',
+    qry: service + 'qryPSG',
     snapshot: service + 'snapshotPSG'
   }
 }

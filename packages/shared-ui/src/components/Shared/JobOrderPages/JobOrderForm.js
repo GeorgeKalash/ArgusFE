@@ -25,13 +25,13 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
-import SerialsLots from './SerialsLots'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
-import Samples from './Samples'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import FormGrid from '@argus/shared-ui/src/components/form'
+import Samples from '@argus/shared-ui/src/components/Shared/JobOrderPages/Samples'
+import SerialsLots from '@argus/shared-ui/src/components/Shared/JobOrderPages/SerialsLots'
 
 export default function JobOrderForm({
   labels,
@@ -901,6 +901,7 @@ export default function JobOrderForm({
                         label={labels.netSerialsWeight}
                         value={formik.values.netSerialsWeight}
                         readOnly
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                   </Grid>
