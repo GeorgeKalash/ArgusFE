@@ -315,6 +315,13 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
+  [ResourceIds.DesignFamilies]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.DesignFamily.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
   [ResourceIds.ChartOfAccounts]: {
     type: LOOKUP,
     endpoint: GeneralLedgerRepository.ChartOfAccounts.snapshot,
