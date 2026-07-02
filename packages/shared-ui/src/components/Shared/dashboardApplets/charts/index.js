@@ -1522,34 +1522,21 @@ const getColorForIndex = (index, canvas) => {
 
 const getPieChartOptions = (label, canvas, onLegendClick) => {
   const base = getChartOptions(label, 'pie', canvas, onLegendClick)
+
   return {
     ...base,
     maintainAspectRatio: false,
     layout: {
-      padding: { top: 0, bottom: 0, left: 0, right: 0 },
+      padding: 0,
     },
     plugins: {
       ...base.plugins,
       legend: {
-        ...base.plugins.legend,
-        position: 'top',
-        labels: {
-          ...base.plugins.legend.labels,
-          usePointStyle: true,
-          pointStyle: 'circle',
-          padding: 4,
-          boxWidth: 6,
-          boxHeight: 6,
-          font: {
-            size: 10,
-          },
-        },
-        maxWidth: 1000,
+        display: false,
       },
     },
   }
 }
-
 export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendClick }) => {
   useInjectChartsStyles()
   Chart.register(ChartDataLabels)
@@ -1627,36 +1614,40 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', minHeight: 0 }}>
-      <div
+     <div
         ref={chartBoxRef}
         style={{
-          position: 'relative',
-          flex: '1 1 0%',
-          width: '100%',
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           minHeight: 0,
-          display: 'grid',
-          placeItems: 'center',
           overflow: 'hidden',
+          paddingTop: 2,
+          paddingBottom: 2,
         }}
       >
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            aspectRatio: '1 / 1',
-            maxWidth: '100%',
-            maxHeight: '100%',
-            margin: '0 auto',
-          }}
-        >
-          <canvas
-            id={id}
-            ref={ref}
-            className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}
-            style={{ width: '100%', height: '100%', display: 'block' }}
-          />
-        </div>
-      </div>
+  <div
+    style={{
+      width: '100%',
+      height: '100%',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      position: 'relative',
+    }}
+  >
+    <canvas
+      id={id}
+      ref={ref}
+      className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'block',
+      }}
+    />
+  </div>
+</div>
 
       {indexRows.length > 0 && (
         <div
