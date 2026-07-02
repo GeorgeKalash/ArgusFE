@@ -300,5 +300,14 @@ export const FinancialRepository = {
   AccountCurrencies: {
     qry: service + 'qryACU',
     set2: service + 'set2ACU'
-  }
+  },
+  CreditLimitHold: {
+    get: service + 'getCLHO',
+    set: service + 'setCLHO',
+    del: service + 'delCLHO',
+    page: service + 'pageCLHO',
+    snapshot: service + 'snapshotCLHO',
+    close: service + 'closeCLHO',
+    reopen: service + 'reopenCLHO'
+  },
 }
