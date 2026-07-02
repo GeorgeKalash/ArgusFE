@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
@@ -11,14 +11,21 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import VendorForm from './VendorForm'
 
-const VendorList = ({ store, labels, maxAccess, refreshItem }) => {
-  const { postRequest } = useContext(RequestsContext)
+const VendorList = ({ store, labels, maxAccess }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
-
+  const [gridData, setGridData] = useState({ list: [] })  
   const { stack } = useWindow()
 
-  const data = { list: store.packB?.priceLists || []}
+  async function fetchGridData() {
+    const response = await getRequest({
+      extension: PurchaseRepository.PriceList.qry,
+      parameters: `&_itemId=${recordId}`
+    })
+
+    return response
+  }
 
   const columns = [
     {
@@ -69,10 +76,13 @@ const VendorList = ({ store, labels, maxAccess, refreshItem }) => {
       record: JSON.stringify(obj)
     })
 
-    await refreshItem()
-
     toast.success(platformLabels.Deleted)
+    fetchGridData()
   }
+
+  useEffect(() => {
+    setGridData({ list: store?.packB?.priceLists || [] })
+  }, [store.recordId, store?.packB?.priceLists])
 
   const add = () => {
     openForm()
@@ -91,7 +101,8 @@ const VendorList = ({ store, labels, maxAccess, refreshItem }) => {
         record: record,
         maxAccess,
         store,
-        refreshItem 
+        fetchGridData,
+        setGridData
       },
 
       title: labels.vendor
@@ -107,7 +118,7 @@ const VendorList = ({ store, labels, maxAccess, refreshItem }) => {
         <Table
           name='vendor'
           columns={columns}
-          gridData={data}
+          gridData={gridData}
           rowId={['vendorId', 'currencyId']}
           onEdit={edit}
           pagination={false}

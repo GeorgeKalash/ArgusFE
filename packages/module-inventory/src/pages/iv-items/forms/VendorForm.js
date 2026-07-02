@@ -19,13 +19,9 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
-const VendorForm = ({ labels, editMode, maxAccess, store, record, refreshItem }) => {
+const VendorForm = ({ labels, editMode, maxAccess, store, record, fetchGridData, setGridData }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const invalidate = useInvalidate({
-    endpointId: PurchaseRepository.PriceList.qry
-  })
 
   const { recordId: itemId } = store
 
@@ -71,7 +67,10 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record, refreshItem })
 
       formik.setValues(submitData)
 
-      await refreshItem()
+       if (fetchGridData && setGridData) {
+        const res2 = await fetchGridData()
+        setGridData(res2)
+      }
     }
   })
 

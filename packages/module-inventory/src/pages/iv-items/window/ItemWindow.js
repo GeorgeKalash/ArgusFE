@@ -116,7 +116,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, dmgId, window }) => {
         <PhysicalForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
       </CustomTabPanel>
       <CustomTabPanel index={5} value={activeTab} maxAccess={maxAccess}>
-        <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} refreshItem={refreshItem}/>
+        <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store}/>
       </CustomTabPanel>
       <CustomTabPanel index={6} value={activeTab} maxAccess={maxAccess}>
         <ItemProductionForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
