@@ -372,28 +372,6 @@ const getChartOptions = (label, type, canvas, onLegendClick) => {
   }
 }
 
-const getPieChartOptions = (label, canvas, onLegendClick) => {
-  const base = getChartOptions(label, 'pie', canvas, onLegendClick)
-  return {
-    ...base,
-    plugins: {
-      ...base.plugins,
-      legend: {
-        ...base.plugins.legend,
-        position: 'top',
-        labels: {
-          ...base.plugins.legend.labels,
-          usePointStyle: true,
-          pointStyle: 'circle',
-          padding: 8,
-          boxWidth: 10,
-        },
-        maxWidth: 1000
-      },
-    }
-  }
-}
-
 export const MixedBarChart = memo(({ id, labels, data1, data2, label1, label2, ratio = 3, rotation, hasLegend }) => {
   useInjectChartsStyles()
 
@@ -1542,12 +1520,43 @@ const getColorForIndex = (index, canvas) => {
   return colors[index % colors.length]
 }
 
+const getPieChartOptions = (label, canvas, onLegendClick) => {
+  const base = getChartOptions(label, 'pie', canvas, onLegendClick)
+  return {
+    ...base,
+    maintainAspectRatio: false,
+    layout: {
+      padding: { top: 0, bottom: 0, left: 0, right: 0 },
+    },
+    plugins: {
+      ...base.plugins,
+      legend: {
+        ...base.plugins.legend,
+        position: 'top',
+        labels: {
+          ...base.plugins.legend.labels,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 4,
+          boxWidth: 6,
+          boxHeight: 6,
+          font: {
+            size: 10,
+          },
+        },
+        maxWidth: 1000,
+      },
+    },
+  }
+}
+
 export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendClick }) => {
   useInjectChartsStyles()
   Chart.register(ChartDataLabels)
 
   const ref = useRef(null)
   const inst = useRef(null)
+  const chartBoxRef = useRef(null)
 
   const getChart = useCallback(() => inst.current, [])
   useArgusTabActivatedResize(getChart)
@@ -1597,6 +1606,18 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
     chart.update('none')
   }, [labels, data, label])
 
+  useEffect(() => {
+    const box = chartBoxRef.current
+    if (!box) return
+
+    const ro = new ResizeObserver(() => {
+      inst.current?.resize()
+    })
+    ro.observe(box)
+
+    return () => ro.disconnect()
+  }, [])
+
   const indexRows = (labels || []).map((lbl, i) => ({
     key: `${lbl}-${i}`,
     color: getColorForIndex(i, ref.current),
@@ -1604,42 +1625,67 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
     value: (data || [])[i],
   }))
 
-return (
-  <div style={{ display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
-    <div style={{ position: 'relative', flex: '0 0 auto', width: '100%', height: '100%' }}>
-      <canvas
-        id={id}
-        ref={ref}
-        className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}
-      />
-    </div>
-
-    {indexRows.length > 0 && (
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', minHeight: 0 }}>
       <div
+        ref={chartBoxRef}
         style={{
-          background: 'rgba(0, 0, 0, 0.55)',
-          borderRadius: 6,
-          padding: '8px 10px',
-          maxHeight: '90%',
-          overflowY: 'auto',
-          direction: 'rtl',
-          fontSize: 12,
-          lineHeight: 1.6,
-          marginLeft: 12,
-          flexShrink: 0,
-          whiteSpace: 'nowrap',
+          position: 'relative',
+          flex: '1 1 0%',
+          width: '100%',
+          minHeight: 0,
+          display: 'grid',
+          placeItems: 'center',
+          overflow: 'hidden',
         }}
       >
-        {indexRows.map((row) => (
-          <div key={row.key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, backgroundColor: row.color, flexShrink: 0 }} />
-            <span style={{ color: '#f0f0f0' }}>{row.label}: {row.value}</span>
-          </div>
-        ))}
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            aspectRatio: '1 / 1',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            margin: '0 auto',
+          }}
+        >
+          <canvas
+            id={id}
+            ref={ref}
+            className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}
+            style={{ width: '100%', height: '100%', display: 'block' }}
+          />
+        </div>
       </div>
-    )}
-  </div>
-)
+
+      {indexRows.length > 0 && (
+        <div
+          style={{
+            background: 'rgba(0, 0, 0, 0.45)',
+            borderRadius: 4,
+            padding: '4px 10px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'center',
+            columnGap: 16,
+            rowGap: 2,
+            fontSize: 10,
+            lineHeight: 1.3,
+            marginTop: 4,
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {indexRows.map((row) => (
+            <span key={row.key} style={{ color: '#f0f0f0' }}>
+              {row.label}: {row.value}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 })
 
 export const DoughnutChart = memo(({ id, labels, data, label }) => {
