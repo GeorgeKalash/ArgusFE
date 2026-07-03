@@ -28,39 +28,42 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { TextField } from '@mui/material'
 
-const QtyStepper = ({ id, qty, onInc, onDec, canAdd }) => {
+const QtyStepper = ({ id, qty, onInc, onDec, onChangeQty, canAdd }) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
       <IconButton
         size='small'
         onClick={e => { e.stopPropagation(); onDec(id) }}
         disabled={qty === 0 || !canAdd}
-        sx={{
-          width: 26, height: 26,
-          border: '1px solid',
-          borderColor: qty === 0 ? 'action.disabled' : 'divider',
-          borderRadius: '50%', p: 0,
-        }}
       >
         <RemoveIcon sx={{ fontSize: 14 }} />
       </IconButton>
 
-      <Typography variant='body2' sx={{ minWidth: 22, textAlign: 'center', fontWeight: 600, fontSize: 13 }} disabled={!canAdd}>
-        {qty}
-      </Typography>
+      <TextField
+        size='small'
+        value={qty}
+        disabled={!canAdd}
+        onClick={e => e.stopPropagation()}
+        onChange={e => {
+          const value = parseInt(e.target.value || 0, 10)
+          onChangeQty(id, isNaN(value) ? 0 : value)
+        }}
+        inputProps={{
+          min: 0,
+          style: {
+            textAlign: 'center',
+            padding: '4px',
+            width: '40px'
+          }
+        }}
+      />
 
       <IconButton
         size='small'
         onClick={e => { e.stopPropagation(); onInc(id) }}
         disabled={!canAdd}
-        sx={{
-          width: 26, height: 26,
-          border: '1px solid', borderColor: 'primary.main',
-          bgcolor: 'primary.main', color: '#fff',
-          borderRadius: '50%', p: 0,
-          '&:hover': { bgcolor: 'primary.dark' },
-        }}
       >
         <AddIcon sx={{ fontSize: 14 }} />
       </IconButton>
@@ -68,7 +71,7 @@ const QtyStepper = ({ id, qty, onInc, onDec, canAdd }) => {
   )
 }
 
-const ProductCard = ({ row, cart, onInc, onDec, labels, canAdd }) => {
+const ProductCard = ({ row, cart, onInc, onDec, labels, canAdd, setQty }) => {
   const id = row.itemId
   const q = cart[id]?.qty || 0
   const inCart = q > 0
@@ -113,10 +116,13 @@ const ProductCard = ({ row, cart, onInc, onDec, labels, canAdd }) => {
       </Typography>
 
       <Typography variant='caption' sx={{ color: 'text.secondary', fontSize: 10 }}>
-        {labels.price}: {row.unitPrice} {row.currencyRef}
+        {labels.price}:  {row.unitPrice.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}  {row.currencyRef}
       </Typography>
 
-      <QtyStepper id={id} qty={q} onInc={onInc} onDec={onDec} canAdd={canAdd}/>
+      <QtyStepper id={id} qty={q} onInc={onInc} onDec={onDec} onChangeQty={setQty} canAdd={canAdd}/>
 
     </Box>
   )
@@ -321,6 +327,31 @@ const Catalogue = () => {
 
   const handleCheckout = () => setCheckoutOpen(true)
 
+
+  const setQty = useCallback((id, qty) => {
+    setCart(c => {
+      if (qty <= 0) {
+        const copy = { ...c }
+        delete copy[id]
+        return copy
+      }
+
+      const existing = c[id]
+      const product = rows.find(r => r.itemId === id)
+      const base = existing || product
+
+      if (!base) return c
+
+      return {
+        ...c,
+        [id]: {
+          ...base,
+          qty
+        }
+      }
+    })
+  }, [rows])
+
   const pageSize = 50
   const startAt  = data?._startAt ?? 0
   const total    = data?.count    ?? 0
@@ -486,7 +517,10 @@ const Catalogue = () => {
                 <>
                   <Typography variant='body2' sx={{ fontWeight: 600, fontSize: 13 }}>
                     {cartCount} item{cartCount !== 1 ? 's' : ''}
-                    {cartTotal > 0 && ` · ${currencyRef} ${cartTotal.toFixed(2)}`}
+                    {cartTotal > 0 && ` · ${currencyRef} ${cartTotal.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}`}
                   </Typography>
                   <Button
                     variant='contained'
@@ -558,6 +592,7 @@ const Catalogue = () => {
                       onDec={dec}
                       labels={labels}
                       canAdd={!!values.clientId}
+                      setQty={setQty}
                     />
                   ))
                 )}

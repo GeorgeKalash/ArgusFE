@@ -174,7 +174,7 @@ const CatalogueCheckout = ({
                       {item.sku}
                     </Typography>
                     <Typography variant='caption' sx={{ display: 'block', color: 'primary.main', fontWeight: 600, fontSize: 12 }}>
-                      {currencyRef} {price.toFixed(2)} × {item.qty} = {currencyRef} {(price * item.qty).toFixed(2)}
+                      {currencyRef} {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2})} × {item.qty} = {currencyRef} {(price * item.qty).toFixed(2)}
                     </Typography>
 
                     <NoteField
@@ -225,7 +225,7 @@ const CatalogueCheckout = ({
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='body2' color='text.secondary'>Total</Typography>
             <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
-              {currencyRef} {total.toFixed(2)}
+              {currencyRef} {total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2})}
             </Typography>
           </Box>
 
