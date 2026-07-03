@@ -120,5 +120,13 @@ export const PayrollRepository = {
     getPack: service + 'getPackFLA',
     set: service + 'setFLA',
     del: service + 'delFLA'
+  },
+  LeavePayment: {
+    qry: service + 'qryLP',
+    page: service + 'pageLP',
+    get: service + 'getLP',
+    set: service + 'setLP',
+    del: service + 'delLP',
+    snapshot: service + 'snapshotLP'
   }
 }
