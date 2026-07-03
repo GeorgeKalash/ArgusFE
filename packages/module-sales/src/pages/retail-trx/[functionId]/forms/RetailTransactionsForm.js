@@ -828,8 +828,11 @@ export default function RetailTransactionsForm({
         popup: row => stack({
           Component: ItemDetails,
           props: {
-            itemId: row?.itemId || null,
-            plId: formik.values?.header?.plId || null
+            values: {
+              itemId: row?.itemId || null,
+              plId: formik.values?.header?.plId || null,
+              siteId: formik.values?.header?.siteId
+            }
           }
         })
       },   
