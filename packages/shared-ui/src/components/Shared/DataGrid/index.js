@@ -602,6 +602,29 @@ export function DataGrid({
         </Box>
       )
     }
+    if (column.colDef?.component === 'image') {
+      return (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%'
+          }}
+        >
+          <img
+            src={params.value || null}
+            alt=''
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              cursor: 'pointer'
+            }}
+          />
+        </Box>
+      )
+    }
     
 
     const Component =
@@ -697,7 +720,7 @@ export function DataGrid({
     }
 
     const comp = column.colDef.component
-    const centered = comp === 'checkbox' || comp === 'button' || comp === 'icon'
+    const centered = comp === 'checkbox' || comp === 'button' || comp === 'icon' || comp === 'image'
 
     return (
       <Box className={`cellEditorBox ${centered ? 'cellEditorBoxCentered' : ''} `}>
@@ -906,13 +929,23 @@ export function DataGrid({
   }
 
   const onCellClicked = async params => {
+    if (params.colDef.component === 'image') {
+      const imageUrl = params.data?.[params.colDef.field]
+
+      if (!imageUrl) return
+      params.colDef.onClick?.({
+        value: params.value,
+        row: params.data
+      })
+      return
+    }
     if (params.event.target.closest('a')) return
     if (typeof onValidationRequired === 'function') onValidationRequired()
 
     const { colDef, rowIndex, api } = params
 
     const nonEditableByClick =
-      colDef.component === 'button' || colDef.component === 'checkbox' || colDef.component === 'icon'
+      colDef.component === 'button' || colDef.component === 'checkbox' || colDef.component === 'icon' || colDef.component === 'image'
 
     if (!nonEditableByClick) {
       api.startEditingCell({
