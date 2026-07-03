@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, memo } from 'react'
+import { useCallback, useEffect, useRef, memo, useState } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
@@ -1520,20 +1520,158 @@ const getColorForIndex = (index, canvas) => {
   return colors[index % colors.length]
 }
 
+const LEADER_LINE_LENGTH = 10
+const HORIZONTAL_LINE_LENGTH = 28 
+const VALUE_MARGIN = 2
+
+const leaderLinesPlugin = {
+  id: 'leaderLines',
+
+ beforeLayout(chart) {
+  const dataset = chart.data.datasets[0]
+  const values = dataset?.data || []
+
+  const ctx = chart.ctx
+  ctx.save()
+  ctx.font = 'bold 13px Arial'
+
+  let maxTextWidth = 0
+  for (let i = 0; i < values.length; i++) {
+    const v = values[i]
+    if (v == null || v === 0) continue
+    maxTextWidth = Math.max(maxTextWidth, ctx.measureText(String(v)).width)
+  }
+
+  ctx.restore()
+
+  const horizontalPadding =
+    maxTextWidth > 0
+      ? LEADER_LINE_LENGTH +
+        HORIZONTAL_LINE_LENGTH +
+        VALUE_MARGIN +
+        maxTextWidth +
+        16
+      : 20
+
+  const layout = chart.options.layout || {}
+
+  const nextPadding = {
+    top: LEADER_LINE_LENGTH + 12,
+    bottom: LEADER_LINE_LENGTH + 12,
+    left: horizontalPadding,
+    right: horizontalPadding,
+  }
+
+  const current = layout.padding || {}
+
+  const changed =
+    current.left !== nextPadding.left ||
+    current.right !== nextPadding.right ||
+    current.top !== nextPadding.top ||
+    current.bottom !== nextPadding.bottom
+
+  if (changed) {
+    chart.options.layout = {
+      ...layout,
+      padding: nextPadding,
+    }
+  }
+},
+  afterDatasetsDraw(chart) {
+    const { ctx, width: canvasWidth } = chart
+    const meta = chart.getDatasetMeta(0)
+    const dataset = chart.data.datasets[0]
+
+    if (!meta?.data?.length) return
+
+    ctx.save()
+    ctx.font = 'bold 13px Arial'
+    ctx.lineWidth = 1.5
+    ctx.strokeStyle = '#555'
+
+    meta.data.forEach((arc, index) => {
+      const value = dataset.data[index]
+      if (value == null || value === 0) return
+
+      const text = String(value)
+      const textWidth = ctx.measureText(text).width
+
+      const angle = (arc.startAngle + arc.endAngle) / 2
+      const center = arc.getCenterPoint()
+      const outerRadius = arc.outerRadius
+
+      const startX = center.x + Math.cos(angle) * 60
+      const startY = center.y + Math.sin(angle) * 60
+
+      const bendX =
+        center.x + Math.cos(angle) * (outerRadius + LEADER_LINE_LENGTH)
+      const bendY =
+        center.y + Math.sin(angle) * (outerRadius + LEADER_LINE_LENGTH)
+
+      const rightSide = Math.cos(angle) >= 0
+
+      const idealEndX = rightSide
+        ? bendX + HORIZONTAL_LINE_LENGTH
+        : bendX - HORIZONTAL_LINE_LENGTH
+
+      const padding = 6
+      const VALUE_SAFE_GAP = VALUE_MARGIN + textWidth + padding
+
+      let endX
+
+      if (rightSide) {
+        const maxX = canvasWidth - VALUE_SAFE_GAP
+        endX = Math.min(idealEndX, maxX)
+        endX = Math.max(endX, bendX + 10)
+      } else {
+        const minX = VALUE_SAFE_GAP
+        endX = Math.max(idealEndX, minX)
+        endX = Math.min(endX, bendX - 10)
+      }
+
+      const endY = bendY
+
+      // LINE
+      ctx.beginPath()
+      ctx.moveTo(startX, startY)
+      ctx.lineTo(bendX, bendY)
+      ctx.lineTo(endX, endY)
+      ctx.stroke()
+
+      // DOT
+      ctx.beginPath()
+      ctx.arc(startX, startY, 3, 0, Math.PI * 2)
+      ctx.fillStyle = '#555'
+      ctx.fill()
+
+      // TEXT (single system, no conflicts)
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = dataset.backgroundColor?.[index] || '#333'
+      ctx.textAlign = rightSide ? 'left' : 'right'
+
+      ctx.fillText(
+        text,
+        rightSide ? endX + VALUE_MARGIN : endX - VALUE_MARGIN,
+        endY
+      )
+    })
+
+    ctx.restore()
+  },
+}
 const getPieChartOptions = (label, canvas, onLegendClick) => {
   const base = getChartOptions(label, 'pie', canvas, onLegendClick)
 
   return {
     ...base,
+    responsive: true,
     maintainAspectRatio: false,
-    layout: {
-      padding: 0,
-    },
+    animation: false,
     plugins: {
       ...base.plugins,
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
+      tooltip: { ...base.plugins.tooltip },
+      datalabels: false,
     },
   }
 }
@@ -1545,6 +1683,8 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
   const inst = useRef(null)
   const chartBoxRef = useRef(null)
 
+  const [colors, setColors] = useState([])
+
   const getChart = useCallback(() => inst.current, [])
   useArgusTabActivatedResize(getChart)
 
@@ -1555,6 +1695,8 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
     if (!ctx) return
     if (inst.current) return
 
+    const initialColors = Array.from({ length: (data || []).length }, (_, i) => getColorForIndex(i, canvas))
+
     inst.current = new Chart(ctx, {
       type: 'pie',
       data: {
@@ -1563,12 +1705,18 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
           {
             label,
             data: data || [],
-            backgroundColor: Array.from({ length: (data || []).length }, (_, i) => getColorForIndex(i, canvas))
-          }
-        ]
+            backgroundColor: initialColors,
+            borderColor: 'rgba(0, 0, 0, 0.2)',
+            borderWidth: 1,
+            clip: false, 
+          },
+        ],
       },
-      options: getPieChartOptions(label, canvas, onLegendClick)
+      options: getPieChartOptions(label, canvas, onLegendClick),
+      plugins: [leaderLinesPlugin],
     })
+
+    setColors(initialColors)
 
     return () => {
       inst.current?.destroy()
@@ -1584,13 +1732,16 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
     const nextHasMeaningful = hasAnyLabel(labels) && hasAnyValue(data)
     if (!nextHasMeaningful && chartHasAnyValue(chart)) return
 
+    const nextColors = Array.from({ length: (data || []).length }, (_, i) => getColorForIndex(i, canvas))
+
     chart.data.labels = labels || []
     chart.data.datasets[0].label = toolTipText || label
     chart.data.datasets[0].data = data || []
-    chart.data.datasets[0].backgroundColor = Array.from({ length: (data || []).length }, (_, i) => getColorForIndex(i, canvas))
+    chart.data.datasets[0].backgroundColor = nextColors
     chart.options = getPieChartOptions(label, canvas, onLegendClick)
 
     chart.update('none')
+    setColors(nextColors)
   }, [labels, data, label])
 
   useEffect(() => {
@@ -1605,16 +1756,64 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
     return () => ro.disconnect()
   }, [])
 
-  const indexRows = (labels || []).map((lbl, i) => ({
+  const chips = (labels || []).map((lbl, i) => ({
     key: `${lbl}-${i}`,
-    color: getColorForIndex(i, ref.current),
+    color: colors[i] || 'transparent',
     label: lbl,
     value: (data || [])[i],
   }))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', minHeight: 0 }}>
-     <div
+      {chips.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'center',
+            columnGap: 14,
+            rowGap: 4,
+            fontSize: 11,
+            lineHeight: 1.3,
+            marginBottom: 6,
+            flexShrink: 0,
+          }}
+        >
+          {chips.map((chip, i) => {
+            const clickable = chip.value !== 0
+            return (
+              <span
+                key={chip.key}
+                onClick={() => clickable && onLegendClick?.({ index: i, label: chip.label, value: chip.value })}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  cursor: clickable ? 'pointer' : 'default',
+                  opacity: clickable ? 1 : 0.5,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <span
+                  style={{
+                    width: 9,
+                    height: 9,
+                    borderRadius: 2,
+                    backgroundColor: chip.color,
+                    display: 'inline-block',
+                    flexShrink: 0,
+                    border: '1px solid rgba(0,0,0,0.15)',
+                  }}
+                />
+                <span style={{ color: '#333333' }}>{chip.label}</span>
+              </span>
+            )
+          })}
+        </div>
+      )}
+
+      <div
         ref={chartBoxRef}
         style={{
           flex: 1,
@@ -1623,58 +1822,29 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
           alignItems: 'center',
           minHeight: 0,
           overflow: 'hidden',
-          paddingTop: 2,
-          paddingBottom: 2,
         }}
       >
-  <div
-    style={{
-      width: '100%',
-      height: '100%',
-      maxWidth: '100%',
-      maxHeight: '100%',
-      position: 'relative',
-    }}
-  >
-    <canvas
-      id={id}
-      ref={ref}
-      className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'block',
-      }}
-    />
-  </div>
-</div>
-
-      {indexRows.length > 0 && (
         <div
           style={{
-            background: 'rgba(0, 0, 0, 0.45)',
-            borderRadius: 4,
-            padding: '4px 10px',
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            alignItems: 'center',
-            columnGap: 16,
-            rowGap: 2,
-            fontSize: 10,
-            lineHeight: 1.3,
-            marginTop: 4,
-            flexShrink: 0,
-            whiteSpace: 'nowrap',
+            width: '100%',
+            height: '100%',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            position: 'relative',
           }}
         >
-          {indexRows.map((row) => (
-            <span key={row.key} style={{ color: '#f0f0f0' }}>
-              {row.label}: {row.value}
-            </span>
-          ))}
+          <canvas
+            id={id}
+            ref={ref}
+            className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'block',
+            }}
+          />
         </div>
-      )}
+      </div>
     </div>
   )
 })
