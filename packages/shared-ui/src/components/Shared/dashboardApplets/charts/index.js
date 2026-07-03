@@ -1543,23 +1543,13 @@ const leaderLinesPlugin = {
   }
 
   ctx.restore()
-
-  const horizontalPadding =
-    maxTextWidth > 0
-      ? LEADER_LINE_LENGTH +
-        HORIZONTAL_LINE_LENGTH +
-        VALUE_MARGIN +
-        maxTextWidth +
-        16
-      : 20
-
   const layout = chart.options.layout || {}
 
   const nextPadding = {
     top: LEADER_LINE_LENGTH + 12,
     bottom: LEADER_LINE_LENGTH + 12,
-    left: horizontalPadding,
-    right: horizontalPadding,
+    left: 70,  
+    right: 70, 
   }
 
   const current = layout.padding || {}
@@ -1596,13 +1586,15 @@ const leaderLinesPlugin = {
       const text = String(value)
       const textWidth = ctx.measureText(text).width
 
-      const angle = (arc.startAngle + arc.endAngle) / 2
+   
       const center = arc.getCenterPoint()
       const outerRadius = arc.outerRadius
+      const isFullCircle = (arc.endAngle - arc.startAngle) >= Math.PI * 2
+      const angle = isFullCircle ? -Math.PI / 4 : (arc.startAngle + arc.endAngle) / 2
 
-      const startX = center.x + Math.cos(angle) * 60
-      const startY = center.y + Math.sin(angle) * 60
-
+      const startRadius = outerRadius * 0.8
+      const startX = center.x + Math.cos(angle) * startRadius
+      const startY = center.y + Math.sin(angle) * startRadius
       const bendX =
         center.x + Math.cos(angle) * (outerRadius + LEADER_LINE_LENGTH)
       const bendY =
