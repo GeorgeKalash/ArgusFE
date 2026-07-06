@@ -13,13 +13,13 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useEffect } from 'react'
-import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-import JobOrderWindow from '../mf-job-orders/window/JobOrderWindow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import JobOrderWindow from '@argus/shared-ui/src/components/Shared/Forms/JobOrderWindow'
 
 const JobInProcess = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -43,13 +43,9 @@ const JobInProcess = () => {
     datasetId: ResourceIds.JobsInProcess
   })
 
-  const { labels: _labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.MFJobOrders
-  })
-
   const { formik } = useForm({
-    initialValues: { workCenterId: null, workCenterName: '', workCenterRef: '' },
-    maxAccess,
+    initialValues: { workCenterId: null, workCenterName: '', workCenterRef: '', lineId: null },
+    maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
       workCenterId: yup.number().required()
@@ -67,7 +63,7 @@ const JobInProcess = () => {
           parameters: `_recordId=${workCenterId}`
         })
 
-        formik.setValues({ workCenterId: workCenterId, workCenterName: record.name, workCenterRef: record.reference })
+        formik.setValues({ ...formik.values, workCenterId: workCenterId, workCenterName: record.name, workCenterRef: record.reference })
       }
     })()
   }, [workCenterId])
@@ -77,7 +73,7 @@ const JobInProcess = () => {
     if (formik.values.workCenterId) {
       const response = await getRequest({
         extension: ManufacturingRepository.MFJobOrder.wip,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_workCenterId=${formik.values.workCenterId}&_params=`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_workCenterId=${formik.values.workCenterId}&_lineId=${formik.values.lineId || 0}&_params=`
       })
 
       return { ...response, _startAt: _startAt }
@@ -130,6 +126,9 @@ const JobInProcess = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -137,16 +136,12 @@ const JobInProcess = () => {
     stack({
       Component: JobOrderWindow,
       props: {
-        labels: _labels,
-        access: maxAccess,
         jobReference: reference,
         recordId,
         lockRecord,
         invalidate
       },
-      width: 1150,
-      height: 700,
-      title: _labels.jobOrder
+      nextToTitle: reference
     })
   }
 
@@ -209,12 +204,34 @@ const JobInProcess = () => {
               ]}
               onChange={(event, newValue) => {
                 formik.setValues({
+                  ...formik.values,
                   workCenterId: newValue?.recordId || null,
                   workCenterRef: newValue?.reference || '',
                   workCenterName: newValue?.name || ''
                 })
               }}
               error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <ResourceComboBox
+              endpointId={ManufacturingRepository.ProductionLine.qry}
+              parameters='_startAt=0&_pageSize=1000'
+              values={formik.values}
+              name='lineId'
+              label={labels.productionLine}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              displayFieldWidth={1}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              maxAccess={access}
+              onChange={(_, newValue) => {
+                formik.setFieldValue('lineId', newValue?.recordId || null)
+              }}
+              error={formik.touched.lineId && Boolean(formik.errors.lineId)}
             />
           </Grid>
           <Grid item xs={2}>
@@ -233,7 +250,6 @@ const JobInProcess = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

@@ -141,7 +141,6 @@ const FiAging = () => {
           labels={_labels}
           maxAccess={access}
           filterBy={filterBy}
-          mandatoryParams={true}
           reportName={'FI04'}
           hasSearch={false}
         />
@@ -151,7 +150,6 @@ const FiAging = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={50}
           disableSorting={true}
           refetch={refetch}

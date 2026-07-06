@@ -5,8 +5,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import serialIcon from '@argus/shared-ui/src/components/images/TableIcons/imgSerials.png'
-import lotIcon from '@argus/shared-ui/src/components/images/TableIcons/lot.png'
 import { Box, Grid, IconButton } from '@mui/material'
 import Image from 'next/image'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
@@ -69,7 +67,7 @@ const AvailabilityList = ({ obj, labels, access }) => {
             <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
               <IconButton size='small' onClick={() => (trackBy === 1 ? onSerial(row.data) : onLot(row.data))}>
                 <Image
-                  src={trackBy === 1 ? serialIcon : lotIcon}
+                  src={trackBy === 1 ? '/images/TableIcons/imgSerials.png' : '/images/TableIcons/lot.png'}
                   width={trackBy === 1 ? 25 : 18}
                   height={18}
                   alt={trackBy === 1 ? labels.serial : labels.lot}
@@ -142,7 +140,6 @@ const AvailabilityList = ({ obj, labels, access }) => {
           gridData={data}
           rowId={['siteRef']}
           maxAccess={access}
-          pageSize={50}
           pagination={false}
         />
       </Grow>

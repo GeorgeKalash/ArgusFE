@@ -4,7 +4,7 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CashTransferTab from '@argus/shared-ui/src/components/Shared/Forms/CashTransferTab'
 import toast from 'react-hot-toast'
@@ -16,12 +16,17 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
+  const { userDefaults } = useContext(DefaultsContext)
   const { platformLabels } = useContext(ControlContext)
+  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value)
+  const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -31,153 +36,78 @@ const CashTransfer = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
-    return { ...response, _startAt: _startAt }
+    return { ...response, _startAt }
+  }
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: CashBankRepository.CashTransfer.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
   }
 
   const {
     query: { data },
-    filterBy,
-    clearFilter,
-    labels: _labels,
+    labels,
     refetch,
-    access
+    access,
+    invalidate,
+    paginationParameters,
+    search,
+    clear
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashBankRepository.CashTransfer.page,
     datasetId: ResourceIds.CashTransfer,
-    filter: {
+    search: {
       endpointId: CashBankRepository.CashTransfer.snapshot,
-      filterFn: fetchWithSearch
+      searchFn: fetchWithSearch
     }
   })
-  async function fetchWithSearch({ filters }) {
-    return await getRequest({
-      extension: CashBankRepository.CashTransfer.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
-  }
 
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CashTransfer.page
-  })
-
-  const userData = window.sessionStorage.getItem('userData')
-    ? JSON.parse(window.sessionStorage.getItem('userData'))
-    : null
-
-  const getPlantId = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userData && userData.userId}&_key=plantId`
-    })
-
-    if (res.record?.value) {
-      return res.record.value
-    }
-
-    return ''
-  }
-
-  const getCashAccountId = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userData && userData.userId}&_key=cashAccountId`
-    })
-
-    if (res.record?.value) {
-      return res.record.value
-    }
-
-    return ''
-  }
+  const userData = getStorageData('userData')
 
   const getDefaultDT = async () => {
     const res = await getRequest({
       extension: SystemRepository.UserFunction.get,
-      parameters: `_userId=${userData && userData.userId}&_functionId=${SystemFunction.CashTransfer}`
+      parameters: `_userId=${userData?.userId}&_functionId=${SystemFunction.CashTransfer}`
     })
-    if (res.record) {
-      return res.record.dtId
-    }
 
-    return ''
+    return res.record?.dtId || null
   }
+
   async function openForm(recordId) {
-    const plantId = await getPlantId()
-    const cashAccountId = await getCashAccountId()
     const dtId = await getDefaultDT()
 
-    if (plantId !== '' && cashAccountId !== '') {
-      openCashTransferWindow(plantId, cashAccountId, recordId, dtId)
-    } else if (recordId) {
-      openCashTransferWindow(plantId, cashAccountId, recordId, dtId)
-    } else {
-      if (plantId === '') {
-        stackError({
-          message: platformLabels.mustHaveDefaultPlant
-        })
-
-        return
-      }
-      if (cashAccountId === '') {
-        stackError({
-          message: platformLabels.mustHaveDefaultCashAcc
-        })
-
-        return
-      }
+    if (recordId) {
+      openStack(recordId, dtId)
+      return
     }
+
+    if (!plantId) {
+      stackError({ message: platformLabels.mustHaveDefaultPlant })
+      return
+    }
+
+    if (!cashAccountId) {
+      stackError({ message: platformLabels.mustHaveDefaultCashAcc })
+      return
+    }
+
+    openStack(null, dtId)
   }
 
-  const columns = [
-    {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'fromPlantName',
-      headerName: _labels.fromPlant,
-      flex: 1
-    },
-    {
-      field: 'toPlantName',
-      headerName: _labels.toPlant,
-      flex: 1
-    },
-    {
-      field: 'fromCAName',
-      headerName: _labels.fromCashAcc,
-      flex: 1
-    },
-    {
-      field: 'toCAName',
-      headerName: _labels.toCashAcc,
-      flex: 1
-    },
-
-    {
-      field: 'rsName',
-      headerName: _labels.releaseStatus,
-      flex: 1
-    },
-    {
-      field: 'statusName',
-      headerName: _labels.status,
-      flex: 1
-    },
-    {
-      field: 'wipName',
-      headerName: _labels.wip,
-      flex: 1
-    }
-  ]
+  function openStack(recordId, dtId) {
+    stack({
+      Component: CashTransferTab,
+      props: {
+        dtId,
+        recordId
+      }
+    })
+  }
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.CashTransfer,
@@ -185,7 +115,66 @@ const CashTransfer = () => {
     hasDT: false
   })
 
-  const delCashTFR = async obj => {
+  const columns = [
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'fromPlantName',
+      headerName: labels.fromPlant,
+      flex: 1
+    },
+    {
+      field: 'toPlantName',
+      headerName: labels.toPlant,
+      flex: 1
+    },
+    {
+      field: 'fromCAName',
+      headerName: labels.fromCashAcc,
+      flex: 1
+    },
+    {
+      field: 'toCAName',
+      headerName: labels.toCashAcc,
+      flex: 1
+    },
+    {
+      field: 'rsName',
+      headerName: labels.releaseStatus,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
+      flex: 1
+    }
+  ]
+
+  const add = async () => await proxyAction()
+
+  const edit = obj => openForm(obj.recordId)
+
+  const del = async obj => {
     await postRequest({
       extension: CashBankRepository.CashTransfer.del,
       record: JSON.stringify(obj)
@@ -194,39 +183,15 @@ const CashTransfer = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const addCashTFR = () => {
-    proxyAction()
-  }
-
-  const editCashTFR = obj => {
-    openForm(obj.recordId)
-  }
-
-  function openCashTransferWindow(plantId, cashAccountId, recordId, dtId) {
-    stack({
-      Component: CashTransferTab,
-      props: {
-        plantId,
-        cashAccountId,
-        dtId,
-        recordId
-      }
-    })
-  }
-
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar
-          onAdd={addCashTFR}
+          onAdd={add}
           maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
-          labels={_labels}
+          onSearch={search} 
+          onSearchClear={clear}
+          labels={labels}
           inputSearch={true}
         />
       </Fixed>
@@ -236,12 +201,12 @@ const CashTransfer = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editCashTFR}
-          onDelete={delCashTFR}
-          isLoading={false}
+          onEdit={edit}
+          onDelete={del}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>

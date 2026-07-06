@@ -109,7 +109,8 @@ export const SaleRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD',
-    page: service + 'pageDTD'
+    page: service + 'pageDTD',
+    snapshot: service + 'snapshotDTD'
   },
   DocumentType: {
     qry: service + 'qryDT'
@@ -163,6 +164,7 @@ export const SaleRepository = {
     summaryORD: service + 'summaryORD',
     pack: service + 'getPackORD',
     get2: service + 'get2ORD',
+    generate: service + 'generateORD',
   },
   SalesOrderItem: {
     qry: service + 'qryORI'
@@ -242,7 +244,9 @@ export const SaleRepository = {
     del: service + 'delQTN',
     postQuotTrx: service + 'transfer1QTN',
     postToInvTrx: service + 'transfer2QTN',
-    postToCons: service + 'transfer3QTN'
+    postToCons: service + 'transfer3QTN',
+    close: service + 'closeQTN',
+    reopen: service + 'reopenQTN',
   },
   QuotationItem: {
     qry: service + 'qryQTI'
@@ -251,12 +255,13 @@ export const SaleRepository = {
     page: service + 'pageDRE',
     page2: service + 'page2DRE',
     snapshot: service + 'snapshotDRE',
-    get: service + 'getDRE',
+    get2: service + 'get2DRE',
     set2: service + 'set2DRE',
     del: service + 'delDRE',
     close: service + 'closeDRE',
     reopen: service + 'reopenDRE',
-    post: service + 'postDRE'
+    post: service + 'postDRE',
+    pack: service + 'getPackDRE'
   },
   DraftReturnSerial: {
     qry: service + 'qryDRS',
@@ -300,8 +305,8 @@ export const SaleRepository = {
   ReturnOnInvoice: {
     snapshot: service + 'snapshotRET',
     page: service + 'pageRET',
-    get: service + 'getRET',
     set2: service + 'set2RET',
+    get2: service + 'get2RET',
     del: service + 'delRET',
     verify: service + 'verifyRET',
     post: service + 'postRET',
@@ -314,5 +319,9 @@ export const SaleRepository = {
   },
   ReturnSerial: {
     qry: service + 'qryRES'
+  },
+  SalesBasket: {
+    get2: service + 'get2BSK',
+    set2: service + 'set2BSK'
   }
 }

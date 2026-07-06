@@ -31,7 +31,8 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
       name: '',
       valuationMethod: '',
       procurementMethod: '',
-      msId: ''
+      msId: '',
+      dmgId: null
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -162,6 +163,21 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
                   formik.setFieldValue('msId', newValue.recordId || '')
                 }}
                 error={formik.touched.msId && Boolean(formik.errors.msId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.DimensionGroup.qry}
+                name='dmgId'
+                label={labels.dimensionGroup}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('dmgId', newValue?.recordId || null)
+                }}
+                error={formik.touched.dmgId && Boolean(formik.errors.dmgId)}
               />
             </Grid>
           </Grid>

@@ -22,8 +22,6 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDPrintForm'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
@@ -31,7 +29,6 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 export default function CastingForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
   const systemFunction = SystemFunction.ModellingCasting
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -45,7 +42,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       reference: '',
@@ -134,19 +131,6 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted
-    },
-    {
-      key: 'threeDPrinting',
-      condition: true,
-      onClick: async () => {
-        stack({
-          Component: ThreeDPrintForm,
-          props: {
-            recordId: formik.values?.threeDPId
-          }
-        })
-      },
-      disabled: !formik.values.threeDPId
     }
   ]
 
@@ -172,6 +156,26 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
     })
   }
 
+  async function onChangeDT (dtId) {
+    if (!dtId) return
+    
+    const { record } = await getRequest({
+      extension: ProductModelingRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    return record || {}
+  }
+
+  useEffect(() => {
+    ;(async function () {
+     if (!recordId) {
+      const response = await onChangeDT(formik.values?.dtId)
+      formik.setFieldValue('productionLineId', response?.productionLineId || null)
+     }
+    })()
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.Casting}
@@ -196,22 +200,9 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik?.values}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
                   changeDT(newValue)
-
-                  formik.setFieldValue('productionLineId', null)
-
-                  if (newValue?.recordId) {
-                    const { record } = await getRequest({
-                      extension: ProductModelingRepository.DocumentTypeDefault.get,
-                      parameters: `_dtId=${newValue?.recordId}`
-                    })
-
-                    formik.setFieldValue('productionLineId', record?.productionLineId)
-                  } else {
-                    formik.setFieldValue('productionLineId', null)
-                  }
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}
@@ -258,6 +249,10 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 endpointId={ProductModelingRepository.Printing.snapshot2}
                 parameters={{ _productionLineId: formik.values.productionLineId || 0 }}
                 valueField='reference'
+                linkOpen={{
+                  props: { recordId: formik.values.threeDPId },
+                  resourceId: ResourceIds.ThreeDPrint
+                }}
                 name='threeDPId'
                 label={labels.threeDP}
                 form={formik}
@@ -382,7 +377,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={ManufacturingRepository.Labor.qry}
-                parameters={`_startAt=0&_pageSize=200&_params=`}
+                parameters={`_startAt=0&_pageSize=10000&_params=`}
                 name='laborId'
                 required
                 readOnly={isPosted}

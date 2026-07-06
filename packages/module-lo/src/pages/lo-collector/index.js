@@ -11,10 +11,11 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import LoCollectorsForms from './forms/LoCollectorsForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const LoCollector = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -86,7 +87,7 @@ const LoCollector = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -101,7 +102,6 @@ const LoCollector = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           refetch={refetch}

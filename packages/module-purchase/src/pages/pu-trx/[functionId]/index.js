@@ -78,6 +78,9 @@ const PuTrx = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -236,7 +239,6 @@ const PuTrx = () => {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           refetch={refetch}

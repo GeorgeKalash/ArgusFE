@@ -91,7 +91,11 @@ const Rubber = () => {
     {
       field: 'modelRef',
       headerName: labels.model,
-      flex: 1
+      flex: 1,
+      linkOpen: data => ({
+        resourceId: ResourceIds.ThreeDPrint,
+        props: { recordId: data?.modelId }
+      })
     },
     {
       field: 'laborName',
@@ -112,6 +116,9 @@ const Rubber = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -169,7 +176,6 @@ const Rubber = () => {
           refetch={refetch}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />

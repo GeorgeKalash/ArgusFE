@@ -12,10 +12,11 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const [selectedCodeId, setSelectedCodeId] = useState('')
 
   const invalidate = useInvalidate({
@@ -112,11 +113,12 @@ const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 filter={excludeSelectedCode}
+                required
                 onClear={() => {
                   formik.setFieldValue('prerequisiteId', '')
                   formik.setFieldTouched('prerequisiteId', false)
                 }}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   const newPrerequisiteId = newValue ? newValue.codeId : ''
                   formik.setFieldValue('prerequisiteId', newPrerequisiteId)
                 }}

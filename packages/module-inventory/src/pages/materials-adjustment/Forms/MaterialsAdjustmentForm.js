@@ -25,7 +25,7 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
-import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
+import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
@@ -90,7 +90,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -169,13 +169,13 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
   const { totalQty, totalCost, totalWeight } = formik?.values?.rows?.reduce(
     (acc, row) => {
-      const qtyValue = parseFloat(row?.qty) || 0
-      const totalCostValue = parseFloat(row?.totalCost) || 0
-      const weightValue = parseFloat(row?.weight) || 0
+      const qtyValue = row?.qty || 0
+      const totalCostValue = row?.totalCost || 0
+      const weightValue = row?.weight || 0
 
       return {
         totalQty: acc?.totalQty + qtyValue,
-        totalCost: (Math.round((parseFloat(acc?.totalCost) + totalCostValue) * 100) / 100).toFixed(2),
+        totalCost: roundTo((acc?.totalCost + totalCostValue) * 100) / 100,
         totalWeight: acc?.totalWeight + weightValue
       }
     },
@@ -237,7 +237,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
+        imgSrc: '/images/TableIcons/imgSerials.png',
         hidden: false
       }
     } else {
@@ -285,18 +285,18 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   }
 
   function calcTotalCost(rec) {
-    if (rec.priceType === 1) return (Math.round(rec.qty * rec.unitCost * 100) / 100).toFixed(2)
-    else if (rec.priceType === 2) return (Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100).toFixed(2)
-    else if (rec.priceType === 3) return (Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100).toFixed(2)
+    if (rec.priceType === 1) return roundTo(Math.round(rec.qty * rec.unitCost * 100) / 100)
+    else if (rec.priceType === 2) return roundTo(Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100)
+    else if (rec.priceType === 3) return roundTo(Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100)
     else return 0
   }
 
   function calcUnitCost(rec) {
-    if (rec.priceType === 1) return rec.qty != 0 ? (rec.totalCost / rec.qty).toFixed(2) : 0
+    if (rec.priceType === 1) return rec.qty != 0 ? roundTo(rec.totalCost / rec.qty) : 0
     else if (rec.priceType === 2)
-      return rec.qty != 0 || rec.volume != 0 ? (rec.totalCost / (rec.qty * rec.volume)).toFixed(2) : 0
+      return rec.qty != 0 || rec.volume != 0 ? roundTo(rec.totalCost / (rec.qty * rec.volume)) : 0
     else if (rec.priceType === 3)
-      return rec.qty != 0 || rec.weight != 0 ? (rec.totalCost / (rec.qty * rec.weight)).toFixed(2) : 0
+      return rec.qty != 0 || rec.weight != 0 ? roundTo(rec.totalCost / (rec.qty * rec.weight)) : 0
     else return 0
   }
 
@@ -345,14 +345,14 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         unitCost,
         itemName: itemNameValue,
         totalCost,
-        details: true,
         msId: itemInfo?.msId,
         categoryName: itemInfo?.categoryName,
         decimals: measurementSchedule?.decimals,
         muRef: filteredMeasurements?.[0]?.reference,
         muId: filteredMeasurements?.[0]?.recordId,
-        metalId,
-        metalRef,
+        muQty: filteredMeasurements?.[0]?.qty,
+        metalId: metalId || null,
+        metalRef: metalRef || null,
         priceType: newRow?.priceType
       }
 
@@ -405,7 +405,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
           }
           if (newRow.isInactive) {
             update({
-              ...formik.initialValues.rows[0],
+              ...initialValues.rows[0],
               id: newRow.id
             })
             stackError({
@@ -421,7 +421,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         } else {
           if (!newRow?.sku) {
             update({
-              ...formik.initialValues.rows[0],
+              ...initialValues.rows[0],
               id: newRow.id
             })
 
@@ -434,7 +434,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
           })
           if (!skuInfo.record) {
             update({
-              ...formik.initialValues.rows[0],
+              ...initialValues.rows[0],
               id: newRow.id
             })
             stackError({
@@ -491,10 +491,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       },
       async onChange({ row: { update, newRow } }) {
         const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
-        const qtyInBase = newRow?.qty * filteredItems?.muQty ?? 0
+        const qtyInBase = filteredItems[0]?.qty ? newRow?.qty * filteredItems[0]?.qty : newRow?.qty
 
         update({
-          qtyInBase,
+          qtyInBase: roundTo(qtyInBase, 3),
           muQty: newRow?.muQty
         })
       },
@@ -518,7 +518,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
           const totalCost = calcTotalCost(newRow)
-          const qtyInBase = newRow?.qty * newRow?.muQty ?? 0
+          const qtyInBase = newRow?.muQty ? newRow.qty * newRow.muQty : newRow?.qty
 
           update({
             totalCost,
@@ -627,6 +627,8 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       parameters: `_filter=&_adjustmentId=${recordId}`
     })
 
+    const disableSKULookup = await getDTD(res?.record?.dtId)
+
     const updatedAdjustments = await Promise.all(
       res2.list.map(async item => {
         const serials = await getSerials(recordId, item.seqNo)
@@ -646,11 +648,14 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       })
     )
 
-    formik.setValues({
-      ...formik.values,
-      ...res.record,
-      date: formatDateFromApi(res.record.date),
-      rows: updatedAdjustments
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        ...res.record,
+        disableSKULookup: disableSKULookup?.record?.disableSKULookup || false,
+        date: formatDateFromApi(res.record.date),
+        rows: updatedAdjustments
+      }
     })
 
     return res?.record
@@ -767,6 +772,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialAdjustment}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -910,7 +916,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
-            initialValues={formik?.initialValues?.rows[0]}
+            initialValues={initialValues?.rows[0]}
             enableFilters
             showCounterColumn={true}
             columns={columns}
@@ -925,7 +931,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
               <CustomTextField
                 name='totalQty'
                 maxAccess={maxAccess}
-                value={getFormattedNumber(Number(totalQty).toFixed(2))}
+                value={getFormattedNumber(roundTo(totalQty))}
                 label={labels.totalQty}
                 readOnly
               />
@@ -934,7 +940,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
               <CustomTextField
                 name='totalCost'
                 maxAccess={maxAccess}
-                value={getFormattedNumber(Number(totalCost).toFixed(2))}
+                value={getFormattedNumber(roundTo(totalCost))}
                 label={labels.totalCost}
                 readOnly
               />
@@ -943,7 +949,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
               <CustomTextField
                 name='totalWeight'
                 maxAccess={maxAccess}
-                value={getFormattedNumber(totalWeight)}
+                value={getFormattedNumber(roundTo(totalWeight))}
                 label={labels.totalWeight}
                 readOnly
               />

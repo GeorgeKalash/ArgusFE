@@ -14,6 +14,8 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { calculateFixed } from '@argus/shared-utils/src/utils/Payroll'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
+import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function DeductionsForm({
   labels,
@@ -44,20 +46,48 @@ export default function DeductionsForm({
       pct: 0,
       comments: '',
       isTaxable: false,
-      edCalcType: null
+      edCalcType: null,
+      isFormula: false,
+      formulaId: null
     },
     validationSchema: yup.object({
-      edId: yup.number().required(),
-      fixedAmount: yup.number().min(0).required(),
-      edCalcType: yup.number().required(),
+      formulaId: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { isFormula } = this.parent
+          return isFormula ? !!value : true
+        }),
+      edId: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { isFormula } = this.parent
+          return isFormula ? true : !!value
+        }),
+      fixedAmount: yup
+        .number()
+        .min(0)
+        .nullable()
+        .test(function (value) {
+          const { isPct, isFormula } = this.parent
+          return isFormula || isPct ? true : value !== null && value !== undefined
+        }),
+      edCalcType: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { isFormula } = this.parent
+          return isFormula ? true : !!value
+        }),
       pct: yup
         .number()
         .min(0)
         .max(100)
+        .nullable()
         .test(function (value) {
-          const { isPct } = this.parent
-
-          return isPct ? !!value : true
+          const { isPct, isFormula } = this.parent
+          return isFormula || !isPct ? true : value !== null && value !== undefined
         })
     }),
     onSubmit: async obj => {
@@ -92,7 +122,7 @@ export default function DeductionsForm({
         })
         formik.setValues({
           ...res?.record,
-          fixedAmount: parseFloat(fixedAmount || 0).toFixed(2) || parseFloat(res?.record?.fixedAmount || 0).toFixed(2),
+          fixedAmount: Number(getFormattedNumber(fixedAmount,2).replace(/,/g, '')) || Number(getFormattedNumber(res?.record?.fixedAmount,2).replace(/,/g, '')),
           isPct: res?.record?.pct > 0
         })
       }
@@ -103,113 +133,149 @@ export default function DeductionsForm({
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={EmployeeRepository.EmployeeDeduction.qry}
-              name='edId'
-              label={labels.deduction}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              filter={item => item.type == 2}
-              onChange={(event, newValue) => formik.setFieldValue('edId', newValue?.recordId || null)}
-              maxAccess={maxAccess}
-              required
-              error={formik.touched.edId && Boolean(formik.errors.edId)}
-            />
+          <Grid item xs={6}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={EmployeeRepository.EmployeeDeduction.qry}
+                  name='edId'
+                  label={labels.deduction}
+                  valueField='recordId'
+                  displayField='name'
+                  values={formik.values}
+                  filter={item => item.type == 2}
+                  onChange={(event, newValue) => formik.setFieldValue('edId', newValue?.recordId || null)}
+                  maxAccess={maxAccess}
+                  required
+                  error={formik.touched.edId && Boolean(formik.errors.edId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomCheckBox
+                  name='includeInTotal'
+                  value={formik.values?.includeInTotal}
+                  onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
+                  label={labels.includeInTotal}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomCheckBox
+                  name='isTaxable'
+                  value={formik.values?.isTaxable}
+                  onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
+                  label={labels.isTaxable}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomCheckBox
+                  name='isFormula'
+                  value={formik.values?.isFormula}
+                  onChange={e => formik.setFieldValue('isFormula', e.target.checked)}
+                  label={labels.isFormula}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={PayrollRepository.Formula.qry}
+                  name='formulaId'
+                  label={labels.formula}
+                  displayField='name'
+                  valueField='recordId'
+                  values={formik.values}
+                  readOnly={!formik.values?.isFormula}
+                  required={formik.values?.isFormula}
+                  onChange={(_, newValue) => formik.setFieldValue('formulaId', newValue?.recordId || null)}
+                  maxAccess={maxAccess}
+                  error={formik.touched.formulaId && Boolean(formik.errors.formulaId)}
+                />
+              </Grid>
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <CustomCheckBox
-              name='includeInTotal'
-              value={formik.values?.includeInTotal}
-              onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
-              label={labels.includeInTotal}
-              maxAccess={maxAccess}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomCheckBox
-              name='isPct'
-              value={formik.values?.isPct}
-              onChange={event => {
-                formik.setFieldValue('pctOf', 1)
-                if (event.target.checked) formik.setFieldValue('fixedAmount', 0)
-                else formik.setFieldValue('pct', 0)
-                formik.setFieldValue('isPct', event.target.checked)
-              }}
-              label={labels.isPct}
-              maxAccess={maxAccess}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              datasetId={DataSets.APPLY_TO_SALARY}
-              name='pctOf'
-              label={labels.pctOf}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              maxAccess={maxAccess}
-              readOnly={!formik.values.isPct}
-              onChange={(_, newValue) => formik.setFieldValue('pctOf', newValue?.key || null)}
-              error={formik.touched.pctOf && Boolean(formik.errors.pctOf)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='pct'
-              label={labels.pct}
-              value={formik.values.pct}
-              readOnly={!formik.values.isPct}
-              required={formik.values.isPct}
-              onBlur={e => {
-                let pctValue = Number(e.target.value)
-                const amount = calculateFixed(pctValue, 1, salaryInfo.header.basicAmount, salaryInfo.header.eAmount)
-                formik.setFieldValue('fixedAmount', parseFloat(amount || 0).toFixed(2))
-                formik.setFieldValue('pct', pctValue)
-              }}
-              allowNegative={false}
-              maxAccess={maxAccess}
-              onClear={() => formik.setFieldValue('pct', 0)}
-              error={formik.touched.pct && Boolean(formik.errors.pct)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='fixedAmount'
-              label={labels.amount}
-              value={formik.values.fixedAmount}
-              onBlur={e => formik.setFieldValue('fixedAmount', parseFloat(e?.target?.value || 0).toFixed(2))}
-              required
-              allowNegative={false}
-              maxAccess={maxAccess}
-              readOnly={formik.values.isPct}
-              onClear={() => formik.setFieldValue('fixedAmount', null)}
-              error={formik.touched.fixedAmount && Boolean(formik.errors.fixedAmount)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomCheckBox
-              name='isTaxable'
-              value={formik.values?.isTaxable}
-              onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
-              label={labels.isTaxable}
-              maxAccess={maxAccess}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              datasetId={DataSets.ED_CALC_TYPE}
-              name='edCalcType'
-              label={labels.calculationType}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              maxAccess={maxAccess}
-              required
-              onChange={(_, newValue) => formik.setFieldValue('edCalcType', newValue?.key || null)}
-              error={formik.touched.edCalcType && Boolean(formik.errors.edCalcType)}
-            />
+          <Grid item xs={6}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <CustomCheckBox
+                  name='isPct'
+                  value={formik.values?.isPct}
+                  onChange={event => {
+                    formik.setFieldValue('pctOf', 1)
+                    if (event.target.checked) formik.setFieldValue('fixedAmount', 0)
+                    else formik.setFieldValue('pct', 0)
+                    formik.setFieldValue('isPct', event.target.checked)
+                  }}
+                  label={labels.isPct}
+                  readOnly={formik.values?.isFormula}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  datasetId={DataSets.APPLY_TO_SALARY}
+                  name='pctOf'
+                  label={labels.pctOf}
+                  valueField='key'
+                  displayField='value'
+                  values={formik.values}
+                  maxAccess={maxAccess}
+                  readOnly={!formik.values.isPct || formik.values?.isFormula}
+                  onChange={(_, newValue) => formik.setFieldValue('pctOf', newValue?.key || null)}
+                  error={formik.touched.pctOf && Boolean(formik.errors.pctOf)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='pct'
+                  label={labels.pct}
+                  value={formik.values.pct}
+                  readOnly={!formik.values.isPct || formik.values?.isFormula}
+                  required={formik.values.isPct || !formik.values?.isFormula}
+                  onBlur={e => {
+                    let pctValue = Number(e.target.value)
+                    const amount = calculateFixed(pctValue, 1, salaryInfo.header.basicAmount, salaryInfo.header.eAmount)
+                    formik.setFieldValue('fixedAmount', roundTo(amount || 0))
+                    formik.setFieldValue('pct', pctValue)
+                  }}
+                  allowNegative={false}
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('pct', 0)}
+                  error={formik.touched.pct && Boolean(formik.errors.pct)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='fixedAmount'
+                  label={labels.amount}
+                  value={formik.values.fixedAmount}
+                  onBlur={e =>
+                    formik.setFieldValue('fixedAmount', e?.target?.value || 0)
+                  }
+                  required={!formik.values?.isFormula}
+                  allowNegative={false}
+                  maxAccess={maxAccess}
+                  readOnly={formik.values.isPct || formik.values?.isFormula}
+                  onClear={() => formik.setFieldValue('fixedAmount', null)}
+                  error={formik.touched.fixedAmount && Boolean(formik.errors.fixedAmount)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  datasetId={DataSets.ED_CALC_TYPE}
+                  name='edCalcType'
+                  label={labels.calculationType}
+                  valueField='key'
+                  displayField='value'
+                  values={formik.values}
+                  maxAccess={maxAccess}
+                  required={!formik.values?.isFormula}
+                  readOnly={formik.values?.isFormula}
+                  onChange={(_, newValue) => formik.setFieldValue('edCalcType', newValue?.key || null)}
+                  error={formik.touched.edCalcType && Boolean(formik.errors.edCalcType)}
+                />
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </VertLayout>

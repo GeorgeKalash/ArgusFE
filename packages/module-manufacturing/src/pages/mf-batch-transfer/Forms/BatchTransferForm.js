@@ -27,6 +27,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import JTCheckoutForm from '@argus/shared-ui/src/components/Shared/Forms/JTCheckoutForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
   const { platformLabels } = useContext(ControlContext)
@@ -51,44 +52,46 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
 
   const conditions = {
     jobId: row => row?.jobId,
-    pcs: row => row?.jobId > 0 && row?.pcs <= row?.jobPcs,
-    qty: row => row?.jobId > 0 && row?.qty <= row?.jobQty,
+    pcs: row => row?.jobId > 0,
+    qty: row => row?.jobId > 0,
     sku: row => row?.sku,
     itemName: row => row?.itemName
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
-
-  const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
-    conditionSchema: ['items'],
-    initialValues: {
-      recordId: null,
-      header: {
-        dtId: null,
-        reference: '',
-        date: new Date(),
-        fromWCId: workCenterId,
-        toWCId: null,
-        notes: '',
-        status: 1,
-        wip: 1
-      },
-      items: [
-        {
-          id: 1,
-          jobId: null,
-          btId: recordId || 0,
-          pcs: 0,
-          qty: 0,
-          transferRef: null,
-          sku: '',
-          itemName: '',
-          transferStatusName: '',
-          transferWipName: ''
-        }
-      ]
+  
+  const initialValues = {
+    recordId: null,
+    header: {
+      dtId: null,
+      reference: '',
+      date: new Date(),
+      fromWCId: workCenterId,
+      toWCId: null,
+      notes: '',
+      status: 1,
+      wip: 1
     },
+    items: [
+      {
+        id: 1,
+        jobId: null,
+        btId: recordId || 0,
+        pcs: 0,
+        qty: 0,
+        transferRef: null,
+        sku: '',
+        itemName: '',
+        transferStatusName: '',
+        transferWipName: ''
+      }
+    ]
+  }
+  
+  const { formik } = useForm({
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    conditionSchema: ['items'],
+    initialValues,
     maxAccess,
     validationSchema: yup.object({
       header: yup.object({
@@ -134,7 +137,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
         parameters: `_dtId=${dtId}`
       })
       formik.setFieldValue('header.fromWCId', res?.record?.workCenterId || workCenterId || null)
-      formik.setFieldValue('items', formik.initialValues.items)
+      formik.setFieldValue('items', initialValues.items)
     }
   }
 
@@ -167,20 +170,22 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       parameters: `_btId=${recordId}`
     })
 
-    formik.setValues({
-      ...formik.values,
-      recordId: header.recordId,
-      header: {
-        ...formik.values.header,
-        ...header
-      },
-      items:
-        itemsResponse?.list?.length > 0
-          ? itemsResponse.list.map((item, index) => ({
-              ...item,
-              id: index + 1
-            }))
-          : formik.values.items
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        recordId: header.recordId,
+        header: {
+          ...formik.values.header,
+          ...header
+        },
+        items:
+          itemsResponse?.list?.length > 0
+            ? itemsResponse.list.map((item, index) => ({
+                ...item,
+                id: index + 1
+              }))
+            : formik.values.items
+      }
     })
   }
 
@@ -190,7 +195,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       label: labels.jobOrder,
       name: 'jobRef',
       disableDuplicate: true,
-      flex: 1,
+      flex: 2,
       props: {
         endpointId: ManufacturingRepository.MFJobOrder.snapshot4,
         parameters: {
@@ -201,7 +206,13 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
         mapping: [
           { from: 'recordId', to: 'jobId' },
           { from: 'reference', to: 'jobRef' },
-          { from: 'itemName', to: 'itemName' }
+          { from: 'itemName', to: 'itemName' },
+          { from: 'itemCategoryName', to: 'itemCategoryName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'sku', value: 'SKU' },
+          { key: 'designName', value: 'Design Name' },
         ],
         displayFieldWidth: 4,
         readOnly: !formik.values?.header?.fromWCId
@@ -214,10 +225,37 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           parameters: `_jobOrderId=${newRow?.jobId}&_toWcId=${formik.values?.header?.toWCId}`
         })
 
+        if (res2?.error) {
+          update({
+            jobId: null,
+            jobRef: '',
+            itemName: '',
+            itemId: null,
+            sku: '',
+            itemGroupName: '',
+            categoryName: '',
+            pcs: 0,
+            qty: 0,
+          })
+
+          return
+        }
+
         const res3 = await getRequest({
           extension: ManufacturingRepository.JobWorkCenter.get,
           parameters: `_jobId=${newRow?.jobId}&_workCenterId=${formik.values?.header?.fromWCId}`
         })
+
+        let metalRef
+
+        if (res2.record?.itemId) {
+          const res4 = await getRequest({
+            extension: InventoryRepository.Physical.get,
+            parameters: `_itemId=${res2.record?.itemId}`
+          })
+
+          metalRef = res4?.record?.metalRef || ''
+        }
 
         update({
           jobId: newRow?.jobId || null,
@@ -226,10 +264,10 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           itemId: res2.record?.itemId || null,
           sku: res2.record?.sku || '',
           itemGroupName: res2.record?.itemGroupName || '',
+          categoryName: newRow?.itemCategoryName || '',
+          metalRef,
           pcs: res3.record?.pcs || 0,
           qty: res3.record?.qty || 0,
-          jobPcs: res3.record?.pcs || 0,
-          jobQty: res3.record?.qty || 0
         })
       }
     },
@@ -251,34 +289,33 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       }
     },
     {
+      component: 'textfield',
+      label: labels.itemCategoryName,
+      name: 'categoryName',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.metalRef,
+      name: 'metalRef',
+      props: {
+        readOnly: true
+      }
+    },
+    {
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      flex: 0.5
+      flex: 1
     },
     {
       component: 'numberfield',
       name: 'pcs',
       label: labels.pcs,
-      flex: 0.5
-    },
-    {
-      component: 'numberfield',
-      name: 'jobQty',
-      label: labels.jobQty,
-      flex: 0.7,
-      props: {
-        readOnly: true
-      }
-    },
-    {
-      component: 'numberfield',
-      name: 'jobPcs',
-      label: labels.jobPcs,
-      flex: 0.7,
-      props: {
-        readOnly: true
-      }
+      flex: 1
     },
     {
       component: 'textfield',
@@ -335,15 +372,15 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   ]
 
   useEffect(() => {
-    if (!recordId && documentType?.dtId) onChangeDT(documentType.dtId)
-  }, [documentType?.dtId])
+    if (!recordId && formik.values?.dtId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [recordId])
 
-  const totalQty = formik.values?.items?.reduce((qty, row) => qty + (parseFloat(row.qty) || 0), 0) ?? 0
-  const totalPcs = formik.values?.items?.reduce((pcs, row) => pcs + (parseFloat(row.pcs) || 0), 0) ?? 0
+  const totalQty = formik.values?.items?.reduce((qty, row) => qty + (row.qty || 0), 0) ?? 0
+  const totalPcs = formik.values?.items?.reduce((pcs, row) => pcs + (row.pcs || 0), 0) ?? 0
 
   return (
     <FormShell
@@ -364,6 +401,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.BatchTransfer}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
                     columnsInDropDown={[
@@ -378,7 +416,6 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       changeDT(newValue)
-                      await onChangeDT(newValue?.recordId)
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
@@ -413,7 +450,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                     values={formik.values.header}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('header.fromWCId', newValue?.recordId || null)
-                      formik.setFieldValue('items', formik.initialValues.items)
+                      formik.setFieldValue('items', initialValues.items)
                     }}
                     error={formik.touched.header?.fromWCId && formik.errors.header?.fromWCId}
                     maxAccess={maxAccess}

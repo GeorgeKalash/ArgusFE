@@ -35,18 +35,23 @@ const getFormattedNumber = (value, decimal, round = false, hideLeadingZeros = fa
     if (decimal !== undefined) {
       if (!round) {
         const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
-        formattedValue = `${formattedIntegerPart}.${decimalPart.slice(0, decimal)}`
-      } else
+        if (decimal === 0) {
+          formattedValue = formattedIntegerPart
+        } else {
+          formattedValue = `${formattedIntegerPart}.${decimalPart.slice(0,decimal)}`
+        }
+      } else {
         formattedValue = new Intl.NumberFormat('en-US', {
           minimumFractionDigits: decimal,
           maximumFractionDigits: decimal
         }).format(Number(sanitizedValue))
+      }
     } else {
       const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
       formattedValue = `${formattedIntegerPart}.${decimalPart}`
     }
   } else {
-    if (decimal) {
+    if (decimal !== undefined) {
       formattedValue = new Intl.NumberFormat('en-US', {
         minimumFractionDigits: decimal,
         maximumFractionDigits: decimal
@@ -97,4 +102,21 @@ const getNumberWithoutCommas = value => {
   return sanitizedValue
 }
 
-export { getFormattedNumber, validateNumberField, getNumberWithoutCommas, getFormattedNumberMax }
+function roundTo(value, decimals = 2) {
+  const numberValue = Number(value);
+
+  if (!Number.isFinite(numberValue)) {
+    return 0;
+  }
+
+  const numberDecimals = Number(decimals);
+
+  if (!Number.isInteger(numberDecimals) || numberDecimals < 0) {
+    return numberValue;
+  }
+
+  const factor = Math.pow(10, numberDecimals);
+  return Math.round(numberValue * factor) / factor;
+}
+
+export { getFormattedNumber, validateNumberField, getNumberWithoutCommas, getFormattedNumberMax, roundTo }

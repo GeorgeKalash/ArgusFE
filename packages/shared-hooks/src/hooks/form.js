@@ -1,9 +1,9 @@
 import { useFormik } from 'formik'
-import { useEffect } from 'react'
+import { useEffect, useRef, useLayoutEffect } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from '@argus/shared-utils/src/utils/maxAccess'
 import * as yup from 'yup'
 
-export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
+export function useForm({ behavior, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
   function explode(str) {
     const parts = str.split('.')
 
@@ -46,8 +46,21 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     return yup.object().shape(updatedSchema)
   }
 
+  const originalSubmit = formikProps.onSubmit;
+
   const formik = useFormik({
     ...formikProps,
+    onSubmit: async (values, helpers) => {
+      submitSucceededRef.current = false
+
+      try {
+        await originalSubmit?.(values, helpers)
+        submitSucceededRef.current = true
+      } catch (error) {
+        submitSucceededRef.current = false
+        throw error
+      }
+    },
     validate(values) {
       let maxAccessErrors = {}
 
@@ -55,7 +68,7 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
         const { controlId, accessLevel } = obj
         if (accessLevel === MANDATORY)
           if (controlId?.indexOf('.') < 0) {
-            const keys = Object.keys(formik.values)
+            const keys = Object.keys(values)
             if (!values[controlId] && keys?.indexOf(controlId) > -1)
               maxAccessErrors = {
                 ...maxAccessErrors,
@@ -96,10 +109,10 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
               }
               if (
                 !maxAccessErrors[gridName][fieldName] &&
-                formik.values[gridName] &&
-                !formik.values[gridName][fieldName] &&
-                formik.values[gridName][fieldName] !== 0 &&
-                formik.values[gridName][fieldName] !== '0'
+                values[gridName] &&
+                !values[gridName][fieldName] &&
+                values[gridName][fieldName] !== 0 &&
+                values[gridName][fieldName] !== '0'
               ) {
                 maxAccessErrors[gridName][fieldName] = `${fieldName} is required.`
               }
@@ -118,19 +131,64 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     }
   })
 
-  formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
-
-  const { key, value, reference } = documentType
+  const submitSucceededRef = useRef(false)
+  const wasSubmittingRef = useRef(false)
 
   useEffect(() => {
-    if (key && value && formik.values[key] !== value) formik.setFieldValue(key, value)
+    if (formik.isSubmitting) {
+      wasSubmittingRef.current = true
+      return
+    }
+
+    if (
+      wasSubmittingRef.current &&
+      !formik.isSubmitting &&
+      submitSucceededRef.current
+    ) {
+      wasSubmittingRef.current = false
+      submitSucceededRef.current = false
+
+      formik.resetForm({
+        values: formik.values
+      })
+    }
+  }, [formik.isSubmitting])
+
+  formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
+
+  const { key, value, fieldBehavior } = behavior || {}
+  const { isEmpty, fieldName } = fieldBehavior || {}
+
+  useLayoutEffect(() => {
+    if (!key || value == null || formik.values[key] === value) return
+
+    formik.setFieldValue(key, value)
   }, [value])
 
   useEffect(() => {
-    if (reference?.isEmpty) {
-      formik.setFieldValue(reference?.fieldName, '')
-    }
-  }, [reference?.isEmpty])
+    if (isEmpty) formik.setFieldValue(fieldName, '')
+  }, [isEmpty])
 
-  return { formik }
+  const normalized = value => {
+    if (value instanceof Date) return value.dateOnly ? value.toDateString() : value.valueOf()
+    if (Array.isArray(value)) return value.map(normalized)
+    if (value && typeof value === 'object')
+      return Object.fromEntries(
+        Object.entries(value)
+          .filter(([, v]) => v !== null && v !== undefined)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => [k, normalized(v)])
+      )
+    
+    return value
+  }
+
+  const dirty = JSON.stringify(normalized(formik.values)) !== JSON.stringify(normalized(formik.initialValues))
+  
+  return {
+    formik: {
+      ...formik,
+      dirty 
+    }
+  }
 }

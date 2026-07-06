@@ -36,6 +36,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
       plantId: null,
       costCenterId: null,
       lineId: null,
+      groupId: null,
       isSerialCreator: false,
       isInactive: false
     },
@@ -104,7 +105,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={ManufacturingRepository.Labor.qry}
-                parameters={`_startAt=0&_pageSize=100&_params=`}
+                parameters={`_startAt=0&_pageSize=10000&_params=`}
                 name='supervisorId'
                 label={labels.supervisor}
                 columnsInDropDown={[
@@ -188,6 +189,23 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => formik.setFieldValue('lineId', newValue?.recordId || null)}
                 error={formik.touched.lineId && Boolean(formik.errors.lineId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.WorkCenterGroups.qry}
+                name='groupId'
+                label={labels.wcg}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('groupId', newValue?.recordId || null)}
+                error={formik.touched.groupId && Boolean(formik.errors.groupId)}
               />
             </Grid>
             <Grid item xs={12}>

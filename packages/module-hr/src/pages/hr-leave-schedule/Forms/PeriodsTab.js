@@ -7,7 +7,7 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import PeriodsForm from './PeriodsForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
@@ -18,7 +18,7 @@ const PeriodsTab = ({ store, labels, maxAccess, window }) => {
 
   async function fetchGridData() {
     return await getRequest({
-      extension: LoanManagementRepository.LeavePeriod.qry,
+      extension: LeaveManagementRepository.LeavePeriod.qry,
       parameters: `&_lsId=${recordId}`
     })
   }
@@ -30,7 +30,7 @@ const PeriodsTab = ({ store, labels, maxAccess, window }) => {
     enabled: !!recordId,
     datasetId: ResourceIds.LeaveSchedule,
     queryFn: fetchGridData,
-    endpointId: LoanManagementRepository.LeavePeriod.qry
+    endpointId: LeaveManagementRepository.LeavePeriod.qry
   })
 
   const columns = [
@@ -104,7 +104,7 @@ const PeriodsTab = ({ store, labels, maxAccess, window }) => {
 
   const del = async obj => {
     await postRequest({
-      extension: LoanManagementRepository.LeavePeriod.del,
+      extension: LeaveManagementRepository.LeavePeriod.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -122,7 +122,6 @@ const PeriodsTab = ({ store, labels, maxAccess, window }) => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          pageSize={50}
           onEdit={edit}
           onDelete={del}
           pagination={false}

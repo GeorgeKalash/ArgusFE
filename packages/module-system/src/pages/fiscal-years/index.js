@@ -105,7 +105,6 @@ const FiscalYear = () => {
           rowId={['fiscalYear']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'

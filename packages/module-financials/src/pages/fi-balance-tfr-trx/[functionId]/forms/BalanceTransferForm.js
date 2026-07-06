@@ -27,6 +27,7 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function BalanceTransferForm({
   labels,
@@ -56,7 +57,7 @@ export default function BalanceTransferForm({
   const defaultPlant = userDefaults?.list?.find(({ key }) => key === 'plantId')?.value
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       dtId: null,
@@ -123,7 +124,7 @@ export default function BalanceTransferForm({
       rateCalcMethod: record?.fromRateCalcMethod,
       dirtyField: DIRTYFIELD_RATE
     })
-    formik.setValues({ ...record, date: formatDateFromApi(record.date), fromAmount: updatedRateRow.amount })
+    formik.resetForm({ values: { ...record, date: formatDateFromApi(record.date), fromAmount: updatedRateRow.amount } })
   }
 
   useEffect(() => {
@@ -172,19 +173,19 @@ export default function BalanceTransferForm({
   const onSelectionChange = async (type, currencyId, date, amount) => {
     const rate = await getRates(currencyId, date)
 
-    formik.setFieldValue(`${type}ExRate`, rate?.exRate ? rate?.exRate?.toFixed(2) : '')
+    formik.setFieldValue(`${type}ExRate`, rate?.exRate ? roundTo(rate?.exRate) : '')
     formik.setFieldValue(`${type}RateCalcMethod`, rate?.rateCalcMethod)
 
     const updatedRateRow = getRate({
       amount: amount || 0,
-      exRate: rate?.exRate.toFixed(2),
+      exRate: rate?.exRate ? roundTo(rate?.exRate) : null,
       baseAmount: 0,
       rateCalcMethod: rate?.rateCalcMethod,
       dirtyField: DIRTYFIELD_RATE
     })
 
-    formik.setFieldValue(`${type}BaseAmount`, parseFloat(updatedRateRow?.baseAmount).toFixed(2))
-    formik.setFieldValue(`${type}Amount`, parseFloat(updatedRateRow?.amount).toFixed(2))
+    formik.setFieldValue(`${type}BaseAmount`, roundTo(updatedRateRow?.baseAmount))
+    formik.setFieldValue(`${type}Amount`, roundTo(updatedRateRow?.amount))
   }
 
   const actions = [
@@ -233,7 +234,7 @@ export default function BalanceTransferForm({
       dirtyField: DIRTYFIELD_RATE
     })
 
-    formik.setFieldValue('fromBaseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+    formik.setFieldValue('fromBaseAmount', roundTo(updatedRateRow?.baseAmount))
 
     const updatedRateRowTo = getRate({
       amount: updatedRateRow?.baseAmount || 0,
@@ -243,8 +244,8 @@ export default function BalanceTransferForm({
       dirtyField: DIRTYFIELD_RATE
     })
 
-    formik.setFieldValue('toAmount', parseFloat(updatedRateRowTo?.amount).toFixed(2) || 0)
-    formik.setFieldValue('toBaseAmount', parseFloat(updatedRateRowTo?.baseAmount).toFixed(2) || 0)
+    formik.setFieldValue('toAmount', roundTo(updatedRateRowTo?.amount) || 0)
+    formik.setFieldValue('toBaseAmount', roundTo(updatedRateRowTo?.baseAmount) || 0)
   }
 
   return (
@@ -443,7 +444,7 @@ export default function BalanceTransferForm({
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='fromAmount'
                     label={labels.amount}
@@ -461,7 +462,7 @@ export default function BalanceTransferForm({
                     maxAccess={maxAccess}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='fromBaseAmount'
                     label={labels.baseAmount}
@@ -474,26 +475,26 @@ export default function BalanceTransferForm({
                     maxAccess={maxAccess}
                   />
                 </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='fromExRate'
-                label={labels.rate}
-                value={formik.values.fromExRate}
-                maxLength={14}
-                decimalScale={2}
-                onChange={e => {
-                  formik.setFieldValue('fromExRate', e.target.value || null)
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='fromExRate'
+                    label={labels.rate}
+                    value={formik.values.fromExRate}
+                    maxLength={14}
+                    decimalScale={2}
+                    onChange={e => {
+                      formik.setFieldValue('fromExRate', e.target.value || null)
 
-                  onChangeValue(e.target.value, formik.values.fromAmount)
-                }}
-                readOnly={isPosted}
-                onClear={() => formik.setFieldValue('fromExRate', '')}
-                required
-                error={formik.touched.fromExRate && Boolean(formik.errors.fromExRate)}
-                maxAccess={maxAccess}
-              />
+                      onChangeValue(e.target.value, formik.values.fromAmount)
+                    }}
+                    readOnly={isPosted}
+                    onClear={() => formik.setFieldValue('fromExRate', '')}
+                    required
+                    error={formik.touched.fromExRate && Boolean(formik.errors.fromExRate)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox

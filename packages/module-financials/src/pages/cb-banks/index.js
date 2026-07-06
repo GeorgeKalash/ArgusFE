@@ -72,7 +72,7 @@ const CbBank = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
+      height: 450,
       title: _labels.bank
     })
   }
@@ -106,7 +106,6 @@ const CbBank = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           maxAccess={access}

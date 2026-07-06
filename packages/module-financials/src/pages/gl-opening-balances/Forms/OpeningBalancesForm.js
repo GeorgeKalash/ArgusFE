@@ -6,18 +6,14 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { DeliveryRepository } from '@argus/repositories/src/repositories/DeliveryRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 
@@ -200,7 +196,7 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='amount'
                 label={labels.amount}
@@ -210,10 +206,11 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
                 onClear={() => formik.setFieldValue('amount', '')}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
-                maxLength={10}
+                maxLength={15}
+                decimalScale={2}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='baseAmount'
                 required
@@ -223,7 +220,7 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 onChange={e => formik.setFieldValue('baseAmount', e.target.value)}
                 onClear={() => formik.setFieldValue('baseAmount', '')}
                 error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
-                maxLength={10}
+                maxLength={15}
                 decimalScale={2}
               />
             </Grid>

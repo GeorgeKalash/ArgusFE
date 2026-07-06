@@ -279,7 +279,6 @@ const GeneratePoductionOrder = () => {
                     columns={columnsOrders}
                     gridData={formik?.values?.orders}
                     rowId={['itemId']}
-                    isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     showCheckboxColumn={true}

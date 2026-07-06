@@ -9,9 +9,11 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
-export default function ItemDetails({ plId, itemId, window }) {
+export default function ItemDetails({ values, window }) {
   const { getRequest } = useContext(RequestsContext)
+  const { plId, itemId, siteId } = values
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.ItemDetails
   })
@@ -25,6 +27,7 @@ export default function ItemDetails({ plId, itemId, window }) {
       name: '',
       weight: null,
       volume: null,
+      onHandPerSite: 0,
       qtyOnHand: null,
       currentCost: null,
       defaultSalePrice: null
@@ -36,12 +39,13 @@ export default function ItemDetails({ plId, itemId, window }) {
       if (!itemId) return 
       const res = await getRequest({
         extension: InventoryRepository.Item.quickView,
-        parameters: `_itemId=${itemId}&_plId=${plId || 0}`
+        parameters: `_itemId=${itemId}&_plId=${plId || 0}&_siteId=${siteId || 0}`
       })
 
       formik.setValues({
         ...res.record,
-        currentCost: res?.record?.hideCost ? '**' : res?.record?.currentCost
+        currentCost: res?.record?.hideCost ? '**' : res?.record?.currentCost,
+        onHandPerSite: res?.record?.onHandPerSite || 0
       })
     })()
   }, [])
@@ -57,16 +61,19 @@ export default function ItemDetails({ plId, itemId, window }) {
             <CustomTextField name='name' value={formik?.values?.name} label={labels.name} readOnly maxAccess={maxAccess}/>
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField name='weight' value={formik?.values?.weight} label={labels.weight} readOnly maxAccess={maxAccess}/>
+            <CustomNumberField name='weight' value={formik?.values?.weight} label={labels.weight} readOnly maxAccess={maxAccess}/>
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField name='volume' value={formik?.values?.volume} label={labels.volume} readOnly maxAccess={maxAccess}/>
+            <CustomNumberField name='volume' value={formik?.values?.volume} label={labels.volume} readOnly maxAccess={maxAccess}/>
+          </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField name='onHandPerSite' value={formik?.values?.onHandPerSite} label={labels.onHandPerSite} readOnly maxAccess={maxAccess}/>
+          </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField name='qtyOnHand' value={formik?.values?.qtyOnHand} label={labels.qtyOnHand} readOnly maxAccess={maxAccess}/>
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField name='qtyOnHand' value={formik?.values?.qtyOnHand} label={labels.qtyOnHand} readOnly maxAccess={maxAccess}/>
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
+            <CustomNumberField
               name='currentCost'
               value={formik?.values?.currentCost}
               label={labels.currentCost}
@@ -75,7 +82,7 @@ export default function ItemDetails({ plId, itemId, window }) {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField
+            <CustomNumberField
               name='defaultSalePrice'
               value={formik?.values?.defaultSalePrice}
               label={labels.defaultSalePrice}

@@ -122,7 +122,7 @@ const SAClients = () => {
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             <IconButton size='small' onClick={() => openPreview(row.data.recordId, row.data.addressId)}>
-              <img src={require('@argus/shared-ui/src/components/images/buttonsIcons/preview-black.png').default.src} alt={'preview'} />
+              <img src='/images/buttonsIcons/preview-black.png' alt={'preview'} />
             </IconButton>
           </Box>
         )
@@ -191,7 +191,6 @@ const SAClients = () => {
           refetch={refetch}
           onEdit={Edit}
           onDelete={Delete}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />

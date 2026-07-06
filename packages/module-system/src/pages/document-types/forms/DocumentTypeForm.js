@@ -9,6 +9,7 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
@@ -31,22 +32,19 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
       recordId: null,
       name: '',
       reference: '',
-      dgId: '',
-      dgName: '',
-      ilId: '',
-      ilName: '',
-      activeStatusName: '',
-      nraRef: '',
-      nraDescription: '',
-      nraId: ''
+      dgId: null,
+      ilId: null,
+      activeStatus: null,
+      nraId: null,
+      defaultPrintTemplateLayoutId: null
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required(),
-      dgName: yup.string().required(),
-      activeStatusName: yup.string().required()
+      dgId: yup.number().required(),
+      activeStatus: yup.number().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -121,11 +119,10 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('dgId', newValue?.key)
-                  formik.setFieldValue('dgName', newValue?.value)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('dgId', newValue?.key || null)
                 }}
-                error={formik.touched.dgName && Boolean(formik.errors.dgName)}
+                error={formik.touched.dgId && Boolean(formik.errors.dgId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -137,9 +134,8 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
                 displayField='name'
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('ilId', newValue?.recordId)
-                  formik.setFieldValue('ilName', newValue?.name)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('ilId', newValue?.recordId || null)
                 }}
                 error={formik.touched.ilId && Boolean(formik.errors.ilId)}
               />
@@ -154,11 +150,10 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('activeStatus', newValue?.key)
-                  formik.setFieldValue('activeStatusName', newValue?.value)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('activeStatus', newValue?.key || null)
                 }}
-                error={formik.touched.activeStatusName && Boolean(formik.errors.activeStatusName)}
+                error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -169,23 +164,30 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
                 name='nraRef'
                 label={labels.nuRange}
                 form={formik}
-                secondDisplayField={true}
+                displayFieldWidth={2}
                 firstValue={formik.values.nraRef}
                 secondValue={formik.values.nraDescription}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('nraId', newValue?.recordId)
-                    formik.setFieldValue('nraRef', newValue?.reference)
-                    formik.setFieldValue('nraDescription', newValue?.description)
-                  } else {
-                    formik.setFieldValue('nraId', null)
-                    formik.setFieldValue('nraRef', null)
-                    formik.setFieldValue('nraDescription', null)
-                  }
+                onChange={(_, newValue) => {
+                    formik.setFieldValue('nraId', newValue?.recordId || null)
+                    formik.setFieldValue('nraRef', newValue?.reference || "")
+                    formik.setFieldValue('nraDescription', newValue?.description || "")
                 }}
                 errorCheck={'nraId'}
                 maxAccess={maxAccess}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                  name='defaultPrintTemplateLayoutId'
+                  label={labels.defaultPrintTemplateLayoutId}
+                  value={formik.values.defaultPrintTemplateLayoutId}
+                  onChange={formik.handleChange}
+                  maxLength='3'
+                  decimalScale={0}
+                  allowNegative={false}
+                  onClear={() => formik.setFieldValue('defaultPrintTemplateLayoutId', null)}
+                  error={formik.touched.defaultPrintTemplateLayoutId && Boolean(formik.errors.defaultPrintTemplateLayoutId)}
+                />
             </Grid>
           </Grid>
         </Grow>

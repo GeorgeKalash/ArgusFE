@@ -1,11 +1,13 @@
 import { Box, Grid } from '@mui/material'
-import { useContext, useState } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { getButtons } from './Buttons'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomButton from '../Inputs/CustomButton'
 import ReportGenerator from './ReportGenerator'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import DirtyDialog from '@argus/shared-ui/src/components/Shared/DirtyDialog'
 
 const WindowToolbar = ({
   onSave,
@@ -33,19 +35,38 @@ const WindowToolbar = ({
   maxAccess,
   onPrint,
   reportSize,
+  dtId,
   actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
   const [reportStore, setReportStore] = useState([])  
+  const [reportPack, setReportPack] = useState(null)
   const [defaultLayoutId, setDefaultLayoutId] = useState(null)
 
+  useEffect(() => {
+    resourceId && getReportLayout()
+  }, [])
+
+  useEffect(() => {
+    if (!reportStore.length || !reportPack) return
+
+    resolveDefaultLayout(reportStore, reportPack)
+  }, [dtId, reportStore])
+
   const getReportLayout = async () => {
-    const reportPack = await getRequest({
+    if (reportPack) return
+
+    const reportPackRes = await getRequest({
       extension: SystemRepository.ReportLayout.get,
       parameters: `_resourceId=${resourceId}`
     })
-    const pack = reportPack?.record || {}
+
+    const pack = reportPackRes?.record || {}
+
+    setReportPack(pack)
 
     const firstStore = (pack?.layouts || []).map(item => ({
       id: item.id,
@@ -69,19 +90,47 @@ const WindowToolbar = ({
 
     const firstStore2 =
       firstStore?.filter(
-        item => !filteringItems.some(filterItem => filterItem.id === item.id && filterItem.isInactive)
+        item =>
+          !filteringItems.some(
+            filterItem =>
+              filterItem.id === item.id &&
+              filterItem.isInactive
+          )
       ) || []
 
     const combinedStore = firstStore ? [...firstStore2, ...secondStore] : [...secondStore]
 
-    setReportStore(
-      (combinedStore || []).map((item, index) => ({
+    const finalStore = (combinedStore || []).map(
+      (item, index) => ({
         ...item,
         uniqueId: index + 1
-      }))
+      })
     )
 
-    setDefaultLayoutId(pack?.defaultLayoutId)
+    setReportStore(finalStore)
+  }
+
+  const resolveDefaultLayout = async (finalStore,pack) => {
+    let selectedDefaultLayout = pack?.defaultLayoutId
+
+    if (dtId) {
+      const res = await getRequest({
+        extension: SystemRepository.DocumentType.get,
+        parameters: `_recordId=${dtId}`
+      })
+
+      const defaultDtTemplateId = res?.record?.defaultPrintTemplateLayoutId
+
+      const existsInStore = finalStore.some(
+        layout => layout.id === defaultDtTemplateId
+      )
+
+      if (existsInStore) {
+        selectedDefaultLayout = defaultDtTemplateId
+      }
+    }
+
+    setDefaultLayoutId(selectedDefaultLayout)
   }
 
   const functionMapping = {
@@ -103,6 +152,22 @@ const WindowToolbar = ({
     onSaveClear,
     onClear,
     onInfo
+  }
+
+  const handleProtectedClick = (button, handleClick) => {
+    if (button.checkDirty && form?.dirty) {
+      stack({
+        Component: DirtyDialog,
+        props: {
+          fullScreen: false,
+        },
+        refresh: false
+      })
+
+      return
+    }
+
+    handleClick?.()
   }
 
   const buttons = getButtons(platformLabels)
@@ -149,7 +214,7 @@ const WindowToolbar = ({
               return (
                 isVisible && (
                   <CustomButton
-                    onClick={handleClick}
+                    onClick={() => handleProtectedClick(button, handleClick)}
                     label={button.label}
                     color={button.color}
                     border={button.border}

@@ -51,10 +51,12 @@ import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
@@ -104,6 +106,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     reference: '',
     date: new Date(),
     dueDate: new Date(),
+    expectedDeliveryDate: null,
     plantId: null,
     clientId: '',
     currencyId: parseInt(currency),
@@ -115,16 +118,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     releaseStatus: '',
     wip: 1,
     deliveryStatus: 1,
-    printStatusName: '',
     isVattable: false,
     exWorks: false,
     taxId: '',
     shipAddress: '',
     billAddress: '',
-    subtotal: '',
+    subtotal: 0,
     miscAmount: 0,
     amount: 0,
-    vatAmount: '',
+    vatAmount: 0,
     tdAmount: 0,
     overdraft: false,
     plId: '',
@@ -139,10 +141,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     tdPct: 0,
     initialTdPct: 0,
     baseAmount: 0,
-    volume: '',
-    weight: '',
+    volume: 0,
+    weight: 0,
     qty: 0,
     serializedAddress: '',
+    sourceId: null,
+    sourceNo: '',
     items: [
       {
         id: 1,
@@ -193,7 +197,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['items'],
     initialValues,
     validateOnChange: true,
@@ -201,7 +205,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
-       sourceNo: yup.string().test( function (value) {
+       sourceNo: yup.string().nullable().test( function (value) {
         const { sourceId } = this.parent
         return !(sourceId && !value)
         }
@@ -213,6 +217,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       delete copy.items
       copy.date = formatDateToApi(copy.date)
       copy.dueDate = formatDateToApi(copy.dueDate)
+      copy.expectedDeliveryDate = copy.expectedDeliveryDate ? formatDateToApi(copy.expectedDeliveryDate) : null
       copy.miscAmount = copy.miscAmount || 0
 
       if (!obj.rateCalcMethod) delete copy.rateCalcMethod
@@ -262,6 +267,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
+  const isReleased = formik.values.status == 4
 
   async function getFilteredMU(itemId, msId) {
     if (!itemId) return
@@ -277,7 +283,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }
 
   function checkMinMaxAmount(amount, type, modType) {
-    let currentAmount = parseFloat(amount) || 0
+    let currentAmount = amount || 0
 
     if (type === modType) {
       if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
@@ -291,7 +297,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const onCondition = row => {
     if (row.itemId && row.taxId) {
       return {
-        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
         hidden: false
       }
     } else {
@@ -338,7 +344,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         }
         if (newRow.isInactive) {
           update({
-            ...formik.initialValues.items[0],
+            ...initialValues.items[0],
             id: newRow.id
           })
 
@@ -489,7 +495,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const muQty = newRow?.muQty ?? filteredItems?.qty
 
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update({ ...data, baseQty: parseFloat(newRow?.qty) * muQty })
+        update({ ...data, baseQty: newRow?.qty * muQty })
       }
     },
     {
@@ -656,6 +662,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     delete copy.items
     copy.date = formatDateToApi(copy.date)
     copy.dueDate = formatDateToApi(copy.dueDate)
+    copy.expectedDeliveryDate = copy.expectedDeliveryDate ? formatDateToApi(copy.expectedDeliveryDate) : null
 
     const res = await postRequest({
       extension: SaleRepository.SalesOrder.close,
@@ -671,6 +678,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     delete copy.items
     copy.date = formatDateToApi(copy.date)
     copy.dueDate = formatDateToApi(copy.dueDate)
+    copy.expectedDeliveryDate = copy.expectedDeliveryDate ? formatDateToApi(copy.expectedDeliveryDate) : null
 
     const res = await postRequest({
       extension: SaleRepository.SalesOrder.reopen,
@@ -687,6 +695,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     delete copy.items
     copy.date = formatDateToApi(copy.date)
     copy.dueDate = formatDateToApi(copy.dueDate)
+    copy.expectedDeliveryDate = copy.expectedDeliveryDate ? formatDateToApi(copy.expectedDeliveryDate) : null
 
     const res = await postRequest({
       extension: SaleRepository.SalesOrder.cancel,
@@ -703,8 +712,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     delete copy.items
     copy.date = formatDateToApi(copy.date)
     copy.dueDate = formatDateToApi(copy.dueDate)
+    copy.expectedDeliveryDate = copy.expectedDeliveryDate ? formatDateToApi(copy.expectedDeliveryDate) : null
 
-    await postRequest({
+    const res = await postRequest({
       extension: SaleRepository.SalesOrder.postToInvoice,
       record: JSON.stringify(copy)
     })
@@ -712,6 +722,16 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     toast.success(platformLabels.Invoice)
     invalidate()
     window.close()
+
+    stack({
+      Component: SaleTransactionForm,
+      props: {
+        recordId: res.recordId,
+        functionId: SystemFunction.SalesInvoice,
+        getResourceId: () => ResourceIds.SalesInvoice,
+        lockRecord
+      }
+    })
   }
 
   async function onWorkFlowClick() {
@@ -780,7 +800,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       key: 'Invoice',
       condition: true,
       onClick: toInvoice,
-      disabled: !(formik.values.deliveryStatus === 1 && formik.values.status !== 3 && isClosed)
+      disabled: !isReleased
     },
     {
       key: 'generateProdOrder',
@@ -824,20 +844,22 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
               }
             })
           )
-        : formik.initialValues.items
+        : initialValues.items
 
-    formik.setValues({
-      ...header,
-      currentDiscount:
-        header?.tdType == 1 || header?.tdType == null
-          ? header?.tdAmount
-          : header?.tdPct,
-      amount: parseFloat(header?.amount).toFixed(2),
-      shipAddress: shipAdd,
-      billAddress: billAdd,
-      tdPct: header?.tdPct || 0,
-      initialTdPct: client?.record?.tdPct || 0,
-      items: modifiedList
+    formik.resetForm({
+      values: {
+        ...header,
+        currentDiscount:
+          header?.tdType == 1 || header?.tdType == null
+            ? header?.tdAmount
+            : header?.tdPct,
+        amount: Number(header?.amount),
+        shipAddress: shipAdd,
+        billAddress: billAdd,
+        tdPct: header?.tdPct || 0,
+        initialTdPct: client?.record?.tdPct || 0,
+        items: modifiedList
+      }
     })
   }
 
@@ -848,6 +870,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     })
 
     res.record.header.date = formatDateFromApi(res?.record?.header?.date)
+    res.record.header.expectedDeliveryDate = formatDateFromApi(res?.record?.header?.expectedDeliveryDate)
 
     return res.record
   }
@@ -949,7 +972,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     if (cycleButtonState.value == 1) {
       currentPctAmount =
         formik.values.currentDiscount < 0 || formik.values.currentDiscount > 100 ? 0 : formik.values.currentDiscount
-      currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(subtotal)) / 100
+      currentTdAmount = (currentPctAmount * subtotal) / 100
       currentDiscountAmount = currentPctAmount
 
       formik.setFieldValue('tdAmount', currentTdAmount)
@@ -960,7 +983,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         formik.values.currentDiscount < 0 || subtotal < formik.values.currentDiscount
           ? 0
           : formik.values.currentDiscount
-      currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(subtotal)) * 100
+      currentPctAmount = (currentTdAmount / subtotal) * 100
       currentDiscountAmount = currentTdAmount
       formik.setFieldValue('tdPct', currentPctAmount)
       formik.setFieldValue('tdAmount', currentTdAmount)
@@ -981,12 +1004,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
-      basePrice: parseFloat(newRow?.basePrice) || 0,
+      basePrice: newRow?.basePrice || 0,
       volume: newRow?.volume || 0,
       weight: newRow?.weight,
       unitPrice: newRow?.unitPrice || 0,
-      upo: parseFloat(newRow?.upo) || 0,
-      qty: parseFloat(newRow?.qty),
+      upo: newRow?.upo || 0,
+      qty: newRow?.qty,
       extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,
       mdType: newRow?.mdType,
@@ -1019,9 +1042,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       unitPrice: itemPriceRow?.unitPrice,
       extendedPrice: itemPriceRow?.extendedPrice,
       upo: itemPriceRow?.upo,
-      mdValue: itemPriceRow?.mdValue,
+      mdValue: roundTo(itemPriceRow?.mdValue || 0, 3), 
       mdType: itemPriceRow?.mdType,
-      mdAmount: itemPriceRow?.mdAmount,
+      mdAmount: roundTo(itemPriceRow?.mdAmount || 0),
       vatAmount: vatCalcRow?.vatAmount
     }
 
@@ -1043,7 +1066,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   const subTotal = getSubtotal(parsedItemsArray)
 
-  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.miscAmount)
+  const miscValue = formik.values.miscAmount == 0 ? 0 : formik.values.miscAmount
 
   const _footerSummary = getFooterTotals(parsedItemsArray, {
     totalQty: 0,
@@ -1051,8 +1074,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     totalVolume: 0,
     totalUpo: 0,
     sumVat: 0,
-    sumExtended: parseFloat(subTotal),
-    tdAmount: parseFloat(formik.values.tdAmount),
+    sumExtended: subTotal,
+    tdAmount: formik.values.tdAmount,
     net: 0,
     miscAmount: miscValue
   })
@@ -1066,21 +1089,21 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
-      tdAmount: parseFloat(currentDiscount),
+      tdAmount: currentDiscount,
       tdPlain: typeChange == 1,
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
       currentDiscount: currentDiscount,
       hiddenTdPct: tdPct,
-      hiddenTdAmount: parseFloat(tdAmount),
+      hiddenTdAmount: tdAmount,
       typeChange: typeChange
     })
 
-    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
+    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct || 0)
+    formik.setFieldValue('tdPct', roundTo(_discountObj?.hiddenTdPct) || 0)
 
     return _discountObj?.hiddenTdPct || 0
   }
@@ -1093,7 +1116,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         qty: item?.qty,
         weight: item?.weight,
         extendedPrice: item?.extendedPrice,
-        baseLaborPrice: parseFloat(item?.baseLaborPrice),
+        baseLaborPrice: item?.baseLaborPrice,
         vatAmount: item?.vatAmount,
         tdPct: tdPct,
         taxDetails: formik.values.isVattable ? item.taxDetails : null
@@ -1108,7 +1131,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }
 
   function ShowMdValueErrorMessage(clientMaxDiscount, rowData, update) {
-    if (parseFloat(rowData.mdAmount) > clientMaxDiscount) {
+    if (rowData.mdAmount > clientMaxDiscount) {
       formik.setFieldValue('mdAmount', clientMaxDiscount)
       rowData.mdAmount = clientMaxDiscount
       const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
@@ -1238,7 +1261,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return { userDefaultsList: userObject, systemDefaultsList: systemObject }
   }
 
-  async function onChangeDtId(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) return
 
     const res = await getRequest({
@@ -1264,23 +1287,23 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }, [address])
 
   useEffect(() => {
-    formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
-    formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(2))
-    formik.setFieldValue('weight', parseFloat(totalWeight).toFixed(2))
-    formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
-    formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
+    formik.setFieldValue('qty', Number(totalQty))
+    formik.setFieldValue('amount', Number(amount))
+    formik.setFieldValue('volume', Number(totalVolume))
+    formik.setFieldValue('weight', Number(totalWeight))
+    formik.setFieldValue('subtotal', Number(subtotal))
+    formik.setFieldValue('vatAmount', Number(vatAmount))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
     if (reCal) {
-      let currentTdAmount = (parseFloat(formik.values.tdPct) * parseFloat(subtotal)) / 100
+      let currentTdAmount = (formik.values.tdPct * subtotal) / 100
       recalcGridVat(formik.values.tdType, formik.values.tdPct, currentTdAmount, formik.values.currentDiscount)
     }
   }, [subtotal])
 
   useEffect(() => {
-    if (formik.values?.dtId & !recordId) onChangeDtId(formik.values?.dtId)
+    if (formik.values?.dtId & !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {
@@ -1346,6 +1369,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesOrder.pack}
                     reducer={response => response?.record?.documentTypes}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -1635,7 +1659,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             }}
             value={formik.values.items}
             error={formik.errors.items}
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={initialValues?.items?.[0]}
             columns={columns}
             name='items'
             maxAccess={maxAccess}
@@ -1661,7 +1685,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     error={formik.touched.description && Boolean(formik.errors.description)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomCheckBox
                     name='overdraft'
                     value={formik.values?.overdraft}
@@ -1669,6 +1693,19 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     readOnly
                     label={labels.overdraft}
                     maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomDatePicker
+                    name='expectedDeliveryDate'
+                    label={labels.expectedDeliveryDate}
+                    value={formik?.values?.expectedDeliveryDate}
+                    onChange={formik.setFieldValue}
+                    editMode={editMode}
+                    readOnly={isClosed}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('expectedDeliveryDate', null)}
+                    error={formik.touched.expectedDeliveryDate && Boolean(formik.errors.expectedDeliveryDate)}
                   />
                 </Grid>
                 <Grid item container spacing={2}>
@@ -1690,8 +1727,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                       displayFieldWidth={1.5}
                       maxAccess={maxAccess}
                       onChange={(_, newValue) => {
-                        formik.setFieldValue('sourceId', newValue ? newValue.recordId : null)
-                        formik.setFieldValue('sourceNo', '')
+                        formik.setFieldValue('sourceNo', null)
+                        formik.setFieldValue('sourceId', newValue?.recordId || null)
                       }}
                       error={formik.touched.sourceId && Boolean(formik.errors.sourceId)}
                     />
@@ -1762,7 +1799,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     handleButtonClick={handleButtonClick}
                     ShowDiscountIcons={true}
                     onChange={e => {
-                      let discount = Number(e.target.value.replace(/,/g, ''))
+                      let discount = e.target.value
                       if (formik.values.tdType == 1) {
                         if (discount < 0 || subtotal < discount) {
                           discount = 0
@@ -1776,17 +1813,17 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     }}
                     onBlur={async e => {
                       setReCal(true)
-                      let discountAmount = Number(e.target.value.replace(/,/g, ''))
-                      let tdPct = Number(e.target.value.replace(/,/g, ''))
-                      let tdAmount = Number(e.target.value.replace(/,/g, ''))
+                      let discountAmount = e.target.value
+                      let tdPct = e.target.value
+                      let tdAmount = e.target.value
                       if (formik.values.tdType == 1) {
-                        tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
-                        formik.setFieldValue('tdPct', tdPct)
+                        tdPct = (discountAmount / subtotal) * 100
+                        formik.setFieldValue('tdPct', roundTo(tdPct || 0))
                       }
 
                       if (formik.values.tdType == 2) {
-                        tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
-                        formik.setFieldValue('tdAmount', tdAmount)
+                        tdAmount = (discountAmount * subtotal) / 100
+                        formik.setFieldValue('tdAmount', roundTo(tdAmount || 0))
                       }
 
                       recalcGridVat(formik.values.tdType, tdPct, tdAmount, discountAmount)

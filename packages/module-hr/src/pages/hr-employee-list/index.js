@@ -1,4 +1,6 @@
 import { useContext } from 'react'
+import { Box, IconButton } from '@mui/material'
+import Image from 'next/image'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -10,8 +12,9 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import EmployeeListWindow from './Windows/EmployeeListWindow'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
+import EmployeeListWindow from '@argus/shared-ui/src/components/Shared/EmployeeListWindow'
+import LeaveSchedules from '@argus/shared-ui/src/components/Shared/EmployeePages/LeaveSchedules'
 
 const EmployeeList = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -124,6 +127,30 @@ const EmployeeList = () => {
       headerName: labels.hireDate,
       flex: 1,
       type: 'date'
+    },
+    {
+      field: '',
+      flex: 0.6,
+      cellRenderer: row => (
+        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+          <IconButton
+            size='small'
+            onClick={() => {
+              stack({
+                Component: LeaveSchedules,
+                props: {
+                  row: row?.data?.parent,
+                  labels,
+                  maxAccess: access
+                },
+                title: labels.leaveSchedule
+              })
+            }}
+          >
+            <Image src={'/images/buttonsIcons/popup-black.png'} width={18} height={18} />
+          </IconButton>
+        </Box>
+      )
     }
   ]
 
@@ -142,22 +169,19 @@ const EmployeeList = () => {
     openForm()
   }
 
-  function openForm(recordId) {
+  function openForm(obj) {
     stack({
       Component: EmployeeListWindow,
       props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 1000,
-      height: 700,
-      title: labels.employee
+        recordId: obj?.recordId,
+        employeeStatus: obj?.activeStatus,
+        onSuccess: invalidate
+      }
     })
   }
 
   const edit = obj => {
-    openForm(obj?.parent?.recordId)
+    openForm(obj?.parent)
   }
 
   return (
@@ -179,6 +203,7 @@ const EmployeeList = () => {
           deleteConfirmationType={'strict'}
           pageSize={50}
           maxAccess={access}
+          actionCondition={(row, type) => { return type === 'delete' ? row?.parent?.activeStatus == 1 : true }}
         />
       </Grow>
     </VertLayout>

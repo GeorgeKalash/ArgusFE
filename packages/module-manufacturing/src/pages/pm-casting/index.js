@@ -72,7 +72,11 @@ const Casting = () => {
     {
       field: 'threeDPRef',
       headerName: labels.threeDP,
-      flex: 1
+      flex: 1,
+      linkOpen: data => ({
+        resourceId: ResourceIds.ThreeDPrint,
+        props: { recordId: data?.threeDPId }
+      })
     },
     {
       field: 'setPcs',
@@ -97,6 +101,9 @@ const Casting = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -149,7 +156,6 @@ const Casting = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           deleteConfirmationType={'strict'}

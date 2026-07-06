@@ -552,10 +552,8 @@ export function DataGrid({
 
               const checked = e.target.checked
 
-              params.node.setDataValue(params.colDef.field, checked)
-
               const changes = { [params.colDef.field]: checked }
-              setData(changes, params)
+              params.node.updateData({ ...params.data, ...changes })
               commit({ ...params.data, ...changes })
 
               if (params.colDef.updateOn !== 'blur') {
@@ -630,9 +628,21 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
+    const isRightAligned =
+      column.colDef?.component === 'numberfield'
+        ? (column.colDef?.props?.align ?? 'right') === 'right'
+        : false
+
     return (
-      <Box className={`cellBox`}>
-        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
+      <Box
+        className={`cellBox ${isRightAligned ? 'rightAlignedCellBox' : ''}`}
+      >
+        <Component
+          {...params}
+          column={column.colDef}
+          updateRow={updateRow}
+          update={update}
+        />
       </Box>
     )
   }
@@ -830,7 +840,13 @@ export function DataGrid({
         cellEditor: CustomCellEditor,
         wrapText: true,
         autoHeight: true,
-        cellClass: `${mergedCellClass || undefined}  ${centered}`,
+        cellClass: [
+          ...mergedCellClass,
+          centered,
+          isNumberColumn ? 'numberCell' : ''
+        ]
+          .filter(Boolean)
+          .join(' '),
         ...(column?.checkAll?.visible && {
           headerClass: 'agHeaderCheckboxCell',
           headerComponent: params => {
@@ -1329,6 +1345,18 @@ export function DataGrid({
           align-items: center;
           overflow: hidden;
           padding: 0px !important;
+        }
+
+        .agContainer :global(.ag-cell.numberCell) {
+          justify-content: flex-end !important;
+        }
+
+        .agContainer:dir(ltr) :global(.ag-cell.numberCell) {
+          padding-right: 6px !important;
+        }
+
+        .agContainer:dir(rtl) :global(.ag-cell.numberCell) {
+          padding-left: 6px !important;
         }
 
         .agContainer :global(.ag-cell .MuiBox-root) {

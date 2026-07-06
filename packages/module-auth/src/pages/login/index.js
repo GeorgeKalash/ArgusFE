@@ -109,7 +109,7 @@ const LoginPage = () => {
         onClose: () => onClose()
       },
       expandable: false,
-      closable: false,
+      closable: true,
       draggable: false,
       spacing: false
     })
@@ -169,7 +169,7 @@ const LoginPage = () => {
           >
             <CardMedia
               component='img'
-              image={require('@argus/shared-ui/src/components/images/logos/ArgusLogo.png').default.src}
+              image={'/images/logos/ArgusLogo.png'}
               alt='ArgusERP'
               sx={{ height: '100%', maxWidth: '100%', objectFit: 'contain' }}
             />

@@ -11,9 +11,11 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import LoCarriersForms from './forms/LoCarriersForm'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const LoCarrier = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -83,7 +85,7 @@ const LoCarrier = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -98,7 +100,6 @@ const LoCarrier = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

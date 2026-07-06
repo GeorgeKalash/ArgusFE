@@ -39,8 +39,8 @@ const Approvals = props => {
     },
     ,
     {
-      field: 'date',
-      headerName: _labels.date,
+      field: 'responseDate',
+      headerName: _labels.responseDate,
       flex: 1,
       type: 'date'
     },
@@ -51,7 +51,9 @@ const Approvals = props => {
     },
     {
       field: 'responseName',
-
+      type: 'badge',
+      family: 'approvals',
+      valueField: 'response',
       headerName: _labels.response,
       flex: 1
     },
@@ -81,7 +83,6 @@ const Approvals = props => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           maxAccess={access}
           pagination={false}
         />

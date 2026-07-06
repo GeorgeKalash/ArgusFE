@@ -8,6 +8,7 @@ export const Module = {
   CurrencyTrading: 35,
   Remittance: 36,
   CashCount: 37,
+  BrokerageTrading: 38,
   Inventory: 41,
   Manufacturing: 42,
   FixedAssets: 43,
@@ -30,5 +31,4 @@ export const Module = {
   Loans: 74,
   Payroll: 75,
   HR: 100,
-  ProductModeling: 48
 }

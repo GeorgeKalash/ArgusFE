@@ -15,7 +15,6 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import { useRefBehavior } from '@argus/shared-hooks/src/hooks/useReferenceProxy'
 import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
@@ -26,6 +25,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 import PrintConfirmationDialog from './PrintConfirmationDialog'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -40,16 +40,18 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   const currencyId = systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value
   const plId = systemDefaults?.list?.find(({ key }) => key === 'plId')?.value
+  const dmgId = parseInt((systemDefaults?.list?.find(({ key }) => key === 'iv_dmgId')?.value)) || null
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.qry
   })
   const imageUploadRef = useRef(null)
 
-  const { changeDT, maxAccess } = useRefBehavior({
-    access: access,
-    readOnlyOnEditMode: store.recordId,
-    name: 'sku'
+  const { onFieldChange, maxAccess, fieldBehavior} = useFieldBehavior({
+    access,
+    fieldName: 'sku',
+    editMode: recordId,
+    enableClearing: !recordId
   })
 
   const { formik } = useForm({
@@ -77,15 +79,17 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       kitItem: false,
       taxId: '',
       lotCategoryId: null,
+      dmgId,
       spfId: '',
       categoryName: '',
       defSaleMUId: '',
       pgId: '',
-      productionLevel: '',
+      productionLevel: null,
       collectionId: null,
       isInactive: false,
       isExternal: false
     },
+    behavior: { fieldBehavior },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -142,23 +146,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         await imageUploadRef.current.submit()
       }
 
-      const res = await getRequest({
-        extension: InventoryRepository.Items.get,
-        parameters: `_recordId=${response.recordId}`
-      })
-
-      setStore(prevStore => ({
-        ...prevStore,
-        _reference: res.record.sku
-      }))
-
-      formik.setFieldValue('sku', res.record.sku)
-      if (window.setTitle && !editMode) {
-        window.setTitle(res.record.sku ? `${labels.items} ${res.record.sku}` : labels.items)
-      }
-
-      await refetchForm(response.recordId)
-
+      await refetchForm(response.recordId, !obj.recordId)
       invalidate()
     }
   })
@@ -177,11 +165,13 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   const editMode = !!formik.values.recordId
 
-  const refetchForm = async recordId => {
+  const refetchForm = async (recordId, showTitle) => {
     const res = await getRequest({
       extension: InventoryRepository.Items.get,
       parameters: `_recordId=${recordId}`
     })
+
+    if (window.setTitle && showTitle) window.setTitle(res.record.sku ? `${labels.items} ${res.record.sku}` : labels.items)
 
     const res2 = await getRequest({
       extension: InventoryRepository.Category.get,
@@ -197,6 +187,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     formik.setValues({ ...res.record, kitItem: !!res.record.kitItem, isExternal })
     setShowLotCategories(res.record.trackBy === 2)
     setShowSerialProfiles(res.record.trackBy === 1)
+
     setStore(prevStore => ({
       ...prevStore,
       nraId: res2?.record?.nraId,
@@ -207,7 +198,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       priceGroupId: res.record.pgId,
       returnPolicy: res.record.returnPolicyId,
       _name: res.record.name,
-      _reference: res.record.sku
+      _reference: res.record.sku,
+      _dmgId: res.record.dmgId || null,
+      _dmgName: res.record.dmgName || ''
     }))
   }
   useEffect(() => {
@@ -312,7 +305,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       key: 'Copy',
       condition: true,
       onClick: () => onCopy(formik?.values),
-      disabled: !(store?.nraId && !formik.values.isExternal)
+      disabled: !editMode || !(store?.nraId && !formik.values.isExternal)
     },
     {
       key: 'History',
@@ -360,30 +353,29 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     ]}
                     required
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      changeDT(newValue)
-
-                      setStore(prevStore => ({
-                        ...prevStore,
-                        nraId: newValue?.nraId
-                      }))
-                      formik.setFieldValue('categoryId', newValue?.recordId || '')
-                      if (!formik.values.kitItem) {
-                        formik.setFieldValue('priceType', newValue?.priceType || '')
-                      }
-                      formik.setFieldValue('trackBy', newValue?.trackBy || '')
-                      formik.setFieldValue('procurementMethod', newValue?.procurementMethod || '')
-                      formik.setFieldValue('msId', newValue?.msId || '')
-                      formik.setFieldValue('valuationMethod', newValue?.valuationMethod || '')
-                      formik.setFieldValue('taxId', newValue?.taxId || ''),
-                        formik.setFieldValue('lotCategoryId', newValue?.lotCategoryId || ''),
-                        formik.setFieldValue('spfId', newValue?.spfId || '')
+                    onChange={(_, newValue) => {
+                      onFieldChange(newValue?.nraId)
                       setShowLotCategories(newValue?.trackBy === '2' || newValue?.trackBy === 2)
                       setShowSerialProfiles(newValue?.trackBy === '1' || newValue?.trackBy === 1)
                       setStore(prevStore => ({
                         ...prevStore,
                         _metal: formik.values.metalId,
-                        _isMetal: newValue?.isMetal
+                        _isMetal: newValue?.isMetal,
+                        nraId: newValue?.nraId
+                      }))
+
+                      formik.setValues(prev => ({
+                        ...prev,
+                        categoryId: newValue?.recordId || null,
+                        priceType: !prev.kitItem ? (newValue?.priceType || '') : prev.priceType,
+                        trackBy: newValue?.trackBy || null,
+                        procurementMethod: newValue?.procurementMethod || '',
+                        msId: newValue?.msId || null,
+                        valuationMethod: newValue?.valuationMethod || '',
+                        taxId: newValue?.taxId || null,
+                        lotCategoryId: newValue?.lotCategoryId || null,
+                        spfId: newValue?.spfId || null,
+                        productionLevel: newValue?.productionLevel || null
                       }))
                     }}
                     error={formik.touched.categoryId && formik.errors.categoryId}
@@ -420,10 +412,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={8}>
                   <CustomTextField
                     name='sku'
-                    required
                     label={labels.reference}
                     value={formik.values.sku}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('sku', '')}
@@ -496,6 +487,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     reducer={response => {
                       return response?.record?.itemGroups
                     }}
+                    readOnly={editMode}
                     values={formik.values}
                     name='groupId'
                     label={labels.itemGroup}
@@ -507,8 +499,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       { key: 'name', value: 'Name' }
                     ]}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('groupId', newValue?.recordId || '')
+                    onChange={async (_, newValue) => {
+                      formik.setFieldValue('groupId', newValue?.recordId || null)
+                      formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
+                      formik.setFieldValue('dmgName', newValue?.dmgName || '')
                     }}
                     error={formik.touched.groupId && formik.errors.groupId}
                   />

@@ -7,7 +7,6 @@ import CustomTextField from '../Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
-import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
@@ -18,30 +17,47 @@ import { ResourceLookup } from './ResourceLookup'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import FormShell from './FormShell'
 import { formatDateFromApi, formatDateTimeForGetAPI, formatDayId } from '@argus/shared-domain/src/lib/date-helper'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import dayjs from 'dayjs'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { DataGrid } from './DataGrid'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
+import { SelfServiceRepository } from '@argus/repositories/src/repositories/SelfServiceRepository'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
-export const LeaveForm = ({ recordId, window }) => {
+export const LeaveForm = ({ recordId, resourceId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
+  const { user } = useContext(AuthContext)
+  const { systemChecks } = useContext(DefaultsContext)
+  const employeeId = user?.employeeId
   const { stack: stackError } = useError()
+  const autoClose = systemChecks?.find(item => item.checkId === SystemChecks.AUTO_CLOSE_LEAVE_REQUEST_ONSAVE)?.value || false
   const editMode = !!recordId
+
+  const getEndpoint = {
+    [ResourceIds.SSLeaveRequest]: {set: SelfServiceRepository.SSLeaveRequest.set2, page: SelfServiceRepository.SSLeaveRequest.page},
+    [ResourceIds.LeaveRequestODOM]: {set: LeaveManagementRepository.LeaveRequest.set2, page: LeaveManagementRepository.LeaveRequest.page}
+  }
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.LeaveRequestODOM,
+    DatasetIdAccess: resourceId,
     editMode
   })
 
-  useSetWindow({ title: platformLabels.LeaveRequestODOM, window })
+  useSetWindow({ title: resourceId ==  ResourceIds.LeaveRequestODOM ? 
+    labels.LeaveRequestODOM :
+    labels.leaveRequest, window })
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.LeaveRequest.page
+    endpointId: getEndpoint[resourceId]?.page
   })
 
   const { formik } = useForm({
@@ -51,7 +67,7 @@ export const LeaveForm = ({ recordId, window }) => {
       startDate: new Date(),
       endDate: new Date(),
       date: new Date(),
-      employeeId: null,
+      employeeId: resourceId === ResourceIds.SSLeaveRequest ? parseInt(employeeId) : null,
       justification: '',
       reference: '',
       destination: '',
@@ -106,23 +122,19 @@ export const LeaveForm = ({ recordId, window }) => {
       }
 
       const res = await postRequest({
-        extension: LoanManagementRepository.LeaveRequest.set2,
+        extension: getEndpoint[resourceId].set,
         record: JSON.stringify(payload)
       })
 
-      await refetchData(res.recordId)
+      const updatedForm = await refetchData(res.recordId)
       toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
-
       invalidate()
+      if (autoClose) await onClose(updatedForm)
     }
   })
 
-  const getLeaveBalance = async (recordId, employeeId, ltId, asOfDate) => {
-    if (!employeeId || !ltId) {
-      formik.setFieldValue('leaveBalance', 0)
-
-      return
-    }
+    const getLeaveBalance = async (recordId, employeeId, ltId, asOfDate) => {
+    if (!employeeId || !ltId) return 0
 
     const res = await getRequest({
       extension: EmployeeRepository.Leaves.get,
@@ -130,23 +142,22 @@ export const LeaveForm = ({ recordId, window }) => {
     })
 
     const lsIdValue = res?.record?.lsId
-    if (!lsIdValue) {
-      formik.setFieldValue('leaveBalance', 0)
 
-      return
-    }
+    if (!lsIdValue) return 0
 
     const res2 = await getRequest({
-      extension: LoanManagementRepository.Leaves.qry,
+      extension: LeaveManagementRepository.Leaves.qry,
       parameters: `_recordId=${recordId}&_employeeId=${employeeId}&_lsId=${lsIdValue}&_asOfDate=${
         asOfDate ? formatDateTimeForGetAPI(asOfDate) : formatDateTimeForGetAPI(new Date())
       }`
     })
 
-    formik.setFieldValue('leaveBalance', res2?.list?.[0]?.summary?.balance ?? 0)
+    return res2?.list?.[0]?.summary?.balance ?? 0
   }
 
   const isClosed = formik.values.wip == 2
+  const isReleased = formik.values.status == 4
+  const isPosted = formik.values.status === 3
 
   const columns = [
     {
@@ -175,40 +186,56 @@ export const LeaveForm = ({ recordId, window }) => {
     }
   ]
 
-  const refetchData = async recordId => {
+ const refetchData = async recordId => {
     if (!recordId) return
 
     const res = await getRequest({
-      extension: LoanManagementRepository.LeaveRequest.get2,
+      extension: LeaveManagementRepository.LeaveRequest.get2,
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({
+    const leaveBalance = await getLeaveBalance(
+      recordId,
+      res?.record?.leave?.employeeId,
+      res?.record?.leave?.ltId,
+      formatDateFromApi(res?.record?.leave?.date)
+    )
+
+    const data = {
       ...res.record.leave,
       date: res.record.leave.date ? formatDateFromApi(res.record.leave.date) : null,
       startDate: res.record.leave.startDate ? formatDateFromApi(res.record.leave.startDate) : null,
       endDate: res.record.leave.endDate ? formatDateFromApi(res.record.leave.endDate) : null,
+      leaveBalance,
       items:
         res.record.leaveDays.map((day, index) => ({
           ...day,
           dayId: formatDayId(day.dayId),
           id: index
         })) || []
-    })
+    }
 
-    getLeaveBalance(
-      recordId,
-      res?.record?.leave?.employeeId,
-      res?.record?.leave?.ltId,
-      formatDateFromApi(res?.record?.leave?.date)
-    )
+    formik.resetForm({ values: data })
+
+    return data
   }
 
-  const onClose = async () => {
-    const { items, ...rest } = formik.values
+  const onPost = async () => {
+    await postRequest({
+      extension: LeaveManagementRepository.LeaveRequest.post,
+      record: JSON.stringify({ recordId: formik.values.recordId })
+    })
+
+    toast.success(platformLabels.Posted)
+    invalidate()
+    window.close()
+  }
+
+  const onClose = async (values = null) => {
+    const { items, ...rest } = values || formik.values
 
     const res = await postRequest({
-      extension: LoanManagementRepository.LeaveRequest.close,
+      extension: LeaveManagementRepository.LeaveRequest.close,
       record: JSON.stringify(rest)
     })
 
@@ -221,7 +248,7 @@ export const LeaveForm = ({ recordId, window }) => {
     const { items, ...rest } = formik.values
 
     const res = await postRequest({
-      extension: LoanManagementRepository.LeaveRequest.reopen,
+      extension: LeaveManagementRepository.LeaveRequest.reopen,
       record: JSON.stringify(rest)
     })
 
@@ -253,8 +280,8 @@ export const LeaveForm = ({ recordId, window }) => {
     let totalDays = 0
 
     items.forEach(row => {
-      const hours = parseFloat(row.hours) || 0
-      const scheduled = parseFloat(row.scheduledHours) || 0
+      const hours = row.hours || 0
+      const scheduled = row.scheduledHours || 0
 
       totalHours += hours
 
@@ -266,6 +293,8 @@ export const LeaveForm = ({ recordId, window }) => {
         }
       }
     })
+
+    totalDays = roundTo(totalDays)
 
     return { totalHours, totalDays }
   }
@@ -292,7 +321,7 @@ export const LeaveForm = ({ recordId, window }) => {
     }
 
     const res = await getRequest({
-      extension: LoanManagementRepository.PreviewDays.preview,
+      extension: LeaveManagementRepository.PreviewDays.preview,
       parameters: `_filter=&_size=30&_startAt=0&_employeeId=${formik.values.employeeId}&_ltId=${formik.values.ltId}&_fromDayId=${fromDayId}&_toDayId=${toDayId}`
     })
 
@@ -330,18 +359,36 @@ export const LeaveForm = ({ recordId, window }) => {
     formik.setFieldValue('leaveDays', totalDays)
   }, [formik.values.items])
 
+  const actionsMap = {
+    [ResourceIds.LeaveRequestODOM]: [
+      {
+        key: 'Locked',
+        condition: isPosted,
+        onClick: 'onUnpostConfirmation',
+        disabled: true
+      },
+      {
+        key: 'Unlocked',
+        condition: !isPosted,
+        onClick: onPost,
+        disabled: !editMode || !isReleased
+      }
+    ]
+  } 
+
   const actions = [
+    ...(actionsMap[resourceId] || []),
     {
       key: 'Close',
       condition: !isClosed,
-      onClick: onClose,
+      onClick: () => onClose(),
       disabled: isClosed || !editMode
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed
+      disabled: !isClosed || isPosted
     },
     {
       key: 'Approval',
@@ -358,7 +405,7 @@ export const LeaveForm = ({ recordId, window }) => {
 
   return (
     <FormShell
-      resourceId={ResourceIds.LeaveRequestODOM}
+      resourceId={resourceId}
       functionId={SystemFunction.LeaveRequest}
       actions={actions}
       form={formik}
@@ -390,35 +437,39 @@ export const LeaveForm = ({ recordId, window }) => {
                 readOnly={isClosed}
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
-                  await getLeaveBalance(recordId, formik?.values?.employeeId, formik?.values?.ltId, newValue)
+                  const leaveBalance = await getLeaveBalance(recordId, formik?.values?.employeeId, formik?.values?.ltId, newValue)
+                  formik.setFieldValue('leaveBalance', leaveBalance)
                 }}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={EmployeeRepository.Employee.snapshot}
-                parameters={{ _branchId: 0 }}
-                form={formik}
-                maxAccess={maxAccess}
-                valueField='reference'
-                readOnly={isClosed}
-                displayField='fullName'
-                name='employeeRef'
-                label={labels.employee}
-                required
-                secondValue={formik.values.employeeName}
-                onChange={async (_, newValue) => {
-                  formik.setFieldValue('employeeRef', newValue?.reference || '')
-                  formik.setFieldValue('employeeName', newValue?.fullName || '')
-                  formik.setFieldValue('employeeId', newValue?.recordId || null)
-                  await getLeaveBalance(recordId, newValue?.recordId, formik?.values?.ltId, formik.values.date)
-                }}
-                error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
-              />
+            {resourceId === ResourceIds.LeaveRequestODOM && (
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={EmployeeRepository.Employee.snapshot}
+                  parameters={{ _branchId: 0 }}
+                  form={formik}
+                  maxAccess={maxAccess}
+                  valueField='reference'
+                  readOnly={isClosed}
+                  displayField='fullName'
+                  name='employeeRef'
+                  label={labels.employee}
+                  required
+                  secondValue={formik.values.employeeName}
+                  onChange={async (_, newValue) => {
+                    formik.setFieldValue('employeeRef', newValue?.reference || '')
+                    formik.setFieldValue('employeeName', newValue?.fullName || '')
+                    const leaveBalance = await getLeaveBalance(recordId, newValue?.recordId, formik?.values?.ltId, formik.values.date)
+                    formik.setFieldValue('leaveBalance', leaveBalance)
+                    formik.setFieldValue('employeeId', newValue?.recordId || null)
+                  }}
+                  error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
+                />
             </Grid>
+            )}
             <Grid item xs={12}>
               <CustomTextField
                 name='justification'
@@ -467,7 +518,7 @@ export const LeaveForm = ({ recordId, window }) => {
                 readOnly={isClosed}
               />
               <ResourceComboBox
-                endpointId={LoanManagementRepository.IndemnityAccuralsFilters.qry}
+                endpointId={LeaveManagementRepository.LeaveTypes.qry}
                 name='ltId'
                 label={labels.leaveType}
                 valueField='recordId'
@@ -480,7 +531,8 @@ export const LeaveForm = ({ recordId, window }) => {
                   formik.setFieldValue('hours', 0)
                   formik.setFieldValue('leaveBalance', 0)
                   formik.setFieldValue('leaveDays', 0)
-                  await getLeaveBalance(recordId, formik?.values?.employeeId, newValue?.recordId, formik.values.date)
+                  const leaveBalance = await getLeaveBalance(recordId, formik?.values?.employeeId, newValue?.recordId, formik.values.date)
+                  formik.setFieldValue('leaveBalance', leaveBalance)
                   formik.setFieldValue('ltId', newValue?.recordId || null)
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
@@ -550,7 +602,7 @@ export const LeaveForm = ({ recordId, window }) => {
                 value={formik.values.leaveDays}
                 readOnly
                 maxAccess={maxAccess}
-                decimalScale={3}
+                decimalScale={2}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('leaveDays', null)}
                 error={formik.touched.leaveDays && Boolean(formik.errors.leaveDays)}
@@ -564,4 +616,4 @@ export const LeaveForm = ({ recordId, window }) => {
 }
 
 LeaveForm.width = 1000
-LeaveForm.height = 650
+LeaveForm.height =680

@@ -145,6 +145,7 @@ export const getButtons = platformLabels => [
     image: 'close.png',
     border: '1px solid #01a437',
     main: false,
+    checkDirty: true,
     access: accessMap[TrxType.CLOSE]
   },
   {
@@ -311,6 +312,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Termination',
+    label: platformLabels.Termination,
+    color: '#e8e7e7',
+    image: 'redCircle.png',
+    main: false
+  },
+  {
     key: 'RecordRemarks',
     label: platformLabels.RecordRemarks,
     color: '#90278e',
@@ -322,6 +330,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.Apply,
     color: '#4eb558',
     image: 'apply.png',
+    main: false
+  },
+  {
+    key: 'Unapply',
+    label: platformLabels.Unapply,
+    color: '#A02F13',
+    image: 'cancelWhite.png',
     main: false
   },
   {
@@ -518,6 +533,7 @@ export const getButtons = platformLabels => [
     label: platformLabels.Unlocked,
     color: '#231f20',
     image: 'unlock.png',
+    checkDirty: true,
     main: false,
     access: accessMap[TrxType.POST]
   },
@@ -696,5 +712,41 @@ export const getButtons = platformLabels => [
     color: '#2C7693',
     image: 'return.png',
     main: false
-  }
+  },
+  {
+    key: 'Recalculate',
+    label: platformLabels.Recalculate,
+    color: '#231f20',
+    image: 'calculator.png',
+    main: false
+  },
+  {
+    key: 'Undo',
+    label: platformLabels.Undo,
+    color: '#bf1e2e',
+    image: 'undoIcon.png',
+    main: false
+  },
+  {
+    key: 'Commission',
+    label: platformLabels.Commission,
+    color: '#231f20',
+    image: 'commission.png',
+    main: false
+  },
+  {
+    key: 'RV',
+    label: platformLabels.RV,
+    color: '#373957',
+    image: 'invoice.png',
+    main: false
+  },
+  {
+    key: 'Reverse',
+    label: platformLabels.ReverseClone,
+    color: '#373957',
+    image: 'undo-arrow-icon.png',
+    main: false
+  },
+  
 ]

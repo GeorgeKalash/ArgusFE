@@ -10,12 +10,13 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 import TaxSchedulesWindow from './Window/TaxSchedulesWindow'
 
 const TaxSchedules = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -73,7 +74,7 @@ const TaxSchedules = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -102,7 +103,6 @@ const TaxSchedules = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}

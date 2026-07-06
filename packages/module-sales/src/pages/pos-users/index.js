@@ -105,7 +105,6 @@ const PosUsers = () => {
           rowId={['userId']}
           onEdit={popup}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           maxAccess={access}

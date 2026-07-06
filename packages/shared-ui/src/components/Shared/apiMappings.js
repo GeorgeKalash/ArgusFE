@@ -20,7 +20,7 @@ import { RemittanceSettingsRepository } from '@argus/repositories/src/repositori
 import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
 import { CTCLRepository } from '@argus/repositories/src/repositories/CTCLRepository'
@@ -311,6 +311,13 @@ export const apiMappings = {
   [ResourceIds.FinancialStatements]: {
     type: COMBOBOX,
     endpoint: FinancialStatementRepository.FinancialStatement.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
+  [ResourceIds.DesignFamilies]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.DesignFamily.qry,
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
@@ -651,6 +658,13 @@ export const apiMappings = {
       { key: 'lineName', value: 'Production Line' }
     ]
   },
+  [ResourceIds.FoCastings]: {
+    type: LOOKUP,
+    endpoint: FoundryRepository.Casting.snapshot,
+    firstField: 'reference',
+    valueOnSelection: 'recordId',
+    secondDisplayField: false
+  },
   [ResourceIds.PointOfSale]: {
     type: COMBOBOX,
     endpoint: PointofSaleRepository.PointOfSales.qry,
@@ -835,16 +849,16 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
-  [ResourceIds.DivisionFilter]: {
+  [ResourceIds.Divisions]: {
     type: COMBOBOX,
-    endpoint: companyStructureRepository.DivisionFilters.qry,
+    endpoint: companyStructureRepository.Divisions.qry,
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
-  [ResourceIds.BranchFilter]: {
+  [ResourceIds.Branches]: {
     type: COMBOBOX,
-    endpoint: companyStructureRepository.BranchFilters.qry,
+    endpoint: companyStructureRepository.Branches.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -852,7 +866,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.CompanyPosition]: {
+  [ResourceIds.CompanyPositions]: {
     type: COMBOBOX,
     endpoint: companyStructureRepository.CompanyPositions.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId`,
@@ -863,9 +877,9 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.DepartmentFilter]: {
+  [ResourceIds.Departments]: {
     type: COMBOBOX,
-    endpoint: companyStructureRepository.DepartmentFilters.qry,
+    endpoint: companyStructureRepository.Departments.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`,
     valueField: 'recordId',
     displayField: ['departmentRef', 'name'],
@@ -912,7 +926,7 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
-  [ResourceIds.AttendanceScheduleFilter]: {
+  [ResourceIds.AttendanceSchedule]: {
     type: COMBOBOX,
     endpoint: TimeAttendanceRepository.AttendanceScheduleFilters.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId&_scId=0`,
@@ -923,9 +937,9 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.IndemnityAccuralsFilter]: {
+  [ResourceIds.LeaveTypes]: {
     type: COMBOBOX,
-    endpoint: LoanManagementRepository.IndemnityAccuralsFilters.qry,
+    endpoint: LeaveManagementRepository.LeaveTypes.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -935,7 +949,7 @@ export const apiMappings = {
   },
   [ResourceIds.LeaveScheduleFilter]: {
     type: COMBOBOX,
-    endpoint: LoanManagementRepository.LeaveScheduleFilters.qry,
+    endpoint: LeaveManagementRepository.LeaveScheduleFilters.qry,
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
@@ -945,8 +959,12 @@ export const apiMappings = {
     endpoint: PayrollRepository.Payroll.qry,
     parameters: `_year=0&_salaryType=5&_status=0`,
     valueField: 'recordId',
-    displayField: ['reference'],
-    columnsInDropDown: [{ key: 'reference', value: 'Reference' }]
+    displayField: ['reference', 'fiscalYear', 'periodName'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'fiscalYear', value: 'Fiscal Year' },
+      { key: 'periodName', value: 'Period' }
+    ]
   },
   [ResourceIds.BankTransferFilter]: {
     type: COMBOBOX,

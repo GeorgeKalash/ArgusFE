@@ -26,14 +26,16 @@ const PostWorkCenterJob = () => {
     datasetId: ResourceIds.PostWorkCenterJob
   })
 
+  const initialValues = {
+    jobId: null,
+    toWorkCenterId: null,
+    workCenterId: null,
+    seqNo: 1,
+    data: { list: [] }
+  }
+
   const { formik } = useForm({
-    initialValues: {
-      jobId: null,
-      toWorkCenterId: null,
-      workCenterId: null,
-      seqNo: 1,
-      data: { list: [] }
-    },
+    initialValues,
     maxAccess,
     validationSchema: yup.object({
       workCenterId: yup.number().required(),
@@ -59,7 +61,9 @@ const PostWorkCenterJob = () => {
           })
         })
         toast.success(platformLabels.Posted)
-        formik.resetForm()
+        formik.resetForm({
+          values: initialValues
+        })
       } else {
         await postRequest({
           extension: ManufacturingRepository.JobWorkCenter.reopen,
@@ -70,7 +74,9 @@ const PostWorkCenterJob = () => {
           })
         })
         toast.success(platformLabels.Unposted)
-        formik.resetForm()
+        formik.resetForm({
+          values: initialValues
+        })
       }
     }
   })
@@ -146,65 +152,78 @@ const PostWorkCenterJob = () => {
   }
 
   const fillForm = async newValue => {
-    if (newValue) {
-      await getRequest({
-        extension: ManufacturingRepository.MFJobOrder.get,
-        parameters: `_recordId=${newValue?.recordId}`
-      }).then(async jobRes => {
-        if (jobRes?.record?.routingSeqNo) {
-          formik.setValues({
-            ...formik.values,
-            ...jobRes?.record,
-            workCenterId: jobRes?.record?.workCenterId || '',
-            workCenterName: jobRes?.record?.wcName || '',
-            workCenterRef: jobRes?.record?.wcRef || '',
-            pcs: jobRes?.record?.pcs || 0,
-            pcsIn: jobRes?.record?.expectedPcs || 0,
-            qty: jobRes?.record?.qty || 0,
-            qtyIn: jobRes?.record?.expectedQty || 0,
-            jobId: jobRes?.record?.recordId || null,
-            jobRef: jobRes?.record?.reference || '',
-            documentTypeID: jobRes?.record?.dtName || null
-          })
-          getJobRouting(jobRes?.record?.recordId, jobRes?.record?.routingSeqNo).then(routingRes => {
-            formik.setFieldValue('status', routingRes?.status || null)
-            formik.setFieldValue('statusName', routingRes?.statusName)
-            formik.setFieldValue('seqNo', jobRes?.record?.routingSeqNo)
-          })
+    if (!newValue) {
+      formik.resetForm()
+      return
+    }
 
-          getData(newValue, jobRes?.record?.routingSeqNo).then(res => {
-            formik.setFieldValue('data', { list: res })
-          })
+    const jobRes = await getRequest({
+      extension: ManufacturingRepository.MFJobOrder.get,
+      parameters: `_recordId=${newValue?.recordId}`
+    })
 
-          const res = await getRequest({
-            extension: ManufacturingRepository.JobRouting.get,
-            parameters: `_jobOrderId=${newValue?.recordId}&_seqNo=${parseInt(jobRes?.record?.routingSeqNo) + 1}`
-          })
-          formik.setFieldValue('toWorkCenterId', res?.record?.workCenterId || null)
-          formik.setFieldValue('toWorkCenterName', res?.record?.workCenterName || '')
-          formik.setFieldValue('toWorkCenterRef', res?.record?.workCenterRef || '')
-        } else {
-          formik.setValues({
-            ...formik.values,
-            ...jobRes?.record,
-            workCenterId: null,
-            workCenterName: '',
-            workCenterRef: '',
-            toWorkCenterId: null,
-            pcs: jobRes?.record?.pcs || 0,
-            pcsIn: jobRes?.record?.expectedPcs || 0,
-            qty: jobRes?.record?.qty || 0,
-            qtyIn: jobRes?.record?.expectedQty || 0,
-            jobId: jobRes?.record?.recordId || null,
-            jobRef: jobRes?.record?.reference || '',
-            documentTypeID: jobRes?.record?.dtName || null,
-            seqNo: 1
-          })
+    const job = jobRes?.record || {}
+
+    if (job?.routingSeqNo) {
+      const routingRes = await getJobRouting(job?.recordId, job?.routingSeqNo)
+
+      const draftList = await getData(newValue, job?.routingSeqNo)
+
+      const nextRoutingRes = await getRequest({
+        extension: ManufacturingRepository.JobRouting.get,
+        parameters: `_jobOrderId=${newValue?.recordId}&_seqNo=${parseInt(job?.routingSeqNo) + 1}`
+      })
+
+      formik.resetForm({
+        values: {
+          ...formik.initialValues,
+          ...job,
+          routingId: newValue?.routingId || null,
+          workCenterId: job?.workCenterId || '',
+          workCenterName: job?.wcName || '',
+          workCenterRef: job?.wcRef || '',
+          pcs: job?.pcs || 0,
+          pcsIn: job?.expectedPcs || 0,
+          qty: job?.qty || 0,
+          qtyIn: job?.expectedQty || 0,
+          jobId: job?.recordId || null,
+          jobRef: job?.reference || '',
+          documentTypeID: job?.dtName || null,
+          status: routingRes?.status || null,
+          statusName: routingRes?.statusName || '',
+          seqNo: job?.routingSeqNo,
+          data: { list: draftList || [] },
+          toWorkCenterId: nextRoutingRes?.record?.workCenterId || null,
+          toWorkCenterName: nextRoutingRes?.record?.workCenterName || '',
+          toWorkCenterRef: nextRoutingRes?.record?.workCenterRef || ''
         }
       })
-    } else {
-      formik.resetForm()
+
+      return
     }
+
+    formik.resetForm({
+      values: {
+        ...formik.initialValues,
+        ...job,
+        routingId: newValue?.routingId || null,
+        workCenterId: null,
+        workCenterName: '',
+        workCenterRef: '',
+        toWorkCenterId: null,
+        toWorkCenterName: '',
+        toWorkCenterRef: '',
+        pcs: job?.pcs || 0,
+        pcsIn: job?.expectedPcs || 0,
+        qty: job?.qty || 0,
+        qtyIn: job?.expectedQty || 0,
+        jobId: job?.recordId || null,
+        jobRef: job?.reference || '',
+        documentTypeID: job?.dtName || null,
+        seqNo: 1,
+        data: { list: [] }
+      }
+    })
   }
 
   return (
@@ -361,7 +380,6 @@ const PostWorkCenterJob = () => {
             columns={columns}
             gridData={formik?.values?.data}
             rowId={['recordId']}
-            isLoading={false}
             pagination={false}
             maxAccess={maxAccess}
           />

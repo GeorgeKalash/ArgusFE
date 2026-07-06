@@ -25,7 +25,8 @@ const MfSettingForm = ({ _labels, access }) => {
     JO_PIC_SOURCE: 'mf_jo_pic_source',
     PICO_DATASOURCE: 'mf_pico_dataSource',
     MAX_ALLOW_QTY_VARIATION: 'mfMaxAllowQtyVariation',
-    MF_MAX_BTFR_LINES_ALLOWED: 'max_btfr_lines_allowed'
+    MF_MAX_BTFR_LINES_ALLOWED: 'max_btfr_lines_allowed',
+    MF_PO_GEN_DIRECTION: 'mf_po_gen_direction'
   }
 
   const DecimalFields = {
@@ -155,17 +156,30 @@ const MfSettingForm = ({ _labels, access }) => {
                 error={formik.touched.mfMaxAllowQtyVariation && Boolean(formik.errors.mfMaxAllowQtyVariation)}
               />
             </Grid>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='max_btfr_lines_allowed'
-                  label={_labels.max_btfr_lines_allowed}
-                  value={formik.values.max_btfr_lines_allowed}
-                  allowNegative={false}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('max_btfr_lines_allowed', null)}
-                  error={formik.touched.max_btfr_lines_allowed && Boolean(formik.errors.max_btfr_lines_allowed)}
-                />
-              </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='max_btfr_lines_allowed'
+                label={_labels.max_btfr_lines_allowed}
+                value={formik.values.max_btfr_lines_allowed}
+                allowNegative={false}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('max_btfr_lines_allowed', null)}
+                error={formik.touched.max_btfr_lines_allowed && Boolean(formik.errors.max_btfr_lines_allowed)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.PO_GENERATE_DIRECTIONS}
+                name='mf_po_gen_direction'
+                label={_labels.poGenerateDirections}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={access}
+                onChange={(_, newValue) => formik.setFieldValue('mf_po_gen_direction', newValue?.key || null) }
+                error={formik.touched.mf_po_gen_direction && Boolean(formik.errors.mf_po_gen_direction)}
+              />
+          </Grid>
         </Grid>
       </VertLayout>
     </Form>

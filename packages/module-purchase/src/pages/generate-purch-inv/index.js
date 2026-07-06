@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -225,7 +225,7 @@ const GeneratePurchaseInvoice = () => {
     formik.handleSubmit()
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     if (recordId) {
       const dtd = await getRequest({
         extension: PurchaseRepository.DocumentTypeDefault.get,
@@ -235,6 +235,10 @@ const GeneratePurchaseInvoice = () => {
       formik.setFieldValue('plantId', dtd?.record?.plantId || null)
     }
   }
+
+  useEffect(() => {
+    if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   return (
     <Form onSave={onGeneratePI} maxAccess={access} isSaved={false}>
@@ -308,7 +312,6 @@ const GeneratePurchaseInvoice = () => {
               columns={columns}
               gridData={formik?.values?.data}
               rowId={['shipmentId']}
-              isLoading={false}
               pagination={false}
               maxAccess={access}
               showCheckboxColumn={true}
@@ -323,6 +326,7 @@ const GeneratePurchaseInvoice = () => {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseInvoice}`}
+                filter={ item => item.activeStatus === 1 }
                 name='dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -336,7 +340,6 @@ const GeneratePurchaseInvoice = () => {
                 maxAccess={access}
                 onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
-                  await onChangeDtId(newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
@@ -374,7 +377,7 @@ const GeneratePurchaseInvoice = () => {
               />
             </Grid>
             <Grid item xs={3} p={2}>
-              <CustomNumberField name='amount' label='' value={formik?.values?.amount} readOnly align='right' />
+              <CustomNumberField name='amount' label='' value={formik?.values?.amount} readOnly />
             </Grid>
           </Grid>
         </Fixed>

@@ -10,7 +10,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -19,57 +19,57 @@ const iconOptions = [
   {
     key: 'Aid-kit',
     value: 'Aid-kit',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Aid-Kit.png').default.src
+    icon: '/images/icons/project-icons/Aid-Kit.png'
   },
   {
     key: 'Birthday',
     value: 'Birthday',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Birthday.png').default.src
+    icon: '/images/icons/project-icons/Birthday.png'
   },
   {
     key: 'Calendar',
     value: 'Calendar',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Calendar.png').default.src
+    icon: '/images/icons/project-icons/Calendar.png'
   },
   {
     key: 'Graduation',
     value: 'Graduation',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Graduation.png').default.src
+    icon: '/images/icons/project-icons/Graduation.png'
   },
   {
     key: 'Engagement',
     value: 'Engagement',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Engagement.png').default.src
+    icon: '/images/icons/project-icons/Engagement.png'
   },
   {
     key: 'Home',
     value: 'Home',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Home.png').default.src
+    icon: '/images/icons/project-icons/Home.png'
   },
   {
     key: 'Injury',
     value: 'Injury',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Injury.png').default.src
+    icon: '/images/icons/project-icons/Injury.png'
   },
   {
     key: 'Maternity',
     value: 'Maternity',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Maternity.png').default.src
+    icon: '/images/icons/project-icons/Maternity.png'
   },
   {
     key: 'Palm-Tree',
     value: 'Palm-Tree',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Palm-Tree.png').default.src
+    icon: '/images/icons/project-icons/Palm-Tree.png'
   },
   {
     key: 'Plane',
     value: 'Plane',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Plane.png').default.src
+    icon: '/images/icons/project-icons/Plane.png'
   },
   {
     key: 'Sport',
     value: 'Sport',
-    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Sport.png').default.src
+    icon: '/images/icons/project-icons/Sport.png'
   }
 ]
 
@@ -80,7 +80,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.LeaveScheduleFilters.page
+    endpointId: LeaveManagementRepository.LeaveScheduleFilters.page
   })
 
   const { formik } = useForm({
@@ -91,6 +91,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
       reference: '',
       ltId: null,
       firstAccrual: null,
+      leaveTrackTime: null,
       coDate: null,
       accrualActivation: null,
       dayType: null,
@@ -101,6 +102,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
       name: yup.string().required(),
       reference: yup.string().required(),
       ltId: yup.number().required(),
+      leaveTrackTime: yup.number().required(),
       firstAccrual: yup.number().required(),
       coDate: yup.number().required(),
       accrualActivation: yup.number().required(),
@@ -108,7 +110,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
     }),
     onSubmit: values => {
       postRequest({
-        extension: LoanManagementRepository.LeaveScheduleFilters.set,
+        extension: LeaveManagementRepository.LeaveScheduleFilters.set,
         record: JSON.stringify(values)
       }).then(res => {
         formik.setFieldValue('recordId', res.recordId)
@@ -131,7 +133,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: LoanManagementRepository.LeaveScheduleFilters.get,
+          extension: LeaveManagementRepository.LeaveScheduleFilters.get,
           parameters: `_recordId=${recordId}`
         })
 
@@ -182,7 +184,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
 
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.IndemnityAccuralsFilters.qry}
+                endpointId={LeaveManagementRepository.LeaveTypes.qry}
                 filter={item => item.isPaid}
                 name='ltId'
                 label={labels.ltId}
@@ -191,10 +193,27 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
                 displayField='name'
                 values={formik.values}
                 readOnly={editMode}
-                onChange={(event, newValue) => {
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('ltId', newValue?.recordId || null)
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.LEAVE_TRACK_TIME}
+                label={labels.leaveTrackTime}
+                name='leaveTrackTime'
+                values={formik.values}
+                maxAccess={maxAccess}
+                valueField='key'
+                displayField='value'
+                required
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('leaveTrackTime', newValue?.key || null)
+                }}
+                error={formik.touched.leaveTrackTime && Boolean(formik.errors.leaveTrackTime)}
               />
             </Grid>
             <Grid item xs={12}>

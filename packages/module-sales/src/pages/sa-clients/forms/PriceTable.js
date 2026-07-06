@@ -108,7 +108,6 @@ const PriceTab = ({ labels, maxAccess, store }) => {
           rowId={['clientId', 'categoryId', 'currencyId', 'priceType']}
           onEdit={Edit}
           onDelete={Delete}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

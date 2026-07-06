@@ -11,9 +11,9 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SelfServiceRepository } from '@argus/repositories/src/repositories/SelfServiceRepository'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import SSLeaveRequestForm from './Forms/SSLeaveRequestForm'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import { LeaveForm } from '@argus/shared-ui/src/components/Shared/LeaveForm'
 
 const SSLeaveRequest = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -76,6 +76,9 @@ const SSLeaveRequest = () => {
     {
       field: 'statusName',
       headerName: labels.statusName,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
@@ -91,15 +94,11 @@ const SSLeaveRequest = () => {
       })
     } else {
       stack({
-        Component: SSLeaveRequestForm,
+        Component: LeaveForm,
         props: {
           recordId,
-          labels,
-          maxAccess: access
-        },
-        width: 800,
-        height: 550,
-        title: labels.SSLeaveRequest
+          resourceId: ResourceIds.SSLeaveRequest
+        }
       })
     }
   }

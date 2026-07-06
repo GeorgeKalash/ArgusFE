@@ -14,6 +14,8 @@ import OutboundTranspForm from './forms/OutboundTranspForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 const OutboundTransp = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -107,11 +109,17 @@ const OutboundTransp = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
       field: 'printStatusName',
       headerName: _labels.printStatus,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {
@@ -121,8 +129,13 @@ const OutboundTransp = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.DeliveryTrip,
+    action: openForm
+  })
+
+  const add = async () => {
+   await proxyAction()
   }
 
   const edit = obj => {
@@ -201,7 +214,6 @@ const OutboundTransp = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

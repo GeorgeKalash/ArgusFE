@@ -47,5 +47,8 @@ export const SystemChecks = {
   CT_DISABLE_MOBILE_VERIFICATION: Module.CurrencyTrading * 100 + 4,
 
   //Sales
-  SRLNO_TEXT_CHECK: Module.Sales * 100 + 2
+  SRLNO_TEXT_CHECK: Module.Sales * 100 + 2,
+
+  //Leave Request
+  AUTO_CLOSE_LEAVE_REQUEST_ONSAVE: Module.LeaveReq * 100 + 1,
 }

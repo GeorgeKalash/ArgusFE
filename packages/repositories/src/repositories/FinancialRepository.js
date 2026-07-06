@@ -37,7 +37,8 @@ export const FinancialRepository = {
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP',
-    page: service + 'pageGRP'
+    page: service + 'pageGRP',
+    snapshot: service + 'snapshotGRP'
   },
   AccountCreditLimit: {
     qry: service + 'qryACL',
@@ -121,7 +122,7 @@ export const FinancialRepository = {
   ReceiptVouchers: {
     pack: service + 'getPackRV',
     qry: service + 'qryRV',
-    get: service + 'getRV',
+    get2: service + 'get2RV',
     set: service + 'setRV',
     del: service + 'delRV',
     page: service + 'pageRV',
@@ -156,6 +157,7 @@ export const FinancialRepository = {
     page2: service + 'pagePV2',
     page3: service + 'pagePV3',
     get: service + 'getPV',
+    get2: service + 'get2PV',
     set2: service + 'set2PV',
     set: service + 'setPV',
     del: service + 'delPV',
@@ -289,5 +291,23 @@ export const FinancialRepository = {
   ApplyManual: {
     set2: service + 'set2APLM',
     qry: service + 'qryAPLM'
-  }
+  },
+  AccountReconciliations: {
+    qry: service + 'qryRCL',
+    set: service + 'setRCL',
+    del: service + 'delRCL'
+  },
+  AccountCurrencies: {
+    qry: service + 'qryACU',
+    set2: service + 'set2ACU'
+  },
+  CreditLimitHold: {
+    get: service + 'getCLHO',
+    set: service + 'setCLHO',
+    del: service + 'delCLHO',
+    page: service + 'pageCLHO',
+    snapshot: service + 'snapshotCLHO',
+    close: service + 'closeCLHO',
+    reopen: service + 'reopenCLHO'
+  },
 }

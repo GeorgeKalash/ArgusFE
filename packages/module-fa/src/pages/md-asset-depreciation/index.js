@@ -12,12 +12,12 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { FixedAssetsRepository } from '@argus/repositories/src/repositories/FixedAssetsRepository'
 import AssetsForm from './form/AssetsForm'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 
 const AssetsDescription = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [params, setParams] = useState('')
-
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -84,11 +84,17 @@ const AssetsDescription = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
       field: 'wipName',
       headerName: _labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     },
     {
@@ -112,12 +118,17 @@ const AssetsDescription = () => {
     })
   }
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.AssetsDepreciation,
+    action: openForm
+  })
+
   const edit = obj => {
     openForm(obj?.recordId)
   }
 
-  const add = () => {
-    openForm()
+  const add = async () => {
+   await proxyAction()
   }
 
   const del = async obj => {
@@ -141,7 +152,6 @@ const AssetsDescription = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           deleteConfirmationType={'strict'}

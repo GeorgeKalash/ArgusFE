@@ -74,27 +74,40 @@ function formatDateTimeForGetAPI(dateString) {
 }
 
 function formatDateDefault(date) {
-  //used for report params
-  return formatDateandTime(date)
+  return formatDateandTime(date);
 }
 
-function formatDateandTime(date, recFormat) {
-  if (!date) return
-
-  let formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
-    'dateFormat'
-  ]
-  formats = recFormat ? `${formats} ` + recFormat : formats
-  const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
-
-  //const formattedDate = format(timeStamptoDate(timestamp), formats)
-  const formattedDate = format(timestamp, formats)
-
-  return formattedDate
+function formatDateTimeDefault(date, timeFormat = 'hh:mm a', showDate = true) {
+  return formatDateandTime(date, timeFormat, showDate);
 }
 
-function formatDateTimeDefault(date, format = 'hh:mm a') {
-  return formatDateandTime(date, format)
+function formatDateandTime(date, recFormat = '', showDate = true) {
+  if (!date) return '';
+
+  const defaultSettings = JSON.parse(window.localStorage.getItem('default') || '{}');
+  const dateFormat = defaultSettings.dateFormat || 'dd/MM/yyyy';
+
+  let formatString;
+
+  if (showDate && recFormat) {
+    // Date + Time
+    formatString = `${dateFormat} ${recFormat}`;
+  } else if (showDate) {
+    // Date only
+    formatString = dateFormat;
+  } else {
+    // Time only
+    formatString = recFormat;
+  }
+
+  const timestamp =
+    date instanceof Date
+      ? date.getTime()
+      : parseInt(date?.match(/\d+/)?.[0], 10);
+
+  if (!timestamp) return '';
+
+  return format(new Date(timestamp), formatString);
 }
 
 //Omar
@@ -181,6 +194,36 @@ const formatDayId = dayId => {
   return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+const formatTimeToApi = time => {
+  return new Date(time).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+}
+
+// Format date as 'yyyymmdd'
+const formatDateToYYYYMMDD = date => {
+  if (!date) return null
+
+  const d = new Date(date)
+
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+
+  return `${year}${month}${day}`
+}
+
+// Format date as 'yyyy/mm/dd'
+const formatDateToSlashDate = dateStr => {
+  if (!dateStr) return null
+
+  const value = String(dateStr)
+
+  return `${value.substring(0, 4)}/${value.substring(4, 6)}/${value.substring(6, 8)}`
+}
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -190,9 +233,12 @@ export {
   formatDateFromApiInline,
   getTimeInTimeZone,
   formatDate,
+  formatDateToYYYYMMDD,
+  formatDateToSlashDate,
   formatDateTimeDefault,
   formatDateFromISO,
   formatDateToISO,
   formatDateTimeForGetAPI,
-  formatDayId
+  formatDayId,
+  formatTimeToApi
 }

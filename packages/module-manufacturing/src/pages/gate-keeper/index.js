@@ -8,7 +8,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import cancelIcon from '@argus/shared-ui/src/components/images/TableIcons/cancel.png'
 import Image from 'next/image'
 import { Box, Grid, IconButton } from '@mui/material'
 import toast from 'react-hot-toast'
@@ -125,7 +124,7 @@ const GateKeeper = () => {
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             <IconButton size='small' onClick={() => openCancel(data)}>
-              <Image src={cancelIcon} width={18} height={18} alt={labels.cancel} />
+              <Image src={'/images/TableIcons/cancel.png'} width={18} height={18} alt={labels.cancel} />
             </IconButton>
           </Box>
         )
@@ -196,7 +195,6 @@ const GateKeeper = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={2000}
           paginationType='client'
           refetch={refetch}

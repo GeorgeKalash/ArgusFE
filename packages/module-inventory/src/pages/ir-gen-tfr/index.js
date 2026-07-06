@@ -311,6 +311,7 @@ export default function IRGenerateTransfer() {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialTransfer}`}
+                filter={ item => item.activeStatus === 1 }
                 name='dtId'
                 label={labels.documentType}
                 columnsInDropDown={[

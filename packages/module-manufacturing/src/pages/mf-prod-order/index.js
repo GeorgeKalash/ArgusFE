@@ -44,10 +44,25 @@ const ProductionOrder = () => {
       flex: 1
     },
     {
+      field: 'dtName',
+      headerName: labels.documentType,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
+    },
+    {
+      field: 'periodTitleName',
+      headerName: labels.orderPeriod,
+      flex: 1
+    },
+    {
+      field: 'lineRef',
+      headerName: labels.prodLine,
+      flex: 1
     },
     {
       field: 'notes',
@@ -62,6 +77,17 @@ const ProductionOrder = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     }
   ]
@@ -131,7 +157,6 @@ const ProductionOrder = () => {
           refetch={refetch}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

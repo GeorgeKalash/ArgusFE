@@ -64,62 +64,64 @@ export default function ShipmentsForm({ recordId, window }) {
   const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value) || null
   const marginDefault = parseInt(systemDefaults?.list?.find(obj => obj.key === 'POSHPVarPct')?.value) || 0
 
-  const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
-    initialValues: {
-      recordId: recordId || null,
-      header: {
-        reference: '',
-        recordId: null,
-        date: new Date(),
-        dtId: null,
-        status: 1,
-        plantId: defplantId,
-        siteId: defSiteId,
-        vendorId: null,
-        volume: 0,
-        qty: 0,
-        weight: 0,
-        notes: '',
-        invoiceId: null,
-        poRef: '',
-        vendorName: '',
-        vendorRef: ''
-      },
-      items: [
-        {
-          id: 1,
-          seqNo: 1,
-          itemId: null,
-          sku: '',
-          itemName: '',
-          qty: null,
-          pendingQty: null,
-          shippedNowQty: null,
-          shipmentId: null,
-          poSeqNo: null,
-          volume: null,
-          weight: null,
-          poId: recordId || 0,
-          poRef: '',
-          siteId: null,
-          siteRef: '',
-          siteName: '',
-          status: null,
-          unitCost: null,
-          trackBy: null,
-          lotCategoryId: null,
-          muName: '',
-          muId: null,
-          muRef: '',
-          msId: null,
-          baseQty: 0,
-          muQty: 0,
-          shipmentId: null,
-          lotButton: true
-        }
-      ]
+  const initialValues = {
+    recordId: recordId || null,
+    header: {
+      reference: '',
+      recordId: null,
+      date: new Date(),
+      dtId: null,
+      status: 1,
+      plantId: defplantId,
+      siteId: defSiteId,
+      vendorId: null,
+      volume: 0,
+      qty: 0,
+      weight: 0,
+      notes: '',
+      invoiceId: null,
+      poRef: '',
+      vendorName: '',
+      vendorRef: ''
     },
+    items: [
+      {
+        id: 1,
+        seqNo: 1,
+        itemId: null,
+        sku: '',
+        itemName: '',
+        qty: null,
+        pendingQty: null,
+        shippedNowQty: null,
+        shipmentId: null,
+        poSeqNo: null,
+        volume: null,
+        weight: null,
+        poId: recordId || 0,
+        poRef: '',
+        siteId: null,
+        siteRef: '',
+        siteName: '',
+        status: null,
+        unitCost: null,
+        trackBy: null,
+        lotCategoryId: null,
+        muName: '',
+        muId: null,
+        muRef: '',
+        msId: null,
+        baseQty: 0,
+        muQty: 0,
+        shipmentId: null,
+        lotButton: true
+      }
+    ]
+  }
+
+  const { formik } = useForm({
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    initialValues,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -169,20 +171,20 @@ export default function ShipmentsForm({ recordId, window }) {
     }
   })
 
-  const { totalQty, totalVolume, totalWeight } = formik?.values?.items?.reduce(
-    (acc, row) => {
-      const totQ = parseFloat(row?.shippedNowQty) || 0
-      const totV = parseFloat(row?.volume) || 0
-      const totW = parseFloat(row?.weight) || 0
+  const calculateShipmentTotals = items => {
+    return (items || []).reduce(
+      (acc, row) => {
+        acc.totalQty += parseFloat(row?.shippedNowQty || 0)
+        acc.totalVolume += parseFloat(row?.volume || 0)
+        acc.totalWeight += parseFloat(row?.weight || 0)
 
-      return {
-        totalQty: acc?.totalQty + totQ,
-        totalVolume: acc?.totalVolume + totV,
-        totalWeight: acc?.totalWeight + totW
-      }
-    },
-    { totalQty: 0, totalVolume: 0, totalWeight: 0 }
-  )
+        return acc
+      },
+      { totalQty: 0, totalVolume: 0, totalWeight: 0 }
+    )
+  }
+
+  const { totalQty, totalVolume, totalWeight } = calculateShipmentTotals(formik?.values?.items)
 
   useEffect(() => {
     formik.setFieldValue('header.qty', totalQty)
@@ -236,14 +238,21 @@ export default function ShipmentsForm({ recordId, window }) {
       )
     }
 
-    formik.setValues({
-      ...formik.values,
-      recordId: shipHeader.record.recordId,
-      dtId: shipHeader.record.dtId,
-      header: {
-        ...shipHeader.record
-      },
-      items: itemsList
+    const headerTotals = calculateShipmentTotals(itemsList)
+
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        recordId: shipHeader.record.recordId,
+        dtId: shipHeader.record.dtId,
+        header: {
+          ...shipHeader.record,
+          qty: headerTotals.totalQty,
+          volume: headerTotals.totalVolume,
+          weight: headerTotals.totalWeight
+        },
+        items: itemsList
+      }
     })
 
     fillGridRefCombo(shipHeader.record.vendorId)
@@ -486,7 +495,7 @@ export default function ShipmentsForm({ recordId, window }) {
 
         if (newRow.isInactive) {
           update({
-            ...formik.initialValues.items[0],
+            ...initialValues.items[0],
             poId: newRow?.poId,
             poRef: newRow?.poRef,
             id: newRow.id
@@ -581,7 +590,7 @@ export default function ShipmentsForm({ recordId, window }) {
       hidden: true,
       name: 'lotButton',
       props: {
-        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/lot.png').default.src,
+        imgSrc: '/images/buttonsIcons/lot.png',
       },
       label: labels.lot, //not added
       onClick: (e, row) => {}
@@ -654,6 +663,7 @@ export default function ShipmentsForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${SystemFunction.Shipment}&_startAt=0&_pageSize=1000`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
                     columnsInDropDown={[
@@ -751,7 +761,7 @@ export default function ShipmentsForm({ recordId, window }) {
                       formik.setFieldValue('header.vendorRef', newValue?.reference || '')
                       fillGridRefCombo(newValue?.recordId)
                       if (!newValue?.recordId) {
-                        formik.setFieldValue('items', formik?.initialValues?.items)
+                        formik.setFieldValue('items', initialValues?.items)
                       }
                       formik.setFieldValue('header.vendorId', newValue?.recordId || null)
                     }}
@@ -804,7 +814,7 @@ export default function ShipmentsForm({ recordId, window }) {
                     readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('header.notes', '')}
+                    onClear={() => formik.setFieldValue('header.notes', null)}
                     error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
                   />
                 </Grid>
@@ -819,7 +829,7 @@ export default function ShipmentsForm({ recordId, window }) {
             }}
             value={formik?.values?.items}
             error={formik?.errors?.items}
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={initialValues?.items?.[0]}
             columns={columns}
             maxAccess={maxAccess}
             name='shippedItems'

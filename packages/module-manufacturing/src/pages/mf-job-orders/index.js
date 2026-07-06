@@ -12,10 +12,10 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import JobOrderWindow from './window/JobOrderWindow'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import JobOrderWindow from '@argus/shared-ui/src/components/Shared/Forms/JobOrderWindow'
 
 const JobOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -61,6 +61,11 @@ const JobOrder = () => {
       field: 'clientName',
       headerName: labels.client,
       flex: 1
+    },  
+    {
+      field: 'sku',
+      headerName: labels.sku,
+      flex: 1
     },
     {
       field: 'itemName',
@@ -97,6 +102,9 @@ const JobOrder = () => {
     {
       field: 'statusName',
       headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
@@ -156,16 +164,11 @@ const JobOrder = () => {
     stack({
       Component: JobOrderWindow,
       props: {
-        labels,
-        access,
         recordId,
         jobReference: reference,
         lockRecord,
         invalidate
       },
-      width: 1150,
-      height: 720,
-      title: labels.jobOrder,
       nextToTitle: reference
     })
   }
@@ -225,7 +228,6 @@ const JobOrder = () => {
           refetch={refetch}
           onDelete={delJOB}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

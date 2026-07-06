@@ -35,8 +35,7 @@ const FaLocations = () => {
     access,
     invalidate,
     refetch,
-    paginationParameters,
-    isLoading
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FixedAssetsRepository.Location.page,
@@ -109,7 +108,6 @@ const FaLocations = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={isLoading}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

@@ -11,7 +11,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
@@ -23,21 +23,24 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
-
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 export default function LeaveRequestForm({ recordId , window}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
+  const autoClose = systemChecks?.find(item => item.checkId === SystemChecks.AUTO_CLOSE_LEAVE_REQUEST_ONSAVE)?.value || false
+  
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.LeaveRequest,
+    editMode: !!recordId
+  })
 
-    const { labels, access } = useResourceParams({
-      datasetId: ResourceIds.LeaveRequest,
-      editMode: !!recordId
-    })
-
-    useSetWindow({ title: labels.title, window })
+  useSetWindow({ title: labels.title, window })
     
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.LeaveRequest.page
+    endpointId: LeaveManagementRepository.LeaveRequest.page
   })
 
   const { maxAccess } = useDocumentType({
@@ -64,7 +67,6 @@ export default function LeaveRequestForm({ recordId , window}) {
       wip: 1
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       hours: yup.number().required(),
       startDate: yup.date().required(),
@@ -76,7 +78,7 @@ export default function LeaveRequestForm({ recordId , window}) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: LoanManagementRepository.LeaveRequest.set,
+        extension: LeaveManagementRepository.LeaveRequest.set,
         record: JSON.stringify({
           ...obj,
           date: formatDateToApi(obj.date),
@@ -86,8 +88,10 @@ export default function LeaveRequestForm({ recordId , window}) {
       })
 
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-      refetchForm(response.recordId)
+      const updatedForm = await refetchForm(response.recordId)
       invalidate()
+
+      if (autoClose) await onClose(updatedForm)
     }
   })
 
@@ -98,40 +102,46 @@ export default function LeaveRequestForm({ recordId , window}) {
     refetchForm(recordId)
   }, [])
 
+
   async function refetchForm(recordId) {
-    if (recordId) {
-      const { record } = await getRequest({
-        extension: LoanManagementRepository.LeaveRequest.get,
-        parameters: `_recordId=${recordId}`
-      })
-      formik.setValues({
-        ...record,
-        date: formatDateFromApi(record.date),
-        startDate: formatDateFromApi(record.startDate),
-        endDate: formatDateFromApi(record.endDate)
-      })
+    if (!recordId) return {}
+
+    const { record } = await getRequest({
+      extension: LeaveManagementRepository.LeaveRequest.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    const data = {
+      ...record,
+      date: formatDateFromApi(record.date),
+      startDate: formatDateFromApi(record.startDate),
+      endDate: formatDateFromApi(record.endDate)
     }
+    formik.resetForm({ values: data })
+
+    return data
   }
 
-  const onClose = async () => {
+  const onClose = async (values = null) => {
+    const payload = values || formik.values
     await postRequest({
-      extension: LoanManagementRepository.LeaveRequest.close,
+      extension: LeaveManagementRepository.LeaveRequest.close,
       record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values.date),
-        startDate: formatDateToApi(formik.values.startDate),
-        endDate: formatDateToApi(formik.values.endDate)
+        ...payload,
+        date: formatDateToApi(payload.date),
+        startDate: formatDateToApi(payload.startDate),
+        endDate: formatDateToApi(payload.endDate)
       })
     })
 
     toast.success(platformLabels.Closed)
-    refetchForm(formik.values.recordId)
+    refetchForm(payload.recordId)
     invalidate()
   }
 
   const onReopen = async () => {
     await postRequest({
-      extension: LoanManagementRepository.LeaveRequest.reopen,
+      extension: LeaveManagementRepository.LeaveRequest.reopen,
       record: JSON.stringify({
         ...formik.values,
         date: formatDateToApi(formik.values.date),
@@ -149,7 +159,7 @@ export default function LeaveRequestForm({ recordId , window}) {
     {
       key: 'Close',
       condition: !isClosed,
-      onClick: onClose,
+      onClick: () => onClose(),
       disabled: isClosed || !editMode
     },
     {
@@ -175,6 +185,7 @@ export default function LeaveRequestForm({ recordId , window}) {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Grow>
@@ -299,7 +310,7 @@ export default function LeaveRequestForm({ recordId , window}) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.IndemnityAccuralsFilters.qry}
+                endpointId={LeaveManagementRepository.LeaveTypes.qry}
                 name='ltId'
                 label={labels.leaveType}
                 valueField='recordId'

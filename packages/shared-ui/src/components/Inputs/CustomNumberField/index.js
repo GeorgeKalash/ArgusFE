@@ -34,7 +34,7 @@ const CustomNumberField = ({
   allowNegative = true,
   arrow = false,
   displayCycleButton = false,
-  align = 'left',
+  align = 'right',
   handleButtonClick,
   cycleButtonLabel = '',
   iconMapIndex = 0,
@@ -45,7 +45,7 @@ const CustomNumberField = ({
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
 
   const handleKeyPress = e => {
-    const regex = /[0-9.-]/
+    const regex = decimalScale > 0 ? /[0-9.-]/ : /[0-9-]/
     const key = String.fromCharCode(e.which || e.keyCode)
     if (!regex.test(key)) {
       e.preventDefault()
@@ -80,16 +80,29 @@ const CustomNumberField = ({
       return null
     }
 
-    const num = val != '' ? val : null
+    if (val === '') return null
 
-    return isNaN(num) ? null : num
+    const num = Number(val)
+
+    return Number.isNaN(num) ? null : num
   }
 
-  const handleNumberChangeValue = (e, blur) => {
-    const value = formatNumber(e)
-    if (value) e.target.value = value
+  const handleNumberValueChange = (values, sourceInfo) => {
+    if (sourceInfo?.source !== 'event') return
 
-    onChange(e, parseInputValue(value, blur))
+    const rawValue = values.value ?? values.formattedValue ?? ''
+    const parsedValue = parseInputValue(rawValue, false)
+
+    const event = {
+      ...sourceInfo?.event,
+      target: {
+        ...sourceInfo?.event?.target,
+        name: props.name,
+        value: parsedValue
+      }
+    }
+
+    onChange(event, parsedValue)
   }
 
   const handleNumberMouseLeave = e => {
@@ -138,7 +151,7 @@ const CustomNumberField = ({
       label={label}
       allowLeadingZeros
       allowNegative={allowNegative}
-      thousandSeparator={thousandSeparator}
+      thousandSeparator={thousandSeparator || null}
       decimalSeparator='.'
       decimalScale={decimalScale}
       value={value ?? ''}
@@ -153,10 +166,19 @@ const CustomNumberField = ({
         autoSelect && e.target.select()
       }}
       onBlur={e => {
-        onBlur(e)
-        if (e.target.value?.endsWith('.')) {
-          handleNumberChangeValue(e, true)
+        const value = formatNumber(e)
+        const parsedValue = parseInputValue(value, true)
+
+        const event = {
+          ...e,
+          target: {
+            ...e.target,
+            name: e.target.name,
+            value: parsedValue
+          }
         }
+
+        onBlur(event, parsedValue)
       }}
       sx={{
         '& .MuiInputBase-input': {
@@ -201,7 +223,7 @@ const CustomNumberField = ({
           },
       }}
       customInput={TextField}
-      onChange={e => handleNumberChangeValue(e)}
+      onValueChange={handleNumberValueChange}
       onMouseLeave={e => handleNumberMouseLeave(e)}
       {...props}
     />

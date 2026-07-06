@@ -140,16 +140,25 @@ const IvMaterialsTransfer = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     },
     {
       field: 'wipName',
       headerName: _labels.wip,
+      type: 'badge',
+      family: 'wip',
+      valueField: 'wip',
       flex: 1
     },
     {
       field: 'printStatusName',
       headerName: _labels.print,
+      type: "icon",
+      family: "printStatus",
+      valueField: "printStatus",
       flex: 1
     },
     {
@@ -170,21 +179,13 @@ const IvMaterialsTransfer = () => {
     openForm(obj?.recordId)
   }
 
-  function openOutWardsWindow(recordId) {
+  function openForm(recordId) {
     stack({
       Component: MaterialsTransferForm,
       props: {
         recordId
       }
     })
-  }
-
-  async function openForm(recordId) {
-    !plantId && !recordId
-      ? stackError({
-          message: platformLabels.noDefaultPlant
-        })
-      : openOutWardsWindow(recordId)
   }
 
   const del = async obj => {
@@ -209,7 +210,7 @@ const IvMaterialsTransfer = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

@@ -10,10 +10,12 @@ import { CommonContext } from '@argus/shared-providers/src/providers/CommonConte
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const ModuleDeactivation = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
+  const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
 
   const { labels: _labels, access } = useResourceQuery({
@@ -95,7 +97,7 @@ const ModuleDeactivation = () => {
         extension: AccessControlRepository.ModuleDeactivation.set2,
         record: JSON.stringify(resultObject)
       })
-      toast.success('Record Updated Successfully')
+      toast.success(platformLabels.Updated)
     } catch (e) {}
   }
 
@@ -107,7 +109,6 @@ const ModuleDeactivation = () => {
             columns={columns}
             gridData={data}
             rowId={['moduleId']}
-            isLoading={false}
             maxAccess={access}
             showCheckboxColumn={true}
             pagination={false}

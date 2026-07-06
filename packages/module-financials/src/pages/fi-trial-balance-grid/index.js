@@ -164,7 +164,6 @@ const FiTrialBalanceGrid = () => {
           columns={columns}
           gridData={data}
           onEdit={edit}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationType='client'

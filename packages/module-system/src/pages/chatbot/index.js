@@ -1,0 +1,1416 @@
+import React, { useState, useRef, useEffect, useContext, useMemo } from "react";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  ArcElement,
+  PointElement,
+  Tooltip,
+  Legend
+} from "chart.js";
+
+import {
+  Bar,
+  Line,
+  Pie,
+  Doughnut
+} from "react-chartjs-2";
+
+import MuiTooltip from "@mui/material/Tooltip";
+
+import { parseChatStream } from "@argus/shared-providers/src/providers/chatService";
+import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import DeleteDialog from "@argus/shared-ui/src/components/Shared/DeleteDialog";
+import { ResourceIds } from "@argus/shared-domain/src/resources/ResourceIds";
+import { useResourceQuery } from "@argus/shared-hooks/src/hooks/resource";
+import { RequestsContext } from "@argus/shared-providers/src/providers/RequestsContext";
+import { ChatbotRepository } from '@argus/repositories/src/repositories/ChatbotRepository'
+import { useError } from '@argus/shared-providers/src/providers/error'
+import { formatDateTimeDefault } from "@argus/shared-domain/src/lib/date-helper";
+import { useReactToPrint } from "react-to-print";
+
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  ArcElement,
+  PointElement,
+  Tooltip,
+  Legend
+);
+
+  const BarChartRenderer = React.memo(({ chart }) => {
+    return (
+      <Bar
+        options={{
+          animation: false
+        }}
+        redraw={false}
+        data={{
+          labels: chart.labels,
+          datasets: chart.datasets.map(ds => ({
+            ...ds,
+            backgroundColor: "rgba(22, 77, 161, 0.65)",
+            borderColor: "rgba(22, 77, 161, 0.85)",
+            borderWidth: 1
+          }))
+        }}
+      />
+    );
+  });
+
+  const LineChartRenderer = React.memo(({ chart }) => {
+    return (
+      <Line
+        options={{
+          animation: false
+        }}
+        redraw={false}
+        data={{
+          labels: chart.labels,
+          datasets: chart.datasets.map(ds => ({
+            ...ds,
+            backgroundColor: "rgba(22, 77, 161, 0.76)",
+            borderColor: "rgba(22, 77, 161, 0.85)",
+          }))
+        }}
+      />
+    );
+  });
+
+  const DoughnutChartRenderer = React.memo(({ chart }) => {
+    return (
+      <Doughnut
+        options={{
+          animation: false
+        }}
+        redraw={false}
+        data={{
+          labels: chart.labels,
+          datasets: chart.datasets.map(ds => ({
+              ...ds,
+              backgroundColor: [
+                "rgba(163,175,30,0.88)",
+                "rgba(37,99,235,0.88)",
+                "rgba(46,138,110,0.88)",
+                "rgba(184,59,246,0.88)",
+                "rgba(246,59,59,0.88)",
+              ],
+              borderColor: [
+                "rgba(163,175,30,0.35)",
+                "rgba(37,99,235,0.35)",
+                "rgba(46,138,110,0.35)",
+                "rgba(184,59,246,0.35)",
+                "rgba(246,59,59,0.35)",
+              ],
+              borderWidth: 0.8
+            }))
+        }}
+        />
+      )
+  });
+
+  const PieChartRenderer = React.memo(({ chart }) => {
+    return (
+      <Pie
+        options={{
+          animation: false
+        }}
+        redraw={false}
+        data={{
+          labels: chart.labels,
+          datasets: chart.datasets.map(ds => ({
+            ...ds,
+            backgroundColor: [
+              "rgba(163,175,30,0.88)",
+              "rgba(37,99,235,0.88)",
+              "rgba(46,138,110,0.88)",
+              "rgba(184,59,246,0.88)",
+              "rgba(246,59,59,0.88)",
+            ],
+            borderColor: [
+              "rgba(163,175,30,0.35)",
+              "rgba(37,99,235,0.35)",
+              "rgba(46,138,110,0.35)",
+              "rgba(184,59,246,0.35)",
+              "rgba(246,59,59,0.35)",
+            ],
+            borderWidth: 0.8
+          }))
+        }}
+      />
+    );
+  });
+
+  const markdownComponents = {
+      p: ({ node, ...props }) => (
+        <p
+          style={{
+            margin: 0,
+            lineHeight: 1.5
+          }}
+          {...props}
+        />
+      ),
+
+      table: ({ node, ...props }) => (
+        <div
+          style={{
+            width: "100%",
+            overflowX: "auto",
+            maxWidth: "100%"
+          }}
+        >
+          <table
+            style={{
+              borderCollapse: "collapse",
+              width: "100%",
+              minWidth: "max-content",
+              marginTop: "10px"
+            }}
+            {...props}
+          />
+        </div>
+      ),
+
+      thead: ({ node, ...props }) => (
+        <thead
+          style={{
+            background: "#e5e7eb"
+          }}
+          {...props}
+        />
+      ),
+
+      th: ({ node, ...props }) => (
+        <th
+          style={{
+            border: "1px solid #d1d5db",
+            padding: "8px",
+            textAlign: "left"
+          }}
+          {...props}
+        />
+      ),
+
+      td: ({ node, ...props }) => (
+        <td
+          style={{
+            border: "1px solid #d1d5db",
+            padding: "8px"
+          }}
+          {...props}
+        />
+      ),
+
+      ul: ({ node, ...props }) => (
+        <ul
+          style={{
+            margin: "6px 0",
+            paddingLeft: "20px"
+          }}
+          {...props}
+        />
+      ),
+
+      ol: ({ node, ...props }) => (
+        <ol
+          style={{
+            margin: "6px 0",
+            paddingLeft: "20px"
+          }}
+          {...props}
+        />
+      ),
+
+      code ({ className, children }) {
+        if (className === "language-chart") {
+          try {
+            const chart = JSON.parse(String(children));
+
+            if (chart.type === "bar") {
+              return (
+                <div style={{ width: "600px", maxWidth: "100%" }}>
+                  <BarChartRenderer chart={chart}/>
+                </div>
+              );
+            }
+
+            if (chart.type === "line") {
+              return (
+                <div style={{ width: "600px", maxWidth: "100%" }}>
+                  <LineChartRenderer chart={chart}/>
+                </div>
+              );
+            }
+
+            if (chart.type === "pie") {
+              return (
+                <div style={{ width: "600px", maxWidth: "100%" }}>
+                  <PieChartRenderer chart={chart}/>
+                </div>
+              );
+            }
+            if (chart.type === "doughnut") {
+              return (
+                <div style={{ width: "600px", maxWidth: "100%" }}>
+                  <DoughnutChartRenderer chart={chart}/>
+                </div>
+              );
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
+        return (
+          <code className={className}>
+            {children}
+          </code>
+        );
+      },
+    }
+  
+
+export default function ChatPage() {
+  const { user } = useContext(AuthContext);
+  const { connectorStreamRequest, postConnectorRequest } = useContext(RequestsContext)
+  // const { stack } = useWindow()
+  const errorModel = useError()
+
+  const inputRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const conversationRef = useRef(null);
+  
+  const [input, setInput] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchText, setSearchText] = useState("");
+  const [balanceDetails, setBalanceDetails] = useState(null);
+  const [copiedIndex, setCopiedIndex] = useState(null);
+
+  const {
+    labels,
+  } = useResourceQuery({
+    datasetId: ResourceIds.AIChatbot,
+  })
+  
+  async function showError(props) {
+    if (errorModel) await errorModel.stack(props)
+  }
+
+  const newChat = {
+    id: Date.now(),
+    conversationId: "",
+    title: labels?.newChat || "New Chat",
+    messages: [],
+    isLoading: false,
+    historyLoaded: false
+    };
+    
+  const [chats, setChats] = useState([]);
+
+  const [selectedChatId, setSelectedChatId] = useState(null);
+
+  const selectedChat =
+    chats.find(
+      (chat) =>
+        chat && chat.id === selectedChatId
+    ) || null;
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth"
+    });
+  }, [selectedChat]);
+
+  useEffect(() => {
+    loadConversations();
+  }, []);
+  
+  const buildNewChat = () => (newChat);
+
+  const createNewChat = () => {
+    const existingDraft = chats.find(
+      (chat) => !chat.conversationId
+    );
+
+    if (existingDraft) {
+      setSelectedChatId(existingDraft.id);
+      return existingDraft;
+    }
+
+    const draft = buildNewChat();
+
+    setChats((prev) => [draft, ...prev]);
+    setSelectedChatId(draft.id);
+
+    return draft;
+  };
+
+  const loadConversations = async () => {
+    const res = await postConnectorRequest({
+      extension: ChatbotRepository.list,
+      record: {
+        argusToken: user.accessToken
+      }
+    });
+
+    setBalanceDetails(res?.balanceDetails || null);
+
+    const mapped =
+      res?.conversations?.map((item) => ({
+        id: item.conversationId,
+        conversationId: item.conversationId,
+        title:
+          item.summary?.trim()
+            ? item.summary
+            : item.conversationId,
+        messages: [],
+        isLoading: false,
+        historyLoaded: false
+      })) || [];
+
+    if (mapped.length) {
+      setChats(mapped);
+    } else {
+      const draft = createNewChat();
+
+      setChats([draft]);
+      setSelectedChatId(draft.id);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim() || selectedChat?.isLoading)
+      return;
+
+    let activeChat = selectedChat;
+
+    const userText = input;
+
+    if (!activeChat) {
+      const existingDraft = chats.find(
+        (chat) => !chat.conversationId
+      );
+
+      if (existingDraft) {
+        activeChat = existingDraft;
+        setSelectedChatId(existingDraft.id);
+      } else {
+        const draft = buildNewChat(); 
+
+        setChats((prev) => [draft, ...prev]);
+        setSelectedChatId(draft.id);
+
+        activeChat = draft;
+      }
+    }
+
+    setChats((prevChats) =>
+      prevChats.map((chat) =>
+        chat.id === activeChat.id
+          ? {
+              ...chat,
+              isLoading: true,
+              messages: [
+                ...chat.messages,
+                {
+                  sender: "user",
+                  type: "text",
+                  text: userText,
+                  createdAt: new Date().toISOString()
+                },
+                {
+                  sender: "assistant",
+                  type: "text",
+                  text: "",
+                  isStreaming: true,
+                  isWaiting: true,
+                  createdAt: new Date().toISOString()
+                }
+              ]
+            }
+          : chat
+      )
+    );
+
+    setInput("");
+    if (inputRef.current) {
+      inputRef.current.style.height = "48px";
+    }
+
+    const conversationId = selectedChat?.conversationId;
+
+    const response =
+      await connectorStreamRequest({
+        extension:
+          ChatbotRepository.chat,
+        record: {
+          argusToken: user.accessToken,
+          conversationId,
+          message: userText
+        }
+      });
+
+    await parseChatStream(
+      response,
+      (event) => {
+        if (event.type === "conversationId") {
+          setChats((prevChats) =>
+            prevChats.map(
+              (chat) =>
+                chat.id === activeChat.id
+                  ? {
+                      ...chat,
+                      conversationId: chat.conversationId || event.value,
+                      title: !chat.conversationId ? event.value : chat.title
+                    }
+                  : chat
+            )
+          );
+
+          return;
+        }
+
+        if (event.type === "chunk") {
+          setChats((prevChats) =>
+            prevChats.map(
+              (chat) => {
+                if (
+                  chat.id !== activeChat.id
+                )
+                  return chat;
+
+                const updatedMessages =
+                  [
+                    ...chat.messages
+                  ];
+
+                const last = updatedMessages.length - 1;
+
+                updatedMessages[last] = {
+                  ...updatedMessages[last],
+                  text: updatedMessages[last].text +event.text,
+                  isStreaming:true,
+                  isWaiting:false
+                };
+
+                return {
+                  ...chat,
+                  messages: updatedMessages
+                };
+              }
+            )
+          );
+        }
+
+        if (event.type === "balance") {
+          const parsedBalance =
+            typeof event.content === "string"
+              ? JSON.parse(event.content)
+              : event.content;
+
+          setBalanceDetails(parsedBalance);
+         
+          return;
+        }
+
+        if (event.type ==="done") {
+          setChats((prevChats) =>
+            prevChats.map(
+              (chat) => {
+                if (chat.id !== activeChat.id)
+                  return chat;
+
+                const updatedMessages = [...chat.messages];
+
+                const lastIndex = updatedMessages.length - 1;
+
+                if (updatedMessages[lastIndex]?.isStreaming) {
+                  updatedMessages[lastIndex] = {
+                    ...updatedMessages[lastIndex],
+                    isStreaming: false
+                  };
+                }
+
+                return {
+                  ...chat,
+                  isLoading: false,
+                  messages: updatedMessages
+                };
+              }
+            )
+          );
+
+        }
+
+        if (event.type ==="error") {
+          showError({
+            message:event.message
+          });
+
+          setChats((prevChats) =>
+            prevChats.map((chat) => {
+              if (chat.id !== activeChat.id)
+                return chat;
+
+              const updatedMessages = [...chat.messages];
+
+              const last = updatedMessages.length - 1;
+
+              if (updatedMessages[last]?.isWaiting) {
+                updatedMessages.pop();
+              }
+
+              return {
+                ...chat,
+                messages:updatedMessages
+              };
+            })
+          );
+
+          return;
+        }
+      }
+    );
+  };
+
+  useEffect(() => {
+    if (!selectedChat?.isLoading) {
+      inputRef.current?.focus();
+    }
+  }, [selectedChat?.isLoading]);
+
+  const renderMessage = (msg, index) => {
+    const streamingText = msg.text.replace(
+      /```chart[\s\S]*$/i,
+      "\n\n📊 Generating chart..."
+    );
+
+    if (msg.type === "text") {
+      return (
+        <MuiTooltip
+          title={msg.createdAt ? formatMessageDate(msg.createdAt) : "" }
+          arrow
+          placement="top"
+          enterDelay={500}
+        >
+        <div
+          key={index}
+          style={{
+            alignSelf:
+              msg.sender === "user"
+                ? "flex-end"
+                : "flex-start",
+            background:
+              msg.sender === "user"
+                ? "#2563eb"
+                : "#f1f1f1",
+            color:
+              msg.sender === "user"
+                ? "#fff"
+                : "#000",
+            padding: "10px 14px",
+            borderRadius: "14px",
+            maxWidth: "70%",
+            position: "relative",
+            whiteSpace: "pre-wrap",
+          }}
+          className="chat-message-wrapper"
+        >
+          {msg.isWaiting ? (
+            <div
+              style={{
+                display: "flex",
+                gap: "6px",
+                alignItems: "center",
+                padding: "4px 0"
+              }}
+            >
+              <span className="typing-dot"></span>
+              <span className="typing-dot"></span>
+              <span className="typing-dot"></span>
+            </div>
+          ) : msg.isStreaming ? (
+            <div style={{ whiteSpace: "pre-wrap" }}>
+              {streamingText}▋
+            </div>
+          ) : ( 
+            <>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(msg.text);
+
+                  setCopiedIndex(index);
+
+                  setTimeout(() => {
+                    setCopiedIndex(null);
+                  }, 2000);
+                }}
+                className="copy-button"
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  right:
+                    msg.sender === "assistant"
+                      ? "-42px"
+                      : "auto",
+                  left:
+                    msg.sender === "user"
+                      ? "-42px"
+                      : "auto",
+                  opacity: 0,
+                  transition: "0.2s ease",
+                  border: "none",
+                  background: "#fff",
+                  borderRadius: "6px",
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                  fontSize: "22px",
+                  color: "#333",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                  width: "34px",
+                  height: "34px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                {copiedIndex === index
+                  ? "✓"
+                  : "⧉"}
+              </button>
+              <ReactMarkdown
+                remarkPlugins={
+                  msg.isStreaming
+                    ? []
+                    : [remarkGfm]
+                }
+                components={markdownComponents}
+              >
+                {msg.text}
+              </ReactMarkdown>
+            </>
+          )}
+            </div>
+            </MuiTooltip>
+          );
+    }
+
+    if (msg.type === "table") {
+      return (
+        <div
+          key={index}
+          style={{
+            alignSelf: "flex-start",
+            background: "#fff",
+            border: "1px solid #ddd",
+            borderRadius: "12px",
+            padding: "12px",
+            maxWidth: "90%",
+            width: "fit-content",
+            minWidth: 0,
+            overflow: "hidden"
+          }}
+          className="chat-message-wrapper"
+        >
+          <div
+            style={{
+              width: "100%",
+              overflowX: "auto",
+              maxWidth: "100%",
+              alignSelf: "flex-start"
+            }}
+          >
+            <table
+              style={{
+                borderCollapse: "collapse",
+                width: "100%",
+                minWidth: "max-content",
+              }}
+            >
+              <thead>
+                <tr>
+                  {msg.columns.map((col, i) => (
+                    <th
+                      key={i}
+                      style={{
+                        padding: "8px",
+                        borderBottom:
+                          "1px solid #ddd",
+                        textAlign: "left"
+                      }}
+                    >
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {msg.rows.map((row, r) => (
+                  <tr key={r}>
+                    {row.map((cell, c) => (
+                      <td
+                        key={c}
+                        style={{
+                          padding: "8px",
+                          borderBottom:
+                            "1px solid #eee"
+                        }}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+
+  // const confirmDeleteChat = (chat) => {
+  //   openDelete({
+  //     ...chat
+  //   });
+  // };
+
+  // const onDelete = (chat) => {
+  //   deleteChat(chat.id);
+  // };
+
+  // function openDelete(chat) {
+  //   stack({
+  //     Component: DeleteDialog,
+  //     props: {
+  //       open: [true, {}],
+  //       fullScreen: false,
+  //       onConfirm: () =>
+  //         onDelete(chat)
+  //     },
+  //     refresh: false
+  //   });
+  // }
+  
+
+  // const deleteChat = (chatId) => {
+  //   const visibleChats =
+  //     searchText.trim()
+  //       ? filteredChats
+  //       : chats;
+
+  //   const deletedIndex =
+  //     visibleChats.findIndex(
+  //       (c) => c.id === chatId
+  //     );
+
+  //   const updatedChats =
+  //     chats.filter(
+  //       (c) => c.id !== chatId
+  //     );
+
+  //   if (!updatedChats.length) {
+  //     setChats([newChat]);
+  //     setSelectedChatId(
+  //       newChat.id
+  //     );
+  //     return;
+  //   }
+
+  //   setChats(updatedChats);
+
+  //   if (
+  //     selectedChatId !== chatId
+  //   ) {
+  //     return;
+  //   }
+
+  //   let nextChat = null;
+
+  //   if (
+  //     deletedIndex >= 0 &&
+  //     visibleChats[
+  //       deletedIndex + 1
+  //     ]
+  //   ) {
+  //     const nextId =
+  //       visibleChats[
+  //         deletedIndex + 1
+  //       ].id;
+
+  //     nextChat =
+  //       updatedChats.find(
+  //         (c) => c.id === nextId
+  //       );
+  //   }
+
+  //   if (
+  //     !nextChat &&
+  //     deletedIndex > 0
+  //   ) {
+  //     const prevId =
+  //       visibleChats[
+  //         deletedIndex - 1
+  //       ].id;
+
+  //     nextChat =
+  //       updatedChats.find(
+  //         (c) => c.id === prevId
+  //       );
+  //   }
+
+  //   if (!nextChat) {
+  //     nextChat =
+  //       updatedChats[0];
+  //   }
+
+  //   setSelectedChatId(
+  //     nextChat.id
+  //   );
+  // };
+
+  const filteredChats =
+    chats.filter((chat) =>
+      chat.title.toLowerCase()?.includes(
+          searchText.toLowerCase()
+        )
+    );
+
+  const openChat = async (chat) => {
+    if (!chat) return;
+
+    setSelectedChatId(chat.id);
+
+    if (!chat.conversationId) return;
+
+    if (chat.historyLoaded) return;
+
+    const res = await postConnectorRequest({
+        extension: ChatbotRepository.history,
+        record: {
+          argusToken: user.accessToken,
+          conversationId: chat.conversationId
+        }
+      });
+
+    const mappedMessages =
+      res.map((msg) => ({
+        sender: msg.role,
+        type: "text",
+        text: msg.content,
+        createdAt: msg.createdAt
+      }));
+
+    setChats((prevChats) =>
+      prevChats.map((c) =>
+        c.id === chat.id
+          ? {
+              ...c,
+              messages: mappedMessages,
+              historyLoaded: true
+            }
+          : c
+      )
+    );
+  };
+
+  const StartNewChat = () => (
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+        color: "#666",
+        textAlign: "center"
+      }}
+    >
+      <h2
+        style={{
+          marginBottom: "10px"
+        }}
+      >
+        {labels?.startNewChat ?? ''}
+      </h2>
+
+      <div>
+        {labels?.askAnything ?? ''}
+      </div>
+    </div>
+  )
+
+  const formatMessageDate = (date) => {
+    if (!date) return "";
+
+    const messageDate = new Date(date);
+    const now = new Date();
+
+    const messageDay = new Date(messageDate);
+    messageDay.setHours(0, 0, 0, 0);
+
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const time = formatDateTimeDefault(messageDate, "hh:mm a", false);
+
+    if (messageDay.getTime() === today.getTime()) {
+      return time;
+    }
+
+    if (messageDay.getTime() === yesterday.getTime()) {
+      return `Yesterday ${time}`;
+    }
+
+    return formatDateTimeDefault(messageDate, "hh:mm a");
+  };
+
+  const handlePrintConversation =
+    useReactToPrint({
+      content: () =>
+        conversationRef.current,
+      documentTitle:
+        selectedChat?.title ||
+        "Conversation"
+    });
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        height: "100vh",
+        overflow: "hidden"
+      }}
+    >
+      <div
+        style={{
+          width: sidebarOpen
+            ? "280px"
+            : "0px",
+          minWidth: sidebarOpen
+            ? "280px"
+            : "0px",
+          flexShrink: 0,
+          overflow: "hidden",
+          transition:
+            "all 0.25s ease",
+          borderRight:
+            sidebarOpen
+              ? "1px solid #ddd"
+              : "none"
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            padding: "16px",
+            boxSizing: "border-box"
+          }}
+        >
+          <button
+            onClick={createNewChat}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "12px 14px",
+              background: "#fff",
+              color: "#111",
+              border: "1px solid #ddd",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontSize: "15px",
+              fontWeight: "500",
+              transition:
+                "all 0.2s ease"
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background =
+                "#f7f7f7")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background =
+                "#fff")
+            }
+          >
+            <span
+              style={{
+                fontSize: "18px",
+                lineHeight: 1
+              }}
+            >
+              ✎
+            </span>
+
+            <span>
+              {labels?.newChat ??
+                "New Chat"}
+            </span>
+          </button>
+          <input
+            value={searchText}
+            onChange={(e) =>
+              setSearchText(
+                e.target.value
+              )
+            }
+            placeholder={labels?.placeholder ?? ''}
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginTop: "12px",
+              marginBottom: "12px",
+              borderRadius: "8px",
+              border: "1px solid #ccc"
+            }}
+          />
+
+          
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              minHeight: 0
+            }}
+          >
+            {filteredChats.map((chat) => (
+              <div
+                key={chat.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent:
+                    "space-between",
+                  padding: "10px",
+                  marginBottom: "8px",
+                  borderRadius: "8px",
+                  background:
+                    chat.id === selectedChatId
+                      ? "#f1f1f1"
+                      : "transparent"
+                }}
+              >
+                <MuiTooltip
+                  title={chat.title}
+                  arrow
+                  placement="bottom"
+                  enterDelay={2000}
+                >
+                  <div
+                    onClick={() =>
+                      openChat(chat)
+                    }
+                    style={{
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                      flex: 1
+                    }}
+                    >
+                    {chat.title}
+                  </div>
+                </MuiTooltip>
+
+                {/* {chat.conversationId && (
+                  <button
+                    onClick={() =>
+                      confirmDeleteChat(chat)
+                    }
+                    style={{
+                      border: "none",
+                      background:
+                        "transparent",
+                      cursor: "pointer",
+                      color: "#999"
+                    }}
+                  >
+                    🗑
+                  </button>
+                )} */}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column"
+        }}
+      >
+        <div
+          style={{
+            padding: "16px",
+            borderBottom: "1px solid #ddd",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "12px"
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center"
+            }}
+          >
+            <button
+              onClick={() =>
+                setSidebarOpen(!sidebarOpen)
+              }
+              style={{
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                fontSize: "20px",
+                padding: "4px 8px",
+                borderRadius: "6px"
+              }}
+            >
+              ☰
+            </button>
+
+            <span
+              style={{
+                fontWeight: "bold"
+              }}
+            >
+              {labels?.aiAssistant ?? ""}
+            </span>
+          </div>
+
+          {balanceDetails && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                flexWrap: "wrap"
+              }}
+            >
+              <div
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "999px",
+                  border: "1px solid #ddd",
+                  background: "#fff",
+                  fontSize: "13px",
+                  fontWeight: 500
+                }}
+              >
+                {balanceDetails.provider}
+              </div>
+
+              <div
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "999px",
+                  background: "#eff6ff",
+                  color: "#2563eb",
+                  fontSize: "13px",
+                  fontWeight: 600
+                }}
+              >
+                {balanceDetails.model}
+              </div>
+
+              <div
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "999px",
+                  background:
+                    balanceDetails.balance < 1000
+                      ? "#fef2f2"
+                      : "#ecfdf5",
+                  color:
+                    balanceDetails.balance < 1000
+                      ? "#dc2626"
+                      : "#059669",
+                  fontSize: "13px",
+                  fontWeight: 600
+                }}
+              >
+                {(balanceDetails.balance).toLocaleString()} {labels.tokensLeft}
+              </div>
+            </div>
+          )}
+
+          <div
+            style={{
+              width: "80px",
+              display: "flex",
+              justifyContent: "flex-end"
+            }}
+          >
+            {selectedChat?.conversationId && (
+              <button
+                onClick={handlePrintConversation}
+                style={{
+                  border: "1px solid #ddd",
+                  background: "#fff",
+                  borderRadius: "8px",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  fontSize: "13px"
+                }}
+              >
+                {labels.export}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div
+          ref={conversationRef}
+          className="chat-print-container"
+          style={{
+            flex: 1,
+            padding: "20px",
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px"
+          }}
+        >
+          {
+            !selectedChat ? (
+
+              <StartNewChat />
+
+            ) : selectedChat.conversationId &&
+                !selectedChat.historyLoaded &&
+                selectedChat.messages.length === 0 ? (
+
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  color: "#666",
+                  textAlign: "center"
+                }}
+              >
+                <div>
+                  {labels?.loadingConversation ?? ''}
+                </div>
+              </div>
+
+            ) : selectedChat.messages.length === 0 ? (
+
+              <StartNewChat />
+
+            ) : (
+
+              <>
+                {selectedChat.messages.map(
+                  (msg, i) =>
+                    renderMessage(msg, i)
+                )}
+
+                <div
+                  ref={messagesEndRef}
+                ></div>
+              </>
+
+            )
+          }
+        </div>
+
+        <div
+          style={{
+            padding: "16px",
+            borderTop: "1px solid #ddd",
+            display: "flex",
+            gap: "10px"
+          }}
+        >
+          <textarea
+            value={input}
+            disabled={selectedChat?.isLoading}
+            ref={inputRef}
+            onChange={(e) => {
+              setInput(e.target.value);
+
+              e.target.style.height = "auto";
+              e.target.style.height =
+                Math.min(e.target.scrollHeight, 160) + "px";
+            }}
+            onKeyDown={(e) => {
+              if (
+                e.key === "Enter" &&
+                !e.shiftKey
+              ) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            rows={1}
+            placeholder={
+              labels?.fieldPlaceHolder ?? ""
+            }
+            style={{
+              flex: 1,
+              padding: "12px",
+              borderRadius: "12px",
+              border: "1px solid #ccc",
+              resize: "none",
+              overflowY: "auto",
+              minHeight: "48px",
+              maxHeight: "160px",
+              fontFamily: "inherit",
+              fontSize: "14px",
+              lineHeight: 1.5
+            }}
+          />
+
+          <button
+            onClick={sendMessage}
+            disabled={selectedChat?.isLoading}
+            style={{
+              padding:
+                "0 18px",
+              border: "none",
+              borderRadius: "8px",
+              background:
+                selectedChat?.isLoading
+                  ? "#9ca3af"
+                  : "#2563eb",
+              color: "#fff",
+              cursor:
+                selectedChat?.isLoading
+                  ? "not-allowed"
+                  : "pointer"
+            }}
+          >
+            {selectedChat?.isLoading
+              ? labels?.sending ?? ''
+              : labels?.send ?? ''}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

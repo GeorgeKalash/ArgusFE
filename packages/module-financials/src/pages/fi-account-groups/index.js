@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -16,56 +16,68 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 const AccountGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
-    return await getRequest({
-      extension: FinancialRepository.Group.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    const response = await getRequest({
+      extension: FinancialRepository.Group.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
+
+    return { ...response, _startAt }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: FinancialRepository.Group.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
+    filterBy,
     paginationParameters,
     refetch,
-    access,
+    access: maxAccess,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.Group.qry,
-    datasetId: ResourceIds.FlAccountGroups
+    endpointId: FinancialRepository.Group.page,
+    datasetId: ResourceIds.FlAccountGroups,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'nraDescription',
-      headerName: _labels.numberRange,
+      headerName: labels.numberRange,
       flex: 1
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
+  const add = () => openForm()
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
+  const edit = obj => openForm(obj?.recordId)
 
   const del = async obj => {
     await postRequest({
@@ -80,34 +92,34 @@ const AccountGroups = () => {
     stack({
       Component: AccountGroupsForm,
       props: {
-        labels: _labels,
+        labels,
         recordId,
-        maxAccess: access
+        maxAccess
       },
       width: 600,
       height: 400,
-      title: _labels.accountGroups
+      title: labels.accountGroups
     })
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar onAdd={add} maxAccess={maxAccess} reportName={'FIGRP'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}
-          paginationType='client'
-          maxAccess={access}
+          paginationType='api'
+          maxAccess={maxAccess}
         />
       </Grow>
     </VertLayout>

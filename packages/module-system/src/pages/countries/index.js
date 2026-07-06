@@ -89,7 +89,6 @@ const Countries = () => {
       field: 'ibanLength',
       headerName: _labels.ibanLength,
       flex: 1,
-      align: 'right',
       type: 'number'
     }
   ]
@@ -138,7 +137,6 @@ const Countries = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           refetch={refetch}
           pageSize={50}
           paginationParameters={paginationParameters}

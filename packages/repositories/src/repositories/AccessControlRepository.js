@@ -26,7 +26,11 @@ export const AccessControlRepository = {
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP',
-    snapshotGRP: service + 'snapshotGRP'
+    snapshotGRP: service + 'snapshotGRP',
+    set2: service + 'set2GRP',
+  },
+  SecurityGroupAI: {
+    qry: service + 'qrySGAI',
   },
   RowAccessUserView: {
     qry: service + 'qryROU',
@@ -112,5 +116,8 @@ export const AccessControlRepository = {
     get2: service + 'get2RDT',
     set2: service + 'set2RDT',
     del: service + 'delRDT'
+  },
+  Provider: {
+    get: service + 'getProviderPack',
   }
 }

@@ -149,7 +149,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='amount'
                 required
@@ -159,11 +159,11 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
                 onClear={() => formik.setFieldValue('amount', '')}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
-                maxLength={10}
+                maxLength={12}
                 decimalScale={2}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='baseAmount'
                 required

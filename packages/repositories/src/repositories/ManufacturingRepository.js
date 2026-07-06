@@ -97,8 +97,7 @@ export const ManufacturingRepository = {
     qry: service + 'qryCLS',
     set: service + 'setCLS',
     get: service + 'getCLS',
-    del: service + 'delCLS',
-    snapshot: service + 'qryCLS'
+    del: service + 'delCLS'
   },
   ProductionStandard: {
     qry: service + 'qrySTD',
@@ -152,6 +151,9 @@ export const ManufacturingRepository = {
     stop: service + 'stopJOB',
     wip: service + 'wipJOB',
     sync: service + 'syncJOB'
+  },
+  GenerateAMC:{
+    generate: service + 'generateAMC'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -271,7 +273,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotPO',
     post: service + 'postPO',
     gen: service + 'genPO',
-    close: service + 'closePO'
+    close: service + 'closePO',
+    reopen: service + 'reopenPO',
   },
   BillOfMaterials: {
     get: service + 'getBMA',
@@ -296,8 +299,7 @@ export const ManufacturingRepository = {
     page: service + 'pageASM',
     snapshot: service + 'snapshotASM',
     post: service + 'postASM',
-    unpost: service + 'unpostASM',
-    generate: service + 'genASM'
+    unpost: service + 'unpostASM'
   },
   AssemblyItems: {
     qry: service + 'qryASC'
@@ -403,9 +405,6 @@ export const ManufacturingRepository = {
     set: service + 'setIMD',
     qry: service + 'qryIMD'
   },
-  JobOrder: {
-    gen: service + 'genORD'
-  },
   RefreshPoItem: {
     refresh: service + 'refreshPOI'
   },
@@ -444,7 +443,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotDIS',
     get: service + 'getDIS',
     set2: service + 'set2DIS',
-    del: service + 'delDIS'
+    del: service + 'delDIS',
+    post: service + 'postDIS'
   },
   DisposalItem: {
     qry: service + 'qryDII'
@@ -474,4 +474,67 @@ export const ManufacturingRepository = {
     del: service + 'delDCA',
     snapshot: service + 'snapshotDCA'
   },
+  StandardCostParameters: {
+    qry: service + 'qrySCP',
+    page: service + 'pageSCP',
+    set: service + 'setSCP',
+    get: service + 'getSCP',
+    del: service + 'delSCP'
+  },
+  StandardCostUpdate: {
+    set2: service + 'set2SCU',
+    get2: service + 'get2SCU',
+    del: service + 'delSCU',
+    page: service + 'pageSCU',
+    snapshot: service + 'snapshotSCU',
+    post: service + 'postSCU',
+    unpost: service + 'unpostSCU',
+    pack: service + 'getPackSCU',
+    close: service + 'closeSCU',
+    reopen: service + 'reopenSCU'
+  },
+  ProductionSummary: {
+    get2: service + 'get2PRS',
+    set2: service + 'set2PRS',
+    del: service + 'delPRS',
+    page: service + 'pagePRS',
+    snapshot: service + 'snapshotPRS',
+    post: service + 'postPRS',
+    setPRSummary: service + 'setPRSummary'
+  },
+  ProductionRequestItems: {
+    import: service + 'importPRI',
+  },
+  ProductionRequest: {
+    page: service + 'pagePR',
+    get2: service + 'get2PR',
+    set2: service + 'set2PR',
+    del: service + 'delPR',
+    snapshot: service + 'snapshotPR',
+    post: service + 'postPR'
+  },
+  WorkCenterGroups: {
+    get: service + 'getWCG',
+    set: service + 'setWCG',
+    del: service + 'delWCG',
+    page: service + 'pageWCG',
+    qry: service + 'qryWCG',
+    snapshot: service + 'snapshotWCG'
+  },
+  ProductionClassGroups: {
+    get: service + 'getPCG',
+    set: service + 'setPCG',
+    del: service + 'delPCG',
+    page: service + 'pagePCG',
+    qry: service + 'qryPCG',
+    snapshot: service + 'snapshotPCG'
+  },
+  ProductionStandardGroups: {
+    get: service + 'getPSG',
+    set: service + 'setPSG',
+    del: service + 'delPSG',
+    page: service + 'pagePSG',
+    qry: service + 'qryPSG',
+    snapshot: service + 'snapshotPSG'
+  }
 }

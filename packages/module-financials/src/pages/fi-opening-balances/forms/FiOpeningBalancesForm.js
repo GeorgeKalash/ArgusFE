@@ -170,7 +170,7 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
                 error={formik.touched.plantId && Boolean(formik.errors.recordId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='amount'
                 type='text'
@@ -184,7 +184,7 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
                 maxLength={15}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='baseAmount'
                 type='text'

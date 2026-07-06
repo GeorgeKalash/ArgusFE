@@ -110,7 +110,6 @@ const CcCashNotes = () => {
           rowId={['currencyId', 'note']}
           onEdit={popup}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'
