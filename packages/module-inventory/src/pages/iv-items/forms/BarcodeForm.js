@@ -44,13 +44,13 @@ const BarcodeForm = ({ store, labels }) => {
     }
   ]
 
-  async function fetchGridData() {
+  async function onSuccess() {
     const response = await getRequest({
       extension: InventoryRepository.Barcode.qry,
       parameters: `_itemId=${recordId}&_pageSize=50&_startAt=0`
     })
 
-    return response
+    setGridData(response)
   }
 
   const {
@@ -83,8 +83,7 @@ const BarcodeForm = ({ store, labels }) => {
         access,
         store,
         msId: store?._msId,
-        setGridData,
-        fetchGridData
+        onSuccess
       },
       title: _labels.Barcodes
     })
@@ -112,8 +111,7 @@ const BarcodeForm = ({ store, labels }) => {
       record: JSON.stringify(obj)
     })
 
-    const res = await fetchGridData()
-    setGridData(res)
+    onSuccess?.()
 
     toast.success(platformLabels.Deleted)
   }

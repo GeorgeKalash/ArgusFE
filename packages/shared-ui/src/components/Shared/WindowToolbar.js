@@ -47,7 +47,7 @@ const WindowToolbar = ({
   const [defaultLayoutId, setDefaultLayoutId] = useState(null)
 
   useEffect(() => {
-    resourceId && getReportLayout()
+    getReportLayout()
   }, [])
 
   useEffect(() => {

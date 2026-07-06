@@ -61,7 +61,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, dmgId, window }) => {
 
     const response = await getRequest({
       extension: InventoryRepository.Items.pack_B,
-      parameters: `_itemId=${store.recordId}&_dimGroupId=${store._dmgId || dmgId}&_dimension=0&_itemRetailCount=${store?.retailSettings?.length}&_msId=${msId}`
+      parameters: `_itemId=${store.recordId}&_dimGroupId=${store._dmgId || dmgId}&_itemRetailCount=${store?.retailSettings?.length}&_msId=${msId}`
     })
 
     setStore(prev => ({

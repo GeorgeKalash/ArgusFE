@@ -18,14 +18,7 @@ const VendorList = ({ store, labels, maxAccess }) => {
   const [gridData, setGridData] = useState({ list: [] })  
   const { stack } = useWindow()
 
-  async function fetchGridData() {
-    const response = await getRequest({
-      extension: PurchaseRepository.PriceList.qry,
-      parameters: `&_itemId=${recordId}`
-    })
 
-    return response
-  }
 
   const columns = [
     {
@@ -70,6 +63,15 @@ const VendorList = ({ store, labels, maxAccess }) => {
     }
   ]
 
+  async function onSuccess() {
+    const response = await getRequest({
+      extension: PurchaseRepository.PriceList.qry,
+      parameters: `&_itemId=${recordId}`
+    })
+
+    setGridData(response)
+  }
+
   const delVendor = async obj => {
     await postRequest({
       extension: PurchaseRepository.PriceList.del,
@@ -77,7 +79,7 @@ const VendorList = ({ store, labels, maxAccess }) => {
     })
 
     toast.success(platformLabels.Deleted)
-    fetchGridData()
+    onSuccess()
   }
 
   useEffect(() => {
@@ -101,8 +103,7 @@ const VendorList = ({ store, labels, maxAccess }) => {
         record: record,
         maxAccess,
         store,
-        fetchGridData,
-        setGridData
+        onSuccess
       },
 
       title: labels.vendor
