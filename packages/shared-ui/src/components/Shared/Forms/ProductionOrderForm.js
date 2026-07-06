@@ -60,7 +60,7 @@ export default function ProductionOrderForm({ recordId, window }) {
 
   const conditions = {
     sku: row => row?.sku,
-    qty: row => row?.itemId && (row?.qty != null || row.qty !== 0),
+    qty: row => row?.qty != null,
     itemName: row => row?.itemName
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
