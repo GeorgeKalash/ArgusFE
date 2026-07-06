@@ -8,6 +8,7 @@ import checkbox from './checkbox'
 import button from './button'
 import icon from './icon'
 import timepicker from './timepicker'
+import image from './image'
 
 export default {
   textfield,
@@ -19,5 +20,6 @@ export default {
   checkbox,
   icon,
   button,
-  timepicker
+  timepicker,
+  image
 }
