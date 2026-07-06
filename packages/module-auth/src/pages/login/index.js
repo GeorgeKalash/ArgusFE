@@ -18,9 +18,6 @@ import OTPAuthentication from '@argus/shared-ui/src/components/Shared/OTPAuthent
 import styles from './LoginPage.module.css'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
-import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
 
@@ -30,18 +27,15 @@ const LinkStyled = styled(Link)(({ theme }) => ({
   color: theme.palette.primary.main
 }))
 
-let tempLabels = null
 const LoginPage = () => {
-  const { getRequest } = useContext(RequestsContext)
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const theme = useTheme()
   const auth = useAuth()
-  const { companyName, setCompanyName, deployHost, validCompanyName } = useContext(AuthContext)
+  const { companyName, setCompanyName, deployHost, validCompanyName, setLanguageId  } = useContext(AuthContext)
   const { stack } = useWindow()
-  const { setTempLanguageId } = useSettings()
+  const { changeLanguage } = useSettings()
   const { platformLabels } = useContext(ControlContext)
-  const translatedLabels = tempLabels || platformLabels
   const Languages = {
     ENGLISH: 1,
     ARABIC: 2,
@@ -75,7 +69,7 @@ const LoginPage = () => {
           viewOTP(loggedUser)
         } else setErrorMessage(error)
       })
-      tempLabels = null
+    
     }
   })
 
@@ -105,7 +99,7 @@ const LoginPage = () => {
         reopenLogin: true,
         username,
         loggedUser,
-        _labels: translatedLabels,
+        _labels: platformLabels,
         onClose: () => onClose()
       },
       expandable: false,
@@ -142,16 +136,9 @@ const LoginPage = () => {
     }
   }
 
-
-  const mapKeyValueListToObject = (list = []) => Object.fromEntries(list.map(({ key, value }) => [key, value]))
-
-  async function getLanguage(language){
-     const res = await getRequest({
-      extension: KVSRepository.getPlatformLabels,
-      parameters: `_dataset=${ResourceIds.Common}&_language=${language}`
-    })
-    tempLabels = mapKeyValueListToObject(res?.list)
-    setTempLanguageId(language)
+  async function getLanguage(language) {
+    setLanguageId(language)     
+    await changeLanguage(language) 
   }
 
   useEffect(() => {
@@ -185,7 +172,7 @@ const LoginPage = () => {
                   value={validation.values.companyName}
                   readOnly={!deployHost ? true : validCompanyName}
                   allowClear={deployHost}
-                  label={translatedLabels?.CompanyName || 'Company Name'}
+                  label={platformLabels?.CompanyName || 'Company Name'}
                   onChange={validation.handleChange}
                   onKeyDown={e => {
                     if (e.key == 'Enter') e.target.blur()
@@ -212,7 +199,7 @@ const LoginPage = () => {
                       name='username'
                       size='small'
                       fullWidth
-                      label={translatedLabels?.Username}
+                      label={platformLabels?.Username}
                       value={validation.values.username}
                       type='text'
                       onChange={validation.handleChange}
@@ -227,7 +214,7 @@ const LoginPage = () => {
                       name='password'
                       size='small'
                       fullWidth
-                      label={translatedLabels?.password}
+                      label={platformLabels?.password}
                       type={showPassword ? 'text' : 'password'}
                       value={validation.values.password}
                       onChange={validation.handleChange}
@@ -250,7 +237,7 @@ const LoginPage = () => {
             {validCompanyName && (
               <>
                 <LinkStyled href='/forget-password' className={styles.linksRow}>
-                  {translatedLabels?.ForgotPass}
+                  {platformLabels?.ForgotPass}
                 </LinkStyled>
 
                 <CustomButton
@@ -259,7 +246,7 @@ const LoginPage = () => {
                   variant='contained'
                   onClick={validation.handleSubmit}
                   disabled={!validCompanyName}
-                  label={translatedLabels?.Login}
+                  label={platformLabels?.Login}
                 />
               </>
             )}
@@ -270,7 +257,7 @@ const LoginPage = () => {
       <Box className={styles.middleZone}>
         <Box className={styles.languageRow}>
           <Typography variant='body2' className={styles.offered}>
-            {translatedLabels?.ArgusOfferedIn}
+            {platformLabels?.ArgusOfferedIn}
           </Typography>
           <Box className={styles.languageLinks}>
             <span className={styles.language} onClick={() => getLanguage(Languages.ENGLISH)}>

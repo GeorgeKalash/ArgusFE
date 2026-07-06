@@ -70,59 +70,102 @@ export const SettingsContext = createContext({
 })
 
 export const SettingsProvider = ({ children, pageSettings }) => {
-  // ** State
-  const [settings, setSettings] = useState({ ...initialSettings })
   const auth = useAuth()
-  const [tempLanguageId, setTempLanguageId] = useState(auth?.user?.languageId || 1)
   const { i18n } = useTranslation()
+  const [settings, setSettings] = useState(initialSettings)
+  const [tempLanguageId, setTempLanguageId] = useState(auth?.user?.languageId || 1)
+
+  const languageMap = {
+    1: { code: 'en', direction: 'ltr' },
+    2: { code: 'ar', direction: 'rtl' },
+    3: { code: 'fr', direction: 'ltr' }
+  }
 
   useEffect(() => {
     const restoredSettings = restoreSettings()
+
     if (restoredSettings) {
-      setSettings({ ...restoredSettings })
+      setSettings(prev => ({
+        ...prev,
+        ...restoredSettings,
+        ...(pageSettings || {})
+      }))
     }
-    if (pageSettings) {
-      setSettings({ ...settings, ...pageSettings })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageSettings])
 
   useEffect(() => {
-    if (settings.layout === 'horizontal' && settings.mode === 'semi-dark') {
-      saveSettings({ ...settings, mode: 'light' })
+    if (settings.layout === 'horizontal') {
+      if (settings.mode === 'semi-dark') {
+        saveSettings({
+          ...settings,
+          mode: 'light'
+        })
+      }
+
+      if (settings.appBar === 'hidden') {
+        saveSettings({
+          ...settings,
+          appBar: 'fixed'
+        })
+      }
     }
-    if (settings.layout === 'horizontal' && settings.appBar === 'hidden') {
-      saveSettings({ ...settings, appBar: 'fixed' })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.layout])
 
   useEffect(() => {
-    switch (tempLanguageId || auth?.user?.languageId) {
-      case 1:
-        i18n.changeLanguage('en')
-        saveSettings({ ...settings, direction: 'ltr' })
-        break
-      case 2:
-        i18n.changeLanguage('ar')
-        saveSettings({ ...settings, direction: 'rtl' })
-        break
-      case 3:
-        i18n.changeLanguage('fr')
-        saveSettings({ ...settings, direction: 'ltr' })
-        break
-
-      default:
-        break
+    if (auth?.user?.languageId) {
+      setTempLanguageId(auth.user.languageId)
     }
-  }, [auth?.user?.languageId, tempLanguageId])
+  }, [auth?.user?.languageId])
 
+  useEffect(() => {
+    changeLanguage(tempLanguageId)
+  }, [tempLanguageId])
+
+  const changeLanguage = async languageId => {
+    const language = languageMap[languageId]
+
+    if (!language) return
+
+    await i18n.changeLanguage(language.code)
+
+    document.documentElement.lang = language.code
+    document.documentElement.dir = language.direction
+
+    document.body.lang = language.code
+    document.body.dir = language.direction
+
+    setSettings(prev => {
+      const updated = {
+        ...prev,
+        direction: language.direction
+      }
+
+      storeSettings(updated)
+
+      return updated
+    })
+  }
+  
   const saveSettings = updatedSettings => {
     storeSettings(updatedSettings)
     setSettings(updatedSettings)
   }
 
-  return <SettingsContext.Provider value={{ settings, saveSettings, setTempLanguageId }}>{children}</SettingsContext.Provider>
+  return (
+    <SettingsContext.Provider
+      value={{
+        settings,
+        saveSettings,
+        changeLanguage,
+        tempLanguageId,
+        setTempLanguageId,
+        direction: settings.direction,
+        languageId: tempLanguageId
+      }}
+    >
+      {children}
+    </SettingsContext.Provider>
+  )
 }
 
 export const SettingsConsumer = SettingsContext.Consumer
