@@ -28,7 +28,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import TodaysLeave from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysLeave'
 import HeadcountHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApplets/HeadcountHistoryApplet'
 import LatenessHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApplets/LatenessHistoryApplet'
-import ConstDashboardItem from '@argus/shared-utils/src/utils/ConstDashboardItem'
+import TodayOverview from '@argus/shared-utils/src/utils/TodayOverview'
 import TodaysAttendance from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysAttendance'
 import TodaysTimeVariations from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysTimeVariations'
 import PendingPunchesApplet from '@argus/shared-ui/src/components/Shared/HrApplets/PendingPunchesApplet'
@@ -45,7 +45,7 @@ const DashboardLayout = () => {
   const _languageId = userData.languageId
   const { PAID_LEAVE, UNPAID_LEAVE, PENDING, NO_SHOW_UP, CHECKED, LEAVE, DAY_OFF,
     LATE_CHECKIN, DURING_SHIFT_LEAVE, EARLY_LEAVE, EARLY_CHECKIN, OVERTIME
-   } = ConstDashboardItem
+   } = TodayOverview
 
   const alertsResourceId = {
     '1': ResourceIds.RightToWork, 

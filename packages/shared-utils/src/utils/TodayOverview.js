@@ -1,4 +1,4 @@
-const ConstDashboardItem = {
+const TodayOverview = {
   CHECKED: 101,
   PENDING: 102,
   NO_SHOW_UP: 103,
@@ -13,4 +13,4 @@ const ConstDashboardItem = {
   UNPAID_LEAVE: 312
 }
 
-export default ConstDashboardItem
+export default TodayOverview
