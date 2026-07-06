@@ -60,8 +60,7 @@ export default function ProductionOrderForm({ recordId, window }) {
 
   const conditions = {
     sku: row => row?.sku,
-    qty: row => row?.qty != null,
-    jobCount: row => row?.jobCount != null,
+    qty: row => row?.qty != null || row.qty !== 0,
     itemName: row => row?.itemName
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
@@ -85,7 +84,6 @@ export default function ProductionOrderForm({ recordId, window }) {
         qty: null,
         pcs: null,
         designId: null,
-        jobCount: null,
         notes: '',
         seqNo: '',
         lineId: null,
@@ -224,7 +222,7 @@ export default function ProductionOrderForm({ recordId, window }) {
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 3
+        displayFieldWidth: 4
       },
       async onChange({ row: { update, newRow } }) {
         let result
@@ -261,7 +259,6 @@ export default function ProductionOrderForm({ recordId, window }) {
           routingId: result1?.routingId || null,
           routingRef: result1?.routingRef || '',
           routingName: result1?.routingName || '',
-          jobCount: 1,
           pictureUrl: resultImg?.record?.url || ''
         })
       }
@@ -283,12 +280,6 @@ export default function ProductionOrderForm({ recordId, window }) {
       props: {
         readOnly: true
       }
-    },
-    {
-      component: 'numberfield',
-      label: labels.jobCount,
-      name: 'jobCount',
-      width: 100
     },
     {
       component: 'resourcecombobox',

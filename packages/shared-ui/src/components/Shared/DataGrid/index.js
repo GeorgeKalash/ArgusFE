@@ -377,19 +377,29 @@ export function DataGrid({
   )
 
   const condition = (i, data) => {
+    const column = allColumns?.[i]
+
+    if (!column) return false
+
+    const component = column.component
+
+    if (['image'].includes(component)) {
+      return false
+    }
+
     return (
-      ((!allColumns?.[i]?.props?.readOnly &&
-        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) ||
-        (allColumns?.[i]?.props?.readOnly &&
-          (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
-            accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
-             !allColumns?.[i]?.props?.disabled && 
-      (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
-        !allColumns?.[i]?.props?.disableCondition(data)) &&
-      (typeof allColumns?.[i]?.props?.onCondition !== 'function' ||
-        !allColumns?.[i]?.props?.onCondition(data)?.hidden) &&
-      (typeof allColumns?.[i]?.props?.onCondition !== 'function' ||
-        !allColumns?.[i]?.props?.onCondition(data)?.disabled)
+      ((!column?.props?.readOnly &&
+        accessLevel({ maxAccess, name: `${name}.${column?.name}` }) !== DISABLED) ||
+        (column?.props?.readOnly &&
+          (accessLevel({ maxAccess, name: `${name}.${column?.name}` }) === FORCE_ENABLED ||
+            accessLevel({ maxAccess, name: `${name}.${column?.name}` }) === MANDATORY))) &&
+             !column?.props?.disabled && 
+      (typeof column?.props?.disableCondition !== 'function' ||
+        !column?.props?.disableCondition(data)) &&
+      (typeof column?.props?.onCondition !== 'function' ||
+        !column?.props?.onCondition(data)?.hidden) &&
+      (typeof column?.props?.onCondition !== 'function' ||
+        !column?.props?.onCondition(data)?.disabled)
     )
   }
 
