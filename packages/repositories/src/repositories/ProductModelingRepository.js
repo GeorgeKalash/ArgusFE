@@ -99,5 +99,12 @@ export const ProductModelingRepository = {
     close: service + 'closeSPL',
     reopen: service + 'reopenSPL',
     post: service + 'postSPL'
+  },
+  Developer: {
+    page: service + 'pageDEV',
+    get: service + 'getDEV',
+    set: service + 'setDEV',
+    del: service + 'delDEV',
+    snapshot: service + 'snapshotDEV'
   }
 }

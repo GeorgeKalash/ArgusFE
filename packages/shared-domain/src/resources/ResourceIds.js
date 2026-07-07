@@ -645,6 +645,7 @@ export const ResourceIds = {
   WorkCenterGroups: 42143,
   ProductionStandardGroups: 42144,
   CreditLimitHold: 31349,
+  Developer: 48104,
 
   // GL
   GLSalesInvoice: 51604,
