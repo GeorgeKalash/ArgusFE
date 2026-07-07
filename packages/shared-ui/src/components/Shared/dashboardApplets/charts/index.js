@@ -2277,14 +2277,10 @@ export const MultiLineChart = memo(({ id, labels, datasets }) => {
         backgroundColor: color,
         pointBackgroundColor: color,
         pointStyle: MULTI_LINE_POINT_STYLES[i % MULTI_LINE_POINT_STYLES.length],
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        borderWidth: 2,
         tension: 0,
         pointRadius: 2,
         pointHoverRadius: 4,
         borderWidth: 2,
-        fill: false,
         spanGaps: false,
       }
     })
@@ -2323,7 +2319,7 @@ export const MultiLineChart = memo(({ id, labels, datasets }) => {
     const ctx = canvas.getContext('2d')
     if (!ctx || chartRef.current) return
 
-    const yScale = getYScale(datasets)
+    const yScale = getYScale(datasets?.flatMap(d => d.data || []))
 
     chartRef.current = new Chart(ctx, {
       type: 'line',
@@ -2372,7 +2368,7 @@ export const MultiLineChart = memo(({ id, labels, datasets }) => {
               offset: false,
               ticks: {
                   autoSkip: true,
-                  maxTicksLimit: 80, 
+                  maxTicksLimit: 80,
                   sampleSize: labels.length,
                   maxRotation: 45,
                   minRotation: 45,
@@ -2389,7 +2385,7 @@ export const MultiLineChart = memo(({ id, labels, datasets }) => {
               color: getCssVar(canvas, '--chart-axis-color', '#f0f0f0'),
               font: { size: Math.max(8, chartSize.ticksSize - 3) },
 
-              stepSize: yScale.step,   
+              stepSize: yScale.step,
             },
 
             grid: { display: false },
@@ -2410,7 +2406,7 @@ export const MultiLineChart = memo(({ id, labels, datasets }) => {
     const chart  = chartRef.current
     if (!canvas || !chart) return
 
-    const yScale = getYScale(datasets)
+    const yScale = getYScale(datasets?.flatMap(d => d.data || []))
 
     chart.data.labels = labels || []
     chart.data.datasets = buildDatasets(canvas)

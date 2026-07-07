@@ -9,7 +9,7 @@ import { Box } from '@mui/material'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '../ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { formatDateToYYYYMMDD } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateToYYYYMMDD, formatDateFromISO } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
 
 const PendingPunchesApplet = ({ }) => {
@@ -38,7 +38,19 @@ const PendingPunchesApplet = ({ }) => {
       extension: TimeAttendanceRepository.PendingPunches.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${paramsList.join('^')}`
     })
-    return { ...response, _startAt }
+
+    const list = (response?.list || []).map(item => ({
+      ...item,
+      clockStamp: item?.clockStamp
+        ? formatDateFromISO(item.clockStamp)
+        : null
+    }))
+
+    return {
+      ...response,
+      list,
+      _startAt
+    }
   }
 
   const { formik } = useForm({
@@ -66,7 +78,7 @@ const PendingPunchesApplet = ({ }) => {
       field: 'clockStamp',
       headerName: labels.date,
       flex: 1,
-      type: 'dateTime'
+      type: 'date'
     },
     {
       field: 'udid',
