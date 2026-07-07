@@ -71,6 +71,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
       startDate: null,
       designGroupId: null,
       designFamilyId: null,
+      developerId: null,
       endDate: null,
       fileReference: '',
       itemGroupId: null,
@@ -567,6 +568,26 @@ const ThreeDDesignForm = ({ recordId, window }) => {
             <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sx={{ marginTop: 20.5 }}>
+                  <ResourceComboBox
+                    endpointId={ProductModelingRepository.Developer.qry}
+                    values={formik.values}
+                    name='developerId'
+                    label={labels.developer}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isPosted || isClosed}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('developerId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.developerId && formik.errors.developerId}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
                     label={labels.date}

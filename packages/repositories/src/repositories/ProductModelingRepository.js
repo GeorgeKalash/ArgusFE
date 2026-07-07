@@ -102,6 +102,7 @@ export const ProductModelingRepository = {
   },
   Developer: {
     page: service + 'pageDEV',
+    qry: service + 'qryDEV',
     get: service + 'getDEV',
     set: service + 'setDEV',
     del: service + 'delDEV',
