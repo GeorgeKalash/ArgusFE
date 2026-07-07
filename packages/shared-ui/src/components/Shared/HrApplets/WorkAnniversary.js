@@ -7,7 +7,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { HRDashboardRepository } from '@argus/repositories/src/repositories/HRDashboardRepository'
-import { formatMMMDDYY } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 
 const WorkAnniversary = ({ window }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -31,12 +31,18 @@ const WorkAnniversary = ({ window }) => {
       flex: 2,
       wrapText: true,
       autoHeight: true,
-      cellRenderer: ({ data }) => (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <span>{data?.employeeName || ''}{data?.age ? ` (${data.age})` : ''}</span>
-        <span>{data?.hireDate ? formatMMMDDYY(data.hireDate) : ''}</span>
-        </div>
-      )
+      cellRenderer: ({ data }) => {
+        const hireDate = data?.hireDate
+          ? formatDateFromApi(data.hireDate)
+          : null
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>{data?.employeeName || ''}{data?.age ? ` (${data.age})` : ''}</span>
+            <span> {hireDate ? `${formatDateDefault(hireDate)}` : ''} </span>
+          </div>
+        )
+      }
     },
     {
       field: 'days',

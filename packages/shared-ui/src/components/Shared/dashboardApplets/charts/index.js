@@ -860,10 +860,39 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
   useArgusTabActivatedResize(getChart)
 
   const { width } = useWindowDimensions()
+
   const chartSize =
     width > 1280 ? sizes[1281] :
     width > 1024 ? sizes[1280] :
     sizes[1024]
+
+  const getYScale = useCallback((values) => {
+    const validValues = (values || [])
+      .filter(v => typeof v === 'number' && !isNaN(v))
+
+    const max = validValues.length ? Math.max(...validValues) : 0
+
+    if (max === 0) {
+      return {
+        min: 0,
+        max: 5,
+        step: 1
+      }
+    }
+
+    const rawStep = max / 5
+
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)))
+    const step = Math.ceil(rawStep / magnitude) * magnitude
+
+    const niceMax = Math.ceil(max / step) * step
+
+    return {
+      min: 0,
+      max: niceMax,
+      step
+    }
+  }, [])
 
   const applyDynamicWidth = useCallback(() => {
     const canvas = canvasRef.current
@@ -877,18 +906,21 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
     canvas.style.width = `${finalWidth}px`
   }, [labels])
 
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
+
     const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    if (chartRef.current) return
+    if (!ctx || chartRef.current) return
 
     const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
     const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
 
     const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
     const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
+
+    const yScale = getYScale(data)
 
     applyDynamicWidth()
 
@@ -905,90 +937,110 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
             borderColor: barBg,
             borderWidth: 0,
             maxBarThickness: MIN_PX_PER_BAR - 4,
-            barPercentage: 0.9,         
-            categoryPercentage: 0.9    
+            barPercentage: 0.9,
+            categoryPercentage: 0.9
           }
         ]
       },
+
       options: {
         responsive: true,
         aspectRatio: ratio,
         maintainAspectRatio: false,
         devicePixelRatio: window.devicePixelRatio || 1,
+
         interaction: {
           mode: 'nearest',
           intersect: true
         },
+
         plugins: {
           tooltip: {
-            bodyFont: { size: chartSize.tooltipBodySize },
-            titleFont: { size: chartSize.tooltipFontSize }
+            bodyFont: {
+              size: chartSize.tooltipBodySize
+            },
+            titleFont: {
+              size: chartSize.tooltipFontSize
+            }
           },
+
           datalabels: {
             display: (data?.length || 0) <= MAX_LABELS_TO_SHOW,
-            anchor: context => {
-              const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-              const barHeight = (value / maxValue) * chartHeight
-              return barHeight >= 120 ? 'center' : 'end'
-            },
-            align: context => {
-              const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-              const barHeight = (value / maxValue) * chartHeight
-              return barHeight >= 120 ? 'center' : 'end'
-            },
+
+            anchor: 'end',
+            align: 'end',
+
             color: context => {
               const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
+              const value = context.dataset.data[context.dataIndex]
               const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-              const barHeight = (value / maxValue) * chartHeight
-              return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
+              const barHeight = (value / chart.scales.y.max) * chartHeight
+
+              return barHeight >= 120
+                ? datalabelInsideColor
+                : datalabelOutsideColor
             },
+
             offset: 0,
             rotation: -90,
-            font: { size: chartSize.size },
+            font: {
+              size: chartSize.size
+            },
+
             formatter: value => value.toLocaleString()
           },
-          legend: { display: false }
+
+          legend: {
+            display: false
+          }
         },
+
         scales: {
           x: {
             ticks: {
-              font: { size: chartSize.ticksSize },
+              font: {
+                size: chartSize.ticksSize
+              },
               autoSkip: true,
               maxRotation: 45,
               minRotation: 45
             }
           },
+
           y: {
-            ticks: { font: { size: chartSize.ticksSize } }
+            min: yScale.min,
+            max: yScale.max,
+
+            ticks: {
+              font: {
+                size: chartSize.ticksSize
+              },
+              stepSize: yScale.step
+            }
           }
         }
       },
+
       plugins: [ChartDataLabels]
     })
+
 
     return () => {
       chartRef.current?.destroy()
       chartRef.current = null
     }
+
   }, [])
+
 
   useEffect(() => {
     const canvas = canvasRef.current
     const chart = chartRef.current
+
     if (!canvas || !chart) return
 
     const nextHasMeaningful = hasAnyLabel(labels) && hasAnyValue(data)
+
     if (!nextHasMeaningful && chartHasAnyValue(chart)) return
 
     const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
@@ -1000,49 +1052,75 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
     applyDynamicWidth()
 
     chart.data.labels = labels || []
+
     chart.data.datasets[0].label = label
     chart.data.datasets[0].data = data || []
     chart.data.datasets[0].backgroundColor = barBg
     chart.data.datasets[0].hoverBackgroundColor = barHoverBg
-    chart.data.datasets[0].borderColor = barBg
-    chart.data.datasets[0].borderWidth = 0
-    chart.data.datasets[0].maxBarThickness = MIN_PX_PER_BAR - 4
-    chart.data.datasets[0].barPercentage = 0.9 
-    chart.data.datasets[0].categoryPercentage = 0.9 
 
-    chart.options.aspectRatio = ratio
-    chart.options.plugins.tooltip.bodyFont.size = chartSize.tooltipBodySize
-    chart.options.plugins.tooltip.titleFont.size = chartSize.tooltipFontSize
+    const yScale = getYScale(data)
+
+    chart.options.scales.y.min = yScale.min
+    chart.options.scales.y.max = yScale.max
+    chart.options.scales.y.ticks.stepSize = yScale.step
+
     chart.options.plugins.datalabels.font.size = chartSize.size
-    chart.options.plugins.datalabels.display = (data?.length || 0) <= MAX_LABELS_TO_SHOW
+
+    chart.options.plugins.datalabels.display =
+      (data?.length || 0) <= MAX_LABELS_TO_SHOW
 
     chart.options.plugins.datalabels.color = context => {
       const c = context.chart
-      const dataset = context.dataset
-      const value = dataset.data[context.dataIndex]
+      const value = context.dataset.data[context.dataIndex]
       const chartHeight = c.scales.y.bottom - c.scales.y.top
-      const maxValue = c.scales.y.max
-      const barHeight = (value / maxValue) * chartHeight
-      return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
+      const barHeight = (value / c.scales.y.max) * chartHeight
+
+      return barHeight >= 120
+        ? datalabelInsideColor
+        : datalabelOutsideColor
     }
 
     chart.options.scales.x.ticks.font.size = chartSize.ticksSize
-    chart.options.scales.x.ticks.autoSkip = true
-    chart.options.scales.x.ticks.maxRotation = 45
-    chart.options.scales.x.ticks.minRotation = 45
     chart.options.scales.y.ticks.font.size = chartSize.ticksSize
 
     chart.update('none')
-  }, [labels, data, label, color, hoverColor, ratio, chartSize])
+
+  }, [
+    labels,
+    data,
+    label,
+    color,
+    hoverColor,
+    ratio,
+    chartSize,
+    getYScale
+  ])
+
 
   return (
     <div
       ref={outerRef}
       className={styles.chartHeight}
-      style={{ width: '100%', overflow: 'hidden' }}
+      style={{
+        width: '100%',
+        overflow: 'hidden'
+      }}
     >
-      <div style={{ overflowX: 'auto', overflowY: 'hidden', width: '100%', height: '100%' }}>
-        <div ref={containerRef} style={{ display: 'inline-block', minWidth: '100%' }}>
+      <div
+        style={{
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          width: '100%',
+          height: '100%'
+        }}
+      >
+        <div
+          ref={containerRef}
+          style={{
+            display: 'inline-block',
+            minWidth: '100%'
+          }}
+        >
           <canvas
             id={id}
             ref={canvasRef}
@@ -1053,7 +1131,6 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
     </div>
   )
 })
-
 export const MixedColorsBarChartDark = memo(({ id, labels, data, label, ratio = 3 }) => {
   useInjectChartsStyles()
 
@@ -2203,33 +2280,40 @@ export const MultiLineChart = memo(({ id, labels, datasets }) => {
         pointRadius: 5,
         pointHoverRadius: 7,
         borderWidth: 2,
-        tension: 0.1,
-        spanGaps: true,
+        tension: 0,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        borderWidth: 2,
+        fill: false,
+        spanGaps: false,
       }
     })
   }, [datasets])
 
-  const getYScale = useCallback((datasets) => {
-    const allValues = (datasets || [])
-      .flatMap(d => d.data || [])
+  const getYScale = useCallback((values) => {
+    const validValues = (values || [])
       .filter(v => typeof v === 'number' && !isNaN(v))
 
-    const max = allValues.length ? Math.max(...allValues) : 1
+    const max = validValues.length ? Math.max(...validValues) : 0
 
-    if (max <= 0) {
+    if (max === 0) {
       return {
         min: 0,
-        max: 1,
-        step: 0.2,
+        max: 5,
+        step: 1
       }
     }
 
-    const niceMax = Math.ceil(max / 50) * 50
+    const rawStep = max / 5
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)))
+    const step = Math.ceil(rawStep / magnitude) * magnitude
+
+    const niceMax = Math.ceil(max / step) * step
 
     return {
       min: 0,
       max: niceMax,
-      step: niceMax / 3, 
+      step
     }
   }, [])
 
@@ -2285,16 +2369,18 @@ export const MultiLineChart = memo(({ id, labels, datasets }) => {
 
         scales: {
           x: {
-            ticks: {
-              color: getCssVar(canvas, '--chart-axis-color', '#f0f0f0'),
-              font: { size: Math.max(8, chartSize.ticksSize - 3) },
-              maxRotation: 45,
-              minRotation: 45,
-              autoSkip: false,
-            },
-            grid: { display: false },
+              offset: false,
+              ticks: {
+                  autoSkip: true,
+                  maxTicksLimit: 80, 
+                  sampleSize: labels.length,
+                  maxRotation: 45,
+                  minRotation: 45,
+                  font: {
+                      size: 8
+                  }
+              }
           },
-
           y: {
             min: yScale.min,
             max: yScale.max,
@@ -2344,17 +2430,10 @@ export const MultiLineChart = memo(({ id, labels, datasets }) => {
   }, [labels, datasets, chartSize, buildDatasets, getYScale])
 
   return (
-    <div
-      className={styles.chartHeight}
-      style={{
-        background: '#ffffff',
-        borderRadius: 8,
-        padding: '8px 4px 4px'
-      }}
-    >
+    <div style={{ height: '100%', width: '100%' }}>
       <canvas
-        id={id}
         ref={canvasRef}
+        id={id}
         className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasLight}`}
       />
     </div>

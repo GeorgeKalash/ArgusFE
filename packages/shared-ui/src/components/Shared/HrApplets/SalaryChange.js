@@ -7,7 +7,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { HRDashboardRepository } from '@argus/repositories/src/repositories/HRDashboardRepository'
-import { formatMMMDDYY } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 
 const SalaryChange = ({ window }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -31,12 +31,21 @@ const SalaryChange = ({ window }) => {
       flex: 2,
       wrapText: true,
       autoHeight: true,
-      cellRenderer: ({ data }) => (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <span>{data?.employeeName || ''}</span>
-        <span>{data?.effectiveDate ? formatMMMDDYY(data.effectiveDate) : ''} {data?.currencyRef || ''} {data?.finalAmount || ''}</span>
-        </div>
-      )
+      cellRenderer: ({ data }) => {
+        const effectiveDate = data?.effectiveDate
+          ? formatDateFromApi(data.effectiveDate)
+          : null
+        
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>{data?.employeeName || ''}</span>
+            <span>
+              {effectiveDate ? `${formatDateDefault(effectiveDate)}` : ''} 
+              {data?.currencyRef || ''} {data?.finalAmount || ''}
+            </span>
+          </div>
+        )
+      }
     },
     {
       field: 'days',

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { CompositeBarChartDark } from '@argus/shared-ui/src/components/Shared/dashboardApplets/charts'
 import { ReportRepository } from '@argus/repositories/src/repositories/ReportRepository'
-import { formatEEEEMMMDDYY, formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateDefault, formatDateForGetApI, formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
@@ -16,25 +16,31 @@ const HeadcountHistoryApplet = ({ }) => {
     datasetId: ResourceIds.HeadcountHistory
   })
 
-  useEffect(() => {
-    const fetchHeadcount = async () => {
-      const formattedDate = formatDateForGetApI(headcountToDate).replace(/-/g, '')
-      const res = await getRequest({
-        extension: ReportRepository.HeadCount.RT103,
-        parameters: `_params=1|19910101^2|${formattedDate}`
-      })
+useEffect(() => {
+  const fetchHeadcount = async () => {
+    const formattedDate = formatDateForGetApI(headcountToDate).replace(/-/g, '')
 
-      setHeadCount(
-        (res?.list || []).map(item => ({
+    const res = await getRequest({
+      extension: ReportRepository.HeadCount.RT103,
+      parameters: `_params=1|19910101^2|${formattedDate}`
+    })
+
+    setHeadCount(
+      (res?.list || []).map(item => {
+        const date = item?.date ? formatDateFromApi(item.date) : null
+
+        return {
           ...item,
-          date: item?.date ? formatEEEEMMMDDYY(item.date) : null
-        }))
-      )
-    }
+          date: date
+            ? `${date.toLocaleDateString('en-US', { weekday: 'long' })} - ${formatDateDefault(date)}`
+            : null
+        }
+      })
+    )
+  }
 
-    fetchHeadcount()
-  }, [headcountToDate])
-
+  fetchHeadcount()
+}, [headcountToDate])
   return (
     <div className='topRow'>
       <div className='chartCard'>
