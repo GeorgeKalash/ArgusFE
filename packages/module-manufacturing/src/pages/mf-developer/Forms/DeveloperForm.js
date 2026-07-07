@@ -79,7 +79,7 @@ export default function DeveloperForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='name'
                 label={labels.name}
-                maxLength='40'
+                maxLength='30'
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
