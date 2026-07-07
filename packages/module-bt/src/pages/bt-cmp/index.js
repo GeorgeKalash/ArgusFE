@@ -84,7 +84,7 @@ const CommodityPairs = () => {
         maxAccess: access
       },
       width: 600,
-      height: 300,
+      height: 400,
       title: labels.commodityPair
     })
   }

@@ -33,7 +33,9 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
       currencyId: null,
       metalId: null,
       defQtyMUId: null,
-      defUnitPriceMUId: null
+      defUnitPriceMUId: null,
+      eo_defQtyMUId: null,
+      eo_defTargetPriceMUId: null
     },
     maxAccess,
     validationSchema: yup.object({
@@ -144,6 +146,46 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
                   formik.setFieldValue('defUnitPriceMUId', newValue?.recordId || null)
                 }}
                 error={formik.touched.defUnitPriceMUId && Boolean(formik.errors.defUnitPriceMUId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={msId && InventoryRepository.MeasurementUnit.qry}
+                parameters={msId && `_msId=${msId}`}
+                name='eo_defQtyMUId'
+                label={labels.eo_defQtyMu}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('eo_defQtyMUId', newValue?.recordId || null)
+                }}
+                error={formik.touched.eo_defQtyMUId && Boolean(formik.errors.eo_defQtyMUId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={msId && InventoryRepository.MeasurementUnit.qry}
+                parameters={msId && `_msId=${msId}`}
+                name='eo_defTargetPriceMUId'
+                label={labels.eo_defTargetPriceMU}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('eo_defTargetPriceMUId', newValue?.recordId || null)
+                }}
+                error={formik.touched.eo_defTargetPriceMUId && Boolean(formik.errors.eo_defTargetPriceMUId)}
               />
             </Grid>
           </Grid>

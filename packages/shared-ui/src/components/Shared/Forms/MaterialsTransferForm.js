@@ -404,8 +404,11 @@ export default function MaterialsTransferForm({ recordId, window }) {
         popup: row =>  stack({
           Component: ItemDetails,
           props: {
-            itemId: row?.itemId,
-            plId: formik.values?.plId
+            values:{
+              itemId: row?.itemId,
+              plId: formik.values?.plId,
+              siteId: formik?.values?.fromSiteId
+            }
           }
         })
       },

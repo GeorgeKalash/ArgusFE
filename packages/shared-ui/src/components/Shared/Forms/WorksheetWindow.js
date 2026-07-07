@@ -1,12 +1,12 @@
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
-import WorksheetForm from '../forms/WorksheetForm.js'
-import MaterialsTab from '../forms/MaterialsTab.js'
-import OperationsTab from '../forms/OperationsTab.js'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow.js'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams.js'
+import WorksheetForm from './WorksheetForm'
+import MaterialsWorksheetTab from './MaterialsWorksheetTab'
+import OperationsTab from './OperationsTab'
 
 const WorksheetWindow = ({ recordId, window, joInvalidate }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -44,7 +44,7 @@ const WorksheetWindow = ({ recordId, window, joInvalidate }) => {
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
-        <MaterialsTab store={store} />
+        <MaterialsWorksheetTab store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab} maxAccess={access}>
         <OperationsTab store={store} labels={labels} maxAccess={access} />

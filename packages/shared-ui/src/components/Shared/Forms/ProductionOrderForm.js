@@ -4,6 +4,7 @@ import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
+import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
@@ -60,7 +61,6 @@ export default function ProductionOrderForm({ recordId, window }) {
   const conditions = {
     sku: row => row?.sku,
     qty: row => row?.qty != null,
-    jobCount: row => row?.jobCount != null,
     itemName: row => row?.itemName
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
@@ -84,7 +84,6 @@ export default function ProductionOrderForm({ recordId, window }) {
         qty: null,
         pcs: null,
         designId: null,
-        jobCount: null,
         notes: '',
         seqNo: '',
         lineId: null,
@@ -189,6 +188,23 @@ export default function ProductionOrderForm({ recordId, window }) {
 
   const columns = [
     {
+      component: 'image',
+      name: 'pictureUrl',
+      label: labels.image,
+      width: 70,
+      onClick: ({ value, row }) => {
+        stack({
+          Component: ImageViewer,
+          props: {
+            imageUrl: value
+          },
+          width: 800,
+          height: 600,
+          title: row.sku
+        })
+      }
+    },
+    {
       component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
@@ -206,11 +222,12 @@ export default function ProductionOrderForm({ recordId, window }) {
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 3
+        displayFieldWidth: 4
       },
       async onChange({ row: { update, newRow } }) {
         let result
         let result1
+        let resultImg
 
         if (newRow?.itemId) {
           const res = await getRequest({
@@ -226,8 +243,13 @@ export default function ProductionOrderForm({ recordId, window }) {
             })
             result1 = res1?.record
           }
+          
+          resultImg = await getRequest({
+            extension: SystemRepository.Attachment.get,
+            parameters: `_resourceId=${ResourceIds.Item}&_seqNo=${0}&_recordId=${newRow?.itemId}`
+          })
         }
-
+          
         update({
           designId: result?.designId || null,
           designRef: result?.designRef || '',
@@ -237,7 +259,7 @@ export default function ProductionOrderForm({ recordId, window }) {
           routingId: result1?.routingId || null,
           routingRef: result1?.routingRef || '',
           routingName: result1?.routingName || '',
-          jobCount: 1
+          pictureUrl: resultImg?.record?.url || ''
         })
       }
     },
@@ -258,12 +280,6 @@ export default function ProductionOrderForm({ recordId, window }) {
       props: {
         readOnly: true
       }
-    },
-    {
-      component: 'numberfield',
-      label: labels.jobCount,
-      name: 'jobCount',
-      width: 100
     },
     {
       component: 'resourcecombobox',

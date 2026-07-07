@@ -364,6 +364,10 @@ export const InventoryRepository = {
     page: service + 'pageCTG',
     snapshot: service + 'snapshotCTG'
   },
+  CatalogueSummary:{
+    summary: service + 'summaryCTG',
+    snapshot: service + 'snapshotCTG2',
+  },
   LabelString: {
     md: service + 'mdLBL'
   },
