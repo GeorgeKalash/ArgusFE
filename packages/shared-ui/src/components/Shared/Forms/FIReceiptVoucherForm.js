@@ -33,6 +33,7 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -167,20 +168,25 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
     if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
 
+  const { openStack } = useStackValueLink({ linkOpen: { resourceId: ResourceIds.MCRFIReceiptVoucher } })
+  
   async function openMCRForm(data) {
-    stack({
-      Component: MultiCurrencyRateForm,
-      props: {
-        DatasetIdAccess: ResourceIds.MCRFIReceiptVoucher,
-        data,
-        onOk: childFormikValues => {
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...childFormikValues
-          }))
+    const hasOpened = await openStack()
+    if (!hasOpened) {
+      stack({
+        Component: MultiCurrencyRateForm,
+        props: {
+          DatasetIdAccess: ResourceIds.MCRFIReceiptVoucher,
+          data,
+          onOk: childFormikValues => {
+            formik.setValues(prevValues => ({
+              ...prevValues,
+              ...childFormikValues
+            }))
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   const editMode = !!formik.values.recordId

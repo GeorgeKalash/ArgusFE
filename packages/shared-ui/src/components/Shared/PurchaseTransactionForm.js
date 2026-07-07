@@ -69,6 +69,7 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ChangeVendor from '@argus/shared-ui/src/components/Shared/ChangeVendor'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 export default function PurchaseTransactionForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -1895,20 +1896,25 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     }
   }
 
-  function openMCRForm(data) {
-    stack({
-      Component: MultiCurrencyRateForm,
-      props: {
-        DatasetIdAccess: getResourceMCR(functionId),
-        data,
-        onOk: childFormikValues => {
-          formik.setFieldValue('header', {
-            ...formik.values.header,
-            ...childFormikValues
-          })
+  const { openStack } = useStackValueLink({ linkOpen: { resourceId: getResourceMCR(functionId) } })
+
+  async function openMCRForm(data) {
+    const hasOpened = await openStack()
+    if (!hasOpened) {
+      stack({
+        Component: MultiCurrencyRateForm,
+        props: {
+          DatasetIdAccess: getResourceMCR(functionId),
+          data,
+          onOk: childFormikValues => {
+            formik.setFieldValue('header', {
+              ...formik.values.header,
+              ...childFormikValues
+            })
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   async function updateValues(fields) {

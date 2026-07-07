@@ -32,6 +32,7 @@ import { ApplyManual } from '@argus/shared-ui/src/components/Shared/ApplyManual'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -370,20 +371,25 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }
   }
 
-  function openMCRForm(data) {
-    stack({
-      Component: MultiCurrencyRateForm,
-      props: {
-        DatasetIdAccess: getResourceMCR(functionId),
-        data,
-        onOk: childFormikValues => {
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...childFormikValues
-          }))
+  const { openStack } = useStackValueLink({ linkOpen: { resourceId: getResourceMCR(functionId) } })
+  
+  async function openMCRForm(data) {
+    const hasOpened = await openStack()
+    if (!hasOpened) {
+      stack({
+        Component: MultiCurrencyRateForm,
+        props: {
+          DatasetIdAccess: getResourceMCR(functionId),
+          data,
+          onOk: childFormikValues => {
+            formik.setValues(prevValues => ({
+              ...prevValues,
+              ...childFormikValues
+            }))
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   async function getDTD(dtId) {
