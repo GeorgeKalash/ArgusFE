@@ -500,10 +500,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
-                      if(!editMode){
-                        formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
-                        formik.setFieldValue('dmgName', newValue?.dmgName || '')
-                      }
+                      if (!editMode) formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
                     }}
                     error={formik.touched.groupId && formik.errors.groupId}
                   />

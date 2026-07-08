@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect, useRef } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -17,7 +17,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId, _dmgId: dmgId } = store
   const { systemDefaults } = useContext(DefaultsContext)
-
+  const hasSavedData = useRef(true)
   const { platformLabels } = useContext(ControlContext)
 
   const [dimensions, setDimensions] = useState([])
@@ -87,6 +87,10 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
 
           return acc
         }, {})
+
+        hasSavedData.current = Object.values({ ...newDimensionValues, ...newUDTValues }).some(
+         value => value !== '' && value !== undefined && value !== null
+        ) 
         formik.setValues(prevValues => ({
           ...prevValues,
           ...newDimensionValues,
@@ -100,55 +104,51 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
 
   const { formik } = useForm({
     initialValues: {},
-    onSubmit: async () => {
+    onSubmit: async values => {
       if (dmgId != formik.values.dmgId) {
          await postRequest({
           extension: InventoryRepository.Items.set,
           record: JSON.stringify({...store?.itemObject, dmgId: formik.values.dmgId})
         })
       }
-      const submissionData = dimensions.map(dimension => ({
-        dimension: dimension.dimensionId,
-        id: formik.values[dimension.dimensionId],
-        itemId: recordId
+      const isEmpty = value => value === '' || value === undefined || value === null
+
+      const filteredUdtData = dimensionsUDT
+      .map(udt => ({
+        dimension: udt.dimensionId,
+        itemId: recordId,
+        value: values[udt.key]
       }))
-
-      const filteredData = submissionData.filter(item => item.id !== '' && item.id !== undefined && item.id !== null)
-
-      const udtData = dimensionsUDT.map(udt => {
-        const udtNumber = udt.key.match(/\d+$/)?.[0]
-
-        return {
-          dimension: udtNumber,
-          itemId: recordId,
-          value: formik.values[udt.key]
-        }
-      })
-
-      const filteredUdtData = udtData.filter(
-        item => item.value !== '' && item.value !== undefined && item.value !== null
-      )
-
-      await postRequest({
-        extension: InventoryRepository.DimensionId.set,
-        record: JSON.stringify({
-          itemId: recordId,
-          data: filteredData
-        })
-      })
-    
+      .filter(item => !isEmpty(item.value))
 
       await postRequest({
         extension: InventoryRepository.DimensionUDT.set,
-        record: JSON.stringify({
-          itemId: recordId,
-          data: filteredUdtData
-        })
+        record: JSON.stringify({ itemId: recordId, data: filteredUdtData })
       })
-      
-      toast.success(platformLabels.Edited)
+
+      await saveDimensionValues(platformLabels.Edited, values)
+      hasSavedData.current = true
     }
   })
+
+  async function saveDimensionValues (toastMessage, values) {
+    const isEmpty = value => value === '' || value === undefined || value === null
+
+    const filteredData = dimensions
+      .map(dimension => ({
+        dimension: dimension.dimensionId,
+        id: values[dimension.dimensionId],
+        itemId: recordId
+      }))
+      .filter(item => !isEmpty(item.id))
+
+    await postRequest({
+      extension: InventoryRepository.DimensionId.set,
+      record: JSON.stringify({ itemId: recordId, data: filteredData })
+    })
+
+    toast.success(toastMessage)
+  }
 
   useEffect(() => {
    if (dmgId) formik.setFieldValue('dmgId', dmgId)
@@ -158,23 +158,27 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
     ([key, value]) => key !== 'dmgId' && value !== '' && value !== null && value !== undefined
   )
 
-  const clearAllDimensionFields = () => {
+  const deleteDimensionFields = async () => {
     const clearedValues = Object.keys(formik.values).reduce((acc, key) => {
       if (key !== 'dmgId') acc[key] = ''
       return acc
     }, {})
 
-    formik.setValues(prev => ({
-      ...prev,
-      ...clearedValues
-    }))
+    const values = {...formik.values, ...clearedValues}
+    formik.setValues(values)
+    if (hasSavedData.current) {
+      await saveDimensionValues(platformLabels.Deleted, values)
+      hasSavedData.current = false
+    } else {
+      toast.success(platformLabels.Deleted)
+    }
   }
 
   const actions = [
     {
       key: 'Delete',
       condition: true,
-      onClick: clearAllDimensionFields,
+      onClick: deleteDimensionFields,
       disabled: !hasAnyValue
     }
   ]
