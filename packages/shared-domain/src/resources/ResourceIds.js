@@ -646,6 +646,8 @@ export const ResourceIds = {
   ProductionStandardGroups: 42144,
   CreditLimitHold: 31349,
   Developer: 48104,
+  ItemWeight: 41124,
+  OpeningWeight: 41313,
 
   // GL
   GLSalesInvoice: 51604,
