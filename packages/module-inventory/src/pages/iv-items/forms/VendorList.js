@@ -18,8 +18,6 @@ const VendorList = ({ store, labels, maxAccess }) => {
   const [gridData, setGridData] = useState({ list: [] })  
   const { stack } = useWindow()
 
-
-
   const columns = [
     {
       field: 'vendorName',
@@ -84,7 +82,7 @@ const VendorList = ({ store, labels, maxAccess }) => {
 
   useEffect(() => {
     setGridData({ list: store?.packB?.priceLists || [] })
-  }, [store.recordId, store?.packB?.priceLists])
+  }, [store?.packB?.priceLists])
 
   const add = () => {
     openForm()

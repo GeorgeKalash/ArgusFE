@@ -42,7 +42,6 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       metalPurity: '',
       isOpenMetalPurity: false
     },
-    enableReinitialize: true,
     validationSchema: yup.object({
       metalId: yup
         .string()
@@ -78,12 +77,10 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   }
 
   useEffect(() => {
-    if (recordId) {
-      if (physicalProperty) {
-        formik.setValues({ ...physicalProperty, isMetal: !!physicalProperty.isMetal })
-      }
+    if (physicalProperty) {
+      formik.setValues({ ...physicalProperty, isMetal: !!physicalProperty.isMetal })
     }
-  }, [recordId, physicalProperty])
+  }, [physicalProperty])
 
   const handleFieldChange = (fieldName, dirtyField, event) => {
     const newValue = Number(event?.target?.value || 0)

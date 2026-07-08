@@ -122,8 +122,8 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
   }
 
   useEffect(() => {
-    if (recordId) fetchFormData()
-  }, [recordId, itemRawMaterials, itemProduction])
+    fetchFormData()
+  }, [itemRawMaterials, itemProduction])
 
     const columns = [
       {

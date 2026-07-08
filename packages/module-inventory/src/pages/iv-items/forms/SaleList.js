@@ -90,28 +90,17 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     }
   })
 
-  const getItems = () => {
-    const list = store.packB?.prices 
-  
-    return list?.length > 0
-      ? list.map((item, index) => {
-          return {
-            ...item,
-            id: index + 1
-          }
-        })
-      : formik.values.items.map((row, index) => ({
-          ...row,
-          id: row.id ?? index
-        }))
-  }
 
   useEffect(() => {
-    if (store?.packB) {
-      const items = getItems()
-      formik.setValues({ ...formik.values, items })
+    const prices = store?.packB?.prices
+
+    if (prices?.length > 0) {
+      formik.setValues(prev => ({
+        ...prev,
+        items: prices.map((item, index) => ({ ...item, id: index + 1 }))
+      }))
     }
-  }, [store.packB])
+  }, [store?.packB])
 
   useEffect(() => {
     formik.setFieldValue('defSaleMUId', store.measurementId || null)

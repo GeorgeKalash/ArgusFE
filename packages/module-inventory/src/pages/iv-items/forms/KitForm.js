@@ -143,15 +143,13 @@ const KitForm = ({ store, labels, maxAccess }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        if (!store.packB) return
-        const modifiedList = (store.packB.kits ?? []).map((kitItems, index) => ({
-          ...kitItems,
-          id: index + 1
-        }))
-        if (modifiedList?.length > 0) {
-          formik.setValues({ kit: modifiedList })
-        }
+      if (!store.packB) return
+      const modifiedList = (store.packB.kits ?? []).map((kitItems, index) => ({
+        ...kitItems,
+        id: index + 1
+      }))
+      if (modifiedList?.length > 0) {
+        formik.setValues({ kit: modifiedList })
       }
     })()
   }, [store.packB])

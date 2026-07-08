@@ -14,78 +14,25 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 
 const PropertiesForm = ({ labels, store, maxAccess }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId, _dmgId, _dmgName } = store
+  const { postRequest } = useContext(RequestsContext)
+  const { recordId, _dmgName } = store
   const { systemDefaults } = useContext(DefaultsContext)
-
   const { platformLabels } = useContext(ControlContext)
 
   const [dimensions, setDimensions] = useState([])
-  const [dimensionsUDT, setDimensionsUDT] = useState([])
 
-  useEffect(() => {
-    const loadDimensions = async () => {
-      if (store.packB?.dimensionGroupElements) {
-        setDimensions(store.packB.dimensionGroupElements)
-      }
-
-      const filteredDimensions2 = systemDefaults?.list
-        ?.filter(
-          item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item?.value?.length > 0
-        )
-        ?.map(item => ({
-          ...item,
-          dimensionId: item.key.match(/\d+$/)?.[0]
-        }))
-
-      setDimensionsUDT(filteredDimensions2)
-    }
-
-    loadDimensions()
-  }, [store.packB, _dmgId, recordId, systemDefaults])
-
-    useEffect(() => {
-    if (!store.packB) return
-
-    const newDimensionValues = {}
-
-    store.packB.itemDimensions?.forEach(item => {
-      newDimensionValues[item.dimension] = item.id
-    })
-
-    formik.setValues(prev => ({
-      ...prev,
-      ...newDimensionValues
-    }))
-  }, [store.packB])
-
-  useEffect(() => {
-    const fetchDimensionsData = async () => {
-      if (recordId && dimensions?.length > 0) {
-        if (!store.packB) return
-
-        const newDimensionValues = {}
-
-        store.packB.itemDimensions?.forEach(item => {
-          newDimensionValues[item.dimension] = item.id
-        })
-
-        const newDimensionUDTValues = {}
-
-        store.packB.userDefinedTexts?.forEach(item => {
-          newDimensionUDTValues[`ivtUDT${item.dimension}`] = item.value
-        })
-        
-        formik.setValues(prevValues => ({
-          ...prevValues,
-          ...newDimensionValues,
-          ...newDimensionUDTValues
-        }))
-      }
-    }
-
-    fetchDimensionsData()
-  }, [recordId, dimensionsUDT, dimensions])
+  const dimensionsUDT =
+    systemDefaults?.list
+      ?.filter(
+        item =>
+          item.key.includes('ivtUDT') &&
+          item.key !== 'ivtUDTCount' &&
+          item.value?.length > 0
+      )
+      ?.map(item => ({
+        ...item,
+        dimensionId: item.key.match(/\d+$/)?.[0]
+      })) ?? []
 
   const { formik } = useForm({
     initialValues: {},
@@ -134,6 +81,30 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
       toast.success(platformLabels.Edited)
     }
   })
+
+  useEffect(() => {
+    if (!store.packB) return
+
+    setDimensions(store.packB.dimensionGroupElements || [])
+
+    const newDimensionValues = {}
+
+    store.packB.itemDimensions?.forEach(item => {
+      newDimensionValues[item.dimension] = item.id
+    })
+
+    const newDimensionUDTValues = {}
+
+    store.packB.userDefinedTexts?.forEach(item => {
+      newDimensionUDTValues[`ivtUDT${item.dimension}`] = item.value
+    })
+
+    formik.setValues(prev => ({
+      ...prev,
+      ...newDimensionValues,
+      ...newDimensionUDTValues
+    }))
+  }, [store.packB])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>

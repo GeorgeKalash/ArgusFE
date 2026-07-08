@@ -91,7 +91,7 @@ const BarcodeForm = ({ store, labels }) => {
 
   useEffect(() => {
     setGridData({ list: barcodes || [] })
-  }, [store.recordId, barcodes])
+  }, [barcodes])
 
   
   async function fetchWithSearch({ options = {}, qry }) {
