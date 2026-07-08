@@ -370,7 +370,7 @@ export default function RubberForm({ labels, access, recordId }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                readOnly={isReleased ||isPosted}
+                readOnly={isReleased || isPosted}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('developerId', newValue?.recordId || null)
