@@ -15,7 +15,7 @@ import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 
 const PropertiesForm = ({ labels, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId, _dmgId, _dmgName } = store
+  const { recordId, _dmgId: dmgId } = store
   const { systemDefaults } = useContext(DefaultsContext)
 
   const { platformLabels } = useContext(ControlContext)
@@ -25,10 +25,10 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
 
   useEffect(() => {
     const loadDimensions = async () => {
-      if (recordId && _dmgId) {
+      if (recordId && dmgId) {
         const fetchDimensionResult = await getRequest({
           extension: InventoryRepository.DimensionGroupElement.qry,
-          parameters: `_groupId=${_dmgId}`
+          parameters: `_groupId=${dmgId}`
         })
 
         setDimensions(fetchDimensionResult.list)
@@ -47,7 +47,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
     }
 
     loadDimensions()
-  }, [recordId, _dmgId, systemDefaults])
+  }, [recordId, dmgId, systemDefaults])
 
   useEffect(() => {
     const fetchDimensionsData = async () => {
@@ -100,9 +100,13 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
 
   const { formik } = useForm({
     initialValues: {},
-
-    validateOnChange: true,
     onSubmit: async () => {
+      if (dmgId != formik.values.dmgId) {
+         await postRequest({
+          extension: InventoryRepository.Items.set,
+          record: JSON.stringify({...store?.itemObject, dmgId: formik.values.dmgId})
+        })
+      }
       const submissionData = dimensions.map(dimension => ({
         dimension: dimension.dimensionId,
         id: formik.values[dimension.dimensionId],
@@ -146,17 +150,56 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
     }
   })
 
+  useEffect(() => {
+   if (dmgId) formik.setFieldValue('dmgId', dmgId)
+  }, [dmgId])
+
+  const hasAnyValue = Object.entries(formik.values).some(
+    ([key, value]) => key !== 'dmgId' && value !== '' && value !== null && value !== undefined
+  )
+
+  const clearAllDimensionFields = () => {
+    const clearedValues = Object.keys(formik.values).reduce((acc, key) => {
+      if (key !== 'dmgId') acc[key] = ''
+      return acc
+    }, {})
+
+    formik.setValues(prev => ({
+      ...prev,
+      ...clearedValues
+    }))
+  }
+
+  const actions = [
+    {
+      key: 'Delete',
+      condition: true,
+      onClick: clearAllDimensionFields,
+      disabled: !hasAnyValue
+    }
+  ]
+
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} actions={actions}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <CustomTextField
-              name='dmgName'
-              label={labels.dmgName}
-              value={_dmgName}
-              readOnly
-            />
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.DimensionGroup.qry}
+                name='dmgId'
+                label={labels.dmgName}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                readOnly={hasAnyValue}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('dmgId', newValue?.recordId || null)
+                }}
+                error={formik.touched.dmgId && Boolean(formik.errors.dmgId)}
+              />
+            </Grid>
             {
               dimensions && dimensions.length > 0 && (
                 
