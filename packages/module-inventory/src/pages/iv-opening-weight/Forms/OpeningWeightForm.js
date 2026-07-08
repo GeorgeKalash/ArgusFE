@@ -130,7 +130,7 @@ export default function OpeningWeightForm({ labels, maxAccess, record, recordId,
                 error={formik.touched.itemId && Boolean(formik.errors.itemId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='avgWeight'
                 label={labels.avgWeight}

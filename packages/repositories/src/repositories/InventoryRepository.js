@@ -403,7 +403,6 @@ export const InventoryRepository = {
     page: service + 'pageWGT',
   },
   OpeningWeight: {
-    qry: service + 'qryOW',
     set: service + 'setOW',
     get: service + 'getOW',
     del: service + 'delOW',
