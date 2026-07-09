@@ -641,6 +641,7 @@ export const ResourceIds = {
   Departments: 70104,
   ProductionSummary: 42351,
   ProductionRequest: 42350,
+  OpenProductionOrder: 42352,
   ProductionClassGroups: 42142,
   WorkCenterGroups: 42143,
   ProductionStandardGroups: 42144,
