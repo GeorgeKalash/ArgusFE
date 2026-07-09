@@ -49,7 +49,20 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
       parameters: `_groupId=${groupId}`
     })
 
+    const newDimensionValues = {}
     setDimensions(fetchDimensionResult.list)
+    fetchDimensionResult.list?.forEach(item => {
+      newDimensionValues[item.dimension] =  isDmgChanged.current ? '' : item.id || ''
+    })
+        
+    if (newDimensionValues?.length === 0) {
+      setHasSavedData(false)
+    } else {
+      setHasSavedData(Object.values(newDimensionValues).some(
+        value => value !== '' && value !== undefined && value !== null
+      ))
+    }
+
   }
 
   
@@ -61,7 +74,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
     const newDimensionValues = {}
 
     store.packB.itemDimensions?.forEach(item => {
-      newDimensionValues[item.dimension] =  isDmgChanged.current ? '' : item.id || ''
+      newDimensionValues[item.dimension] =  item.id
     })
 
     const newDimensionUDTValues = {}
@@ -70,7 +83,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
       newDimensionUDTValues[`ivtUDT${item.dimension}`] = item.value
     })
 
-    if (dimensions?.length === 0) {
+    if (newDimensionValues?.length === 0) {
       setHasSavedData(false)
     } else {
       setHasSavedData(Object.values(newDimensionValues).some(
