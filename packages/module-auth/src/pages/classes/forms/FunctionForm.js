@@ -85,7 +85,7 @@ const FunctionForm = ({ labels, maxAccess, classId, record, window }) => {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={DocumentReleaseRepository.Strategy.qry}
-                parameters={`_startAt=0&_pageSize=50`}
+                parameters={`_startAt=0&_pageSize=1000`}
                 name='strategyId'
                 label={labels.strategy}
                 valueField='recordId'

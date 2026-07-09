@@ -36,7 +36,6 @@ const ItemWindow = ({ obj, labels, maxAccess, window }) => {
     nraId: null,
     productionLevel: null,
     _dmgId: dmgId || null,
-    _dmgName: null,
     packB: null,
     retailSettings: []
   })

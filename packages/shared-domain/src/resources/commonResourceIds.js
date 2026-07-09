@@ -56,5 +56,6 @@ export const commonResourceIds = [
   ResourceIds.ReceiptVoucher,
   ResourceIds.MFJobOrders,
   ResourceIds.IssueOfMaterials,
-  ResourceIds.CreditLimitHold
+  ResourceIds.CreditLimitHold,
+  ResourceIds.InventoryTransaction,
 ]

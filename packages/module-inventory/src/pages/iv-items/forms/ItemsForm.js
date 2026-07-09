@@ -194,7 +194,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       _name: item?.name,
       _reference: item?.sku,
       _dmgId: item?.dmgId || null,
-      _dmgName: item?.dmgName || '',
+      itemObject: item
     }))
   }
   useEffect(() => {
@@ -466,7 +466,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   <ResourceComboBox
                     dataGrid
                     store={store?.itemGroups}
-                    readOnly={editMode}
                     values={formik.values}
                     name='groupId'
                     label={labels.itemGroup}
@@ -480,8 +479,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
-                      formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
-                      formik.setFieldValue('dmgName', newValue?.dmgName || '')
+                      if (!editMode) formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
                     }}
                     error={formik.touched.groupId && formik.errors.groupId}
                   />

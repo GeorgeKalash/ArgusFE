@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect, useRef } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -14,12 +14,15 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 
 const PropertiesForm = ({ labels, store, maxAccess }) => {
-  const { postRequest } = useContext(RequestsContext)
-  const { recordId, _dmgName } = store
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { recordId, _dmgId: dmgId } = store
   const { systemDefaults } = useContext(DefaultsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const [dimensions, setDimensions] = useState([])
+
+  const [hasSavedData, setHasSavedData] = useState(false)
+  const isDmgChanged = useRef(false)
 
   const dimensionsUDT =
     systemDefaults?.list
@@ -34,54 +37,22 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
         dimensionId: item.key.match(/\d+$/)?.[0]
       })) ?? []
 
-  const { formik } = useForm({
-    initialValues: {},
-
-    validateOnChange: true,
-    onSubmit: async () => {
-      const submissionData = dimensions.map(dimension => ({
-        dimension: dimension.dimensionId,
-        id: formik.values[dimension.dimensionId],
-        itemId: recordId
-      }))
-
-      const filteredData = submissionData.filter(item => item.id !== '' && item.id !== undefined && item.id !== null)
-
-      const udtData = dimensionsUDT.map(udt => {
-        const udtNumber = udt.key.match(/\d+$/)?.[0]
-
-        return {
-          dimension: udtNumber,
-          itemId: recordId,
-          value: formik.values[udt.key]
-        }
-      })
-
-      const filteredUdtData = udtData.filter(
-        item => item.value !== '' && item.value !== undefined && item.value !== null
-      )
-
-      await postRequest({
-        extension: InventoryRepository.DimensionId.set,
-        record: JSON.stringify({
-          itemId: recordId,
-          data: filteredData
-        })
-      })
-    
-
-      await postRequest({
-        extension: InventoryRepository.DimensionUDT.set,
-        record: JSON.stringify({
-          itemId: recordId,
-          data: filteredUdtData
-        })
-      })
+  const loadDimensionFields = async groupId => {
+    if (!groupId) {
+      setDimensions([])
       
-      toast.success(platformLabels.Edited)
+      return
     }
-  })
 
+    const fetchDimensionResult = await getRequest({
+      extension: InventoryRepository.DimensionGroupElement.qry,
+      parameters: `_groupId=${groupId}`
+    })
+
+    setDimensions(fetchDimensionResult.list)
+  }
+
+  
   useEffect(() => {
     if (!store.packB) return
 
@@ -90,7 +61,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
     const newDimensionValues = {}
 
     store.packB.itemDimensions?.forEach(item => {
-      newDimensionValues[item.dimension] = item.id
+      newDimensionValues[item.dimension] =  isDmgChanged.current ? '' : item.id || ''
     })
 
     const newDimensionUDTValues = {}
@@ -99,24 +70,132 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
       newDimensionUDTValues[`ivtUDT${item.dimension}`] = item.value
     })
 
+    if (dimensions?.length === 0) {
+      setHasSavedData(false)
+    } else {
+      setHasSavedData(Object.values(newDimensionValues).some(
+        value => value !== '' && value !== undefined && value !== null
+      ))
+    }
+
     formik.setValues(prev => ({
       ...prev,
       ...newDimensionValues,
       ...newDimensionUDTValues
     }))
+
   }, [store.packB])
 
+  const { formik } = useForm({
+    initialValues: {},
+    onSubmit: async values => {
+      if (dmgId != formik.values.dmgId) {
+         await postRequest({
+          extension: InventoryRepository.Items.set,
+          record: JSON.stringify({...store?.itemObject, dmgId: formik.values.dmgId})
+        })
+      }
+      const isEmpty = value => value === '' || value === undefined || value === null
+
+      const filteredUdtData = dimensionsUDT
+      .map(udt => ({
+        dimension: udt.dimensionId,
+        itemId: recordId,
+        value: values[udt.key]
+      }))
+      .filter(item => !isEmpty(item.value))
+
+      await postRequest({
+        extension: InventoryRepository.DimensionUDT.set,
+        record: JSON.stringify({ itemId: recordId, data: filteredUdtData })
+      })
+
+      await saveDimensionValues(platformLabels.Edited, values)
+      setHasSavedData(dimensions.some(
+        dimension => !isEmpty(values[dimension.dimensionId])
+      ))
+    }
+  })
+
+  async function saveDimensionValues (toastMessage, values) {
+    const isEmpty = value => value === '' || value === undefined || value === null
+
+    const filteredData = dimensions
+      .map(dimension => ({
+        dimension: dimension.dimensionId,
+        id: values[dimension.dimensionId],
+        itemId: recordId
+      }))
+      .filter(item => !isEmpty(item.id))
+
+    await postRequest({
+      extension: InventoryRepository.DimensionId.set,
+      record: JSON.stringify({ itemId: recordId, data: filteredData })
+    })
+
+    toast.success(toastMessage)
+    isDmgChanged.current = false
+  }
+
+  useEffect(() => {
+   if (dmgId) formik.setFieldValue('dmgId', dmgId)
+  }, [dmgId])
+
+  const hasCurrentValues = dimensions.some(
+    dimension => {
+      const value = formik.values[dimension.dimensionId]
+      return value !== '' && value !== null && value !== undefined
+    }
+  )
+
+  const deleteDimensionFields = async () => {
+    const clearedValues = dimensions.reduce((acc, dimension) => {
+      acc[dimension.dimensionId] = ''
+      return acc
+    }, {})
+
+    const values = { ...formik.values, ...clearedValues }
+    formik.setValues(values)
+    if (hasSavedData) {
+      await saveDimensionValues(platformLabels.Deleted, values)
+      setHasSavedData(false)
+    } else {
+      toast.success(platformLabels.Cleared)
+    }
+  }
+
+  const actions = [
+    {
+      key: 'Delete',
+      condition: true,
+      onClick: deleteDimensionFields,
+      disabled: !hasSavedData
+    }
+  ]
+
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} actions={actions}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <CustomTextField
-              name='dmgName'
-              label={labels.dmgName}
-              value={_dmgName}
-              readOnly
-            />
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.DimensionGroup.qry}
+                name='dmgId'
+                label={labels.dmgName}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                readOnly={hasCurrentValues}
+                maxAccess={maxAccess}
+                onChange={async (_, newValue) => {
+                  isDmgChanged.current = true
+                  await loadDimensionFields(newValue?.recordId || null)
+                  formik.setFieldValue('dmgId', newValue?.recordId || null)
+                }}
+                error={formik.touched.dmgId && Boolean(formik.errors.dmgId)}
+              />
+            </Grid>
             {
               dimensions && dimensions.length > 0 && (
                 
