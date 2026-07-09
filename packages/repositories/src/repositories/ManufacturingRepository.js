@@ -177,7 +177,8 @@ export const ManufacturingRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD',
-    page: service + 'pageDTD'
+    page: service + 'pageDTD',
+    page2: service + 'page2DTD'
   },
   RawMaterialCategory: {
     qry: service + 'qryRMC',
