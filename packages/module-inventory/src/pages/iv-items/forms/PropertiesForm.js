@@ -17,22 +17,31 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId, _dmgId: dmgId } = store
   const { systemDefaults } = useContext(DefaultsContext)
-  const hasSavedData = useRef(true)
   const { platformLabels } = useContext(ControlContext)
 
   const [dimensions, setDimensions] = useState([])
   const [dimensionsUDT, setDimensionsUDT] = useState([])
+  const [hasSavedData, setHasSavedData] = useState(false)
+  const isDmgChanged = useRef(false)
+
+  const loadDimensionFields = async groupId => {
+    if (!groupId) {
+      setDimensions([])
+      
+      return
+    }
+
+    const fetchDimensionResult = await getRequest({
+      extension: InventoryRepository.DimensionGroupElement.qry,
+      parameters: `_groupId=${groupId}`
+    })
+
+    setDimensions(fetchDimensionResult.list)
+  }
 
   useEffect(() => {
     const loadDimensions = async () => {
-      if (recordId && dmgId) {
-        const fetchDimensionResult = await getRequest({
-          extension: InventoryRepository.DimensionGroupElement.qry,
-          parameters: `_groupId=${dmgId}`
-        })
-
-        setDimensions(fetchDimensionResult.list)
-      }
+      if (recordId && dmgId) await loadDimensionFields(dmgId)
 
       const filteredDimensions2 = systemDefaults?.list
         ?.filter(
@@ -65,7 +74,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
 
         const newDimensionValues = dimensionResponses.reduce((acc, res, index) => {
           const dimensionKey = dimensions[index].dimensionId
-          acc[dimensionKey] = res.record?.id || ''
+          acc[dimensionKey] = isDmgChanged.current ? '' : res.record?.id || ''
 
           return acc
         }, {})
@@ -88,14 +97,17 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
           return acc
         }, {})
 
-        hasSavedData.current = Object.values({ ...newDimensionValues, ...newUDTValues }).some(
-         value => value !== '' && value !== undefined && value !== null
-        ) 
+        setHasSavedData(Object.values(newDimensionValues).some(
+          value => value !== '' && value !== undefined && value !== null
+        ))
+
         formik.setValues(prevValues => ({
           ...prevValues,
           ...newDimensionValues,
           ...newUDTValues
         }))
+      } else if (recordId && dimensions?.length === 0) {
+        setHasSavedData(false)
       }
     }
 
@@ -127,7 +139,9 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
       })
 
       await saveDimensionValues(platformLabels.Edited, values)
-      hasSavedData.current = true
+      setHasSavedData(dimensions.some(
+        dimension => !isEmpty(values[dimension.dimensionId])
+      ))
     }
   })
 
@@ -148,29 +162,33 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
     })
 
     toast.success(toastMessage)
+    isDmgChanged.current = false
   }
 
   useEffect(() => {
    if (dmgId) formik.setFieldValue('dmgId', dmgId)
   }, [dmgId])
 
-  const hasAnyValue = Object.entries(formik.values).some(
-    ([key, value]) => key !== 'dmgId' && value !== '' && value !== null && value !== undefined
+  const hasCurrentValues = dimensions.some(
+    dimension => {
+      const value = formik.values[dimension.dimensionId]
+      return value !== '' && value !== null && value !== undefined
+    }
   )
 
   const deleteDimensionFields = async () => {
-    const clearedValues = Object.keys(formik.values).reduce((acc, key) => {
-      if (key !== 'dmgId') acc[key] = ''
+    const clearedValues = dimensions.reduce((acc, dimension) => {
+      acc[dimension.dimensionId] = ''
       return acc
     }, {})
 
-    const values = {...formik.values, ...clearedValues}
+    const values = { ...formik.values, ...clearedValues }
     formik.setValues(values)
-    if (hasSavedData.current) {
+    if (hasSavedData) {
       await saveDimensionValues(platformLabels.Deleted, values)
-      hasSavedData.current = false
+      setHasSavedData(false)
     } else {
-      toast.success(platformLabels.Deleted)
+      toast.success(platformLabels.Cleared)
     }
   }
 
@@ -179,7 +197,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
       key: 'Delete',
       condition: true,
       onClick: deleteDimensionFields,
-      disabled: !hasAnyValue
+      disabled: !hasSavedData
     }
   ]
 
@@ -196,9 +214,11 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
                 values={formik.values}
                 valueField='recordId'
                 displayField='name'
-                readOnly={hasAnyValue}
+                readOnly={hasCurrentValues}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => {
+                onChange={async (_, newValue) => {
+                  isDmgChanged.current = true
+                  await loadDimensionFields(newValue?.recordId || null)
                   formik.setFieldValue('dmgId', newValue?.recordId || null)
                 }}
                 error={formik.touched.dmgId && Boolean(formik.errors.dmgId)}
