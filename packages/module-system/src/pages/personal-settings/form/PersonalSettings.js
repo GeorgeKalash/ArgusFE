@@ -13,9 +13,11 @@ import i18n from '@argus/shared-configs/src/configs/i18n'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const PersonalSettings = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   useEffect(() => {
     ;(async function () {
@@ -59,7 +61,7 @@ const PersonalSettings = ({ _labels, access }) => {
       extension: SelfServiceRepository.SSUserInfo.set,
       record: JSON.stringify(obj)
     })
-    toast.success('Record Success')
+    toast.success(platformLabels.Updated)
 
     window.localStorage.setItem('languageId', obj.languageId)
 

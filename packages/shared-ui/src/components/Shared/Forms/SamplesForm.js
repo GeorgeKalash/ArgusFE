@@ -79,6 +79,7 @@ export default function SamplesForm({ recordId, window }) {
         collectionId: null,
         jobId: null,
         itemId: null,
+        developerId: null,
         threeDDId: null,
         productionLineId: null,
         designFamilyId: null,
@@ -392,6 +393,26 @@ export default function SamplesForm({ recordId, window }) {
                     }}
                     required
                     error={formik?.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ProductModelingRepository.Developer.qry}
+                    values={formik.values.header}
+                    name='header.developerId'
+                    label={labels.developer}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isClosed}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('header.developerId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.header?.developerId && formik.errors.header?.developerId}
                   />
                 </Grid>
               </Grid>

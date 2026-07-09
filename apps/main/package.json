@@ -19,6 +19,7 @@
     "@argus/module-bt": "file:../../packages/module-bt",
     "@argus/module-businessPartners": "file:../../packages/module-businessPartners",
     "@argus/module-ct": "file:../../packages/module-ct",
+    "@argus/module-cs": "file:../../packages/module-cs",
     "@argus/module-delivery": "file:../../packages/module-delivery",
     "@argus/module-fa": "file:../../packages/module-fa",
     "@argus/module-financials": "file:../../packages/module-financials",

@@ -314,10 +314,6 @@ export const ResourceIds = {
   MaterialsTransfer: 41208,
   InventoryTransaction: 41209,
   SalesDefaults: 51114,
-  DivisionFilter: 70101,
-  BranchFilter: 70102,
-  CompanyPosition: 70103,
-  DepartmentFilter: 70104,
   HRDocTypeFilter: 71104,
   SalaryChangeReasonFilter: 71105,
   EmploymentStatusFilter: 71107,
@@ -638,6 +634,20 @@ export const ResourceIds = {
   PayPeriod: 75108,
   EmployeeMissingDetails: 71407,
   ChangeVendor: 50615,
+  EventOrder: 38304,
+  CompanyPositions: 70103,
+  Divisions: 70101,
+  Branches: 70102,
+  Departments: 70104,
+  ProductionSummary: 42351,
+  ProductionRequest: 42350,
+  ProductionClassGroups: 42142,
+  WorkCenterGroups: 42143,
+  ProductionStandardGroups: 42144,
+  CreditLimitHold: 31349,
+  Developer: 48104,
+  ItemWeight: 41124,
+  OpeningWeight: 41313,
 
   // GL
   GLSalesInvoice: 51604,
@@ -723,5 +733,6 @@ export const ResourceIds = {
   ADDCorrespondentAgentBranch: 36608,
   ADDNationalClientMaster: 35601,
   ADDWorkClientMaster: 35602,
-  ADDClientCorporate: 35603
+  ADDClientCorporate: 35603,
+  ADDBranches: 70601
 }

@@ -362,6 +362,10 @@ export const InventoryRepository = {
     page: service + 'pageCTG',
     snapshot: service + 'snapshotCTG'
   },
+  CatalogueSummary:{
+    summary: service + 'summaryCTG',
+    snapshot: service + 'snapshotCTG2',
+  },
   LabelString: {
     md: service + 'mdLBL'
   },
@@ -393,5 +397,15 @@ export const InventoryRepository = {
   },
   ItemRawMaterial: {
     qry: service + 'qryIRM',
+  },
+  ItemWeight: {
+    del: service + 'delDIM',
+    page: service + 'pageWGT',
+  },
+  OpeningWeight: {
+    set: service + 'setOW',
+    get: service + 'getOW',
+    del: service + 'delOW',
+    page: service + 'pageOW'
   }
 }

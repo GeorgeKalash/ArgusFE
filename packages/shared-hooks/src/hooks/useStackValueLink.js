@@ -94,5 +94,5 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef, cacheO
     />
   )
 
-  return { linkStyle, shouldHandleMouseDown, handleClick, TextMeasure }
+  return { linkStyle, shouldHandleMouseDown, handleClick, TextMeasure, openStack }
 }

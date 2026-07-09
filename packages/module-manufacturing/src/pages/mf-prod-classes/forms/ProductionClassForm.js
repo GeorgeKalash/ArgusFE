@@ -29,7 +29,8 @@ export default function ProductionClassForm({ labels, maxAccess, store, setStore
       recordId,
       reference: '',
       name: '',
-      standardId: null
+      standardId: null,
+      groupId: null
     },
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -111,6 +112,25 @@ export default function ProductionClassForm({ labels, maxAccess, store, setStore
                   formik.setFieldValue('standardId', newValue?.recordId || null)
                 }}
                 error={formik.touched.standardId && Boolean(formik.errors.standardId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionClassGroups.qry}
+                name='groupId'
+                label={labels.pcg}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('groupId', newValue?.recordId || null)
+                }}
+                error={formik.touched.groupId && Boolean(formik.errors.groupId)}
               />
             </Grid>
           </Grid>
