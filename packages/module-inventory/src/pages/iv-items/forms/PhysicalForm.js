@@ -77,10 +77,18 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   }
 
   useEffect(() => {
+    if (!recordId) return
+
     if (physicalProperty) {
-      formik.setValues({ ...physicalProperty, isMetal: !!physicalProperty.isMetal })
+      formik.setValues({
+        ...physicalProperty,
+        isMetal: !!physicalProperty.isMetal,
+        itemId: recordId
+      })
+    } else {
+      formik.setFieldValue('itemId', recordId)
     }
-  }, [physicalProperty])
+  }, [recordId, physicalProperty])
 
   const handleFieldChange = (fieldName, dirtyField, event) => {
     const newValue = Number(event?.target?.value || 0)
