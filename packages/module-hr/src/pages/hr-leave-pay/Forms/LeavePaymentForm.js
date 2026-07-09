@@ -107,21 +107,9 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
 
   async function handleSubmit(obj) {
     const payload = {
-      recordId: obj.recordId,
-      paymentRef: obj.paymentRef,
+      ...obj,
       date: formatDateToApi(obj.date),
-      employeeId: obj.employeeId,
-      employeeName: obj.employeeName,
       effectiveDate: formatDateToApi(obj.effectiveDate),
-      lsId: obj.lsId,
-      lsName: obj.lsName,
-      ltId: obj.ltId,
-      ltName: obj.ltName,
-      departmentId: obj.departmentId,
-      salary: obj.salary,
-      days: obj.days,
-      hours: obj.hours,
-      amount: obj.amount,
       summary: {
         leaveTrackTime: obj.summary?.leaveTrackTime ?? null,
         lttName: obj.summary?.lttName || '',
@@ -185,24 +173,23 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
     return { ltId, ltName, tracksByHours }
   }
 
-  async function fetchEmployeeQuickView(employeeId) {
-    if (!employeeId) return
+  async function fetchEmployeeQuickView(employeeId, effectiveDate) {
+    if (!employeeId || !effectiveDate) return
 
     const res = await getRequest({
       extension: EmployeeRepository.QuickView.get,
-      parameters: `_recordId=${employeeId}&_asOfDate=${formatDateForGetApI(formik.values.date)}`
+      parameters: `_recordId=${employeeId}&_asOfDate=${formatDateForGetApI(effectiveDate)}`
     })
 
-    const qv = res?.record || {}
-
-    formik.setFieldValue('hireDate', formatDateFromApi(qv.hireDate) || '')
-    formik.setFieldValue('serviceDuration', qv.serviceDuration || '')
-    formik.setFieldValue('departmentId', qv.departmentId || null)
-    formik.setFieldValue('departmentName', qv.departmentName || '')
-    formik.setFieldValue('positionName', qv.positionName || '')
-    formik.setFieldValue('branchName', qv.branchName || '')
-    formik.setFieldValue('nationality', qv.countryName || '')
-    formik.setFieldValue('loanBalance', qv.loanBalance || 0)
+    formik.setFieldValue('hireDate', res?.record?.hireDate ? formatDateFromApi(res?.record?.hireDate) : '')
+    formik.setFieldValue('serviceDuration', res?.record?.serviceDuration || '')
+    formik.setFieldValue('departmentId', res?.record?.departmentId || null)
+    formik.setFieldValue('departmentName', res?.record?.departmentName || '')
+    formik.setFieldValue('positionName', res?.record?.positionName || '')
+    formik.setFieldValue('branchName', res?.record?.branchName || '')
+    formik.setFieldValue('nationality', res?.record?.countryName || '')
+    formik.setFieldValue('loanBalance', res?.record?.loanBalance || 0)
+    formik.setFieldValue('salary', res?.record?.salary || 0)
   }
 
   async function fillLeaveBalances(employeeId, lsId, effectiveDate, ltNameOverride) {
@@ -277,7 +264,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
 
       const [ltInfo] = await Promise.all([
         fetchLeaveScheduleAndType(record.lsId),
-        fetchEmployeeQuickView(record.employeeId)
+        fetchEmployeeQuickView(record.employeeId, effDate)
       ])
 
       await fillLeaveBalances(record.employeeId, record.lsId, effDate, ltInfo?.ltName)
@@ -349,8 +336,10 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                       formik.setFieldValue('positionName', newValue?.positionName || '')
                       formik.setFieldValue('branchName', newValue?.branchName || '')
                       formik.setFieldValue('nationality', newValue?.nationality || '')
+                      formik.setFieldValue('hours', 0)
+                      formik.setFieldValue('amount', 0)
 
-                      await fetchEmployeeQuickView(newValue?.recordId)
+                      await fetchEmployeeQuickView(newValue?.recordId, formik.values.effectiveDate)
 
                       await fillLeaveBalances(newValue?.recordId, formik.values.lsId, formik.values.effectiveDate)
                     }}
@@ -366,6 +355,10 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                     maxAccess={maxAccess}
                     onChange={async (name, value) => {
                       formik.setFieldValue(name, value)
+                      formik.setFieldValue('hours', 0)
+                      formik.setFieldValue('amount', 0)
+
+                      await fetchEmployeeQuickView(formik.values.employeeId, value)
                       await fillLeaveBalances(formik.values.employeeId, formik.values.lsId, value)
                     }}
                     onClear={() => formik.setFieldValue('effectiveDate', null)}
@@ -387,6 +380,9 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                       formik.setFieldValue('lsName', newValue?.name || '')
                       formik.setFieldValue('ltId', null)
                       formik.setFieldValue('ltName', '')
+                      formik.setFieldValue('days', 0)
+                      formik.setFieldValue('hours', 0)
+                      formik.setFieldValue('amount', 0)
 
                       const ltInfo = await fetchLeaveScheduleAndType(newValue?.recordId)
 

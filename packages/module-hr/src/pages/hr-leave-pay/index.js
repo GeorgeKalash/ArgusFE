@@ -32,7 +32,7 @@ const LeavePayment = () => {
   async function fetchWithSearch({ qry }) {
     return await getRequest({
       extension: PayrollRepository.LeavePayment.snapshot,
-      parameters: `_filter=${qry}`
+      parameters: `_filter=${qry}&_size=30&_startAt=0&_employeeId=0&_lsId=0`
     })
   }
 
