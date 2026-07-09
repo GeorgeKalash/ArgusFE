@@ -7,5 +7,19 @@ export const BenefitsRepository = {
     get: service + 'getSC',
     set: service + 'setSC',
     del: service + 'delSC',
+  },
+  ScheduleBenefits: {
+    qry: service + 'qrySB',
+    get: service + 'getSB'
+  },
+  BenefitAcquisition: {
+    page: service + 'pageBA',
+    qry: service + 'qryBA',
+    get: service + 'getBA',
+    set: service + 'setBA',
+    del: service + 'delBA'
+  },
+  Settlement: {
+    qry: service + 'qrySE'
   }
 }

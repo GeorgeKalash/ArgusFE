@@ -639,6 +639,7 @@ export const ResourceIds = {
   Branches: 70102,
   Departments: 70104,
   LeavePayment: 75202,
+  BenefitAcquisitions: 78201,
 
   // GL
   GLSalesInvoice: 51604,
