@@ -13,7 +13,9 @@ import RetailForm from '../forms/RetailForm.js'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext.js'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository.js'
 
-const ItemWindow = ({ recordId, labels, msId, maxAccess, dmgId, window }) => {
+const ItemWindow = ({ obj, labels, maxAccess, window }) => {
+  const { recordId, msId, dmgId } = obj || {}
+
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
@@ -22,7 +24,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, dmgId, window }) => {
 
   const [store, setStore] = useState({
     recordId: recordId || null,
-    _msId: msId,
+    _msId: msId || null,
     measurementId: null,
     priceGroupId: null,
     returnPolicy: null,
@@ -33,7 +35,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, dmgId, window }) => {
     _metal: null,
     nraId: null,
     productionLevel: null,
-    _dmgId: null,
+    _dmgId: dmgId || null,
     _dmgName: null,
     packB: null,
     retailSettings: []
@@ -57,11 +59,11 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, dmgId, window }) => {
   }, [])
 
   const refreshItem = async () => {
-    if (!msId || !dmgId  || !store.retailSettings?.length) return
+    if (!store._msId || !store._dmgId || !store.retailSettings?.length) return
 
     const response = await getRequest({
       extension: InventoryRepository.Items.pack_B,
-      parameters: `_itemId=${store.recordId}&_dimGroupId=${store._dmgId || dmgId}&_itemRetailCount=${store?.retailSettings?.length}&_msId=${msId}`
+      parameters: `_itemId=${store.recordId}&_dimGroupId=${store._dmgId}&_itemRetailCount=${store?.retailSettings?.length}&_msId=${store._msId}`
     })
 
     setStore(prev => ({
@@ -75,7 +77,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess, dmgId, window }) => {
     if (!store.recordId || store.packB) return
 
     refreshItem()
-  }, [store.recordId, store._dmgId, store.retailSettings])
+  }, [store.recordId, store._dmgId, store._msId, store.retailSettings])
 
   const tabs = [
     { label: labels.items },

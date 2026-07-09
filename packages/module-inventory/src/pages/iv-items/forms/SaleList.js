@@ -22,14 +22,21 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
 
+  const isAnyFilled = row =>
+    !!row?.currencyId ||
+    !!row?.plId ||
+    !!row?.ptName ||
+    (row?.value != null && row?.value !== '') ||
+    !!row?.vtName ||
+    (row?.minPrice != null && row?.minPrice !== '')
+
   const conditions = {
-    currencyId: row => row?.currencyId,
-    plId: row => row?.plId,
-    ptName: row => row?.ptName,
-    value: row => row?.value || row?.value === 0,
-    vtName: row => row?.vtName,
-    minPrice: row =>
-      (row.value > 0 || row?.plId > 0 || row?.ptName > 0 || row?.currencyId > 0) && row?.minPrice <= row?.value
+    currencyId: isAnyFilled,
+    plId: isAnyFilled,
+    ptName: isAnyFilled,
+    value: isAnyFilled,
+    vtName: isAnyFilled,
+    minPrice: row => (row.value > 0 || row?.plId > 0 || row?.ptName > 0 || row?.currencyId > 0) && row?.minPrice <= row?.value
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
