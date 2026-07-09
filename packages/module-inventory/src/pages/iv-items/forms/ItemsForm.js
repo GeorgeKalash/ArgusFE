@@ -200,7 +200,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       _name: res.record.name,
       _reference: res.record.sku,
       _dmgId: res.record.dmgId || null,
-      _dmgName: res.record.dmgName || ''
+      itemObject: res.record
     }))
   }
   useEffect(() => {
@@ -487,7 +487,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     reducer={response => {
                       return response?.record?.itemGroups
                     }}
-                    readOnly={editMode}
                     values={formik.values}
                     name='groupId'
                     label={labels.itemGroup}
@@ -501,8 +500,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
-                      formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
-                      formik.setFieldValue('dmgName', newValue?.dmgName || '')
+                      if (!editMode) formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
                     }}
                     error={formik.touched.groupId && formik.errors.groupId}
                   />
