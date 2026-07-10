@@ -32,26 +32,23 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
     maxAccess,
     initialValues: {
       recordId: recordId,
-      year: '',
+      year: null,
       siteId: null,
       sku: '',
       itemId: null,
       itemName: '',
       qty: null,
-      pieces: '',
-      avgWeight: '',
-      lotCategoryId: '',
-      trackBy: '',
-      pieces: '',
+      pieces: null,
+      lotCategoryId: null,
+      trackBy: null,
       periodId: null
     },
     validationSchema: yup.object({
-      year: yup.string().required(),
-      siteId: yup.string().required(),
+      year: yup.number().required(),
+      siteId: yup.number().required(),
       sku: yup.string().required(),
-      itemId: yup.string().required(),
+      itemId: yup.number().required(),
       qty: yup.number().required().min(0.01),
-      avgWeight: yup.string().nullable().max(999999),
       periodId: yup.number().required()
     }),
     onSubmit: async obj => {
@@ -144,7 +141,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 required
                 refresh={editMode}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('year', newValue?.fiscalYear)}
+                onChange={(_, newValue) => formik.setFieldValue('year', newValue?.fiscalYear || null)}
                 error={formik.touched.year && Boolean(formik.errors.year)}
               />
             </Grid>
@@ -174,7 +171,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 values={formik.values}
                 displayField='name'
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('siteId', newValue?.recordId)}
+                onChange={(_, newValue) => formik.setFieldValue('siteId', newValue?.recordId || null)}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
             </Grid>
@@ -182,21 +179,25 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
                 name='sku'
-                refresh={editMode}
                 readOnly={editMode}
                 secondDisplayField={false}
                 label={labels.sku}
-                valueField='sku'
+                valueField='itemId'
                 displayField='sku'
+                columnsInDropDown={[
+                  { key: 'sku', value: 'SKU' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'FL Name' },
+                ]}
                 valueShow='sku'
                 required
                 form={formik}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('itemName', newValue ? newValue.name : '')
                   formik.setFieldValue('sku', newValue ? newValue.sku : '')
-                  formik.setFieldValue('trackBy', newValue ? newValue.trackBy : '')
-                  formik.setFieldValue('lotCategory', newValue ? newValue.lotCategory : '')
-                  formik.setFieldValue('itemId', newValue?.recordId)
+                  formik.setFieldValue('trackBy', newValue ? newValue.trackBy : null)
+                  formik.setFieldValue('lotCategory', newValue ? newValue.lotCategory : null)
+                  formik.setFieldValue('itemId', newValue?.recordId || null)
                 }}
                 errorCheck={'sku'}
                 maxAccess={maxAccess}
@@ -204,7 +205,6 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
-                endpointId={InventoryRepository.Item.snapshot}
                 name='itemName'
                 value={formik.values.itemName}
                 readOnly
@@ -220,7 +220,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 value={formik?.values?.qty}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('qty', '')}
+                onClear={() => formik.setFieldValue('qty', null)}
                 error={formik.touched.qty && Boolean(formik.errors.qty)}
                 decimalScale={3}
                 allowNegative={false}
@@ -234,23 +234,9 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 value={formik?.values?.pieces}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('pieces', '')}
+                onClear={() => formik.setFieldValue('pieces', null)}
                 decimalScale={2}
                 error={formik.touched.pieces && Boolean(formik.errors.pieces)}
-                allowNegative={false}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='avgWeight'
-                label={labels.avgWeight}
-                value={formik?.values?.avgWeight}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('avgWeight', '')}
-                decimalScale={2}
-                error={formik.touched.avgWeight && Boolean(formik.errors.avgWeight)}
-                maxLength={8}
                 allowNegative={false}
               />
             </Grid>

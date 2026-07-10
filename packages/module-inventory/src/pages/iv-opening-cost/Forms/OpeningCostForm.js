@@ -38,7 +38,7 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
     validateOnChange: true,
     validationSchema: yup.object({
       year: yup.number().required(),
-      itemId: yup.string().required(),
+      itemId: yup.number().required(),
       periodId: yup.number().required(),
       avgCost: yup.number().min(0).max(999999999).required()
     }),
@@ -126,14 +126,15 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
                 name='itemId'
                 label={labels.sku}
                 readOnly={editMode}
-                valueField='recordId'
-                displayField='sku'
+                valueField='itemId'
+                displayField={['sku', 'name']}
                 valueShow='sku'
                 secondDisplayField={false}
                 form={formik}
                 columnsInDropDown={[
                   { key: 'sku', value: 'SKU' },
-                  { key: 'name', value: 'Name' }
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'FL Name' }
                 ]}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('itemId', newValue?.recordId || '')
