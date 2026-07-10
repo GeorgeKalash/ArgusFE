@@ -14,11 +14,14 @@ import DraftForm from '@argus/shared-ui/src/components/Shared/Forms/DraftForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 
 const DraftSerialsInvoices = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const {
     query: { data },
@@ -140,17 +143,47 @@ const DraftSerialsInvoices = () => {
   }
 
   const editDSI = obj => {
-    openForm(obj.recordId)
+    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, reference, status) {
+    if (recordId && status !== 3) {
+      await lockRecord({
+        recordId: recordId,
+        reference: reference,
+        resourceId: ResourceIds.DraftSerialsInvoices,
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: ResourceIds.DraftSerialsInvoices,
+            recordId,
+            reference
+          })
+          openStack(recordId)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId)
+    }
+  }
+
+  async function openStack(recordId) {
     stack({
       Component: DraftForm,
       props: {
         labels,
         access,
         recordId,
-        invalidate
+        invalidate,
+        lockRecord
       },
       title: labels.draftSerInv
     })
