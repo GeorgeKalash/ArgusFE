@@ -37,66 +37,57 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
         dimensionId: item.key.match(/\d+$/)?.[0]
       })) ?? []
 
+  const isEmptyValue = value => value === '' || value === undefined || value === null
+
+  const computeHasSavedData = values =>
+    Object.values(values).some(value => !isEmptyValue(value))
+
   const loadDimensionFields = async groupId => {
     if (!groupId) {
       setDimensions([])
+      setHasSavedData(false)
       
       return
     }
 
-    const fetchDimensionResult = await getRequest({
+    const { list = [] } = await getRequest({
       extension: InventoryRepository.DimensionGroupElement.qry,
       parameters: `_groupId=${groupId}`
     })
 
-    const newDimensionValues = {}
-    setDimensions(fetchDimensionResult.list)
-    fetchDimensionResult.list?.forEach(item => {
-      newDimensionValues[item.dimension] =  isDmgChanged.current ? '' : item.id || ''
-    })
-        
-    if (newDimensionValues?.length === 0) {
-      setHasSavedData(false)
-    } else {
-      setHasSavedData(Object.values(newDimensionValues).some(
-        value => value !== '' && value !== undefined && value !== null
-      ))
-    }
+    setDimensions(list)
 
+    const newDimensionValues = list.reduce((acc, item) => {
+      acc[item.dimension] = isDmgChanged.current ? '' : (item.id || '')
+      return acc
+    }, {})
+
+    setHasSavedData(computeHasSavedData(newDimensionValues))
   }
 
-  
   useEffect(() => {
     if (!store.packB) return
 
-    setDimensions(store.packB.dimensionGroupElements || [])
+    const { dimensionGroupElements = [], itemDimensions = [], userDefinedTexts = [] } = store.packB
+    setDimensions(dimensionGroupElements)
 
-    const newDimensionValues = {}
+    const newDimensionValues = itemDimensions.reduce((acc, item) => {
+      acc[item.dimension] = item.id
+      return acc
+    }, {})
 
-    store.packB.itemDimensions?.forEach(item => {
-      newDimensionValues[item.dimension] =  item.id
-    })
+    const newDimensionUDTValues = userDefinedTexts.reduce((acc, item) => {
+      acc[`ivtUDT${item.dimension}`] = item.value
+      return acc
+    }, {})
 
-    const newDimensionUDTValues = {}
-
-    store.packB.userDefinedTexts?.forEach(item => {
-      newDimensionUDTValues[`ivtUDT${item.dimension}`] = item.value
-    })
-
-    if (newDimensionValues?.length === 0) {
-      setHasSavedData(false)
-    } else {
-      setHasSavedData(Object.values(newDimensionValues).some(
-        value => value !== '' && value !== undefined && value !== null
-      ))
-    }
+    setHasSavedData(computeHasSavedData(newDimensionValues))
 
     formik.setValues(prev => ({
       ...prev,
       ...newDimensionValues,
       ...newDimensionUDTValues
     }))
-
   }, [store.packB])
 
   const { formik } = useForm({
