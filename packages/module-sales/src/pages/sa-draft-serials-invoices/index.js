@@ -143,11 +143,11 @@ const DraftSerialsInvoices = () => {
   }
 
   const editDSI = obj => {
-    openForm(obj?.recordId, obj?.reference, obj?.status)
+    openForm(obj?.recordId, obj?.reference, obj?.wip)
   }
 
-  async function openForm(recordId, reference, status) {
-    if (recordId && status !== 3) {
+  async function openForm(recordId, reference, wip) {
+    if (recordId && wip !== 2) {
       await lockRecord({
         recordId: recordId,
         reference: reference,
