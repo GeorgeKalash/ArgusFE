@@ -183,7 +183,8 @@ export const FinancialRepository = {
     del: service + 'delDI'
   },
   PaymentVoucherExpenses: {
-    qry: service + 'qryPVX'
+    qry: service + 'qryPVX',
+    set2: service + 'set2PVE'
   },
   PaymentVoucherCostCenters: {
     qry: service + 'qryPVC'
