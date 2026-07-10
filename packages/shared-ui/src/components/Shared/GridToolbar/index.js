@@ -56,12 +56,12 @@ const GridToolbar = ({
     const walk = node => {
       if (!React.isValidElement(node)) return
 
-      const { name, value, values, formObject, form, children } = node.props || {}
+      const { name, value, values, formObject, form, children, initialValue } = node.props || {}
 
       if (name && !fields.has(name)) {
         fields.set(
           name,
-          value ?? values?.[name] ?? formObject?.[name] ?? form?.values?.[name]
+           value ?? values?.[name] ?? formObject?.[name] ?? form?.values?.[name] ?? initialValue
         )
       }
 

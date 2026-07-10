@@ -50,6 +50,7 @@ const RPBGridToolbar = ({
   const openRPB = () => {
     stack({
       Component: ReportParameterBrowser,
+      windowType: 'ReportParameterBrowser',
       props: {
         reportName: reportName,
         rpbParams,

@@ -134,9 +134,9 @@ export function WindowProvider({ children }) {
   }
 
   function addToStack(options) {
-    const { Component, spacing = true, trackPage = true } = options
+    const { Component, spacing = true, trackPage = true, windowType = null} = options
     const dimensions = getWindowDimensions(options.width, options.height, spacing)
-    if (trackPage) trackInteraction('Window')
+    if (trackPage && windowType != 'ReportParameterBrowser') trackInteraction('Window')
 
     setStack(stack => [
       ...stack,

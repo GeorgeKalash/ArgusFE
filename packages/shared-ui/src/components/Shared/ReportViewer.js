@@ -138,6 +138,7 @@ const ReportViewer = ({ resourceId }) => {
           hasSearch={false}
           reportName={report.selectedReport?.parameters}
           disableActionsPadding
+          resetKey={reportStore}
           leftSection={
             <Grid container spacing={2} alignItems='end' wrap='nowrap'>
               <Grid item xs>

@@ -185,21 +185,38 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
     if (isEmpty) formik.setFieldValue(fieldName, '')
   }, [isEmpty])
 
-  const normalized = value => {
-    if (value instanceof Date) return value.dateOnly ? value.toDateString() : value.valueOf()
-    if (Array.isArray(value)) return value.map(normalized)
-    if (value && typeof value === 'object')
-      return Object.fromEntries(
-        Object.entries(value)
-          .filter(([, v]) => v !== null && v !== undefined)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([k, v]) => [k, normalized(v)])
-      )
-    
-    return value
+  const areDatesEqual = (a, b) => {
+    const eitherIsDateOnly = (a instanceof Date && a.dateOnly) || (b instanceof Date && b.dateOnly)
+
+    if (eitherIsDateOnly) {
+      return a.toDateString() === b.toDateString()
+    }
+
+    return a.valueOf() === b.valueOf()
   }
 
-  const dirty = JSON.stringify(normalized(formik.values)) !== JSON.stringify(normalized(formik.initialValues))
+  const deepEqual = (a, b) => {
+    if (a instanceof Date || b instanceof Date) {
+      if (!(a instanceof Date) || !(b instanceof Date)) return false
+      return areDatesEqual(a, b)
+    }
+
+    if (Array.isArray(a) || Array.isArray(b)) {
+      if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false
+      return a.every((item, i) => deepEqual(item, b[i]))
+    }
+
+    if (a && typeof a === 'object' && b && typeof b === 'object') {
+      const keysA = Object.keys(a).filter(k => a[k] !== null && a[k] !== undefined)
+      const keysB = Object.keys(b).filter(k => b[k] !== null && b[k] !== undefined)
+      if (keysA.length !== keysB.length) return false
+      return keysA.every(k => keysB.includes(k) && deepEqual(a[k], b[k]))
+    }
+
+    return a === b
+  }
+
+  const dirty = !deepEqual(formik.values, formik.initialValues)
  
   console.log('dirty',dirty ,'\n ',formik.initialValues,' \n ',formik.values,isInsideWindow)
 
