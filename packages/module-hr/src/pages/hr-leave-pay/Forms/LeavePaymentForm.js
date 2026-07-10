@@ -22,7 +22,6 @@ import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
-
 export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -134,7 +133,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
     invalidate()
   }
 
-  const editMode = !!recordId || !!formik.values.recordId
+  const editMode = !!formik.values.recordId
 
   async function fetchLeaveScheduleAndType(lsId) {
     if (!lsId) {
