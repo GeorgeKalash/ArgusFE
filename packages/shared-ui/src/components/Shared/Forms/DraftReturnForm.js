@@ -34,9 +34,11 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 
-export default function DraftReturnForm({ labels, access, recordId, invalidate }) {
+export default function DraftReturnForm({ labels, access, recordId, lockRecord, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels} = useContext(ControlContext)
@@ -728,6 +730,20 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         ...summaryGridData,
         taxDetails: pack.taxDetails,
         taxDetailsStore: []
+      }
+    })
+
+    !formik.values.recordId &&
+    lockRecord({
+      recordId: pack.header.recordId,
+      reference: pack.header.reference,
+      resourceId: ResourceIds.DraftSerialReturns,
+      onSuccess: () => {
+        addLockedScreen({
+          resourceId: ResourceIds.DraftSerialReturns,
+          recordId: pack.header.recordId,
+          reference: pack.header.reference
+        })
       }
     })
 

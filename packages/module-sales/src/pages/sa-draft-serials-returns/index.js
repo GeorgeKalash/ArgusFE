@@ -14,11 +14,14 @@ import DraftReturnForm from '@argus/shared-ui/src/components/Shared/Forms/DraftR
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 
 const DraftSerialsReturns = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const {
     query: { data },
@@ -140,17 +143,47 @@ const DraftSerialsReturns = () => {
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, reference, status) {
+    if (recordId && status !== 3) {
+      await lockRecord({
+        recordId: recordId,
+        reference: reference,
+        resourceId: ResourceIds.DraftSerialReturns,
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: ResourceIds.DraftSerialReturns,
+            recordId,
+            reference
+          })
+          openStack(recordId)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId)
+    }
+  }
+
+  async function openStack(recordId) {
     stack({
       Component: DraftReturnForm,
       props: {
         labels,
         access,
         recordId,
-        invalidate
+        invalidate,
+        lockRecord
       },
       width: 1300,
       height: 750,
