@@ -37,7 +37,7 @@ const TodaysTimeVariations = ({ index, window }) => {
   })
 
   const getTitle = [labels.earlyCheckIn, labels.lateCheckIn, labels.duringShiftLeave, labels.earlyLeave, labels.overtime]
-  useSetWindow({ title: `${labels.todaysTimeVariations || ''} - ${getTitle?.[index] || ''}`, window })
+  useSetWindow({ title: Object.keys(labels).length ? `${labels.todaysTimeVariations || ''} - ${getTitle?.[index] || ''}` : ``, window })
 
   const columns = [
     {

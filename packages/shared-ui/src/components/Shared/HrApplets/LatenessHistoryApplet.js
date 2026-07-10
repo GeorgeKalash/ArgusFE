@@ -75,7 +75,7 @@ const LatenessHistoryApplet = ({}) => {
             />
           </div>
         </div>
-          <Box sx={{  height: 350 }}>
+          <Box>
             <MultiLineChart
               id='lateness-history'
               labels={latenessHistory?.map(a => a.date) || []}

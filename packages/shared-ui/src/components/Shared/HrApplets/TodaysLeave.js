@@ -24,9 +24,9 @@ const TodaysLeave = ({index, window }) => {
     datasetId: ResourceIds.TodaysLeaves
   })
 
-  useSetWindow({ title: index == 0 
-    ? `${labels.todaysLeave || ''} - ${labels.paidLeave || ''}`
-    : `${labels.todaysLeave || ''} - ${labels.unpaidLeave || ''}`, window })
+  useSetWindow({ title: !Object.keys(labels).length ? `` 
+    : `${labels.todaysLeave || ''} - ${(index == 0 
+      ? labels.paidLeave : labels.unpaidLeave) || ''}`, window })
 
   const columns = [
     {
