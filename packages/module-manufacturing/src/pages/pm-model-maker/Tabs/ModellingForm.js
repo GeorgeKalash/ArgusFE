@@ -54,6 +54,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       endDate: null,
       productionClassId: null,
       productionStandardId: null,
+      developerId: null,
       collectionId: null,
       itemGroupId: null,
       designGroupId: null,
@@ -341,6 +342,26 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 readOnly={isClosed}
                 onClear={() => formik.setFieldValue('endDate', null)}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ProductModelingRepository.Developer.qry}
+                values={formik.values}
+                name='developerId'
+                label={labels.developer}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly={isPosted || isClosed}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('developerId', newValue?.recordId || null)
+                }}
+                error={formik.touched.developerId && formik.errors.developerId}
               />
             </Grid>
             <Grid item xs={12}>

@@ -1,72 +1,66 @@
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-import { useFormik } from 'formik'
-import { useContext, useEffect, useState } from 'react'
-import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
+import { useContext, useEffect } from 'react'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 
-const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functionId, window, editMode }) => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+const FunctionForm = ({ labels, maxAccess, classId, record, window }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const [initialValues, setInitialData] = useState({
-    functionId: null,
-    strategyId: null
+  const invalidate = useInvalidate({
+    endpointId: DocumentReleaseRepository.ClassFunction.qry
   })
 
-  const formik = useFormik({
-    validateOnChange: true,
-    initialValues,
+  const editMode = !!record?.functionId
+
+  const { formik } = useForm({
+    initialValues: {
+      classId,
+      functionId: record?.functionId || null,
+      strategyId: record?.strategyId || null
+    },
+    maxAccess,
     validationSchema: yup.object({
-      functionId: yup.string().required(' '),
-      strategyId: yup.string().required(' ')
+      functionId: yup.string().required(),
+      strategyId: yup.string().required()
     }),
-    onSubmit: async values => {
-      await postFunction(values)
+    onSubmit: async obj => {
+      await postRequest({
+        extension: DocumentReleaseRepository.ClassFunction.set,
+        record: JSON.stringify(obj)
+      })
+
+      toast.success(!editMode ? platformLabels.Added : platformLabels.Edited)
+      invalidate()
+      window.close()
     }
   })
 
-  const postFunction = async obj => {
-    const classId = obj.classId ? obj.classId : recordId
-    obj.classId = classId
-    await postRequest({
-      extension: DocumentReleaseRepository.ClassFunction.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getFunctionGridData(classId)
-        !editMode ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-        window.close()
-      })
-      .catch(error => {})
-  }
-
   useEffect(() => {
-    editMode && getFunctionsById(recordId, functionId)
-  }, [recordId])
+    ;(async function () {
+      if (editMode) {
+        const res = await getRequest({
+          extension: DocumentReleaseRepository.ClassFunction.get,
+          parameters: `_classId=${classId}&_functionId=${record.functionId}`
+        })
 
-  const getFunctionsById = (recordId, functionId) => {
-    const defaultParams = `_classId=${recordId}&&_functionId=${functionId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.ClassFunction.get,
-      parameters: parameters
-    }).then(res => {
-      console.log(res.record)
-      formik.setValues(res.record)
-    })
-  }
+        formik.setValues(res.record)
+      }
+    })()
+  }, [])
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Functions} maxAccess={maxAccess} isInfo={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -81,9 +75,9 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
                 readOnly={editMode}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('functionId', '')}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('functionId', newValue?.key || '')
+                onClear={() => formik.setFieldValue('functionId', null)}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('functionId', newValue?.key || null)
                 }}
                 error={formik.touched.functionId && Boolean(formik.errors.functionId)}
               />
@@ -91,7 +85,7 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={DocumentReleaseRepository.Strategy.qry}
-                parameters={`_startAt=0&_pageSize=50`}
+                parameters={`_startAt=0&_pageSize=1000`}
                 name='strategyId'
                 label={labels.strategy}
                 valueField='recordId'
@@ -99,9 +93,9 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('strategyId', '')}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('strategyId', newValue?.recordId || '')
+                onClear={() => formik.setFieldValue('strategyId', null)}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('strategyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.strategyId && Boolean(formik.errors.strategyId)}
               />
@@ -109,7 +103,7 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

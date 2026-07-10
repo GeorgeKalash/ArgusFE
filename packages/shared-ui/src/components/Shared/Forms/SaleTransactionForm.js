@@ -70,6 +70,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import CommissionDetailsForm from '@argus/module-sales/src/pages/sa-trx/[functionId]/Forms/CommissionDetailsForm'
 import FIReceiptVoucherForm from './FIReceiptVoucherForm'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 export default function SaleTransactionForm({
   recordId,
@@ -391,20 +392,25 @@ export default function SaleTransactionForm({
     }
   }
 
-  function openMCRForm(data) {
-    stack({
-      Component: MultiCurrencyRateForm,
-      props: {
-        DatasetIdAccess: getResourceMCR(functionId),
-        data,
-        onOk: childFormikValues => {
-          formik.setFieldValue('header', {
-            ...formik.values.header,
-            ...childFormikValues
-          })
+  const { openStack } = useStackValueLink({ linkOpen: { resourceId: getResourceMCR(functionId) } })
+    
+  async function openMCRForm(data) {
+    const hasOpened = await openStack()
+    if (!hasOpened) {
+      stack({
+        Component: MultiCurrencyRateForm,
+        props: {
+          DatasetIdAccess: getResourceMCR(functionId),
+          data,
+          onOk: childFormikValues => {
+            formik.setFieldValue('header', {
+              ...formik.values.header,
+              ...childFormikValues
+            })
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   const isPosted = formik.values.header.status === 3

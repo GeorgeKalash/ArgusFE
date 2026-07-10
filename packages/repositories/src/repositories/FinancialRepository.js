@@ -37,14 +37,16 @@ export const FinancialRepository = {
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP',
-    page: service + 'pageGRP'
+    page: service + 'pageGRP',
+    snapshot: service + 'snapshotGRP'
   },
   AccountCreditLimit: {
     qry: service + 'qryACL',
     page: service + 'pageACL',
     get: service + 'getACL',
     set: service + 'setACL',
-    del: service + 'delACL'
+    del: service + 'delACL',
+    get2: service + 'get2ACL'
   },
   AccountCreditBalance: {
     qry: service + 'qryACB',
@@ -299,5 +301,14 @@ export const FinancialRepository = {
   AccountCurrencies: {
     qry: service + 'qryACU',
     set2: service + 'set2ACU'
-  }
+  },
+  CreditLimitHold: {
+    get: service + 'getCLHO',
+    set: service + 'setCLHO',
+    del: service + 'delCLHO',
+    page: service + 'pageCLHO',
+    snapshot: service + 'snapshotCLHO',
+    close: service + 'closeCLHO',
+    reopen: service + 'reopenCLHO'
+  },
 }

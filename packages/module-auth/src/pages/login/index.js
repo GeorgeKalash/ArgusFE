@@ -11,7 +11,6 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import BlankLayout from '@argus/shared-core/src/@core/layouts/BlankLayout'
 import ErrorWindow from '@argus/shared-ui/src/components/Shared/ErrorWindow'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ChangePassword from '@argus/shared-ui/src/components/Shared/ChangePassword'
 import axios from 'axios'
@@ -19,6 +18,8 @@ import OTPAuthentication from '@argus/shared-ui/src/components/Shared/OTPAuthent
 import styles from './LoginPage.module.css'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.7rem',
@@ -31,10 +32,15 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const theme = useTheme()
   const auth = useAuth()
-  const { companyName, setCompanyName, deployHost, validCompanyName } = useContext(AuthContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { companyName, setCompanyName, deployHost, validCompanyName, setLanguageId  } = useContext(AuthContext)
   const { stack } = useWindow()
-
+  const { changeLanguage } = useSettings()
+  const { platformLabels } = useContext(ControlContext)
+  const Languages = {
+    ENGLISH: 1,
+    ARABIC: 2,
+    FRENCH: 3
+  }
   const validation = useFormik({
     initialValues: {
       username: '',
@@ -63,6 +69,7 @@ const LoginPage = () => {
           viewOTP(loggedUser)
         } else setErrorMessage(error)
       })
+    
     }
   })
 
@@ -127,6 +134,11 @@ const LoginPage = () => {
     } catch (error) {
       stackError({ message: error.message })
     }
+  }
+
+  async function getLanguage(language) {
+    setLanguageId(language)     
+    await changeLanguage(language) 
   }
 
   useEffect(() => {
@@ -248,9 +260,15 @@ const LoginPage = () => {
             {platformLabels?.ArgusOfferedIn}
           </Typography>
           <Box className={styles.languageLinks}>
-            <LinkStyled href='/pages/auth/login-en' className={styles.language}>English</LinkStyled>
-            <LinkStyled href='/pages/auth/login-fr' className={styles.language}>Français</LinkStyled>
-            <LinkStyled href='/pages/auth/login-ar' className={styles.language}>عربي</LinkStyled>
+            <span className={styles.language} onClick={() => getLanguage(Languages.ENGLISH)}>
+              English
+            </span>
+            <span className={styles.language} onClick={() => getLanguage(Languages.FRENCH)}>
+              Français
+            </span>
+            <span className={styles.language} onClick={() => getLanguage(Languages.ARABIC)}>
+              عربي
+            </span>          
           </Box>
         </Box>
       </Box>

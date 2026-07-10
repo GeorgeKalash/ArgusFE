@@ -28,6 +28,7 @@ import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -114,20 +115,26 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   const editMode = !!formik.values.recordId || !!recordId
   const isPosted = formik.values.status === 3
 
-  function openMCRForm(data) {
-    stack({
-      Component: MultiCurrencyRateForm,
-      props: {
-        DatasetIdAccess: ResourceIds.MCRIncreaseDecreaseAdj,
-        data,
-        onOk: childFormikValues => {
-          formik.setValues({
-            ...formik.values,
-            ...childFormikValues
-          })
+
+  const { openStack } = useStackValueLink({ linkOpen: { resourceId: ResourceIds.MCRIncreaseDecreaseAdj } })
+
+  async function openMCRForm(data) {
+    const hasOpened = await openStack()
+    if (!hasOpened) {
+      stack({
+        Component: MultiCurrencyRateForm,
+        props: {
+          DatasetIdAccess: ResourceIds.MCRIncreaseDecreaseAdj,
+          data,
+          onOk: childFormikValues => {
+            formik.setValues({
+              ...formik.values,
+              ...childFormikValues
+            })
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   async function getMultiCurrencyFormData(currencyId, date) {

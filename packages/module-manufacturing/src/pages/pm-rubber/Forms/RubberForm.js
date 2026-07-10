@@ -54,6 +54,7 @@ export default function RubberForm({ labels, access, recordId }) {
       modelId: null,
       modelRef: '',
       threeDPId: null,
+      developerId: null,
       designGroupId: null,
       designFamilyId: null,
       productionClassId: null,
@@ -355,6 +356,26 @@ export default function RubberForm({ labels, access, recordId }) {
                 readOnly={isReleased || isPosted}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ProductModelingRepository.Developer.qry}
+                values={formik.values}
+                name='developerId'
+                label={labels.developer}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly={isReleased || isPosted}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('developerId', newValue?.recordId || null)
+                }}
+                error={formik.touched.developerId && formik.errors.developerId}
               />
             </Grid>
             <Grid item xs={12}>

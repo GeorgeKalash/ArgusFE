@@ -634,6 +634,7 @@ export const ResourceIds = {
   PayPeriod: 75108,
   EmployeeMissingDetails: 71407,
   ChangeVendor: 50615,
+  EventOrder: 38304,
   CompanyPositions: 70103,
   Divisions: 70101,
   Branches: 70102,
@@ -641,6 +642,15 @@ export const ResourceIds = {
   LeavePayment: 75202,
   BenefitAcquisitions: 78201,
   BenefitSettlement: 78202,
+  ProductionSummary: 42351,
+  ProductionRequest: 42350,
+  ProductionClassGroups: 42142,
+  WorkCenterGroups: 42143,
+  ProductionStandardGroups: 42144,
+  CreditLimitHold: 31349,
+  Developer: 48104,
+  ItemWeight: 41124,
+  OpeningWeight: 41313,
 
   // GL
   GLSalesInvoice: 51604,
