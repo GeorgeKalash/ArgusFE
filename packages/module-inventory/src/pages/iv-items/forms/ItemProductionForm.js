@@ -11,7 +11,6 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -21,7 +20,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 
 export default function ItemProductionForm({ labels, editMode, maxAccess, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId, productionLevel } = store
+  const { recordId, productionLevel, itemProduction, itemRawMaterials } = store
   const { platformLabels } = useContext(ControlContext)
 
   const conditions = {
@@ -101,21 +100,14 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
       formik.setValues(obj)
       toast.success(platformLabels.Edited)
 
-      await fetchFormData()
-
       invalidate()
       
     }
   })
 
   async function fetchFormData() {
-    const res = await getRequest({
-      extension: InventoryRepository.ItemProduction.getPack,
-      parameters: `_recordId=${recordId}`
-    })
-
-    const rows = res?.record?.items?.length
-      ? res.record.items.map((row, index) => ({
+    const rows = itemRawMaterials?.length
+      ? itemRawMaterials.map((row, index) => ({
           ...row,
           id: index + 1
         }))
@@ -123,15 +115,15 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
 
     formik.setValues({
       header: {
-        ...res?.record?.header
+        ...itemProduction
       },
       items: rows
     })
   }
 
   useEffect(() => {
-    if (recordId) fetchFormData()
-  }, [recordId])
+    fetchFormData()
+  }, [itemRawMaterials, itemProduction])
 
     const columns = [
       {
@@ -286,7 +278,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={ManufacturingRepository.ProductionLine.qry}
+                store={store?.productionLines}
                 name='header.lineId'
                 label={labels.productionLine}
                 columnsInDropDown={[
@@ -306,7 +298,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={ManufacturingRepository.ProductionClass.qry}
+                store={store?.productionClasses}
                 values={formik.values.header}
                 name='header.classId'
                 label={labels.productionClass}
@@ -321,7 +313,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={ManufacturingRepository.ProductionStandard.qry}
+                store={store?.productionStandards}
                 values={formik.values.header}
                 name='header.standardId'
                 label={labels.productionStandard}
@@ -336,7 +328,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={InventoryRepository.SerialsProfile.qry}
+                store={store?.serialProfiles}
                 values={formik.values.header}
                 name='header.spfId'
                 label={labels.sprofile}
@@ -383,13 +375,14 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={ManufacturingRepository.CostGroup.qry}
+                store={store?.costGroups}
                 name='header.cgId'
                 label={labels.cg}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                displayFieldWidth={2}
                 values={formik.values.header}
                 valueField='recordId'
                 displayField='name'
@@ -402,7 +395,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={SCRepository.LabelTemplate.qry}
+                store={store?.labelTemplates}
                 name='header.ltId'
                 label={labels.template}
                 valueField='recordId'
@@ -417,7 +410,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={ManufacturingRepository.RawMaterialCategory.qry}
+                store={store?.rawMaterialCategories}
                 name='header.rmcId'
                 label={labels.rmc}
                 valueField='recordId'
@@ -461,8 +454,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={formik.values?.header?.itemId && ManufacturingRepository.BillOfMaterials.qry2}
-                parameters={`_itemId=${formik?.values?.header?.itemId}`}
+                store={store?.packB?.billOfMaterials ?? []}
                 name='header.bomId'
                 label={labels.bom}
                 columnsInDropDown={[

@@ -17,7 +17,6 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
-import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import HistoryList from './HistoryList'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -167,40 +166,35 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   const refetchForm = async (recordId, showTitle) => {
     const res = await getRequest({
-      extension: InventoryRepository.Items.get,
+      extension: InventoryRepository.Items.get2IT,
       parameters: `_recordId=${recordId}`
-    })
+    }) 
+    const { item, category } = res.record
 
-    if (window.setTitle && showTitle) window.setTitle(res.record.sku ? `${labels.items} ${res.record.sku}` : labels.items)
+    if (window.setTitle && showTitle) window.setTitle(item?.sku ? `${labels.items} ${item?.sku}` : labels.items)
 
-    const res2 = await getRequest({
-      extension: InventoryRepository.Category.get,
-      parameters: `_recordId=${res?.record?.categoryId}`
-    })
+    const isExternal = await getData(category?.nraId)
 
-    const isExternal = await getData(res2.record.nraId)
+    setFormikInitial(item)
 
-    res.record.isInactive = res.record.isInactive || false
-
-    setFormikInitial(res.record)
-
-    formik.setValues({ ...res.record, kitItem: !!res.record.kitItem, isExternal })
-    setShowLotCategories(res.record.trackBy === 2)
-    setShowSerialProfiles(res.record.trackBy === 1)
+    formik.setValues({ ...item, kitItem: !!item?.kitItem, isInactive: item?.isInactive || false, isExternal })
+    setShowLotCategories(item?.trackBy === 2)
+    setShowSerialProfiles(item?.trackBy === 1)
 
     setStore(prevStore => ({
       ...prevStore,
-      nraId: res2?.record?.nraId,
-      _msId: res.record.msId,
-      _kit: res.record.kitItem,
-      productionLevel: res.record.productionLevel,
-      measurementId: res.record.defSaleMUId,
-      priceGroupId: res.record.pgId,
-      returnPolicy: res.record.returnPolicyId,
-      _name: res.record.name,
-      _reference: res.record.sku,
-      _dmgId: res.record.dmgId || null,
-      _dmgName: res.record.dmgName || ''
+      ...res.record,
+      nraId: category?.nraId,
+      _msId: item?.msId,
+      _kit: item?.kitItem,
+      productionLevel: item?.productionLevel,
+      measurementId: item?.defSaleMUId,
+      priceGroupId: item?.pgId,
+      returnPolicy: item?.returnPolicyId,
+      _name: item?.name,
+      _reference: item?.sku,
+      _dmgId: item?.dmgId || null,
+      itemObject: item
     }))
   }
   useEffect(() => {
@@ -337,10 +331,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={8}>
                   <ResourceComboBox
                     dataGrid
-                    endpointId={InventoryRepository.Items.pack}
-                    reducer={response => {
-                      return response?.record?.categories
-                    }}
+                    store={store?.categories}
                     values={formik.values}
                     name='categoryId'
                     label={labels.category}
@@ -384,15 +375,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={4}>
                   <ResourceComboBox
                     dataGrid
-                    endpointId={InventoryRepository.Items.pack}
-                    reducer={response => {
-                      const formattedPriceTypes = response?.record?.priceTypes?.map(priceTypes => ({
-                        key: parseInt(priceTypes.key),
-                        value: priceTypes.value
-                      }))
-
-                      return formattedPriceTypes
-                    }}
+                    store={store?.priceTypes?.map(item => ({
+                      key: parseInt(item.key),
+                      value: item.value
+                    }))}
                     values={formik.values}
                     defaultIndex={onKitItem && 0}
                     name='priceType'
@@ -424,17 +410,13 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={4}>
                   <ResourceComboBox
                     dataGrid
-                    endpointId={InventoryRepository.Items.pack}
-                    reducer={response => {
-                      const formattedprocurementMethod = response?.record?.procurementMethods.map(
+                    store={store?.procurementMethods?.map(
                         procurementMethods => ({
                           key: parseInt(procurementMethods.key),
                           value: procurementMethods.value
                         })
                       )
-
-                      return formattedprocurementMethod
-                    }}
+                    }
                     name='procurementMethod'
                     label={labels.procurement}
                     valueField='key'
@@ -482,12 +464,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Items.pack}
                     dataGrid
-                    reducer={response => {
-                      return response?.record?.itemGroups
-                    }}
-                    readOnly={editMode}
+                    store={store?.itemGroups}
                     values={formik.values}
                     name='groupId'
                     label={labels.itemGroup}
@@ -501,15 +479,14 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
-                      formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
-                      formik.setFieldValue('dmgName', newValue?.dmgName || '')
+                      if (!editMode) formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
                     }}
                     error={formik.touched.groupId && formik.errors.groupId}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Collections.qry}
+                    store={store?.collections}
                     name='collectionId'
                     label={labels.collection}
                     valueField='recordId'
@@ -528,10 +505,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Items.pack}
-                    reducer={response => {
-                      return response?.record?.measurementSchedules
-                    }}
+                    store={store?.measurementSchedules}
                     values={formik.values}
                     name='msId'
                     label={labels.measure}
@@ -545,7 +519,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     readOnly={editMode}
                     required
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('msId', newValue?.recordId || '')
                     }}
                     error={formik.touched.msId && formik.errors.msId}
@@ -553,15 +527,11 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Items.pack}
-                    reducer={response => {
-                      const formattedvaluationMethod = response?.record?.valuations.map(valuations => ({
+                    store={store?.valuations?.map(valuations => (({
                         key: parseInt(valuations.key),
                         value: valuations.value
-                      }))
-
-                      return formattedvaluationMethod
-                    }}
+                      })))
+                    }
                     values={formik.values}
                     name='valuationMethod'
                     label={labels.valation}
@@ -645,7 +615,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    datasetId={DataSets.PRODUCTION_LEVEL}
+                    store={store?.productionLevels}
                     name='productionLevel'
                     label={labels.productionLevel}
                     valueField='key'
@@ -675,10 +645,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Items.pack}
-                    reducer={response => {
-                      return response?.record?.taxSchedules
-                    }}
+                    store={store?.taxSchedules}
                     values={formik.values}
                     name='taxId'
                     label={labels.vatSchedule}
@@ -695,15 +662,11 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Items.pack}
-                    reducer={response => {
-                      const formattedtrackByList = response?.record?.trackByList.map(trackByList => ({
+                    store={store?.trackByList?.map(trackByList => (({
                         key: parseInt(trackByList.key),
                         value: trackByList.value
-                      }))
-
-                      return formattedtrackByList
-                    }}
+                      })))
+                    }
                     values={formik.values}
                     name='trackBy'
                     label={labels.trackBy}
@@ -725,10 +688,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 {showLotCategories && !formik.values.kitItem && (
                   <Grid item xs={12}>
                     <ResourceComboBox
-                      endpointId={InventoryRepository.Items.pack}
-                      reducer={response => {
-                        return response?.record?.lotCategories
-                      }}
+                      store={store?.lotCategories}
                       values={formik.values}
                       name='lotCategoryId'
                       label={labels.lotCategory}
@@ -754,10 +714,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 {showSerialProfiles && !formik.values.kitItem && (
                   <Grid item xs={12}>
                     <ResourceComboBox
-                      endpointId={InventoryRepository.Items.pack}
-                      reducer={response => {
-                        return response?.record?.serialProfiles
-                      }}
+                      store={store?.serialProfiles}
                       required
                       values={formik.values}
                       readOnly={editMode}
@@ -767,8 +724,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       displayField='name'
                       displayFieldWidth={1}
                       maxAccess={maxAccess}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue('spfId', newValue?.recordId || '')
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('spfId', newValue?.recordId || null)
                         formik.setFieldValue('spfName', newValue?.name || '')
                       }}
                       error={formik.touched.spfId && Boolean(formik.errors.spfId) && !formik.values.spfName}

@@ -89,8 +89,10 @@ export const InventoryRepository = {
     get: service + 'getIT',
     get2: service + 'getIT2',
     set: service + 'setIT',
+    get2IT: service + 'get2IT',
     del: service + 'delIT',
-    snapshot: service + 'snapshotIT2'
+    snapshot: service + 'snapshotIT2',
+    pack_B: service + 'packIT_B'
   },
   Currency: {
     qry: service + 'qryITC',
@@ -397,5 +399,15 @@ export const InventoryRepository = {
   },
   ItemRawMaterial: {
     qry: service + 'qryIRM',
+  },
+  ItemWeight: {
+    del: service + 'delDIM',
+    page: service + 'pageWGT',
+  },
+  OpeningWeight: {
+    set: service + 'setOW',
+    get: service + 'getOW',
+    del: service + 'delOW',
+    page: service + 'pageOW'
   }
 }

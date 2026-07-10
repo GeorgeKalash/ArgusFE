@@ -24,6 +24,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
       extension: SystemRepository.ReportLayout.get,
       parameters: `_resourceId=${row.resourceId}`
     })
+
     const pack = reportPack?.record || {}
 
     const response2Map = new Map((pack?.reportLayoutOverrides || []).map(item => [item.id, item.isInactive]))

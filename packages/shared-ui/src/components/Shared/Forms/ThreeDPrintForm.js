@@ -69,6 +69,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
       productionClassId: null,
       productionLineId: null,
       collectionId: null,
+      developerId: null,
       productionStandardRef: '',
       designGroupId: null,
       designFamilyId: null,
@@ -520,13 +521,33 @@ export default function ThreeDPrintForm({ recordId, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ProductModelingRepository.Developer.qry}
+                    values={formik.values}
+                    name='developerId'
+                    label={labels.developer}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isReleased || isPosted}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('developerId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.developerId && formik.errors.developerId}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <CustomTextField
                     name='fileReference'
                     label={labels.threeDDFile}
                     value={formik.values.fileReference}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    readOnly={isPosted}
+                    readOnly={isReleased || isPosted}
                     onClear={() => formik.setFieldValue('fileReference', '')}
                     error={formik.touched.fileReference && Boolean(formik.errors.fileReference)}
                   />
