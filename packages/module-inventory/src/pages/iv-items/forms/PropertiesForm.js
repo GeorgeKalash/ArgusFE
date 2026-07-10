@@ -20,99 +20,75 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const [dimensions, setDimensions] = useState([])
-  const [dimensionsUDT, setDimensionsUDT] = useState([])
+
   const [hasSavedData, setHasSavedData] = useState(false)
   const isDmgChanged = useRef(false)
+
+  const dimensionsUDT =
+    systemDefaults?.list
+      ?.filter(
+        item =>
+          item.key.includes('ivtUDT') &&
+          item.key !== 'ivtUDTCount' &&
+          item.value?.length > 0
+      )
+      ?.map(item => ({
+        ...item,
+        dimensionId: item.key.match(/\d+$/)?.[0]
+      })) ?? []
+
+  const isEmptyValue = value => value === '' || value === undefined || value === null
+
+  const computeHasSavedData = values =>
+    Object.values(values).some(value => !isEmptyValue(value))
 
   const loadDimensionFields = async groupId => {
     if (!groupId) {
       setDimensions([])
+      setHasSavedData(false)
       
       return
     }
 
-    const fetchDimensionResult = await getRequest({
+    const { list = [] } = await getRequest({
       extension: InventoryRepository.DimensionGroupElement.qry,
       parameters: `_groupId=${groupId}`
     })
 
-    setDimensions(fetchDimensionResult.list)
+    setDimensions(list)
+
+    const newDimensionValues = list.reduce((acc, item) => {
+      acc[item.dimension] = isDmgChanged.current ? '' : (item.id || '')
+      return acc
+    }, {})
+
+    setHasSavedData(computeHasSavedData(newDimensionValues))
   }
 
   useEffect(() => {
-    const loadDimensions = async () => {
-      if (recordId && dmgId) await loadDimensionFields(dmgId)
+    if (!store.packB) return
 
-      const filteredDimensions2 = systemDefaults?.list
-        ?.filter(
-          item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item?.value?.length > 0
-        )
-        ?.map(item => ({
-          ...item,
-          dimensionId: item.key.match(/\d+$/)?.[0]
-        }))
+    const { dimensionGroupElements = [], itemDimensions = [], userDefinedTexts = [] } = store.packB
+    setDimensions(dimensionGroupElements)
 
-      setDimensionsUDT(filteredDimensions2)
-    }
+    const newDimensionValues = itemDimensions.reduce((acc, item) => {
+      acc[item.dimension] = item.id
+      return acc
+    }, {})
 
-    loadDimensions()
-  }, [recordId, dmgId, systemDefaults])
+    const newDimensionUDTValues = userDefinedTexts.reduce((acc, item) => {
+      acc[`ivtUDT${item.dimension}`] = item.value
+      return acc
+    }, {})
 
-  useEffect(() => {
-    const fetchDimensionsData = async () => {
-      if (recordId && dimensions?.length > 0) {
-        const dimensionRequests = dimensions.map(dimension => {
-          const dimensionNumber = dimension.dimensionId
+    setHasSavedData(computeHasSavedData(newDimensionValues))
 
-          return getRequest({
-            extension: InventoryRepository.DimensionId.get,
-            parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
-          })
-        })
-
-        const dimensionResponses = await Promise.all(dimensionRequests)
-
-        const newDimensionValues = dimensionResponses.reduce((acc, res, index) => {
-          const dimensionKey = dimensions[index].dimensionId
-          acc[dimensionKey] = isDmgChanged.current ? '' : res.record?.id || ''
-
-          return acc
-        }, {})
-
-        const udtRequests = dimensionsUDT
-          .filter(dimension => dimension.dimensionId)
-          .map(dimension => {
-            return getRequest({
-              extension: InventoryRepository.DimensionUDT.get,
-              parameters: `_itemId=${recordId}&_dimension=${dimension.dimensionId}`
-            })
-          })
-
-        const udtResponses = await Promise.all(udtRequests)
-
-        const newUDTValues = udtResponses.reduce((acc, res, index) => {
-          const udtKey = dimensionsUDT.filter(dimension => dimension.dimensionId)[index]?.key
-          acc[udtKey] = res?.record?.value || ''
-
-          return acc
-        }, {})
-
-        setHasSavedData(Object.values(newDimensionValues).some(
-          value => value !== '' && value !== undefined && value !== null
-        ))
-
-        formik.setValues(prevValues => ({
-          ...prevValues,
-          ...newDimensionValues,
-          ...newUDTValues
-        }))
-      } else if (recordId && dimensions?.length === 0) {
-        setHasSavedData(false)
-      }
-    }
-
-    fetchDimensionsData()
-  }, [recordId, dimensionsUDT, dimensions])
+    formik.setValues(prev => ({
+      ...prev,
+      ...newDimensionValues,
+      ...newDimensionUDTValues
+    }))
+  }, [store.packB])
 
   const { formik } = useForm({
     initialValues: {},
@@ -208,7 +184,7 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={InventoryRepository.DimensionGroup.qry}
+                store={store?.dimensionGroups}
                 name='dmgId'
                 label={labels.dmgName}
                 values={formik.values}
@@ -232,18 +208,25 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
                     {dimensions?.map((dimension, index) => {
                       const dimensionNumber = dimension.dimensionId
 
+                      const options =
+                        (store.packB?.dimensions || [])
+                          .filter(d => d.dimension === dimensionNumber)
                       return (
                         <Grid container mt={0.2} spacing={2} key={index}>
                           <Grid item xs={12}>
                             <ResourceComboBox
-                              endpointId={InventoryRepository.Dimension.qry}
-                              parameters={`_dimension=${dimensionNumber}`}
+                              store={options}
                               name={`${dimension.dimensionId}`}
                               label={dimension.dimensionName}
                               valueField='id'
                               displayField='name'
                               values={formik.values}
-                              onChange={(_, newValue) => formik.setFieldValue(`${dimension.dimensionId}`, newValue?.id || null)}
+                              onChange={(_, newValue) =>
+                                formik.setFieldValue(
+                                  `${dimension.dimensionId}`,
+                                  newValue?.id || null
+                                )
+                              }
                             />
                           </Grid>
                         </Grid>
