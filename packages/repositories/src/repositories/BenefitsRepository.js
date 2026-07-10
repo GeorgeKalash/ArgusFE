@@ -17,9 +17,15 @@ export const BenefitsRepository = {
     qry: service + 'qryBA',
     get: service + 'getBA',
     set: service + 'setBA',
-    del: service + 'delBA'
+    del: service + 'delBA',
+    snapshot: service + 'snapshotBA'
   },
   Settlement: {
-    qry: service + 'qrySE'
+    qry: service + 'qrySE',
+    page: service + 'pageSE',
+    get: service + 'getSE',
+    set: service + 'setSE',
+    del: service + 'delSE',
+    preview: service + 'previewSE',
   }
 }

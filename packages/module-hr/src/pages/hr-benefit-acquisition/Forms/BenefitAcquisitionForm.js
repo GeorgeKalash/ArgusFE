@@ -21,7 +21,6 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useError } from '@argus/shared-providers/src/providers/error'
 
@@ -30,8 +29,6 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
-
-  console.log(systemDefaults)
 
   const invalidate = useInvalidate({
     endpointId: BenefitsRepository.BenefitAcquisition.page
