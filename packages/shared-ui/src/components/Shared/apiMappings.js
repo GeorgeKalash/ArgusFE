@@ -315,6 +315,13 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
+  [ResourceIds.DesignFamilies]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.DesignFamily.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
   [ResourceIds.ChartOfAccounts]: {
     type: LOOKUP,
     endpoint: GeneralLedgerRepository.ChartOfAccounts.snapshot,
@@ -918,6 +925,16 @@ export const apiMappings = {
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
+  [ResourceIds.BiometricDevices]: {
+    type: COMBOBOX,
+    endpoint: TimeAttendanceRepository.BiometricDevices.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   },
   [ResourceIds.AttendanceSchedule]: {
     type: COMBOBOX,

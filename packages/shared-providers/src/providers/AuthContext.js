@@ -106,18 +106,15 @@ const AuthProvider = ({ children }) => {
 
   const initAuth = async () => {
     const userData = window.localStorage.getItem('userData') || window.sessionStorage.getItem('userData')
-    const savedLanguageId = window.localStorage.getItem('languageId')
     const storedCompany = await getFromDB('authSettings', 'companyName')
     if (storedCompany) setCompanyName(storedCompany)
+
     if (userData) {
       setUser(JSON.parse(userData))
-      if (savedLanguageId) {
-        setLanguageId(parseInt(savedLanguageId))
-      }
+      const savedLanguageId = window.localStorage.getItem('languageId')
+      setLanguageId(savedLanguageId ? parseInt(savedLanguageId) : 1)
     } else {
-      if (savedLanguageId) {
-        setLanguageId(parseInt(savedLanguageId))
-      }
+      setLanguageId(1)
     }
   }
 
@@ -257,6 +254,8 @@ const AuthProvider = ({ children }) => {
     setUser(null)
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
+    window.localStorage.removeItem('languageId')
+    setLanguageId(1) 
     await router.push('/login')
     initAuth()
     fetchData()
@@ -311,6 +310,7 @@ const AuthProvider = ({ children }) => {
     validCompanyName,
     deployHost,
     languageId,
+    setLanguageId,
     setUser,
     setLoading,
     login: handleLogin,

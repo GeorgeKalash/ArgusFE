@@ -19,7 +19,7 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { useBarcodeFieldBehaviours } from '@argus/shared-hooks/src/hooks/useBarcodeFieldBehaviours'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
-export default function BarcodesForm({ labels, access, store, recordId, msId, barcode }) {
+export default function BarcodesForm({ labels, access, store, recordId, msId, barcode, onSuccess }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -73,6 +73,9 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
 
         await imageUploadRef.current.submit()
       }
+      
+      if (onSuccess) onSuccess()
+      
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
