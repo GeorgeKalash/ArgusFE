@@ -926,6 +926,16 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
+  [ResourceIds.BiometricDevices]: {
+    type: COMBOBOX,
+    endpoint: TimeAttendanceRepository.BiometricDevices.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
   [ResourceIds.AttendanceSchedule]: {
     type: COMBOBOX,
     endpoint: TimeAttendanceRepository.AttendanceScheduleFilters.qry,
