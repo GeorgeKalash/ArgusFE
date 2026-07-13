@@ -212,7 +212,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='qty'
                 required
@@ -226,7 +226,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 allowNegative={false}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='pieces'
                 label={labels.pieces}

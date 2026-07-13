@@ -155,7 +155,7 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='avgCost'
                 label={labels.cost}
