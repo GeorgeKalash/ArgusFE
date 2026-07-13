@@ -1280,7 +1280,7 @@ export default function SaleTransactionForm({
   async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
-    const saTrxTaxes = saTrxPack?.taxDetails || []
+    const saTrxTaxes = saTrxPack?.taxes || []
     const balance = saTrxPack?.accountBalance?.balance
     const accountId = saTrxPack?.client?.accountId
     const maxDiscount = saTrxPack?.client?.maxDiscount
@@ -1296,7 +1296,7 @@ export default function SaleTransactionForm({
         let calculatedTaxDetails = []
 
         if (item?.taxId) {
-          const rawTaxDetails = saTrxTaxes.filter(td => td.taxId === item.taxId)
+          const rawTaxDetails = saTrxTaxes.filter(td => td.seqNo === item.seqNo)
           calculatedTaxDetails = buildCalculatedTaxDetails(item, rawTaxDetails)
         }
 
@@ -1590,6 +1590,13 @@ export default function SaleTransactionForm({
       dirtyField: dirtyField
     })
 
+    const taxDetails = formik.values.header.isVattable === true && newRow.taxDetails
+      ? newRow.taxDetails.map(td => ({
+          ...td,
+          amount: td.taxScheduleAmount
+        }))
+      : null
+
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
@@ -1600,12 +1607,7 @@ export default function SaleTransactionForm({
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: itemPriceRow?.vatAmount || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
-      taxDetails: formik.values.header.isVattable === true && newRow.taxDetails
-        ? newRow.taxDetails.map(td => ({
-            ...td,
-            amount: td.taxScheduleAmount
-          }))
-        : null
+      taxDetails
     })
 
     let commonData = {
@@ -1624,7 +1626,8 @@ export default function SaleTransactionForm({
       totalWeightPerG: itemPriceRow?.totalWeightPerG ? roundTo(itemPriceRow.totalWeightPerG) : 0,
       mdAmount: itemPriceRow?.mdAmount ? itemPriceRow.mdAmount : 0,
       vatAmount: vatCalcRow?.vatAmount ? vatCalcRow.vatAmount : 0,
-      priceWithVAT: calculatePrice(newRow, newRow?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE)
+      priceWithVAT: calculatePrice(newRow, newRow?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+      taxDetails: buildCalculatedTaxDetails(newRow, taxDetails)
     }
 
     return iconClicked ? { changes: commonData } : commonData
