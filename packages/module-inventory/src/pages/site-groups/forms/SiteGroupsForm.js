@@ -18,7 +18,7 @@ export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.SiteGroups.page
+    endpointId: InventoryRepository.SiteGroups.qry
   })
 
   const { formik } = useForm({

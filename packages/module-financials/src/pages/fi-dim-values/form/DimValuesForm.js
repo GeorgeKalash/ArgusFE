@@ -10,7 +10,6 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 

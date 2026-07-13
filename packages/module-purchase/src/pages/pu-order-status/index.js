@@ -24,7 +24,7 @@ const PUOrderStatus = () => {
     try {
       const response = await getRequest({
         extension: PurchaseRepository.PUOrderStatus.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
       })
 
       return { ...response, _startAt: _startAt }

@@ -24,7 +24,7 @@ const InventoryOpeningQtys = () => {
 
     return await getRequest({
       extension: InventoryRepository.InventoryOpeningQtys.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}&_sortBy=year desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
   }
 

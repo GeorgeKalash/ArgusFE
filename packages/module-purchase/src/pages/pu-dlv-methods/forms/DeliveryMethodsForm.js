@@ -18,7 +18,7 @@ export default function DeliveryMethodsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: PurchaseRepository.DeliveryMethods.qry
+    endpointId: PurchaseRepository.DeliveryMethods.page
   })
 
   const { formik } = useForm({

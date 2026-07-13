@@ -21,7 +21,7 @@ export default function PaymentTermsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: PurchaseRepository.PaymentTerms.qry
+    endpointId: PurchaseRepository.PaymentTerms.page
   })
 
   const { formik } = useForm({

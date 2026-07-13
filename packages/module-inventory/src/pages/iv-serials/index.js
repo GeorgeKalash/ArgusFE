@@ -37,7 +37,7 @@ const IvSerials = () => {
     if (formik.values.itemId || formik.values.srlNo) {
       const response = await getRequest({
         extension: InventoryRepository.Serial.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_itemId=${
           formik.values.itemId || 0
         }&_srlNo=${formik.values.srlNo || 0}`
       })

@@ -158,7 +158,7 @@ const SaTrx = () => {
 
     const response = await getRequest({
       extension: SaleRepository.SalesTransaction.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&_dgId=${functionId}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_dgId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }

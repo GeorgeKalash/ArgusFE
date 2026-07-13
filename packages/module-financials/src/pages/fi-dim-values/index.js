@@ -89,7 +89,6 @@ const DimensionsValues = () => {
         labels: _labels,
         recordId: id,
         maxAccess: access,
-        invalidate,
         dimValue: filters?.qry
       },
       width: 600,

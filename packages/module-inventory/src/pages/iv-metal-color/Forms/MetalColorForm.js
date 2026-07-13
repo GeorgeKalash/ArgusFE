@@ -18,7 +18,7 @@ export default function MetalColorForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.MetalColor.qry
+    endpointId: InventoryRepository.MetalColor.page
   })
 
   const { formik } = useForm({

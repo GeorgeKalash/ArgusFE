@@ -17,7 +17,7 @@ const SalesInquiries = () => {
 
     const response = await getRequest({
       extension: SaleRepository.SalesInquiries.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=itemId`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     const transformedData = response.list.map(sale => ({

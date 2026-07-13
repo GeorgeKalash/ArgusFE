@@ -28,7 +28,7 @@ const CycleCounts = () => {
 
     const response = await getRequest({
       extension: SCRepository.StockCount.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }

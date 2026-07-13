@@ -257,6 +257,7 @@ export const InventoryRepository = {
     qry: service + 'qryAVA'
   },
   Parts: {
+    page: service + 'pagePRT',
     qry: service + 'qryPRT',
     del: service + 'delPRT',
     get: service + 'getPRT',
@@ -270,6 +271,7 @@ export const InventoryRepository = {
     set: service + 'setDTD'
   },
   Serial: {
+    page: service + 'pageSRL',
     qry: service + 'qrySRL',
     get2: service + 'get2SRL',
     set: service + 'setSRL',

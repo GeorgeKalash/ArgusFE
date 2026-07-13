@@ -24,7 +24,7 @@ const IvItems = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.Items.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=recordId desc&_params=${params}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }

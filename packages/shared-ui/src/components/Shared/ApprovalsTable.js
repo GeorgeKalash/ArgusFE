@@ -61,7 +61,7 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
 
     const response = await getRequest({
       extension: DocumentReleaseRepository.DocumentsOnHold.page,
-      parameters: `_startAt=${_startAt}&_reference=&_sortBy=reference desc&_pageSize=${pageSize}`
+      parameters: `_startAt=${_startAt}&_reference=&_pageSize=${pageSize}`
     })
 
     return { ...response, _startAt: _startAt }

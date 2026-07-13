@@ -23,7 +23,7 @@ const OpeningCost = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.OpeningCost.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}&_sortBy=year desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
