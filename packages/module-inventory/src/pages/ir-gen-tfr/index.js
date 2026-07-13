@@ -51,7 +51,7 @@ export default function IRGenerateTransfer() {
     initialValues: {
       dtId: null,
       fromSiteId: siteId,
-      toSiteId: null,
+      toSiteId: 0,
       date: new Date(),
       reference: '',
       items: []

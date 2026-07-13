@@ -18,6 +18,7 @@ import CustomNumberField from '../Inputs/CustomNumberField'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
 
 const formatDateTo = value => {
   const date = new Date(value)
@@ -74,6 +75,28 @@ const convertCompactFormatToDate = compactDate => {
   const minute = parseInt(compactDate.slice(10, 12), 10)
 
   return new Date(year, month, day, hour, minute)
+}
+
+const getDirtyParameters = (values, initialValues) => {
+  const current = values?.parameters || {}
+  const initial = initialValues?.parameters || {}
+  const allIds = new Set([...Object.keys(current), ...Object.keys(initial)])
+  const diffs = {}
+
+  allIds.forEach(id => {
+    const currentVal = current[id]?.value
+    const initialVal = initial[id]?.value
+
+    if (currentVal !== initialVal) {
+      diffs[id] = {
+        caption: current[id]?.caption || initial[id]?.caption,
+        from: initialVal,
+        to: currentVal
+      }
+    }
+  })
+
+  return diffs
 }
 
 const GetLookup = ({ field, formik }) => {
@@ -403,6 +426,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const trackInteraction = usePageInteraction()
+  const { clearPageInteractions } = useInteractionTracker()
 
   useSetWindow({ title: platformLabels.ReportParametersBrowser, window })
 
@@ -473,6 +497,17 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     }
   })
 
+  const dirtyParams = getDirtyParameters(formik.values, formik.initialValues)
+  const isDirty = Object.keys(dirtyParams).length > 0
+
+  useEffect(() => {
+    if (isDirty) {
+      trackInteraction('RPBGridToolbar')
+    } else {
+      clearPageInteractions(trackInteraction.currentPageResourceId, 'RPBGridToolbar')
+    }
+  }, [formik.values])
+
   const mergeFieldWithApiDetails = async () => {
     const fieldComponentArray = []
     let list = ''
@@ -515,7 +550,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       return acc
     }, [])
 
-    formik.setFieldValue('parameters', mappedData)
+    formik.resetForm({ values: { parameters: mappedData } })
   }, [])
 
   useEffect(() => {

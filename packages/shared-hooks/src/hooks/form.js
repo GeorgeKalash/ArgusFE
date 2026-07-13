@@ -216,9 +216,24 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
     return a === b
   }
 
+  const getDirtyFields = (values, initialValues) => {
+    const diffs = {}
+    const allKeys = new Set([...Object.keys(values || {}), ...Object.keys(initialValues || {})])
+
+    allKeys.forEach(key => {
+      if (!deepEqual(values?.[key], initialValues?.[key])) {
+        diffs[key] = {
+          from: initialValues?.[key],
+          to: values?.[key]
+        }
+      }
+    })
+
+    return diffs
+  }
+
   const dirty = !deepEqual(formik.values, formik.initialValues)
- 
-  console.log('dirty',dirty ,'\n ',formik.initialValues,' \n ',formik.values,isInsideWindow)
+  const dirtyFields = getDirtyFields(formik.values, formik.initialValues)
 
   useEffect(() => {
     if (!isImmediateWindow && isInsideWindow) return
@@ -230,7 +245,8 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
   return {
     formik: {
       ...formik,
-      dirty 
+      dirty,
+      dirtyFields
     }
   }
 }

@@ -64,7 +64,9 @@ const TrxDetails = () => {
       data: '',
       moduleId: '',
       trxType: '',
-      userId: '',
+      userId: null,
+      username: '',
+      email: '',
       startDate: initialStartDate,
       endDate: initialStartDate
     },
@@ -211,10 +213,10 @@ const TrxDetails = () => {
               displayFieldWidth={2}
               valueShow='username'
               secondValueShow='email'
-              onChange={(event, newValue) => {
-                formik.setFieldValue('userId', newValue ? newValue.recordId : '')
-                formik.setFieldValue('email', newValue ? newValue.email : '')
-                formik.setFieldValue('username', newValue ? newValue.username : '')
+              onChange={(_, newValue) => {
+                formik.setFieldValue('userId', newValue?.recordId || null)
+                formik.setFieldValue('email', newValue?.email || '')
+                formik.setFieldValue('username', newValue?.username || '')
               }}
             />
           </Grid>
