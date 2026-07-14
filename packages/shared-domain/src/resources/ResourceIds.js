@@ -38,6 +38,13 @@ export const ResourceIds = {
   Loans: 74201,
   RightToWork: 70114,
   Salaries: 71206,
+  EmployeeRightToWork: 71210,
+  Probation: 71215,
+  CasePleads: 76210,
+  EmploymentReview: 71601,
+  EmployeesBirthday: 71604,
+  TermEndDate: 71602,
+  WorkAnniversary: 71603,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
