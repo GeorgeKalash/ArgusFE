@@ -30,27 +30,25 @@ const OpenProductionOrder = () => {
     validateOnChange: true,
     onSubmit: async obj => {
 
-      const itemValues = items
+      const itemValues = obj?.items
         .filter(item => item.isChecked)
-        .map(({ scheduledDate, functionId, id, isChecked, ...item }) => item)
-
+        .map(({ id, isChecked, ...item }) => item)
       if (itemValues?.length < 1) {
         stackError({
-          message: labels.checkItemsBeforeAppend
+          message: platformLabels.checkItemsBeforeAppend
         })
 
         return
       }
 
-      const res = await postRequest({
+      await postRequest({
         extension: ManufacturingRepository.ProductionOrder.generate,
         record: JSON.stringify({ items: itemValues })
       })
 
-      if (res.recordId) {
-        toast.success(platformLabels.Generated)
-        getData()
-      }
+      toast.success(platformLabels.Generated)
+      getData()
+      
     }
   })
 
@@ -90,7 +88,7 @@ const OpenProductionOrder = () => {
           const items = formik.values.items.map(({ isChecked, ...item }) => ({
             ...item,
             isChecked: checked,
-            produceNow: checked ? item.balance : 0
+            producedNow: checked ? item.balance : 0
           }))
 
           formik.setFieldValue('items', items)
@@ -98,7 +96,7 @@ const OpenProductionOrder = () => {
       },
 
       async onChange({ row: { update, newRow } }) {
-        update({ produceNow: newRow.isChecked ? newRow.balance : 0 })
+        update({ producedNow: newRow.isChecked ? newRow.balance : 0 })
       }
     },
     {
@@ -163,21 +161,21 @@ const OpenProductionOrder = () => {
     {
       component: 'numberfield',
       label: labels.genQty,
-      name: 'produceNow',
+      name: 'producedNow',
       updateOn: 'blur',
       defaultValue: 0,
       propsReducer({ row, props }) {
         return { ...props, readOnly: !row.isChecked }
       },
       async onChange({ row: { update, newRow } }) {
-        const { produceNow, balance, qty } = newRow
-        let value = produceNow
+        const { producedNow, balance } = newRow
+        let value = producedNow
         const maxValue = balance
 
         if (value > maxValue) 
         value = maxValue
 
-        update({ produceNow: value || 0 })
+        update({ producedNow: value || 0 })
       }
     }
   ]
