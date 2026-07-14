@@ -418,11 +418,6 @@ export default function SaleTransactionForm({
 
   function buildCalculatedTaxDetails(row, taxDetailsList = []) {
     return (taxDetailsList || []).map(td => {
-      const singleTaxDetail = {
-        ...td,
-        taxScheduleAmount: td.amount || td.taxScheduleAmount || 0
-      }
-
       const calculatedAmount = calcVatAmountPerTaxDetail(
         {
           priceType: row?.priceType,
@@ -434,9 +429,9 @@ export default function SaleTransactionForm({
           baseLaborPrice: row?.baseLaborPrice || 0,
           vatAmount: row?.vatAmount || 0,
           tdPct: formik.values?.header?.tdPct || 0,
-          taxDetails: singleTaxDetail
+          taxDetails: td
         },
-        singleTaxDetail
+        td
       )
 
       return {
@@ -1293,12 +1288,7 @@ export default function SaleTransactionForm({
 
     const modifiedList = await Promise.all(
       (saTrxItems || []).map(async (item, index) => {
-        let calculatedTaxDetails = []
-
-        if (item?.taxId) {
-          const rawTaxDetails = saTrxTaxes.filter(td => td.seqNo === item.seqNo)
-          calculatedTaxDetails = buildCalculatedTaxDetails(item, rawTaxDetails)
-        }
+        const taxDetails = saTrxTaxes.filter(tax => tax.seqNo === item.seqNo) || []
 
         return {
           ...item,
@@ -1317,9 +1307,9 @@ export default function SaleTransactionForm({
                 id: index
               }
             }),
-          priceWithVAT: calculatePrice(item, calculatedTaxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
           totalWeightPerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
-          taxDetails: calculatedTaxDetails
+          taxDetails
         }
       })
     )
