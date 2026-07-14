@@ -680,8 +680,8 @@ const DashboardLayout = () => {
                 <div className='summaryCard'>
                   <h2 className='title'>{labels.todaysAttendance}</h2>
                 </div>
-                 <div style={{ height: '380px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-20px' }}>
-                <div style={{ width: '280px', height: '340px' }}> 
+               <div className='pieChartWrapper'>
+                <div className='pieChartContainer'>
                   <PieChart
                     id='todaysLeave'
                     labels={[`${labels.pending}`, `${labels.noShowUp}`, `${labels.checked}`, `${labels.leave}`, `${labels.dayOff}`]}
@@ -712,8 +712,8 @@ const DashboardLayout = () => {
                 <div className='summaryCard'>
                   <h2 className='title'>{labels.todaysTimeVariations}</h2>
                 </div>
-               <div style={{ height: '380px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-20px' }}>
-                <div style={{ width: '280px', height: '340px' }}>
+               <div className='pieChartWrapper'>
+                <div className='pieChartContainer'>
                   <PieChart
                     id='todaysTimeVariations'
                     labels={[`${labels.earlyCheckIn}`, `${labels.lateCheckIn}`, `${labels.duringShiftLeave}`, `${labels.earlyLeave}`, `${labels.overtime}`]}
@@ -742,8 +742,8 @@ const DashboardLayout = () => {
                 <div className='summaryCard'>
                   <h2 className='title'>{labels.todaysLeave}</h2>
                 </div>
-               <div style={{ height: '380px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-20px' }}>
-                 <div style={{ width: '300px', height: '340px' }}>   
+               <div className='pieChartWrapper'>
+                <div className='pieChartContainer'>
                   <PieChart
                     id='todaysLeave'
                     labels={[`${labels.PaidLeave}`, `${labels.UnpaidLeave}`]}
@@ -855,6 +855,19 @@ const DashboardLayout = () => {
           flex-direction: column;
           justify-content: center;
           align-items: center;
+        }
+
+        .pieChartWrapper {
+          height: 380px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-top: -20px;
+        }
+
+        .pieChartContainer {
+          width: 300px;
+          height: 340px;
         }
 
         .middleRow {
