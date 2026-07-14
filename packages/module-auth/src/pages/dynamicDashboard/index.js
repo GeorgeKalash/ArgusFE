@@ -6,7 +6,8 @@ import {
   HorizontalBarChartDark,
   MixedBarChart,
   MixedColorsBarChartDark,
-  LineChart
+  LineChart,
+  PieChart
 } from '@argus/shared-ui/src/components/Shared/dashboardApplets/charts'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { DashboardRepository } from '@argus/repositories/src/repositories/DashboardRepository'
@@ -22,6 +23,15 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
+import { HRDashboardRepository } from '@argus/repositories/src/repositories/HRDashboardRepository'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import TodaysLeave from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysLeave'
+import HeadcountHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApplets/HeadcountHistoryApplet'
+import LatenessHistoryApplet from '@argus/shared-ui/src/components/Shared/HrApplets/LatenessHistoryApplet'
+import TodayOverview from '@argus/shared-utils/src/utils/TodayOverview'
+import TodaysAttendance from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysAttendance'
+import TodaysTimeVariations from '@argus/shared-ui/src/components/Shared/HrApplets/TodaysTimeVariations'
+import PendingPunchesApplet from '@argus/shared-ui/src/components/Shared/HrApplets/PendingPunchesApplet'
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
@@ -29,9 +39,28 @@ const DashboardLayout = () => {
   const [applets, setApplets] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(0)
+  const { stack } = useWindow()
   const userData = getStorageData('userData')
   const _userId = userData.userId
   const _languageId = userData.languageId
+  const { PAID_LEAVE, UNPAID_LEAVE, PENDING, NO_SHOW_UP, CHECKED, LEAVE, DAY_OFF,
+    LATE_CHECKIN, DURING_SHIFT_LEAVE, EARLY_LEAVE, EARLY_CHECKIN, OVERTIME
+   } = TodayOverview
+
+  const alertsResourceId = {
+    '1': ResourceIds.RightToWork, 
+    '2': ResourceIds.EmployeeRightToWork,
+    '3': ResourceIds.Probation,
+    '4': ResourceIds.Salaries,
+    '5': ResourceIds.EmploymentReview,
+    '6': ResourceIds.EmployeeChart,
+    '7': ResourceIds.TermEndDate,
+    '8': ResourceIds.WorkAnniversary,
+    '9': ResourceIds.EmployeesBirthday,
+    '10': ResourceIds.LeaveRequestODOM,
+    '11': ResourceIds.LeaveRequestODOM,
+    '12': ResourceIds.CasePleads
+  }
 
   const getRequestRef = React.useRef(getRequest)
   useEffect(() => {
@@ -55,6 +84,8 @@ const DashboardLayout = () => {
     datasetId: ResourceIds.UserDashboard
   })
 
+  const hasApplet = (applets, appletId) => (applets?.list || []).some(a => a.appletId === appletId)
+
   useEffect(() => {
     let cancelled = false
 
@@ -70,7 +101,7 @@ const DashboardLayout = () => {
         if (cancelled) return
         setApplets(appletsRes.list)
 
-        const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+        const [resDashboard, resSP, resTV, resTimeCode, alerts, dashboard, branchAvailability] = await Promise.all([
           getRequestRef.current({ extension: DashboardRepository.dashboard }),
           getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
           getRequestRef.current({
@@ -80,7 +111,26 @@ const DashboardLayout = () => {
           getRequestRef.current({
             extension: SystemRepository.KeyValueStore,
             parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
-          })
+          }),
+          hasApplet(appletsRes, ResourceIds.Alerts) 
+            ?  getRequestRef.current({
+                extension: SystemRepository.SystemAlerts.active,
+                parameters: `_params=`
+              })
+            : Promise.resolve({ list: [] }),
+          hasApplet(appletsRes, ResourceIds.TodaysLeaves) || hasApplet(appletsRes, ResourceIds.TodaysAttendance) 
+          || hasApplet(appletsRes, ResourceIds.TodaysTimeVariationsSummary)
+            ? getRequestRef.current({
+                extension: HRDashboardRepository.Dashboard.dashboard,
+                parameters: `_params=`
+              })
+            : Promise.resolve({ list: [] }),
+          hasApplet(appletsRes, ResourceIds.BranchAvailability)
+            ? getRequestRef.current({
+                extension: HRDashboardRepository.BranchAvailability.qry,
+                parameters: `_params=`
+              })
+            : Promise.resolve({ list: [] })
         ])
 
         if (cancelled) return
@@ -99,6 +149,27 @@ const DashboardLayout = () => {
           acc[tab.timeCode] = { list: (resTV.list || []).filter(d => d.timeCode === tab.timeCode) }
           return acc
         }, {})
+        
+        const COUNT_MAP = {
+          [PAID_LEAVE]: 'paidCount',
+          [UNPAID_LEAVE]: 'unpaidCount',
+          [DAY_OFF]: 'dayOff',
+          [LEAVE]: 'leave',
+          [NO_SHOW_UP]: 'noShowUp',
+          [PENDING]: 'pending',
+          [CHECKED]: 'checked',
+          [LATE_CHECKIN]: 'lateCheckIn',
+          [DURING_SHIFT_LEAVE]: 'duringShiftLeave',
+          [EARLY_LEAVE]: 'earlyLeave',
+          [EARLY_CHECKIN]: 'earlyCheckIn',
+          [OVERTIME]: 'overtime',
+        }
+        const counts = {}
+
+        for (const item of dashboard?.list || []) {
+          const key = COUNT_MAP[item.itemId]
+          if (key) counts[key] = item.count
+        }
 
         setData({
           dashboard: resDashboard?.record,
@@ -106,8 +177,31 @@ const DashboardLayout = () => {
           hr: {
             timeVariationDetails: resTV.list || [],
             tabs: filteredTabs,
-            groupedData: groupedData
-          }
+            groupedData,
+          },
+          alerts: (alerts?.list || []).map(item => ({
+            ...item,
+            alertResourceId: alertsResourceId[item?.alertId] || null,
+          })),
+          todaysLeaveCount: {
+            paidCount: counts.paidCount ?? null,
+            unpaidCount: counts.unpaidCount ?? null,
+          },
+          branchAvailability: branchAvailability?.list,
+          todaysAttendance: {
+            pending: counts.pending ?? null,
+            noShowUp: counts.noShowUp ?? null,
+            checked: counts.checked ?? null,
+            leave: counts.leave ?? null,
+            dayOff: counts.dayOff ?? null,
+          },
+          todaysTimeVariations: {
+            lateCheckIn: counts.lateCheckIn ?? null,
+            duringShiftLeave: counts.duringShiftLeave ?? null,
+            earlyLeave: counts.earlyLeave ?? null,
+            earlyCheckIn: counts.earlyCheckIn ?? null,
+            overtime: counts.overtime ?? null,
+          },
         })
 
         if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
@@ -131,7 +225,6 @@ const DashboardLayout = () => {
     if (!Array.isArray(applets)) return false
     return applets.some(applet => applet.appletId === appletId)
   }
-
   return (
     <>
     <div className='frame'>
@@ -533,20 +626,176 @@ const DashboardLayout = () => {
               ))}
             </div>
           )}
+
         </div>
 
-        {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
-          <div className='topRow'>
-            <div className='chartCard'>
-              <div className='summaryCard'>
-                <h2 className='title'>{labels.authorization}</h2>
-              </div>
-              <Box sx={{ display: 'flex', height: '350px' }}>
-                <ApprovalsTable pageSize={10} />
-              </Box>
-            </div>
-          </div>
+        {containsApplet(ResourceIds.HeadcountHistory) && (
+          <HeadcountHistoryApplet />
         )}
+
+        {containsApplet(ResourceIds.LatenessHistory) && (
+          <LatenessHistoryApplet />
+        )}
+
+        {containsApplet(ResourceIds.PendingPunches) && (
+          <PendingPunchesApplet />
+        )}
+
+        <div className='middleRow'>
+          {containsApplet(ResourceIds.Alerts) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.alerts}</h2>
+                </div>
+                <Box sx={{ display: 'flex', height: '350px' }}>
+                  <Table
+                    name='alertsTable'
+                    columns={[
+                      { field: 'alertName', headerName: labels.alerts, flex: 3 },
+                      {
+                        field: 'count',
+                        headerName: labels.counts,
+                        flex: 1,
+                        linkOpen: data => ({
+                          resourceId: data.alertResourceId,
+                          props: { value: data }
+                        })
+                      }
+
+                    ]}
+                    gridData={{ list: data?.alerts || [] }}
+                    rowId={['alertId']}
+                    pagination={false}
+                    maxAccess={access}
+                  />
+                </Box>
+              </div>
+            </div>
+          )}
+
+          {containsApplet(ResourceIds.TodaysAttendance) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.todaysAttendance}</h2>
+                </div>
+               <div className='pieChartWrapper'>
+                <div className='pieChartContainer'>
+                  <PieChart
+                    id='todaysLeave'
+                    labels={[`${labels.pending}`, `${labels.noShowUp}`, `${labels.checked}`, `${labels.leave}`, `${labels.dayOff}`]}
+                    data={[data.todaysAttendance.pending, data.todaysAttendance.noShowUp, data.todaysAttendance.checked, data.todaysAttendance.leave, data.todaysAttendance.dayOff]}
+                    toolTipText={labels.counts}
+                    onLegendClick={({ index }) => {
+                        const attendanceKeys = ['pending', 'noShowUp', 'checked', 'leave', 'dayOff']
+                        
+                        const key = attendanceKeys[index]
+                        if (!key || data.todaysAttendance[key] === 0) return
+
+                        stack({
+                          Component: TodaysAttendance,
+                          props: { index }
+                        })
+                      }
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+            </div>
+          )}
+
+          {containsApplet(ResourceIds.TodaysTimeVariationsSummary) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.todaysTimeVariations}</h2>
+                </div>
+               <div className='pieChartWrapper'>
+                <div className='pieChartContainer'>
+                  <PieChart
+                    id='todaysTimeVariations'
+                    labels={[`${labels.earlyCheckIn}`, `${labels.lateCheckIn}`, `${labels.duringShiftLeave}`, `${labels.earlyLeave}`, `${labels.overtime}`]}
+                    data={[data?.todaysTimeVariations.earlyCheckIn, data?.todaysTimeVariations.lateCheckIn, data?.todaysTimeVariations.duringShiftLeave, data?.todaysTimeVariations.earlyLeave, data?.todaysTimeVariations.overtime]}
+                    toolTipText={labels.counts}
+                    onLegendClick={({ index }) => {
+                      const attendanceKeys = ['earlyCheckIn', 'lateCheckIn','duringShiftLeave','earlyLeave','overtime']
+                      const key = attendanceKeys[index]
+                      if (!key || data.todaysTimeVariations[key] === 0) return
+
+                      stack({
+                        Component: TodaysTimeVariations,
+                        props: { index }
+                      })
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+            </div>
+          )}
+
+          {containsApplet(ResourceIds.TodaysLeaves) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.todaysLeave}</h2>
+                </div>
+               <div className='pieChartWrapper'>
+                <div className='pieChartContainer'>
+                  <PieChart
+                    id='todaysLeave'
+                    labels={[`${labels.PaidLeave}`, `${labels.UnpaidLeave}`]}
+                    data={[data.todaysLeaveCount.paidCount, data.todaysLeaveCount.unpaidCount]}
+                    toolTipText={labels.counts}
+                    onLegendClick={({ index }) => {
+                      const attendanceKeys = ['paidCount', 'unpaidCount']
+                      const key = attendanceKeys[index]
+                      if (!key || data.todaysLeaveCount[key] === 0) return
+
+                      stack({
+                        Component: TodaysLeave,
+                        props: { index }
+                      })
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+            </div>
+          )}
+
+          {containsApplet(ResourceIds.BranchAvailability) && (
+          <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.branchAvailability}</h2>
+                </div>
+                <HorizontalBarChartDark           
+                  labels={(data?.branchAvailability || []).map(b => b.branchName)}
+                  data={(data?.branchAvailability || []).map(s => s.scheduled)}
+                  data2={(data?.branchAvailability || []).map(b => b.scheduled - b.present)}
+                  label={labels.present}
+                  label2={labels.absent}
+                  color='#6e87b6'
+                  hoverColor='#e50808'
+                />
+              </div>
+          )}
+
+          {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
+            <div className='topRow'>
+              <div className='chartCard'>
+                <div className='summaryCard'>
+                  <h2 className='title'>{labels.authorization}</h2>
+                </div>
+                <Box sx={{ display: 'flex', height: '350px' }}>
+                  <ApprovalsTable pageSize={10} />
+                </Box>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
        <style jsx global>{`
@@ -606,6 +855,19 @@ const DashboardLayout = () => {
           flex-direction: column;
           justify-content: center;
           align-items: center;
+        }
+
+        .pieChartWrapper {
+          height: 380px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-top: -20px;
+        }
+
+        .pieChartContainer {
+          width: 300px;
+          height: 340px;
         }
 
         .middleRow {
