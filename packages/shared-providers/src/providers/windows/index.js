@@ -56,7 +56,7 @@ export function WindowProvider({ children }) {
       : null
 
   const trackInteraction = usePageInteraction()
-  const { clearPageInteractions, interactions } = useInteractionTracker()
+  const { clearPageInteractions } = useInteractionTracker()
 
   const tabsContext = useContext(TabsContext)
   const currentTab = tabsContext?.currentTab || null

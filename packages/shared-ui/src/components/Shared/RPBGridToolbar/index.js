@@ -6,6 +6,7 @@ import { Grid } from '@mui/material'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
 const styles = {
   leftSectionGridItem: 'leftSectionGridItem',
   bottomSectionContainer: 'bottomSectionContainer'
@@ -32,6 +33,7 @@ const RPBGridToolbar = ({
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const trackInteraction = usePageInteraction()
+  const { clearPageInteractions } = useInteractionTracker()
 
   useEffect(() => {
     setRpbParams([])
@@ -55,6 +57,13 @@ const RPBGridToolbar = ({
         reportName: reportName,
         rpbParams,
         setRpbParams
+      },
+      onClose: () => {
+        const haveEmptyValues = rpbParams?.every(item => {
+          if (item && Object.prototype.hasOwnProperty.call(item, 'value')) return item.value === undefined
+          return Object.values(item ?? {}).every(value => value == null)
+        })
+        if (!Boolean(rpbParams.length) || haveEmptyValues) clearPageInteractions(trackInteraction.currentPageResourceId, 'RPBForm')
       }
     })
   }
@@ -122,10 +131,6 @@ const RPBGridToolbar = ({
       disabled: rest?.disablePrint
     }
   ].filter(item => !item?.hidden)
-
-  useEffect(() => {
-    if (rpbParams.length > 0) trackInteraction('RPBGridToolbar')
-  }, [rpbParams])
 
   return (
     <>
