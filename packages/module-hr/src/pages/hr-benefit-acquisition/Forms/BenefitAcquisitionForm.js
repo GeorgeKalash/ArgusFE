@@ -34,6 +34,8 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
     endpointId: BenefitsRepository.BenefitAcquisition.page
   })
 
+  const bsDefault = parseInt(systemDefaults?.list?.find(obj => obj.key === 'bsId')?.value) || null
+
   const initialValues = {
     recordId: recordId || null,
     employeeId: null,
@@ -104,69 +106,63 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
   const editMode = !!formik.values.recordId
 
   async function fetchEmployeeQuickView(employeeId) {
-    if (!employeeId) return
+    if (!employeeId) return {}
 
     const res = await getRequest({
       extension: EmployeeRepository.QuickView.get,
       parameters: `_recordId=${employeeId}&_asOfDate=${formatDateForGetApI(new Date())}`
     })
 
-    formik.setFieldValue('branchName', res?.record?.branchName || '')
-    formik.setFieldValue('departmentName', res?.record?.departmentName || '')
-    formik.setFieldValue('positionName', res?.record?.positionName || '')
-    formik.setFieldValue('hireDate', res?.record?.hireDate ? formatDateFromApi(res?.record?.hireDate) : null)
-    formik.setFieldValue('nationality', res?.record?.countryName || '')
-    formik.setFieldValue('divisionName', res?.record?.divisionName || '')
-    formik.setFieldValue('reportToName', res?.record?.reportToName || '')
-    formik.setFieldValue('eosBalance', res?.record?.indemnity || 0)
-    formik.setFieldValue('serviceDuration', res?.record?.serviceDuration || '')
-    formik.setFieldValue('esName', res?.record?.esName || '')
-    formik.setFieldValue('loanBalance', res?.record?.loanBalance || 0)
+    const values = res?.record
+
+    return {
+      departmentName: values?.departmentName || '',
+      positionName: values?.positionName || '',
+      hireDate: values?.hireDate ? formatDateFromApi(values?.hireDate) : null,
+      nationality: values?.countryName || '',
+      divisionName: values?.divisionName || '',
+      reportToName: values?.reportToName || '',
+      eosBalance: values?.indemnity || 0,
+      serviceDuration: values?.serviceDuration || '',
+      esName: values?.esName || '',
+      loanBalance: values?.loanBalance || 0
+    }
   }
 
   async function resolveBenefitSchedule(employeeId) {
-    let bsId = null
-    let bsName = null
-
     const hireRes = await getRequest({
       extension: EmployeeRepository.Hiring.get,
       parameters: `_employeeId=${employeeId}`
     })
-    bsId = hireRes?.record?.bsId || null
-    bsName = hireRes?.record?.bsName || ''
 
-    if(!bsId) {
-      bsId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'bsId')?.value) || null
+    let bsId = hireRes?.record?.bsId || null
+    let bsName = hireRes?.record?.bsName || ''
 
-      if (bsId) {
+    if (!bsId) {
+      if (bsDefault) {
         const res = await getRequest({
-          extension: BenefitsRepository.BenefitSchedule.get, 
-          parameters: `_recordId=${bsId}`
+          extension: BenefitsRepository.BenefitSchedule.get,
+          parameters: `_recordId=${bsDefault}`
         })
-
+        bsId = bsDefault
         bsName = res?.record.name || ''
+      } else {
+        stackError({ message: labels.noBenefitSchedule })
       }
     }
 
-
-    if (!bsId) {
-      stackError({
-        message: labels.noBenefitSchedule
-      })
-
-      return
-    }
-
-    formik.setFieldValue('bsId', bsId)
-    formik.setFieldValue('bsName', bsName || '')
+    return { bsId, bsName }
   }
 
   function calculatePeriodAndAqRatio({ employeeId, benefitId, bsId, dateFrom, dateTo, amount }) {
-    if (!employeeId || !benefitId || !bsId || !dateFrom || !dateTo || !amount) return
+    if (!employeeId || !benefitId || !bsId || !dateFrom || !dateTo || !amount) return {}
 
     const days = Math.round((new Date(dateTo) - new Date(dateFrom)) / (1000 * 60 * 60 * 24))
-    formik.setFieldValue('period', String(days))
-    formik.setFieldValue('aqRatio', roundTo(days / 360, 3))
+
+    return {
+      period: String(days),
+      aqRatio: roundTo(days / 360, 3)
+    }
   }
 
   useEffect(() => {
@@ -179,6 +175,7 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
       })
 
       const record = res?.record || {}
+      const employeeQuickView = await fetchEmployeeQuickView(record.employeeId)
 
       formik.setValues({
         ...record,
@@ -190,10 +187,9 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
             (new Date(formatDateFromApi(record.dateTo)) - new Date(formatDateFromApi(record.dateFrom))) /
               (1000 * 60 * 60 * 24), 3
           )
-        )
+        ),
+        ...employeeQuickView
       })
-
-      await fetchEmployeeQuickView(record.employeeId)
     }
     fetchRecord()
   }, [])
@@ -229,24 +225,28 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
                       { key: 'fullName', value: 'Name' }
                     ]}
                     onChange={async (_, newValue) => {
-                      formik.setFieldValue('employeeId', newValue?.recordId || null)
-                      formik.setFieldValue('employeeName', newValue?.fullName || '')
-                      formik.setFieldValue('employeeRef', newValue?.reference || '')
+                      const employeeId = newValue?.recordId || null
 
-                      await fetchEmployeeQuickView(newValue?.recordId)
+                      const employeeQuickView = await fetchEmployeeQuickView(employeeId)
+                      const benefitSchedule = !editMode && employeeId ? await resolveBenefitSchedule(employeeId) : {}
 
-                      if (!editMode) {
-                        formik.setFieldValue('bsId', null)
-                        formik.setFieldValue('bsName', '')
-                        if (newValue?.recordId) await resolveBenefitSchedule(newValue.recordId)
-                      }
-                      calculatePeriodAndAqRatio({
-                        employeeId: newValue?.recordId,
+                      const periodAndRatio = calculatePeriodAndAqRatio({
+                        employeeId,
                         benefitId: formik.values.benefitId,
-                        bsId: formik.values.bsId,
+                        bsId: !editMode ? benefitSchedule.bsId : formik.values.bsId,
                         dateFrom: formik.values.dateFrom,
                         dateTo: formik.values.dateTo,
                         amount: formik.values.amount
+                      })
+
+                      formik.setValues({
+                        ...formik.values,
+                        employeeId,
+                        employeeName: newValue?.fullName || '',
+                        employeeRef: newValue?.reference || '',
+                        ...employeeQuickView,
+                        ...(!editMode ? { bsId: benefitSchedule.bsId || null, bsName: benefitSchedule.bsName || '' } : {}),
+                        ...periodAndRatio
                       })
                     }}
                     error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
@@ -273,22 +273,26 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
                     required
                     readOnly={!formik.values.bsId}
                     maxAccess={maxAccess}
-                    onChange={async (_, newValue) => {
-                      formik.setFieldValue('benefitName', newValue?.benefitName || '')
+                    onChange={(_, newValue) => {
+                      const benefitId = newValue?.benefitId || null
 
-                      formik.setFieldValue('aqType', newValue?.aqType || null)
-                      formik.setFieldValue('aqTypeName', newValue?.aqTypeName || '')
-
-                      calculatePeriodAndAqRatio({
+                      const periodAndRatio = calculatePeriodAndAqRatio({
                         employeeId: formik.values.employeeId,
-                        benefitId: newValue?.benefitId,
+                        benefitId,
                         bsId: formik.values.bsId,
                         dateFrom: formik.values.dateFrom,
                         dateTo: formik.values.dateTo,
                         amount: formik.values.amount
                       })
-                      
-                      formik.setFieldValue('benefitId', newValue?.benefitId || null)
+
+                      formik.setValues({
+                        ...formik.values,
+                        benefitId,
+                        benefitName: newValue?.benefitName || '',
+                        aqType: newValue?.aqType || null,
+                        aqTypeName: newValue?.aqTypeName || '',
+                        ...periodAndRatio
+                      })
                     }}
                     error={formik.touched.benefitId && Boolean(formik.errors.benefitId)}
                   />
@@ -313,10 +317,8 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
                     required
                     maxAccess={maxAccess}
                     max={formik.values.dateTo}
-                    onChange={(name, value) => {
-                      formik.setFieldValue(name, value)
-
-                      calculatePeriodAndAqRatio({
+                    onChange={(_, value) => {
+                      const periodAndRatio = calculatePeriodAndAqRatio({
                         employeeId: formik.values.employeeId,
                         benefitId: formik.values.benefitId,
                         bsId: formik.values.bsId,
@@ -324,6 +326,8 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
                         dateTo: formik.values.dateTo,
                         amount: formik.values.amount
                       })
+
+                      formik.setValues({ ...formik.values, dateFrom: value, ...periodAndRatio })
                     }}
                     onClear={() => {
                       formik.setFieldValue('dateFrom', null)
@@ -341,8 +345,8 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
                     readOnly={!formik.values.dateFrom}
                     maxAccess={maxAccess}
                     min={formik.values.dateFrom}
-                    onChange={(name, value) => {
-                      calculatePeriodAndAqRatio({
+                    onChange={(_, value) => {
+                      const periodAndRatio = calculatePeriodAndAqRatio({
                         employeeId: formik.values.employeeId,
                         benefitId: formik.values.benefitId,
                         bsId: formik.values.bsId,
@@ -350,8 +354,8 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
                         dateTo: value,
                         amount: formik.values.amount
                       })
-                      
-                      formik.setFieldValue(name, value)
+
+                      formik.setValues({ ...formik.values, dateTo: value, ...periodAndRatio })
                     }}
                     onClear={() => formik.setFieldValue('dateTo', null)}
                     error={formik.touched.dateTo && Boolean(formik.errors.dateTo)}
@@ -398,12 +402,13 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
                     label={labels.amount}
                     value={formik.values.amount}
                     required
+                    maxLength={8}
                     maxAccess={maxAccess}
                     decimalScale={0}
                     onChange={e => formik.setFieldValue('amount', e.target.value)}
                     onClear={() => formik.setFieldValue('amount', null)}
                     onBlur={() => {
-                      calculatePeriodAndAqRatio({
+                      const periodAndRatio = calculatePeriodAndAqRatio({
                         employeeId: formik.values.employeeId,
                         benefitId: formik.values.benefitId,
                         bsId: formik.values.bsId,
@@ -411,6 +416,8 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
                         dateTo: formik.values.dateTo,
                         amount: formik.values.amount
                       })
+
+                      formik.setValues({ ...formik.values, ...periodAndRatio })
                     }}
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
                   />
@@ -462,6 +469,7 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
                     label={labels.notes}
                     value={formik.values.notes}
                     rows={3}
+                    maxLength={255}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('notes', '')}

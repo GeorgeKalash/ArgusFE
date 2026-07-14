@@ -122,7 +122,6 @@ export const PayrollRepository = {
     del: service + 'delFLA'
   },
   LeavePayment: {
-    qry: service + 'qryLP',
     page: service + 'pageLP',
     get: service + 'getLP',
     set: service + 'setLP',

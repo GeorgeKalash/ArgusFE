@@ -61,66 +61,10 @@ export default function BenefitSettlementForm({ labels, maxAccess, recordId }) {
     onSubmit: handleSubmit
   })
 
-  async function handleSubmit(obj) {
-    const payload = {
-      ...obj,
-      date: formatDateToApi(obj.date),
-      ...(obj.payId != null && { payId: obj.payId }),
-      ...(obj.salaryId != null && { salaryId: obj.salaryId }),
-      ...(obj.leaveId != null && { leaveId: obj.leaveId }),
-      ...(obj.leavePaymentId != null && { leavePaymentId: obj.leavePaymentId }),
-      ...(obj.fsId != null && { fsId: obj.fsId }),
-      ...(obj.paySeqNo != null && { paySeqNo: obj.paySeqNo })
-    }
-
-    const response = await postRequest({
-      extension: BenefitsRepository.Settlement.set,
-      record: JSON.stringify(payload)
-    })
-
-    if (!obj.recordId) {
-      formik.setFieldValue('recordId', response.recordId)
-
-      const recRes = await getRequest({
-        extension: BenefitsRepository.Settlement.get,
-        parameters: `_recordId=${response.recordId}`
-      })
-      formik.setFieldValue('settlementRef', recRes?.record?.settlementRef || recRes?.record?.preview?.parent?.settlementRef || '')
-    }
-
-    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-    invalidate()
-  }
-
-  const editMode = !!formik.values.recordId
-
-  async function fetchEmployeeSettlementPreview({ employeeId, date, type }) {
-    if (!employeeId || !date || !type) return
-
-    const res = await getRequest({
-      extension: BenefitsRepository.Settlement.preview,
-      parameters: `_employeeId=${employeeId}&_date=${formatDateForGetApI(date)}&_type=${type}`
-    })
-
-    formik.setFieldValue('leavePaymentDescription', res?.record?.leavePaymentDescription || '')
-    formik.setFieldValue('payrollDescription', res?.record?.payrollDescription || '')
-    formik.setFieldValue('leaveDescription', res?.record?.leaveDescription || '')
-    formik.setFieldValue('terminationDescription', res?.record?.terminationDescription || '')
-    formik.setFieldValue('finalSettlementDescription', res?.record?.finalSettlementDescription || '')
-    formik.setFieldValue('salaryId', res?.record?.parent?.salaryId ?? null)
-    formik.setFieldValue('payId', res?.record?.parent?.payId ?? null)
-    formik.setFieldValue('leaveId', res?.record?.parent?.leaveId ?? null)
-    formik.setFieldValue('leavePaymentId', res?.record?.parent?.leavePaymentId ?? null)
-    formik.setFieldValue('fsId', res?.record?.parent?.fsId ?? null)
-    formik.setFieldValue('paySeqNo', res?.record?.parent?.paySeqNo ?? null)
-  }
-
-  const fetchRecord = async () => {
-    if (!recordId) return
-
+  async function fetchRecordById(id) {
     const res = await getRequest({
       extension: BenefitsRepository.Settlement.get,
-      parameters: `_recordId=${recordId}`
+      parameters: `_recordId=${id}`
     })
 
     const record = res?.record || {}
@@ -131,12 +75,12 @@ export default function BenefitSettlementForm({ labels, maxAccess, recordId }) {
       date: formatDateFromApi(record.date),
       employeeRef: record.employee?.parent?.reference || '',
       employeeName: record.employee?.parent?.fullName || '',
-      salaryId: preview.parent?.salaryId ?? record.salaryId ?? null,
-      payId: preview.parent?.payId ?? record.payId ?? null,
-      leaveId: preview.parent?.leaveId ?? record.leaveId ?? null,
-      leavePaymentId: preview.parent?.leavePaymentId ?? record.leavePaymentId ?? null,
-      fsId: preview.parent?.fsId ?? record.fsId ?? null,
-      paySeqNo: preview.parent?.paySeqNo ?? record.paySeqNo ?? null,
+      salaryId: preview.parent?.salaryId ?? null,
+      payId: preview.parent?.payId ?? null,
+      leaveId: preview.parent?.leaveId ?? null,
+      leavePaymentId: preview.parent?.leavePaymentId ?? null,
+      fsId: preview.parent?.fsId ?? null,
+      paySeqNo: preview.parent?.paySeqNo ?? null,
       leavePaymentDescription: preview.leavePaymentDescription || '',
       payrollDescription: preview.payrollDescription || '',
       leaveDescription: preview.leaveDescription || '',
@@ -145,8 +89,68 @@ export default function BenefitSettlementForm({ labels, maxAccess, recordId }) {
     })
   }
 
+  async function handleSubmit(obj) {
+    const {
+      salaryId,
+      payId,
+      leaveId,
+      leavePaymentId,
+      fsId,
+      paySeqNo,
+      ...rest
+    } = obj
+
+    const payload = {
+      ...rest,
+      date: formatDateToApi(obj.date),
+      ...(salaryId != null && { salaryId }),
+      ...(payId != null && { payId }),
+      ...(leaveId != null && { leaveId }),
+      ...(leavePaymentId != null && { leavePaymentId }),
+      ...(fsId != null && { fsId }),
+      ...(paySeqNo != null && { paySeqNo })
+    }
+
+    const response = await postRequest({
+      extension: BenefitsRepository.Settlement.set,
+      record: JSON.stringify(payload)
+    })
+
+    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+    invalidate()
+    
+    await fetchRecordById(response.recordId)
+  }
+
+  const editMode = !!formik.values.recordId
+
+  async function fetchEmployeeSettlementPreview({ employeeId, date, type }) {
+    if (!employeeId || !date || !type) return {}
+
+    const res = await getRequest({
+      extension: BenefitsRepository.Settlement.preview,
+      parameters: `_employeeId=${employeeId}&_date=${formatDateForGetApI(date)}&_type=${type}`
+    })
+
+    const record = res?.record
+
+    return {
+      leavePaymentDescription: record?.leavePaymentDescription || '',
+      payrollDescription: record?.payrollDescription || '',
+      leaveDescription: record?.leaveDescription || '',
+      terminationDescription: record?.terminationDescription || '',
+      finalSettlementDescription: record?.finalSettlementDescription || '',
+      salaryId: record?.parent?.salaryId ?? null,
+      payId: record?.parent?.payId ?? null,
+      leaveId: record?.parent?.leaveId ?? null,
+      leavePaymentId: record?.parent?.leavePaymentId ?? null,
+      fsId: record?.parent?.fsId ?? null,
+      paySeqNo: record?.parent?.paySeqNo ?? null
+    }
+  }
+
   useEffect(() => {
-    fetchRecord()
+    if (recordId) fetchRecordById(recordId)
   }, [])
 
   return (
@@ -187,16 +191,21 @@ export default function BenefitSettlementForm({ labels, maxAccess, recordId }) {
                   { key: 'fullName', value: 'Name' }
                 ]}
                 onChange={async (_, newValue) => {
-                  formik.setFieldValue('employeeName', newValue?.fullName || '')
-                  formik.setFieldValue('employeeRef', newValue?.reference || '')
+                  const employeeId = newValue?.recordId || null
 
-                  await fetchEmployeeSettlementPreview({
-                    employeeId: newValue?.recordId,
+                  const preview = await fetchEmployeeSettlementPreview({
+                    employeeId,
                     date: formik.values.date,
                     type: formik.values.type
                   })
-                  
-                  formik.setFieldValue('employeeId', newValue?.recordId || null)
+
+                  formik.setValues({
+                    ...formik.values,
+                    employeeId,
+                    employeeName: newValue?.fullName || '',
+                    employeeRef: newValue?.reference || '',
+                    ...preview
+                  })
                 }}
                 error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
               />
@@ -209,12 +218,16 @@ export default function BenefitSettlementForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 onChange={async (name, value) => {
-                  formik.setFieldValue(name, value)
-
-                  await fetchEmployeeSettlementPreview({
+                  const preview = await fetchEmployeeSettlementPreview({
                     employeeId: formik.values.employeeId,
                     date: value,
                     type: formik.values.type
+                  })
+
+                  formik.setValues({
+                    ...formik.values,
+                    date: value,
+                    ...preview
                   })
                 }}
                 onClear={() => formik.setFieldValue('date', null)}
@@ -232,12 +245,18 @@ export default function BenefitSettlementForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  formik.setFieldValue('type', newValue?.key ?? null)
+                  const type = newValue?.key ?? null
 
-                  await fetchEmployeeSettlementPreview({
+                  const preview = await fetchEmployeeSettlementPreview({
                     employeeId: formik.values.employeeId,
                     date: formik.values.date,
-                    type: newValue?.key
+                    type
+                  })
+
+                  formik.setValues({
+                    ...formik.values,
+                    type,
+                    ...preview
                   })
                 }}
                 error={formik.touched.type && Boolean(formik.errors.type)}
@@ -249,13 +268,14 @@ export default function BenefitSettlementForm({ labels, maxAccess, recordId }) {
                 label={labels.notes}
                 value={formik.values.notes}
                 rows={3}
+                maxLength='200'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('notes', '')}
               />
             </Grid>
              <Grid item xs={12}>
-              <FieldSet title={labels.BenefitSettlement}>
+              <FieldSet title={labels.EmployeeSettlement}>
                 <Grid item xs={12}>
                   <CustomTextField
                     name='leavePaymentDescription'

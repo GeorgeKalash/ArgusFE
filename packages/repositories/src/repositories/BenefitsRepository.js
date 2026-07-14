@@ -9,16 +9,13 @@ export const BenefitsRepository = {
     del: service + 'delSC',
   },
   ScheduleBenefits: {
-    qry: service + 'qrySB',
-    get: service + 'getSB'
+    qry: service + 'qrySB'
   },
   BenefitAcquisition: {
     page: service + 'pageBA',
-    qry: service + 'qryBA',
     get: service + 'getBA',
     set: service + 'setBA',
-    del: service + 'delBA',
-    snapshot: service + 'snapshotBA'
+    del: service + 'delBA'
   },
   Settlement: {
     qry: service + 'qrySE',
