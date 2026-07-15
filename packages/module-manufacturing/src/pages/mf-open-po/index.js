@@ -105,7 +105,7 @@ const OpenProductionOrder = () => {
       component: 'image',
       name: 'pictureUrl',
       label: labels.image,
-      width: 70,
+      width: 50,
       onClick: ({ value, row }) => {
         stack({
           Component: ImageViewer,
