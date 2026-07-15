@@ -76,7 +76,7 @@ const InventoryTransaction = props => {
       field: 'extendedCost',
       headerName: _labels.extendedCost,
       flex: 1,
-      type: 'number'
+      type: { field: 'number', decimal: 2 }
     }
   ]
 
