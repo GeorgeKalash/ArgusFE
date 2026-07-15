@@ -148,6 +148,8 @@ export default function BenefitAcquisitionForm({ labels, maxAccess, recordId }) 
         bsName = res?.record.name || ''
       } else {
         stackError({ message: labels.noBenefitSchedule })
+
+        return
       }
     }
 

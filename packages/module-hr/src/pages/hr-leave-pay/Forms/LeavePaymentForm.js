@@ -77,7 +77,6 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
       effectiveDate: yup.date().required(),
       employeeId: yup.number().required(),
       lsId: yup.number().required(),
-      ltId: yup.number().required(),
       days: yup
         .number()
         .nullable()
@@ -149,10 +148,11 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
       parameters: `_recordId=${ltId}`
     })
 
-    const ltName = ltRes?.record?.name || ''
-    const trackByHours = ltRes?.record?.leaveTrackTime === 1
-
-    return { ltId, ltName, trackByHours }
+    return { 
+      ltId, 
+      ltName: ltRes?.record?.name || '', 
+      trackByHours: ltRes?.record?.leaveTrackTime === 1 
+    }
   }
 
   async function fetchEmployeeQuickView(employeeId, effectiveDate) {
@@ -226,21 +226,27 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
   }
 
   function recalcFromDays(days, salary) {
-    if (!monthWorkHrs || !dayWorkHrs) return
+    if (!monthWorkHrs || !dayWorkHrs) return {}
+
     const d = parseFloat(days) || 0
     const s = parseFloat(salary) || 0
     const hours = d * dayWorkHrs
     const amount = (s / monthWorkHrs) * dayWorkHrs * d
-    formik.setFieldValue('hours', parseFloat(hours.toFixed(2)))
-    formik.setFieldValue('amount', parseFloat(amount.toFixed(2)))
+
+    return {
+      hours: parseFloat(hours.toFixed(2)),
+      amount: parseFloat(amount.toFixed(2))
+    }
   }
 
   function recalcFromHours(hours, salary) {
-    if (!monthWorkHrs) return
+    if (!monthWorkHrs) return {}
+
     const h = parseFloat(hours) || 0
     const s = parseFloat(salary) || 0
     const amount = (s / monthWorkHrs) * h
-    formik.setFieldValue('amount', parseFloat(amount.toFixed(2)))
+
+    return { amount: parseFloat(amount.toFixed(2)) }
   }
 
   useEffect(() => {
@@ -430,8 +436,12 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                     readOnly={!formik.values.trackByHours}
                     onChange={e => {
                       const hours = e.target.value
-                      formik.setFieldValue('hours', hours)
-                      recalcFromHours(hours, formik.values.salary)
+
+                      formik.setValues({
+                        ...formik.values,
+                        hours,
+                        ...recalcFromHours(hours, formik.values.salary)
+                      })
                     }}
                     onClear={() => {
                       formik.setFieldValue('hours', 0)
@@ -449,8 +459,12 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                     readOnly={formik.values.trackByHours}
                     onChange={e => {
                       const days = e.target.value
-                      formik.setFieldValue('days', days)
-                      recalcFromDays(days, formik.values.salary)
+
+                      formik.setValues({
+                        ...formik.values,
+                        days,
+                        ...recalcFromDays(days, formik.values.salary)
+                      })
                     }}
                     onClear={() => {
                       formik.setFieldValue('days', 0)
