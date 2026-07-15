@@ -12,11 +12,14 @@ import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 
 const OpenProductionOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
+  const { stack } = useWindow()
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.OpenProductionOrder
@@ -27,7 +30,6 @@ const OpenProductionOrder = () => {
     initialValues: {
       items: []
     },
-    validateOnChange: true,
     onSubmit: async obj => {
 
       const itemValues = obj?.items
