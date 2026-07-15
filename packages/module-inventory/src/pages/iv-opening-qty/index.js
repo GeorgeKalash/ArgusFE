@@ -81,7 +81,7 @@ const InventoryOpeningQtys = () => {
       flex: 1
     },
     {
-      field: 'periodId',
+      field: 'periodName',
       headerName: _labels.periodId,
       flex: 1
     },
