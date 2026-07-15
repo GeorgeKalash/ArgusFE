@@ -100,6 +100,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         jobId: yup.number().required(),
         operationId: yup.number().required(),
         laborId: yup.number().required(),
+        fromSiteId: yup.number().required(),
+        toSiteId: yup.number().required(),
         pcs: yup.number().min(0.01).nullable(),
         avgWeight: yup.number().min(0.01).nullable(),
         producedWeight: yup.number().min(0.01).required(),
@@ -631,6 +633,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 values={formik.values.header}
                 readOnly={isPosted}
                 maxAccess={maxAccess}
+                required
                 onChange={(_, newValue) => {
                   formik.setFieldValue('header.fromSiteId', newValue?.recordId || null)
                 }}
@@ -650,6 +653,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values.header}
                 maxAccess={maxAccess}
+                required
                 readOnly={isPosted}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('header.toSiteId', newValue?.recordId || null)

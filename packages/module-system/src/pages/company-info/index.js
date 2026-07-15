@@ -12,11 +12,12 @@ import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const CompanyInfo = () => {
   const imageUploadRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { labels: labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.CompanyInfo
   })
@@ -71,7 +72,7 @@ const CompanyInfo = () => {
     if (imageUploadRef.current) {
       await imageUploadRef.current.submit()
     }
-    toast.success('Record Edited Successfully')
+    toast.success(platformLabels.Edited)
   }
 
   return (

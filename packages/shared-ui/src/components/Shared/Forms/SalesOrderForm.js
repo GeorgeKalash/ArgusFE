@@ -106,6 +106,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     reference: '',
     date: new Date(),
     dueDate: new Date(),
+    expectedDeliveryDate: null,
     plantId: null,
     clientId: '',
     currencyId: parseInt(currency),
@@ -216,6 +217,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       delete copy.items
       copy.date = formatDateToApi(copy.date)
       copy.dueDate = formatDateToApi(copy.dueDate)
+      copy.expectedDeliveryDate = copy.expectedDeliveryDate ? formatDateToApi(copy.expectedDeliveryDate) : null
       copy.miscAmount = copy.miscAmount || 0
 
       if (!obj.rateCalcMethod) delete copy.rateCalcMethod
@@ -660,6 +662,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     delete copy.items
     copy.date = formatDateToApi(copy.date)
     copy.dueDate = formatDateToApi(copy.dueDate)
+    copy.expectedDeliveryDate = copy.expectedDeliveryDate ? formatDateToApi(copy.expectedDeliveryDate) : null
 
     const res = await postRequest({
       extension: SaleRepository.SalesOrder.close,
@@ -675,6 +678,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     delete copy.items
     copy.date = formatDateToApi(copy.date)
     copy.dueDate = formatDateToApi(copy.dueDate)
+    copy.expectedDeliveryDate = copy.expectedDeliveryDate ? formatDateToApi(copy.expectedDeliveryDate) : null
 
     const res = await postRequest({
       extension: SaleRepository.SalesOrder.reopen,
@@ -691,6 +695,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     delete copy.items
     copy.date = formatDateToApi(copy.date)
     copy.dueDate = formatDateToApi(copy.dueDate)
+    copy.expectedDeliveryDate = copy.expectedDeliveryDate ? formatDateToApi(copy.expectedDeliveryDate) : null
 
     const res = await postRequest({
       extension: SaleRepository.SalesOrder.cancel,
@@ -707,6 +712,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     delete copy.items
     copy.date = formatDateToApi(copy.date)
     copy.dueDate = formatDateToApi(copy.dueDate)
+    copy.expectedDeliveryDate = copy.expectedDeliveryDate ? formatDateToApi(copy.expectedDeliveryDate) : null
 
     const res = await postRequest({
       extension: SaleRepository.SalesOrder.postToInvoice,
@@ -864,6 +870,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     })
 
     res.record.header.date = formatDateFromApi(res?.record?.header?.date)
+    res.record.header.expectedDeliveryDate = formatDateFromApi(res?.record?.header?.expectedDeliveryDate)
 
     return res.record
   }
@@ -1678,7 +1685,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     error={formik.touched.description && Boolean(formik.errors.description)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomCheckBox
                     name='overdraft'
                     value={formik.values?.overdraft}
@@ -1686,6 +1693,19 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     readOnly
                     label={labels.overdraft}
                     maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomDatePicker
+                    name='expectedDeliveryDate'
+                    label={labels.expectedDeliveryDate}
+                    value={formik?.values?.expectedDeliveryDate}
+                    onChange={formik.setFieldValue}
+                    editMode={editMode}
+                    readOnly={isClosed}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('expectedDeliveryDate', null)}
+                    error={formik.touched.expectedDeliveryDate && Boolean(formik.errors.expectedDeliveryDate)}
                   />
                 </Grid>
                 <Grid item container spacing={2}>

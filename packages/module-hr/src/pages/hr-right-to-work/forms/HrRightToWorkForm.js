@@ -111,7 +111,7 @@ export default function HrRightToWorkForm({ labels, maxAccess, recordId }) {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.BranchFilters.qry}
+                endpointId={companyStructureRepository.Branches.qry}
                 name='branchId'
                 label={labels.branch}
                 columnsInDropDown={[
@@ -196,7 +196,7 @@ export default function HrRightToWorkForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.DivisionFilters.qry}
+                endpointId={companyStructureRepository.Divisions.qry}
                 name='divisionId'
                 label={labels.division}
                 valueField='recordId'

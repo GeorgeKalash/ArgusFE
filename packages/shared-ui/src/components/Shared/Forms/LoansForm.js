@@ -289,7 +289,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.BranchFilters.qry}
+                endpointId={companyStructureRepository.Branches.qry}
                 name='branchId'
                 label={labels.branch}
                 readOnly

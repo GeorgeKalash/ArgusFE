@@ -13,10 +13,12 @@ import CustomTextField from '../Inputs/CustomTextField'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import Form from './Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 export const InterfacesForm = ({ recordId, resourceId, name }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { labels: _labels, access } = useResourceParams({
     datasetId: ResourceIds.InterfaceMap,
@@ -60,7 +62,7 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
       })
 
       if (res.recordId) {
-        toast.success('Record Successfully')
+        toast.success(platformLabels.Saved)
       }
     }
   })

@@ -47,7 +47,7 @@ const WindowToolbar = ({
   const [defaultLayoutId, setDefaultLayoutId] = useState(null)
 
   useEffect(() => {
-    resourceId && getReportLayout()
+    getReportLayout()
   }, [])
 
   useEffect(() => {
@@ -58,6 +58,8 @@ const WindowToolbar = ({
 
   const getReportLayout = async () => {
     if (reportPack) return
+
+    if (!previewReport || !resourceId) return
 
     const reportPackRes = await getRequest({
       extension: SystemRepository.ReportLayout.get,

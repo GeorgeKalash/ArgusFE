@@ -17,6 +17,7 @@ import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 export default function SalesSettingsForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
@@ -34,7 +35,9 @@ export default function SalesSettingsForm({ _labels, access }) {
     'sdpItemName',
     'sdpUnitPrice',
     'allowSalesNoLinesTrx',
-    'salesTD'
+    'salesTD',
+    'default_so_dt',
+    'default_special_so_dt',
   ]
 
   const { formik } = useForm({
@@ -49,7 +52,9 @@ export default function SalesSettingsForm({ _labels, access }) {
       sdpItemName: false,
       sdpUnitPrice: false,
       allowSalesNoLinesTrx: false,
-      salesTD: false
+      salesTD: false,
+      default_so_dt: null,
+      default_special_so_dt: null
     },
     maxAccess: access,
     validateOnChange: true,
@@ -253,6 +258,46 @@ export default function SalesSettingsForm({ _labels, access }) {
                 onChange={event => formik.setFieldValue('salesTD', event.target.checked)}
                 label={_labels.salesTD}
                 maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_dgId=${SystemFunction.SalesOrder}&_startAt=${0}&_pageSize=${1000}`}
+                name='default_so_dt'
+                label={_labels.salesOrderDt}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={access}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('default_so_dt', newValue?.recordId || null)
+                }}
+                error={formik.touched.default_so_dt && Boolean(formik.errors.default_so_dt)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_dgId=${SystemFunction.SalesOrder}&_startAt=${0}&_pageSize=${1000}`}
+                name='default_special_so_dt'
+                label={_labels.defaultSpecialSoDt}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={access}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('default_special_so_dt', newValue?.recordId || null)
+                }}
+                error={formik.touched.default_special_so_dt && Boolean(formik.errors.default_special_so_dt)}
               />
             </Grid>
           </Grid>

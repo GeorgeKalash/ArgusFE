@@ -204,7 +204,7 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
 
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.DepartmentFilters.qry}
+                endpointId={companyStructureRepository.Departments.qry}
                 parameters={`_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`}
                 name='departmentId'
                 label={labels.department}
@@ -226,7 +226,7 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
 
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.BranchFilters.qry}
+                endpointId={companyStructureRepository.Branches.qry}
                 name='branchId'
                 label={labels.branch}
                 columnsInDropDown={[
@@ -247,7 +247,7 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.DivisionFilters.qry}
+                endpointId={companyStructureRepository.Divisions.qry}
                 name='divisionId'
                 label={labels.division}
                 valueField='recordId'

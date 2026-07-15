@@ -1,7 +1,17 @@
-import { useCallback, useEffect, useRef, memo } from 'react'
+import { useCallback, useEffect, useRef, memo, useState } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+
+const MULTI_LINE_DEFAULT_COLORS = [
+  '#FF8C00', 
+  '#333333', 
+  '#8B0000',
+  '#90EE90', 
+  '#1F3BB3', 
+  '#800080'
+]
+const MULTI_LINE_POINT_STYLES = ['circle', 'triangle', 'rect', 'rectRot', 'star', 'cross']
 
 const styles = new Proxy(
   {},
@@ -34,6 +44,7 @@ const CHARTS_CSS = String.raw`
   --chart-bar-1-hover-bg: rgb(113, 27, 26);
   --chart-bar-2-bg: rgb(5, 28, 104);
   --chart-bar-2-hover-bg: rgb(33, 58, 141);
+  --chart-bar-2-hover-bg2: rgb(255, 215, 0);
   --chart-primary-bar-bg: #6673FD;
   --chart-primary-bar-border: #6673FD;
   --chart-mixed-1: rgba(88, 2, 1);
@@ -54,10 +65,10 @@ const CHARTS_CSS = String.raw`
   --chart-radar-fill: rgba(102, 115, 253, 0.2);
   --chart-radar-border: #6673FD;
   --chart-radar-point: #6673FD;
-  --chart-pie-1: #6673FD;
-  --chart-pie-2: #FF6384;
-  --chart-pie-3: #36A2EB;
-  --chart-pie-4: #FFCE56;
+  --chart-pie-1: #6D0F1C; 
+  --chart-pie-2: #585858; 
+  --chart-pie-3: #2e2d2d; 
+  --chart-pie-4: #1F1F1F; 
   --chart-compbar-bg: rgba(0, 123, 255, 0.5);
   --chart-compbar-hover-bg: rgb(255, 255, 0);
   --chart-compbar-axis-color: #000000;             
@@ -74,7 +85,7 @@ const CHARTS_CSS = String.raw`
 }
 
 .chartCanvasDark {
-  --chart-legend-label-color: #f0f0f0;
+  --chart-legend-label-color: #000;
   --chart-title-color: #f0f0f0;
   --chart-axis-color: #f0f0f0;
   --chart-tooltip-bg: #f0f0f0;
@@ -257,7 +268,7 @@ const generateColors = (dataLength, canvas) => {
   return { backgroundColors, borderColors }
 }
 
-const getChartOptions = (label, type, canvas) => {
+const getChartOptions = (label, type, canvas, onLegendClick) => {
   const legendLabelColor = getCssVar(canvas, '--chart-legend-label-color')
   const titleColor = getCssVar(canvas, '--chart-title-color')
   const axisColor = getCssVar(canvas, '--chart-axis-color')
@@ -274,7 +285,23 @@ const getChartOptions = (label, type, canvas) => {
       legend: {
         labels: {
           color: legendLabelColor
-        }
+        },
+        onHover: (event) => {
+          if (onLegendClick) event.native.target.style.cursor = 'pointer'
+        },
+        onLeave: (event) => {
+          if (onLegendClick) event.native.target.style.cursor = 'default'
+        },
+        onClick: (e, legendItem) => {
+          onLegendClick?.({
+            label: legendItem.text,
+            index: legendItem.index,
+            event: e
+          })
+        },
+      },
+      datalabels: {
+        color: '#fff', 
       },
       title: {
         display: true,
@@ -537,7 +564,7 @@ export const MixedBarChart = memo(({ id, labels, data1, data2, label1, label2, r
   )
 })
 
-export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, hoverColor }) => {
+export const HorizontalBarChartDark = memo(({ id, labels, data, data2, label, label2, color, hoverColor }) => {
   useInjectChartsStyles()
 
   const canvasRef = useRef(null)
@@ -556,6 +583,9 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
   const fullChartHeight = Math.max(320, itemCount * rowHeight + 80)
   const visibleHeight = shouldScroll ? 260 : fullChartHeight
 
+  const isStacked = Array.isArray(data2) && data2.length > 0
+  const getRemainderData = (data, data2) => (data || []).map((v, i) => Math.max(0, v - (data2[i] || 0)))
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -566,6 +596,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
 
     const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
     const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
+    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg2')
 
     const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
     const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
@@ -574,17 +605,41 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
       type: 'bar',
       data: {
         labels: labels || [],
-        datasets: [
-          {
-            label,
-            data: data || [],
-            backgroundColor: barBg,
-            hoverBackgroundColor: barHoverBg,
-            borderWidth: 1,
-            barThickness: Math.max(10, Math.min(18, rowHeight - 4)),
-            maxBarThickness: 20
-          }
-        ]
+        datasets: isStacked
+          ? [
+              {
+                label: '',
+                data: getRemainderData(data, data2),
+                backgroundColor: barBg,
+                hoverBackgroundColor: barHoverBg,
+                borderWidth: 1,
+                barThickness: Math.max(10, Math.min(18, rowHeight - 4)),
+                maxBarThickness: 20,
+                stack: 'stack',
+                datalabels: { display: false }
+              },
+              {
+                label,
+                data: data2 || [],
+                backgroundColor: '#9e9e9e',
+                hoverBackgroundColor: bar2HoverBg,
+                borderWidth: 1,
+                barThickness: Math.max(10, Math.min(18, rowHeight - 4)),
+                maxBarThickness: 20,
+                stack: 'stack'
+              }
+            ]
+          : [
+              {
+                label,
+                data: data || [],
+                backgroundColor: barBg,
+                hoverBackgroundColor: barHoverBg,
+                borderWidth: 1,
+                barThickness: Math.max(10, Math.min(18, rowHeight - 4)),
+                maxBarThickness: 20
+              }
+            ]
       },
       options: {
         indexAxis: 'y',
@@ -600,6 +655,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
         },
         scales: {
           x: {
+            stacked: isStacked,
             beginAtZero: true,
             max: Math.max(...(data || [0]), 0) * 1.15 || 1,
             ticks: {
@@ -615,6 +671,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
             }
           },
           y: {
+            stacked: isStacked,
             ticks: {
               font: { size: chartSize.ticksSize },
               autoSkip: false
@@ -627,11 +684,25 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
         plugins: {
           tooltip: {
             bodyFont: { size: chartSize.tooltipBodySize },
-            titleFont: { size: chartSize.tooltipFontSize }
+            titleFont: { size: chartSize.tooltipFontSize },
+            callbacks: isStacked
+              ? {
+                  label: function (context) {
+                    if (context.datasetIndex === 0) {
+                      return `${label}: ${(data || [])[context.dataIndex] - ((data2 || [])[context.dataIndex] || 0)}`
+                    }
+                    if (context.datasetIndex === 1) {
+                      return `${label2}: ${(data2 || [])[context.dataIndex]}`
+                    }
+                    return null
+                  }
+                }
+              : undefined
           },
           datalabels: {
             clip: false,
             clamp: true,
+            display: isStacked ? context => context.datasetIndex === 1 : true,
             anchor: context => {
               const chart = context.chart
               const dataset = context.dataset
@@ -667,7 +738,9 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
             },
             offset: 4,
             font: { size: chartSize.size },
-            formatter: value => `${Math.ceil(value).toLocaleString()}`
+            formatter: isStacked
+              ? () => ``
+              : value => `${Math.ceil(value).toLocaleString()}`
           },
           legend: { display: false }
         }
@@ -691,16 +764,29 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
 
     const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
     const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
+    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg2')
 
     const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
     const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chart.data.labels = labels || []
-    chart.data.datasets[0].label = label
-    chart.data.datasets[0].data = data || []
-    chart.data.datasets[0].backgroundColor = barBg
-    chart.data.datasets[0].hoverBackgroundColor = barHoverBg
-    chart.data.datasets[0].barThickness = Math.max(10, Math.min(18, rowHeight - 4))
+
+    if (isStacked) {
+      chart.data.datasets[0].data = getRemainderData(data, data2)
+      chart.data.datasets[0].backgroundColor = barBg
+      chart.data.datasets[0].hoverBackgroundColor = barHoverBg
+      chart.data.datasets[0].barThickness = Math.max(10, Math.min(18, rowHeight - 4))
+      chart.data.datasets[1].label = label
+      chart.data.datasets[1].data = data2 || []
+      chart.data.datasets[1].hoverBackgroundColor = bar2HoverBg
+      chart.data.datasets[1].barThickness = Math.max(10, Math.min(18, rowHeight - 4))
+    } else {
+      chart.data.datasets[0].label = label
+      chart.data.datasets[0].data = data || []
+      chart.data.datasets[0].backgroundColor = barBg
+      chart.data.datasets[0].hoverBackgroundColor = barHoverBg
+      chart.data.datasets[0].barThickness = Math.max(10, Math.min(18, rowHeight - 4))
+    }
 
     chart.options.plugins.tooltip.bodyFont.size = chartSize.tooltipBodySize
     chart.options.plugins.tooltip.titleFont.size = chartSize.tooltipFontSize
@@ -723,7 +809,7 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
 
     chart.resize()
     chart.update('none')
-  }, [id, labels, data, label, color, hoverColor, chartSize, rowHeight])
+  }, [id, labels, data, data2, label, color, hoverColor, chartSize, rowHeight])
 
   return (
     <div
@@ -759,9 +845,14 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
   )
 })
 
+const MIN_PX_PER_BAR = 32 
+const MAX_LABELS_TO_SHOW = 60 
+
 export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
   useInjectChartsStyles()
 
+  const outerRef = useRef(null)
+  const containerRef = useRef(null)
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -769,20 +860,69 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
   useArgusTabActivatedResize(getChart)
 
   const { width } = useWindowDimensions()
-  const chartSize = width > 1280 ? sizes[1281] : width > 1024 ? sizes[1280] : sizes[1024]
+
+  const chartSize =
+    width > 1280 ? sizes[1281] :
+    width > 1024 ? sizes[1280] :
+    sizes[1024]
+
+  const getYScale = useCallback((values) => {
+    const validValues = (values || [])
+      .filter(v => typeof v === 'number' && !isNaN(v))
+
+    const max = validValues.length ? Math.max(...validValues) : 0
+
+    if (max === 0) {
+      return {
+        min: 0,
+        max: 5,
+        step: 1
+      }
+    }
+
+    const rawStep = max / 5
+
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)))
+    const step = Math.ceil(rawStep / magnitude) * magnitude
+
+    const niceMax = Math.ceil(max / step) * step
+
+    return {
+      min: 0,
+      max: niceMax,
+      step
+    }
+  }, [])
+
+  const applyDynamicWidth = useCallback(() => {
+    const canvas = canvasRef.current
+    const outer = outerRef.current
+    if (!canvas || !outer) return
+
+    const stableWidth = outer.clientWidth
+    const neededWidth = (labels?.length || 0) * MIN_PX_PER_BAR
+    const finalWidth = Math.max(stableWidth, neededWidth)
+
+    canvas.style.width = `${finalWidth}px`
+  }, [labels])
+
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
+
     const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    if (chartRef.current) return
+    if (!ctx || chartRef.current) return
 
     const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
     const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
 
     const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
     const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
+
+    const yScale = getYScale(data)
+
+    applyDynamicWidth()
 
     chartRef.current = new Chart(ctx, {
       type: 'bar',
@@ -794,74 +934,113 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
             data: data || [],
             backgroundColor: barBg,
             hoverBackgroundColor: barHoverBg,
-            borderWidth: 1
+            borderColor: barBg,
+            borderWidth: 0,
+            maxBarThickness: MIN_PX_PER_BAR - 4,
+            barPercentage: 0.9,
+            categoryPercentage: 0.9
           }
         ]
       },
+
       options: {
         responsive: true,
         aspectRatio: ratio,
         maintainAspectRatio: false,
+        devicePixelRatio: window.devicePixelRatio || 1,
+
+        interaction: {
+          mode: 'nearest',
+          intersect: true
+        },
+
         plugins: {
           tooltip: {
-            bodyFont: { size: chartSize.tooltipBodySize },
-            titleFont: { size: chartSize.tooltipFontSize }
+            bodyFont: {
+              size: chartSize.tooltipBodySize
+            },
+            titleFont: {
+              size: chartSize.tooltipFontSize
+            }
           },
+
           datalabels: {
-            anchor: context => {
-              const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-              const barHeight = (value / maxValue) * chartHeight
-              return barHeight >= 120 ? 'center' : 'end'
-            },
-            align: context => {
-              const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-              const barHeight = (value / maxValue) * chartHeight
-              return barHeight >= 120 ? 'center' : 'end'
-            },
+            display: (data?.length || 0) <= MAX_LABELS_TO_SHOW,
+
+            anchor: 'end',
+            align: 'end',
+
             color: context => {
               const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
+              const value = context.dataset.data[context.dataIndex]
               const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-              const barHeight = (value / maxValue) * chartHeight
-              return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
+              const barHeight = (value / chart.scales.y.max) * chartHeight
+
+              return barHeight >= 120
+                ? datalabelInsideColor
+                : datalabelOutsideColor
             },
+
             offset: 0,
             rotation: -90,
-            font: { size: chartSize.size },
+            font: {
+              size: chartSize.size
+            },
+
             formatter: value => value.toLocaleString()
           },
-          legend: { display: false }
+
+          legend: {
+            display: false
+          }
         },
+
         scales: {
-          x: { ticks: { font: { size: chartSize.ticksSize } } },
-          y: { ticks: { font: { size: chartSize.ticksSize } } }
+          x: {
+            ticks: {
+              font: {
+                size: chartSize.ticksSize
+              },
+              autoSkip: true,
+              maxRotation: 45,
+              minRotation: 45
+            }
+          },
+
+          y: {
+            min: yScale.min,
+            max: yScale.max,
+
+            ticks: {
+              font: {
+                size: chartSize.ticksSize
+              },
+              stepSize: yScale.step
+            }
+          }
         }
       },
+
       plugins: [ChartDataLabels]
     })
+
 
     return () => {
       chartRef.current?.destroy()
       chartRef.current = null
     }
+
   }, [])
+
 
   useEffect(() => {
     const canvas = canvasRef.current
     const chart = chartRef.current
+
     if (!canvas || !chart) return
 
     const nextHasMeaningful = hasAnyLabel(labels) && hasAnyValue(data)
+
     if (!nextHasMeaningful && chartHasAnyValue(chart)) return
 
     const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
@@ -870,40 +1049,88 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
     const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
     const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
+    applyDynamicWidth()
+
     chart.data.labels = labels || []
+
     chart.data.datasets[0].label = label
     chart.data.datasets[0].data = data || []
     chart.data.datasets[0].backgroundColor = barBg
     chart.data.datasets[0].hoverBackgroundColor = barHoverBg
 
-    chart.options.aspectRatio = ratio
-    chart.options.plugins.tooltip.bodyFont.size = chartSize.tooltipBodySize
-    chart.options.plugins.tooltip.titleFont.size = chartSize.tooltipFontSize
+    const yScale = getYScale(data)
+
+    chart.options.scales.y.min = yScale.min
+    chart.options.scales.y.max = yScale.max
+    chart.options.scales.y.ticks.stepSize = yScale.step
+
     chart.options.plugins.datalabels.font.size = chartSize.size
+
+    chart.options.plugins.datalabels.display =
+      (data?.length || 0) <= MAX_LABELS_TO_SHOW
 
     chart.options.plugins.datalabels.color = context => {
       const c = context.chart
-      const dataset = context.dataset
-      const value = dataset.data[context.dataIndex]
+      const value = context.dataset.data[context.dataIndex]
       const chartHeight = c.scales.y.bottom - c.scales.y.top
-      const maxValue = c.scales.y.max
-      const barHeight = (value / maxValue) * chartHeight
-      return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
+      const barHeight = (value / c.scales.y.max) * chartHeight
+
+      return barHeight >= 120
+        ? datalabelInsideColor
+        : datalabelOutsideColor
     }
 
     chart.options.scales.x.ticks.font.size = chartSize.ticksSize
     chart.options.scales.y.ticks.font.size = chartSize.ticksSize
 
     chart.update('none')
-  }, [labels, data, label, color, hoverColor, ratio, chartSize])
+
+  }, [
+    labels,
+    data,
+    label,
+    color,
+    hoverColor,
+    ratio,
+    chartSize,
+    getYScale
+  ])
+
 
   return (
-    <div className={styles.chartHeight}>
-      <canvas id={id} ref={canvasRef} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`} />
+    <div
+      ref={outerRef}
+      className={styles.chartHeight}
+      style={{
+        width: '100%',
+        overflow: 'hidden'
+      }}
+    >
+      <div
+        style={{
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          width: '100%',
+          height: '100%'
+        }}
+      >
+        <div
+          ref={containerRef}
+          style={{
+            display: 'inline-block',
+            minWidth: '100%'
+          }}
+        >
+          <canvas
+            id={id}
+            ref={canvasRef}
+            className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}
+          />
+        </div>
+      </div>
     </div>
   )
 })
-
 export const MixedColorsBarChartDark = memo(({ id, labels, data, label, ratio = 3 }) => {
   useInjectChartsStyles()
 
@@ -1081,11 +1308,7 @@ export const CompositeBarChart = memo(({ labels, data, label }) => {
           }
         ]
       },
-      options: {
-        ...getChartOptions(label, 'bar', canvas),
-        responsive: true,
-        maintainAspectRatio: false
-      }
+      options: { ...getChartOptions(label, 'bar', canvas), responsive: true, maintainAspectRatio: false }
     })
 
     return () => {
@@ -1374,11 +1597,162 @@ const getColorForIndex = (index, canvas) => {
   return colors[index % colors.length]
 }
 
-export const PieChart = memo(({ id, labels, data, label }) => {
+const LEADER_LINE_LENGTH = 10
+const HORIZONTAL_LINE_LENGTH = 28 
+const VALUE_MARGIN = 2
+
+const leaderLinesPlugin = {
+  id: 'leaderLines',
+
+ beforeLayout(chart) {
+  const dataset = chart.data.datasets[0]
+  const values = dataset?.data || []
+
+  const ctx = chart.ctx
+  ctx.save()
+  ctx.font = 'bold 13px Arial'
+
+  let maxTextWidth = 0
+  for (let i = 0; i < values.length; i++) {
+    const v = values[i]
+    if (v == null || v === 0) continue
+    maxTextWidth = Math.max(maxTextWidth, ctx.measureText(String(v)).width)
+  }
+
+  ctx.restore()
+  const layout = chart.options.layout || {}
+
+  const nextPadding = {
+    top: LEADER_LINE_LENGTH + 12,
+    bottom: LEADER_LINE_LENGTH + 12,
+    left: 70,  
+    right: 70, 
+  }
+
+  const current = layout.padding || {}
+
+  const changed =
+    current.left !== nextPadding.left ||
+    current.right !== nextPadding.right ||
+    current.top !== nextPadding.top ||
+    current.bottom !== nextPadding.bottom
+
+  if (changed) {
+    chart.options.layout = {
+      ...layout,
+      padding: nextPadding,
+    }
+  }
+},
+  afterDatasetsDraw(chart) {
+    const { ctx, width: canvasWidth } = chart
+    const meta = chart.getDatasetMeta(0)
+    const dataset = chart.data.datasets[0]
+
+    if (!meta?.data?.length) return
+
+    ctx.save()
+    ctx.font = 'bold 13px Arial'
+    ctx.lineWidth = 1.5
+    ctx.strokeStyle = '#555'
+
+    meta.data.forEach((arc, index) => {
+      const value = dataset.data[index]
+      if (value == null || value === 0) return
+
+      const text = String(value)
+      const textWidth = ctx.measureText(text).width
+
+   
+      const center = arc.getCenterPoint()
+      const outerRadius = arc.outerRadius
+      const isFullCircle = (arc.endAngle - arc.startAngle) >= Math.PI * 2
+      const angle = isFullCircle ? -Math.PI / 4 : (arc.startAngle + arc.endAngle) / 2
+
+      const startRadius = outerRadius * 0.8
+      const startX = center.x + Math.cos(angle) * startRadius
+      const startY = center.y + Math.sin(angle) * startRadius
+      const bendX =
+        center.x + Math.cos(angle) * (outerRadius + LEADER_LINE_LENGTH)
+      const bendY =
+        center.y + Math.sin(angle) * (outerRadius + LEADER_LINE_LENGTH)
+
+      const rightSide = Math.cos(angle) >= 0
+
+      const idealEndX = rightSide
+        ? bendX + HORIZONTAL_LINE_LENGTH
+        : bendX - HORIZONTAL_LINE_LENGTH
+
+      const padding = 6
+      const VALUE_SAFE_GAP = VALUE_MARGIN + textWidth + padding
+
+      let endX
+
+      if (rightSide) {
+        const maxX = canvasWidth - VALUE_SAFE_GAP
+        endX = Math.min(idealEndX, maxX)
+        endX = Math.max(endX, bendX + 10)
+      } else {
+        const minX = VALUE_SAFE_GAP
+        endX = Math.max(idealEndX, minX)
+        endX = Math.min(endX, bendX - 10)
+      }
+
+      const endY = bendY
+
+      // LINE
+      ctx.beginPath()
+      ctx.moveTo(startX, startY)
+      ctx.lineTo(bendX, bendY)
+      ctx.lineTo(endX, endY)
+      ctx.stroke()
+
+      // DOT
+      ctx.beginPath()
+      ctx.arc(startX, startY, 3, 0, Math.PI * 2)
+      ctx.fillStyle = '#555'
+      ctx.fill()
+
+      // TEXT (single system, no conflicts)
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = dataset.backgroundColor?.[index] || '#333'
+      ctx.textAlign = rightSide ? 'left' : 'right'
+
+      ctx.fillText(
+        text,
+        rightSide ? endX + VALUE_MARGIN : endX - VALUE_MARGIN,
+        endY
+      )
+    })
+
+    ctx.restore()
+  },
+}
+const getPieChartOptions = (label, canvas, onLegendClick) => {
+  const base = getChartOptions(label, 'pie', canvas, onLegendClick)
+
+  return {
+    ...base,
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    plugins: {
+      ...base.plugins,
+      legend: { display: false },
+      tooltip: { ...base.plugins.tooltip },
+      datalabels: false,
+    },
+  }
+}
+export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendClick }) => {
   useInjectChartsStyles()
+  Chart.register(ChartDataLabels)
 
   const ref = useRef(null)
   const inst = useRef(null)
+  const chartBoxRef = useRef(null)
+
+  const [colors, setColors] = useState([])
 
   const getChart = useCallback(() => inst.current, [])
   useArgusTabActivatedResize(getChart)
@@ -1390,10 +1764,7 @@ export const PieChart = memo(({ id, labels, data, label }) => {
     if (!ctx) return
     if (inst.current) return
 
-    const c1 = getCssVar(canvas, '--chart-pie-1')
-    const c2 = getCssVar(canvas, '--chart-pie-2')
-    const c3 = getCssVar(canvas, '--chart-pie-3')
-    const c4 = getCssVar(canvas, '--chart-pie-4')
+    const initialColors = Array.from({ length: (data || []).length }, (_, i) => getColorForIndex(i, canvas))
 
     inst.current = new Chart(ctx, {
       type: 'pie',
@@ -1403,12 +1774,18 @@ export const PieChart = memo(({ id, labels, data, label }) => {
           {
             label,
             data: data || [],
-            backgroundColor: [c1, c2, c3, c4]
-          }
-        ]
+            backgroundColor: initialColors,
+            borderColor: 'rgba(0, 0, 0, 0.2)',
+            borderWidth: 1,
+            clip: false, 
+          },
+        ],
       },
-      options: getChartOptions(label, 'pie', canvas)
+      options: getPieChartOptions(label, canvas, onLegendClick),
+      plugins: [leaderLinesPlugin],
     })
+
+    setColors(initialColors)
 
     return () => {
       inst.current?.destroy()
@@ -1424,21 +1801,121 @@ export const PieChart = memo(({ id, labels, data, label }) => {
     const nextHasMeaningful = hasAnyLabel(labels) && hasAnyValue(data)
     if (!nextHasMeaningful && chartHasAnyValue(chart)) return
 
-    const c1 = getCssVar(canvas, '--chart-pie-1')
-    const c2 = getCssVar(canvas, '--chart-pie-2')
-    const c3 = getCssVar(canvas, '--chart-pie-3')
-    const c4 = getCssVar(canvas, '--chart-pie-4')
+    const nextColors = Array.from({ length: (data || []).length }, (_, i) => getColorForIndex(i, canvas))
 
     chart.data.labels = labels || []
-    chart.data.datasets[0].label = label
+    chart.data.datasets[0].label = toolTipText || label
     chart.data.datasets[0].data = data || []
-    chart.data.datasets[0].backgroundColor = [c1, c2, c3, c4]
-    chart.options = getChartOptions(label, 'pie', canvas)
+    chart.data.datasets[0].backgroundColor = nextColors
+    chart.options = getPieChartOptions(label, canvas, onLegendClick)
 
     chart.update('none')
+    setColors(nextColors)
   }, [labels, data, label])
 
-  return <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}></canvas>
+  useEffect(() => {
+    const box = chartBoxRef.current
+    if (!box) return
+
+    const ro = new ResizeObserver(() => {
+      inst.current?.resize()
+    })
+    ro.observe(box)
+
+    return () => ro.disconnect()
+  }, [])
+
+  const chips = (labels || []).map((lbl, i) => ({
+    key: `${lbl}-${i}`,
+    color: colors[i] || 'transparent',
+    label: lbl,
+    value: (data || [])[i],
+  }))
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', minHeight: 0 }}>
+      {chips.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'center',
+            columnGap: 14,
+            rowGap: 4,
+            fontSize: 11,
+            lineHeight: 1.3,
+            marginBottom: 6,
+            flexShrink: 0,
+          }}
+        >
+          {chips.map((chip, i) => {
+            const clickable = chip.value !== 0
+            return (
+              <span
+                key={chip.key}
+                onClick={() => clickable && onLegendClick?.({ index: i, label: chip.label, value: chip.value })}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  cursor: clickable ? 'pointer' : 'default',
+                  opacity: clickable ? 1 : 0.5,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <span
+                  style={{
+                    width: 9,
+                    height: 9,
+                    borderRadius: 2,
+                    backgroundColor: chip.color,
+                    display: 'inline-block',
+                    flexShrink: 0,
+                    border: '1px solid rgba(0,0,0,0.15)',
+                  }}
+                />
+                <span style={{ color: '#333333' }}>{chip.label}</span>
+              </span>
+            )
+          })}
+        </div>
+      )}
+
+      <div
+        ref={chartBoxRef}
+        style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: 0,
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            position: 'relative',
+          }}
+        >
+          <canvas
+            id={id}
+            ref={ref}
+            className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'block',
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  )
 })
 
 export const DoughnutChart = memo(({ id, labels, data, label }) => {
@@ -1766,6 +2243,195 @@ export const CompBarChart = memo(({ id, labels, datasets }) => {
   return (
     <div className={styles.chartHeight}>
       <canvas id={id} ref={ref} className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasDark}`}></canvas>
+    </div>
+  )
+})
+
+export const MultiLineChart = memo(({ id, labels, datasets }) => {
+  useInjectChartsStyles()
+
+  const canvasRef = useRef(null)
+  const chartRef  = useRef(null)
+
+  const getChart = useCallback(() => chartRef.current, [])
+  useArgusTabActivatedResize(getChart)
+
+  const { width } = useWindowDimensions()
+  const chartSize =
+    width > 1280 ? sizes[1281] :
+    width > 1024 ? sizes[1280] :
+    sizes[1024]
+
+  const buildDatasets = useCallback((canvas) => {
+    return (datasets || []).map((ds, i) => {
+      const color =
+        ds.color ||
+        getCssVar(canvas, `--chart-line-multi-${i + 1}`) ||
+        MULTI_LINE_DEFAULT_COLORS[i % MULTI_LINE_DEFAULT_COLORS.length]
+
+      return {
+        label: ds.label ?? `Series ${i + 1}`,
+        data: ds.data ?? [],
+        fill: false,
+        borderColor: color,
+        backgroundColor: color,
+        pointBackgroundColor: color,
+        pointStyle: MULTI_LINE_POINT_STYLES[i % MULTI_LINE_POINT_STYLES.length],
+        tension: 0,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        borderWidth: 2,
+        spanGaps: false,
+      }
+    })
+  }, [datasets])
+
+  const getYScale = useCallback((values) => {
+    const validValues = (values || [])
+      .filter(v => typeof v === 'number' && !isNaN(v))
+
+    const max = validValues.length ? Math.max(...validValues) : 0
+
+    if (max === 0) {
+      return {
+        min: 0,
+        max: 5,
+        step: 1
+      }
+    }
+
+    const rawStep = max / 5
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)))
+    const step = Math.ceil(rawStep / magnitude) * magnitude
+
+    const niceMax = Math.ceil(max / step) * step
+
+    return {
+      min: 0,
+      max: niceMax,
+      step
+    }
+  }, [])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx || chartRef.current) return
+
+    const yScale = getYScale(datasets?.flatMap(d => d.data || []))
+
+    chartRef.current = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels || [],
+        datasets: buildDatasets(canvas),
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              pointStyle: 'circle',
+              padding: 20,
+              color: getCssVar(canvas, '--chart-legend-label-color', '#f0f0f0'),
+              font: { size: chartSize.size },
+            },
+          },
+
+          datalabels: { display: false },
+
+          tooltip: {
+            backgroundColor: getCssVar(canvas, '--chart-tooltip-bg', '#f0f0f0'),
+            titleColor: getCssVar(canvas, '--chart-tooltip-title-color', '#231F20'),
+            bodyColor: getCssVar(canvas, '--chart-tooltip-body-color', '#231F20'),
+            bodyFont: { size: chartSize.tooltipBodySize },
+            titleFont: { size: chartSize.tooltipFontSize },
+            callbacks: {
+              label: ctx => ` ${ctx.dataset.label}: ${ctx.raw ?? 0}`,
+            },
+          },
+        },
+
+        scales: {
+          x: {
+              offset: false,
+              ticks: {
+                  autoSkip: true,
+                  maxTicksLimit: 80,
+                  sampleSize: labels.length,
+                  maxRotation: 45,
+                  minRotation: 45,
+                  font: {
+                      size: 8
+                  }
+              }
+          },
+          y: {
+            min: yScale.min,
+            max: yScale.max,
+
+            ticks: {
+              color: getCssVar(canvas, '--chart-axis-color', '#f0f0f0'),
+              font: { size: Math.max(8, chartSize.ticksSize - 3) },
+
+              stepSize: yScale.step,
+            },
+
+            grid: { display: false },
+          },
+        },
+      },
+      plugins: [ChartDataLabels],
+    })
+
+    return () => {
+      chartRef.current?.destroy()
+      chartRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const chart  = chartRef.current
+    if (!canvas || !chart) return
+
+    const yScale = getYScale(datasets?.flatMap(d => d.data || []))
+
+    chart.data.labels = labels || []
+    chart.data.datasets = buildDatasets(canvas)
+
+    chart.options.scales.y.min = yScale.min
+    chart.options.scales.y.max = yScale.max
+    chart.options.scales.y.ticks.stepSize = yScale.step
+
+    chart.options.plugins.legend.labels.font.size = chartSize.size
+    chart.options.plugins.tooltip.bodyFont.size = chartSize.tooltipBodySize
+    chart.options.plugins.tooltip.titleFont.size = chartSize.tooltipFontSize
+
+    chart.options.scales.x.ticks.font.size = Math.max(8, chartSize.ticksSize - 3)
+    chart.options.scales.y.ticks.font.size = Math.max(8, chartSize.ticksSize - 3)
+
+    chart.update('none')
+  }, [labels, datasets, chartSize, buildDatasets, getYScale])
+
+  return (
+    <div style={{ height: '100%', width: '100%' }}>
+      <canvas
+        ref={canvasRef}
+        id={id}
+        className={`${styles.chartCanvas} ${styles.chartCanvasVars} ${styles.chartCanvasLight}`}
+      />
     </div>
   )
 })
