@@ -15,13 +15,16 @@ import { IconButton, Box } from '@mui/material'
 import Image from 'next/image'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import DraftReturnForm from '@argus/shared-ui/src/components/Shared/Forms/DraftReturnForm'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 
 const PostDraftReturn = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const { platformLabels } = useContext(ControlContext)
 
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const {
     query: { data },
@@ -154,14 +157,48 @@ const PostDraftReturn = () => {
     }
   ]
 
-  async function edit({ recordId }) {
+  const edit = obj => {
+    openForm(obj?.recordId, obj?.reference, obj?.wip)
+  }
+
+  async function openForm(recordId, reference, wip) {
+    if (recordId && wip !== 2) {
+      await lockRecord({
+        recordId: recordId,
+        reference: reference,
+        resourceId: ResourceIds.DraftSerialReturns,
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: ResourceIds.DraftSerialReturns,
+            recordId,
+            reference
+          })
+          openStack(recordId)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId)
+    }
+  }
+
+  async function openStack(recordId) {
     stack({
       Component: DraftReturnForm,
       props: {
         labels,
         access,
         recordId,
-        invalidate
+        invalidate,
+        lockRecord
       },
       width: 1300,
       height: 750,
