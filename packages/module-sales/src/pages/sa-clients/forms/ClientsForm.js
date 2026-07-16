@@ -260,6 +260,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                   }
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -280,6 +281,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                   }
                 }}
                 error={formik.touched.szId && Boolean(formik.errors.szId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -294,6 +296,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                   formik.setFieldValue('languageId', newValue?.key ?? '')
                 }}
                 error={formik.touched.languageId && Boolean(formik.errors.languageId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

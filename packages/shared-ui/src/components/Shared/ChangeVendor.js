@@ -75,13 +75,13 @@ export default function ChangeVendor({ formValues, onSubmit, window }) {
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <CustomTextField name='reference' label={labels.reference} value={formValues?.reference} readOnly />
+            <CustomTextField name='reference' label={labels.reference} value={formValues?.reference} readOnly maxAccess={access}/>
           </Grid>
           <Grid item xs={12}>
-            <CustomDatePicker name='date' label={labels.date} value={formValues?.date} readOnly />
+            <CustomDatePicker name='date' label={labels.date} value={formValues?.date} readOnly maxAccess={access}/>
           </Grid>
           <Grid item xs={9}>
-            <CustomCheckBox name='isVattable' value={formValues?.isVattable} label={labels.vat} readOnly />
+            <CustomCheckBox name='isVattable' value={formValues?.isVattable} label={labels.vat} readOnly maxAccess={access}/>
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
@@ -92,6 +92,7 @@ export default function ChangeVendor({ formValues, onSubmit, window }) {
               displayField='value'
               values={formValues}
               readOnly
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
@@ -103,6 +104,7 @@ export default function ChangeVendor({ formValues, onSubmit, window }) {
               displayField={['reference', 'name']}
               readOnly
               values={formValues}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
@@ -117,6 +119,7 @@ export default function ChangeVendor({ formValues, onSubmit, window }) {
               displayFieldWidth={4}
               valueShow='vendorRef'
               secondValueShow='vendorName'
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>

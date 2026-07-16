@@ -110,6 +110,7 @@ export default function EmployeeMissingDetails () {
                 <ResourceComboBox
                     datasetId={DataSets.EMPLOYEE_STATUS}
                     name='status'
+                    maxAccess={access}
                     label={labels.status}
                     valueField='key'
                     displayField='value'

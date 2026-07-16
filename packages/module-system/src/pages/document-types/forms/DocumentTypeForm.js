@@ -187,7 +187,8 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
                   allowNegative={false}
                   onClear={() => formik.setFieldValue('defaultPrintTemplateLayoutId', null)}
                   error={formik.touched.defaultPrintTemplateLayoutId && Boolean(formik.errors.defaultPrintTemplateLayoutId)}
-                />
+                  maxAccess={maxAccess}
+              />
             </Grid>
           </Grid>
         </Grow>

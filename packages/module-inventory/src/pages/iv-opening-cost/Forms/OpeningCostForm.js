@@ -166,6 +166,7 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
                 decimalScale={3}
                 onClear={() => formik.setFieldValue('avgCost', 0)}
                 error={formik.touched.avgCost && Boolean(formik.errors.avgCost)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

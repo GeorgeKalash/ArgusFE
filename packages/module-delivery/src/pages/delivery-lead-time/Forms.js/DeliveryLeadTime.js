@@ -87,7 +87,7 @@ export default function DeliveryLeadTimeForm({ labels, maxAccess, recordId }) {
                 displayField='name'
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('szId', newValue?.recordId)
                 }}
                 error={formik.touched.szId && Boolean(formik.errors.szId)}
@@ -100,6 +100,7 @@ export default function DeliveryLeadTimeForm({ labels, maxAccess, recordId }) {
                 value={formik.values.leadTimeInDays}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('leadTimeInDays', '')}
+                maxAccess={maxAccess}
                 required
                 maxLength='2'
                 decimalScale={0}
@@ -115,7 +116,7 @@ export default function DeliveryLeadTimeForm({ labels, maxAccess, recordId }) {
                 displayField='name'
                 valueField='recordId'
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('smsTemplateId', newValue?.recordId)
                 }}
                 maxAccess={maxAccess}

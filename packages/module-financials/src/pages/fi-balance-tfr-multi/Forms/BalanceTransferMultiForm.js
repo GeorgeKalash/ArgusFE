@@ -441,7 +441,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.plantId', newValue?.recordId || null)
                 }}
                 error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
@@ -478,6 +478,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                   formik.setFieldValue('header.spId', newValue?.recordId || null)
                 }}
                 error={formik?.touched?.header?.spId && Boolean(formik?.errors?.header?.spId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -551,6 +552,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 value={formik?.values?.header?.fromGroup}
                 label={labels.fromGroup}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>

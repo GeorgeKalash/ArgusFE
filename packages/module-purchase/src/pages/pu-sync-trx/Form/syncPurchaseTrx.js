@@ -136,6 +136,7 @@ export default function SyncPurchaseTrx({ _labels, access }) {
                   formik.setFieldValue('batchId', newValue?.recordId || 0)
                 }}
                 error={formik.touched.batchId && Boolean(formik.errors.batchId)}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

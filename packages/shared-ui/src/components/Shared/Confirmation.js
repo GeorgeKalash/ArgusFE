@@ -106,6 +106,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                   idTypes?.list?.find(item => item.recordId === formik.values.idtId)?.name ||
                   clientformik.values?.id_type?.name
                 }
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -120,6 +121,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 readOnly={true}
                 error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
                 helperText={formik.touched.birthDate && formik.errors.birthDate}
+                maxAccess={maxAccess}
               />
             </Grid>
 
@@ -149,6 +151,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 }}
                 error={formik.touched.idNo && Boolean(formik.errors.idNo)}
                 helperText={formik.touched.idNo && formik.errors.idNo}
+                maxAccess={maxAccess}
               />
             </Grid>
 
@@ -177,6 +180,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 }}
                 error={formik.touched.idNoRepeat && Boolean(formik.errors.idNoRepeat)}
                 helperText={formik.touched.idNoRepeat && formik.errors.idNoRepeat}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>

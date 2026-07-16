@@ -94,11 +94,11 @@ const TaxDetails = props => {
       <Fixed>
         <Grid container xs={9} spacing={2} sx={{ p: 2 }}>
           <Grid item xs={6}>
-            <CustomTextField label={_labels.sku} value={obj.sku} readOnly />
+            <CustomTextField label={_labels.sku} value={obj.sku} readOnly maxAccess={access} />
           </Grid>
           <Grid item xs={5}></Grid>
           <Grid item xs={6}>
-            <CustomTextField label={_labels.itemName} value={obj.itemName} readOnly />
+            <CustomTextField label={_labels.itemName} value={obj.itemName} readOnly maxAccess={access} />
           </Grid>
         </Grid>
       </Fixed>

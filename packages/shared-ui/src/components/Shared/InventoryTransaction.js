@@ -115,7 +115,7 @@ const InventoryTransaction = props => {
       <Fixed>
         <Grid container justifyContent='flex-end' sx={{ px: 2, py: 2 }}>
           <Grid item xs={2}>
-            <CustomNumberField name='extendedCosts' label={_labels.extendedCosts} value={extendedCosts} readOnly />
+            <CustomNumberField name='extendedCosts' label={_labels.extendedCosts} value={extendedCosts} readOnly maxAccess={access}/>
           </Grid>
         </Grid>
       </Fixed>

@@ -278,6 +278,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 label={labels.tradeDiscount}
                 value={formik.values.tradeDiscount}
                 onChange={e => formik.setFieldValue('tradeDiscount', e.target.value)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

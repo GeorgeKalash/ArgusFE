@@ -246,6 +246,7 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
                       value={file?.name}
                       readOnly
                       disabled={!!file?.name}
+                      maxAccess={access}
                     />
 
                     <CustomButton

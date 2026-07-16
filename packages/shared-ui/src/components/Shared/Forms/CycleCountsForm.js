@@ -343,6 +343,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                   formik.setFieldValue('plantId', newValue ? newValue?.recordId : null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

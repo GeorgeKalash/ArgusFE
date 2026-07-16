@@ -587,7 +587,8 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                     required
                     readOnly={isClosed || isCancelled}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('currencyId', newValue?.recordId || null)
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
@@ -605,7 +606,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                     required
                     readOnly
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('accountType', newValue?.key || null)
                     }}
                     error={formik.touched.accountType && Boolean(formik.errors.accountType)}
@@ -617,7 +618,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                     label={labels.date}
                     value={formik.values.date}
                     required
-                    onChange={(e, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('date', newValue)
                     }}
                     onClear={() => formik.setFieldValue('date', null)}
@@ -659,7 +660,8 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('plantId', newValue?.recordId || null)
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
