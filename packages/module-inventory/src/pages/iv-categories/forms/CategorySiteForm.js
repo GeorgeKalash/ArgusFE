@@ -134,7 +134,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
             columns={columns}
             allowAddNewLine={false}
             allowDelete={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </FormShell>

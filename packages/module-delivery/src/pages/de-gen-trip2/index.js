@@ -745,7 +745,7 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsTrucks}
                     allowAddNewLine={false}
                     allowDelete={false}
-                  />
+                    maxAccess={access}/>
                 </Grid>
                 <Grid item xs={9} sx={{ display: 'flex' }}>
                   <Table

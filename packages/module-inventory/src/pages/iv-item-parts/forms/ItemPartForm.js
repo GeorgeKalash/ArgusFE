@@ -164,7 +164,7 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
             error={formik.errors.items}
             allowDelete
             columns={columns}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </FormShell>

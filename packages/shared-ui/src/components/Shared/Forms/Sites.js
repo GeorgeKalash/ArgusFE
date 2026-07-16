@@ -154,7 +154,7 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
               enableFilters
               allowAddNewLine={false}
               allowDelete={false}
-            />
+              maxAccess={maxAccess}/>
           </Grow>
         </Grow>
       </VertLayout>

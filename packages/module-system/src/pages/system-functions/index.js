@@ -143,7 +143,7 @@ const SystemFunction = () => {
             enableFilters
             allowDelete={false}
             allowAddNewLine={false}
-          />
+            maxAccess={access}/>
         </Grow>
       </VertLayout>
     </Form>

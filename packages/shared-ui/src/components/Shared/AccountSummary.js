@@ -278,10 +278,10 @@ export default function AccountSummary({ accountId, date, window }) {
       </Fixed>
       <Grid container spacing={1} sx={{ flex: 1 }}>
         <Grid item xs={5} sx={{ display: 'flex' }}>
-          <Table name='summaryTable' columns={formik.values.summaryColumns} gridData={formik.values.summaryData} pagination={false} />
+          <Table name='summaryTable' columns={formik.values.summaryColumns} gridData={formik.values.summaryData} pagination={false} maxAccess={access}/>
         </Grid>
         <Grid item xs={7} sx={{ display: 'flex' }}>
-          <Table name='agingProfilesTable' columns={formik.values.columns} gridData={formik.values.gridData} pagination={false} />
+          <Table name='agingProfilesTable' columns={formik.values.columns} gridData={formik.values.gridData} pagination={false} maxAccess={access}/>
         </Grid>
       </Grid>
     </VertLayout>

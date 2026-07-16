@@ -799,7 +799,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
           columns={columns}
           allowDelete={!isClosed && !isCancelled}
           allowAddNewLine={!isClosed && !isCancelled}
-        />
+          maxAccess={maxAccess}/>
       </VertLayout>
     </FormShell>
   )

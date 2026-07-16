@@ -149,7 +149,7 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
                 }
               }
             ]}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>
