@@ -298,5 +298,8 @@ export const SystemRepository = {
     set: service + 'setFPT',
     del: service + 'delFPT',
     qry: service + 'qryFPT'
+  },
+  Nationality: {
+    get: service + 'getNA'
   }
 }
