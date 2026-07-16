@@ -59,13 +59,9 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
   const postFetchDefault = obj => {
     const hijriDate = moment(formatDateForGetApI(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
 
-    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_idType=${obj.idtId}&_liveRequest=${
-      formik.values.liveRequest ? 1 : 0
-    }`
-    var parameters = defaultParams
     getRequest({
       extension: CurrencyTradingSettingsRepository.Yakeen.get,
-      parameters: parameters
+      parameters: `_number=${obj.idNo}&_date=${hijriDate}&_idType=${obj.idtId}&_liveRequest=${formik.values.liveRequest ? 1 : 0}`
     }).then(result => {
       const res = result.record
 

@@ -84,7 +84,7 @@ const Damages = () => {
 
     const response = await getRequest({
       extension: ManufacturingRepository.DamageReturn.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_jobId=0&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_jobId=0`
     })
 
     return { ...response, _startAt: _startAt }

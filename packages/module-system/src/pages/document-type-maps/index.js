@@ -6,7 +6,7 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -30,10 +30,6 @@ const DocumentTypeMaps = () => {
     return { ...response, _startAt }
   }
 
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.DocumentTypeMap.page
-  })
-
   async function fetchWithFilter({ filters, pagination }) {
     return fetchGridData({
       _startAt: pagination?._startAt || 0,
@@ -46,6 +42,7 @@ const DocumentTypeMaps = () => {
     labels: _labels,
     paginationParameters,
     refetch,
+    invalidate,
     access,
     filterBy
   } = useResourceQuery({

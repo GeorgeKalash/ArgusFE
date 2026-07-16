@@ -22,7 +22,7 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.OpeningCost.qry
+    endpointId: InventoryRepository.OpeningCost.page
   })
 
   const { formik } = useForm({

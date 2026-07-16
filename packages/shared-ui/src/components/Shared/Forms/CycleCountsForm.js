@@ -35,7 +35,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   const editMode = !!store.recordId
 
   const invalidate = useInvalidate({
-    endpointId: SCRepository.StockCount.qry
+    endpointId: SCRepository.StockCount.page
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({

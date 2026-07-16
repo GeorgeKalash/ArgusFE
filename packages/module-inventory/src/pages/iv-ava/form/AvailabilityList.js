@@ -24,7 +24,7 @@ const AvailabilityList = ({ obj, labels, access }) => {
 
     const response = await getRequest({
       extension: InventoryRepository.Availability.qry,
-      parameters: `_itemId=${obj.itemId}&_siteId=${0}&_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_itemId=${obj.itemId}&_siteId=${0}&_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     const filteredData = response?.list?.filter(item => item.siteRef && item.siteName)

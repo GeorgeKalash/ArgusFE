@@ -5,7 +5,7 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import SitesForm from './forms/SitesForm'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -46,6 +46,7 @@ const Sites = () => {
     access,
     filterBy,
     refetch,
+    invalidate,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -54,10 +55,6 @@ const Sites = () => {
     filter: {
       filterFn: fetchWithFilter
     }
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Site.page
   })
 
   const columns = [

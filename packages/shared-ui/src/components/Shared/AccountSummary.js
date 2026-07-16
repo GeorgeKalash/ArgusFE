@@ -225,7 +225,7 @@ export default function AccountSummary({ accountId, date, window }) {
           <Grid item xs={5}>
             <ResourceComboBox
               endpointId={FinancialRepository.AgingProfile.qry}
-              parameters={`_startAt=0&_pageSize=1000&filter=`}
+              parameters={`_startAt=0&_pageSize=1000`}
               name='agpId'
               label={labels.agingProfile}
               values={formik.values}

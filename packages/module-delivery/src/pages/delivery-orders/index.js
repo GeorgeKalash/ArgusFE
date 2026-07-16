@@ -24,8 +24,8 @@ const DeliveryOrders = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: DeliveryRepository.DeliveriesOrders.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
+      extension: DeliveryRepository.DeliveriesOrders.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -50,7 +50,7 @@ const DeliveryOrders = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DeliveryRepository.DeliveriesOrders.qry,
+    endpointId: DeliveryRepository.DeliveriesOrders.page,
     datasetId: ResourceIds.DeliveriesOrders,
     filter: {
       filterFn: fetchWithFilter

@@ -23,7 +23,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.Group.qry
+    endpointId: FinancialRepository.Group.page
   })
 
   const { formik } = useForm({

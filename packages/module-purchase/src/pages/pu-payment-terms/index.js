@@ -23,8 +23,8 @@ const PaymentTerm = () => {
 
     try {
       const response = await getRequest({
-        extension: PurchaseRepository.PaymentTerms.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+        extension: PurchaseRepository.PaymentTerms.page,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
       })
 
       return { ...response, _startAt: _startAt }
@@ -40,7 +40,7 @@ const PaymentTerm = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PurchaseRepository.PaymentTerms.qry,
+    endpointId: PurchaseRepository.PaymentTerms.page,
     datasetId: ResourceIds.PUPaymentTerms
   })
 

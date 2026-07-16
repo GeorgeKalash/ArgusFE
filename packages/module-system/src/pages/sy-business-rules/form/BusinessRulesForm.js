@@ -21,7 +21,7 @@ export default function BusinessRulesForm({ labels, obj, window, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.BusinessRules.qry
+    endpointId: SystemRepository.BusinessRules.page
   })
 
   const { formik } = useForm({

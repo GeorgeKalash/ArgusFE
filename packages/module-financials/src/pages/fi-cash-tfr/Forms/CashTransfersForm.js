@@ -68,7 +68,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   }
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CashTransfers.qry
+    endpointId: CashBankRepository.CashTransfers.page
   })
 
   async function getCurrencyId() {
