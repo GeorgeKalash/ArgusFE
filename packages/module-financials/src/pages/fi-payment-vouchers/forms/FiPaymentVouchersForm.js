@@ -76,7 +76,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       glId: null,
       amount: null,
       checkNo: '',
-      checkbookId: null,
+      checkBookId: null,
       decimals: null,
       notes: '',
       exRate: 1,
@@ -706,7 +706,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                   formik.setFieldValue('paymentMethod', newValue?.key || null)
                   if (!newValue?.key) {
                     formik.setFieldValue('checkNo', '')
-                    formik.setFieldValue('checkbookId', null)
+                    formik.setFieldValue('checkBookId', null)
                   }
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
@@ -762,16 +762,16 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
               <ResourceComboBox
                 endpointId={FinancialRepository.PaymentVouchers.pack}
                 reducer={response => response?.record?.checkBooks}
-                name='checkbookId'
+                name='checkBookId'
                 label={labels.checkbook}
                 valueField='recordId'
                 displayField={'firstCheckNo'}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('checkbookId', newValue?.recordId || null)
+                  formik.setFieldValue('checkBookId', newValue?.recordId || null)
                 }}
-                error={formik.touched.checkbookId && Boolean(formik.errors.checkbookId)}
+                error={formik.touched.checkBookId && Boolean(formik.errors.checkBookId)}
                 disabled={formik.values.paymentMethod != 3}
               />
             </Grid>
