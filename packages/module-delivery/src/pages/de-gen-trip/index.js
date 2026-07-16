@@ -452,7 +452,7 @@ const GenerateOutboundTransportation = () => {
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('vehicleId', newValue?.recordId || null)
-                  formik.setFieldValue('capacity', newValue?.capacityVolume || null)
+                  formik.setFieldValue('capacity', newValue?.capacityVolume || 0)
                 }}
                 required
                 error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}

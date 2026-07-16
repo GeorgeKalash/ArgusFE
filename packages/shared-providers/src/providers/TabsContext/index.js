@@ -638,6 +638,8 @@ const TabsProvider = ({ children }) => {
         }
       ])
 
+      setCurrentTabIndex(openTabs?.length)
+
       return
     }
 

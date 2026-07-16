@@ -50,6 +50,7 @@ export function WindowProvider({ children }) {
   const [rerenderFlag, setRerenderFlag] = useState(false)
   const [lockProps, setLockProps] = useState(null)
   const closedWindow = useRef(null)
+  const windowCountRef = useRef({})
   const userId =
     typeof window !== 'undefined'
       ? JSON.parse(window.sessionStorage.getItem('userData'))?.userId
@@ -63,6 +64,7 @@ export function WindowProvider({ children }) {
 
   const currentValue = { ...stack[stack.length - 1] }
   const isImmediateWindow = currentValue?.isImmediateWindow ?? false
+  let lockedWindowResourceId = null
 
   function lockRecord(obj) {
     getRequest({
@@ -70,6 +72,7 @@ export function WindowProvider({ children }) {
       parameters: `_resourceId=${obj.resourceId}&_recordId=${obj.recordId}`
     }).then(res => {
       if (res.record && res.record.userId != userId) {
+        lockedWindowResourceId = res.record?.resourceId || null
         obj.isAlreadyLocked?.(res.record.userName)
         return
       }
@@ -109,10 +112,29 @@ export function WindowProvider({ children }) {
     }
   }
 
-  function closeWindow() {
-    if (currentTab?.resourceId) clearPageInteractions(currentTab.resourceId, 'Window')
-    const closingWindow = stack[stack.length - 1]
+  function incrementWindowCount(resourceId) {
+    if (!resourceId) return
 
+    windowCountRef.current[resourceId] = (windowCountRef.current[resourceId] || 0) + 1
+  }
+
+  function decrementWindowCount(resourceId) {
+    if (!resourceId) return 0
+
+    const next = Math.max((windowCountRef.current[resourceId] || 1) - 1, 0)
+    windowCountRef.current[resourceId] = next
+
+    return next
+  }
+
+  function closeWindow() {
+    const closingWindow = stack[stack.length - 1]
+    const resourceId = currentTab?.resourceId   
+
+    if (resourceId) {
+      const remaining = decrementWindowCount(resourceId)
+      if (remaining === 0) clearPageInteractions(resourceId, 'Window')   
+    }
     if (
       lockProps &&
       closingWindow?.props?.recordId === lockProps.recordId
@@ -123,7 +145,12 @@ export function WindowProvider({ children }) {
   }
 
   function closeWindowById(givenId) {
-    if (currentTab?.resourceId) clearPageInteractions(currentTab.resourceId, 'Window')
+    const resourceId = currentTab?.resourceId
+
+    if (resourceId) {
+      const remaining = decrementWindowCount(resourceId)
+      if (remaining === 0) clearPageInteractions(resourceId, 'Window')
+    }
     unlockRecord()
     closedWindow.current = currentValue
     setStack(stack => stack.filter(({ id }) => givenId != id))
@@ -136,7 +163,12 @@ export function WindowProvider({ children }) {
   function addToStack(options) {
     const { Component, spacing = true, trackPage = true, windowType = null} = options
     const dimensions = getWindowDimensions(options.width, options.height, spacing)
-    if (trackPage && windowType != 'ReportParameterBrowser') trackInteraction('Window')
+    const resourceId = currentTab?.resourceId
+
+    if (lockedWindowResourceId != resourceId && trackPage && windowType != 'ReportParameterBrowser') {
+      trackInteraction('Window')
+      incrementWindowCount(currentTab?.resourceId)
+    }
 
     setStack(stack => [
       ...stack,

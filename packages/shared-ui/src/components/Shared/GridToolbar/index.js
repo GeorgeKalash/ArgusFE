@@ -10,6 +10,7 @@ import ReportGenerator from '../ReportGenerator'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 import isEqual from 'lodash/isEqual'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
 
 const styles = {
   dialogActions: 'dialogActions',
@@ -47,6 +48,7 @@ const GridToolbar = ({
   const { platformLabels } = useContext(ControlContext)
   const [reportStore, setReportStore] = useState([])
   const trackInteraction = usePageInteraction()
+  const { clearPageInteractions } = useInteractionTracker()
   const initialFieldValuesRef = useRef(null)
   const previousFieldValuesRef = useRef(null)
 
@@ -162,7 +164,7 @@ const GridToolbar = ({
   }, [resetKey])
 
   const clear = () => {
-    trackInteraction()
+    clearPageInteractions(trackInteraction?.currentPageResourceId, 'gridToolbar')
     setSearchValue('')
     onSearch('')
     if (onSearchClear) onSearchClear()
@@ -444,7 +446,8 @@ const GridToolbar = ({
                       if (onSearchChange) onSearchChange(e.target.value)
                     }}
                     onSearch={value => {
-                      trackInteraction('gridToolbar')
+                      if (Boolean(value)) trackInteraction('gridToolbar')
+                      else clearPageInteractions(trackInteraction.currentPageResourceId, 'gridToolbar')
                       onSearch(value)
                     }}
                     search={true}

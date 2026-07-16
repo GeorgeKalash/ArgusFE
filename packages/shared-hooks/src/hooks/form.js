@@ -233,7 +233,7 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
   }
 
   const dirty = !deepEqual(formik.values, formik.initialValues)
-  const dirtyFields = getDirtyFields(formik.values, formik.initialValues)
+  const dirtyFields = getDirtyFields(formik.values, formik.initialValues) //help us to know faster what are the dirty fields
 
   useEffect(() => {
     if (!isImmediateWindow && isInsideWindow) return
@@ -245,8 +245,7 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
   return {
     formik: {
       ...formik,
-      dirty,
-      dirtyFields
+      dirty
     }
   }
 }

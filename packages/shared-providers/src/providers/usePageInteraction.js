@@ -17,7 +17,7 @@ const usePageInteraction = () => {
   const isReady = !!currentPageResourceId
 
   const trackInteraction = useCallback(
-    (source = null, clearInteraction = false) => {
+    (source = null) => {
       if (!currentPageResourceId) return false
 
       track(currentPageResourceId, source)

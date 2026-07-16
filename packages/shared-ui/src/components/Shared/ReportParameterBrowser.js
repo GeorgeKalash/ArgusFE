@@ -552,8 +552,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   }, [items])
 
   useEffect(() => {
-    if (items.length === 0) return
-    if (!rpbParams || rpbParams.length === 0) return
+    if (!rpbParams || rpbParams.length === 0 || items.length === 0) return
 
     const rpbMapped = rpbParams.reduce((acc, item) => {
       acc[item?.fieldId] = {

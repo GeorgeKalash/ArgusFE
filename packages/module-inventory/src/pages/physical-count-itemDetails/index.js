@@ -162,7 +162,7 @@ const PhysicalCountItemDe = () => {
     rowsUpdate.current = modifiedList
     setEditMode(res?.list?.length > 0)
   }
-console.log('formik',formik.values.rows)
+
   useEffect(() => {
     getSysChecks()
   }, [SystemChecks.POS_JUMP_TO_NEXT_LINE])

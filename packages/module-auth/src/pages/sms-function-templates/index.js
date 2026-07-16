@@ -65,7 +65,6 @@ const SmsFunctionTemplate = () => {
 
   const { formik } = useForm({
     maxAccess: access,
-    validateOnChange: true,
     initialValues: { rows: [] },
     onSubmit: async values => {
       await postSmsFunctionTemplates(values.rows)

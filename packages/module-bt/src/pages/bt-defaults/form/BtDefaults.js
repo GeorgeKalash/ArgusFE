@@ -71,7 +71,7 @@ const BtDefaults = ({ _labels, access }) => {
                 ]}
                 values={formik.values}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('fixing_msId', newValue?.recordId || '')
+                  formik.setFieldValue('fixing_msId', newValue?.recordId || null)
                 }}
                 error={formik.touched.fixing_msId && Boolean(formik.errors.fixing_msId)}
               />

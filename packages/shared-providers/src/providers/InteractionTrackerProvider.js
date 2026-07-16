@@ -153,9 +153,6 @@ export const InteractionTrackerProvider = ({ children }) => {
     }
   }, [fieldStates])
 
-  console.log('interactions', interactions)
-  console.log('fieldStates', fieldStates)
-
   return (
     <InteractionTrackerContext.Provider
       value={{

@@ -24,8 +24,7 @@ const BeneficiaryFields = () => {
   const {
     labels: labels,
     filterBy,
-    access,
-    filters
+    access
   } = useResourceQuery({
     datasetId: ResourceIds.CorrespondentControl,
     filter: {
@@ -140,7 +139,6 @@ const BeneficiaryFields = () => {
   }
 
   const onChange = (index, value) => {
-    console.log(index, value)
     if (value) {
       if (index === 'countryId') filterBy('countryId', value)
       if (index === 'dispersalType') filterBy('dispersalType', value)

@@ -220,12 +220,10 @@ const RPBGridToolbar = ({
 
       <GridToolbar
         onSearch={value => {
-          trackInteraction('RPBGridToolbar')
           filters(value, reportParams)
         }}
         reportParams={reportParams}
         onSearchClear={() => {
-          trackInteraction('RPBGridToolbar')
           setSearch('')
           if (typeof filterBy === 'function') filterBy('params', reportParams)
           else onClear(reportParams)
