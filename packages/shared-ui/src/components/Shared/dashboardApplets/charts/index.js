@@ -1600,50 +1600,53 @@ const getColorForIndex = (index, canvas) => {
 const LEADER_LINE_LENGTH = 10
 const HORIZONTAL_LINE_LENGTH = 28 
 const VALUE_MARGIN = 2
+const CANVAS_EDGE_SAFETY = 4
 
 const leaderLinesPlugin = {
   id: 'leaderLines',
 
- beforeLayout(chart) {
-  const dataset = chart.data.datasets[0]
-  const values = dataset?.data || []
+  beforeLayout(chart) {
+    const dataset = chart.data.datasets[0]
+    const values = dataset?.data || []
 
-  const ctx = chart.ctx
-  ctx.save()
-  ctx.font = 'bold 13px Arial'
+    const ctx = chart.ctx
+    ctx.save()
+    ctx.font = 'bold 13px Arial'
 
-  let maxTextWidth = 0
-  for (let i = 0; i < values.length; i++) {
-    const v = values[i]
-    if (v == null || v === 0) continue
-    maxTextWidth = Math.max(maxTextWidth, ctx.measureText(String(v)).width)
-  }
-
-  ctx.restore()
-  const layout = chart.options.layout || {}
-
-  const nextPadding = {
-    top: LEADER_LINE_LENGTH + 12,
-    bottom: LEADER_LINE_LENGTH + 12,
-    left: 70,  
-    right: 70, 
-  }
-
-  const current = layout.padding || {}
-
-  const changed =
-    current.left !== nextPadding.left ||
-    current.right !== nextPadding.right ||
-    current.top !== nextPadding.top ||
-    current.bottom !== nextPadding.bottom
-
-  if (changed) {
-    chart.options.layout = {
-      ...layout,
-      padding: nextPadding,
+    let maxTextWidth = 0
+    for (let i = 0; i < values.length; i++) {
+      const v = values[i]
+      if (v == null || v === 0) continue
+      maxTextWidth = Math.max(maxTextWidth, ctx.measureText(String(v)).width)
     }
-  }
-},
+
+    ctx.restore()
+    const horizontalPadding = Math.ceil(
+      HORIZONTAL_LINE_LENGTH + LEADER_LINE_LENGTH + maxTextWidth + VALUE_MARGIN + CANVAS_EDGE_SAFETY + 10
+    )
+
+    const layout = chart.options.layout || {}
+    const nextPadding = {
+      top: LEADER_LINE_LENGTH + 12,
+      bottom: LEADER_LINE_LENGTH + 12,
+      left: Math.max(40, horizontalPadding),
+      right: Math.max(40, horizontalPadding),
+    }
+
+    const current = layout.padding || {}
+    const changed =
+      current.left !== nextPadding.left ||
+      current.right !== nextPadding.right ||
+      current.top !== nextPadding.top ||
+      current.bottom !== nextPadding.bottom
+
+    if (changed) {
+      chart.options.layout = {
+        ...layout,
+        padding: nextPadding,
+      }
+    }
+  },
   afterDatasetsDraw(chart) {
     const { ctx, width: canvasWidth } = chart
     const meta = chart.getDatasetMeta(0)
@@ -1672,10 +1675,8 @@ const leaderLinesPlugin = {
       const startRadius = outerRadius * 0.8
       const startX = center.x + Math.cos(angle) * startRadius
       const startY = center.y + Math.sin(angle) * startRadius
-      const bendX =
-        center.x + Math.cos(angle) * (outerRadius + LEADER_LINE_LENGTH)
-      const bendY =
-        center.y + Math.sin(angle) * (outerRadius + LEADER_LINE_LENGTH)
+      const bendX = center.x + Math.cos(angle) * (outerRadius + LEADER_LINE_LENGTH)
+      const bendY = center.y + Math.sin(angle) * (outerRadius + LEADER_LINE_LENGTH)
 
       const rightSide = Math.cos(angle) >= 0
 
@@ -1687,7 +1688,6 @@ const leaderLinesPlugin = {
       const VALUE_SAFE_GAP = VALUE_MARGIN + textWidth + padding
 
       let endX
-
       if (rightSide) {
         const maxX = canvasWidth - VALUE_SAFE_GAP
         endX = Math.min(idealEndX, maxX)
@@ -1699,6 +1699,19 @@ const leaderLinesPlugin = {
       }
 
       const endY = bendY
+      let textDrawX = rightSide ? endX + VALUE_MARGIN : endX - VALUE_MARGIN
+      let textLeft = rightSide ? textDrawX : textDrawX - textWidth
+      let textRight = rightSide ? textDrawX + textWidth : textDrawX
+
+      if (textLeft < CANVAS_EDGE_SAFETY) {
+        const shift = CANVAS_EDGE_SAFETY - textLeft
+        endX += shift
+        textDrawX += shift
+      } else if (textRight > canvasWidth - CANVAS_EDGE_SAFETY) {
+        const shift = textRight - (canvasWidth - CANVAS_EDGE_SAFETY)
+        endX -= shift
+        textDrawX -= shift
+      }
 
       // LINE
       ctx.beginPath()
@@ -1713,16 +1726,12 @@ const leaderLinesPlugin = {
       ctx.fillStyle = '#555'
       ctx.fill()
 
-      // TEXT (single system, no conflicts)
+      // TEXT
       ctx.textBaseline = 'middle'
       ctx.fillStyle = dataset.backgroundColor?.[index] || '#333'
       ctx.textAlign = rightSide ? 'left' : 'right'
 
-      ctx.fillText(
-        text,
-        rightSide ? endX + VALUE_MARGIN : endX - VALUE_MARGIN,
-        endY
-      )
+      ctx.fillText(text, textDrawX, endY)
     })
 
     ctx.restore()
@@ -1886,9 +1895,10 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
         ref={chartBoxRef}
         style={{
           flex: 1,
+          width: '100%',
           display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          justifyContent: 'stretch',
+          alignItems: 'stretch',
           minHeight: 0,
           overflow: 'hidden',
         }}
@@ -1897,8 +1907,6 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
           style={{
             width: '100%',
             height: '100%',
-            maxWidth: '100%',
-            maxHeight: '100%',
             position: 'relative',
           }}
         >
