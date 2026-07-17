@@ -370,7 +370,23 @@ const Catalogue = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar maxAccess={access} reportName={'IVIT'} filterBy={filterBy} previewReport={ResourceIds.Catalogue} />
+        <RPBGridToolbar
+          maxAccess={access}
+          reportName={'IVIT'}
+          filterBy={filterBy}
+          previewReport={
+            view === 'grid'
+              ? ResourceIds.Catalogue
+              : values.clientId
+                ? ResourceIds.SalesBasket
+                : undefined
+          }
+          reportExtraParams={
+            view === 'icons' && values.clientId
+              ? `_clientId=${values.clientId}`
+              : undefined
+          }
+        />
 
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

@@ -278,6 +278,7 @@ export const ResourceIds = {
   Client: 51202,
   SalesOrder: 51302,
   SalesOrderSource: 51120,
+  SalesBasket: 51121,
   Drivers: 52201,
   Vehicle: 52202,
   SecurityGroupsFilter: 90101,
