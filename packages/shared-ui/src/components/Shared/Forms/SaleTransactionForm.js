@@ -1,7 +1,7 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -1323,6 +1323,8 @@ export default function SaleTransactionForm({
           ...formik.values.header,
           ...saTrxHeader,
           amount: roundTo(saTrxHeader?.amount) ?? 0,
+          vatAmount: roundTo(saTrxHeader?.vatAmount || 0),
+          baseAmount: roundTo(saTrxHeader?.baseAmount || 0),
           billAddress: billAdd,
           currentDiscount:
             saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null
