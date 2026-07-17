@@ -1,7 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 
-// Add all your custom field components here
 const COMPONENTS = [
   'CustomDatePicker',
   'CustomTextField',
@@ -35,7 +34,6 @@ function getAllFiles(dir, files = [], rootDir = dir) {
   return files
 }
 
-// Detect what value is used for maxAccess in this file e.g. {access} or {maxAccess}
 function detectMaxAccessValue(content) {
   const match = content.match(/maxAccess=(\{[^}]+\})/)
   return match ? match[1] : null
@@ -89,10 +87,8 @@ function main() {
   for (const file of allFiles) {
     let content = fs.readFileSync(file, 'utf8')
 
-    // Check if this file has any of our components missing maxAccess
     const needsFix = COMPONENTS.some(comp => {
       if (!content.includes(`<${comp}`)) return false
-      // Quick check: does any instance of this component NOT have maxAccess nearby
       let searchFrom = 0
       while (true) {
         const startIdx = content.indexOf(`<${comp}`, searchFrom)
@@ -108,11 +104,9 @@ function main() {
 
     if (!needsFix) continue
 
-    // Detect the maxAccess value used in this file
     const maxAccessValue = detectMaxAccessValue(content)
 
     if (!maxAccessValue) {
-      // No existing maxAccess found in this file — skip and warn
       skipped.push(path.relative(rootDir, file))
       continue
     }

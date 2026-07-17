@@ -1,11 +1,9 @@
 const fs = require('fs')
 const path = require('path')
 
-// Add all your Table / DataGrid component names here
 const TABLE_COMPONENTS = [
   'Table',
   'DataGrid',
-  // add more, e.g. 'InlineEditGrid', 'ResourceTable', etc.
 ]
 
 const EXTENSIONS = ['.jsx', '.js']
@@ -31,9 +29,6 @@ function getAllFiles(dir, files = [], rootDir = dir) {
   return files
 }
 
-// Find where the OPENING tag ends (handles self-closing tags AND tags with children),
-// respecting {} expressions and quoted strings so we don't get fooled by
-// '>' or '/>' appearing inside attribute values (e.g. columns={[{...}]}).
 function findOpeningTagEnd(content, startIdx) {
   let i = startIdx
   let braceDepth = 0
@@ -77,8 +72,6 @@ function findOpeningTagEnd(content, startIdx) {
   return null
 }
 
-// Detect what value the screen already uses for access control.
-// Priority: existing maxAccess={...} > existing access={...} prop > destructured `access` var
 function detectAccessValue(content) {
   let match = content.match(/maxAccess=\{([^}]+)\}/)
   if (match) return { value: `{${match[1]}}`, source: 'maxAccess prop' }
@@ -104,7 +97,6 @@ function addMaxAccessToComponent(content, componentName, maxAccessValue) {
     const startIdx = result.indexOf(openTag, searchFrom)
     if (startIdx === -1) break
 
-    // avoid matching e.g. <TableRow when looking for <Table
     const nextChar = result[startIdx + openTag.length]
     if (nextChar && /[A-Za-z0-9_]/.test(nextChar)) {
       searchFrom = startIdx + openTag.length
@@ -152,8 +144,8 @@ function main() {
 
   let totalFixed = 0
   let totalFiles = 0
-  const skippedNoAccess = []   // has table/grid, missing maxAccess, but screen has no access control at all
-  const alreadyOk = []         // has table/grid, all instances already have maxAccess
+  const skippedNoAccess = []  
+  const alreadyOk = []     
 
   for (const file of allFiles) {
     let content = fs.readFileSync(file, 'utf8')
@@ -162,7 +154,6 @@ function main() {
 
     const relativePath = path.relative(rootDir, file)
 
-    // does any instance of a table component lack maxAccess?
     const needsFix = TABLE_COMPONENTS.some(comp => {
       if (!content.includes(`<${comp}`)) return false
       let searchFrom = 0
