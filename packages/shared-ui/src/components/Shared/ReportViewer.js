@@ -57,6 +57,8 @@ const ReportViewer = ({ resourceId }) => {
           reportClass: item.instanceName,
           parameters: item.parameters,
           layoutName: item.layoutName,
+          schemaFile: item.schemaFile,
+          reportEngine: item.reportEngine,
           assembly: 'ArgusRPT.dll'
         }))
 
@@ -68,7 +70,9 @@ const ReportViewer = ({ resourceId }) => {
           reportClass: item.reportName,
           parameters: item.parameters,
           layoutName: item.caption,
-          assembly: item.assembly
+          assembly: item.assembly,
+          schemaFile: item.schemaFile,
+          reportEngine: item.reportEngine,
         }))
 
       return [...prev, ...layoutsPack, ...templatesPack]
