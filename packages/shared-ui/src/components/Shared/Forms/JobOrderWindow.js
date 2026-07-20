@@ -13,7 +13,7 @@ import SizesTab from '@argus/shared-ui/src/components/Shared/JobOrderPages/Sizes
 import WorkCenterTab from '@argus/shared-ui/src/components/Shared/JobOrderPages/WorkCenterTab'
 import ItemTab from '@argus/shared-ui/src/components/Shared/JobOrderPages/ItemTab'
 
-const JobOrderWindow = ({ recordId, jobReference, invalidate, lockRecord, window }) => {
+const JobOrderWindow = ({ recordId, jobReference, invalidate, window }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId, jobReference, isPosted: false, isCancelled: false })
   const [refetchRouting, setRefetchRouting] = useState(false)
@@ -54,7 +54,6 @@ const JobOrderWindow = ({ recordId, jobReference, invalidate, lockRecord, window
           maxAccess={access}
           setRefetchRouting={setRefetchRouting}
           invalidate={invalidate}
-          lockRecord={lockRecord}
           refetchJob={refetchJob}
           setRefetchJob={setRefetchJob}
           window={window}

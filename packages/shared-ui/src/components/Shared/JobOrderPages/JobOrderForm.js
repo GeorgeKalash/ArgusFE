@@ -27,11 +27,10 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import FormGrid from '@argus/shared-ui/src/components/form'
 import Samples from '@argus/shared-ui/src/components/Shared/JobOrderPages/Samples'
 import SerialsLots from '@argus/shared-ui/src/components/Shared/JobOrderPages/SerialsLots'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function JobOrderForm({
   labels,
@@ -40,7 +39,6 @@ export default function JobOrderForm({
   store,
   setRefetchRouting,
   invalidate,
-  lockRecord,
   refetchJob,
   setRefetchJob,
   window
@@ -52,7 +50,6 @@ export default function JobOrderForm({
   const recordId = store?.recordId
   const [imageSource, setImageSource] = useState(null)
   const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
-  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -299,35 +296,14 @@ export default function JobOrderForm({
       })
     })
     toast.success(platformLabels.Posted)
-    lockRecord({
-      recordId: res.recordId,
-      reference: formik.values.reference,
-      resourceId: ResourceIds.MFJobOrders,
-      onSuccess: () => {
-        addLockedScreen({
-          resourceId: ResourceIds.MFJobOrders,
-          recordId: res.recordId,
-          reference: formik.values.reference
-        })
-        refetchForm(res.recordId)
-        setStore(prevStore => ({
-          ...prevStore,
-          isPosted: true
-        }))
-      },
-      isAlreadyLocked: name => {
-        window.close()
-        stack({
-          Component: NormalDialog,
-          props: {
-            DialogText: `${platformLabels.RecordLocked} ${name}`,
-            width: 600,
-            height: 200,
-            title: platformLabels.Dialog
-          }
-        })
-      }
-    })
+    
+    refetchForm(res.recordId)
+    setStore(prevStore => ({
+      ...prevStore,
+      isPosted: true
+    }))
+
+    await releaseLock()
 
     invalidate()
   }
@@ -405,22 +381,15 @@ export default function JobOrderForm({
       ...rest
     }))
 
-    !formik.values.recordId &&
-      lockRecord({
-        recordId: jobOrder?.recordId,
-        reference: jobOrder?.reference,
-        resourceId: ResourceIds.MFJobOrders,
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: ResourceIds.MFJobOrders,
-            recordId: jobOrder?.recordId,
-            reference: jobOrder?.reference
-          })
-        }
-      })
-
     return jobOrder?.reference
   }
+
+  const { releaseLock } = useRecordLock({
+    recordId,
+    reference: formik.values.reference,
+    resourceId: ResourceIds.MFJobOrders,
+    enabled: !!recordId && !isPosted
+  })
 
   async function getRouting(recordId) {
     if (!recordId) return

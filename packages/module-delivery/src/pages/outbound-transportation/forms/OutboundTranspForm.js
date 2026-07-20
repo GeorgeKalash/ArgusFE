@@ -26,6 +26,7 @@ import CustomTimePicker from '@argus/shared-ui/src/components/Inputs/CustomTimeP
 import dayjs from 'dayjs'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -150,6 +151,13 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   const isClosed = formik.values.header.wip === 2
   const editMode = !!formik.values.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.Trip,
+    enabled: !!recordId && !isClosed
+  })
+
   async function refetchForm(recordId) {
     const res = await getOutboundTransp(recordId)
     const formattedDepDate = formatDateFromApi(res.record.header.departureTime)
@@ -221,7 +229,8 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
     toast.success(platformLabels.Closed)
     invalidate()
-
+    
+    await releaseLock()
     await refetchForm(formik.values.recordId)
   }
 

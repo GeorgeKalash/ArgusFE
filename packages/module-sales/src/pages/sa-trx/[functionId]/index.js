@@ -15,18 +15,17 @@ import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/Sa
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import toast from 'react-hot-toast'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
-  const { stack, lockRecord } = useWindow()
+  const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { addLockedScreen } = useContext(LockedScreensContext)
+  const { checkLock } = useRecordLock()
 
   const { functionId } = Router()
 
@@ -192,48 +191,25 @@ const SaTrx = () => {
   })
 
   const edit = obj => {
-    openForm(obj?.recordId, obj?.reference, obj?.status)
+    openForm(obj?.recordId)
   }
 
-  function openStack(recordId) {
+  async function openForm(recordId) {
+    const canOpen = await checkLock({
+      resourceId: getResourceId(parseInt(functionId)),
+      recordId
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: SaleTransactionForm,
       props: {
         recordId,
         functionId,
-        lockRecord,
         getResourceId,
       }
     })
-  }
-
-  async function openForm(recordId, reference, status) {
-    if (recordId && status !== 3) {
-      await lockRecord({
-        recordId: recordId,
-        reference: reference,
-        resourceId: getResourceId(parseInt(functionId)),
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: getResourceId(parseInt(functionId)),
-            recordId,
-            reference
-          })
-          openStack(recordId)
-        },
-        isAlreadyLocked: name => {
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              title: platformLabels.Dialog
-            }
-          })
-        }
-      })
-    } else {
-      openStack(recordId)
-    }
   }
 
   const add = async () => {

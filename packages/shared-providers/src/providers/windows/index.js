@@ -45,7 +45,7 @@ export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [rerenderFlag, setRerenderFlag] = useState(false)
-  const [lockProps, setLockProps] = useState(null)
+  const lockProps = useRef(null)
   const closedWindow = useRef(null)
   const userId =
     typeof window !== 'undefined'
@@ -54,49 +54,29 @@ export function WindowProvider({ children }) {
 
   const currentValue = { ...stack[stack.length - 1] }
 
-  function lockRecord(obj) {
-    getRequest({
-      extension: AccessControlRepository.LockedRecords.get,
-      parameters: `_resourceId=${obj.resourceId}&_recordId=${obj.recordId}`
-    }).then(res => {
-      if (res.record && res.record.userId != userId) {
-        obj.isAlreadyLocked?.(res.record.userName)
-        return
-      }
 
-      const body = {
-        resourceId: obj.resourceId,
-        recordId: obj.recordId,
-        reference: obj.reference,
-        userId,
-        clockStamp: new Date()
-      }
-
-      postRequest({
-        extension: AccessControlRepository.lockRecord,
-        record: JSON.stringify(body)
-      }).then(() => {
-        setLockProps(obj)
-        obj.onSuccess?.()
-      })
-    })
+  function registerLock(props) {
+    lockProps.current = props
   }
 
-  function unlockRecord() {
-    if (lockProps) {
-      const body = {
-        resourceId: lockProps.resourceId,
-        recordId: lockProps.recordId,
-        reference: lockProps.reference,
-        userId: userId,
-        clockStamp: new Date()
-      }
-      postRequest({
-        extension: AccessControlRepository.unlockRecord,
-        record: JSON.stringify(body)
-      })
-      setLockProps(null)
+  async function unlockRecord() {
+    if (!lockProps.current)
+      return
+
+    const body = {
+      resourceId: lockProps.current.resourceId,
+      recordId: lockProps.current.recordId,
+      reference: lockProps.current.reference,
+      userId,
+      clockStamp: new Date()
     }
+
+    await postRequest({
+      extension: AccessControlRepository.unlockRecord,
+      record: JSON.stringify(body)
+    })
+
+    lockProps.current = null
   }
 
   function closeWindow() {
@@ -160,7 +140,7 @@ export function WindowProvider({ children }) {
   }
 
   return (
-    <WindowContext.Provider value={{ stack: addToStack, lockRecord }}>
+    <WindowContext.Provider value={{ stack: addToStack, registerLock }}>
       {children}
       {stack.map(
         ({

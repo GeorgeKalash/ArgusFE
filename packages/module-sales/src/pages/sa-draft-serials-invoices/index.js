@@ -14,14 +14,13 @@ import DraftForm from '@argus/shared-ui/src/components/Shared/Forms/DraftForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const DraftSerialsInvoices = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack, lockRecord } = useWindow()
-  const { addLockedScreen } = useContext(LockedScreensContext)
+  const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -143,47 +142,24 @@ const DraftSerialsInvoices = () => {
   }
 
   const editDSI = obj => {
-    openForm(obj?.recordId, obj?.reference, obj?.wip)
+    openForm(obj?.recordId)
   }
 
-  async function openForm(recordId, reference, wip) {
-    if (recordId && wip !== 2) {
-      await lockRecord({
-        recordId: recordId,
-        reference: reference,
-        resourceId: ResourceIds.DraftSerialsInvoices,
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: ResourceIds.DraftSerialsInvoices,
-            recordId,
-            reference
-          })
-          openStack(recordId)
-        },
-        isAlreadyLocked: name => {
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              title: platformLabels.Dialog
-            }
-          })
-        }
-      })
-    } else {
-      openStack(recordId)
-    }
-  }
+  async function openForm(recordId) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.DraftSerialsInvoices,
+      recordId
+    })
 
-  async function openStack(recordId) {
+    if (!canOpen) return
+
     stack({
       Component: DraftForm,
-      props: {
+      props:{
         labels,
         access,
         recordId,
-        invalidate,
-        lockRecord
+        invalidate
       },
       title: labels.draftSerInv
     })

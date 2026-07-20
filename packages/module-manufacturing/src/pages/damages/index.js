@@ -14,14 +14,13 @@ import DamageForm from '@argus/shared-ui/src/components/Shared/Forms/DamageForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const Damages = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack, lockRecord } = useWindow()
-  const { addLockedScreen } = useContext(LockedScreensContext)
+  const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -125,51 +124,26 @@ const Damages = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId, obj?.reference, obj?.status)
+    openForm(obj?.recordId)
   }
 
-  async function openStack(recordId) {
+  async function openForm(recordId) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.Damages,
+      recordId
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: DamageForm,
       props: {
-        recordId,
-        lockRecord,
+        recordId
       },
       width: 1150,
       height: 580,
       title: labels.damage
     })
-  }
-
-  async function openForm(recordId, reference, status) {
-    if (recordId && status !== 3) {
-      await lockRecord({
-        recordId,
-        reference,
-        resourceId: ResourceIds.Damages,
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: ResourceIds.Damages,
-            recordId,
-            reference
-          })
-          openStack(recordId, reference)
-        },
-        isAlreadyLocked: name => {
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              width: 600,
-              height: 200,
-              title: platformLabels.Dialog
-            }
-          })
-        }
-      })
-    } else {
-      openStack(recordId, reference)
-    }
   }
 
   const del = async obj => {
