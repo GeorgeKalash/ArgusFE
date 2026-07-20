@@ -15,6 +15,9 @@ import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 
+const POPUP_PORTAL_SELECTOR =
+  '.MuiPopover-root, .MuiAutocomplete-popper, .MuiMenu-list, .MuiPickersPopper-root'
+
 export function DataGrid({
   name,
   columns,
@@ -274,6 +277,7 @@ export function DataGrid({
       if (!api) return
       const editing = api.getEditingCells?.() || []
       if (editing.length) {
+        document.activeElement?.blur()
         api.stopEditing()
         api.flushAsyncTransactions?.()
       }
@@ -286,7 +290,7 @@ export function DataGrid({
       const pressedButton = target.closest(BUTTON_SELECTOR)
 
       if (gridApiRef.current?.getEditingCells()?.length == 0) return
-      if (!pressedButton || pressedButton.closest('.MuiPaper-root')) return
+    if (!pressedButton || pressedButton.closest(POPUP_PORTAL_SELECTOR)) return
       if (isInsideAgGridUX(pressedButton, e)) return
       if (gridApiRef.current?.getEditingCells()?.length > 0) {
         commitIfEditing()
@@ -984,7 +988,7 @@ export function DataGrid({
 
       if (
         !event.target.closest('.ag-cell') &&
-        !pressedButton?.closest('.MuiPaper-root') &&
+        !pressedButton?.closest(POPUP_PORTAL_SELECTOR) &&
         gridApiRef.current?.getEditingCells()?.length > 0
       ) {
         gridApiRef.current?.stopEditing()
