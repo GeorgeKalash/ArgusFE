@@ -537,7 +537,7 @@ export function DataGrid({
     const isCheckbox = comp === 'checkbox'
 
     if (isCheckbox) {
-      const disabledCheckbox = _disabled || !!column.colDef?.props?.readOnly
+      const disabledCheckbox = _disabled || !!column.colDef?.props?.disabled
 
       return (
         <Box
@@ -547,7 +547,8 @@ export function DataGrid({
             padding: '0',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            pointerEvents: disabledCheckbox ? 'none' : 'auto'
           }}
         >
           <GridCheckbox
@@ -960,7 +961,7 @@ export function DataGrid({
 
     const nonEditableByClick =
       colDef.component === 'button' || colDef.component === 'checkbox' || colDef.component === 'icon' || colDef.component === 'image'
-
+    
     if (!nonEditableByClick) {
       api.startEditingCell({
         rowIndex: rowIndex,
