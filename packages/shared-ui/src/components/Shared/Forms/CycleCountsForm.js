@@ -94,22 +94,13 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: response.recordId
-        }))
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
-        const res2 = await getData(response.recordId)
-
-        formik.setValues({
-          ...res2.record,
-          date: formatDateFromApi(res2.record.date)
-        })
-      } else toast.success(platformLabels.Edited)
-
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: response.recordId
+      }))
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
+      refetchForm(response.recordId)
     }
   })
 
@@ -123,37 +114,38 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     })
   }
 
-  async function getData(recordId) {
-    return await getRequest({
+  async function refetchForm(recordId) {
+    const res = await getRequest({
       extension: SCRepository.StockCount.get,
       parameters: `_recordId=${recordId}`
     })
-  }
 
-  async function refetchForm(recordId) {
-    const res2 = await getData(recordId)
-    res2.record.date = formatDateFromApi(res2.record.date)
-
-    return res2
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: formatDateFromApi(res.record.date)
+      }
+    })
+    
+    setStore(prevStore => ({
+      ...prevStore,
+      isClosed: res.record.wip === 2,
+      isPosted: res.record.status === 3
+    }))
   }
 
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
 
-  const onClose = async recId => {
+  const onClose = async () => {
     const res = await postRequest({
       extension: SCRepository.StockCount.close,
-      record: JSON.stringify({ recordId: recId })
+      record: JSON.stringify({ recordId: formik.values.recordId })
     })
 
     toast.success(platformLabels.Closed)
     invalidate()
-    const res2 = await refetchForm(res.recordId)
-    formik.setValues(res2.record)
-    setStore(prevStore => ({
-      ...prevStore,
-      isClosed: res2.record.wip === 2
-    }))
+    refetchForm(res.recordId)
   }
 
   async function onReopen() {
@@ -164,50 +156,29 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
 
     toast.success(platformLabels.Reopened)
     invalidate()
-    const res2 = await refetchForm(res.recordId)
-    formik.setValues(res2.record)
-    setStore(prevStore => ({
-      ...prevStore,
-      isClosed: res2.record.wip === 2
-    }))
+    refetchForm(res.recordId)
   }
 
   const onPost = async () => {
-    const copy = { ...formik.values }
-    copy.date = formatDateToApi(copy.date)
-
     const res = await postRequest({
       extension: SCRepository.StockCount.post,
-      record: JSON.stringify(copy)
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
     })
 
     toast.success(platformLabels.Posted)
     invalidate()
-    const res2 = await refetchForm(res.recordId)
-    formik.setValues(res2.record)
-    setStore(prevStore => ({
-      ...prevStore,
-      isPosted: res2.record.status === 3
-    }))
+    refetchForm(res.recordId)
   }
 
   const onUnpost = async () => {
-    const copy = { ...formik.values }
-    copy.date = formatDateToApi(copy.date)
-
     const res = await postRequest({
       extension: SCRepository.StockCount.unpost,
-      record: JSON.stringify(copy)
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
     })
 
     toast.success(platformLabels.Unposted)
     invalidate()
-    const res2 = await refetchForm(res.recordId)
-    formik.setValues(res2.record)
-    setStore(prevStore => ({
-      ...prevStore,
-      isPosted: res2.record.status !== 3
-    }))
+    refetchForm(res.recordId)
   }
 
   const actions = [
@@ -220,7 +191,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     {
       key: 'Close',
       condition: !isClosed,
-      onClick: () => onClose(formik.values.recordId),
+      onClick: onClose,
       disabled: isPosted || isClosed || !editMode
     },
     {
@@ -245,24 +216,9 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   ]
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getData(recordId)
-
-        setStore(prevStore => ({
-          ...prevStore,
-          isPosted: res.record.status === 3,
-          isClosed: res.record.wip === 2
-        }))
-
-        formik.resetForm({
-          values: {
-            ...res.record,
-            date: formatDateFromApi(res.record.date)
-          }
-        })
-      }
-    })()
+    if (recordId) {
+      refetchForm(recordId)
+    }
   }, [])
 
   return (
