@@ -47,22 +47,24 @@ const ItemWindow = ({ obj, labels, maxAccess, window }) => {
         parameters: ''
       })
 
-      setStore(prev => ({
-        ...prev,
-        ...res.record,
-        _retailSettings: res.record.retailSettings
-      }))
+      if (res?.record) {
+        setStore(prev => ({
+          ...prev,
+          ...res.record,
+          _retailSettings: res?.record?.retailSettings
+        }))
+      }
     }
 
     loadPack()
   }, [])
 
   const refreshItem = async () => {
-    if (!store._msId || !store._dmgId || !store.retailSettings?.length) return
+    if (!store._msId || !store.retailSettings?.length) return
 
     const response = await getRequest({
       extension: InventoryRepository.Items.pack_B,
-      parameters: `_itemId=${store.recordId}&_dimGroupId=${store._dmgId}&_itemRetailCount=${store?.retailSettings?.length}&_msId=${store._msId}`
+      parameters: `_itemId=${store.recordId}&_dimGroupId=${store._dmgId || 0}&_itemRetailCount=${store?.retailSettings?.length}&_msId=${store._msId}`
     })
 
     setStore(prev => ({

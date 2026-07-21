@@ -64,14 +64,6 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
     }
   }
 
-  const filteredData = formik.values.search
-    ? formik.values.rows.filter(
-        item =>
-          (item.siteRef && item.siteRef.toString().includes(formik.values.search.toLowerCase())) ||
-          (item.siteName && item.siteName.toLowerCase().includes(formik.values.search.toLowerCase()))
-      )
-    : formik.values.rows
-
   const columns = [
     {
       component: 'checkbox',
@@ -79,7 +71,7 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
       name: 'isChecked',
       flex: 1,
       props: {
-        disabled: isPosted || isClosed
+        disabled: isClosed
       }
     },
     {
