@@ -38,7 +38,7 @@ const OpenPurchaseRequisition = () => {
   function checkItems(items) {
     if (items?.length < 1) {
       stackError({
-        message: labels.checkItemsBeforeAppend
+        message: platformLabels.checkItemsBeforeAppend
       })
 
       return false

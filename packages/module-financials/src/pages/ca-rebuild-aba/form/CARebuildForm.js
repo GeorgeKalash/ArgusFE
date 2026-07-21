@@ -18,10 +18,8 @@ export default function CARebuildAccountBalance({ _labels, access }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    initialValues: { fiscalYear: '', cashAccountId: 0, recordId: 'N/A' },
+    initialValues: { fiscalYear: null, cashAccountId: null, recordId: 'N/A' },
     maxAccess: access,
-    validateOnChange: true,
-
     validationSchema: yup.object({
       fiscalYear: yup.string().required()
     }),
@@ -82,7 +80,7 @@ export default function CARebuildAccountBalance({ _labels, access }) {
                 required
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                  formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
@@ -102,7 +100,7 @@ export default function CARebuildAccountBalance({ _labels, access }) {
                 values={formik.values}
                 maxAccess={access}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue?.recordId || 0)
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
               />

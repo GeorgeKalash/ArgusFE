@@ -76,6 +76,8 @@ const WindowToolbar = ({
       reportClass: item.instanceName,
       parameters: item.parameters,
       layoutName: item.layoutName,
+      schemaFile: item.schemaFile,
+      reportEngine: item.reportEngine,
       assembly: 'ArgusRPT.dll'
     }))
 
@@ -85,6 +87,8 @@ const WindowToolbar = ({
       reportClass: item.reportName,
       parameters: item.parameters,
       layoutName: item.caption,
+      schemaFile: item.schemaFile,
+      reportEngine: item.reportEngine,
       assembly: item.assembly
     }))
 

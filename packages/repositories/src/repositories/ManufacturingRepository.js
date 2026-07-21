@@ -276,6 +276,8 @@ export const ManufacturingRepository = {
     gen: service + 'genPO',
     close: service + 'closePO',
     reopen: service + 'reopenPO',
+    open: service + 'openPO',
+    generate: service + 'genORDFromPO',
   },
   BillOfMaterials: {
     get: service + 'getBMA',

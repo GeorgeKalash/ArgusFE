@@ -1,7 +1,7 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -418,11 +418,6 @@ export default function SaleTransactionForm({
 
   function buildCalculatedTaxDetails(row, taxDetailsList = []) {
     return (taxDetailsList || []).map(td => {
-      const singleTaxDetail = {
-        ...td,
-        taxScheduleAmount: td.amount || td.taxScheduleAmount || 0
-      }
-
       const calculatedAmount = calcVatAmountPerTaxDetail(
         {
           priceType: row?.priceType,
@@ -434,9 +429,9 @@ export default function SaleTransactionForm({
           baseLaborPrice: row?.baseLaborPrice || 0,
           vatAmount: row?.vatAmount || 0,
           tdPct: formik.values?.header?.tdPct || 0,
-          taxDetails: singleTaxDetail
+          taxDetails: td
         },
-        singleTaxDetail
+        td
       )
 
       return {
@@ -1280,7 +1275,7 @@ export default function SaleTransactionForm({
   async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
-    const saTrxTaxes = saTrxPack?.taxDetails || []
+    const saTrxTaxes = saTrxPack?.taxes || []
     const balance = saTrxPack?.accountBalance?.balance
     const accountId = saTrxPack?.client?.accountId
     const maxDiscount = saTrxPack?.client?.maxDiscount
@@ -1293,12 +1288,7 @@ export default function SaleTransactionForm({
 
     const modifiedList = await Promise.all(
       (saTrxItems || []).map(async (item, index) => {
-        let calculatedTaxDetails = []
-
-        if (item?.taxId) {
-          const rawTaxDetails = saTrxTaxes.filter(td => td.taxId === item.taxId)
-          calculatedTaxDetails = buildCalculatedTaxDetails(item, rawTaxDetails)
-        }
+        const taxDetails = saTrxTaxes.filter(tax => tax.seqNo === item.seqNo) || []
 
         return {
           ...item,
@@ -1317,9 +1307,9 @@ export default function SaleTransactionForm({
                 id: index
               }
             }),
-          priceWithVAT: calculatePrice(item, calculatedTaxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
           totalWeightPerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
-          taxDetails: calculatedTaxDetails
+          taxDetails
         }
       })
     )
@@ -1333,6 +1323,8 @@ export default function SaleTransactionForm({
           ...formik.values.header,
           ...saTrxHeader,
           amount: roundTo(saTrxHeader?.amount) ?? 0,
+          vatAmount: roundTo(saTrxHeader?.vatAmount || 0),
+          baseAmount: roundTo(saTrxHeader?.baseAmount || 0),
           billAddress: billAdd,
           currentDiscount:
             saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null
@@ -1590,6 +1582,13 @@ export default function SaleTransactionForm({
       dirtyField: dirtyField
     })
 
+    const taxDetails = formik.values.header.isVattable === true && newRow.taxDetails
+      ? newRow.taxDetails.map(td => ({
+          ...td,
+          amount: td.taxScheduleAmount
+        }))
+      : null
+
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
@@ -1600,12 +1599,7 @@ export default function SaleTransactionForm({
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: itemPriceRow?.vatAmount || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
-      taxDetails: formik.values.header.isVattable === true && newRow.taxDetails
-        ? newRow.taxDetails.map(td => ({
-            ...td,
-            amount: td.taxScheduleAmount
-          }))
-        : null
+      taxDetails
     })
 
     let commonData = {
@@ -1624,7 +1618,8 @@ export default function SaleTransactionForm({
       totalWeightPerG: itemPriceRow?.totalWeightPerG ? roundTo(itemPriceRow.totalWeightPerG) : 0,
       mdAmount: itemPriceRow?.mdAmount ? itemPriceRow.mdAmount : 0,
       vatAmount: vatCalcRow?.vatAmount ? vatCalcRow.vatAmount : 0,
-      priceWithVAT: calculatePrice(newRow, newRow?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE)
+      priceWithVAT: calculatePrice(newRow, newRow?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+      taxDetails: buildCalculatedTaxDetails(newRow, taxDetails)
     }
 
     return iconClicked ? { changes: commonData } : commonData

@@ -156,6 +156,12 @@ const TabsProvider = ({ children }) => {
     page: null
   })
 
+  const [bulkCloseDialog, setBulkCloseDialog] = useState({
+    open: false,
+    type: null,
+    tabIndex: null
+  })
+
   const tabsWrapperRef = useRef(null)
   const pagesCacheRef = useRef(new Map())
   const redirectingRef = useRef(false)
@@ -337,9 +343,19 @@ const TabsProvider = ({ children }) => {
   }, [])
 
   const handleCloseTab = async activeTab => {
-    const hasUnsavedChanges = interactions.length ? interactions.some(item => item.pageId === activeTab.resourceId) : false
-    const isActiveTab = activeTab?.resourceId == currentTab?.resourceId
-    if (hasUnsavedChanges && !isActiveTab) {
+    const hasUnsavedChanges = interactions.length
+      ? interactions.some(item => item.pageId === activeTab.resourceId)
+      : false
+    const isStandingOnTab = activeTab?.resourceId == currentTab?.resourceId
+    
+    if (hasUnsavedChanges && isStandingOnTab) {
+      clearPageInteractions(activeTab.resourceId)
+      await closeTab(activeTab.route)
+
+      return
+    }
+
+    if (hasUnsavedChanges && !isStandingOnTab) {
       setCloseDialog({
         open: true,
         tab: activeTab,
@@ -455,7 +471,7 @@ const TabsProvider = ({ children }) => {
     [currentTabIndex, openTabs, router.asPath, navigateTo, normalizeRoute, setCurrentTabIndex]
   )
 
-  const handleCloseAllTabs = useCallback(async () => {
+  const executeCloseAllTabs = useCallback(async () => {
     closingRouteRef.current = normalizeRoute(router.asPath)
 
     if (hasHomeTab) {
@@ -482,7 +498,20 @@ const TabsProvider = ({ children }) => {
     })
   }, [openTabs, hasHomeTab, navigateTo, normalizeRoute, router.asPath, setOpenTabs, setCurrentTabIndex])
 
-  const handleCloseOtherTab = useCallback(
+  const handleCloseAllTabs = useCallback(async () => {
+    const hasDirtyTabs = openTabs.some(tab =>
+      interactions.some(item => item.pageId === tab.resourceId)
+    )
+
+    if (hasDirtyTabs) {
+      setBulkCloseDialog({ open: true, type: 'all', tabIndex: null })
+      return
+    }
+
+    await executeCloseAllTabs()
+  }, [openTabs, interactions, executeCloseAllTabs])
+
+  const executeCloseOtherTab = useCallback(
     async tabIndex => {
       const selectedTab = openTabs?.[tabIndex]
       if (!selectedTab) return
@@ -520,6 +549,53 @@ const TabsProvider = ({ children }) => {
     },
     [openTabs, hasHomeTab, navigateTo, normalizeRoute, router.asPath, setOpenTabs, setCurrentTabIndex]
   )
+
+  const handleCloseOtherTab = useCallback(
+    async tabIndex => {
+      const otherTabs = openTabs.filter((_, i) => i !== tabIndex)
+      const hasDirtyTabs = otherTabs.some(tab =>
+        interactions.some(item => item.pageId === tab.resourceId)
+      )
+
+      if (hasDirtyTabs) {
+        setBulkCloseDialog({ open: true, type: 'other', tabIndex })
+        return
+      }
+
+      await executeCloseOtherTab(tabIndex)
+    },
+    [openTabs, interactions, executeCloseOtherTab]
+  )
+
+  const clearInteractionsForTabs = tabs => {
+    tabs.forEach(tab => {
+      if (tab.resourceId) {
+        clearPageInteractions(tab.resourceId)
+      }
+    })
+  }
+
+  const confirmBulkClose = async () => {
+    const { type, tabIndex } = bulkCloseDialog
+
+    setBulkCloseDialog({
+      open: false,
+      type: null,
+      tabIndex: null
+    })
+
+    if (type === 'all') {
+      clearInteractionsForTabs(openTabs)
+      await executeCloseAllTabs()
+    } else if (type === 'other') {
+      clearInteractionsForTabs(openTabs.filter((_, i) => i !== tabIndex))
+      await executeCloseOtherTab(tabIndex)
+    }
+  }
+
+  const cancelBulkCloseDialog = () => {
+    setBulkCloseDialog({ open: false, type: null, tabIndex: null })
+  }
 
   const closeTab = useCallback(
     async tabRoute => {
@@ -894,7 +970,7 @@ const TabsProvider = ({ children }) => {
           onClick={async event => {
             event.preventDefault()
             event.stopPropagation()
-            await closeTab(openTabs?.[tabsIndex]?.route)
+            await handleCloseTab(activeTab)
             handleClose()
           }}
         >
@@ -940,6 +1016,30 @@ const TabsProvider = ({ children }) => {
 
               <button style={buttonStyle} onClick={confirmCloseTab}>
                {platformLabels?.CloseTab}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bulkCloseDialog.open && (
+        <div style={getOverlayStyle()}>
+          <div style={modalStyle}>
+            <div style={headerStyle}>
+              {platformLabels?.Confirmation}
+            </div>
+
+            <div style={messageStyle}>
+              You have tabs with unsaved changes. Are you sure you want to close them?
+            </div>
+
+            <div style={footerStyle}>
+              <button style={cancelButtonStyle} onClick={cancelBulkCloseDialog}>
+                {platformLabels?.Cancel}
+              </button>
+
+              <button style={buttonStyle} onClick={confirmBulkClose}>
+                {platformLabels?.CloseTab}
               </button>
             </div>
           </div>

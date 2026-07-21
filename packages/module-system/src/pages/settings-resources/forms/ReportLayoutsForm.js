@@ -119,6 +119,16 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
       flex: 1
     },
     {
+      field: 'reportEngineName',
+      headerName: labels.reportEngineName,
+      flex: 1
+    },
+    {
+      field: 'schemaFile',
+      headerName: labels.schemaFile,
+      flex: 1
+    },
+    {
       flex: 0.5,
       cellRenderer: row => {
         return (

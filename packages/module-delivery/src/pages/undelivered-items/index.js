@@ -79,7 +79,7 @@ const UndeliveredItems = () => {
 
       if (itemValues?.length < 1) {
         stackError({
-          message: labels.checkItemsBeforeAppend
+          message: platformLabels.checkItemsBeforeAppend
         })
 
         return

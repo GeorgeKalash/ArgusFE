@@ -78,7 +78,7 @@ const GridToolbar = ({
 
   const attachTrackingToClicks = React.useCallback(node => {
     if (!React.isValidElement(node)) return node
-    const { children, onClick, initialValue, value, name } = node.props || {}
+    const { children, onClick, initialValue, value, name, excludeFromDirtyTracking } = node.props || {}
     const newProps = {}
 
     if (onClick) {
@@ -104,7 +104,7 @@ const GridToolbar = ({
 
           trackInteraction.trackPageFields(initialValues, currentValues)
         } else {
-          trackInteraction('gridToolbar')
+          if (!excludeFromDirtyTracking) trackInteraction('gridToolbar')
         }
 
         return result

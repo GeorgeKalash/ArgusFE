@@ -112,7 +112,7 @@ export default function IRGenerateConsumption() {
     const list = formik.values.items.filter(row => row.isChecked)
     if (list.length < 1) {
       stackError({
-        message: labels.checkItemsBeforeAppend
+        message: platformLabels.checkItemsBeforeAppend
       })
 
       return false

@@ -89,6 +89,7 @@ export default function JobOrderForm({
     RMCost: 0,
     deliveryDate: null,
     spId: null,
+    poId: null,
     sizeId: null,
     lineId: null,
     itemsPL: null,
@@ -841,7 +842,7 @@ export default function JobOrderForm({
                         label={labels.expectedQty}
                         value={formik.values.expectedQty}
                         required
-                        readOnly={isCancelled || isReleased || isPosted}
+                        readOnly={formik?.values?.poId || isCancelled || isReleased || isPosted}
                         onChange={e => formik.setFieldValue('expectedQty', e.target.value)}
                         onClear={() => formik.setFieldValue('expectedQty', 0)}
                         error={formik.touched.expectedQty && Boolean(formik.errors.expectedQty)}
@@ -853,7 +854,7 @@ export default function JobOrderForm({
                         label={labels.expectedPcs}
                         value={formik.values.expectedPcs}
                         required
-                        readOnly={isCancelled || isReleased || isPosted}
+                        readOnly={formik?.values?.poId || isCancelled || isReleased || isPosted}
                         onChange={e => {
                           formik.setFieldValue('expectedPcs', e.target.value)
                           formik.setFieldValue(
