@@ -405,6 +405,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 onChange={event => formik.setFieldValue('disableItemDuplicate', event.target.checked)}
                 label={labels.disableItemDuplicate}
                 maxAccess={maxAccess}
+                readOnly={isClosed}
               />
             </Grid>
           </Grid>
