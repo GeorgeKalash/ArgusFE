@@ -29,9 +29,11 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -64,7 +66,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const { formik } = useForm({
     maxAccess: maxAccess,
     validateOnChange: true,
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       reference: '',
@@ -145,7 +147,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
         dirtyField: DIRTYFIELD_RATE
       })
 
-      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
       formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
@@ -166,20 +168,25 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
     if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
 
+  const { openStack } = useStackValueLink({ linkOpen: { resourceId: ResourceIds.MCRFIReceiptVoucher } })
+  
   async function openMCRForm(data) {
-    stack({
-      Component: MultiCurrencyRateForm,
-      props: {
-        DatasetIdAccess: ResourceIds.MCRFIReceiptVoucher,
-        data,
-        onOk: childFormikValues => {
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...childFormikValues
-          }))
+    const hasOpened = await openStack()
+    if (!hasOpened) {
+      stack({
+        Component: MultiCurrencyRateForm,
+        props: {
+          DatasetIdAccess: ResourceIds.MCRFIReceiptVoucher,
+          data,
+          onOk: childFormikValues => {
+            formik.setValues(prevValues => ({
+              ...prevValues,
+              ...childFormikValues
+            }))
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   const editMode = !!formik.values.recordId
@@ -193,6 +200,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
       formik.setFieldValue('cashAccountRef', '')
       formik.setFieldValue('cashAccountName', '')
       formik.setFieldValue('accountBalance', 0)
+      formik.setFieldValue('caAccountId', null)
 
       return
     }
@@ -201,9 +209,10 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
       extension: CashBankRepository.CbBankAccounts.get,
       parameters: `_recordId=${cashAccountId}`
     })
-    
+
     const balance = await getBalance(cashAccountResult?.accountId, formik.values.currencyId)
     formik.setFieldValue('accountBalance', balance || 0)
+    formik.setFieldValue('caAccountId', cashAccountResult?.accountId || null)
     formik.setFieldValue('cashAccountId', cashAccountResult?.recordId || null)
     formik.setFieldValue('cashAccountRef', cashAccountResult?.reference || '')
     formik.setFieldValue('cashAccountName', cashAccountResult?.name || '')
@@ -248,9 +257,12 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
         extension: FinancialRepository.ReceiptVouchers.get2,
         parameters: `_recordId=${recordId}`
       })
-      formik.setValues({ ...res.record.receiptVoucher, 
-        date: formatDateFromApi(res.record.receiptVoucher.date),
-        accountBalance: res.record?.accountBalance?.balance || 0
+      formik.resetForm({
+        values: {
+          ...res.record.receiptVoucher, 
+          date: formatDateFromApi(res.record.receiptVoucher.date),
+          accountBalance: res.record?.accountBalance?.balance || 0
+        }
       })
     }
   }
@@ -594,7 +606,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
                   const balance = await getBalance(newValue?.accountId, formik.values.currencyId)
-                  formik.setFieldValue('currentAccountId', newValue?.accountId || null)
+                  formik.setFieldValue('caAccountId', newValue?.accountId || null)
                   formik.setFieldValue('accountBalance', balance || 0)
                   formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
@@ -624,7 +636,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={6}>
+                <Grid item xs={7}>
                   <ResourceComboBox
                     endpointId={FinancialRepository.ReceiptVouchers.pack}
                     reducer={response => response?.record?.currencies}
@@ -643,7 +655,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       await getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
-                      const balance = await getBalance(formik.values.currentAccountId, newValue?.recordId)
+                      const balance = await getBalance(formik.values.caAccountId, newValue?.recordId)
                       formik.setFieldValue('accountBalance', balance || 0)
                       formik.setFieldValue('currencyName', newValue?.name)
                       formik.setFieldValue('currencyId', newValue?.recordId)
@@ -655,22 +667,14 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                   <CustomButton
                     onClick={() => openMCRForm(formik.values)}
                     image='popup.png'
-                    tooltipText={platformLabels.add}
+                    tooltipText={platformLabels.MultiCurrencyRate}
                     disabled={
                       !formik.values.currencyId ||
                       formik.values.currencyId === currencyId
                     }
                   />
                 </Grid>
-                <Grid item xs={5}>
-                  <CustomNumberField
-                    name='accountBalance'
-                    label={labels.balance}
-                    value={formik.values.accountBalance}
-                    readOnly
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
+                
               </Grid>
             </Grid>
             <Grid item xs={6}>
@@ -684,6 +688,43 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 maxLength='20'
                 maxAccess={maxAccess}
                 error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='amount'
+                required
+                label={labels.amount}
+                value={formik.values.amount}
+                readOnly={isCancelled || isPosted}
+                maxAccess={maxAccess}
+                maxLength={12}
+                decimalScale={2}
+                onChange={async e => {
+                  formik.setFieldValue('amount', e.target.value)
+
+                  const updatedRateRow = getRate({
+                    amount: e.target.value ?? 0,
+                    exRate: formik.values?.exRate,
+                    baseAmount: 0,
+                    rateCalcMethod: formik.values?.rateCalcMethod,
+                    dirtyField: DIRTYFIELD_RATE
+                  })
+                  formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
+                }}
+                onClear={async () => {
+                  formik.setFieldValue('amount', 0)
+                }}
+                error={formik.touched.amount && Boolean(formik.errors.amount)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='accountBalance'
+                label={labels.balance}
+                value={formik.values.accountBalance}
+                readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -707,36 +748,6 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='amount'
-                required
-                label={labels.amount}
-                value={formik.values.amount}
-                readOnly={isCancelled || isPosted}
-                maxAccess={maxAccess}
-                maxLength={'10'}
-                decimalScale={2}
-                onChange={async e => {
-                  formik.setFieldValue('amount', e.target.value)
-
-                  const updatedRateRow = getRate({
-                    amount: e.target.value ?? 0,
-                    exRate: formik.values?.exRate,
-                    baseAmount: 0,
-                    rateCalcMethod: formik.values?.rateCalcMethod,
-                    dirtyField: DIRTYFIELD_RATE
-                  })
-                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-                }}
-                onClear={async () => {
-                  formik.setFieldValue('amount', 0)
-                }}
-                error={formik.touched.amount && Boolean(formik.errors.amount)}
-              />
-            </Grid>
-            <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <ResourceComboBox
                 neverPopulate={true}

@@ -43,7 +43,7 @@ export default function RubberForm({ labels, access, recordId }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       dtId: null,
@@ -54,6 +54,7 @@ export default function RubberForm({ labels, access, recordId }) {
       modelId: null,
       modelRef: '',
       threeDPId: null,
+      developerId: null,
       designGroupId: null,
       designFamilyId: null,
       productionClassId: null,
@@ -100,11 +101,13 @@ export default function RubberForm({ labels, access, recordId }) {
       extension: ProductModelingRepository.Rubber.get,
       parameters: `_recordId=${damageId}`
     }).then(res => {
-      formik.setValues({
-        ...res?.record,
-        startDate: formatDateFromApi(res?.record?.startDate),
-        endDate: formatDateFromApi(res?.record?.endDate),
-        date: formatDateFromApi(res?.record?.date)
+      formik.resetForm({
+        values: {
+          ...res?.record,
+          startDate: formatDateFromApi(res?.record?.startDate),
+          endDate: formatDateFromApi(res?.record?.endDate),
+          date: formatDateFromApi(res?.record?.date)
+        }
       })
     })
   }
@@ -186,6 +189,33 @@ export default function RubberForm({ labels, access, recordId }) {
     })
   }
 
+  async function onChangeDT (dtId) {
+    const { record } = await getRequest({
+      extension: ProductModelingRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    if (record?.productionLineId) {
+      formik.setFieldValue('modelRef', '')
+      formik.setFieldValue('threeDPId', null)
+      formik.setFieldValue('laborId', null)
+      formik.setFieldValue('laborName', '')
+      formik.setFieldValue('modelId', null)
+      formik.setFieldValue('pcs', '')
+      formik.setFieldValue('jobId', '')
+    }
+    formik.setFieldValue('productionLineId', record?.productionLineId || null)
+  }
+
+  useEffect(() => {
+   ;(async function () {
+    if (!recordId) {
+      if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
+      else formik.setFieldValue('productionLineId', null)
+    }
+    })()
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.Rubber}
@@ -203,6 +233,7 @@ export default function RubberForm({ labels, access, recordId }) {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Rubber}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -214,29 +245,9 @@ export default function RubberForm({ labels, access, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
-
-                  formik.setFieldValue('productionLineId', null)
-
-                  if (newValue?.recordId) {
-                    const { record } = await getRequest({
-                      extension: ProductModelingRepository.DocumentTypeDefault.get,
-                      parameters: `_dtId=${newValue?.recordId}`
-                    })
-
-                    if (record?.productionLineId) {
-                      formik.setFieldValue('modelRef', '')
-                      formik.setFieldValue('threeDPId', null)
-                      formik.setFieldValue('laborId', null)
-                      formik.setFieldValue('laborName', '')
-                      formik.setFieldValue('modelId', null)
-                      formik.setFieldValue('pcs', '')
-                      formik.setFieldValue('jobId', '')
-                    }
-                    formik.setFieldValue('productionLineId', record?.productionLineId || null)
-                  }
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
@@ -345,6 +356,26 @@ export default function RubberForm({ labels, access, recordId }) {
                 readOnly={isReleased || isPosted}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ProductModelingRepository.Developer.qry}
+                values={formik.values}
+                name='developerId'
+                label={labels.developer}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly={isReleased || isPosted}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('developerId', newValue?.recordId || null)
+                }}
+                error={formik.touched.developerId && formik.errors.developerId}
               />
             </Grid>
             <Grid item xs={12}>

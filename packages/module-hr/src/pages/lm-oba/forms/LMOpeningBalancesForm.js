@@ -11,7 +11,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
@@ -22,14 +22,14 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.OpeningBalances.page
+    endpointId: LeaveManagementRepository.OpeningBalances.page
   })
 
   const { formik } = useForm({
     initialValues: {
       fiscalYear: null,
       employeeId: null,
-      lsId: null,
+      ltId: null,
       days: null
     },
     maxAccess,
@@ -37,18 +37,18 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
     validationSchema: yup.object({
       fiscalYear: yup.number().required(),
       employeeId: yup.number().required(),
-      lsId: yup.number().required(),
+      ltId: yup.number().required(),
       days: yup.number().required().min(0).max(999)
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: LoanManagementRepository.OpeningBalances.set,
+        extension: LeaveManagementRepository.OpeningBalances.set,
         record: JSON.stringify(obj)
       })
 
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
       if (!obj.recordId) {
-        formik.setFieldValue('recordId', String(obj.employeeId * 100) + String(obj.fiscalYear * 10) + String(obj.lsId))
+        formik.setFieldValue('recordId', String(obj.employeeId * 100) + String(obj.fiscalYear * 10) + String(obj.ltId))
       }
       invalidate()
     }
@@ -57,15 +57,15 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
 
   useEffect(() => {
     ;(async function () {
-      if (obj?.employeeId && obj?.fiscalYear && obj?.lsId) {
+      if (obj?.employeeId && obj?.fiscalYear && obj?.ltId) {
         const { record } = await getRequest({
-          extension: LoanManagementRepository.OpeningBalances.get,
-          parameters: `_employeeId=${obj.employeeId}&_fiscalYear=${obj.fiscalYear}&_lsId=${obj.lsId}`
+          extension: LeaveManagementRepository.OpeningBalances.get,
+          parameters: `_employeeId=${obj.employeeId}&_fiscalYear=${obj.fiscalYear}&_ltId=${obj.ltId}`
         })
 
         formik.setValues({
           ...record,
-          recordId: String(record.employeeId * 100) + String(record.fiscalYear * 10) + String(record.lsId)
+          recordId: String(record.employeeId * 100) + String(record.fiscalYear * 10) + String(record.ltId)
         })
       }
     })()
@@ -120,9 +120,9 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
 
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={LoanManagementRepository.LeaveScheduleFilters.qry}
-                name='lsId'
-                label={labels.leaveSchedule}
+                endpointId={LeaveManagementRepository.LeaveTypes.qry}
+                name='ltId'
+                label={labels.leaveType}
                 values={formik.values}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -133,10 +133,10 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('lsId', newValue?.recordId || null)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('ltId', newValue?.recordId || null)
                 }}
-                error={formik.touched.lsId && Boolean(formik.errors.lsId)}
+                error={formik.touched.ltId && Boolean(formik.errors.ltId)}
               />
             </Grid>
 

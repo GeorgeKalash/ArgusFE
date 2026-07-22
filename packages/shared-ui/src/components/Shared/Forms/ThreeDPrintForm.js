@@ -51,7 +51,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       reference: '',
@@ -69,6 +69,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
       productionClassId: null,
       productionLineId: null,
       collectionId: null,
+      developerId: null,
       productionStandardRef: '',
       designGroupId: null,
       designFamilyId: null,
@@ -121,11 +122,13 @@ export default function ThreeDPrintForm({ recordId, window }) {
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res?.record?.date),
-      startDate: formatDateFromApi(res?.record?.startDate),
-      endDate: formatDateFromApi(res?.record?.endDate)
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: formatDateFromApi(res?.record?.date),
+        startDate: formatDateFromApi(res?.record?.startDate),
+        endDate: formatDateFromApi(res?.record?.endDate)
+      }
     })
   }
 
@@ -163,7 +166,13 @@ export default function ThreeDPrintForm({ recordId, window }) {
   const actions = [
     {
       key: 'Locked',
-      condition: true,
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || isPosted || !isReleased
     },
@@ -451,7 +460,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     decimalScale={0}
                     readOnly={isPosted}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('nbOfLayers', '')}
+                    onClear={() => formik.setFieldValue('nbOfLayers', null)}
                     error={formik.touched.nbOfLayers && Boolean(formik.errors.nbOfLayers)}
                   />
                 </Grid>
@@ -512,13 +521,33 @@ export default function ThreeDPrintForm({ recordId, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ProductModelingRepository.Developer.qry}
+                    values={formik.values}
+                    name='developerId'
+                    label={labels.developer}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isReleased || isPosted}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('developerId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.developerId && formik.errors.developerId}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <CustomTextField
                     name='fileReference'
                     label={labels.threeDDFile}
                     value={formik.values.fileReference}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    readOnly={isPosted}
+                    readOnly={isReleased || isPosted}
                     onClear={() => formik.setFieldValue('fileReference', '')}
                     error={formik.touched.fileReference && Boolean(formik.errors.fileReference)}
                   />

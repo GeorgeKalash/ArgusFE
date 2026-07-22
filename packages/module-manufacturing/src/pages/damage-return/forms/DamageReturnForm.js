@@ -39,7 +39,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       dtId: null,
@@ -92,13 +92,15 @@ export default function DamageReturnForm({ labels, access, recordId }) {
         extension: ManufacturingRepository.MFJobOrder.get,
         parameters: `_recordId=${res?.record?.jobId}`
       }).then(jobRes => {
-        formik.setValues({
-          ...res?.record,
-          date: formatDateFromApi(res?.record?.date),
-          sku: jobRes?.record?.sku,
-          itemName: jobRes?.record?.itemName,
-          designName: jobRes?.record?.designName,
-          designRef: jobRes?.record?.designRef
+        formik.resetForm({
+          values: {
+            ...res?.record,
+            date: formatDateFromApi(res?.record?.date),
+            sku: jobRes?.record?.sku,
+            itemName: jobRes?.record?.itemName,
+            designName: jobRes?.record?.designName,
+            designRef: jobRes?.record?.designRef
+          }
         })
       })
     })
@@ -158,6 +160,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.DamageReturn}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
                 columnsInDropDown={[

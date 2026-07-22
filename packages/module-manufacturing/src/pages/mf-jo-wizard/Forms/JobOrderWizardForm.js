@@ -26,6 +26,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function JobOrderWizardForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -45,7 +46,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       header: {
@@ -99,9 +100,11 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         jobId: yup.number().required(),
         operationId: yup.number().required(),
         laborId: yup.number().required(),
-        pcs: yup.number().min(0.01).nullable(),
+        fromSiteId: yup.number().required(),
+        toSiteId: yup.number().required(),
+        pcs: yup.number().min(0).nullable(),
         avgWeight: yup.number().min(0.01).nullable(),
-        producedWeight: yup.number().min(0.01).required(),
+        producedWeight: yup.number().min(0).required(),
         workCenterName: yup.string().required(),
       }),
       rows: yup
@@ -246,7 +249,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
   ]
 
   const totalIssued = formik.values?.rows?.reduce((issued, row) => {
-    const issuedValue = parseFloat(row.issued?.toString().replace(/,/g, '')) || 0
+    const issuedValue = row.issued || 0
 
     return issued + issuedValue
   }, 0)
@@ -263,14 +266,16 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         id: index + 1
       }))
 
-      formik.setValues({
-        recordId: res.record.header.recordId,
-        header: {
-          ...res.record.header,
-          date: formatDateFromApi(res?.record?.header?.date),
-          producedWeight: res.record.header.pcs * res.record.header.avgWeight
-        },
-        rows: modifiedList
+      formik.resetForm({
+        values: {
+          recordId: res.record.header.recordId,
+          header: {
+            ...res.record.header,
+            date: formatDateFromApi(res?.record?.header?.date),
+            producedWeight: res.record.header.pcs * res.record.header.avgWeight
+          },
+          rows: modifiedList
+        }
       })
 
       return res?.record
@@ -298,7 +303,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
   }
 
   const totalReturned = formik.values?.rows?.reduce((returned, row) => {
-    const returnedValue = parseFloat(row.returned?.toString().replace(/,/g, '')) || 0
+    const returnedValue = row.returned || 0
 
     return returned + returnedValue
   }, 0)
@@ -335,7 +340,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
   ]
 
   const totalConsumed = formik.values?.rows?.reduce((consumed, row) => {
-    const consumedValue = parseFloat(row.consumed?.toString().replace(/,/g, '')) || 0
+    const consumedValue = row.consumed || 0
 
     return consumed + consumedValue
   }, 0)
@@ -347,7 +352,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
   }, [])
 
   useEffect(() => {
-    formik.setFieldValue('header.totalSFQty', parseFloat(totalUsedSemiFinished).toFixed(2))
+    formik.setFieldValue('header.totalSFQty', roundTo(totalUsedSemiFinished))
   }, [totalUsedSemiFinished])
 
   return (
@@ -368,6 +373,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.JobOrderWizard}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 readOnly={editMode}
                 label={labels.documentType}
@@ -412,52 +418,64 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
               />
             </Grid>
-            <Grid item xs={4}>
-              <ResourceComboBox
-                endpointId={ManufacturingRepository.MFJobOrder.qry2}
-                name='header.jobId'
-                label={labels.jobOrder}
-                values={formik.values.header}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference', width: 1 },
-                  { key: 'date', value: 'Date', type: 'date', width: 1 },
-                  { key: 'sku', value: 'sku', width: 1 },
-                  { key: 'itemName', value: 'Item Name', width: 2 },
-                  { key: 'productionLineName', value: 'Prod Line', width: 1 }
-                ]}
-                displayFieldWidth={2.5}
-                required
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
-                  formik.setFieldValue('header.jobId', newValue?.recordId || null)
-                  formik.setFieldValue('header.sku', newValue?.sku || null)
-                  formik.setFieldValue('header.itemName', newValue?.itemName || '')
-                  formik.setFieldValue('header.itemId', newValue?.itemId || null)
-                  formik.setFieldValue('header.expectedPcs', newValue?.expectedPcs || 0)
-                  formik.setFieldValue('header.avgWeight', newValue?.avgWeight || 0)
-                  formik.setFieldValue('header.workCenterName', newValue?.wcName || '')
-                  formik.setFieldValue('header.workCenterId', newValue?.workCenterId || null)
-                  formik.setFieldValue('header.lineId', newValue?.lineId || null)
-                  formik.setFieldValue('header.operationId', null)
-                  formik.setFieldValue('header.laborId', null)
-                  const physical = await getItemPhysical(newValue?.itemId)
-                  formik.setFieldValue('header.weight', physical?.weight || 0)
-                  const production = await getItemProduction(newValue?.itemId)
-                  formik.setFieldValue('header.bomId', production?.bomId || 0)
-                  formik.setFieldValue('header.producedWeight', newValue?.avgWeight * formik.values.header.pcs)
-                }}
-                onClear={async (_, newValue) => {
-                  formik.setFieldValue('header.workCenterName', '')
-                  formik.setFieldValue('header.workCenterId', null)
-                  formik.setFieldValue('header.operationId', null)
-                  formik.setFieldValue('header.laborId', null)
-                }}
-                error={formik?.touched?.header?.jobId && Boolean(formik?.errors?.header?.jobId)}
-              />
-            </Grid>
+             {!editMode ? (
+              <Grid item xs={4}>
+                <ResourceComboBox
+                  endpointId={ManufacturingRepository.MFJobOrder.qry2}
+                  name='header.jobId'
+                  label={labels.jobOrder}
+                  values={formik.values.header}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference', width: 1 },
+                    { key: 'date', value: 'Date', type: 'date', width: 1 },
+                    { key: 'sku', value: 'sku', width: 1 },
+                    { key: 'itemName', value: 'Item Name', width: 2 },
+                    { key: 'productionLineName', value: 'Prod Line', width: 1 }
+                  ]}
+                  displayFieldWidth={2.5}
+                  required
+                  readOnly={editMode}
+                  maxAccess={maxAccess}
+                  onChange={async (_, newValue) => {
+                    formik.setFieldValue('header.jobId', newValue?.recordId || null)
+                    formik.setFieldValue('header.sku', newValue?.sku || null)
+                    formik.setFieldValue('header.itemName', newValue?.itemName || '')
+                    formik.setFieldValue('header.itemId', newValue?.itemId || null)
+                    formik.setFieldValue('header.expectedPcs', newValue?.expectedPcs || 0)
+                    formik.setFieldValue('header.avgWeight', newValue?.avgWeight || 0)
+                    formik.setFieldValue('header.workCenterName', newValue?.wcName || '')
+                    formik.setFieldValue('header.workCenterId', newValue?.workCenterId || null)
+                    formik.setFieldValue('header.lineId', newValue?.lineId || null)
+                    formik.setFieldValue('header.operationId', null)
+                    formik.setFieldValue('header.laborId', null)
+                    const physical = await getItemPhysical(newValue?.itemId)
+                    formik.setFieldValue('header.weight', physical?.weight || 0)
+                    const production = await getItemProduction(newValue?.itemId)
+                    formik.setFieldValue('header.bomId', production?.bomId || 0)
+                    formik.setFieldValue('header.producedWeight', newValue?.avgWeight * formik.values.header.pcs)
+                  }}
+                  onClear={async (_, newValue) => {
+                    formik.setFieldValue('header.workCenterName', '')
+                    formik.setFieldValue('header.workCenterId', null)
+                    formik.setFieldValue('header.operationId', null)
+                    formik.setFieldValue('header.laborId', null)
+                  }}
+                  error={formik?.touched?.header?.jobId && Boolean(formik?.errors?.header?.jobId)}
+                />
+              </Grid>
+              ) : (
+              <Grid item xs={4}>
+                <CustomTextField
+                  name='header.jobRef'
+                  label={labels.jobOrder}
+                  value={formik?.values?.header?.jobRef}
+                  maxAccess={maxAccess}
+                  readOnly
+                />  
+              </Grid>
+            )}
             <Grid item xs={8}>
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
@@ -625,6 +643,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 values={formik.values.header}
                 readOnly={isPosted}
                 maxAccess={maxAccess}
+                required
                 onChange={(_, newValue) => {
                   formik.setFieldValue('header.fromSiteId', newValue?.recordId || null)
                 }}
@@ -644,6 +663,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values.header}
                 maxAccess={maxAccess}
+                required
                 readOnly={isPosted}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('header.toSiteId', newValue?.recordId || null)

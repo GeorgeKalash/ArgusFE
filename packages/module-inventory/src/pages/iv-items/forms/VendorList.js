@@ -1,11 +1,9 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -17,28 +15,8 @@ const VendorList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
-
+  const [gridData, setGridData] = useState({ list: [] })  
   const { stack } = useWindow()
-
-  async function fetchGridData() {
-    const response = await getRequest({
-      extension: PurchaseRepository.PriceList.qry,
-      parameters: `&_itemId=${recordId}`
-    })
-
-    return response
-  }
-
-  const {
-    query: { data },
-    labels: _labels,
-    invalidate
-  } = useResourceQuery({
-    enabled: !!recordId,
-    datasetId: ResourceIds.PriceList,
-    queryFn: fetchGridData,
-    endpointId: PurchaseRepository.PriceList.qry
-  })
 
   const columns = [
     {
@@ -83,14 +61,28 @@ const VendorList = ({ store, labels, maxAccess }) => {
     }
   ]
 
+  async function onSuccess() {
+    const response = await getRequest({
+      extension: PurchaseRepository.PriceList.qry,
+      parameters: `&_itemId=${recordId}`
+    })
+
+    setGridData(response)
+  }
+
   const delVendor = async obj => {
     await postRequest({
       extension: PurchaseRepository.PriceList.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
+
     toast.success(platformLabels.Deleted)
+    onSuccess()
   }
+
+  useEffect(() => {
+    setGridData({ list: store?.packB?.priceLists || [] })
+  }, [store?.packB?.priceLists])
 
   const add = () => {
     openForm()
@@ -108,7 +100,8 @@ const VendorList = ({ store, labels, maxAccess }) => {
         recordId: recordId ? recordId : null,
         record: record,
         maxAccess,
-        store
+        store,
+        onSuccess
       },
 
       title: labels.vendor
@@ -124,7 +117,7 @@ const VendorList = ({ store, labels, maxAccess }) => {
         <Table
           name='vendor'
           columns={columns}
-          gridData={data}
+          gridData={gridData}
           rowId={['vendorId', 'currencyId']}
           onEdit={edit}
           pagination={false}

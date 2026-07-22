@@ -177,7 +177,8 @@ export const ManufacturingRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD',
-    page: service + 'pageDTD'
+    page: service + 'pageDTD',
+    page2: service + 'page2DTD'
   },
   RawMaterialCategory: {
     qry: service + 'qryRMC',
@@ -273,7 +274,10 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotPO',
     post: service + 'postPO',
     gen: service + 'genPO',
-    close: service + 'closePO'
+    close: service + 'closePO',
+    reopen: service + 'reopenPO',
+    open: service + 'openPO',
+    generate: service + 'genORDFromPO',
   },
   BillOfMaterials: {
     get: service + 'getBMA',
@@ -492,4 +496,48 @@ export const ManufacturingRepository = {
     close: service + 'closeSCU',
     reopen: service + 'reopenSCU'
   },
+  ProductionSummary: {
+    get2: service + 'get2PRS',
+    set2: service + 'set2PRS',
+    del: service + 'delPRS',
+    page: service + 'pagePRS',
+    snapshot: service + 'snapshotPRS',
+    post: service + 'postPRS',
+    setPRSummary: service + 'setPRSummary'
+  },
+  ProductionRequestItems: {
+    import: service + 'importPRI',
+  },
+  ProductionRequest: {
+    page: service + 'pagePR',
+    get2: service + 'get2PR',
+    set2: service + 'set2PR',
+    del: service + 'delPR',
+    snapshot: service + 'snapshotPR',
+    post: service + 'postPR'
+  },
+  WorkCenterGroups: {
+    get: service + 'getWCG',
+    set: service + 'setWCG',
+    del: service + 'delWCG',
+    page: service + 'pageWCG',
+    qry: service + 'qryWCG',
+    snapshot: service + 'snapshotWCG'
+  },
+  ProductionClassGroups: {
+    get: service + 'getPCG',
+    set: service + 'setPCG',
+    del: service + 'delPCG',
+    page: service + 'pagePCG',
+    qry: service + 'qryPCG',
+    snapshot: service + 'snapshotPCG'
+  },
+  ProductionStandardGroups: {
+    get: service + 'getPSG',
+    set: service + 'setPSG',
+    del: service + 'delPSG',
+    page: service + 'pagePSG',
+    qry: service + 'qryPSG',
+    snapshot: service + 'snapshotPSG'
+  }
 }

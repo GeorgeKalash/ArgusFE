@@ -76,6 +76,13 @@ const CustomDatePicker = ({
   const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
 
+  if (value instanceof Date && !value.dateOnly) {
+    Object.defineProperty(value, 'dateOnly', {
+      value: true,
+      enumerable: false
+    })
+  }
+
   function formatDate(newValue) {
     const offsetMinutes = -new Date().getTimezoneOffset()
     const hours = Math.floor(offsetMinutes / 60)
@@ -83,6 +90,10 @@ const CustomDatePicker = ({
 
     const value = new Date(newValue)
     value.setHours(hours, minutes, 0, 0)
+    Object.defineProperty(value, 'dateOnly', {
+      value: true,
+      enumerable: false
+    })
 
     return value
   }

@@ -37,7 +37,10 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
       isConfidential: false,
       sign: null,
       activeStatus: null,
-      sgId: null
+      sgId: null,
+      flName: '',
+      fsGroup: null,
+      fsSection: null
     },
     maxAccess,
     validationSchema: yup.object({
@@ -85,6 +88,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
     })
   }, [])
 
+
   return (
     <FormShell resourceId={ResourceIds.ChartOfAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
@@ -128,6 +132,18 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='flName'
+                label={labels.flName}
+                value={formik.values.flName}
+                maxLength='100'
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('flName', '')}
+                error={formik.touched.flName && Boolean(formik.errors.flName)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -208,6 +224,43 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                 required={formik.values.isConfidential}
                 readOnly={!formik.values.isConfidential}
                 error={formik.touched.sgId && Boolean(formik.errors.sgId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.FS_GROUP}
+                label={labels.fsGroup}
+                name='fsGroup'
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('fsGroup', newValue?.key || null)
+                  formik.setFieldValue('fsSection', null)
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.FS_SECTION}
+                label={labels.fsSection}
+                name='fsSection'
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                maxAccess={maxAccess}
+                readOnly={!formik.values.fsGroup}
+                filter={item => {
+                  if (formik.values.fsGroup == 1) return ['1', '2', '3'].includes(item.key)
+                  if (formik.values.fsGroup == 2) return ['4', '5'].includes(item.key)
+
+                  return false
+                }}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('fsSection', newValue?.key || null)
+                }}
               />
             </Grid>
           </Grid>

@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { LeaveForm } from '@argus/shared-ui/src/components/Shared/LeaveForm'
 
 const LeaveRequestOneDayOrMore = () => {
@@ -29,7 +29,7 @@ const LeaveRequestOneDayOrMore = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: LoanManagementRepository.LeaveRequest.page,
+      extension: LeaveManagementRepository.LeaveRequest.page,
       parameters: `_size=30&_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_sortBy=recordId&_multiDayLeave=2`
     })
 
@@ -61,7 +61,7 @@ const LeaveRequestOneDayOrMore = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: LoanManagementRepository.LeaveRequest.page,
+    endpointId: LeaveManagementRepository.LeaveRequest.page,
     datasetId: ResourceIds.LeaveRequestODOM,
     filter: {
       filterFn: fetchWithFilter,
@@ -71,7 +71,7 @@ const LeaveRequestOneDayOrMore = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: LoanManagementRepository.LeaveRequest.snapshot,
+        extension: LeaveManagementRepository.LeaveRequest.snapshot,
         parameters: `_filter=${filters.qry}&_multiDayLeave=2`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -158,7 +158,8 @@ const LeaveRequestOneDayOrMore = () => {
     stack({
       Component: LeaveForm,
       props: {
-        recordId
+        recordId,
+        resourceId: ResourceIds.LeaveRequestODOM
       }
     })
   }
@@ -169,7 +170,7 @@ const LeaveRequestOneDayOrMore = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: LoanManagementRepository.LeaveRequest.del,
+      extension: LeaveManagementRepository.LeaveRequest.del,
       record: JSON.stringify(obj)
     })
     invalidate()

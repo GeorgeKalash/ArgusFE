@@ -128,7 +128,7 @@ export default function ResetTVForm({ _labels, maxAccess }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.BranchFilters.qry}
+                endpointId={companyStructureRepository.Branches.qry}
                 name='branchId'
                 label={_labels.branch}
                 columnsInDropDown={[

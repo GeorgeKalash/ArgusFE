@@ -24,6 +24,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
       extension: SystemRepository.ReportLayout.get,
       parameters: `_resourceId=${row.resourceId}`
     })
+
     const pack = reportPack?.record || {}
 
     const response2Map = new Map((pack?.reportLayoutOverrides || []).map(item => [item.id, item.isInactive]))
@@ -115,6 +116,16 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
     {
       field: 'layoutName',
       headerName: labels.layoutName,
+      flex: 1
+    },
+    {
+      field: 'reportEngineName',
+      headerName: labels.reportEngineName,
+      flex: 1
+    },
+    {
+      field: 'schemaFile',
+      headerName: labels.schemaFile,
       flex: 1
     },
     {

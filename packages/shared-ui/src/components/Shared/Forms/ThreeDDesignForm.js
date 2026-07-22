@@ -53,7 +53,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       wip: 1,
@@ -71,6 +71,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
       startDate: null,
       designGroupId: null,
       designFamilyId: null,
+      developerId: null,
       endDate: null,
       fileReference: '',
       itemGroupId: null,
@@ -127,11 +128,13 @@ const ThreeDDesignForm = ({ recordId, window }) => {
       extension: ProductModelingRepository.ThreeDDesign.get,
       parameters: `_recordId=${recordId}`
     }).then(res => {
-      formik.setValues({
-        ...res.record,
-        date: formatDateFromApi(res?.record?.date),
-        startDate: formatDateFromApi(res?.record?.startDate),
-        endDate: formatDateFromApi(res?.record?.endDate)
+      formik.resetForm({
+        values: {
+          ...res.record,
+          date: formatDateFromApi(res?.record?.date),
+          startDate: formatDateFromApi(res?.record?.startDate),
+          endDate: formatDateFromApi(res?.record?.endDate)
+        }
       })
     })
   }
@@ -222,6 +225,47 @@ const ThreeDDesignForm = ({ recordId, window }) => {
     }
   ]
 
+  async function onChangeDT (dtId) {
+    const { record } = await getRequest({
+      extension: ProductModelingRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    if (!record || record?.productionLineId)
+      formik.setValues({
+        ...formik.values,
+        dtId,
+        productionLineId: record?.productionLineId,
+        sketchId: null,
+        sketchRef: '',
+        sketchName: '',
+        itemGroupId: null,
+        itemGroupRef: '',
+        itemGroupName: '',
+        productionClassId: null,
+        productionClassRef: '',
+        productionClassName: '',
+        productionStandardId: null,
+        productionStandardRef: '',
+        productionStandardName: '',
+        collectionId: null,
+        metalPurity: null,
+        metalId: null,
+        designGroupId: null,
+        designFamilyId: null
+      })
+    else formik.setFieldValue('productionLineId', null)
+  }
+
+  useEffect(() => {
+   ;(async function () {
+    if (!recordId) {
+      if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
+      else formik.setFieldValue('productionLineId', null)
+    }
+    })()
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.ThreeDDesign}
@@ -241,6 +285,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.doctype}
                     columnsInDropDown={[
@@ -251,43 +296,9 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || '')
                       changeDT(newValue)
-
-                      formik.setFieldValue('productionLineId', null)
-
-                      if (newValue?.recordId) {
-                        const { record } = await getRequest({
-                          extension: ProductModelingRepository.DocumentTypeDefault.get,
-                          parameters: `_dtId=${newValue?.recordId}`
-                        })
-
-                        if (record?.productionLineId) {
-                          formik.setValues({
-                            ...formik.values,
-                            dtId: newValue?.recordId,
-                            productionLineId: record?.productionLineId,
-                            sketchId: null,
-                            sketchRef: '',
-                            sketchName: '',
-                            itemGroupId: null,
-                            itemGroupRef: '',
-                            itemGroupName: '',
-                            productionClassId: null,
-                            productionClassRef: '',
-                            productionClassName: '',
-                            productionStandardId: null,
-                            productionStandardRef: '',
-                            productionStandardName: '',
-                            collectionId: null,
-                            metalPurity: null,
-                            metalId: null,
-                            designGroupId: null,
-                            designFamilyId: null
-                          })
-                        }
-                      }
                     }}
                     readOnly={editMode}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -339,7 +350,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('source', newValue?.key || null)
+                      formik.setFieldValue('source', Number(newValue?.key) || null)
                     }}
                     error={formik.touched.source && Boolean(formik.errors.source)}
                   />
@@ -547,7 +558,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('castingType', newValue?.key)
+                      formik.setFieldValue('castingType', Number(newValue?.key))
                     }}
                     error={formik.touched.castingType && Boolean(formik.errors.castingType)}
                   />
@@ -557,6 +568,26 @@ const ThreeDDesignForm = ({ recordId, window }) => {
             <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sx={{ marginTop: 20.5 }}>
+                  <ResourceComboBox
+                    endpointId={ProductModelingRepository.Developer.qry}
+                    values={formik.values}
+                    name='developerId'
+                    label={labels.developer}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isPosted || isClosed}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('developerId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.developerId && formik.errors.developerId}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
