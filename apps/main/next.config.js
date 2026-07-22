@@ -8,6 +8,7 @@ const allModules = [
   '@argus/module-auth',
   '@argus/module-system',
   '@argus/module-hr',
+  '@argus/module-cs',
   '@argus/module-remittance',
   '@argus/module-financials',
   '@argus/module-businessPartners',
