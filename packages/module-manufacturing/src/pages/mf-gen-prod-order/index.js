@@ -42,7 +42,8 @@ const GeneratePoductionOrder = () => {
             poId: 0,
             seqNo: 0,
             itemId: item.itemId,
-            qty: item.produceNow
+            qty: item.produceNow,
+            pcs: item.pcs
           }))
       }
 
@@ -78,6 +79,12 @@ const GeneratePoductionOrder = () => {
     {
       field: 'soQty',
       headerName: labels.soQty,
+      type: 'number',
+      flex: 1
+    },
+    {
+      field: 'pcs',
+      headerName: labels.pcs,
       type: 'number',
       flex: 1
     },

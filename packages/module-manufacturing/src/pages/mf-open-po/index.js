@@ -90,7 +90,8 @@ const OpenProductionOrder = () => {
           const items = formik.values.items.map(({ isChecked, ...item }) => ({
             ...item,
             isChecked: checked,
-            producedNow: checked ? item.balance : 0
+            producedNow: checked ? item.balance : 0,
+            jobCount: 1
           }))
 
           formik.setFieldValue('items', items)
@@ -98,7 +99,10 @@ const OpenProductionOrder = () => {
       },
 
       async onChange({ row: { update, newRow } }) {
-        update({ producedNow: newRow.isChecked ? newRow.balance : 0 })
+        update({
+          producedNow: newRow.isChecked ? newRow.balance : 0,
+          jobCount: 1
+        })
       }
     },
     {
@@ -150,6 +154,12 @@ const OpenProductionOrder = () => {
     },
     {
       component: 'numberfield',
+      label: labels.pcs,
+      name: 'pcs',
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
       label: labels.produced,
       name: 'producedQty',
       props: { readOnly: true }
@@ -159,6 +169,19 @@ const OpenProductionOrder = () => {
       label: labels.balance,
       name: 'balance',
       props: { readOnly: true, decimalScale: 2 }
+    },
+    {
+      component: 'numberfield',
+      label: labels.jobCount,
+      name: 'jobCount',
+      updateOn: 'blur',
+      defaultValue: 1,
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.isChecked }
+      },
+      async onChange({ row: { update, newRow } }) {
+       update({ jobCount: Math.max(newRow.jobCount, 1) })
+      }
     },
     {
       component: 'numberfield',
