@@ -142,6 +142,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     initialTdPct: 0,
     baseAmount: 0,
     volume: 0,
+    pieces: 0,
     weight: 0,
     qty: 0,
     serializedAddress: '',
@@ -496,6 +497,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update({ ...data, baseQty: newRow?.qty * muQty })
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.pcs,
+      name: 'pieces',
+      props: {
+        decimalScale: 2,
+        readOnly: true
       }
     },
     {
