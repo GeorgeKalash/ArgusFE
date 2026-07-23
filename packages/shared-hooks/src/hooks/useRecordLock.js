@@ -13,7 +13,6 @@ export const useRecordLock = ({
   enabled = false
 } = {}) => {
   const { stack } = useWindow()
-
   const { addLockedScreen, removeLockedScreen } = useContext(LockedScreensContext)
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -25,8 +24,8 @@ export const useRecordLock = ({
     window.sessionStorage.getItem('userData')
   )?.userId
 
-  const checkLock = async ({ resourceId, recordId }) => {
-    if (!recordId || !resourceId) return true
+  const checkLock = async ({ resourceId, recordId, disabled }) => {
+    if (disabled || !recordId || !resourceId) return true
 
     const res = await getRequest({
       extension: AccessControlRepository.LockedRecords.get,
@@ -71,6 +70,8 @@ export const useRecordLock = ({
   }
 
   const releaseLock = async () => {
+    if (!lockCreatedRef.current) return
+
     releaseRequestedRef.current = true
     await unlock()
   }

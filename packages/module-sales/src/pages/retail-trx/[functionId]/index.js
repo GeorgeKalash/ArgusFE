@@ -167,7 +167,7 @@ const RetailTrx = () => {
   })
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
   const getCorrectLabel = functionId => {
@@ -198,10 +198,11 @@ const RetailTrx = () => {
     }
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
     const canOpen = await checkLock({
       resourceId: getResourceId[parseInt(functionId)],
-      recordId
+      recordId,
+      disabled
     })
 
     if (!canOpen) return

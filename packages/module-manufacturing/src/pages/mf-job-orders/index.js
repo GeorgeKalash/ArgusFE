@@ -156,13 +156,14 @@ const JobOrder = () => {
   }
 
   const editJOB = obj => {
-    openForm(obj?.recordId, obj?.reference, obj?.status)
+    openForm(obj?.recordId, obj?.reference, obj?.status == 3)
   }
 
-  async function openForm(recordId, reference) {
+  async function openForm(recordId, reference, disabled) {
     const canOpen = await checkLock({
       resourceId: ResourceIds.MFJobOrders,
-      recordId
+      recordId,
+      disabled
     })
 
     if (!canOpen) return

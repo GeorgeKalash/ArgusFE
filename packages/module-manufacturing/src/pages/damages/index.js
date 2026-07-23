@@ -124,13 +124,14 @@ const Damages = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
     const canOpen = await checkLock({
       resourceId: ResourceIds.Damages,
-      recordId
+      recordId,
+      disabled
     })
 
     if (!canOpen) return

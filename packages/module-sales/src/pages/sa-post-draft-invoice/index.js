@@ -157,13 +157,14 @@ const PostDraftInvoice = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
     const canOpen = await checkLock({
       resourceId: ResourceIds.DraftSerialsInvoices,
-      recordId
+      recordId,
+      disabled
     })
 
     if (!canOpen) return

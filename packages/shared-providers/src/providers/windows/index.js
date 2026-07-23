@@ -1,8 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Window from '@argus/shared-ui/src/components/Shared/Window'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { v4 as uuidv4 } from 'uuid'
 
 const WindowContext = React.createContext(null)
@@ -43,57 +41,18 @@ function getWindowDimensions(width, height, spacing = true) {
 
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
-  const { postRequest, getRequest } = useContext(RequestsContext)
   const [rerenderFlag, setRerenderFlag] = useState(false)
-  const lockProps = useRef(null)
   const closedWindow = useRef(null)
-  const userId =
-    typeof window !== 'undefined'
-      ? JSON.parse(window.sessionStorage.getItem('userData'))?.userId
-      : null
 
   const currentValue = { ...stack[stack.length - 1] }
 
 
-  function registerLock(props) {
-    lockProps.current = props
-  }
-
-  async function unlockRecord() {
-    if (!lockProps.current)
-      return
-
-    const body = {
-      resourceId: lockProps.current.resourceId,
-      recordId: lockProps.current.recordId,
-      reference: lockProps.current.reference,
-      userId,
-      clockStamp: new Date()
-    }
-
-    await postRequest({
-      extension: AccessControlRepository.unlockRecord,
-      record: JSON.stringify(body)
-    })
-
-    lockProps.current = null
-  }
-
   function closeWindow() {
-    const closingWindow = stack[stack.length - 1]
-
-    if (
-      lockProps &&
-      closingWindow?.props?.recordId === lockProps.recordId
-    ) {
-      unlockRecord()
-    }
 
     setStack(stack => stack.slice(0, stack.length - 1))
   }
 
   function closeWindowById(givenId) {
-    unlockRecord()
     closedWindow.current = currentValue
     setStack(stack => stack.filter(({ id }) => givenId != id))
   }
@@ -140,7 +99,7 @@ export function WindowProvider({ children }) {
   }
 
   return (
-    <WindowContext.Provider value={{ stack: addToStack, registerLock }}>
+    <WindowContext.Provider value={{ stack: addToStack }}>
       {children}
       {stack.map(
         ({

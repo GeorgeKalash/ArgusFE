@@ -130,10 +130,16 @@ const JobInProcess = () => {
       flex: 1
     }
   ]
-  async function openForm(recordId, reference) {
+
+  const edit = obj => {
+    openForm(obj?.recordId, obj?.reference, obj?.status == 3)
+  }
+
+  async function openForm(recordId, reference, disabled) {
     const canOpen = await checkLock({
       resourceId: ResourceIds.MFJobOrders,
-      recordId
+      recordId,
+      disabled
     })
 
     if (!canOpen) return
@@ -146,11 +152,6 @@ const JobInProcess = () => {
       },
       nextToTitle: reference
     })
-  }
-
-
-  const edit = obj => {
-    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
   return (
