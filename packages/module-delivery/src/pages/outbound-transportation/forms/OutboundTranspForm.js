@@ -67,6 +67,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     tripOrders: [
       {
         id: 1,
+        tripId: recordId || 0,
         soRef: null,
         soId: null,
         soDate: null,
@@ -300,7 +301,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       onChange({ row: { update, newRow } }) {
         update({
           soDate: newRow.soDate ? formatDateFromApi(newRow.soDate) : null,
-          tripId: formik.values.recordId
+          tripId: formik.values.recordId || 0
         })
       }
     },
