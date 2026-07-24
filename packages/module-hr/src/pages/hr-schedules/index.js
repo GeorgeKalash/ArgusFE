@@ -121,13 +121,13 @@ export default function Schedules(){
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access}  leftSection={
-            <Grid item xs={3}>
-                  <CustomButton
-                    label={labels.employee}
-                    onClick={openEmployeesSchedule}
-                    tooltipText={labels.employee}
-                  />
+        <GridToolbar onAdd={add} maxAccess={access} leftSection={
+            <Grid item>
+              <CustomButton
+                label={labels.employee}
+                onClick={openEmployeesSchedule}
+                tooltipText={labels.employee}
+              />
             </Grid>
           }/>
       </Fixed>
