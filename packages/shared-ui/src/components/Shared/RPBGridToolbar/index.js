@@ -24,6 +24,7 @@ const RPBGridToolbar = ({
   paramsRequired = false,
   leftSection,
   disableActionsPadding,
+  reportExtraParams,
   ...rest
 }) => {
   const { stack } = useWindow()
@@ -204,6 +205,7 @@ const RPBGridToolbar = ({
       <GridToolbar
         onSearch={value => filters(value, reportParams)}
         reportParams={reportParams}
+        reportExtraParams={reportExtraParams}
         onSearchClear={() => {
           setSearch('')
           if (typeof filterBy === 'function') filterBy('params', reportParams)
