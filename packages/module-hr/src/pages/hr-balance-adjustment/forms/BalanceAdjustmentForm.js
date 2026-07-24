@@ -21,7 +21,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
-import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 
 export default function BalanceAdjustmentForm({ labels, access, recordId, window }) {
@@ -92,10 +91,12 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({
-      ...res.record,
-      effectiveDate: formatDateFromApi(res?.record?.effectiveDate),
-      date: formatDateFromApi(res?.record?.date)
+    formik.resetForm({
+      values: {
+        ...res.record,
+        effectiveDate: formatDateFromApi(res?.record?.effectiveDate),
+        date: formatDateFromApi(res?.record?.date)
+      }
     })
   }
 
