@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography'
 import Icon from '@argus/shared-core/src/@core/components/icon'
 import { useAuth } from '@argus/shared-hooks/src/hooks/useAuth'
 import styles from './Navigation.module.css'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
 
 const UserDropdown = props => {
   const { settings } = props
@@ -17,6 +18,7 @@ const UserDropdown = props => {
   const auth = useAuth()
   const { logout,companyName } = useAuth()
   const { direction } = settings
+    const { setInteractions } = useInteractionTracker()
 
   const handleDropdownOpen = event => {
     setAnchorEl(event.currentTarget)
@@ -30,6 +32,7 @@ const UserDropdown = props => {
   const handleLogout = () => {
     logout()
     handleDropdownClose()
+    setInteractions([])
   }
 
   return (

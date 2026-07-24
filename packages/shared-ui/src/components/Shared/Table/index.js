@@ -320,7 +320,6 @@ const Table = ({
     props?.gridData?.list?.forEach(row => {
       initialCheckedRef.current.set(getRowKey(row), !!row.checked)
     })
-    clearPageInteractions?.()
 
     const areAllValuesTrue =
       props?.gridData?.list?.length > 0 && props?.gridData?.list?.every(item => item?.checked === true)

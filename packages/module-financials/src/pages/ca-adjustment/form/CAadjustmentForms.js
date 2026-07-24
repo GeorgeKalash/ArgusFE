@@ -29,6 +29,7 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -38,6 +39,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   })
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
+  const currentResourceId = functionId == SystemFunction.CashIncrease ? ResourceIds.IncreaseAdj : ResourceIds.DecreaseAdj
 
   const { stack } = useWindow()
   const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
@@ -321,7 +323,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
   return (
     <FormShell
-      resourceId={ResourceIds.IncreaseDecreaseAdj}
+      resourceId={currentResourceId}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

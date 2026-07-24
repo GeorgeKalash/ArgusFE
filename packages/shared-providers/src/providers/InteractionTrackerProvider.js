@@ -158,6 +158,7 @@ export const InteractionTrackerProvider = ({ children }) => {
       value={{
         track,
         interactions,
+        setInteractions,
         clearPageInteractions,
         trackFieldState,
         getPageState

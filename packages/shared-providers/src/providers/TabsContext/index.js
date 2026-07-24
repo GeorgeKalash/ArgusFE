@@ -142,7 +142,7 @@ const TabsProvider = ({ children }) => {
 
   const { lockedScreens, removeLockedScreen } = useContext(LockedScreensContext)
   const { postRequest } = useContext(RequestsContext)
-  const { interactions, clearPageInteractions } = useInteractionTracker()
+  const { interactions, setInteractions, clearPageInteractions } = useInteractionTracker()
   const { platformLabels } = useContext(ControlContext)
 
   const [anchorEl, setAnchorEl] = useState(null)
@@ -567,14 +567,6 @@ const TabsProvider = ({ children }) => {
     [openTabs, interactions, executeCloseOtherTab]
   )
 
-  const clearInteractionsForTabs = tabs => {
-    tabs.forEach(tab => {
-      if (tab.resourceId) {
-        clearPageInteractions(tab.resourceId)
-      }
-    })
-  }
-
   const confirmBulkClose = async () => {
     const { type, tabIndex } = bulkCloseDialog
 
@@ -585,10 +577,15 @@ const TabsProvider = ({ children }) => {
     })
 
     if (type === 'all') {
-      clearInteractionsForTabs(openTabs)
+      setInteractions([])
       await executeCloseAllTabs()
     } else if (type === 'other') {
-      clearInteractionsForTabs(openTabs.filter((_, i) => i !== tabIndex))
+      const tabs = openTabs.filter((_, i) => i !== tabIndex)
+      tabs.forEach(tab => {
+        if (tab.resourceId) {
+          clearPageInteractions(tab.resourceId)
+        }
+      })
       await executeCloseOtherTab(tabIndex)
     }
   }
@@ -676,6 +673,7 @@ const TabsProvider = ({ children }) => {
     if (!shouldManageTabs || !initialLoadDone || !router.asPath || redirectingRef.current) return
 
     const normalizedRoute = normalizeRoute(router.asPath)
+    console.log('lastOpenedPage', lastOpenedPage, normalizedRoute)
 
     if (closingRouteRef.current === normalizedRoute) return
 
@@ -970,7 +968,11 @@ const TabsProvider = ({ children }) => {
           onClick={async event => {
             event.preventDefault()
             event.stopPropagation()
-            await handleCloseTab(activeTab)
+            const targetTab = openTabs[tabsIndex]
+            if (targetTab) {
+              unlockIfLocked(targetTab)
+              await handleCloseTab(targetTab)
+            }
             handleClose()
           }}
         >
@@ -1030,7 +1032,7 @@ const TabsProvider = ({ children }) => {
             </div>
 
             <div style={messageStyle}>
-              You have tabs with unsaved changes. Are you sure you want to close them?
+             {platformLabels?.dirtyTabsConfirmation}
             </div>
 
             <div style={footerStyle}>
@@ -1039,7 +1041,7 @@ const TabsProvider = ({ children }) => {
               </button>
 
               <button style={buttonStyle} onClick={confirmBulkClose}>
-                {platformLabels?.CloseTab}
+                {platformLabels?.CloseTabs}
               </button>
             </div>
           </div>
