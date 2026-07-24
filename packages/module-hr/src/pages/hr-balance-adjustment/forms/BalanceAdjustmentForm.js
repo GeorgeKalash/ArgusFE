@@ -290,7 +290,6 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 onChange={formik.handleChange}
                 maxLength={5}
                 decimalScale={2}
-                allowNegative={false}
                 maxAccess={maxAccess}
                 required
                 readOnly={isPosted}
@@ -306,7 +305,6 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 onChange={formik.handleChange}
                 maxLength={6}
                 decimalScale={2}
-                allowNegative={false}
                 maxAccess={maxAccess}
                 required
                 readOnly={isPosted}
