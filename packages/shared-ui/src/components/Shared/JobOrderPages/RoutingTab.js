@@ -329,7 +329,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
             name='routings'
             maxAccess={maxAccess}
             allowDelete={!store?.isPosted && !store?.isCancelled}
-            deleteHideCondition={{ status: [1, 2, 3, 4] }}
+            deleteHideCondition={{ status: [1, 2, 3, 4, 6] }}
           />
         </Grow>
       </VertLayout>
