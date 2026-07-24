@@ -73,13 +73,13 @@ const TrialBalanceForm = ({ access, labels, obj, params }) => {
         <Grid container sx={{ p: 2 }}>
           <Grid item container spacing={2} xs={6}>
             <Grid item xs={12}>
-              <CustomTextField label={labels.currency} value={obj.currencyRef} readOnly />
+              <CustomTextField label={labels.currency} value={obj.currencyRef} readOnly maxAccess={access} />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField label={labels.account} value={obj.accountRef} readOnly />
+              <CustomTextField label={labels.account} value={obj.accountRef} readOnly maxAccess={access} />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField label={labels.name} value={obj.accountName} readOnly />
+              <CustomTextField label={labels.name} value={obj.accountName} readOnly maxAccess={access} />
             </Grid>
           </Grid>
         </Grid>

@@ -121,6 +121,7 @@ const UserDashboard = () => {
               <CustomTextField
                 name='search'
                 value={search}
+                maxAccess={access}
                 label={platformLabels.Search}
                 onClear={() => setSearch('')}
                 onChange={handleSearchChange}

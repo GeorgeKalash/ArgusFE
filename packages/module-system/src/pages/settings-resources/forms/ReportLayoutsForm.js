@@ -224,7 +224,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
           </Grid>
         </Fixed>
         <Grow>
-          <Table columns={columns} gridData={data} rowId={['id']} pagination={false} />
+          <Table columns={columns} gridData={data} rowId={['id']} pagination={false} maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

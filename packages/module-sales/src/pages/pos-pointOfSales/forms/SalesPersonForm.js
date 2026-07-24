@@ -124,7 +124,7 @@ const SalesPersonForm = ({ store, labels, maxAccess }) => {
             value={formik.values.pOSUser || []}
             error={formik.errors.pOSUser}
             columns={columns}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

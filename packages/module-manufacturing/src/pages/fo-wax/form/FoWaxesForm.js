@@ -677,6 +677,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     value={rmWgt}
                     readOnly
                     error={formik.touched?.header?.rmWgt && Boolean(formik.errors?.header?.rmWgt)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -700,6 +701,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     value={netWgt}
                     readOnly
                     error={formik.touched?.header?.netWgt && Boolean(formik.errors?.header?.netWgt)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>

@@ -137,7 +137,7 @@ const CashAccountForm = ({ store, labels, maxAccess }) => {
             error={formik.errors.pOSUser}
             allowDelete
             columns={columns}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

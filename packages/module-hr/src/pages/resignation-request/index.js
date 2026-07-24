@@ -83,7 +83,7 @@ const ResignationRequest = () => {
 
     const response = await getRequest({
       extension: EmployeeRepository.ResignationRequest.page,
-      parameters: `_startAt=${_startAt}&_size=${_pageSize}&_params=${params}&_sortBy=recordId&filter=`
+      parameters: `_startAt=${_startAt}&_size=${_pageSize}&_params=${params}&_sortBy=recordId`
     })
 
     return { ...response, _startAt: _startAt }

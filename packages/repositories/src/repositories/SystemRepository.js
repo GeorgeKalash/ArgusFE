@@ -24,6 +24,7 @@ export const SystemRepository = {
     set2: service + 'set2RT'
   },
   DocumentType: {
+    page: service + 'pageDT',
     qry: service + 'qryDT',
     qry2: service + 'qry2DT',
     get: service + 'getDT',
@@ -45,6 +46,7 @@ export const SystemRepository = {
   },
   NumberRange: {
     snapshot: service + 'snapshotNRA',
+    page: service + 'pageNRA',
     qry: service + 'qryNRA',
     get: service + 'getNRA',
     set: service + 'setNRA',
@@ -105,6 +107,7 @@ export const SystemRepository = {
     snapshot: service + 'snapshotCDI'
   },
   Address: {
+    page: service + 'pageADD',
     qry: service + 'qryADD',
     get: service + 'getADD',
     set: service + 'setADD',
@@ -252,7 +255,7 @@ export const SystemRepository = {
     qry2: service + 'qryTL2',
     get: service + 'getTL'
   },
-  BusinessRules: { qry: service + 'qryRUL', set: service + 'setRUL', get: service + 'getRUL', del: service + 'delRUL' },
+  BusinessRules: { page: service + 'pageRUL', qry: service + 'qryRUL', set: service + 'setRUL', get: service + 'getRUL', del: service + 'delRUL' },
   Rules: {
     qry: service + 'qryADR',
     set2: service + 'set2ADR'

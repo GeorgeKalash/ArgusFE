@@ -210,6 +210,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode, window })
                 readOnly={editMode}
                 required
                 error={formik.touched.grossWgt && Boolean(formik.errors.grossWgt)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -239,6 +240,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode, window })
                 readOnly={editMode}
                 required
                 error={formik.touched.netWgt && Boolean(formik.errors.netWgt)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>

@@ -150,7 +150,7 @@ const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
             columns={columns}
             allowDelete={false}
             allowAddNewLine={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

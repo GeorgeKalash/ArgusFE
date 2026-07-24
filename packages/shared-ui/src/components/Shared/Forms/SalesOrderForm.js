@@ -1762,7 +1762,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess}/>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField

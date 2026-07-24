@@ -185,6 +185,7 @@ const GateKeeper = () => {
                 onChange={(event, newValue) => {
                   onChange(newValue?.key)
                 }}
+                maxAccess={access}
               />
             </Grid>
           }

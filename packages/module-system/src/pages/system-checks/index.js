@@ -137,6 +137,7 @@ const SystemChecks = () => {
                 onSearch={e => setSearch(e)}
                 search={true}
                 height={35}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

@@ -496,7 +496,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField name='statusName' label={labels.status} readOnly value={formik.values.statusName} />
+                  <CustomTextField name='statusName' label={labels.status} readOnly value={formik.values.statusName} maxAccess={maxAccess}/>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea

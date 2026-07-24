@@ -846,6 +846,7 @@ export default function JobOrderForm({
                         onChange={e => formik.setFieldValue('expectedQty', e.target.value)}
                         onClear={() => formik.setFieldValue('expectedQty', 0)}
                         error={formik.touched.expectedQty && Boolean(formik.errors.expectedQty)}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item>
@@ -867,6 +868,7 @@ export default function JobOrderForm({
                           formik.setFieldValue('expectedQty', 0)
                         }}
                         error={formik.touched.expectedPcs && Boolean(formik.errors.expectedPcs)}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item>
@@ -928,6 +930,7 @@ export default function JobOrderForm({
                         label={labels.itemWeight}
                         value={formik.values.stdWeight}
                         readOnly
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -945,6 +948,7 @@ export default function JobOrderForm({
                         label={labels.avgWeight}
                         value={formik.values.avgWeight}
                         readOnly
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>

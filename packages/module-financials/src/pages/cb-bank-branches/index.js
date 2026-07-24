@@ -2,9 +2,8 @@ import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -21,11 +20,11 @@ const BankBranches = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     return await getRequest({
-      extension: CashBankRepository.BankBranches.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: CashBankRepository.BankBranches.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
   }
 
@@ -35,10 +34,11 @@ const BankBranches = () => {
     paginationParameters,
     filterBy,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CashBankRepository.BankBranches.qry,
+    endpointId: CashBankRepository.BankBranches.page,
     datasetId: ResourceIds.BankBranches,
     filter: {
       filterFn: fetchWithFilter
@@ -57,10 +57,6 @@ const BankBranches = () => {
       }
     } catch (error) {}
   }
-
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.BankBranches.qry
-  })
 
   const columns = [
     {
