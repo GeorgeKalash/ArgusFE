@@ -8,15 +8,17 @@ import { ReportRepository } from '@argus/repositories/src/repositories/ReportRep
 import EmployeeListWindow from '@argus/shared-ui/src/components/Shared/EmployeeListWindow'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 
-export default function EmployeeMissingList ({labels, maxAccess, fieldId, status, onSuccess: refetch}) {
+export default function EmployeeMissingList ({ labels, maxAccess, fieldId, onSuccess: refetch }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData() {
     const response = await getRequest({
       extension: ReportRepository.EmployeeMissingDetails.RT107b,
-      parameters: `_fieldId=${fieldId}&_activeStatus=${status}`
+      parameters: `_fieldId=${fieldId}`
     })
 
     response.list = (response?.list || []).map(item => ({
@@ -108,6 +110,9 @@ export default function EmployeeMissingList ({labels, maxAccess, fieldId, status
 
   return (
     <VertLayout>
+      <Fixed>
+        <GridToolbar maxAccess={maxAccess} previewReport={ResourceIds.EmployeeMissingDetails} />
+      </Fixed>
       <Grow>
         <Table
           name='Employeetable'
