@@ -111,7 +111,15 @@ export default function EmployeeMissingList ({ labels, maxAccess, fieldId, onSuc
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar maxAccess={maxAccess} previewReport={ResourceIds.EmployeeMissingDetails} />
+        <GridToolbar 
+          maxAccess={maxAccess} 
+          previewReport={ResourceIds.EmployeeMissingDetails} 
+          reportExtraParams={
+            fieldId
+              ? `_fieldId=${fieldId}`
+              : undefined
+          }
+        />
       </Fixed>
       <Grow>
         <Table
