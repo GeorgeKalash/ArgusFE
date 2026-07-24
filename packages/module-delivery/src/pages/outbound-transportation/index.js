@@ -11,17 +11,16 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { DeliveryRepository } from '@argus/repositories/src/repositories/DeliveryRepository'
 import OutboundTranspForm from './forms/OutboundTranspForm'
-import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const OutboundTransp = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack, lockRecord } = useWindow()
-  const { addLockedScreen } = useContext(LockedScreensContext)
+  const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -139,10 +138,18 @@ const OutboundTransp = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId, obj?.reference, obj?.status)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
-  async function openStack(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.Trip,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: OutboundTranspForm,
       props: {
@@ -154,35 +161,6 @@ const OutboundTransp = () => {
       height: 700,
       title: _labels.outboundTransp
     })
-  }
-
-  async function openForm(recordId, reference, status) {
-    if (recordId && status !== 3) {
-      await lockRecord({
-        recordId: recordId,
-        reference: reference,
-        resourceId: ResourceIds.Trip,
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: ResourceIds.Trip,
-            recordId,
-            reference
-          })
-          openStack(recordId)
-        },
-        isAlreadyLocked: name => {
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              title: platformLabels.Dialog
-            }
-          })
-        }
-      })
-    } else {
-      openStack(recordId)
-    }
   }
 
   const del = async obj => {

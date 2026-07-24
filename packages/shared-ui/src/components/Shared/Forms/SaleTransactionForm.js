@@ -50,7 +50,6 @@ import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/Mu
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
@@ -61,7 +60,6 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
@@ -71,16 +69,14 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import CommissionDetailsForm from '@argus/module-sales/src/pages/sa-trx/[functionId]/Forms/CommissionDetailsForm'
 import FIReceiptVoucherForm from './FIReceiptVoucherForm'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
-
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function SaleTransactionForm({
   recordId,
   functionId,
   window,
-  lockRecord,
   getResourceId
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -415,6 +411,13 @@ export default function SaleTransactionForm({
 
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
+
+  const { releaseLock } = useRecordLock({
+    recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: getResourceId(parseInt(functionId)),
+    enabled: !!recordId && !isPosted
+  })
 
   function buildCalculatedTaxDetails(row, taxDetailsList = []) {
     return (taxDetailsList || []).map(td => {
@@ -1070,6 +1073,7 @@ export default function SaleTransactionForm({
 
     toast.success(platformLabels.Posted)
     invalidate()
+    await releaseLock()
     window.close()
   }
 
@@ -1079,30 +1083,7 @@ export default function SaleTransactionForm({
       record: JSON.stringify(formik.values.header)
     }).then(res => {
       toast.success(platformLabels.Posted)
-      lockRecord({
-        recordId: res.recordId,
-        reference: formik.values.header.reference,
-        resourceId: getResourceId(parseInt(functionId)),
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: getResourceId(parseInt(functionId)),
-            recordId,
-            reference: formik.values.header.reference
-          })
-          refetchForm(res.recordId)
-        },
-        isAlreadyLocked: name => {
-          window.close()
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              title: platformLabels.Dialog
-            },
-            title: platformLabels.Dialog
-          })
-        }
-      })
+      refetchForm(res.recordId)
       invalidate()
     })
   }
@@ -1345,20 +1326,6 @@ export default function SaleTransactionForm({
         taxes: saTrxTaxes
       }
     })
-
-    !formik.values.recordId &&
-      lockRecord({
-        recordId: saTrxHeader.recordId,
-        reference: saTrxHeader.reference,
-        resourceId: getResourceId(parseInt(functionId)),
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: getResourceId(parseInt(functionId)),
-            recordId: saTrxHeader.recordId,
-            reference: saTrxHeader.reference
-          })
-        }
-      })
   }
 
   async function getSalesTransactionPack(transactionId) {
