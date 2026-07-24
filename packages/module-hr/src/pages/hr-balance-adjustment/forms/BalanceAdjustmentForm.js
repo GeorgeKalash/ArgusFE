@@ -224,7 +224,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 required
                 secondValue={formik.values.employeeName}
                 onChange={async (_, newValue) => {
-                  const lsRes = await getEmployeeSchedule(newValue?.recordId, formik.values.ltId)
+                  const lsRes = await getEmployeeSchedule(formik.values.ltId, newValue?.recordId)
                   formik.setFieldValue('scheduleName', lsRes?.lsName || null)
                   formik.setFieldValue('lsId', lsRes?.lsId || null)
                   
