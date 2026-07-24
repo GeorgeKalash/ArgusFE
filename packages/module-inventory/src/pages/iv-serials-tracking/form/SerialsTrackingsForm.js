@@ -62,9 +62,9 @@ export default function SerialsTrackingsForm({ _labels: labels, access }) {
           typeName: mapped?.typeName || '',
           type: mapped?.type
         }
-      }) || []
-
-    formik.setFieldValue('rows', rows)
+      }) || [] 
+      
+    formik.resetForm({ values: { rows } })
   }
 
   useEffect(() => {

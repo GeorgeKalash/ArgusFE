@@ -24,21 +24,21 @@ const HROrgChart = () => {
 
   const { formik } = useForm({
     initialValues: {
-      type: 0,
+      type: '0',
       orgData: []
-    },
-    validateOnChange: true,
-    onSubmit: async obj => {
-      const data = await getRequest({
-        extension: companyStructureRepository.Departments.qry,
-        parameters: `_filter=&_size=1000&_startAt=0&_type=${obj?.type}&_activeStatus=1&_sortBy=recordId`
-      })
-
-      const transformed = transformToOrgChartData(data.list || [])
-
-      formik.setFieldValue('orgData', transformed)
     }
   })
+
+  async function loadChart () {
+    const data = await getRequest({
+      extension: companyStructureRepository.Departments.qry,
+      parameters: `_filter=&_size=1000&_startAt=0&_type=${formik.values?.type}&_activeStatus=1&_sortBy=recordId`
+    })
+
+    const transformed = transformToOrgChartData(data.list || [])
+
+    formik.setFieldValue('orgData', transformed)
+  }
 
   function transformToOrgChartData(records) {
     const idToName = {}
@@ -88,7 +88,7 @@ const HROrgChart = () => {
               </Grid>
               <Grid item>
                 <CustomButton
-                  onClick={formik.handleSubmit}
+                  onClick={loadChart}
                   label={platformLabels.GO}
                   color='#231f20'
                 />

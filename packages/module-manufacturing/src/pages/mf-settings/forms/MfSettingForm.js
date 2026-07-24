@@ -59,10 +59,14 @@ const MfSettingForm = ({ _labels, access }) => {
   useEffect(() => {
     if (!systemDefaults?.list?.length) return
 
+    const myObject = {}
     systemDefaults.list.forEach(({ key, value }) => {
       if (!Object.values(DefaultFields).includes(key)) return
-      formik.setFieldValue(key, parseDefaultValue(key, value))
+
+      myObject[key] = parseDefaultValue(key, value)
     })
+
+    formik.resetForm({ values: myObject })
   }, [systemDefaults])
 
   return (

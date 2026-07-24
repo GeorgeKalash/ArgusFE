@@ -206,7 +206,12 @@ const ImageUpload = forwardRef(
         })
 
         const record = result?.record || {}
-        formik.setValues({ ...record, resourceId })
+        formik.resetForm({ 
+          values: { 
+          ...record, 
+          resourceId 
+          } 
+        })
         SavedImageInfo.current = { ...record, resourceId }
 
         setImage(record?.fileName ? `${record.fileName}?t=${Date.now()}` : '')
@@ -223,7 +228,12 @@ const ImageUpload = forwardRef(
       })
 
       const record = result?.record || {}
-      formik.setValues({ ...record, resourceId: effectiveResId })
+      formik.resetForm({
+        values: {
+          ...record, 
+          resourceId: effectiveResId 
+        }
+      })
       SavedImageInfo.current = { ...record, resourceId: effectiveResId }
 
       setImage(record?.url ? `${record.url}?t=${Date.now()}` : '')

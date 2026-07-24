@@ -115,7 +115,9 @@ export default function EmployeeMissingDetails () {
                     displayField='value'
                     value={status}
                     onClear={() => setStatus('2')}
-                    onChange={(_, newValue) => setStatus(newValue?.key || '2') }
+                    onChange={(_, newValue) => {
+                      setStatus(newValue?.key || '2') 
+                    }}
                 />
             </Grid>
           }

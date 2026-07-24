@@ -148,7 +148,11 @@ const UndeliveredItems = () => {
       balance: item.qty - item.deliveredQty
     }))
 
-    formik.setFieldValue('items', res)
+    formik.resetForm({ values: {
+        ...formik.values,
+        items: res
+      }
+    })
   }
 
   const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)

@@ -39,7 +39,7 @@ const SalesZonesLevels = () => {
           levelId: item?.levelId,
           name: item?.name
         }))
-        if (res.list.length > 0) formik.setValues({ items: processedData })
+        if (res.list.length > 0) formik.resetForm({ values: {items: processedData} })
       })
       .catch(error => {
         setErrorMessage(error)

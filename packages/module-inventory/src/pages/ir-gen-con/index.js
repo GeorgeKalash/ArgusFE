@@ -38,7 +38,7 @@ export default function IRGenerateConsumption() {
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateConsumption
   })
-  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
+  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value) || null
 
   const conditions = {
     transferNow: row => row?.transferNow > 0,
@@ -52,7 +52,7 @@ export default function IRGenerateConsumption() {
     conditionSchema: ['items'],
     initialValues: {
       dtId: null,
-      fromSiteId: null,
+      fromSiteId: siteId,
       workCenterId: null,
       date: new Date(),
       reference: '',
@@ -295,10 +295,6 @@ export default function IRGenerateConsumption() {
     })
     formik.setFieldValue('items', res.list)
   }
-
-  useEffect(() => {
-    if (siteId) formik.setFieldValue('fromSiteId', siteId)
-  }, [siteId])
 
   useEffect(() => {
     fetchGridData()

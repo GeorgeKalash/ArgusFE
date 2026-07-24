@@ -21,15 +21,16 @@ import OpenMultiForm from './forms/OpenMultiForm'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import Icon from '@argus/shared-core/src/@core/components/icon'
 import CashTransferTab from '@argus/shared-ui/src/components/Shared/Forms/CashTransferTab'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const OpenMultiCurrencyCashTransfer = () => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const userData = getStorageData('userData')
+  const { userDefaults } = useContext(DefaultsContext)
 
-  const _userId = userData.userId
+  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value) || null
 
   const fetchData = async () => {
     if (!formik.values.plantId) {
@@ -59,7 +60,7 @@ const OpenMultiCurrencyCashTransfer = () => {
 
   const { formik } = useForm({
     initialValues: {
-      plantId: ''
+      plantId
     },
     access,
     validateOnChange: true,
@@ -67,17 +68,6 @@ const OpenMultiCurrencyCashTransfer = () => {
       plantId: yup.string().required()
     })
   })
-
-  useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${_userId}&_key=plantId`
-      })
-
-      formik.setFieldValue('plantId', parseInt(res.record.value) || '')
-    })()
-  }, [])
 
   const rowColumns = [
     {

@@ -28,6 +28,8 @@ import LinkCellRenderer from '@argus/shared-ui/src/components/Shared/Table/LinkC
 import { getStatusBadgeColor } from "@argus/shared-utils/src/utils/status-badge-colors";
 import { getStatusIcon } from "@argus/shared-utils/src/utils/status-icon";
 import Chip from "@mui/material/Chip";
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
 
 const Table = ({
   name = 'table',
@@ -71,9 +73,19 @@ const Table = ({
   const [menuAnchor, setMenuAnchor] = useState(null)
   const [selectedColId, setSelectedColId] = useState(null)
   const [hoveredTable, setHoveredTable] = useState(false)
-
+  const initialCheckedRef = useRef(new Map())
+  const changedRowsRef = useRef(new Map())
+  const trackInteraction = usePageInteraction()
+  const { clearPageInteractions } = useInteractionTracker()
   const { width } = useWindowDimensions()
 
+  const getRowKey = row => {
+    if (Array.isArray(props.rowId)) {
+      return props.rowId.map(key => row[key]).join('|')
+    }
+
+    return row[props.rowId || 'id']
+  }
   const rowHeight =
     width <= 768 ? 36 : width <= 1024 ? 32 : width <= 1280 ? 30 : width <= 1366 ? 32 : width < 1600 ? 34 : 36
 
@@ -83,6 +95,18 @@ const Table = ({
   const badgeHeight = Math.round(rowHeight * 0.65);
   const badgeFont = Math.max(10, Math.round(rowHeight * 0.33));
   const badgeRadius = Math.round(badgeHeight / 3);
+  
+  const updateDirtyState = row => {
+    const key = getRowKey(row)
+    const initial = initialCheckedRef.current.get(key)
+    const current = !!row.checked
+
+    if (initial === current) changedRowsRef.current.delete(key)
+    else changedRowsRef.current.set(key, true)
+
+    if (changedRowsRef.current.size > 0) trackInteraction('table')
+    else clearPageInteractions(trackInteraction?.currentPageResourceId, 'table')
+  }
 
   const columns = useMemo(() => {
   return props?.columns
@@ -135,6 +159,8 @@ const Table = ({
             const handleCheckboxChange = event => {
               const checked = event.target.checked
               node.setDataValue(col.field, checked)
+              data[col.field] = checked
+              updateDirtyState(data)
             }
 
             return (
@@ -253,7 +279,8 @@ const Table = ({
   )}, [
     props?.columns,
     languageId,
-    disableSorting
+    disableSorting,
+    updateDirtyState
   ])
 
   function dateComparator(date1, date2) {
@@ -287,6 +314,14 @@ const Table = ({
 
 
   useEffect(() => {
+    initialCheckedRef.current.clear()
+    changedRowsRef.current.clear()
+
+    props?.gridData?.list?.forEach(row => {
+      initialCheckedRef.current.set(getRowKey(row), !!row.checked)
+    })
+    clearPageInteractions?.()
+
     const areAllValuesTrue =
       props?.gridData?.list?.length > 0 && props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
@@ -576,6 +611,7 @@ const Table = ({
     allNodes.forEach(node => {
       node.data.checked = e.target.checked
       node.setDataValue('checked', e.target.checked)
+      updateDirtyState(node.data)
     })
 
     setChecked(e.target.checked)
@@ -655,6 +691,7 @@ const Table = ({
 
           if (rowSelection !== 'single') {
             params.node.setDataValue(params.colDef.field, checked)
+            params.data.checked = checked
           } else {
             params.api.forEachNode(node => {
               if (node.id === params.node.id) {
@@ -664,7 +701,7 @@ const Table = ({
               }
             })
           }
-
+          updateDirtyState(params.data)
           syncCheckAllState(params.api)
 
           if (handleCheckboxChange) {

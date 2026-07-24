@@ -10,6 +10,61 @@ import { RequestsContext } from '../RequestsContext'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { LockedScreensContext } from '../LockedScreensContext'
 import styles from './TabsProvider.module.css'
+import { useInteractionTracker } from '../InteractionTrackerProvider'
+import { ControlContext } from '../ControlContext'
+import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
+
+const modalStyle = {
+  background: '#fff',
+  borderRadius: 8,
+  width: 400,
+  maxWidth: '90%',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden'
+}
+
+const headerStyle = {
+  background: '#1f1f1f',
+  color: '#fff',
+  padding: '12px 16px',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  fontWeight: 'bold'
+}
+
+const messageStyle = {
+  padding: 20,
+  fontSize: 14,
+  color: '#333'
+}
+
+const footerStyle = {
+  padding: '12px 16px',
+  display: 'flex',
+  justifyContent: 'flex-end',
+  gap: '10px'
+}
+
+const buttonStyle = {
+  background: '#1f1f1f',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 4,
+  padding: '8px 16px',
+  cursor: 'pointer'
+}
+
+const cancelButtonStyle = {
+  background: '#ccc',
+  color: '#000',
+  border: 'none',
+  borderRadius: 4,
+  padding: '8px 16px',
+  cursor: 'pointer'
+}
 
 const TabsContext = createContext()
 
@@ -87,11 +142,25 @@ const TabsProvider = ({ children }) => {
 
   const { lockedScreens, removeLockedScreen } = useContext(LockedScreensContext)
   const { postRequest } = useContext(RequestsContext)
+  const { interactions, clearPageInteractions } = useInteractionTracker()
+  const { platformLabels } = useContext(ControlContext)
 
   const [anchorEl, setAnchorEl] = useState(null)
   const [tabsIndex, setTabsIndex] = useState(null)
   const [menuPosition, setMenuPosition] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
+  const currentTab = openTabs?.[currentTabIndex] || null
+  const [closeDialog, setCloseDialog] = useState({
+    open: false,
+    tab: null,
+    page: null
+  })
+
+  const [bulkCloseDialog, setBulkCloseDialog] = useState({
+    open: false,
+    type: null,
+    tabIndex: null
+  })
 
   const tabsWrapperRef = useRef(null)
   const pagesCacheRef = useRef(new Map())
@@ -113,6 +182,28 @@ const TabsProvider = ({ children }) => {
   const userId = userDataParsed?.userId
   const open = Boolean(menuPosition)
   const hasHomeTab = Boolean(dashboardId)
+  const { settings } = useSettings()
+  const { navCollapsed } = settings
+  const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 100
+  const menuWidth =
+      screenWidth <= 768 ? 180 :
+      screenWidth <= 1024 ? 200 :
+      screenWidth <= 1280 ? 210 :
+      screenWidth <= 1366 ? 220 :
+      screenWidth <= 1600 ? 240 : 300
+
+  const getOverlayStyle = () => ({
+    position: 'fixed',
+    top: 0,
+    left: navCollapsed ? 10 : menuWidth,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999
+  })
 
   const normalizeRoute = useCallback(route => {
     if (!route) return ''
@@ -251,6 +342,56 @@ const TabsProvider = ({ children }) => {
     setTabsIndex(null)
   }, [])
 
+  const handleCloseTab = async activeTab => {
+    const hasUnsavedChanges = interactions.length
+      ? interactions.some(item => item.pageId === activeTab.resourceId)
+      : false
+    const isStandingOnTab = activeTab?.resourceId == currentTab?.resourceId
+    
+    if (hasUnsavedChanges && isStandingOnTab) {
+      clearPageInteractions(activeTab.resourceId)
+      await closeTab(activeTab.route)
+
+      return
+    }
+
+    if (hasUnsavedChanges && !isStandingOnTab) {
+      setCloseDialog({
+        open: true,
+        tab: activeTab,
+        page: activeTab.label
+      })
+
+      return
+    }
+
+    clearPageInteractions(activeTab.resourceId)
+    await closeTab(activeTab.route)
+  }
+
+  const confirmCloseTab = async () => {
+    const activeTab = closeDialog.tab
+    if (!activeTab) return
+
+    clearPageInteractions(activeTab.resourceId)
+
+    setCloseDialog({
+      open: false,
+      tab: null,
+      page: null
+    })
+
+    await closeTab(activeTab.route)
+  }
+
+  const cancelCloseDialog = () => {
+    setCloseDialog({
+      open: false,
+      tab: null,
+      page: null
+    })
+  }
+
   useEffect(() => {
     if (!shouldManageTabs || !children || !router.asPath) return
 
@@ -330,7 +471,7 @@ const TabsProvider = ({ children }) => {
     [currentTabIndex, openTabs, router.asPath, navigateTo, normalizeRoute, setCurrentTabIndex]
   )
 
-  const handleCloseAllTabs = useCallback(async () => {
+  const executeCloseAllTabs = useCallback(async () => {
     closingRouteRef.current = normalizeRoute(router.asPath)
 
     if (hasHomeTab) {
@@ -357,7 +498,20 @@ const TabsProvider = ({ children }) => {
     })
   }, [openTabs, hasHomeTab, navigateTo, normalizeRoute, router.asPath, setOpenTabs, setCurrentTabIndex])
 
-  const handleCloseOtherTab = useCallback(
+  const handleCloseAllTabs = useCallback(async () => {
+    const hasDirtyTabs = openTabs.some(tab =>
+      interactions.some(item => item.pageId === tab.resourceId)
+    )
+
+    if (hasDirtyTabs) {
+      setBulkCloseDialog({ open: true, type: 'all', tabIndex: null })
+      return
+    }
+
+    await executeCloseAllTabs()
+  }, [openTabs, interactions, executeCloseAllTabs])
+
+  const executeCloseOtherTab = useCallback(
     async tabIndex => {
       const selectedTab = openTabs?.[tabIndex]
       if (!selectedTab) return
@@ -395,6 +549,53 @@ const TabsProvider = ({ children }) => {
     },
     [openTabs, hasHomeTab, navigateTo, normalizeRoute, router.asPath, setOpenTabs, setCurrentTabIndex]
   )
+
+  const handleCloseOtherTab = useCallback(
+    async tabIndex => {
+      const otherTabs = openTabs.filter((_, i) => i !== tabIndex)
+      const hasDirtyTabs = otherTabs.some(tab =>
+        interactions.some(item => item.pageId === tab.resourceId)
+      )
+
+      if (hasDirtyTabs) {
+        setBulkCloseDialog({ open: true, type: 'other', tabIndex })
+        return
+      }
+
+      await executeCloseOtherTab(tabIndex)
+    },
+    [openTabs, interactions, executeCloseOtherTab]
+  )
+
+  const clearInteractionsForTabs = tabs => {
+    tabs.forEach(tab => {
+      if (tab.resourceId) {
+        clearPageInteractions(tab.resourceId)
+      }
+    })
+  }
+
+  const confirmBulkClose = async () => {
+    const { type, tabIndex } = bulkCloseDialog
+
+    setBulkCloseDialog({
+      open: false,
+      type: null,
+      tabIndex: null
+    })
+
+    if (type === 'all') {
+      clearInteractionsForTabs(openTabs)
+      await executeCloseAllTabs()
+    } else if (type === 'other') {
+      clearInteractionsForTabs(openTabs.filter((_, i) => i !== tabIndex))
+      await executeCloseOtherTab(tabIndex)
+    }
+  }
+
+  const cancelBulkCloseDialog = () => {
+    setBulkCloseDialog({ open: false, type: null, tabIndex: null })
+  }
 
   const closeTab = useCallback(
     async tabRoute => {
@@ -512,6 +713,8 @@ const TabsProvider = ({ children }) => {
           resourceId
         }
       ])
+
+      setCurrentTabIndex(openTabs?.length)
 
       return
     }
@@ -660,25 +863,29 @@ const TabsProvider = ({ children }) => {
   }
 
   return (
-    <>
+      <TabsContext.Provider value={{ currentTab }}>
       <Box ref={tabsWrapperRef} className={styles.tabsWrapper}>
-        <Tabs
-          value={currentTabIndex}
-          onChange={handleChange}
-          variant='scrollable'
-          scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
-          aria-label='scrollable auto tabs example'
-          classes={{ indicator: styles.tabsIndicator }}
-          className={styles.tabs}
-        >
-          {openTabs.map((activeTab, i) => (
+      <Tabs
+        value={currentTabIndex}
+        onChange={handleChange}
+        variant='scrollable'
+        scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
+        aria-label='scrollable auto tabs example'
+        classes={{ indicator: styles.tabsIndicator }}
+        className={styles.tabs}
+      >
+        {openTabs.map((activeTab, i) => {
+          const hasUnsavedChanges = interactions.length ? interactions.some(item => item.pageId === activeTab.resourceId) : false
+          const label = hasUnsavedChanges ? `${activeTab.label} *` : `${activeTab.label}`
+          return (
             <Tab
               key={activeTab?.id}
               className={styles.tabName}
               label={
                 <Box display='flex' alignItems='center'>
-                  <span>{activeTab.label}</span>
-                  {i === currentTabIndex && activeTab.route !== '/no-access/'&& (
+                  <span>{label}</span>
+
+                  {i === currentTabIndex && activeTab.route !== '/no-access/' && (
                     <IconButton
                       size='small'
                       className={styles.svgIcon}
@@ -687,9 +894,13 @@ const TabsProvider = ({ children }) => {
                         e.stopPropagation()
                       }}
                       onClick={e => {
+                        clearPageInteractions(activeTab.resourceId) 
                         e.preventDefault()
                         e.stopPropagation()
-                        setReloadOpenedPage({ path: openTabs[i].route.replace(/\/$/, ''), name: openTabs[i].label })
+                        setReloadOpenedPage({
+                          path: openTabs[i].route.replace(/\/$/, ''),
+                          name: openTabs[i].label
+                        })
                       }}
                     >
                       <RefreshIcon className={styles.svgIcon} />
@@ -708,7 +919,7 @@ const TabsProvider = ({ children }) => {
                         e.preventDefault()
                         e.stopPropagation()
                         if (activeTab) unlockIfLocked(activeTab)
-                        await closeTab(activeTab.route)
+                        await handleCloseTab(activeTab)
                       }}
                     >
                       <CloseIcon className={styles.svgIcon} />
@@ -722,8 +933,9 @@ const TabsProvider = ({ children }) => {
                 selected: styles.selectedTab
               }}
             />
-          ))}
-        </Tabs>
+          )
+        })}
+      </Tabs>
       </Box>
 
       <Box
@@ -758,7 +970,7 @@ const TabsProvider = ({ children }) => {
           onClick={async event => {
             event.preventDefault()
             event.stopPropagation()
-            await closeTab(openTabs?.[tabsIndex]?.route)
+            await handleCloseTab(activeTab)
             handleClose()
           }}
         >
@@ -787,7 +999,53 @@ const TabsProvider = ({ children }) => {
           Close All Tabs
         </MenuItem>
       </Menu>
-    </>
+
+      {closeDialog.open && (
+        <div style={getOverlayStyle()}>
+          <div style={modalStyle}>
+            <div style={headerStyle}>
+              {platformLabels?.Confirmation}
+            </div>
+
+            <div style={messageStyle}> {`${closeDialog?.page} ${platformLabels?.ConfirmationMessage}`} </div>
+
+            <div style={footerStyle}>
+              <button style={cancelButtonStyle} onClick={cancelCloseDialog}>
+                {platformLabels?.Cancel}
+              </button>
+
+              <button style={buttonStyle} onClick={confirmCloseTab}>
+               {platformLabels?.CloseTab}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bulkCloseDialog.open && (
+        <div style={getOverlayStyle()}>
+          <div style={modalStyle}>
+            <div style={headerStyle}>
+              {platformLabels?.Confirmation}
+            </div>
+
+            <div style={messageStyle}>
+              You have tabs with unsaved changes. Are you sure you want to close them?
+            </div>
+
+            <div style={footerStyle}>
+              <button style={cancelButtonStyle} onClick={cancelBulkCloseDialog}>
+                {platformLabels?.Cancel}
+              </button>
+
+              <button style={buttonStyle} onClick={confirmBulkClose}>
+                {platformLabels?.CloseTab}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </TabsContext.Provider>
   )
 }
 
