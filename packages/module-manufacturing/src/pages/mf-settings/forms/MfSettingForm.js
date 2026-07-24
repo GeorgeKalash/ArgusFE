@@ -12,6 +12,8 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
 const MfSettingForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -26,7 +28,9 @@ const MfSettingForm = ({ _labels, access }) => {
     PICO_DATASOURCE: 'mf_pico_dataSource',
     MAX_ALLOW_QTY_VARIATION: 'mfMaxAllowQtyVariation',
     MF_MAX_BTFR_LINES_ALLOWED: 'max_btfr_lines_allowed',
-    MF_PO_GEN_DIRECTION: 'mf_po_gen_direction'
+    MF_PO_GEN_DIRECTION: 'mf_po_gen_direction',
+    MF_DEF_JODT_ID: 'mf_defJODTId',
+    MF_DEF_WORKCENTER_ID: 'mf_defWorkCenterId'
   }
 
   const DecimalFields = {
@@ -69,6 +73,43 @@ const MfSettingForm = ({ _labels, access }) => {
     <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={SystemRepository.DocumentType.qry}
+              parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.JobOrder}`}
+              name='mf_defJODTId'
+              label={_labels.joDocumentType}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              onChange={(_, newValue) => {
+                formik.setFieldValue('mf_defJODTId', newValue?.recordId || null)
+              }}
+              error={formik.touched.mf_defJODTId && Boolean(formik.errors.mf_defJODTId)}
+              maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={ManufacturingRepository.WorkCenter.qry}
+              name='mf_defWorkCenterId'
+              label={_labels.workCenter}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              maxAccess={access}
+              onChange={(_, newValue) => formik.setFieldValue('mf_defWorkCenterId', newValue?.recordId || null)}
+              error={formik.touched.mf_defWorkCenterId && formik.errors.mf_defWorkCenterId}
+            />
+          </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={InventoryRepository.Site.qry}
