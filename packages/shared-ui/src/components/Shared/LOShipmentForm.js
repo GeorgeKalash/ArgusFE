@@ -98,7 +98,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
         record: JSON.stringify(resultObject)
       })
 
-      toast.success('Record Updated Successfully')
+      toast.success(platformLabels.Updated)
     }
   })
   const index = formik.values.packages.findIndex(item => item.id === selectedRowId)

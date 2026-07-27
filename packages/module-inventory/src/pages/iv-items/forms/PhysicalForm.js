@@ -16,9 +16,9 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import { DirtyField, GeometricShape, PhysicalPropertyCalculatorCtrl } from '@argus/shared-utils/src/utils/PhysicalPropertyCalc'
 
 const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { recordId } = store
+  const { recordId, physicalProperty } = store
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.snapshot
@@ -42,7 +42,6 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       metalPurity: '',
       isOpenMetalPurity: false
     },
-    enableReinitialize: true,
     validationSchema: yup.object({
       metalId: yup
         .string()
@@ -78,19 +77,18 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   }
 
   useEffect(() => {
-    const fetchRecord = async () => {
-      if (recordId) {
-        const res = await getRequest({
-          extension: InventoryRepository.Physical.get,
-          parameters: `_itemId=${recordId}`
-        })
-        if (res.record) {
-          formik.setValues({ ...res.record, isMetal: !!res.record.isMetal })
-        }
-      }
+    if (!recordId) return
+
+    if (physicalProperty) {
+      formik.setValues({
+        ...physicalProperty,
+        isMetal: !!physicalProperty.isMetal,
+        itemId: recordId
+      })
+    } else {
+      formik.setFieldValue('itemId', recordId)
     }
-    fetchRecord()
-  }, [recordId])
+  }, [recordId, physicalProperty])
 
   const handleFieldChange = (fieldName, dirtyField, event) => {
     const newValue = Number(event?.target?.value || 0)
@@ -134,191 +132,194 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     >
       <VertLayout>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={InventoryRepository.Items.pack}
-              reducer={response => {
-                return response?.record?.shapes?.map(shape => ({
-                  key: parseInt(shape.key),
-                  value: shape.value
-                }))
-              }}
-              values={formik.values}
-              name='shape'
-              label={labels.shape}
-              valueField='key'
-              displayField='value'
-              displayFieldWidth={1}
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('shape', newValue?.key || '')
-                if (newValue?.key === GeometricShape.CUBIC) {
-                  formik.setFieldValue('diameter', 0)
-                }
-                if (newValue?.key === GeometricShape.CYLINDER) {
-                  formik.setFieldValue('width', 0)
-                  formik.setFieldValue('depth', 0)
-                }
-              }}
-              error={formik.touched.shape && formik.errors.shape}
-            />
+          <Grid item xs={4}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  store={store?.shapes?.map(item => ({
+                    key: parseInt(item.key),
+                    value: item.value
+                  }))}
+                  values={formik.values}
+                  name='shape'
+                  label={labels.shape}
+                  valueField='key'
+                  displayField='value'
+                  displayFieldWidth={1}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('shape', newValue?.key || '')
+                    if (newValue?.key === GeometricShape.CUBIC) {
+                      formik.setFieldValue('diameter', 0)
+                    }
+                    if (newValue?.key === GeometricShape.CYLINDER) {
+                      formik.setFieldValue('width', 0)
+                      formik.setFieldValue('depth', 0)
+                    }
+                  }}
+                  error={formik.touched.shape && formik.errors.shape}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='diameter'
+                  label={labels.diameter}
+                  value={formik.values.diameter}
+                  maxAccess={maxAccess}
+                  readOnly={formik.values.shape === GeometricShape.CUBIC}
+                  onBlur={e => handleFieldChange('diameter', DirtyField.DIAMETER, e)}
+                  onClear={() => handleFieldClear('diameter')}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='length'
+                  label={labels.length}
+                  value={formik.values.length}
+                  maxAccess={maxAccess}
+                  onBlur={e => handleFieldChange('length', DirtyField.LENGTH, e)}
+                  onClear={() => handleFieldClear('length')}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='width'
+                  label={labels.width}
+                  value={formik.values.width}
+                  maxAccess={maxAccess}
+                  readOnly={formik.values.shape === GeometricShape.CYLINDER}
+                  onBlur={e => handleFieldChange('width', DirtyField.WIDTH, e)}
+                  onClear={() => handleFieldClear('width')}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='depth'
+                  label={labels.depth}
+                  value={formik.values.depth}
+                  maxAccess={maxAccess}
+                  readOnly={formik.values.shape === GeometricShape.CYLINDER}
+                  onBlur={e => handleFieldChange('depth', DirtyField.DEPTH, e)}
+                  onClear={() => handleFieldClear('depth')}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='volume'
+                  label={labels.volume}
+                  value={formik.values.volume}
+                  maxAccess={maxAccess}
+                  decimalScale={4}
+                  onBlur={e => handleFieldChange('volume', DirtyField.VOLUME, e)}
+                  onClear={() => handleFieldClear('volume')}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='weight'
+                  label={labels.weight}
+                  value={formik.values.weight}
+                  maxAccess={maxAccess}
+                  allowNegative={false}
+                  onBlur={e => handleFieldChange('weight', DirtyField.WEIGHT, e)}
+                  onClear={() => handleFieldClear('weight')}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='density'
+                  label={labels.density}
+                  value={formik.values.density}
+                  maxAccess={maxAccess}
+                  decimalScale={3}
+                  onBlur={e => handleFieldChange('density', DirtyField.DENSITY, e)}
+                  onClear={() => handleFieldClear('density')}
+                />
+              </Grid>
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='diameter'
-              label={labels.diameter}
-              value={formik.values.diameter}
-              maxAccess={maxAccess}
-              readOnly={formik.values.shape === GeometricShape.CUBIC}
-              onBlur={e => handleFieldChange('diameter', DirtyField.DIAMETER, e)}
-              onClear={() => handleFieldClear('diameter')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='length'
-              label={labels.length}
-              value={formik.values.length}
-              maxAccess={maxAccess}
-              onBlur={e => handleFieldChange('length', DirtyField.LENGTH, e)}
-              onClear={() => handleFieldClear('length')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='width'
-              label={labels.width}
-              value={formik.values.width}
-              maxAccess={maxAccess}
-              readOnly={formik.values.shape === GeometricShape.CYLINDER}
-              onBlur={e => handleFieldChange('width', DirtyField.WIDTH, e)}
-              onClear={() => handleFieldClear('width')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='depth'
-              label={labels.depth}
-              value={formik.values.depth}
-              maxAccess={maxAccess}
-              readOnly={formik.values.shape === GeometricShape.CYLINDER}
-              onBlur={e => handleFieldChange('depth', DirtyField.DEPTH, e)}
-              onClear={() => handleFieldClear('depth')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='volume'
-              label={labels.volume}
-              value={formik.values.volume}
-              maxAccess={maxAccess}
-              decimalScale={4}
-              onBlur={e => handleFieldChange('volume', DirtyField.VOLUME, e)}
-              onClear={() => handleFieldClear('volume')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='weight'
-              label={labels.weight}
-              value={formik.values.weight}
-              maxAccess={maxAccess}
-              allowNegative={false}
-              onBlur={e => handleFieldChange('weight', DirtyField.WEIGHT, e)}
-              onClear={() => handleFieldClear('weight')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='density'
-              label={labels.density}
-              value={formik.values.density}
-              maxAccess={maxAccess}
-              decimalScale={3}
-              onBlur={e => handleFieldChange('density', DirtyField.DENSITY, e)}
-              onClear={() => handleFieldClear('density')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomCheckBox
-              name='isMetal'
-              value={formik.values.isMetal}
-              onChange={event => {
-                if (!event.target.checked) {
-                  formik.setFieldValue('metalId', '')
-                  formik.setFieldValue('metalColorId', '')
-                  formik.setFieldValue('metalPurity', '')
-                  formik.setFieldValue('weight', 0)
-                  formik.setFieldValue('density', 0)
-                }
-                formik.setFieldValue('isMetal', event.target.checked)
-              }}
-              label={labels.isMetal}
-              maxAccess={maxAccess}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={InventoryRepository.Items.pack}
-              reducer={response => response?.record?.metals}
-              values={formik.values}
-              name='metalId'
-              label={labels.metal}
-              readOnly={!formik.values.isMetal}
-              required={formik.values.isMetal}
-              valueField='recordId'
-              displayField='reference'
-              displayFieldWidth={1}
-              columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('metalId', newValue?.recordId || '')
-                formik.setFieldValue('metalPurity', newValue?.purity || '')
-              }}
-              error={formik.touched.metalId && formik.errors.metalId}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={InventoryRepository.Items.pack}
-              reducer={response => response?.record?.metalColors}
-              values={formik.values}
-              name='metalColorId'
-              label={labels.metalColor}
-              readOnly={!formik.values.isMetal}
-              valueField='recordId'
-              displayField='reference'
-              displayFieldWidth={1}
-              columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
-              required={formik.values.isMetal}
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('metalColorId', newValue?.recordId || '')
-              }}
-              error={formik.touched.metalColorId && formik.errors.metalColorId}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='metalPurity'
-              label={labels.metalPurity}
-              readOnly
-              decimalScale={5}
-              maxLength={10}
-              value={formik.values.metalPurity}
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('metalPurity', '')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomCheckBox
-              name='isOpenMetalPurity'
-              value={formik.values?.isOpenMetalPurity}
-              onChange={event => formik.setFieldValue('isOpenMetalPurity', event.target.checked)}
-              label={labels.isOpenMetalPurity}
-              maxAccess={maxAccess}
-            />
+          <Grid item xs={8}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <CustomCheckBox
+                  name='isMetal'
+                  value={formik.values.isMetal}
+                  onChange={event => {
+                    if (!event.target.checked) {
+                      formik.setFieldValue('metalId', '')
+                      formik.setFieldValue('metalColorId', '')
+                      formik.setFieldValue('metalPurity', '')
+                      formik.setFieldValue('weight', 0)
+                      formik.setFieldValue('density', 0)
+                    }
+                    formik.setFieldValue('isMetal', event.target.checked)
+                  }}
+                  label={labels.isMetal}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  store={store.metals}
+                  values={formik.values}
+                  name='metalId'
+                  label={labels.metal}
+                  readOnly={!formik.values.isMetal}
+                  required={formik.values.isMetal}
+                  valueField='recordId'
+                  displayField='reference'
+                  displayFieldWidth={1}
+                  columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('metalId', newValue?.recordId || '')
+                    formik.setFieldValue('metalPurity', newValue?.purity || '')
+                  }}
+                  error={formik.touched.metalId && formik.errors.metalId}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  store={store.metalColors}
+                  values={formik.values}
+                  name='metalColorId'
+                  label={labels.metalColor}
+                  readOnly={!formik.values.isMetal}
+                  valueField='recordId'
+                  displayField='reference'
+                  displayFieldWidth={1}
+                  columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
+                  required={formik.values.isMetal}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('metalColorId', newValue?.recordId || '')
+                  }}
+                  error={formik.touched.metalColorId && formik.errors.metalColorId}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='metalPurity'
+                  label={labels.metalPurity}
+                  readOnly
+                  decimalScale={5}
+                  maxLength={10}
+                  value={formik.values.metalPurity}
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('metalPurity', '')}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomCheckBox
+                  name='isOpenMetalPurity'
+                  value={formik.values?.isOpenMetalPurity}
+                  onChange={event => formik.setFieldValue('isOpenMetalPurity', event.target.checked)}
+                  label={labels.isOpenMetalPurity}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </VertLayout>

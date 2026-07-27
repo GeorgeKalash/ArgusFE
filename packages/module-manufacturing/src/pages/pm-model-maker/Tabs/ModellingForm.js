@@ -42,7 +42,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       dtId: null,
@@ -54,6 +54,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       endDate: null,
       productionClassId: null,
       productionStandardId: null,
+      developerId: null,
       collectionId: null,
       itemGroupId: null,
       designGroupId: null,
@@ -100,11 +101,13 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res?.record?.date),
-      startDate: formatDateFromApi(res?.record?.startDate),
-      endDate: formatDateFromApi(res?.record?.endDate)
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: formatDateFromApi(res?.record?.date),
+        startDate: formatDateFromApi(res?.record?.startDate),
+        endDate: formatDateFromApi(res?.record?.endDate)
+      }
     })
     setStore(prevStore => ({
       ...prevStore,
@@ -205,6 +208,37 @@ export default function ModellingForm({ labels, access, setStore, store }) {
     })
   }
 
+  async function onChangeDT (dtId) {
+    const { record } = await getRequest({
+      extension: ProductModelingRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    formik.setFieldValue('productionLineId', record?.productionLineId || null)
+    if (record?.productionLineId) {
+      formik.setFieldValue('threeDPRef', '')
+      formik.setFieldValue('threeDPId', null)
+      formik.setFieldValue('designGroupId', null)
+      formik.setFieldValue('designFamilyId', null)
+      formik.setFieldValue('productionClassId', null)
+      formik.setFieldValue('productionStandardId', null)
+      formik.setFieldValue('collectionId', null)
+      formik.setFieldValue('itemGroupId', null)
+      formik.setFieldValue('metalId', null)
+      formik.setFieldValue('productionClassRef', '')
+      formik.setFieldValue('productionClassName', '')
+    }
+  }
+
+  useEffect(() => {
+   ;(async function () {
+    if (!recordId) {
+      if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
+      else formik.setFieldValue('productionLineId', null)
+    }
+    })()
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.ModelMaker}
@@ -222,6 +256,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.ModelMaker}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -233,34 +268,8 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   changeDT(newValue)
-
-                  formik.setFieldValue('productionLineId', null)
-
-                  if (newValue?.recordId) {
-                    const { record } = await getRequest({
-                      extension: ProductModelingRepository.DocumentTypeDefault.get,
-                      parameters: `_dtId=${newValue?.recordId}`
-                    })
-
-                    formik.setFieldValue('productionLineId', record?.productionLineId)
-
-                    if (record?.productionLineId) {
-                      formik.setFieldValue('threeDPRef', '')
-                      formik.setFieldValue('threeDPId', null)
-
-                      formik.setFieldValue('designGroupId', null)
-                      formik.setFieldValue('designFamilyId', null)
-                      formik.setFieldValue('productionClassId', null)
-                      formik.setFieldValue('productionStandardId', null)
-                      formik.setFieldValue('collectionId', null)
-                      formik.setFieldValue('itemGroupId', null)
-                      formik.setFieldValue('metalId', null)
-                      formik.setFieldValue('productionClassRef', '')
-                      formik.setFieldValue('productionClassName', '')
-                    }
-                  }
                   formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -333,6 +342,26 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 readOnly={isClosed}
                 onClear={() => formik.setFieldValue('endDate', null)}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ProductModelingRepository.Developer.qry}
+                values={formik.values}
+                name='developerId'
+                label={labels.developer}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly={isPosted || isClosed}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('developerId', newValue?.recordId || null)
+                }}
+                error={formik.touched.developerId && formik.errors.developerId}
               />
             </Grid>
             <Grid item xs={12}>

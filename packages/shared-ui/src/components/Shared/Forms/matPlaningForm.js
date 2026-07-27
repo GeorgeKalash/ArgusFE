@@ -52,7 +52,7 @@ export default function MatPlaningForm({ recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       header: {
@@ -108,20 +108,22 @@ export default function MatPlaningForm({ recordId, window }) {
       parameters: `_mrpId=${requestId}`
     })
 
-    formik.setValues({
-      recordId: record.recordId,
-      header: {
-        ...record,
-        date: formatDateFromApi(record?.date)
-      },
-      items: list?.map((item, index) => {
-        return {
-          ...item,
-          id: index + 1,
-          seqNo: index + 1,
-          date: formatDateFromApi(item.date)
-        }
-      })
+    formik.resetForm({
+      values: {
+        recordId: record.recordId,
+        header: {
+          ...record,
+          date: formatDateFromApi(record?.date)
+        },
+        items: list?.map((item, index) => {
+          return {
+            ...item,
+            id: index + 1,
+            seqNo: index + 1,
+            date: formatDateFromApi(item.date)
+          }
+        })
+      }
     })
   }
 
@@ -406,6 +408,7 @@ export default function MatPlaningForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MRP}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[

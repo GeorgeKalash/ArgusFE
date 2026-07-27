@@ -31,6 +31,8 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import { ApplyManual } from '@argus/shared-ui/src/components/Shared/ApplyManual'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -79,7 +81,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       dueDate: new Date()
     },
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validateOnChange: true,
     validationSchema: yup.object({
       amount: yup.number().required(),
@@ -130,20 +132,20 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       rateCalcMethod: formik.values?.rateCalcMethod,
       dirtyField: DIRTYFIELD_RATE
     })
-    formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+    formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
   }
 
   useEffect(() => {
-    let calculatedAmount = parseFloat(formik.values.subtotal)
+    let calculatedAmount = formik.values.subtotal
 
     if (formik.values.isSubjectToVAT) {
       const currentVat = (formik?.values?.recordId ? formik?.values?.vatPct : vatPct) || 0
-      const vatAmount = (calculatedAmount * parseFloat(currentVat)) / 100
+      const vatAmount = (calculatedAmount * currentVat) / 100
       formik.setFieldValue('vatAmount', vatAmount)
       formik.setFieldValue('vatPct', currentVat)
       calculatedAmount += vatAmount
     } else {
-      formik.setFieldValue('vatPct', '')
+      formik.setFieldValue('vatPct', null)
       formik.setFieldValue('vatAmount', 0)
     }
 
@@ -159,10 +161,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
           parameters: `_recordId=${recordId}`
         })
 
-        formik.setValues({
-          ...res.record,
-          dueDate: res?.record?.dueDate ? formatDateFromApi(res.record.dueDate): null,
-          date: formatDateFromApi(res.record.date)
+        formik.resetForm({
+          values: {
+            ...res.record,
+            dueDate: res?.record?.dueDate ? formatDateFromApi(res.record.dueDate) : null,
+            date: formatDateFromApi(res.record.date)
+          }
         })
       }
     })()
@@ -367,20 +371,25 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }
   }
 
-  function openMCRForm(data) {
-    stack({
-      Component: MultiCurrencyRateForm,
-      props: {
-        DatasetIdAccess: getResourceMCR(functionId),
-        data,
-        onOk: childFormikValues => {
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...childFormikValues
-          }))
+  const { openStack } = useStackValueLink({ linkOpen: { resourceId: getResourceMCR(functionId) } })
+  
+  async function openMCRForm(data) {
+    const hasOpened = await openStack()
+    if (!hasOpened) {
+      stack({
+        Component: MultiCurrencyRateForm,
+        props: {
+          DatasetIdAccess: getResourceMCR(functionId),
+          data,
+          onOk: childFormikValues => {
+            formik.setValues(prevValues => ({
+              ...prevValues,
+              ...childFormikValues
+            }))
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   async function getDTD(dtId) {
@@ -420,6 +429,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${formik.values.functionId}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     readOnly={editMode}
                     label={labels.doctype}
@@ -534,7 +544,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                      <CustomButton
                         onClick={() => openMCRForm(formik.values)}
                         image='popup.png'
-                        tooltipText={platformLabels.add}
+                        tooltipText={platformLabels.MultiCurrencyRate}
                         disabled={
                           !formik.values.currencyId ||
                           formik.values.currencyId === currencyId
@@ -548,7 +558,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
             <Grid item xs={6}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='subtotal'
                     readOnly={isPosted || isCancelled}
@@ -564,7 +574,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     error={formik.touched.subtotal && Boolean(formik.errors.subtotal)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}></Grid>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='vatPct'
                     readOnly
@@ -576,7 +587,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     error={formik.touched.vatPct && Boolean(formik.errors.vatPct)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}></Grid>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='vatAmount'
                     readOnly={!formik.values.isSubjectToVAT || isPosted || isCancelled}
@@ -587,9 +599,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     onChange={async e => {
                       const vatPct =
                         formik.values.subtotal != 0
-                          ? (parseFloat(e.target.value) * 100) / parseFloat(formik.values.subtotal)
+                          ? (e.target.value * 100) / formik.values.subtotal
                           : 0
-                      formik.setFieldValue('vatPct', parseFloat(vatPct).toFixed(2) || 0)
+                      formik.setFieldValue('vatPct', roundTo(vatPct) || 0)
                       formik.setFieldValue('vatAmount', e.target.value)
                       const calcAmount = Number(e.target.value || 0) + Number(formik.values.subtotal)
                       formik.setFieldValue('amount', calcAmount)
@@ -602,7 +614,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+
+                <Grid item xs={6}></Grid>
+                <Grid item xs={6}>
                   <CustomCheckBox
                     name='isSubjectToVAT'
                     value={formik.values?.isSubjectToVAT}
@@ -614,7 +628,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     readOnly={postedOrCanceled}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}></Grid>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='amount'
                     label={labels.amount}

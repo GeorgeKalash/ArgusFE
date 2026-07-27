@@ -97,13 +97,12 @@ const MonthlyTargetForm = ({ store, labels, maxAccess }) => {
   ]
 
   const totalAmount = formik.values.rows.reduce((sumAmount, row) => {
-    const amountValue = parseFloat(row.targetAmount?.toString().replace(/,/g, '')) || 0
+    const amountValue = row.targetAmount || 0
 
     return sumAmount + amountValue
   }, 0)
 
-  const targetAmountValue = parseFloat(formik.values.targetAmount?.toString().replace(/,/g, '')) || 0
-  const balance = totalAmount - targetAmountValue || 0
+  const balance = totalAmount - formik.values.targetAmount || 0
 
   const changeFiscal = async selectedFiscal => {
     if (selectedFiscal) {

@@ -15,19 +15,24 @@ import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function TaxCodesForm({ labels, maxAccess, setStore, store, editMode }) {
+export default function TaxCodesForm({ labels, maxAccess, setStore, store }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const editMode = !!recordId
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.TaxCodes.qry
+    endpointId: FinancialRepository.TaxCodes.page
   })
 
   const { formik } = useForm({
-    initialValues: { recordId: null, name: '', reference: '', nonDeductible: false },
+    initialValues: {
+      recordId,
+      name: '',
+      reference: '',
+      nonDeductible: false
+    },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required()
@@ -38,13 +43,11 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: response.recordId
-        }))
+      if (!obj.recordId) {
         formik.setFieldValue('recordId', response.recordId)
+        setStore(prev => ({ ...prev, recordId: response.recordId }))
       }
+
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
@@ -57,8 +60,8 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
           extension: FinancialRepository.TaxCodes.get,
           parameters: `_recordId=${recordId}`
         })
-
         formik.setValues(res.record)
+        setStore(prev => ({ ...prev, recordId: res.record.recordId }))
       }
     })()
   }, [])
@@ -90,6 +93,7 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
                 label={labels.reference}
                 value={formik.values.reference}
                 required
+                maxLength='10'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
@@ -109,7 +113,7 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
                 error={formik.touched.name && Boolean(formik.errors.name)}
               />
             </Grid>
-            <Grid item sx={{ pb: '10px' }} xs={12}>
+            <Grid item xs={12}>
               <CustomCheckBox
                 name='nonDeductible'
                 value={formik.values?.nonDeductible}

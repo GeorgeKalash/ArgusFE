@@ -11,9 +11,11 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 export default function CARebuildAccountBalance({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: { fiscalYear: '', cashAccountId: 0, recordId: 'N/A' },
@@ -31,7 +33,7 @@ export default function CARebuildAccountBalance({ _labels, access }) {
         record: JSON.stringify(rest)
       })
 
-      toast.success('Record Success')
+      toast.success(platformLabels.rebuild)
       formik.setValues({
         ...obj
       })

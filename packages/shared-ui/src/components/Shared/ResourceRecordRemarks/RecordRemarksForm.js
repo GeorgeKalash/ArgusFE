@@ -9,9 +9,11 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import styles from './ResourceRecordRemarks.module.css'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterRef, labels, window }) => {
   const { postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.RecordRemarks.qry
@@ -38,10 +40,10 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
         record: JSON.stringify(values)
       })
       if (data) {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
         window.close()
       } else {
-        toast.success('Record Add Successfully')
+        toast.success(platformLabels.Added)
         formik.setFieldValue('notes', '')
       }
       invalidate()

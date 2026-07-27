@@ -59,27 +59,27 @@ export default function MainForm({ labels, access, store, setStore, window }) {
     'batchWSRM'
   )
 
+  const initialValues = {
+    recordId: null,
+    header: {
+      recordId: null,
+      reference: '',
+      workCenterId: null,
+      operationId: null,
+      laborId: null,
+      date: new Date(),
+      dtId: null,
+      status: 1,
+      wip: 1
+    },
+    batchWorksheetJobs: [{ id: 1 }],
+    batchWSRM: [{ id: 1 }]
+  }
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['batchWorksheetJobs', 'batchWSRM'],
-    initialValues: {
-      recordId: null,
-      header: {
-        recordId: null,
-        reference: '',
-        workCenterId: null,
-        operationId: null,
-        laborId: null,
-        date: new Date(),
-        dtId: null,
-        status: 1,
-        wip: 1
-      },
-      batchWorksheetJobs: [{ id: 1 }],
-      batchWSRM: [{ id: 1 }]
-    },
-
+    initialValues,
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required(),
@@ -128,29 +128,35 @@ export default function MainForm({ labels, access, store, setStore, window }) {
         extension: ManufacturingRepository.BatchWorksheet.get2,
         parameters: `_recordId=${recordId}`
       })
-      formik.setValues({
-        recordId: res.record.header.recordId,
-        header: {
-          ...res.record.header,
-          date: formatDateFromApi(res.record.header.date)
-        },
-        batchWorksheetJobs:
-          res.record?.batchWorksheetJobs?.length > 0
-            ? res.record?.batchWorksheetJobs?.map((item, index) => ({
+
+      if (!res?.record) {
+        return
+      }
+      formik.resetForm({
+        values: {
+          recordId: res?.record?.header?.recordId,
+          header: {
+            ...res?.record?.header,
+            date: formatDateFromApi(res?.record?.header?.date)
+          },
+          batchWorksheetJobs:
+            res?.record?.batchWorksheetJobs?.length > 0
+              ? res?.record?.batchWorksheetJobs?.map((item, index) => ({
+                  ...item,
+                  id: index + 1
+                }))
+              : initialValues?.batchWorksheetJobs,
+          batchWSRM: res?.record?.batchWorksheetRawMaterials?.length
+            ? res?.record?.batchWorksheetRawMaterials?.map((item, index) => ({
                 ...item,
                 id: index + 1
               }))
-            : formik.initialValues?.batchWorksheetJobs,
-        batchWSRM: res.record?.batchWorksheetRawMaterials.length
-          ? res.record?.batchWorksheetRawMaterials?.map((item, index) => ({
-              ...item,
-              id: index + 1
-            }))
-          : formik.initialValues?.batchWSRM
+            : initialValues?.batchWSRM
+        }
       })
       setStore({
-        recordId: res.record.header.recordId,
-        batchWorksheetDistributions: res.record?.batchWorksheetDistributions
+        recordId: res?.record?.header?.recordId,
+        batchWorksheetDistributions: res?.record?.batchWorksheetDistributions
       })
     }
   }
@@ -336,23 +342,11 @@ export default function MainForm({ labels, access, store, setStore, window }) {
     }
   ]
 
-  const totalPctOfBatch = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => {
-    const value = parseFloat(row?.pctOfBatch?.toString().replace(/,/g, '')) || 0
+  const totalPctOfBatch = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => sum + row?.pctOfBatch || 0, 0)
 
-    return sum + value
-  }, 0)
+  const totalQtyOut = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => sum + row?.qtyOut || 0, 0)
 
-  const totalQtyOut = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => {
-    const value = parseFloat(row?.qtyOut?.toString().replace(/,/g, '')) || 0
-
-    return sum + value
-  }, 0)
-
-  const totalVariation = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => {
-    const value = parseFloat(row?.variation?.toString().replace(/,/g, '')) || 0
-
-    return sum + value
-  }, 0)
+  const totalVariation = formik?.values?.batchWorksheetJobs?.reduce((sum, row) => sum + row?.variation || 0, 0)
 
   return (
     <FormShell

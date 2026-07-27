@@ -68,7 +68,7 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
       extension: SystemRepository.RecordRemarks.del,
       record: JSON.stringify(obj)
     })
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
     invalidate()
   }
 

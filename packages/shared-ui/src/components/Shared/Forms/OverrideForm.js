@@ -232,7 +232,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.BranchFilters.qry}
+                endpointId={companyStructureRepository.Branches.qry}
                 name='branchId'
                 label={labels.branch}
                 valueField='recordId'

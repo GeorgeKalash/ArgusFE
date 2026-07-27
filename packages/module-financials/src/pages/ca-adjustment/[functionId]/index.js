@@ -122,7 +122,7 @@ const CAadjustment = () => {
         functionId
       },
       width: 900,
-      height: 600,
+      height: 550,
       title: functionId == 3301 ? _labels.increaseAdj : _labels.decreaseAdj
     })
   }

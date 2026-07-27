@@ -197,8 +197,9 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
+              <CustomTextField
                 name='IBAN'
+                type='number'
                 label={labels.IBAN}
                 value={formik.values.IBAN}
                 maxAccess={maxAccess}

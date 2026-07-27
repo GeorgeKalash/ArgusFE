@@ -39,6 +39,7 @@ export const CashBankRepository = {
     qry: service + 'qryTFM',
     get: service + 'getTFM',
     set: service + 'set2TFM',
+    get2: service + 'get2TFM',
     del: service + 'delTFM',
     page: service + 'pageTFM',
     snapshot: service + 'snapshotTFM',

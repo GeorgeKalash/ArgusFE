@@ -15,6 +15,9 @@ import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 
+const POPUP_PORTAL_SELECTOR =
+  '.MuiPopover-root, .MuiAutocomplete-popper, .MuiMenu-list, .MuiPickersPopper-root'
+
 export function DataGrid({
   name,
   columns,
@@ -274,6 +277,7 @@ export function DataGrid({
       if (!api) return
       const editing = api.getEditingCells?.() || []
       if (editing.length) {
+        document.activeElement?.blur()
         api.stopEditing()
         api.flushAsyncTransactions?.()
       }
@@ -286,7 +290,7 @@ export function DataGrid({
       const pressedButton = target.closest(BUTTON_SELECTOR)
 
       if (gridApiRef.current?.getEditingCells()?.length == 0) return
-      if (!pressedButton || pressedButton.closest('.MuiPaper-root')) return
+    if (!pressedButton || pressedButton.closest(POPUP_PORTAL_SELECTOR)) return
       if (isInsideAgGridUX(pressedButton, e)) return
       if (gridApiRef.current?.getEditingCells()?.length > 0) {
         commitIfEditing()
@@ -377,19 +381,29 @@ export function DataGrid({
   )
 
   const condition = (i, data) => {
+    const column = allColumns?.[i]
+
+    if (!column) return false
+
+    const component = column.component
+
+    if (['image'].includes(component)) {
+      return false
+    }
+
     return (
-      ((!allColumns?.[i]?.props?.readOnly &&
-        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) ||
-        (allColumns?.[i]?.props?.readOnly &&
-          (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
-            accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
-             !allColumns?.[i]?.props?.disabled && 
-      (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
-        !allColumns?.[i]?.props?.disableCondition(data)) &&
-      (typeof allColumns?.[i]?.props?.onCondition !== 'function' ||
-        !allColumns?.[i]?.props?.onCondition(data)?.hidden) &&
-      (typeof allColumns?.[i]?.props?.onCondition !== 'function' ||
-        !allColumns?.[i]?.props?.onCondition(data)?.disabled)
+      ((!column?.props?.readOnly &&
+        accessLevel({ maxAccess, name: `${name}.${column?.name}` }) !== DISABLED) ||
+        (column?.props?.readOnly &&
+          (accessLevel({ maxAccess, name: `${name}.${column?.name}` }) === FORCE_ENABLED ||
+            accessLevel({ maxAccess, name: `${name}.${column?.name}` }) === MANDATORY))) &&
+             !column?.props?.disabled && 
+      (typeof column?.props?.disableCondition !== 'function' ||
+        !column?.props?.disableCondition(data)) &&
+      (typeof column?.props?.onCondition !== 'function' ||
+        !column?.props?.onCondition(data)?.hidden) &&
+      (typeof column?.props?.onCondition !== 'function' ||
+        !column?.props?.onCondition(data)?.disabled)
     )
   }
 
@@ -523,7 +537,7 @@ export function DataGrid({
     const isCheckbox = comp === 'checkbox'
 
     if (isCheckbox) {
-      const disabledCheckbox = _disabled || !!column.colDef?.props?.readOnly
+      const disabledCheckbox = _disabled || !!column.colDef?.props?.disabled
 
       return (
         <Box
@@ -533,7 +547,8 @@ export function DataGrid({
             padding: '0',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            pointerEvents: disabledCheckbox ? 'none' : 'auto'
           }}
         >
           <GridCheckbox
@@ -552,10 +567,8 @@ export function DataGrid({
 
               const checked = e.target.checked
 
-              params.node.setDataValue(params.colDef.field, checked)
-
               const changes = { [params.colDef.field]: checked }
-              setData(changes, params)
+              params.node.updateData({ ...params.data, ...changes })
               commit({ ...params.data, ...changes })
 
               if (params.colDef.updateOn !== 'blur') {
@@ -604,6 +617,29 @@ export function DataGrid({
         </Box>
       )
     }
+    if (column.colDef?.component === 'image') {
+      return (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%'
+          }}
+        >
+          <img
+            src={params.value || null}
+            alt=''
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              cursor: 'pointer'
+            }}
+          />
+        </Box>
+      )
+    }
     
 
     const Component =
@@ -630,9 +666,21 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
+    const isRightAligned =
+      column.colDef?.component === 'numberfield'
+        ? (column.colDef?.props?.align ?? 'right') === 'right'
+        : false
+
     return (
-      <Box className={`cellBox`}>
-        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
+      <Box
+        className={`cellBox ${isRightAligned ? 'rightAlignedCellBox' : ''}`}
+      >
+        <Component
+          {...params}
+          column={column.colDef}
+          updateRow={updateRow}
+          update={update}
+        />
       </Box>
     )
   }
@@ -687,7 +735,7 @@ export function DataGrid({
     }
 
     const comp = column.colDef.component
-    const centered = comp === 'checkbox' || comp === 'button' || comp === 'icon'
+    const centered = comp === 'checkbox' || comp === 'button' || comp === 'icon' || comp === 'image'
 
     return (
       <Box className={`cellEditorBox ${centered ? 'cellEditorBoxCentered' : ''} `}>
@@ -830,7 +878,13 @@ export function DataGrid({
         cellEditor: CustomCellEditor,
         wrapText: true,
         autoHeight: true,
-        cellClass: `${mergedCellClass || undefined}  ${centered}`,
+        cellClass: [
+          ...mergedCellClass,
+          centered,
+          isNumberColumn ? 'numberCell' : ''
+        ]
+          .filter(Boolean)
+          .join(' '),
         ...(column?.checkAll?.visible && {
           headerClass: 'agHeaderCheckboxCell',
           headerComponent: params => {
@@ -890,14 +944,24 @@ export function DataGrid({
   }
 
   const onCellClicked = async params => {
+    if (params.colDef.component === 'image') {
+      const imageUrl = params.data?.[params.colDef.field]
+
+      if (!imageUrl) return
+      params.colDef.onClick?.({
+        value: params.value,
+        row: params.data
+      })
+      return
+    }
     if (params.event.target.closest('a')) return
     if (typeof onValidationRequired === 'function') onValidationRequired()
 
     const { colDef, rowIndex, api } = params
 
     const nonEditableByClick =
-      colDef.component === 'button' || colDef.component === 'checkbox' || colDef.component === 'icon'
-
+      colDef.component === 'button' || colDef.component === 'checkbox' || colDef.component === 'icon' || colDef.component === 'image'
+    
     if (!nonEditableByClick) {
       api.startEditingCell({
         rowIndex: rowIndex,
@@ -925,7 +989,7 @@ export function DataGrid({
 
       if (
         !event.target.closest('.ag-cell') &&
-        !pressedButton?.closest('.MuiPaper-root') &&
+        !pressedButton?.closest(POPUP_PORTAL_SELECTOR) &&
         gridApiRef.current?.getEditingCells()?.length > 0
       ) {
         gridApiRef.current?.stopEditing()
@@ -1329,6 +1393,18 @@ export function DataGrid({
           align-items: center;
           overflow: hidden;
           padding: 0px !important;
+        }
+
+        .agContainer :global(.ag-cell.numberCell) {
+          justify-content: flex-end !important;
+        }
+
+        .agContainer:dir(ltr) :global(.ag-cell.numberCell) {
+          padding-right: 6px !important;
+        }
+
+        .agContainer:dir(rtl) :global(.ag-cell.numberCell) {
+          padding-left: 6px !important;
         }
 
         .agContainer :global(.ag-cell .MuiBox-root) {

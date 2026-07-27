@@ -64,7 +64,7 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
       extension: GeneralLedgerRepository.IntegrationAccounts.set2,
       record: JSON.stringify(data)
     }).then(res => {
-      toast.success('Record Successfully Saved')
+      toast.success(platformLabels.Saved)
     })
   }
 

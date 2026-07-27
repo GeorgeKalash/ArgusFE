@@ -6,6 +6,8 @@ import { getButtons } from './Buttons'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomButton from '../Inputs/CustomButton'
 import ReportGenerator from './ReportGenerator'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import DirtyDialog from '@argus/shared-ui/src/components/Shared/DirtyDialog'
 
 const WindowToolbar = ({
   onSave,
@@ -38,12 +40,14 @@ const WindowToolbar = ({
 }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
   const [reportStore, setReportStore] = useState([])  
   const [reportPack, setReportPack] = useState(null)
   const [defaultLayoutId, setDefaultLayoutId] = useState(null)
 
   useEffect(() => {
-    resourceId && getReportLayout()
+    getReportLayout()
   }, [])
 
   useEffect(() => {
@@ -54,6 +58,8 @@ const WindowToolbar = ({
 
   const getReportLayout = async () => {
     if (reportPack) return
+
+    if (!previewReport || !resourceId) return
 
     const reportPackRes = await getRequest({
       extension: SystemRepository.ReportLayout.get,
@@ -70,6 +76,8 @@ const WindowToolbar = ({
       reportClass: item.instanceName,
       parameters: item.parameters,
       layoutName: item.layoutName,
+      schemaFile: item.schemaFile,
+      reportEngine: item.reportEngine,
       assembly: 'ArgusRPT.dll'
     }))
 
@@ -79,6 +87,8 @@ const WindowToolbar = ({
       reportClass: item.reportName,
       parameters: item.parameters,
       layoutName: item.caption,
+      schemaFile: item.schemaFile,
+      reportEngine: item.reportEngine,
       assembly: item.assembly
     }))
 
@@ -150,6 +160,22 @@ const WindowToolbar = ({
     onInfo
   }
 
+  const handleProtectedClick = (button, handleClick) => {
+    if (button.checkDirty && form?.dirty) {
+      stack({
+        Component: DirtyDialog,
+        props: {
+          fullScreen: false,
+        },
+        refresh: false
+      })
+
+      return
+    }
+
+    handleClick?.()
+  }
+
   const buttons = getButtons(platformLabels)
 
   return (
@@ -194,7 +220,7 @@ const WindowToolbar = ({
               return (
                 isVisible && (
                   <CustomButton
-                    onClick={handleClick}
+                    onClick={() => handleProtectedClick(button, handleClick)}
                     label={button.label}
                     color={button.color}
                     border={button.border}

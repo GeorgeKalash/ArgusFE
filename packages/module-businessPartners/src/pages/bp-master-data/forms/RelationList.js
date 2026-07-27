@@ -103,6 +103,7 @@ const RelationList = ({ store, labels, maxAccess }) => {
       </Fixed>
       <Grow>
         <Table
+          name="relationTable"
           columns={columns}
           gridData={relationGridData}
           rowId={['recordId']}

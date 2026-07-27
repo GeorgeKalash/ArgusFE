@@ -100,7 +100,15 @@ export function WindowProvider({ children }) {
   }
 
   function closeWindow() {
-    unlockRecord()
+    const closingWindow = stack[stack.length - 1]
+
+    if (
+      lockProps &&
+      closingWindow?.props?.recordId === lockProps.recordId
+    ) {
+      unlockRecord()
+    }
+
     setStack(stack => stack.slice(0, stack.length - 1))
   }
 

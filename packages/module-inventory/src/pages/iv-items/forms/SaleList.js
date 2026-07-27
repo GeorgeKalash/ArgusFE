@@ -18,18 +18,25 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
 
+  const isAnyFilled = row =>
+    !!row?.currencyId ||
+    !!row?.plId ||
+    !!row?.ptName ||
+    (row?.value != null && row?.value !== '') ||
+    !!row?.vtName ||
+    (row?.minPrice != null && row?.minPrice !== '')
+
   const conditions = {
-    currencyId: row => row?.currencyId,
-    plId: row => row?.plId,
-    ptName: row => row?.ptName,
-    value: row => row?.value || row?.value === 0,
-    vtName: row => row?.vtName,
-    minPrice: row =>
-      (row.value > 0 || row?.plId > 0 || row?.ptName > 0 || row?.currencyId > 0) && row?.minPrice <= row?.value
+    currencyId: isAnyFilled,
+    plId: isAnyFilled,
+    ptName: isAnyFilled,
+    value: isAnyFilled,
+    vtName: isAnyFilled,
+    minPrice: row => (row.value > 0 || row?.plId > 0 || row?.ptName > 0 || row?.currencyId > 0) && row?.minPrice <= row?.value
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
@@ -90,38 +97,17 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     }
   })
 
-  const getItems = async recordId => {
-    if (!recordId) return
-
-    const response = await getRequest({
-      extension: SaleRepository.Sales.qry,
-      parameters: `&_itemId=${recordId}&_currencyId=${0}`
-    })
-
-    return response?.list?.length > 0
-      ? response.list.map((item, index) => {
-          return {
-            ...item,
-            id: index + 1
-          }
-        })
-      : formik.values.items.map((row, index) => ({
-          ...row,
-          id: row.id ?? index
-        }))
-  }
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const items = await getItems(recordId)
-        formik.setValues({
-          ...formik.values,
-          items
-        })
-      }
-    })()
-  }, [recordId])
+    const prices = store?.packB?.prices
+
+    if (prices?.length > 0) {
+      formik.setValues(prev => ({
+        ...prev,
+        items: prices.map((item, index) => ({ ...item, id: index + 1 }))
+      }))
+    }
+  }, [store?.packB])
 
   useEffect(() => {
     formik.setFieldValue('defSaleMUId', store.measurementId || null)
@@ -255,8 +241,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
           <Grid container spacing={2}>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={store._msId ? InventoryRepository.MeasurementUnit.qry : ''}
-                parameters={`_msId=${store._msId}`}
+                store={store?._measurementUnits}
                 name='defSaleMUId'
                 label={labels.measure}
                 columnsInDropDown={[
@@ -267,21 +252,21 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('defSaleMUId', newValue?.recordId || '')
                 }}
               />
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SaleRepository.PriceGroups.qry}
+                store={store.priceGroups}
                 name='pgId'
                 label={labels.priceGroups}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('pgId', newValue?.recordId || '')
                 }}
                 onClear={() => formik.setFieldValue('pgId', '')}
@@ -289,7 +274,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SaleRepository.ReturnPolicy.qry}
+                store={store.returnPolicies}
                 name='returnPolicyId'
                 label={labels.returnPolicy}
                 valueField='recordId'

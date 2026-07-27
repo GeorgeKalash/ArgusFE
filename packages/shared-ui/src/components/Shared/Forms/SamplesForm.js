@@ -63,7 +63,7 @@ export default function SamplesForm({ recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['rows'],
     initialValues: {
       recordId,
@@ -79,6 +79,7 @@ export default function SamplesForm({ recordId, window }) {
         collectionId: null,
         jobId: null,
         itemId: null,
+        developerId: null,
         threeDDId: null,
         productionLineId: null,
         designFamilyId: null,
@@ -234,13 +235,16 @@ export default function SamplesForm({ recordId, window }) {
         }))
       : formik.initialValues.rows
 
-    formik.setValues({
-      recordId: res?.record?.header?.recordId,
-      header: {
-        ...res?.record?.header,
-        date: formatDateFromApi(res?.record?.header?.date)
-      },
-      rows: modifiedList
+    formik.resetForm({
+      values: {
+        recordId: res?.record?.header?.recordId,
+        imageDirty: false,
+        header: {
+          ...res?.record?.header,
+          date: formatDateFromApi(res?.record?.header?.date)
+        },
+        rows: modifiedList
+      }
     })
 
     return res?.record
@@ -325,6 +329,7 @@ export default function SamplesForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Samples}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -388,6 +393,26 @@ export default function SamplesForm({ recordId, window }) {
                     }}
                     required
                     error={formik?.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ProductModelingRepository.Developer.qry}
+                    values={formik.values.header}
+                    name='header.developerId'
+                    label={labels.developer}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isClosed}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('header.developerId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.header?.developerId && formik.errors.header?.developerId}
                   />
                 </Grid>
               </Grid>

@@ -58,7 +58,7 @@ export default function SalaryTab({
       bankId: null,
       accountNumber: null,
       comments: '',
-      basicAmount: '',
+      basicAmount: 0,
       finalAmount: null,
       eAmount: null,
       dAmount: null
@@ -70,7 +70,6 @@ export default function SalaryTab({
       salaryType: yup.number().required(),
       paymentFrequency: yup.number().required(),
       paymentMethod: yup.number().required(),
-      basicAmount: yup.number().required(),
       bankId: yup
         .number()
         .nullable()
@@ -119,22 +118,6 @@ export default function SalaryTab({
     }
   })
   const editMode = !!formik?.values?.recordId
-
-  async function updateAmountFields(basicAmount) {
-    const totalEN = recordId ? (basicAmount ? await ChangeEntitlementsAmount(entitlements, basicAmount) : 0) : 0
-    const totalDE = recordId ? (basicAmount ? await ChangeDeductionsAmount(deductions, basicAmount, totalEN) : 0) : 0
-    const finalAmount = basicAmount ? totalEN - totalDE + basicAmount : 0
-    setSalaryInfo(prev => ({
-      ...prev,
-      basicAmount: basicAmount || 0
-    }))
-    reCalcNewAmounts(basicAmount, totalEN)
-
-    formik.setFieldValue('finalAmount', parseFloat(finalAmount).toFixed(2))
-    formik.setFieldValue('eAmount', parseFloat(totalEN).toFixed(2))
-    formik.setFieldValue('dAmount', parseFloat(totalDE).toFixed(2))
-    formik.setFieldValue('basicAmount', basicAmount)
-  }
 
   async function getSalaryInfo(recordId) {
     const res = await getRequest({
@@ -274,20 +257,6 @@ export default function SalaryTab({
               required
               onClear={() => formik.setFieldValue('effectiveDate', null)}
               error={formik.touched.effectiveDate && Boolean(formik.errors.effectiveDate)}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <CustomNumberField
-              name='basicAmount'
-              label={labels.basicAmount}
-              value={formik?.values?.basicAmount}
-              onChange={e => updateAmountFields(e?.target?.value ? Number(e.target.value.replace(/,/g, '')) : null)}
-              required
-              maxLength={10}
-              maxAccess={maxAccess}
-              allowNegative={false}
-              onClear={() => updateAmountFields(null)}
-              error={formik.touched.basicAmount && Boolean(formik.errors.basicAmount)}
             />
           </Grid>
           <Grid item xs={6}>

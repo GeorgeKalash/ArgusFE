@@ -12,6 +12,8 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { RepairAndServiceRepository } from '@argus/repositories/src/repositories/RepairAndServiceRepository'
 import RepairRequestForm from './Forms/RepairRequestForm'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 
 export default function RepairRequest() {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -70,8 +72,13 @@ export default function RepairRequest() {
     }
   ]
 
-  const add = () => {
-    openForm()
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.RepairRequest,
+    action: openForm
+  })
+
+  const add = async () => {
+   await proxyAction()
   }
 
   const edit = obj => {

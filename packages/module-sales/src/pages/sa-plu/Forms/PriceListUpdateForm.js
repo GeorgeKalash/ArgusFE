@@ -41,7 +41,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
   const { formik } = useForm({
     maxAccess,
     validateOnChange: true,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId,
       reference: '',
@@ -105,7 +105,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
         items: res2
       }))
 
-      formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
+      formik.resetForm({ values: { ...res.record, date: formatDateFromApi(res?.record?.date) } })
     }
   }
 
@@ -245,7 +245,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
                 readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('type', newValue?.key || null)
+                  formik.setFieldValue('type', Number(newValue?.key) || null)
                 }}
                 error={formik.touched.type && Boolean(formik.errors.type)}
               />

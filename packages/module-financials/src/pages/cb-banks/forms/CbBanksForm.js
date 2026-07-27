@@ -113,7 +113,7 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore }) {
                 error={formik.touched.name && Boolean(formik.errors.name)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={8}>
               <CustomTextField
                 name='swiftCode'
                 label={labels.swiftCode}
@@ -126,7 +126,7 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore }) {
                 error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={4}>
               <CustomNumberField
                 name='accNoLength'
                 label={labels.accNoLength}

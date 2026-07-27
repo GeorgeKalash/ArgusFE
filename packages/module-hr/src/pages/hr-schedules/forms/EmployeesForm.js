@@ -31,6 +31,11 @@ export default function Employees({labels, scheduleId, maxAccess}){
 
   const columns = [
     {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
       field: 'fullName',
       headerName: labels.name,
       flex: 1

@@ -4,7 +4,7 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import SalesSettingsForm from './Form/SalesSettingsForm'
 
 const SalesSettings = () => {
-  return <ImmediateWindow datasetId={ResourceIds.SalesDefaults} labelKey={'salesSettings'} Component={SalesSettingsForm} height={600}/>
+  return <ImmediateWindow datasetId={ResourceIds.SalesDefaults} labelKey={'salesSettings'} Component={SalesSettingsForm} height={750}/>
 }
 
 export default SalesSettings

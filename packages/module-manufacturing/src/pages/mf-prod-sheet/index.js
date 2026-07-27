@@ -14,6 +14,8 @@ import ProductionSheetForm from './Forms/ProductionSheetForm'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 
 const ProductionSheet = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -86,8 +88,13 @@ const ProductionSheet = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.ProductionSheet,
+    action: openForm
+  })
+
+  const add = async () => {
+   await proxyAction()
   }
 
   const edit = obj => {

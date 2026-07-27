@@ -11,6 +11,7 @@ import CustomTextField from '../Inputs/CustomTextField'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { calcVatAmountPerTaxDetail } from '@argus/shared-utils/src/utils/VatCalculator'
 
 const TaxDetails = props => {
   const { taxId, obj, taxes, window } = props
@@ -19,23 +20,6 @@ const TaxDetails = props => {
 
   const useTaxes = Array.isArray(taxes) && taxes?.length > 0
   useSetWindow({ title: platformLabels.TaxDetails, window })
-
-  const vatAmount = (taxDetail, taxItem) => {
-    switch (taxDetail.taxBase) {
-      case 1:
-        return ((taxItem.extendedPrice * taxDetail.amount) / 100).toFixed(2)
-      case 2:
-        return (taxItem.qty * taxDetail.amount).toFixed(2)
-      case 3:
-        return (taxItem.basePrice != null ? (taxItem.basePrice * taxItem.qty * taxDetail.amount) / 100 : 0).toFixed(2)
-      case 4:
-        return (
-          taxItem.baseLaborPrice != null ? (taxItem.baseLaborPrice * taxItem.qty * taxDetail.amount) / 100 : 0
-        ).toFixed(2)
-      default:
-        return null
-    }
-  }
 
   const {
     query: { data },
@@ -96,7 +80,7 @@ const TaxDetails = props => {
     })
 
     res.list = res.list.map(item => {
-      const vatValue = vatAmount(item, obj)
+      const vatValue = calcVatAmountPerTaxDetail(obj, item)
       item.vatAmount = vatValue
 
       return item

@@ -164,6 +164,7 @@ export const SaleRepository = {
     summaryORD: service + 'summaryORD',
     pack: service + 'getPackORD',
     get2: service + 'get2ORD',
+    generate: service + 'generateORD',
   },
   SalesOrderItem: {
     qry: service + 'qryORI'
@@ -318,5 +319,9 @@ export const SaleRepository = {
   },
   ReturnSerial: {
     qry: service + 'qryRES'
+  },
+  SalesBasket: {
+    get2: service + 'get2BSK',
+    set2: service + 'set2BSK'
   }
 }

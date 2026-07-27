@@ -39,7 +39,7 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
   })
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: store.recordId,
       dtId: null,
@@ -87,11 +87,13 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
         parameters: `_recordId=${recordId}`
       })
 
-      formik.setValues({
-        ...res.record,
-        date: formatDateFromApi(res.record?.date),
-        scheduled: res.record?.scheduled ? formatDateFromApi(res.record?.scheduled) : null,
-        dueDate: res.record?.dueDate ? formatDateFromApi(res.record.dueDate) : null
+      formik.resetForm({
+        values: {
+          ...res.record,
+          date: formatDateFromApi(res.record?.date),
+          scheduled: res.record?.scheduled ? formatDateFromApi(res.record?.scheduled) : null,
+          dueDate: res.record?.dueDate ? formatDateFromApi(res.record.dueDate) : null
+        }
       })
 
       setStore(prevStore => ({
@@ -278,7 +280,7 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
                 required
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('priority', newValue?.key || null)
+                  formik.setFieldValue('priority', Number(newValue?.key) || null)
                 }}
                 error={formik.touched.priority && Boolean(formik.errors.priority)}
                 maxAccess={maxAccess}
@@ -327,7 +329,7 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
                     required
                     values={formik.values}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('progress', newValue?.key || null)
+                      formik.setFieldValue('progress', Number(newValue?.key) || null)
                     }}
                     error={formik.touched.progress && Boolean(formik.errors.progress)}
                     maxAccess={maxAccess}

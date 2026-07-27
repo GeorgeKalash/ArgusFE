@@ -189,16 +189,42 @@ export default function TaDslForm({ recordId, window }) {
       extension: TimeAttendanceRepository.ShitLeave.get,
       parameters: `_recordId=${recordId}`
     })
-    formik.setValues({
-      ...record,
-      date: formatDateFromApi(record.date),
-      leaveDate: formatDateFromApi(record.leaveDate),
-      fromTime: dayjs(record.fromTime, 'HH:mm'),
-      toTime: dayjs(record.toTime, 'HH:mm'),
-      returnTime: record?.returnTime?.trim() ? dayjs(record?.returnTime, 'HH:mm') : null
+
+    const parsedDate = formatDateFromApi(record.date)
+    const parsedLeaveDate = formatDateFromApi(record.leaveDate)
+
+    const res = await getRequest({
+      extension: EmployeeRepository.QuickView.get,
+      parameters: `_recordId=${record.employeeId}&_asOfDate=${formatDateForGetApI(parsedDate)}`
     })
 
-    setViewField(record.employeeId)
+    const schedule = await fetchSchedule(
+      record.employeeId,
+      parsedLeaveDate
+    )
+
+    const position = `${res?.record?.positionName || ''}${res?.record?.positionRef ? ` ${res?.record.positionRef}` : ''}`;
+
+    formik.resetForm({
+      values: {
+        ...record,
+        date: parsedDate,
+        leaveDate: parsedLeaveDate,
+        fromTime: dayjs(record.fromTime, 'HH:mm'),
+        toTime: dayjs(record.toTime, 'HH:mm'),
+        returnTime: record?.returnTime?.trim()
+          ? dayjs(record?.returnTime, 'HH:mm')
+          : null,
+        departmentRef: res?.record?.departmentRef,
+        departmentName: res?.record?.departmentName,
+        departmentHeadRef: res?.record?.departmentHeadRef,
+        departmentHeadName: res?.record?.departmentHeadName,
+        reportToRef: res?.record?.reportToRef,
+        reportToName: res?.record?.reportToName,
+        schedule,
+        position,
+      }
+    })
 
     return record
   }
@@ -208,6 +234,32 @@ export default function TaDslForm({ recordId, window }) {
       refetchForm(recordId)
     }
   }, [])
+
+  async function fetchSchedule(employeeId, leaveDate) {
+    if (!employeeId || !leaveDate) return ''
+
+    const { list } = await getRequest({
+      extension: TimeAttendanceRepository.FlatSchedule.qry,
+      parameters:
+        `_params=1|` +
+        employeeId +
+        '^2|' +
+        formatDateTo(leaveDate) +
+        '^3|' +
+        formatDateTo(leaveDate)
+    })
+
+    const schedule = list
+      ?.map(x => {
+        const from = dayjs(formatDateFromApi(x.dtFrom)).format('HH:mm')
+        const to = dayjs(formatDateFromApi(x.dtTo)).format('HH:mm')
+
+        return `[${from}..${to}]`
+      })
+      .join(' ')
+
+      return schedule
+  }
 
   const actions = [
     {
@@ -242,25 +294,7 @@ export default function TaDslForm({ recordId, window }) {
   useEffect(() => {
     ;(async function () {
       if (formik.values.leaveDate && formik.values.employeeId) {
-        const { list } = await getRequest({
-          extension: TimeAttendanceRepository.FlatSchedule.qry,
-          parameters:
-            `_params=1|` +
-            formik.values.employeeId +
-            '^2|' +
-            formatDateTo(formik.values.leaveDate) +
-            '^3|' +
-            formatDateTo(formik.values.leaveDate)
-        })
-
-        const schedule = list
-          ?.map(x => {
-            const from = dayjs(formatDateFromApi(x.dtFrom)).format('HH:mm')
-            const to = dayjs(formatDateFromApi(x.dtTo)).format('HH:mm')
-
-            return `[${from}..${to}]`
-          })
-          .join(' ')
+        const schedule = await fetchSchedule(formik.values.employeeId, formik.values.leaveDate)
 
         formik.setFieldValue('schedule', schedule)
       }

@@ -115,7 +115,7 @@ export default function HRGeneratePayrollForm({ _labels, access }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.DepartmentFilters.qry}
+                endpointId={companyStructureRepository.Departments.qry}
                 parameters={`_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`}
                 name='departmentId'
                 label={_labels.department}
@@ -132,7 +132,7 @@ export default function HRGeneratePayrollForm({ _labels, access }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.BranchFilters.qry}
+                endpointId={companyStructureRepository.Branches.qry}
                 name='branchId'
                 label={_labels.branch}
                 valueField='recordId'

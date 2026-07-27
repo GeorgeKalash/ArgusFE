@@ -55,6 +55,18 @@ const InventoryTransaction = props => {
       type: 'number'
     },
     {
+      field: 'itemWeight',
+      headerName: _labels.weight,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'currentItemWeight',
+      headerName: _labels.currentItemWeight,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'amount',
       headerName: _labels.amount,
       flex: 1,
@@ -64,7 +76,7 @@ const InventoryTransaction = props => {
       field: 'extendedCost',
       headerName: _labels.extendedCost,
       flex: 1,
-      type: 'number'
+      type: { field: 'number', decimal: 2 }
     }
   ]
 
@@ -111,6 +123,6 @@ const InventoryTransaction = props => {
   )
 }
 
-InventoryTransaction.width = 700
+InventoryTransaction.width = 850
 
 export default InventoryTransaction

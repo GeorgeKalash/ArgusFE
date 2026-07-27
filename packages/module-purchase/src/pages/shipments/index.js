@@ -12,6 +12,8 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import ShipmentsForm from './forms/ShipmentsForm'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 
 const Shipments = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -97,8 +99,13 @@ const Shipments = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.Shipment,
+    action: openForm
+  })
+
+  const add = async () => {
+   await proxyAction()
   }
 
   const edit = obj => {

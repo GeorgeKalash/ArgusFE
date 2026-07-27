@@ -72,7 +72,7 @@ const CbBank = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
+      height: 450,
       title: _labels.bank
     })
   }

@@ -163,7 +163,9 @@ export const EmployeeRepository = {
   Leaves: {
     set: service + 'setLS',
     del: service + 'delLS',
-    get: service + 'getLS'
+    get: service + 'getLS',
+    qry: service + 'qryLS',
+    set2: service + 'set2LS',
   }
 }
 

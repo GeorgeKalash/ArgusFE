@@ -31,6 +31,7 @@ import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDial
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -59,44 +60,46 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
+  const initialValues = {
+    recordId: null,
+    reference: '',
+    accountType: 3,
+    currencyId: parseInt(currencyId),
+    paymentMethod: null,
+    date: new Date(),
+    amount: null,
+    notes: '',
+    subTotal: null,
+    exRate: 1,
+    rateCalcMethod: 1,
+    baseAmount: null,
+    dtId: null,
+    status: 1,
+    releaseStatus: null,
+    cashAccountId: parseInt(cashAccountId),
+    plantId: parseInt(plantId),
+    expenses: [
+      {
+        id: 1,
+        pvId: recordId || 0,
+        seqNo: 1,
+        etId: '',
+        subTotal: null,
+        vatAmount: null,
+        amount: null,
+        supplierName: '',
+        taxRef: '',
+        notes: '',
+        isVAT: false,
+        hasCostCenters: false,
+        costCenters: []
+      }
+    ]
+  }
+  
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
-    initialValues: {
-      recordId: null,
-      reference: '',
-      accountType: 3,
-      currencyId: parseInt(currencyId),
-      paymentMethod: null,
-      date: new Date(),
-      amount: null,
-      notes: '',
-      subTotal: null,
-      exRate: 1,
-      rateCalcMethod: 1,
-      baseAmount: null,
-      dtId: null,
-      status: 1,
-      releaseStatus: null,
-      cashAccountId: parseInt(cashAccountId),
-      plantId: parseInt(plantId),
-      expenses: [
-        {
-          id: 1,
-          pvId: recordId || 0,
-          seqNo: 1,
-          etId: '',
-          subTotal: null,
-          vatAmount: null,
-          amount: null,
-          supplierName: '',
-          taxRef: '',
-          notes: '',
-          isVAT: false,
-          hasCostCenters: false,
-          costCenters: []
-        }
-      ]
-    },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    initialValues,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -153,7 +156,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   })
 
   const totalAmount = formik.values?.expenses?.reduce((amount, row) => {
-    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+    const amountValue = row.amount || 0
 
     return amount + amountValue
   }, 0)
@@ -179,6 +182,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const editMode = !!formik.values.recordId
 
   async function getPaymentOrder(recordId) {
+    const vatPct = await getDefaultVAT()
     const res = await getRequest({
       extension: FinancialRepository.PaymentOrders.get,
       parameters: `_recordId=${recordId}`
@@ -203,16 +207,19 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
       })
     )
 
-    formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res.record.date),
-      expenses: expensesList
+    formik.resetForm({
+      values: {
+        ...res.record,
+        vatPct,
+        date: formatDateFromApi(res.record.date),
+        expenses: expensesList
+      }
     })
 
     return res.record
   }
 
-  async function getDTD(dtId) {
+  async function onChangeDT(dtId) {
     if (dtId) {
       const res = await getRequest({
         extension: FinancialRepository.FIDocTypeDefaults.get,
@@ -226,7 +233,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   }
 
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) getDTD(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {
@@ -275,7 +282,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   }
 
   const subTotalSum = formik.values?.expenses?.reduce((subTotal, row) => {
-    const subTotalValue = parseFloat(row.subTotal?.toString().replace(/,/g, '')) || 0
+    const subTotalValue = row.subTotal
 
     return subTotal + subTotalValue
   }, 0)
@@ -364,7 +371,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   ]
 
   const vatSum = formik?.values?.expenses?.reduce((vatAmount, row) => {
-    const vatAmountValue = parseFloat(row.vatAmount?.toString().replace(/,/g, '')) || 0
+    const vatAmountValue = row.vatAmount
 
     return vatAmount + vatAmountValue
   }, 0)
@@ -427,12 +434,12 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
 
           let newSubtotal = (newRow?.amount || 0) * (100 / (100 + (vatPct || 0))) || 0
           update({
-            subTotal: parseFloat(newSubtotal || 0).toFixed(2),
-            vatAmount: (parseFloat(newRow?.amount || 0) - parseFloat(newSubtotal || 0)).toFixed(2)
+            subTotal: roundTo(newSubtotal),
+            vatAmount: roundTo(((newRow?.amount || 0) - (newSubtotal || 0)))
           })
         } else {
           update({
-            subTotal: parseFloat(newRow.amount || 0),
+            subTotal: roundTo(newRow.amount),
             vatAmount: 0
           })
         }
@@ -446,15 +453,19 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
         readOnly: isCancelled
       },
       async onChange({ row: { update, newRow } }) {
+        const amount = newRow.amount || 0
+
         if (newRow.isVAT) {
-          let newsubTotal = parseFloat(newRow.amount || 0) * (100 / (100 + formik.values.vatPct || 0))
+          const vatPct = formik.values.vatPct || 0
+          const newSubTotal = amount * (100 / (100 + vatPct))
+
           update({
-            subTotal: parseFloat(newsubTotal || 0).toFixed(2),
-            vatAmount: (parseFloat(newRow.amount || 0) - parseFloat(newsubTotal || 0)).toFixed(2)
+            subTotal: roundTo(newSubTotal),
+            vatAmount: roundTo(((amount || 0) - (newSubTotal || 0)))
           })
         } else {
           update({
-            subTotal: parseFloat(newRow.amount || 0),
+            subTotal: roundTo(newRow.amount),
             vatAmount: 0
           })
         }
@@ -733,7 +744,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                         rateCalcMethod: formik.values?.rateCalcMethod,
                         dirtyField: DIRTYFIELD_RATE
                       })
-                      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
                       formik.setFieldValue('amount', e.target.value)
                     }}
                     onClear={() => {
@@ -782,7 +793,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
           onChange={value => formik.setFieldValue('expenses', value)}
           value={formik.values.expenses}
           error={formik.errors.expenses}
-          initialValues={formik?.initialValues?.expenses[0]}
+          initialValues={initialValues?.expenses[0]}
           columns={columns}
           allowDelete={!isClosed && !isCancelled}
           allowAddNewLine={!isClosed && !isCancelled}

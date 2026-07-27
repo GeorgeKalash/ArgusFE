@@ -102,4 +102,21 @@ const getNumberWithoutCommas = value => {
   return sanitizedValue
 }
 
-export { getFormattedNumber, validateNumberField, getNumberWithoutCommas, getFormattedNumberMax }
+function roundTo(value, decimals = 2) {
+  const numberValue = Number(value);
+
+  if (!Number.isFinite(numberValue)) {
+    return 0;
+  }
+
+  const numberDecimals = Number(decimals);
+
+  if (!Number.isInteger(numberDecimals) || numberDecimals < 0) {
+    return numberValue;
+  }
+
+  const factor = Math.pow(10, numberDecimals);
+  return Math.round(numberValue * factor) / factor;
+}
+
+export { getFormattedNumber, validateNumberField, getNumberWithoutCommas, getFormattedNumberMax, roundTo }

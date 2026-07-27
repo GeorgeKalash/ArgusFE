@@ -17,13 +17,14 @@ import { ResourceLookup } from './ResourceLookup'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import FormShell from './FormShell'
 import { formatDateFromApi, formatDateTimeForGetAPI, formatDayId } from '@argus/shared-domain/src/lib/date-helper'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import dayjs from 'dayjs'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { DataGrid } from './DataGrid'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { SelfServiceRepository } from '@argus/repositories/src/repositories/SelfServiceRepository'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
@@ -42,7 +43,7 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
 
   const getEndpoint = {
     [ResourceIds.SSLeaveRequest]: {set: SelfServiceRepository.SSLeaveRequest.set2, page: SelfServiceRepository.SSLeaveRequest.page},
-    [ResourceIds.LeaveRequestODOM]: {set: LoanManagementRepository.LeaveRequest.set2, page: LoanManagementRepository.LeaveRequest.page}
+    [ResourceIds.LeaveRequestODOM]: {set: LeaveManagementRepository.LeaveRequest.set2, page: LeaveManagementRepository.LeaveRequest.page}
   }
 
   const { labels, access: maxAccess } = useResourceParams({
@@ -132,7 +133,7 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
     }
   })
 
-  const getLeaveBalance = async (recordId, employeeId, ltId, asOfDate) => {
+    const getLeaveBalance = async (recordId, employeeId, ltId, asOfDate) => {
     if (!employeeId || !ltId) return 0
 
     const res = await getRequest({
@@ -145,7 +146,7 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
     if (!lsIdValue) return 0
 
     const res2 = await getRequest({
-      extension: LoanManagementRepository.Leaves.qry,
+      extension: LeaveManagementRepository.Leaves.qry,
       parameters: `_recordId=${recordId}&_employeeId=${employeeId}&_lsId=${lsIdValue}&_asOfDate=${
         asOfDate ? formatDateTimeForGetAPI(asOfDate) : formatDateTimeForGetAPI(new Date())
       }`
@@ -185,11 +186,11 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
     }
   ]
 
-  const refetchData = async recordId => {
+ const refetchData = async recordId => {
     if (!recordId) return
 
     const res = await getRequest({
-      extension: LoanManagementRepository.LeaveRequest.get2,
+      extension: LeaveManagementRepository.LeaveRequest.get2,
       parameters: `_recordId=${recordId}`
     })
 
@@ -214,14 +215,14 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
         })) || []
     }
 
-    formik.setValues(data)
+    formik.resetForm({ values: data })
 
     return data
   }
 
   const onPost = async () => {
     await postRequest({
-      extension: LoanManagementRepository.LeaveRequest.post,
+      extension: LeaveManagementRepository.LeaveRequest.post,
       record: JSON.stringify({ recordId: formik.values.recordId })
     })
 
@@ -234,7 +235,7 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
     const { items, ...rest } = values || formik.values
 
     const res = await postRequest({
-      extension: LoanManagementRepository.LeaveRequest.close,
+      extension: LeaveManagementRepository.LeaveRequest.close,
       record: JSON.stringify(rest)
     })
 
@@ -247,7 +248,7 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
     const { items, ...rest } = formik.values
 
     const res = await postRequest({
-      extension: LoanManagementRepository.LeaveRequest.reopen,
+      extension: LeaveManagementRepository.LeaveRequest.reopen,
       record: JSON.stringify(rest)
     })
 
@@ -279,8 +280,8 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
     let totalDays = 0
 
     items.forEach(row => {
-      const hours = parseFloat(row.hours) || 0
-      const scheduled = parseFloat(row.scheduledHours) || 0
+      const hours = row.hours || 0
+      const scheduled = row.scheduledHours || 0
 
       totalHours += hours
 
@@ -292,6 +293,8 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
         }
       }
     })
+
+    totalDays = roundTo(totalDays)
 
     return { totalHours, totalDays }
   }
@@ -318,7 +321,7 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
     }
 
     const res = await getRequest({
-      extension: LoanManagementRepository.PreviewDays.preview,
+      extension: LeaveManagementRepository.PreviewDays.preview,
       parameters: `_filter=&_size=30&_startAt=0&_employeeId=${formik.values.employeeId}&_ltId=${formik.values.ltId}&_fromDayId=${fromDayId}&_toDayId=${toDayId}`
     })
 
@@ -515,7 +518,7 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
                 readOnly={isClosed}
               />
               <ResourceComboBox
-                endpointId={LoanManagementRepository.LeaveTypes.qry}
+                endpointId={LeaveManagementRepository.LeaveTypes.qry}
                 name='ltId'
                 label={labels.leaveType}
                 valueField='recordId'
@@ -599,7 +602,7 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
                 value={formik.values.leaveDays}
                 readOnly
                 maxAccess={maxAccess}
-                decimalScale={3}
+                decimalScale={2}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('leaveDays', null)}
                 error={formik.touched.leaveDays && Boolean(formik.errors.leaveDays)}

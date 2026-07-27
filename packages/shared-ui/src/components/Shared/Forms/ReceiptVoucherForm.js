@@ -57,7 +57,7 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
 
   const { formik } = useForm({
     maxAccess: maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validateOnChange: true,
     initialValues: {
       recordId,

@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -24,7 +24,7 @@ const BalanceAdjustment = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: LoanManagementRepository.BalanceAdjustment.page,
+      extension: LeaveManagementRepository.BalanceAdjustment.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
     })
 
@@ -41,7 +41,7 @@ const BalanceAdjustment = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: LoanManagementRepository.BalanceAdjustment.page,
+    endpointId: LeaveManagementRepository.BalanceAdjustment.page,
     datasetId: ResourceIds.BalanceAdjustment,
     filter: {
       filterFn: fetchWithFilter
@@ -51,7 +51,7 @@ const BalanceAdjustment = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: LoanManagementRepository.BalanceAdjustment.snapshot,
+        extension: LeaveManagementRepository.BalanceAdjustment.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     } else {
@@ -65,7 +65,7 @@ const BalanceAdjustment = () => {
     var parameters = defaultParams
 
     const response = await getRequest({
-      extension: LoanManagementRepository.BalanceAdjustment.page,
+      extension: LeaveManagementRepository.BalanceAdjustment.page,
       parameters: parameters
     })
 
@@ -95,15 +95,15 @@ const BalanceAdjustment = () => {
       flex: 1
     },
     {
-      field: 'leaveTrackTimeName',
-      headerName: labels.leaveTrackTime,
-      flex: 1
-    },
-    {
       field: 'effectiveDate',
       headerName: labels.effectiveDate,
       flex: 1,
       type: 'date'
+    },
+    {
+      field: 'days',
+      headerName: labels.days,
+      flex: 1
     },
     {
       field: 'hours',
@@ -118,6 +118,11 @@ const BalanceAdjustment = () => {
     {
       field: 'notes',
       headerName: labels.notes,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     }
   ]
@@ -151,7 +156,7 @@ const BalanceAdjustment = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: LoanManagementRepository.BalanceAdjustment.del,
+      extension: LeaveManagementRepository.BalanceAdjustment.del,
       record: JSON.stringify(obj)
     })
     invalidate()

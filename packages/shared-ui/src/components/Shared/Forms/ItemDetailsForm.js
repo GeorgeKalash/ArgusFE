@@ -253,7 +253,7 @@ export default function ItemDetailsForm({
                     label={labels.qty}
                     value={formik.values.details.qty}
                     onChange={e => {
-                      let qty = Number(e.target.value.replace(/,/g, ''))
+                      let qty = e.target.value
                       formik.setFieldValue('details.totalCost', (qty || 0) * (formik.values.details.unitCost || 0))
                       formik.setFieldValue('details.qty', qty)
                     }}

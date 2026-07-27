@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -127,7 +127,7 @@ const GeneratePurchaseInvoice = () => {
         .reduce((amountSum, row) => {
           let amountValue = 0
           if (row.checked) {
-            amountValue = parseFloat(row?.amountAfterVat?.toString().replace(/,/g, '')) || 0
+            amountValue = row?.amountAfterVat || 0
           }
 
           return amountSum + amountValue
@@ -230,7 +230,7 @@ const GeneratePurchaseInvoice = () => {
     formik.handleSubmit()
   }
 
-  async function onChangeDtId(recordId) {
+  async function onChangeDT(recordId) {
     if (recordId) {
       const dtd = await getRequest({
         extension: SaleRepository.DocumentTypeDefault.get,
@@ -240,6 +240,8 @@ const GeneratePurchaseInvoice = () => {
       formik.setFieldValue('plantId', dtd?.record?.plantId)
     }
   }
+
+  useEffect(() => { onChangeDT(formik.values?.dtId) }, [formik.values?.dtId])
 
   return (
     <Form onSave={onGenerateSI} isSaved={false} maxAccess={access} fullSize>
@@ -364,9 +366,8 @@ const GeneratePurchaseInvoice = () => {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
-                  await onChangeDtId(newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
@@ -396,7 +397,6 @@ const GeneratePurchaseInvoice = () => {
                 label={labels.amount}
                 value={formik?.values?.amount}
                 readOnly
-                align='right'
               />
             </Grid>
           </Grid>

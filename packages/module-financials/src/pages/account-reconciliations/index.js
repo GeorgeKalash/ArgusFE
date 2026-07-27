@@ -262,7 +262,7 @@ export default function AccountReconciliations(){
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} p={2}>
-            <Grid item xs={4}>
+            <Grid item xs={8}>
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
                        <CustomDatePicker
@@ -351,7 +351,7 @@ export default function AccountReconciliations(){
                     </Grid>
                 </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
@@ -382,7 +382,7 @@ export default function AccountReconciliations(){
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField

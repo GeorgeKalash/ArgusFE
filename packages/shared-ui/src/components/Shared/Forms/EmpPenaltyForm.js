@@ -96,7 +96,12 @@ export default function EmpPenaltyForm({ recordId, window }) {
         extension: EmployeeRepository.EmployeePenalty.get,
         parameters: `_recordId=${recordId}`
       })
-      formik.setValues({ ...record, date: formatDateFromApi(record.date) })
+      formik.resetForm({
+        values: {
+          ...record, 
+          date: formatDateFromApi(record.date) 
+        }
+      })
     }
   }
 
@@ -169,6 +174,7 @@ export default function EmpPenaltyForm({ recordId, window }) {
       actions={actions}
       maxAccess={maxAccess}
       editMode={editMode}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Grow>

@@ -12,6 +12,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 
 export default function ProdStandardsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -24,10 +25,10 @@ export default function ProdStandardsForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     initialValues: {
       recordId: null,
-      reference: ''
+      reference: '',
+      groupId: null
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
     }),
@@ -74,6 +75,25 @@ export default function ProdStandardsForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionStandardGroups.qry}
+                name='groupId'
+                label={labels.psg}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('groupId', newValue?.recordId || null)
+                }}
+                error={formik.touched.groupId && Boolean(formik.errors.groupId)}
               />
             </Grid>
           </Grid>

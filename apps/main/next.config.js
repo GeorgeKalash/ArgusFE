@@ -10,6 +10,7 @@ const nextConfig = {
     '@argus/module-fa',
     '@argus/module-rs',
     '@argus/module-ct',
+    '@argus/module-cs',
     '@argus/module-auth',
     '@argus/module-system',
     '@argus/module-hr',

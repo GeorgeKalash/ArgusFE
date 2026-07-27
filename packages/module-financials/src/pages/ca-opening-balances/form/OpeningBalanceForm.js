@@ -149,7 +149,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='amount'
                 required
@@ -163,7 +163,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 decimalScale={2}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='baseAmount'
                 required

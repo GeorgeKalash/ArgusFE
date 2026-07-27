@@ -89,7 +89,6 @@ const Countries = () => {
       field: 'ibanLength',
       headerName: _labels.ibanLength,
       flex: 1,
-      align: 'right',
       type: 'number'
     }
   ]

@@ -111,11 +111,16 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
 
     if (res?.record) {
       const { record } = res
+      const employee = await fetchEmployee(record.employeeId)
 
-      formik.setValues({
-        ...record,
-        date: formatDateFromApi(record.date),
-        effectiveDate: formatDateFromApi(record.effectiveDate)
+      formik.resetForm({
+        values: {
+          ...formik.values,
+          ...record,
+          date: formatDateFromApi(record.date),
+          effectiveDate: formatDateFromApi(record.effectiveDate),
+          ...employee
+        }
       })
 
       setStore(prev => ({
@@ -124,8 +129,6 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
         loanAmount: record.amount ?? 0,
         effectiveDate: formatDateFromApi(res.record.effectiveDate)
       }))
-
-      await fetchEmployee(record.employeeId)
     }
 
     return res
@@ -145,8 +148,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
 
     const { record } = result
 
-    formik.setValues(prev => ({
-      ...prev,
+    return {
       employeeId: id,
       employeeRef: record?.reference || '',
       employeeName: record?.fullName || '',
@@ -154,7 +156,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
       departmentName: record?.departmentName || '',
       loanBalance: record?.loanBalance ?? 0,
       branchId: record?.branchId || null
-    }))
+    }
   }
 
   const resetEmployeeFields = () => {
@@ -170,25 +172,6 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
     }))
   }
 
-  const refetchForm = async id => {
-    const res = await fetchData(id)
-
-    if (res?.record) {
-      formik.setValues(prev => ({
-        ...prev,
-        ...res.record,
-        date: formatDateFromApi(res.record.date),
-        effectiveDate: formatDateFromApi(res.record.effectiveDate)
-      }))
-
-      setStore(prev => ({
-        ...prev,
-        isClosed: res.record.wip === 2,
-        effectiveDate: formatDateFromApi(res.record.effectiveDate)
-      }))
-    }
-  }
-
   const onClose = async () => {
     const res = await postRequest({
       extension: LoanTrackingRepository.Loans.close,
@@ -197,7 +180,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
 
     toast.success(platformLabels.Closed)
     invalidate()
-    refetchForm(res.recordId)
+    fetchData(res.recordId)
   }
 
   const onReopen = async () => {
@@ -208,7 +191,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
 
     toast.success(platformLabels.Reopened)
     invalidate()
-    refetchForm(res.recordId)
+    fetchData(res.recordId)
   }
 
   const actions = [
@@ -306,7 +289,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.BranchFilters.qry}
+                endpointId={companyStructureRepository.Branches.qry}
                 name='branchId'
                 label={labels.branch}
                 readOnly

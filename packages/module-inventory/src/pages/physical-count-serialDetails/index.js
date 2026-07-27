@@ -1,6 +1,6 @@
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -17,7 +17,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import toast from 'react-hot-toast'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
+import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearGridConfirmation'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -37,9 +37,7 @@ const PhysicalCountSerialDe = () => {
     datasetId: ResourceIds.PhysicalCountSerialDetail
   })
 
-  const { formik } = useForm({
-    maxAccess: access,
-    initialValues: {
+  const initialValues = {
       stockCountId: null,
       siteId: null,
       controllerId: null,
@@ -60,7 +58,11 @@ const PhysicalCountSerialDe = () => {
           itemName: ''
         }
       ]
-    },
+    }
+
+  const { formik } = useForm({
+    maxAccess: access,
+    initialValues,
     validationSchema: yup.object({
       stockCountId: yup.number().required(),
       scDate: yup.date().required(),
@@ -120,33 +122,42 @@ const PhysicalCountSerialDe = () => {
   })
 
   async function fetchGridData(controllerId) {
-    await getRequest({
-      extension: SCRepository.StockCountSerialDetail.qry,
-      parameters: `_stockCountId=${formik.values.stockCountId}&_siteId=${formik.values.siteId}&_controllerId=${
-        controllerId || formik?.values?.controllerId
-      }`
-    }).then(res => {
-      if (res.list) {
-        const modifiedList = res.list?.map((item, index) => ({
-          ...item,
-          id: index + 1
-        }))
-        if (modifiedList.length > 0) {
-          formik.setFieldValue('rows', modifiedList)
-        }
-      }
+    const status = await checkPhyStatus(controllerId)
 
-      setEditMode(res.list.length > 0)
+    const res = await getRequest({
+      extension: SCRepository.StockCountSerialDetail.qry,
+      parameters: `_stockCountId=${formik.values.stockCountId}&_siteId=${formik.values.siteId}&_controllerId=${controllerId}`
     })
+
+    const modifiedList =
+      res.list?.length > 0
+        ? res.list.map((item, index) => ({
+            ...item,
+            id: index + 1
+          }))
+        : initialValues.rows
+
+    const nextValues = {
+      ...formik.values,
+      controllerId,
+      status,
+      rows: modifiedList
+    }
+
+    formik.resetForm({ values: nextValues })
+    setEditMode(res?.list?.length > 0)
+    setCombosDisabled(true)
   }
 
   const checkPhyStatus = async controllerId => {
+    if (!controllerId) return
+
     const resp = await getRequest({
       extension: SCRepository.StockCountControllerTab.get,
       parameters: `_stockCountId=${formik.values.stockCountId}&_siteId=${formik.values.siteId}&_controllerId=${controllerId}`
     })
 
-    formik.setFieldValue('status', resp?.record?.status)
+    return resp?.record?.status
   }
 
   async function autoSave(lastLine) {
@@ -161,6 +172,7 @@ const PhysicalCountSerialDe = () => {
       })
 
       toast.success(platformLabels.Saved)
+      fetchGridData(formik?.values?.controllerId)
     }
   }
 
@@ -177,6 +189,8 @@ const PhysicalCountSerialDe = () => {
     })
 
     toast.success(platformLabels.Deleted)
+
+    fetchGridData(formik?.values?.controllerId)
 
     return true
   }
@@ -308,7 +322,7 @@ const PhysicalCountSerialDe = () => {
         open: { flag: true },
         fullScreen: false,
         onConfirm: () => {
-          clearOption === 'clearAll' ? formik.resetForm() : formik.setFieldValue('rows', formik.initialValues.rows)
+          clearOption === 'clearAll' ? formik.resetForm({ values: initialValues }) : formik.setFieldValue('rows', initialValues.rows)
           setCombosDisabled(false)
           setEditMode(false)
         },
@@ -354,7 +368,7 @@ const PhysicalCountSerialDe = () => {
   const totalCount = formik.values.rows.filter(item => item.srlNo).length
 
   const totalWeight = formik.values.rows.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
+    const weightValue = row.weight || 0
 
     return weightSum + weightValue
   }, 0)
@@ -369,7 +383,7 @@ const PhysicalCountSerialDe = () => {
           controllerId: formik?.values?.controllerId,
           stockCountId: formik?.values?.stockCountId
         },
-        onCloseimport: fetchGridData,
+        onCloseimport: () => fetchGridData(formik?.values?.controllerId),
         maxAccess: access
       }
     })
@@ -478,10 +492,11 @@ const PhysicalCountSerialDe = () => {
                 required
                 readOnly={combosDisabled}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('controllerId', newValue?.controllerId || null)
-                  setCombosDisabled(true)
-                  newValue?.controllerId && checkPhyStatus(newValue?.controllerId)
-                  newValue?.controllerId && fetchGridData(newValue?.controllerId)
+                  if (newValue?.controllerId) {
+                    fetchGridData(newValue.controllerId)
+                  } else {
+                    formik.setFieldValue('controllerId', null)
+                  }
                 }}
                 error={formik.touched.controllerId && Boolean(formik.errors.controllerId)}
                 maxAccess={access}
@@ -494,7 +509,7 @@ const PhysicalCountSerialDe = () => {
             onChange={(value, action, row) => handleGridChange(value, action, row)}
             value={formik.values.controllerId ? formik.values.rows : []}
             error={formik.errors?.rows}
-            initialValues={formik?.initialValues?.rows?.[0]}
+            initialValues={initialValues?.rows?.[0]}
             columns={columns}
             enableFilters
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
@@ -526,7 +541,7 @@ const PhysicalCountSerialDe = () => {
               <CustomTextField
                 name='totalWeight'
                 label={labels.totalWeight}
-                value={getFormattedNumber(totalWeight.toFixed(2))}
+                value={getFormattedNumber(roundTo(totalWeight))}
                 readOnly
                 hidden={!formik.values.controllerId}
                 numberField

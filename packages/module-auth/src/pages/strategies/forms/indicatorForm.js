@@ -7,11 +7,11 @@ import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const IndicatorForm = ({ labels, editMode, maxAccess, store }) => {
-  const [valueGridData, setValueGridData] = useState([])
   const { postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
 
@@ -67,10 +67,7 @@ const IndicatorForm = ({ labels, editMode, maxAccess, store }) => {
 
     Promise.all(requests)
       .then(results => {
-        toast.success('Records Edited Successfully')
-      })
-      .catch(error => {
-        toast.error('An error occurred while editing records')
+        toast.success(platformLabels.Edited)
       })
   }
 
@@ -83,9 +80,8 @@ const IndicatorForm = ({ labels, editMode, maxAccess, store }) => {
         const gridData = res.list.map((item, index) => ({
           id: index + 1,
           ...item,
-          strtategyId: item.strategyId
+          strategyId: item.strategyId
         }))
-        setValueGridData(gridData)
         formik.setValues({ indicatorData: gridData })
       })
       .catch(error => {
@@ -106,7 +102,7 @@ const IndicatorForm = ({ labels, editMode, maxAccess, store }) => {
       extension: DocumentReleaseRepository.ApplySTG.apply,
       record: JSON.stringify(valuesWithoutGroupName)
     })
-    toast.success('Strategy Applied Successfully')
+    toast.success(platformLabels.StrategyApplied)
 
     setApplyTrigger(prev => prev + 1)
   }

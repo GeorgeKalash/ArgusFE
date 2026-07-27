@@ -86,6 +86,7 @@ export default function DraftSerialsInvoiceForm({ labels, maxAccess, recordId, f
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 required
                 label={labels.documentType}

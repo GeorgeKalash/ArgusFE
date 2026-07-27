@@ -72,13 +72,13 @@ export default function JobsForm({ labels, maxAccess, store }) {
   })
 
   const assignedWgtBB = formik?.values?.items?.reduce((outputWgtSum, row) => {
-    const outputWgtValue = parseFloat(row?.outputWgt?.toString().replace(/,/g, '')) || 0
+    const outputWgtValue = row?.outputWgt || 0
 
     return outputWgtSum + outputWgtValue
   }, 0)
 
   const totalLoss = formik?.values?.items?.reduce((lossSum, row) => {
-    const lossValue = parseFloat(row?.loss?.toString().replace(/,/g, '')) || 0
+    const lossValue = row?.loss || 0
 
     return lossSum + lossValue
   }, 0)

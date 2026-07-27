@@ -34,6 +34,8 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
 export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -108,7 +110,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     initialValues,
     maxAccess,
     validateOnChange: true,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     validationSchema: yup.object({
       accountType: yup.string().required(),
       currencyId: yup.number().required(),
@@ -129,7 +131,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       const payload = getPayload(obj)
 
       const response = await postRequest({
-        extension: FinancialRepository.PaymentVouchers.set2,
+        extension: FinancialRepository.PaymentVoucherExpenses.set2,
         record: JSON.stringify(payload)
       })
 
@@ -180,6 +182,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
 
 
   async function refetchForm (recordId) {
+    const vatPct = await getDefaultVAT()
     const response = await getRequest({
       extension: FinancialRepository.PaymentVouchers.get2,
       parameters: `_recordId=${recordId}`
@@ -198,17 +201,24 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
         }
       })
     )
+    const subtotal = expensesList.reduce((sum, row) => {
+      return sum + Number(row.subtotal || 0)
+    }, 0)
 
-    formik.setValues({
-      ...response.record?.header,
-      date: formatDateFromApi(response?.record?.header?.date),
-      accountBalance: response.record?.accountBalance?.balance || 0,
-      expenses: expensesList
+    formik.resetForm({
+      values: {
+        ...response.record?.header,
+        date: formatDateFromApi(response?.record?.header?.date),
+        accountBalance: response.record?.accountBalance?.balance || 0,
+        vatPct,
+        subtotal,
+        expenses: expensesList
+      }
     })
   }
 
   const totalAmount = formik.values?.expenses?.reduce((amount, row) => {
-    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+    const amountValue = row.amount || 0
 
     return amount + amountValue
   }, 0)
@@ -230,7 +240,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       refetchForm(res.recordId)
     } catch (exception) {}
   }
-  async function getDTD(dtId) {
+  async function onChangeDT(dtId) {
     if (dtId) {
       const res = await getRequest({
         extension: FinancialRepository.FIDocTypeDefaults.get,
@@ -263,7 +273,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   }
 
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) getDTD(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {
@@ -290,6 +300,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
 
     const vatPctValue = parseInt(res.record.value)
     formik.setFieldValue('vatPct', vatPctValue)
+    return vatPctValue
   }
 
   const onWorkFlowClick = async () => {
@@ -451,12 +462,12 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
         if (newRow.isVAT && newRow.amount) {
           let newSubtotal = newRow.amount * (100 / (100 + formik.values.vatPct))
           update({
-            subtotal: newSubtotal.toFixed(2),
-            vatAmount: (newRow.amount - newSubtotal).toFixed(2)
+            subtotal: roundTo(newSubtotal),
+            vatAmount: roundTo(newRow.amount - newSubtotal)
           })
         } else {
           update({
-            subtotal: newRow.amount,
+            subtotal: roundTo(newRow.amount),
             vatAmount: 0
           })
         }
@@ -473,12 +484,12 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
         if (newRow.isVAT) {
           let newSubtotal = newRow.amount * (100 / (100 + formik.values.vatPct))
           update({
-            subtotal: newSubtotal.toFixed(2),
-            vatAmount: (newRow.amount - newSubtotal).toFixed(2)
+            subtotal: roundTo(newSubtotal),
+            vatAmount: roundTo(newRow.amount - newSubtotal)
           })
         } else {
           update({
-            subtotal: newRow.amount,
+            subtotal: roundTo(newRow.amount),
             vatAmount: 0
           })
         }
@@ -561,22 +572,26 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   }
 
   const subtotalSum = formik.values?.expenses?.reduce((subtotal, row) => {
-    const subtotalValue = parseFloat(row.subtotal?.toString().replace(/,/g, '')) || 0
+    const subtotalValue = row.subtotal || 0
 
     return subtotal + subtotalValue
   }, 0)
 
   const vatSum = formik.values?.expenses?.reduce((vatAmount, row) => {
-    const vatAmountValue = parseFloat(row.vatAmount?.toString().replace(/,/g, '')) || 0
+    const vatAmountValue = row.vatAmount || 0
 
     return vatAmount + vatAmountValue
   }, 0)
 
   const amountSum = formik.values?.expenses?.reduce((amount, row) => {
-    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+    const amountValue = row.amount || 0
 
     return amount + amountValue
   }, 0)
+
+  useEffect(() => {
+    formik.setFieldValue('subtotal', Number(subtotalSum))
+  }, [subtotalSum])
 
   async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
     if (currencyId && date && rateType) {
@@ -593,7 +608,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
         dirtyField: DIRTYFIELD_RATE
       })
 
-      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
       if (res.record?.exRate) formik.setFieldValue('exRate', res.record?.exRate)
       if (res.record?.rateCalcMethod) formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
@@ -616,23 +631,28 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     })()
   }, [])
 
-  function openMCRForm(data) {
-    stack({
-      Component: MultiCurrencyRateForm,
-      props: {
-        DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
-        data: {
-          ...data,
-          amount: amountSum
-        },
-        onOk: childFormikValues => {
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...childFormikValues
-          }))
+  const { openStack } = useStackValueLink({ linkOpen: { resourceId: ResourceIds.MCRPaymentVoucherExpenses } })
+    
+  async function openMCRForm(data) {
+    const hasOpened = await openStack()
+    if(!hasOpened) {
+      stack({
+        Component: MultiCurrencyRateForm,
+        props: {
+          DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
+          data: {
+            ...data,
+            amount: amountSum
+          },
+          onOk: childFormikValues => {
+            formik.setValues(prevValues => ({
+              ...prevValues,
+              ...childFormikValues
+            }))
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   return (
@@ -784,7 +804,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                       <CustomButton
                         onClick={() => openMCRForm(formik.values)}
                         image='popup.png'
-                        tooltipText={platformLabels.add}
+                        tooltipText={platformLabels.MultiCurrencyRate}
                         disabled={
                           !formik.values.currencyId ||
                           formik.values.currencyId === currencyId
@@ -842,7 +862,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={3}>
                   <CustomNumberField
                     name='subtotal'
                     label={labels.subtotal}
@@ -867,7 +887,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     required={formik.values.paymentMethod == 3}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={3}>
                   <CustomNumberField
                     name='vatAmount'
                     label={labels.vat}
@@ -879,6 +899,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
                   />
                 </Grid>
+                <Grid item xs={3}></Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={CashBankRepository.CACheckbook.qry}
@@ -895,14 +916,13 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     disabled={formik.values.paymentMethod != 3}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={3}>
                   <CustomNumberField
                     name='amount'
                     label={labels.amount}
                     value={amountSum}
                     readOnly
                     maxAccess={maxAccess}
-                    thousandSeparator={false}
                     onChange={async e => {
                       const updatedRateRow = getRate({
                         amount: e.target.value ?? 0,
@@ -911,7 +931,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                         rateCalcMethod: formik.values?.rateCalcMethod,
                         dirtyField: DIRTYFIELD_RATE
                       })
-                      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                      formik.setFieldValue('baseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
                       formik.setFieldValue('amount', e.target.value)
                     }}
                     onClear={async () => {
@@ -920,7 +940,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
                   />
                 </Grid>
-
+                <Grid item xs={3}></Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
                     name='notes'
@@ -945,7 +965,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
           }}
           value={formik?.values?.expenses}
           error={formik?.errors?.expenses}
-          initialValues={formik?.initialValues?.expenses[0]}
+          initialValues={initialValues?.expenses[0]}
           columns={columns}
           allowDelete={!isPosted && !isCancelled}
           allowAddNewLine={!isPosted && !isCancelled}

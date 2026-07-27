@@ -86,7 +86,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   ]
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       reference: '',
@@ -226,19 +226,24 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       )
     }
 
-    formik.setValues({
-      ...doHeader?.record,
-      plantId: props.plantId || doHeader?.record.plantId,
-      dtId: props.dtId || doHeader?.record.dtId,
-      address: address,
-      orders: ordersList
+    formik.resetForm({
+      values: {
+        ...doHeader?.record,
+        plantId: props.plantId || doHeader?.record.plantId,
+        dtId: props.dtId || doHeader?.record.dtId,
+        address: address,
+        orders: ordersList
+      }
     })
   }
 
   const onPost = async () => {
     await postRequest({
       extension: DeliveryRepository.DeliveriesOrders.post,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({
+        ...formik.values,
+        date: formatDateToApi(formik.values.date)
+      })
     })
 
     toast.success(platformLabels.Posted)
@@ -250,7 +255,10 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   const onUnpost = async () => {
     await postRequest({
       extension: DeliveryRepository.DeliveriesOrders.unpost,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({
+        ...formik.values,
+        date: formatDateToApi(formik.values.date)
+      })
     })
 
     toast.success(platformLabels.Unposted)
@@ -502,7 +510,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.docType}
-                    readOnly={editMode || isCancelled}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
@@ -541,7 +549,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     label={labels.date}
                     value={formik.values?.date}
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('date', '')}
+                    onClear={() => formik.setFieldValue('date', null)}
                     readOnly={isPosted || isCancelled}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                     maxAccess={maxAccess}
@@ -694,7 +702,10 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.clientId && !isCancelled && !isPosted}
                     onChange={e => formik.setFieldValue('address', e.target.value)}
-                    onClear={() => formik.setFieldValue('address', '')}
+                    onClear={() => {
+                      formik.setFieldValue('address', null)
+                      formik.setFieldValue('addressId', null)
+                    }}
                     onDropDown={() => openAddressFilterForm(true)}
                   />
                 </Grid>

@@ -38,7 +38,7 @@ const OpenPurchaseRequisition = () => {
   function checkItems(items) {
     if (items?.length < 1) {
       stackError({
-        message: labels.checkItemsBeforeAppend
+        message: platformLabels.checkItemsBeforeAppend
       })
 
       return false
@@ -383,7 +383,7 @@ const OpenPurchaseRequisition = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={companyStructureRepository.DepartmentFilters.qry}
+                    endpointId={companyStructureRepository.Departments.qry}
                     parameters={`_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`}
                     name='departmentId'
                     label={labels.department}

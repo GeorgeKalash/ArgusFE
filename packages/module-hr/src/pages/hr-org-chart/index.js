@@ -30,7 +30,7 @@ const HROrgChart = () => {
     validateOnChange: true,
     onSubmit: async obj => {
       const data = await getRequest({
-        extension: companyStructureRepository.DepartmentFilters.qry,
+        extension: companyStructureRepository.Departments.qry,
         parameters: `_filter=&_size=1000&_startAt=0&_type=${obj?.type}&_activeStatus=1&_sortBy=recordId`
       })
 

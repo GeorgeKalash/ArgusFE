@@ -67,7 +67,7 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
-      width: 1200,
+      width: 1300,
       height: 600,
       title: labels.reportLayout
     })

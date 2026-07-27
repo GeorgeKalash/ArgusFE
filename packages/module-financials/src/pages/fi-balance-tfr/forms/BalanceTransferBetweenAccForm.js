@@ -28,6 +28,7 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function BalanceTransferForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -49,7 +50,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
   const defaultSP = userDefaults?.list?.find(({ key }) => key === 'spId')?.value
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: recordId || '',
       dtId: null,
@@ -112,7 +113,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({ ...record, date: formatDateFromApi(record.date) })
+    formik.resetForm({ values: { ...record, date: formatDateFromApi(record.date) } })
   }
 
   useEffect(() => {
@@ -167,19 +168,19 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
   const onSelectionChange = async (currencyId, date, amount) => {
     const rate = await getRates(currencyId, date)
 
-    formik.setFieldValue(`fromExRate`, rate?.exRate?.toFixed(2))
+    formik.setFieldValue(`fromExRate`, rate?.exRate ? roundTo(rate?.exRate) : null)
     formik.setFieldValue(`fromRateCalcMethod`, rate?.rateCalcMethod)
 
     const updatedRateRow = getRate({
       amount: amount || 0,
-      exRate: rate?.exRate.toFixed(2) || 0,
+      exRate: rate?.exRate ? roundTo(rate?.exRate) : null,
       baseAmount: formik?.values?.fromBaseAmount,
       rateCalcMethod: rate?.rateCalcMethod || 0,
       dirtyField: DIRTYFIELD_RATE
     })
 
-    formik.setFieldValue('fromBaseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2))
-    formik.setFieldValue('fromAmount', parseFloat(updatedRateRow?.amount).toFixed(2))
+    formik.setFieldValue('fromBaseAmount', roundTo(updatedRateRow?.baseAmount))
+    formik.setFieldValue('fromAmount', roundTo(updatedRateRow?.amount))
   }
 
   const actions = [
@@ -225,6 +226,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.BalanceTransfer}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.docType}
                     columnsInDropDown={[
@@ -468,7 +470,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                     error={formik.touched.fromCurrencyId && Boolean(formik.errors.fromCurrencyId)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='fromAmount'
                     label={labels.amount}
@@ -482,7 +484,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                         rateCalcMethod: formik.values?.fromRateCalcMethod || 0,
                         dirtyField: DIRTYFIELD_RATE
                       })
-                      formik.setFieldValue('fromBaseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                      formik.setFieldValue('fromBaseAmount', roundTo(updatedRateRow?.baseAmount) || 0)
                       formik.setFieldValue('fromAmount', e.target.value)
                     }}
                     onClear={() => formik.setFieldValue('fromAmount', '')}

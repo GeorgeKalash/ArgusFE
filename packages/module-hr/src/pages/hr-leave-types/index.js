@@ -10,7 +10,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import LeaveTypeForm from './Forms/LeaveTypeForm'
 
 const HRLeaveTypes = () => {
@@ -22,7 +22,7 @@ const HRLeaveTypes = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: LoanManagementRepository.LeaveTypes.page,
+      extension: LeaveManagementRepository.LeaveTypes.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,7 +38,7 @@ const HRLeaveTypes = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: LoanManagementRepository.LeaveTypes.page,
+    endpointId: LeaveManagementRepository.LeaveTypes.page,
     datasetId: ResourceIds.LeaveTypes
   })
 
@@ -79,7 +79,7 @@ const HRLeaveTypes = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: LoanManagementRepository.LeaveTypes.del,
+      extension: LeaveManagementRepository.LeaveTypes.del,
       record: JSON.stringify(obj)
     })
     toast.success(platformLabels.Deleted)

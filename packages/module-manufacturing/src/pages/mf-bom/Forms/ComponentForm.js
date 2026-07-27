@@ -132,7 +132,8 @@ export default function ComponentForm({
                   { key: 'sku', value: 'SKU' },
                   { key: 'name', value: 'Name' }
                 ]}
-                onChange={async (event, newValue) => {
+                displayFieldWidth={2}
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('itemId', newValue?.recordId || null)
                   formik.setFieldValue('itemName', newValue?.name)
                   formik.setFieldValue('sku', newValue?.sku)

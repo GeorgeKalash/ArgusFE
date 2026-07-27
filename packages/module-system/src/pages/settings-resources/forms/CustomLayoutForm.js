@@ -12,6 +12,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -178,6 +179,29 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
       component: 'checkbox',
       label: labels.isInactive,
       name: 'isInactive'
+    },
+    {
+      component: 'resourcecombobox',
+      name: 'reportEngineName',
+      label: labels.reportEngineName,
+      flex: 1,
+      props: {
+        datasetId: DataSets.REPORT_ENGINE,
+        valueField: 'key',
+        displayField: 'value',
+        mapping: [
+          { from: 'key', to: 'reportEngine' },
+          { from: 'value', to: 'reportEngineName' }
+        ]
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.schemaFile,
+      name: 'schemaFile',
+      propsReducer({ row, props }) {
+        return { ...props, required: row.reportEngine == 2, readOnly: row.reportEngine != 2 }
+      }
     },
     {
       component: 'textfield',

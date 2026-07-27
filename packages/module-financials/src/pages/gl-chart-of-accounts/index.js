@@ -122,7 +122,7 @@ const ChartOfAccounts = () => {
         recordId
       },
       width: 600,
-      height: 600,
+      height: 680,
       title: labels.chartOfAccount
     })
   }

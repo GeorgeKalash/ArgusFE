@@ -15,7 +15,7 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { calculateFixed } from '@argus/shared-utils/src/utils/Payroll'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
-import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
+import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function DeductionsForm({
   labels,
@@ -235,7 +235,7 @@ export default function DeductionsForm({
                   onBlur={e => {
                     let pctValue = Number(e.target.value)
                     const amount = calculateFixed(pctValue, 1, salaryInfo.header.basicAmount, salaryInfo.header.eAmount)
-                    formik.setFieldValue('fixedAmount', parseFloat(amount || 0).toFixed(2))
+                    formik.setFieldValue('fixedAmount', roundTo(amount || 0))
                     formik.setFieldValue('pct', pctValue)
                   }}
                   allowNegative={false}
@@ -250,12 +250,7 @@ export default function DeductionsForm({
                   label={labels.amount}
                   value={formik.values.fixedAmount}
                   onBlur={e =>
-                    formik.setFieldValue(
-                      'fixedAmount',
-                      parseFloat(
-                        String(e?.target?.value || 0).replace(/,/g, '')
-                      ).toFixed(2)
-                    )
+                    formik.setFieldValue('fixedAmount', e?.target?.value || 0)
                   }
                   required={!formik.values?.isFormula}
                   allowNegative={false}

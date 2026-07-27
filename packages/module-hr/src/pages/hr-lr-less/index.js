@@ -7,7 +7,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import LeaveRequestForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveRequestForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -24,7 +24,7 @@ const LeaveRequest = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: LoanManagementRepository.LeaveRequest.page,
+      extension: LeaveManagementRepository.LeaveRequest.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=50&_filter=&_sortBy=recordId&_multiDayLeave=1&_params=${
         params || ''
       }`
@@ -43,7 +43,7 @@ const LeaveRequest = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: LoanManagementRepository.LeaveRequest.page,
+    endpointId: LeaveManagementRepository.LeaveRequest.page,
     datasetId: ResourceIds.LeaveRequest,
     filter: {
       filterFn: fetchWithFilter,
@@ -54,7 +54,7 @@ const LeaveRequest = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: LoanManagementRepository.LeaveRequest.snapshot,
+        extension: LeaveManagementRepository.LeaveRequest.snapshot,
         parameters: `_filter=${filters.qry}&_multiDayLeave=1`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -151,7 +151,7 @@ const LeaveRequest = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: LoanManagementRepository.LeaveRequest.del,
+      extension: LeaveManagementRepository.LeaveRequest.del,
       record: JSON.stringify(obj)
     })
     invalidate()

@@ -15,6 +15,7 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import Form from './Form'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, window }) {
   const { getRequest } = useContext(RequestsContext)
@@ -54,11 +55,20 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
           RateDivision.FINANCIALS
         }`
       })
-      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
-      formik.setFieldValue('rateCalcMethodName', res.record?.rateCalcMethodName)
-      formik.setFieldValue('exchangeId', res.record?.exchangeId)
-      formik.setFieldValue('exchangeName', res.record?.exchangeName)
-      formik.setFieldValue('rateTypeName', res.record?.rateTypeName)
+
+      const nextValues = {
+        ...formik.values,
+        rateCalcMethod: res.record?.rateCalcMethod,
+        rateCalcMethodName: res.record?.rateCalcMethodName,
+        exchangeId: res.record?.exchangeId,
+        exchangeName: res.record?.exchangeName,
+        rateTypeId: res.record?.rateTypeId,
+        rateTypeName: res.record?.rateTypeName
+      }
+
+      formik.resetForm({
+        values: nextValues
+      })
     }
   }
 
@@ -69,16 +79,24 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
   }, [])
 
   const ok = () => {
-    if (onOk) {
-      const updatedValues = {
-        ...formik.values,
-        exRate: formik.values.exRate,
-        baseAmount: formik.values.baseAmount,
-        amount: formik.values.amount
-      }
-      onOk(updatedValues)
+    const current = formik.values
+
+    const hasChange =
+      (current.exRate ?? 0) !== (formik?.initialValues?.exRate ?? 0) ||
+      (current.baseAmount ?? 0) !== (formik?.initialValues?.baseAmount ?? 0)
+
+    if (!hasChange) {
       window.close()
+      return
     }
+
+    onOk?.({
+      exRate: roundTo(current.exRate),
+      baseAmount: roundTo(current.baseAmount),
+      rateCalcMethod: current.rateCalcMethod
+    })
+
+    window.close()
   }
 
   const actions = [
@@ -119,7 +137,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 readOnly
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomTextField
                 name='rateCalcMethodName'
                 value={formik?.values?.rateCalcMethodName}
@@ -127,7 +145,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 readOnly
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='exRate'
                 value={formik?.values?.exRate}
@@ -154,7 +172,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                   const updatedRateRow = getRate({
                     amount: data?.amount || 0,
                     exRate: inputValue,
-                    baseAmount: parseFloat(formik?.values?.baseAmount || 0).toFixed(2),
+                    baseAmount: roundTo(formik?.values?.baseAmount || 0),
                     rateCalcMethod: formik?.values?.rateCalcMethod,
                     dirtyField: DIRTYFIELD_RATE
                   })
@@ -162,15 +180,15 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                   formik.setValues({
                     ...formik.values,
                     ...updatedRateRow,
-                    baseAmount: parseFloat(updatedRateRow.baseAmount).toFixed(2)
+                    baseAmount: roundTo(updatedRateRow.baseAmount)
                   })
                 }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField name='amount' value={formik?.values?.amount} label={labels.amount} readOnly />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='baseAmount'
                 value={formik?.values?.baseAmount}
@@ -195,7 +213,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                   const updatedRateRow = getRate({
                     amount: data?.amount || 0,
                     exRate: formik?.values?.exRate,
-                    baseAmount: parseFloat(inputValue || 0).toFixed(2),
+                    baseAmount: roundTo(inputValue || 0),
                     rateCalcMethod: formik?.values?.rateCalcMethod,
                     dirtyField: DIRTYFIELD_BASE_AMOUNT_MCR
                   })
@@ -214,5 +232,5 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
   )
 }
 
-MultiCurrencyRateForm.width = 500
-MultiCurrencyRateForm.height = 500
+MultiCurrencyRateForm.width = 600
+MultiCurrencyRateForm.height = 400

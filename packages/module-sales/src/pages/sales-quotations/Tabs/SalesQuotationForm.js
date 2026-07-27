@@ -51,6 +51,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -179,7 +180,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     conditionSchema: ['items'],
     initialValues,
     validationSchema: yup.object({
@@ -336,19 +337,19 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         const filteredItems = filteredMeasurements?.current?.filter(item => item.recordId === newRow?.muId)
 
         update({
-          volume: parseFloat(itemPhysProp?.volume) || 0,
-          weight: parseFloat(itemPhysProp?.weight || 0).toFixed(2),
-          vatAmount: parseFloat(itemInfo?.vatPct || 0).toFixed(2),
-          basePrice: parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5),
-          unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
-          upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
+          volume: itemPhysProp?.volume || 0,
+          weight: roundTo(itemPhysProp?.weight || 0, 2),
+          vatAmount: roundTo(itemInfo?.vatPct || 0, 2),
+          basePrice: roundTo(ItemConvertPrice?.basePrice || 0, 5),
+          unitPrice: roundTo(ItemConvertPrice?.unitPrice || 0, 3),
+          upo: roundTo(ItemConvertPrice?.upo || 0, 2),
           priceType: ItemConvertPrice?.priceType || 1,
-          mdAmount: formik.values.maxDiscount ? parseFloat(formik.values.maxDiscount).toFixed(2) : 0,
+          mdAmount: formik.values.maxDiscount ? roundTo(formik.values.maxDiscount, 2) : 0,
           qty: 0,
           msId: itemInfo?.msId,
           muRef: filteredMU?.[0]?.reference,
           muId: filteredMU?.[0]?.recordId,
-          extendedPrice: parseFloat('0').toFixed(2),
+          extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
           taxDetails: rowTaxDetails || null,
@@ -728,11 +729,11 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
               return {
                 ...item,
                 id: index + 1,
-                basePrice: parseFloat(item.basePrice).toFixed(5),
-                unitPrice: parseFloat(item.unitPrice).toFixed(3),
-                upo: parseFloat(item.upo).toFixed(2),
-                vatAmount: parseFloat(item.vatAmount).toFixed(2),
-                extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+                basePrice: roundTo(item.basePrice, 5),
+                unitPrice: roundTo(item.unitPrice, 3),
+                upo: roundTo(item.upo, 2),
+                vatAmount: roundTo(item.vatAmount, 2),
+                extendedPrice: roundTo(item.extendedPrice, 2),
                 msId: itemInfo?.msId || item.msId,
                 taxDetails: taxDetailsResponse
               }
@@ -740,16 +741,18 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           )
         : formik.values.items
 
-    formik.setValues({
-      ...sqHeader.record,
-      currentDiscount:
-        sqHeader?.record?.tdType == 1 || sqHeader?.record?.tdType == null
-          ? sqHeader?.record?.tdAmount
-          : sqHeader?.record?.tdPct,
-      amount: parseFloat(sqHeader?.record?.amount).toFixed(2),
-      maxDiscount: clientDiscount?.record?.tdPct || 0,
-      shipAddress: shipAdd,
-      items: modifiedList
+    formik.resetForm({
+      values: {
+        ...sqHeader.record,
+        currentDiscount:
+          sqHeader?.record?.tdType == 1 || sqHeader?.record?.tdType == null
+            ? sqHeader?.record?.tdAmount
+            : sqHeader?.record?.tdPct,
+        amount: sqHeader?.record?.amount,
+        maxDiscount: clientDiscount?.record?.tdPct || 0,
+        shipAddress: shipAdd,
+        items: modifiedList
+      }
     })
   }
 
@@ -884,7 +887,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     if (cycleButtonState.value == 1) {
       currentPctAmount =
         formik.values.currentDiscount < 0 || formik.values.currentDiscount > 100 ? 0 : formik.values.currentDiscount
-      currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(subtotal)) / 100
+      currentTdAmount = ((currentPctAmount) * (subtotal)) / 100
       currentDiscountAmount = currentPctAmount
 
       formik.setFieldValue('tdAmount', currentTdAmount)
@@ -895,7 +898,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         formik.values.currentDiscount < 0 || subtotal < formik.values.currentDiscount
           ? 0
           : formik.values.currentDiscount
-      currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(subtotal)) * 100
+      currentPctAmount = ((currentTdAmount) / (subtotal)) * 100
       currentDiscountAmount = currentTdAmount
       formik.setFieldValue('tdPct', currentPctAmount)
       formik.setFieldValue('tdAmount', currentTdAmount)
@@ -911,7 +914,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   }
 
   function checkMinMaxAmount(amount, type) {
-    let currentAmount = parseFloat(amount) || 0
+    let currentAmount = amount || 0
 
     if (type === MDTYPE_PCT) {
       if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
@@ -929,18 +932,18 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
-      basePrice: parseFloat(newRow?.basePrice) || 0,
-      volume: parseFloat(newRow?.volume) || 0,
-      weight: parseFloat(newRow?.weight),
-      unitPrice: parseFloat(newRow?.unitPrice || 0),
-      upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-      qty: parseFloat(newRow?.qty),
-      extendedPrice: parseFloat(newRow?.extendedPrice),
+      basePrice: newRow?.basePrice || 0,
+      volume: newRow?.volume || 0,
+      weight: newRow?.weight,
+      unitPrice: newRow?.unitPrice || 0,
+      upo: newRow?.upo ? newRow?.upo : 0,
+      qty: newRow?.qty,
+      extendedPrice: newRow?.extendedPrice,
       mdAmount,
       mdType: newRow?.mdType,
       baseLaborPrice: 0,
       totalWeightPerG: 0,
-      mdValue: parseFloat(newRow?.mdValue),
+      mdValue: newRow?.mdValue,
       tdPct: formik?.values?.tdPct || 0,
       dirtyField: dirtyField
     })
@@ -950,9 +953,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       basePrice: itemPriceRow?.basePrice,
       qty: itemPriceRow?.qty,
       weight: itemPriceRow?.weight,
-      extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
+      extendedPrice: roundTo(itemPriceRow?.extendedPrice, 2),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(itemPriceRow?.vatAmount),
+      vatAmount: roundTo(itemPriceRow?.vatAmount, 2),
       tdPct: formik?.values?.tdPct,
       taxDetails: formik.values.isVattable ? newRow.taxDetails : null
     })
@@ -960,17 +963,17 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
-      volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
-      weight: parseFloat(itemPriceRow?.weight).toFixed(2),
-      basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
-      unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
-      extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
-      upo: parseFloat(itemPriceRow?.upo).toFixed(2),
+      qty: itemPriceRow?.qty ? roundTo(itemPriceRow?.qty, 2) : 0,
+      volume: itemPriceRow?.volume ? roundTo(itemPriceRow.volume, 2) : 0,
+      weight: roundTo(itemPriceRow?.weight, 2),
+      basePrice: itemPriceRow?.basePrice ? roundTo(itemPriceRow.basePrice, 5) : 0,
+      unitPrice: itemPriceRow?.unitPrice ? roundTo(itemPriceRow.unitPrice, 3) : 0,
+      extendedPrice: itemPriceRow?.extendedPrice ? roundTo(itemPriceRow.extendedPrice, 2) : 0,
+      upo: roundTo(itemPriceRow?.upo, 2),
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
-      mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
-      vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0
+      mdAmount: itemPriceRow?.mdAmount ? roundTo(itemPriceRow.mdAmount, 2) : 0,
+      vatAmount: vatCalcRow?.vatAmount ? roundTo(vatCalcRow.vatAmount, 2) : 0
     }
 
     return iconClicked ? { changes: commonData } : commonData
@@ -980,18 +983,18 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     ?.filter(item => item.itemId !== undefined)
     .map(item => ({
       ...item,
-      basePrice: parseFloat(item.basePrice) || 0,
-      unitPrice: parseFloat(item.unitPrice) || 0,
-      upo: parseFloat(item.upo) || 0,
-      vatAmount: parseFloat(item.vatAmount) || 0,
-      weight: parseFloat(item.weight) || 0,
-      volume: parseFloat(item.volume) || 0,
-      extendedPrice: parseFloat(item.extendedPrice) || 0
+      basePrice: item.basePrice || 0,
+      unitPrice: item.unitPrice || 0,
+      upo: item.upo || 0,
+      vatAmount: item.vatAmount || 0,
+      weight: item.weight || 0,
+      volume: item.volume || 0,
+      extendedPrice: item.extendedPrice || 0
     }))
 
   const subTotal = getSubtotal(parsedItemsArray)
 
-  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.miscAmount)
+  const miscValue = formik.values.miscAmount == 0 ? 0 : formik.values.miscAmount
 
   const _footerSummary = getFooterTotals(parsedItemsArray, {
     totalQty: 0,
@@ -999,8 +1002,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     totalVolume: 0,
     totalUpo: 0,
     sumVat: 0,
-    sumExtended: parseFloat(subTotal),
-    tdAmount: parseFloat(formik.values.tdAmount),
+    sumExtended: subTotal,
+    tdAmount: formik.values.tdAmount,
     net: 0,
     miscAmount: miscValue
   })
@@ -1014,18 +1017,30 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
-      tdAmount: parseFloat(currentDiscount),
+      tdAmount: currentDiscount,
       tdPlain: typeChange == 1,
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
       currentDiscount: currentDiscount,
       hiddenTdPct: tdPct,
-      hiddenTdAmount: parseFloat(tdAmount),
+      hiddenTdAmount: tdAmount,
       typeChange: typeChange
     })
 
-    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
+    console.log({
+      tdAmount: currentDiscount,
+      tdPlain: typeChange == 1,
+      tdPct: typeChange == 2,
+      tdType: typeChange,
+      subtotal: subtotal,
+      currentDiscount: currentDiscount,
+      hiddenTdPct: tdPct,
+      hiddenTdAmount: tdAmount,
+      typeChange: typeChange
+    })
+
+    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? roundTo(_discountObj?.hiddenTdAmount, 2) : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct)
@@ -1035,16 +1050,16 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
         priceType: item?.priceType,
-        basePrice: parseFloat(item?.basePrice),
+        basePrice: item?.basePrice,
         qty: item?.qty,
         weight: item?.weight,
-        extendedPrice: parseFloat(item?.extendedPrice),
-        baseLaborPrice: parseFloat(item?.baseLaborPrice),
-        vatAmount: parseFloat(item?.vatAmount),
+        extendedPrice: item?.extendedPrice,
+        baseLaborPrice: item?.baseLaborPrice,
+        vatAmount: item?.vatAmount,
         tdPct: tdPct,
         taxDetails: formik.values.isVattable ? item.taxDetails : null
       })
-      formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
+      formik.setFieldValue(`items[${index}].vatAmount`, roundTo(vatCalcRow?.vatAmount, 2))
     })
   }
 
@@ -1054,7 +1069,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   }
 
   function ShowMdValueErrorMessage(clientMaxDiscount, rowData, update) {
-    if (parseFloat(rowData.mdAmount) > clientMaxDiscount) {
+    if (rowData.mdAmount > clientMaxDiscount) {
       formik.setFieldValue('mdAmount', clientMaxDiscount)
       rowData.mdAmount = clientMaxDiscount
       const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
@@ -1187,7 +1202,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     })
   }
 
-  async function onChangeDtId(dtId) {
+  async function onChangeDT(dtId) {
     if (!dtId) return
 
     const res = await getRequest({
@@ -1211,22 +1226,22 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   }, [address])
 
   useEffect(() => {
-    formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
-    formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(2))
-    formik.setFieldValue('weight', parseFloat(totalWeight).toFixed(2))
-    formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
-    formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
+    formik.setFieldValue('qty', Number(totalQty))
+    formik.setFieldValue('amount', Number(amount))
+    formik.setFieldValue('volume', Number(totalVolume))
+    formik.setFieldValue('weight', Number(totalWeight))
+    formik.setFieldValue('subtotal', Number(subtotal))
+    formik.setFieldValue('vatAmount', Number(vatAmount))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
     if (reCal) {
-      let currentTdAmount = (parseFloat(formik.values.tdPct) * parseFloat(subtotal)) / 100
+      let currentTdAmount = (formik.values.tdPct * subtotal) / 100
       recalcGridVat(formik.values.tdType, formik.values.tdPct, currentTdAmount, formik.values.currentDiscount)
     }
   }, [subtotal])
   useEffect(() => {
-    if (formik.values?.dtId && !recordId) onChangeDtId(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {
@@ -1279,6 +1294,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.SalesQuotation}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -1618,7 +1634,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={initialValues?.items?.[0]}
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
@@ -1710,7 +1726,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     handleButtonClick={handleDiscountButtonClick}
                     ShowDiscountIcons={true}
                     onChange={e => {
-                      let discount = Number(e.target.value.replace(/,/g, ''))
+                      let discount = e.target.value
                       if (formik.values.tdType == 1) {
                         if (discount < 0 || subtotal < discount) {
                           discount = 0
@@ -1724,16 +1740,16 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     }}
                     onBlur={async e => {
                       setReCal(true)
-                      let discountAmount = Number(e.target.value.replace(/,/g, ''))
-                      let tdPct = Number(e.target.value.replace(/,/g, ''))
-                      let tdAmount = Number(e.target.value.replace(/,/g, ''))
+                      let discountAmount = e.target.value
+                      let tdPct = e.target.value
+                      let tdAmount = e.target.value
                       if (formik.values.tdType == 1) {
-                        tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
+                        tdPct = (discountAmount / subtotal) * 100
                         formik.setFieldValue('tdPct', tdPct)
                       }
 
                       if (formik.values.tdType == 2) {
-                        tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
+                        tdAmount = (discountAmount * subtotal) / 100
                         formik.setFieldValue('tdAmount', tdAmount)
                       }
 

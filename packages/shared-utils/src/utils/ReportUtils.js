@@ -37,7 +37,9 @@ export const generateReport = async ({
     format: selectedFormat,
     reportClass: selectedReport.reportClass,
     functionId: functionId,
-    paramsDict: paramsDict || ''
+    paramsDict: paramsDict || '',
+    reportEngine: selectedReport.reportEngine || 1,
+    schemaFile: selectedReport.schemaFile || '',
   }
 
   const response = await postRequest({

@@ -10,11 +10,12 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { formik } = useForm({
     validateOnChange: true,
     maxAccess,
@@ -65,7 +66,7 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
       extension: FinancialRepository.TaxDetailPack.set2,
       record: JSON.stringify(data)
     }).then(res => {
-      toast.success('Record Edited Successfully')
+      toast.success(platformLabels.Edited)
       setStore(prevStore => ({
         ...prevStore,
         TaxDetail: items

@@ -6,11 +6,15 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
+import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 
 const AccountBalanceForm = ({ labels, maxAccess, store }) => {
   const { getRequest } = useContext(RequestsContext)
-  const { recordId } = store
-  var editMode = !!recordId 
+  const { recordId: accountId } = store
+  const { stack } = useWindow()
+  const editMode = !!accountId
 
   const columns = [
     {
@@ -46,19 +50,38 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
     datasetId: ResourceIds.Accounts
   })
 
+  const actions = [
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: { 
+            accountId,
+            date: new Date()
+          }
+        })
+      },
+      disabled: !accountId
+    }
+  ]
+
   return (
-    <VertLayout>
-      <Grow>
-        <Table
-          name='accountBalance'
-          columns={columns}
-          gridData={data}
-          rowId={['currencyId']}
-          maxAccess={maxAccess}
-          pagination={false}
-        />
-      </Grow>
-    </VertLayout>
+    <Form actions={actions} maxAccess={maxAccess} isParentWindow={false} isSaved={false} fullSize>
+      <VertLayout>
+        <Grow>
+          <Table
+            name='accountBalance'
+            columns={columns}
+            gridData={data}
+            rowId={['currencyId']}
+            maxAccess={maxAccess}
+            pagination={false}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

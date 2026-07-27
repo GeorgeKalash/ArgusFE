@@ -166,7 +166,6 @@ const FSAccountDetails = ({ labels, columnVisibility, columnLabels, breakDowns, 
                         label={item.label}
                         value={item.value}
                         readOnly
-                        align='right'
                         />
                     </Grid>
                     ))}

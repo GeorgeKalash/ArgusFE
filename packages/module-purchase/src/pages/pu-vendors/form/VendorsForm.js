@@ -28,9 +28,11 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
     endpointId: PurchaseRepository.Vendor.page
   })
 
-  const { maxAccess, changeDT } = useFieldBehavior({
-    access: access,
-    editMode: !!recordId
+  const { maxAccess, onFieldChange, fieldBehavior } = useFieldBehavior({
+    access,
+    fieldName: 'reference',
+    editMode: !!recordId,
+    enableClearing: !recordId
   })
 
   const { formik } = useForm({
@@ -50,6 +52,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
       isInactive: false,
       isTaxable: false
     },
+    behavior: { fieldBehavior },
     maxAccess,
     validateOnChange: true,
     validate: values => {
@@ -71,11 +74,6 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
       })
 
       if (!obj.recordId) {
-        setStore({
-          recordId: response.recordId,
-          name: obj.name
-        })
-        formik.setFieldValue('recordId', response.recordId)
         getData(response.recordId)
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
@@ -139,9 +137,9 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('groupId', newValue ? newValue.recordId : '')
-                  changeDT(newValue?.nraId)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('groupId', newValue?.recordId || null)
+                  onFieldChange(newValue?.nraId)
                 }}
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                 maxAccess={maxAccess}
@@ -154,6 +152,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 value={formik.values.reference}
                 onChange={formik.handleChange}
                 maxLength='10'
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}

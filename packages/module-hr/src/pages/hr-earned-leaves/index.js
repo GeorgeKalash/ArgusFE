@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
+import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import EarnedLeavesForm from './Forms/EarnedLeavesForm'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -24,7 +24,7 @@ const EarnedLeaves = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: LoanManagementRepository.EarnedLeave.page,
+      extension: LeaveManagementRepository.EarnedLeave.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -40,7 +40,7 @@ const EarnedLeaves = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: LoanManagementRepository.EarnedLeave.page,
+    endpointId: LeaveManagementRepository.EarnedLeave.page,
     datasetId: ResourceIds.EarnedLeave
   })
 
@@ -62,8 +62,8 @@ const EarnedLeaves = () => {
       type: 'date'
     },
     {
-      field: 'lsName',
-      headerName: labels.leaveSchedule,
+      field: 'ltName',
+      headerName: labels.leaveType,
       flex: 1
     },
     {
@@ -105,7 +105,7 @@ const EarnedLeaves = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: LoanManagementRepository.EarnedLeave.del,
+      extension: LeaveManagementRepository.EarnedLeave.del,
       record: JSON.stringify(obj)
     })
     invalidate()

@@ -52,6 +52,7 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function RetailTransactionsForm({
   labels,
@@ -202,7 +203,7 @@ export default function RetailTransactionsForm({
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -415,7 +416,7 @@ export default function RetailTransactionsForm({
   }
 
   function checkMinMaxAmount(amount, type) {
-    let currentAmount = parseFloat(amount) || 0
+    let currentAmount = amount || 0
 
     if (type === MDTYPE_PCT) {
       if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
@@ -567,9 +568,9 @@ export default function RetailTransactionsForm({
         return {
           ...item,
           id: index + 1,
-          qty: parseFloat(item.qty).toFixed(2),
-          unitPrice: parseFloat(item.unitPrice).toFixed(2),
-          extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+          qty: roundTo(item.qty),
+          unitPrice: roundTo(item.unitPrice),
+          extendedPrice: roundTo(item.extendedPrice),
           priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
           totPricePerG: getTotPricePerG(retailTrxHeader, item, DIRTYFIELD_BASE_PRICE),
           taxDetails: itemTaxDetails
@@ -582,27 +583,57 @@ export default function RetailTransactionsForm({
         return {
           ...item,
           id: index + 1,
-          amount: parseFloat(item.amount).toFixed(2),
+          amount: roundTo(item.amount),
           ccRef: item?.ccRef || ''
         }
       })
     )
     const countryId = systemDefaults?.list?.find(({ key }) => key === 'countryId')
 
-    formik.setValues({
-      recordId: retailTrxHeader.recordId || null,
-      header: {
-        ...retailTrxHeader,
-        countryId: retailTrxHeader?.countryId || countryId?.value,
-        name: addressObj?.record?.name || retailTrxHeader?.clientName,
-        street1: addressObj?.record?.street1,
-        street2: addressObj?.record?.street2,
-        phone: addressObj?.record?.phone,
-        cityId: addressObj?.record?.cityId,
-        KGmetalPrice: retailTrxHeader?.metalPrice ? retailTrxHeader?.metalPrice * 1000 : 0
-      },
-      items: modifiedItemsList,
-      cash: modifiedCashList
+    const parsedModifiedItems = modifiedItemsList.map(item => ({
+      ...item,
+      basePrice: item.basePrice || 0,
+      unitPrice: item.unitPrice || 0,
+      vatAmount: item.vatAmount || 0,
+      weight: item.weight || 0,
+      volume: item.volume || 0,
+      extendedPrice: item.extendedPrice || 0
+    }))
+
+    const loadedFooter = getFooterTotals(parsedModifiedItems, {
+      totalQty: 0,
+      totalWeight: 0,
+      totalVolume: 0,
+      totalUpo: 0,
+      sumVat: 0,
+      sumExtended: getSubtotal(parsedModifiedItems),
+      tdAmount: 0,
+      net: 0,
+      miscAmount: 0
+    })
+
+    formik.resetForm({
+      values: {
+        ...initialValues,
+        recordId: retailTrxHeader.recordId || null,
+        disableSKULookup: false,
+        header: {
+          ...initialValues.header,
+          ...retailTrxHeader,
+          countryId: retailTrxHeader?.countryId || countryId?.value,
+          name: addressObj?.record?.name || retailTrxHeader?.clientName || '',
+          street1: addressObj?.record?.street1 || '',
+          street2: addressObj?.record?.street2 || '',
+          phone: addressObj?.record?.phone || '',
+          cityId: addressObj?.record?.cityId || '',
+          city: addressObj?.record?.city || '',
+          KGmetalPrice: retailTrxHeader?.metalPrice ? retailTrxHeader?.metalPrice * 1000 : 0,
+          qty: roundTo(loadedFooter?.totalQty) || 0,
+          weight: roundTo(loadedFooter?.totalWeight) || 0
+        },
+        items: parsedModifiedItems,
+        cash: modifiedCashList.length ? modifiedCashList : [{ id: 1 }]
+      }
     })
 
     setAddress({
@@ -652,18 +683,18 @@ export default function RetailTransactionsForm({
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
-      basePrice: parseFloat(newRow?.basePrice || 0),
-      volume: parseFloat(newRow?.volume) || 0,
-      weight: parseFloat(newRow?.weight),
-      unitPrice: parseFloat(newRow?.unitPrice || 0),
+      basePrice: newRow?.basePrice || 0,
+      volume: newRow?.volume || 0,
+      weight: newRow?.weight,
+      unitPrice: newRow?.unitPrice || 0,
       upo: 0,
-      qty: parseFloat(newRow?.qty) || 0,
-      extendedPrice: parseFloat(newRow?.extendedPrice),
+      qty: newRow?.qty || 0,
+      extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,
       mdType: newRow?.mdType || 1,
-      baseLaborPrice: parseFloat(newRow?.baseLaborPrice) || 0,
+      baseLaborPrice: newRow?.baseLaborPrice || 0,
       totalWeightPerG: newRow?.totPricePerG,
-      mdValue: parseFloat(newRow?.mdValue),
+      mdValue: newRow?.mdValue,
       tdPct: 0,
       dirtyField: dirtyField
     })
@@ -671,11 +702,11 @@ export default function RetailTransactionsForm({
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
-      qty: parseFloat(itemPriceRow?.qty),
-      weight: parseFloat(itemPriceRow?.weight),
-      extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-      baseLaborPrice: parseFloat(itemPriceRow?.baseLaborPrice),
-      vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
+      qty: itemPriceRow?.qty,
+      weight: itemPriceRow?.weight,
+      extendedPrice: itemPriceRow?.extendedPrice,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice,
+      vatAmount: itemPriceRow?.vatAmount || 0,
       tdPct: 0,
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
     })
@@ -683,18 +714,18 @@ export default function RetailTransactionsForm({
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
-      volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
-      weight: itemPriceRow?.weight ? parseFloat(itemPriceRow.weight).toFixed(2) : 0,
-      basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
-      baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(5) : 0,
-      unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
-      extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
+      qty: itemPriceRow?.qty ? roundTo(itemPriceRow?.qty) : 0,
+      volume: itemPriceRow?.volume ? roundTo(itemPriceRow.volume) : 0,
+      weight: itemPriceRow?.weight ? roundTo(itemPriceRow.weight) : 0,
+      basePrice: itemPriceRow?.basePrice ? roundTo(itemPriceRow.basePrice, 5) : 0,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice ? roundTo(itemPriceRow.baseLaborPrice, 5) : 0,
+      unitPrice: itemPriceRow?.unitPrice ? roundTo(itemPriceRow.unitPrice, 3) : 0,
+      extendedPrice: itemPriceRow?.extendedPrice ? roundTo(itemPriceRow.extendedPrice) : 0,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
-      totPricePerG: itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0,
-      mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
-      vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0,
+      totPricePerG: itemPriceRow?.totalWeightPerG ? roundTo(itemPriceRow.totalWeightPerG) : 0,
+      mdAmount: itemPriceRow?.mdAmount ? roundTo(itemPriceRow.mdAmount) : 0,
+      vatAmount: vatCalcRow?.vatAmount ? roundTo(vatCalcRow.vatAmount) : 0,
       taxDetails: newRow.taxDetails
     }
 
@@ -707,12 +738,12 @@ export default function RetailTransactionsForm({
     ?.filter(item => item.itemId !== undefined)
     .map(item => ({
       ...item,
-      basePrice: parseFloat(item.basePrice) || 0,
-      unitPrice: parseFloat(item.unitPrice) || 0,
-      vatAmount: parseFloat(item.vatAmount) || 0,
-      weight: parseFloat(item.weight) || 0,
-      volume: parseFloat(item.volume) || 0,
-      extendedPrice: parseFloat(item.extendedPrice) || 0
+      basePrice: item.basePrice || 0,
+      unitPrice: item.unitPrice || 0,
+      vatAmount: item.vatAmount || 0,
+      weight: item.weight || 0,
+      volume: item.volume || 0,
+      extendedPrice: item.extendedPrice || 0
     }))
 
   const subTotal = reCal ? getSubtotal(parsedItemsArray) : formik.values?.header?.subtotal || 0
@@ -723,27 +754,27 @@ export default function RetailTransactionsForm({
     totalVolume: 0,
     totalUpo: 0,
     sumVat: 0,
-    sumExtended: parseFloat(subTotal),
+    sumExtended: subTotal,
     tdAmount: 0,
     net: 0,
     miscAmount: 0
   })
 
-  const totalQty = _footerSummary?.totalQty?.toFixed(2) || 0
-  const amount = reCal ? _footerSummary?.net?.toFixed(2) : parseFloat(formik.values?.header?.amount).toFixed(2) || 0
-  const totalWeight = _footerSummary?.totalWeight?.toFixed(2)
-  const subtotal = reCal ? subTotal?.toFixed(2) : parseFloat(formik.values?.header?.subtotal).toFixed(2) || 0
+  const totalQty = roundTo(_footerSummary?.totalQty) || 0
+  const amount = reCal ? roundTo(_footerSummary?.net) : roundTo(formik.values?.header?.amount) || 0
+  const totalWeight = roundTo(_footerSummary?.totalWeight)
+  const subtotal = reCal ? roundTo(subTotal) : roundTo(formik.values?.header?.subtotal) || 0
 
   const vatAmount = reCal
-    ? _footerSummary?.sumVat.toFixed(2)
-    : parseFloat(formik.values?.header.vatAmount).toFixed(2) || 0
+    ? roundTo(_footerSummary?.sumVat)
+    : roundTo(formik.values?.header.vatAmount) || 0
 
   const cashAmount = formik.values.cash.reduce((curSum, row) => {
-    const curValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+    const curValue = row.amount || 0
 
     return curSum + curValue
   }, 0)
-  const totBalance = (parseFloat(subtotal) + parseFloat(vatAmount) - parseFloat(cashAmount)).toFixed(2)
+  const totBalance = roundTo(subtotal + vatAmount - cashAmount)
 
   const iconKey = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
@@ -764,7 +795,7 @@ export default function RetailTransactionsForm({
 
         const resetRow = () => {
           update({
-            ...formik.initialValues.items[0],
+            ...initialValues.items[0],
             id: newRow.id
           })
         }
@@ -797,8 +828,11 @@ export default function RetailTransactionsForm({
         popup: row => stack({
           Component: ItemDetails,
           props: {
-            itemId: row?.itemId || null,
-            plId: formik.values?.header?.plId || null
+            values: {
+              itemId: row?.itemId || null,
+              plId: formik.values?.header?.plId || null,
+              siteId: formik.values?.header?.siteId
+            }
           }
         })
       },   
@@ -827,7 +861,7 @@ export default function RetailTransactionsForm({
       async onChange({ row: { update, newRow, oldRow, addRow } }) {
         const resetRow = () => {
           update({
-            ...formik.initialValues.items[0],
+            ...initialValues.items[0],
             id: newRow.id,
             barcode: newRow.barcode
           })
@@ -1038,11 +1072,11 @@ export default function RetailTransactionsForm({
         displayFieldWidth: 3
       },
       async onChange({ row: { update, newRow } }) {
-        if (cashAmount == 0) update({ amount: (Number(amount) || 0).toFixed(2) })
+        if (cashAmount == 0) update({ amount: roundTo(Number(amount) || 0) })
         getFilteredCC(newRow?.cashAccountId)
 
         if (newRow?.type == 1) {
-          update({ bankFees: calculateBankFees(newRow?.ccId, newRow?.amount)?.toFixed(2) || 0 })
+          update({ bankFees: roundTo(calculateBankFees(newRow?.ccId, newRow?.amount)) || 0 })
         } else {
           update({ ccId: null, ccRef: '', bankFees: null })
         }
@@ -1072,7 +1106,7 @@ export default function RetailTransactionsForm({
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow?.ccId) {
-          update({ bankFees: calculateBankFees(newRow?.ccId, newRow?.amount)?.toFixed(2) || 0 })
+          update({ bankFees: roundTo(calculateBankFees(newRow?.ccId, newRow?.amount)) || 0 })
         }
       },
       propsReducer({ row, props }) {
@@ -1290,45 +1324,45 @@ export default function RetailTransactionsForm({
     setReCal(true)
   }
   function calculatePrice(item = {}, taxDetails = null, dirtyField) {
-    const unitPrice = parseFloat(item?.unitPrice || 0)
-    const priceWithVAT = parseFloat(item?.priceWithVAT || 0)
+    const unitPrice = (item?.unitPrice || 0)
+    const priceWithVAT = (item?.priceWithVAT || 0)
 
     if (!taxDetails) {
       const price = priceWithVAT ? Math.abs(priceWithVAT - unitPrice) : unitPrice
 
-      return price.toFixed(2)
+      return roundTo(price)
     }
 
     const { amount = 0, taxBase } = taxDetails
-    if (dirtyField == DIRTYFIELD_UNIT_PRICE) return (unitPrice * (1 + parseFloat(amount) / 100)).toFixed(2)
+    if (dirtyField == DIRTYFIELD_UNIT_PRICE) return roundTo(unitPrice * (1 + (amount) / 100))
     else {
-      if (taxBase == 1) return (priceWithVAT / (1 + parseFloat(amount) / 100)).toFixed(2)
-      if (taxBase == 2) return priceWithVAT.toFixed(2)
+      if (taxBase == 1) return roundTo(priceWithVAT / (1 + (amount) / 100))
+      if (taxBase == 2) return roundTo(priceWithVAT)
 
-      return (priceWithVAT - unitPrice).toFixed(2)
+      return roundTo(priceWithVAT - unitPrice)
     }
   }
 
   function getTotPricePerG(header, item, dirtyField) {
     const itemPriceRow = getIPR({
       priceType: item?.priceType,
-      basePrice: parseFloat(item?.basePrice || 0),
-      volume: parseFloat(item?.volume) || 0,
-      weight: parseFloat(item?.weight),
-      unitPrice: parseFloat(item?.unitPrice || 0),
+      basePrice: item?.basePrice || 0,
+      volume: item?.volume || 0,
+      weight: item?.weight,
+      unitPrice: item?.unitPrice || 0,
       upo: 0,
-      qty: parseFloat(item?.qty) || 0,
-      extendedPrice: parseFloat(item?.extendedPrice),
+      qty: item?.qty || 0,
+      extendedPrice: item?.extendedPrice,
       mdAmount: header?.mdAmount || 0,
       mdType: item?.mdType || 1,
       baseLaborPrice: item?.baseLaborPrice || 0,
       totalWeightPerG: item?.totPricePerG,
-      mdValue: parseFloat(item?.mdValue),
+      mdValue: item?.mdValue,
       tdPct: 0,
       dirtyField
     })
 
-    return itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0
+    return itemPriceRow?.totalWeightPerG ? roundTo(itemPriceRow.totalWeightPerG) : 0
   }
 
   useEffect(() => {
@@ -1345,12 +1379,12 @@ export default function RetailTransactionsForm({
   }, [formik.values.header.dtId])
 
   useEffect(() => {
-    formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
-    formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
-    formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('header.baseAmount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
-    formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
+    formik.setFieldValue('header.qty', roundTo(totalQty))
+    formik.setFieldValue('header.weight', roundTo(totalWeight))
+    formik.setFieldValue('header.amount', roundTo(amount))
+    formik.setFieldValue('header.baseAmount', roundTo(amount))
+    formik.setFieldValue('header.subtotal', roundTo(subtotal))
+    formik.setFieldValue('header.vatAmount', roundTo(vatAmount))
   }, [totalQty, amount, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
@@ -1391,6 +1425,7 @@ export default function RetailTransactionsForm({
                         : response?.record?.documentTypes?.filter(item => item.activeStatus == 1)
                     }}
                     parameters={`_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     readOnly={isPosted || formik?.values?.items?.some(item => item.sku)}
                     label={labels.documentType}
@@ -1783,7 +1818,7 @@ export default function RetailTransactionsForm({
             }}
             value={formik?.values?.items}
             error={formik.errors.items}
-            initialValues={formik.initialValues.items[0]}
+            initialValues={initialValues.items[0]}
             name='items'
             columns={columns}
             maxAccess={maxAccess}

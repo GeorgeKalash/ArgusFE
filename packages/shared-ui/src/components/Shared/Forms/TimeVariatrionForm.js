@@ -224,25 +224,33 @@ export default function TimeVariatrionForm({ recordId, window }) {
 
   async function refetchForm(recordId) {
     const res = await loadData(recordId)
-    formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res?.record?.date),
-      clockDuration: time(res?.record?.duration)
+
+    const parsedDate = formatDateFromApi(res?.record?.date)
+
+    await getShiftData(
+      res?.record?.employeeId,
+      parsedDate
+    )
+
+    const quickView = await getRequest({
+      extension: EmployeeRepository.QuickView.get,
+      parameters: `_recordId=${res?.record?.employeeId}&_asOfDate=${formatDateMDY(parsedDate)}`
+    })
+
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: parsedDate,
+        clockDuration: time(res?.record?.duration),
+        terminationDate: quickView?.record?.terminationDate || null
+      }
     })
   }
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await loadData(recordId)
-        await getShiftData(res?.record?.employeeId, formatDateFromApi(res?.record?.date))
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res?.record?.date),
-          clockDuration: time(res?.record?.duration)
-        })
-      }
-    })()
+    if (recordId) {
+      refetchForm(recordId)
+    }
   }, [])
 
   return (
@@ -388,7 +396,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
                 required
                 readOnly={isCancelled || isClosed}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('damageLevel', newValue?.key || null)}
+                onChange={(_, newValue) => formik.setFieldValue('damageLevel', Number(newValue?.key) || null)}
                 error={formik.touched.damageLevel && Boolean(formik.errors.damageLevel)}
               />
             </Grid>

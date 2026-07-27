@@ -120,10 +120,8 @@ const IvItems = () => {
       Component: ItemWindow,
       props: {
         labels: _labels,
-        recordId: obj?.recordId,
-        msId: obj?.msId,
-        maxAccess: access,
-        sku: obj?.sku
+        obj,
+        maxAccess: access
       },
       width: 1200,
       height: 670,

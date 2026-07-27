@@ -21,7 +21,7 @@ export default function BatchTransferDTDForm({ labels, maxAccess, recordId, wind
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.DocumentTypeDefault.page
+    endpointId: ManufacturingRepository.DocumentTypeDefault.page2
   })
 
   const { formik } = useForm({

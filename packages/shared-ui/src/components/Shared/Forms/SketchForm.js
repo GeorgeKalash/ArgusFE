@@ -49,7 +49,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
   }
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
       reference: '',
@@ -63,6 +63,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
       designFamilyId: null,
       metalId: null,
       collectionId: null,
+      developerId: null,
       source: null,
       statusName: '',
       notes: '',
@@ -126,10 +127,11 @@ export default function SketchForm({ recordId, invalidate, window }) {
       parameters: `_recordId=${recordId}`
     })
 
-    res.record.date = formatDateFromApi(res?.record?.date)
-
-    formik.setValues({
-      ...res.record
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: formatDateFromApi(res?.record?.date)
+      }
     })
   }
 
@@ -274,7 +276,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     required
                     values={formik.values}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('source', newValue?.key || null)
+                      formik.setFieldValue('source', Number(newValue?.key) || null)
                     }}
                     readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
@@ -453,6 +455,26 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     seqNo={0}
                     recordId={recordId}
                     height={250}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ProductModelingRepository.Developer.qry}
+                    values={formik.values}
+                    name='developerId'
+                    label={labels.developer}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isPosted || isClosed}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('developerId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.developerId && formik.errors.developerId}
                   />
                 </Grid>
                 <Grid item xs={12}>

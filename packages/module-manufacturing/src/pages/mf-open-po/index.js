@@ -1,0 +1,272 @@
+import { useContext, useEffect } from 'react'
+import toast from 'react-hot-toast'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import { useError } from '@argus/shared-providers/src/providers/error'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
+
+const OpenProductionOrder = () => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack: stackError } = useError()
+  const { stack } = useWindow()
+
+  const { labels, access } = useResourceQuery({
+    datasetId: ResourceIds.OpenProductionOrder
+  })
+
+  const { formik } = useForm({
+    maxAccess: access,
+    initialValues: {
+      items: []
+    },
+    onSubmit: async obj => {
+
+      const itemValues = obj?.items
+        .filter(item => item.isChecked)
+        .map(({ id, isChecked, ...item }) => item)
+      if (itemValues?.length < 1) {
+        stackError({
+          message: platformLabels.checkItemsBeforeAppend
+        })
+
+        return
+      }
+
+      await postRequest({
+        extension: ManufacturingRepository.ProductionOrder.generate,
+        record: JSON.stringify({ items: itemValues })
+      })
+
+      toast.success(platformLabels.Generated)
+      getData()
+      
+    }
+  })
+
+  async function getData() {
+    const result = await getRequest({
+      extension: ManufacturingRepository.ProductionOrder.open,
+      parameters: `_params=`
+    })
+
+    const res = result?.list?.map((item, index) => ({
+      ...item,
+      id: index + 1,
+      date: formatDateFromApi(item.date),
+      balance: item.qty - item.producedQty,
+      balancePcs: item.pcs - item.producedPcs,
+    }))
+
+    formik.setFieldValue('items', res)
+  }
+
+   useEffect(() => {
+      ;(async function () {
+        getData()
+      })()
+    }, [])
+
+  const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)
+
+  const columns = [
+    {
+      component: 'checkbox',
+      name: 'isChecked',
+      flex: 0.3,
+      checkAll: {
+        value: isCheckedAll,
+        visible: true,
+        onChange({ checked }) {
+          const items = formik.values.items.map(({ isChecked, ...item }) => ({
+            ...item,
+            isChecked: checked,
+            producedNowQty: checked ? item.balance : 0,
+            producedNowPcs: checked ? item.balancePcs : 0,
+            jobCount: 1
+          }))
+
+          formik.setFieldValue('items', items)
+        }
+      },
+
+      async onChange({ row: { update, newRow } }) {
+        update({
+          producedNowQty: newRow.isChecked ? newRow.balance : 0,
+          producedNowPcs: newRow.isChecked ? newRow.balancePcs : 0,
+          jobCount: 1
+        })
+      }
+    },
+    {
+      component: 'image',
+      name: 'pictureUrl',
+      label: labels.image,
+      width: 30,
+      onClick: ({ value, row }) => {
+        stack({
+          Component: ImageViewer,
+          props: {
+            imageUrl: value
+          },
+          width: 800,
+          height: 600,
+          title: row.sku
+        })
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.poRef,
+      name: 'poRef',
+      props: { readOnly: true }
+    },
+    {
+      component: 'textfield',
+      label: labels.sku,
+      name: 'sku',
+      props: { readOnly: true }
+    },
+    {
+      component: 'textfield',
+      label: labels.name,
+      name: 'itemName',
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      label: labels.itemWeight,
+      name: 'itemWeight',
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      label: labels.qty,
+      name: 'qty',
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      label: labels.pcs,
+      name: 'pcs',
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      label: labels.balancePcs,
+      name: 'balancePcs',
+      props: { readOnly: true, decimalScale: 2 }
+    },
+    
+    {
+      component: 'numberfield',
+      label: labels.produced,
+      name: 'producedQty',
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      label: labels.balance,
+      name: 'balance',
+      props: { readOnly: true, decimalScale: 2 }
+    },
+    {
+      component: 'numberfield',
+      label: labels.jobCount,
+      name: 'jobCount',
+      updateOn: 'blur',
+      defaultValue: 1,
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.isChecked }
+      },
+      async onChange({ row: { update, newRow } }) {
+       update({ jobCount: Math.max(newRow.jobCount, 1) })
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.genPcs,
+      name: 'producedNowPcs',
+      updateOn: 'blur',
+      defaultValue: 0,
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.isChecked }
+      },
+      async onChange({ row: { update, newRow } }) {
+        const { producedNowPcs, balancePcs } = newRow
+        let value = producedNowPcs
+        const maxValue = balancePcs
+
+        if (value > maxValue) 
+        value = maxValue
+
+        update({ producedNowPcs: value || 0 })
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.genQty,
+      name: 'producedNowQty',
+      updateOn: 'blur',
+      defaultValue: 0,
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.isChecked }
+      },
+      async onChange({ row: { update, newRow } }) {
+        const { producedNowQty, balance } = newRow
+        let value = producedNowQty
+        const maxValue = balance
+
+        if (value > maxValue) 
+        value = maxValue
+
+        update({ producedNowQty: value || 0 })
+      }
+    }
+  ]
+
+  const actions = [
+    {
+      key: 'generate',
+      condition: true,
+      onClick: () => formik.handleSubmit()
+    }
+  ]
+
+  return (
+    <Form
+      actions={actions}
+      onSave={formik.handleSubmit}
+      isSaved={false}
+      maxAccess={access}
+      fullSize
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={columns}
+            name='items'
+            allowDelete={false}
+            allowAddNewLine={false}
+            maxAccess={access}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
+  )
+}
+
+export default OpenProductionOrder

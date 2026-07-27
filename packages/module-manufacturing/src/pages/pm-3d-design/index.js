@@ -109,7 +109,7 @@ const ThreeDDesign = () => {
       flex: 1
     },
     {
-      field: 'castingName',
+      field: 'castingTypeName',
       headerName: labels.castingType,
       flex: 1
     },

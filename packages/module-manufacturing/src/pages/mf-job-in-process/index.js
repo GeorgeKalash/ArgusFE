@@ -13,14 +13,13 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useEffect } from 'react'
-import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-import JobOrderWindow from '../mf-job-orders/window/JobOrderWindow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import JobOrderWindow from '@argus/shared-ui/src/components/Shared/Forms/JobOrderWindow'
 
 const JobInProcess = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -44,13 +43,9 @@ const JobInProcess = () => {
     datasetId: ResourceIds.JobsInProcess
   })
 
-  const { labels: _labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.MFJobOrders
-  })
-
   const { formik } = useForm({
     initialValues: { workCenterId: null, workCenterName: '', workCenterRef: '', lineId: null },
-    maxAccess,
+    maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
       workCenterId: yup.number().required()
@@ -141,16 +136,12 @@ const JobInProcess = () => {
     stack({
       Component: JobOrderWindow,
       props: {
-        labels: _labels,
-        access: maxAccess,
         jobReference: reference,
         recordId,
         lockRecord,
         invalidate
       },
-      width: 1150,
-      height: 700,
-      title: _labels.jobOrder
+      nextToTitle: reference
     })
   }
 
@@ -236,7 +227,7 @@ const JobInProcess = () => {
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
-              maxAccess={maxAccess}
+              maxAccess={access}
               onChange={(_, newValue) => {
                 formik.setFieldValue('lineId', newValue?.recordId || null)
               }}

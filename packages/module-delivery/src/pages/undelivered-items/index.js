@@ -79,7 +79,7 @@ const UndeliveredItems = () => {
 
       if (itemValues?.length < 1) {
         stackError({
-          message: labels.checkItemsBeforeAppend
+          message: platformLabels.checkItemsBeforeAppend
         })
 
         return
@@ -271,6 +271,7 @@ const UndeliveredItems = () => {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${SystemFunction.DeliveryOrder}&_startAt=${0}&_pageSize=${1000}`}
+                    filter={ item => item.activeStatus === 1 }
                     name='dtId'
                     label={labels.documentType}
                     valueField='recordId'
