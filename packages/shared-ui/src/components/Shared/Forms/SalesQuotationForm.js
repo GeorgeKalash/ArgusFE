@@ -52,8 +52,10 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
+export default function SalesQuotationForm({ recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -66,6 +68,13 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
   const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.SalesQuotations,
+    editMode: !!recordId
+  })
+  
+  useSetWindow({ title: labels.SalesQuotations, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesQuotation,
@@ -1799,3 +1808,5 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     </FormShell>
   )
 }
+SalesQuotationForm.width = 1300
+SalesQuotationForm.height = 730
