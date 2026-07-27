@@ -1,0 +1,110 @@
+{
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/DesignerForm": {
+    "id": 70243,
+    "files": [
+      "static/chunks/70243.9897d9b909ce4e7a.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/Forms/SketchForm": {
+    "id": 44129,
+    "files": [
+      "static/chunks/44129.261dcfd6f0570ab1.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm": {
+    "id": 38096,
+    "files": [
+      "static/chunks/2494-2b320c0c1402073c.js",
+      "static/chunks/38096-9b3ec8d398703b29.js",
+      "static/chunks/43727.9bd2e33f194550d9.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/Forms/ThreeDPrintForm": {
+    "id": 53164,
+    "files": [
+      "static/chunks/2494-2b320c0c1402073c.js",
+      "static/chunks/53164-47651e080a1d37b6.js",
+      "static/chunks/9303.a112cf0bb0bf4cb9.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/CasePleads": {
+    "id": 17569,
+    "files": [
+      "static/chunks/17569.eae42c28619ac0da.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/CompanyRightToWork": {
+    "id": 48583,
+    "files": [
+      "static/chunks/48583.e7749deebdaaa09e.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/EmployeeRightToWork": {
+    "id": 93636,
+    "files": [
+      "static/chunks/93636.5332eec813600f5e.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/EmployeesBirthday": {
+    "id": 35496,
+    "files": [
+      "static/chunks/35496.daaab820ecac11f8.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/EmploymentReview": {
+    "id": 53096,
+    "files": [
+      "static/chunks/53096.95cee205fc379ff9.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/LeavingSoon": {
+    "id": 72823,
+    "files": [
+      "static/chunks/83589.5f284bd0a0162383.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/ProbationEnd": {
+    "id": 68651,
+    "files": [
+      "static/chunks/68651.de6f526fc8cbbf4c.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/RetirementAge": {
+    "id": 30256,
+    "files": [
+      "static/chunks/30256.c0a0682087bdc4d1.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/SalaryChange": {
+    "id": 47471,
+    "files": [
+      "static/chunks/47471.b72508e21be9f5cd.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/TermEndDate": {
+    "id": 64347,
+    "files": [
+      "static/chunks/64347.8cb2d2c7bd2dfcbe.js"
+    ]
+  },
+  "../../../packages/shared-domain/src/resources/ResourceRegistry.js -> @argus/shared-ui/src/components/Shared/HrApplets/WorkAnniversary": {
+    "id": 13602,
+    "files": [
+      "static/chunks/13602.48b5f78daeedc0ef.js"
+    ]
+  },
+  "../../../packages/shared-ui/src/components/Shared/TextEditor/index.js -> html-to-draftjs": {
+    "id": 84585,
+    "files": [
+      "static/chunks/d3b25665.d8047151150d56f1.js",
+      "static/chunks/84585.6fba684c053e9ff1.js"
+    ]
+  },
+  "../../../packages/shared-ui/src/components/Shared/TextEditor/index.js -> react-draft-wysiwyg": {
+    "id": 11303,
+    "files": [
+      "static/chunks/d3b25665.d8047151150d56f1.js",
+      "static/chunks/5c025fa9.535b2a2dd575aa16.js"
+    ]
+  }
+}
