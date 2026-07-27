@@ -27,13 +27,12 @@ export default function DepartmentForm({ labels, maxAccess, recordId, window }) 
       name: '',
       reference: ''
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: RepairAndServiceRepository.Department.set,
         record: JSON.stringify(obj)
       })
