@@ -1560,7 +1560,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     value={formik.values?.isVattable}
                     onChange={event => formik.setFieldValue('isVattable', event.target.checked)}
                     label={labels.VAT}
-                    disabled
+                    disabled={formik.values.items[0]?.itemId}
                     maxAccess={maxAccess}
                   />
                 </Grid>
