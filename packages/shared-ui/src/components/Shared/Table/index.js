@@ -873,7 +873,7 @@ const Table = ({
           ...column,
           width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
           flex: column.flex,
-          sort: column.sort || '',
+          sort: column.sort ?? undefined,
           cellRenderer:
             column.type === 'image'
               ? imageRenderer(column)
