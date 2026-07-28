@@ -198,6 +198,9 @@ const OpenProductionOrder = () => {
       name: 'producedNowPcs',
       updateOn: 'blur',
       defaultValue: 0,
+      props: {
+        decimalScale: 2
+      },
       propsReducer({ row, props }) {
         return { ...props, readOnly: !row.isChecked }
       },
@@ -221,6 +224,9 @@ const OpenProductionOrder = () => {
       name: 'producedNowQty',
       updateOn: 'blur',
       defaultValue: 0,
+      props: {
+        decimalScale: 2
+      },
       propsReducer({ row, props }) {
         return { ...props, readOnly: !row.isChecked }
       },
