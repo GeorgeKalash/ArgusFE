@@ -91,18 +91,17 @@ const OpenProductionOrder = () => {
           const items = formik.values.items.map(({ isChecked, ...item }) => ({
             ...item,
             isChecked: checked,
-            producedNowQty: checked ? item.balance : 0,
+            producedNowQty: checked ? item.balancePcs * item.itemWeight : 0,
             producedNowPcs: checked ? item.balancePcs : 0,
             jobCount: 1
           }))
-
           formik.setFieldValue('items', items)
         }
       },
 
       async onChange({ row: { update, newRow } }) {
         update({
-          producedNowQty: newRow.isChecked ? newRow.balance : 0,
+          producedNowQty: newRow.isChecked ? newRow.balancePcs * newRow.itemWeight : 0,
           producedNowPcs: newRow.isChecked ? newRow.balancePcs : 0,
           jobCount: 1
         })
@@ -210,7 +209,10 @@ const OpenProductionOrder = () => {
         if (value > maxValue) 
         value = maxValue
 
-        update({ producedNowPcs: value || 0 })
+        update({ 
+          producedNowPcs: value || 0,
+          producedNowQty: value * newRow.itemWeight
+        })
       }
     },
     {
@@ -230,7 +232,10 @@ const OpenProductionOrder = () => {
         if (value > maxValue) 
         value = maxValue
 
-        update({ producedNowQty: value || 0 })
+        update({ 
+          producedNowQty: value || 0,
+          producedNowPcs: value / newRow.itemWeight
+        })
       }
     }
   ]
