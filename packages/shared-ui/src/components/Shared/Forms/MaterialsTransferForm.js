@@ -287,21 +287,23 @@ export default function MaterialsTransferForm({ recordId, window }) {
       const res = await getDTD(dtId)
 
       formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
-      !recordId && formik.setFieldValue('toSiteId', res?.record?.toSiteId || null)
-      !recordId && formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId || null)
-      !recordId && formik.setFieldValue('carrierId', res?.record?.carrierId)
-      !recordId && formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      formik.setFieldValue('toSiteId', res?.record?.toSiteId || null)
+      formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId || null)
+      formik.setFieldValue('carrierId', res?.record?.carrierId)
+      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
     }
   }
 
   useEffect(() => {
-    if (!formik?.values?.dtId) {
-      formik.setFieldValue('disableSKULookup', false)
+    if (!editMode) {
+      if (!formik?.values?.dtId) {
+        formik.setFieldValue('disableSKULookup', false)
 
-      return
+        return
+      }
+
+      if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
     }
-
-    if (formik.values?.dtId) onChangeDT(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
@@ -1009,6 +1011,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         const res = await getData(recordId)
         const resNotification = await getNotificationData(recordId)
         const plId = await getPlId(res.record.toSiteId)
+        const dtId = await getDTD(res.record.dtId)
         const updatedTransfers = await fillDetails(recordId, true)
 
         formik.resetForm({
@@ -1016,6 +1019,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
             ...res.record,
             plId,
             transfers: updatedTransfers,
+            disableSKULookup: dtId?.record?.disableSKULookup || false,
             notificationGroupId: resNotification?.record?.notificationGroupId,
             serials: serials?.current?.list
           }
