@@ -23,9 +23,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     Unreached: { key: 5, value: 'Unreached' }
   }
 
-  const { formik } = useForm({
-    maxAccess,
-    initialValues: {
+  const initialValues = {
       jobId: recordId,
       jobReference,
       routings: [
@@ -37,13 +35,17 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           workCenterId: '',
           operationId: '',
           status: status.Unreached.key,
-          qty: '',
-          qtyIn: '',
-          pcs: '',
-          pcsIn: ''
+          qty: 0,
+          qtyIn: 0,
+          pcs: 0,
+          pcsIn: 0,
         }
       ]
-    },
+    }
+
+  const { formik } = useForm({
+    maxAccess,
+    initialValues,
     validationSchema: yup.object({
       routings: yup.array().of(
         yup.object({
@@ -330,6 +332,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
             maxAccess={maxAccess}
             allowDelete={!store?.isPosted && !store?.isCancelled}
             deleteHideCondition={{ status: [1, 2, 3, 4, 6] }}
+            initialValues={initialValues?.routings?.[0]}
           />
         </Grow>
       </VertLayout>
