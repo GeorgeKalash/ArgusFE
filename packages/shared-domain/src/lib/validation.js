@@ -16,13 +16,23 @@ function conditionalField(fieldValidators, fieldKey, allowNoLines) {
       if (!isAnyFieldFilled) return true
     }
 
-    const isRequired = fieldValidators[fieldKey](row)
+    const result = fieldValidators[fieldKey](row)
 
-    if (!isRequired) {
-      return true
+    if (typeof result === 'boolean') {
+      if (!result) return true
+
+      return value != null && value !== ''
     }
 
-    return value != null && value !== ''
+    if (result?.invalid) {
+      return false
+    }
+
+    if (result?.required) {
+      return value != null && value !== ''
+    }
+
+    return true
   }
 }
 

@@ -36,29 +36,36 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     ptName: isAnyFilled,
     value: isAnyFilled,
     vtName: isAnyFilled,
-    minPrice: row => (row.value > 0 || row?.plId > 0 || row?.ptName > 0 || row?.currencyId > 0) && row?.minPrice <= row?.value
+    minPrice: row => {
+      return {
+        required: false,
+        invalid: row.minPrice > row.value
+      }
+    }
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
+  const initialValues = {
+    defSaleMUId: store.measurementId || '',
+    pgId: store.priceGroupId || '',
+    returnPolicyId: store.returnPolicy || '',
+    items: [
+      {
+        id: 1,
+        itemId: store.recordId,
+        currencyId: null,
+        plId: null,
+        priceType: 0,
+        muId: 0,
+        valueType: '',
+        value: null,
+        minPrice: null
+      }
+    ]
+  }
+
   const { formik } = useForm({
-    initialValues: {
-      defSaleMUId: store.measurementId || '',
-      pgId: store.priceGroupId || '',
-      returnPolicyId: store.returnPolicy || '',
-      items: [
-        {
-          id: 1,
-          itemId: store.recordId,
-          currencyId: null,
-          plId: null,
-          priceType: 0,
-          muId: 0,
-          valueType: '',
-          value: null,
-          minPrice: null
-        }
-      ]
-    },
+    initialValues,
     conditionSchema: ['items'],
     validationSchema: yup.object({
       items: yup.array().of(schema)
@@ -295,7 +302,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             value={formik.values?.items}
             error={formik.errors?.items}
             name='salesTable'
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={initialValues?.items?.[0]}
             columns={columns}
             maxAccess={maxAccess}
           />
