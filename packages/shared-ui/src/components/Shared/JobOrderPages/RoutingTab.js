@@ -23,9 +23,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     Unreached: { key: 5, value: 'Unreached' }
   }
 
-  const { formik } = useForm({
-    maxAccess,
-    initialValues: {
+  const initialValues = {
       jobId: recordId,
       jobReference,
       routings: [
@@ -37,13 +35,17 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           workCenterId: '',
           operationId: '',
           status: status.Unreached.key,
-          qty: '',
-          qtyIn: '',
-          pcs: '',
-          pcsIn: ''
+          qty: 0,
+          qtyIn: 0,
+          pcs: 0,
+          pcsIn: 0,
         }
       ]
-    },
+    }
+
+  const { formik } = useForm({
+    maxAccess,
+    initialValues,
     validationSchema: yup.object({
       routings: yup.array().of(
         yup.object({
@@ -187,6 +189,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.qtyIn,
       flex: 1,
       name: 'qtyIn',
+      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -196,6 +199,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.pcsIn,
       flex: 1,
       name: 'pcsIn',
+      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -205,6 +209,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.qty,
       flex: 1,
       name: 'qty',
+      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -214,6 +219,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.pcs,
       flex: 1,
       name: 'pcs',
+      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -330,6 +336,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
             maxAccess={maxAccess}
             allowDelete={!store?.isPosted && !store?.isCancelled}
             deleteHideCondition={{ status: [1, 2, 3, 4, 6] }}
+            initialValues={initialValues?.routings?.[0]}
           />
         </Grow>
       </VertLayout>
