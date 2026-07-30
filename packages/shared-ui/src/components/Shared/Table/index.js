@@ -20,7 +20,7 @@ import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-hel
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
@@ -71,7 +71,7 @@ const Table = ({
   const [menuAnchor, setMenuAnchor] = useState(null)
   const [selectedColId, setSelectedColId] = useState(null)
   const [hoveredTable, setHoveredTable] = useState(false)
-
+  const queryClient = useQueryClient()
   const { width } = useWindowDimensions()
 
   const rowHeight =
@@ -828,6 +828,12 @@ const Table = ({
     enabled: !!tableName
   })
 
+  const updateTableSettings = async (columnState) => {
+    await saveToDB(storeName, tableName, columnState)
+
+    queryClient.setQueryData([tableName], columnState)
+  }
+
   const checkboxColumn = useMemo(() => ({
     headerName: '',
     field: 'checked',
@@ -868,11 +874,11 @@ const Table = ({
         const savedColumn = tableSettings?.find(
           item => item.colId === column.field
         )
-
+console.log('savedColumn',savedColumn)
         return {
           ...column,
           width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
-          flex: column.flex,
+          flex: savedColumn?.width ? undefined : column.flex,
           sort: column.sort ?? undefined,
           cellRenderer:
             column.type === 'image'
@@ -1019,29 +1025,11 @@ const Table = ({
   useEffect(() => {
     if (!tableSettings || !gridApiRef.current?.columnApi) return
 
-    const hasFlex = columnDefs.some(col => col.flex)
-
-    const stateToApply = hasFlex
-      ? tableSettings.map(col => ({
-          colId: col.colId,
-          pinned: col.pinned,
-          sort: col.sort,
-          sortIndex: col.sortIndex,
-        }))
-      : tableSettings
 
     gridApiRef.current.columnApi.applyColumnState({
-      state: stateToApply,
+      state: tableSettings,
       applyOrder: true
     })
-
-    if (hasFlex) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          gridApiRef.current?.api?.sizeColumnsToFit?.()
-        })
-      })
-    }
   }, [tableSettings])
 
   const onColumnPinned = params => {
@@ -1049,7 +1037,7 @@ const Table = ({
 
     if (!tableName) return
 
-    saveToDB(storeName, tableName, columnState)
+    updateTableSettings(columnState)
   }
 
   const onGridReady = params => {
@@ -1103,68 +1091,53 @@ const Table = ({
     setTimeout(async () => {
       const columnState = gridApiRef.current?.columnApi?.getColumnState()
       
-      await saveToDB(storeName, tableName, columnState)
+      await updateTableSettings(columnState)
     }, 0)
   }
 
   const onColumnMoved = params => {
     if (params.columnApi && tableName && params.source != 'gridOptionsChanged') {
       const columnState = params.columnApi.getColumnState()
-      saveToDB(storeName, tableName, columnState)
+      updateTableSettings(columnState)
     }
   }
 
-  const onColumnResized = params => {
-    if (tableName && params?.source === 'uiColumnResized') {
-      const hasFlex = columnDefs.some(col => col.flex)
-      
-      if (hasFlex) {
-        const columnState = params.columnApi.getColumnState().map(col => ({
-          colId: col.colId,
-          pinned: col.pinned,
-          sort: col.sort,
-          sortIndex: col.sortIndex,
-        }))
-        saveToDB(storeName, tableName, columnState)
-        return
-      }
-
-      const columnState = params.columnApi.getColumnState()
-      saveToDB(storeName, tableName, columnState)
-    }
+const onColumnResized = params => {
+  if (!tableName || params.source !== 'uiColumnResized' || !params.finished) {
+    return
   }
 
+  const columnState = params.columnApi.getColumnState().map(col => ({
+    ...col,
+    width: params.columnApi.getColumn(col.colId)?.getActualWidth(),
+    flex: null
+  }))
+
+  updateTableSettings(columnState)
+}
   const onSortChanged = params => {
     if (params.columnApi && tableName && params.source == 'uiColumnSorted') {
       const columnState = params.columnApi.getColumnState()
 
-      saveToDB(storeName, tableName, columnState)
+      updateTableSettings(columnState)
     }
   }
+  console.log('tableSettings',tableSettings)
 
   const onReset = async () => {
     await deleteFromDB(storeName, tableName)
 
     gridApiRef.current?.columnApi?.resetColumnState()
 
-    const defaultState = [
-      ...(showCheckboxColumn
-        ? [{
-            colId: checkboxColumn.field,
-            width: checkboxColumn.width,
-            pinned: null,
-            sort: null
-          }]
-        : []),
-      ...props.columns
-          .filter(col => col?.field)
-          .map(col => ({
-            colId: col.field,
-            width: col.width,
-            pinned: null,
-            sort: null
-          }))
-    ]
+   const defaultState = props.columns
+  .filter(col => col.field)
+  .map(col => ({
+    colId: col.field,
+    width: col.width,
+    flex: col.flex,
+    pinned: null,
+    sort: null
+  }))
 
     gridApiRef.current?.columnApi?.applyColumnState({
       state: defaultState,
