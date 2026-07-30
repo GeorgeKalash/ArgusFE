@@ -22,24 +22,20 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
 
-  const isAnyFilled = row =>
-    !!row?.currencyId ||
-    !!row?.plId ||
-    !!row?.ptName ||
-    (row?.value != null && row?.value !== '') ||
-    !!row?.vtName ||
-    (row?.minPrice != null && row?.minPrice !== '')
-
   const conditions = {
-    currencyId: isAnyFilled,
-    plId: isAnyFilled,
-    ptName: isAnyFilled,
-    value: isAnyFilled,
-    vtName: isAnyFilled,
+    currencyId: row => row?.currencyId,
+    plId: row => row?.plId,
+    ptName: row => row?.ptName,
+    value: row => row?.value || row?.value === 0,
+    vtName: row => row?.vtName,
     minPrice: row => {
+      if (row?.minPrice == null || row?.minPrice === '') {
+        return { valid: true, optional: true }
+      }
+
       return {
-        required: false,
-        invalid: row.minPrice > row.value
+        valid: row.minPrice <= row.value,
+        optional: true
       }
     }
   }
