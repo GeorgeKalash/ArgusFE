@@ -39,13 +39,13 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       }
     }
   }
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'salesTable')
 
   const initialValues = {
     defSaleMUId: store.measurementId || '',
     pgId: store.priceGroupId || '',
     returnPolicyId: store.returnPolicy || '',
-    items: [
+    salesTable: [
       {
         id: 1,
         itemId: store.recordId,
@@ -62,10 +62,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
 
   const { formik } = useForm({
     initialValues,
-    conditionSchema: ['items'],
+    conditionSchema: ['salesTable'],
     validationSchema: yup.object({
-      items: yup.array().of(schema)
+      salesTable: yup.array().of(schema)
     }),
+    maxAccess,
     onSubmit: async obj => {
       const submissionData = {
         ...formikInitial,
@@ -85,7 +86,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         record: JSON.stringify({
           itemId: recordId,
           pgId: obj?.pgId || null,
-          items: obj.items
+          items: obj.salesTable
             .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
             .map(item => ({
               ...item,
@@ -107,7 +108,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     if (prices?.length > 0) {
       formik.setValues(prev => ({
         ...prev,
-        items: prices.map((item, index) => ({ ...item, id: index + 1 }))
+        salesTable: prices.map((item, index) => ({ ...item, id: index + 1 }))
       }))
     }
   }, [store?.packB])
@@ -294,11 +295,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
-            value={formik.values?.items}
-            error={formik.errors?.items}
+            onChange={value => formik.setFieldValue('salesTable', value)}
+            value={formik.values?.salesTable}
+            error={formik.errors?.salesTable}
             name='salesTable'
-            initialValues={initialValues?.items?.[0]}
+            initialValues={initialValues?.salesTable?.[0]}
             columns={columns}
             maxAccess={maxAccess}
           />

@@ -20,10 +20,12 @@ function conditionalField(fieldValidators, fieldKey, allowNoLines) {
 
     const result = fieldValidators[fieldKey](row)
 
-    if (typeof result === 'object' && result !== null) {
-      if (!result.valid) return false
-      if (result.optional && (value == null || value === '')) return true
-      return true
+    if (typeof result === 'object' && result !== null && ('optional' in result || 'valid' in result)) {
+      if (result.optional && (value == null || value === '')) {
+        return true
+      }
+
+      return result.valid
     }
 
     return !!result && value != null && value !== ''
@@ -36,7 +38,7 @@ function createConditionalSchema(fieldValidators, allowNoLines, maxAccess, array
   maxAccess?.record?.controls.forEach(({ controlId, accessLevel }) => {
     const [parent, id] = controlId?.split('.')
     if (parent === arrayName)
-      if (accessLevel === 2 && !(id in updatedValidators)) {
+      if (accessLevel === 2 && (id in updatedValidators)) {
         updatedValidators[id] = row => row?.[id] != null
       }
 
