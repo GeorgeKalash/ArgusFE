@@ -715,7 +715,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode
+      disabled: !isClosed || !editMode || !isReleased
     },
   ]
 
