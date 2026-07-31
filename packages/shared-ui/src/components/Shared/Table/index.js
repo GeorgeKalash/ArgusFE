@@ -71,7 +71,6 @@ const Table = ({
   const [menuAnchor, setMenuAnchor] = useState(null)
   const [selectedColId, setSelectedColId] = useState(null)
   const [hoveredTable, setHoveredTable] = useState(false)
-  const queryClient = useQueryClient()
   const { width } = useWindowDimensions()
 
   const rowHeight =
@@ -828,11 +827,6 @@ const Table = ({
     enabled: !!tableName
   })
 
-  const updateTableSettings = async (columnState) => {
-    await saveToDB(storeName, tableName, columnState)
-
-    queryClient.setQueryData([tableName], columnState)
-  }
 
   const checkboxColumn = useMemo(() => ({
     headerName: '',
@@ -871,14 +865,10 @@ const Table = ({
       ...filteredColumns.map(column => {
         const isLinkedColumn = column.type === 'link' || !!column.linkOpen
 
-        const savedColumn = tableSettings?.find(
-          item => item.colId === column.field
-        )
-console.log('savedColumn',savedColumn)
         return {
           ...column,
-          width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
-          flex: savedColumn?.width ? undefined : column.flex,
+          width: (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
+          flex: undefined,
           sort: column.sort ?? undefined,
           cellRenderer:
             column.type === 'image'
@@ -1004,7 +994,6 @@ console.log('savedColumn',savedColumn)
       filteredColumns,
       additionalWidth,
       languageId,
-      tableSettings,
       checkboxColumn,
       showCheckboxColumn
     ])
@@ -1025,19 +1014,14 @@ console.log('savedColumn',savedColumn)
   useEffect(() => {
     if (!tableSettings || !gridApiRef.current?.columnApi) return
 
-
-    gridApiRef.current.columnApi.applyColumnState({
-      state: tableSettings,
-      applyOrder: true
-    })
+    gridApiRef.current.columnApi.applyColumnState({ state: tableSettings, applyOrder: true })
   }, [tableSettings])
 
   const onColumnPinned = params => {
     const columnState = params.columnApi.getColumnState()
-
     if (!tableName) return
 
-    updateTableSettings(columnState)
+    saveToDB(storeName, tableName, columnState)
   }
 
   const onGridReady = params => {
@@ -1090,39 +1074,47 @@ console.log('savedColumn',savedColumn)
     }
     setTimeout(async () => {
       const columnState = gridApiRef.current?.columnApi?.getColumnState()
-      
-      await updateTableSettings(columnState)
+      saveToDB(storeName, tableName, columnState)
     }, 0)
   }
 
   const onColumnMoved = params => {
     if (params.columnApi && tableName && params.source != 'gridOptionsChanged') {
       const columnState = params.columnApi.getColumnState()
-      updateTableSettings(columnState)
+      saveToDB(storeName, tableName, columnState)
     }
   }
 
-const onColumnResized = params => {
-  if (!tableName || params.source !== 'uiColumnResized' || !params.finished) {
-    return
+  const onColumnResized = params => {
+    if (!tableName || params.source !== 'uiColumnResized' || !params.finished) {
+      return
+    }
+
+    const resizedId = params.column.getColId()
+
+    const state = params.columnApi.getColumnState().map(col => {
+        if (col.colId === resizedId) {
+            return {
+                ...col,
+                width: params.columnApi
+                    .getColumn(col.colId)
+                    ?.getActualWidth(),
+                flex: null
+            }
+        }
+
+        return col
+    })
+
+   saveToDB(storeName, tableName, state)
   }
 
-  const columnState = params.columnApi.getColumnState().map(col => ({
-    ...col,
-    width: params.columnApi.getColumn(col.colId)?.getActualWidth(),
-    flex: null
-  }))
-
-  updateTableSettings(columnState)
-}
   const onSortChanged = params => {
     if (params.columnApi && tableName && params.source == 'uiColumnSorted') {
       const columnState = params.columnApi.getColumnState()
-
-      updateTableSettings(columnState)
+      saveToDB(storeName, tableName, columnState)
     }
   }
-  console.log('tableSettings',tableSettings)
 
   const onReset = async () => {
     await deleteFromDB(storeName, tableName)
