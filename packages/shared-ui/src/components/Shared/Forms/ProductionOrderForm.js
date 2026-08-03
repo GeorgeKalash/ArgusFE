@@ -725,6 +725,7 @@ export default function ProductionOrderForm({ recordId, window }) {
             maxAccess={maxAccess}
             initialValues={initialValues?.rows?.[0]}
             columns={columns}
+            enableFilters
             allowAddNewLine={!isPosted && !isClosed}
             allowDelete={!isPosted && !isClosed}
             disabled={isPosted || isClosed}
