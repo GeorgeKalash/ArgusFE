@@ -33,7 +33,7 @@ const GlobalAuthorization = () => {
   const {
     query: { data },
     refetch,
-    labels: labels,
+    labels,
     filterBy,
     clearFilter,
     access,
@@ -61,7 +61,7 @@ const GlobalAuthorization = () => {
     stack({
       Component: ReportLayoutsForm,
       props: {
-        labels: labels,
+        labels,
         maxAccess: access,
         row: { resourceId: row.data.resourceId, resourceName: row.data.resourceName, moduleId: filters.moduleId },
         invalidate,
@@ -77,7 +77,7 @@ const GlobalAuthorization = () => {
     stack({
       Component: CustomLayoutForm,
       props: {
-        labels: labels,
+        labels,
         maxAccess: access,
         row: { resourceId: row.data.resourceId, resourceName: row.data.resourceName },
         invalidate,
