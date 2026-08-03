@@ -36,16 +36,51 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     ptName: isAnyFilled,
     value: isAnyFilled,
     vtName: isAnyFilled,
-    minPrice: row => (row.value > 0 || row?.plId > 0 || row?.ptName > 0 || row?.currencyId > 0) && row?.minPrice <= row?.value
+    minPrice: row => row?.value || row?.value === 0
   }
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'salesTable')
+
+  const isMinPriceRequired =
+    maxAccess?.record?.controls?.some(
+      c => c.controlId === 'salesTable.minPrice' && c.accessLevel === 2
+    ) ?? false
+
+  const salesRowSchema = schema.concat(
+    yup.object({
+      minPrice: yup
+        .number()
+        .nullable()
+        .test(
+          'min-price-validation',
+          'Min price must be less than price',
+          function (minPrice) {
+            const { value: price } = this.parent
+
+            if (isMinPriceRequired && (minPrice == null || minPrice === '')) {
+              return false
+            }
+
+            if (minPrice === '' || minPrice == null || price == null || price === '') {
+              return true
+            }
+
+            if (minPrice >= price) {
+              return false
+            }
+
+            return true
+          }
+        )
+    })
+  )
+
 
   const { formik } = useForm({
     initialValues: {
       defSaleMUId: store.measurementId || '',
       pgId: store.priceGroupId || '',
       returnPolicyId: store.returnPolicy || '',
-      items: [
+      salesTable: [
         {
           id: 1,
           itemId: store.recordId,
@@ -59,9 +94,9 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         }
       ]
     },
-    conditionSchema: ['items'],
+    conditionSchema: ['salesTable'],
     validationSchema: yup.object({
-      items: yup.array().of(schema)
+      salesTable: yup.array().of(salesRowSchema)
     }),
     onSubmit: async obj => {
       const submissionData = {
@@ -82,7 +117,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         record: JSON.stringify({
           itemId: recordId,
           pgId: obj?.pgId || null,
-          items: obj.items
+          items: obj.salesTable
             .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
             .map(item => ({
               ...item,
@@ -104,7 +139,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     if (prices?.length > 0) {
       formik.setValues(prev => ({
         ...prev,
-        items: prices.map((item, index) => ({ ...item, id: index + 1 }))
+        salesTable: prices.map((item, index) => ({ ...item, id: index + 1 }))
       }))
     }
   }, [store?.packB])
@@ -291,11 +326,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
-            value={formik.values?.items}
-            error={formik.errors?.items}
+            onChange={value => formik.setFieldValue('salesTable', value)}
+            value={formik.values?.salesTable}
+            error={formik.errors?.salesTable}
             name='salesTable'
-            initialValues={formik?.initialValues?.items?.[0]}
+            initialValues={formik?.initialValues?.salesTable?.[0]}
             columns={columns}
             maxAccess={maxAccess}
           />
