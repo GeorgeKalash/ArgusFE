@@ -279,11 +279,11 @@ const Table = ({
 
     return match && match.accessLevel === ControlAccessLevel.Hidden
   }
-  const filteredColumns = useMemo(
-    () => columns.filter(column => !shouldRemoveColumn(column)),
-    [columns, columnsAccess]
-  )
+  const filteredColumns = useMemo(() => {
+    return columns.filter(column => !shouldRemoveColumn(column))
+  }, [columns, columnsAccess])
 
+  const stableFilteredColumns = useStableValue(filteredColumns)
 
   useEffect(() => {
     const areAllValuesTrue =
@@ -859,10 +859,37 @@ const Table = ({
     suppressMenu: true
   }), [checked, showSelectAll, rowSelection])
 
+  function deepEqualIgnoreFunctions(a, b) {
+    if (a === b) return true
+    if (typeof a === 'function' && typeof b === 'function') return true
+    if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
+      return a === b
+    }
+    if (Array.isArray(a) !== Array.isArray(b)) return false
+
+    const aKeys = Object.keys(a)
+    const bKeys = Object.keys(b)
+    if (aKeys.length !== bKeys.length) return false
+
+    for (const key of aKeys) {
+      if (!deepEqualIgnoreFunctions(a[key], b[key])) return false
+    }
+    return true
+  }
+
+  function useStableValue(value) {
+    const ref = useRef(value)
+    if (!deepEqualIgnoreFunctions(ref.current, value)) {
+      ref.current = value
+    }
+    return ref.current
+  }
+
+
   const columnDefs = useMemo(() => {
     return [
       ...(showCheckboxColumn ? [checkboxColumn] : []),
-      ...filteredColumns.map(column => {
+      ...stableFilteredColumns.map(column => {
         const isLinkedColumn = column.type === 'link' || !!column.linkOpen
 
         return {
@@ -991,12 +1018,12 @@ const Table = ({
       : [])
       ]
     }, [
-      filteredColumns,
-      additionalWidth,
-      languageId,
-      checkboxColumn,
-      showCheckboxColumn
-    ])
+   stableFilteredColumns,
+   additionalWidth,
+   languageId,
+   checkboxColumn,
+   showCheckboxColumn
+])
 
   const gridOptions = useMemo(
     () => ({
