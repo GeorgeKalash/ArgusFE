@@ -85,7 +85,7 @@ const GlobalAuthorization = () => {
       },
       width: 1200,
       height: 600,
-      title: labels.printTemplates
+      title: labels.customLayout
     })
   }
 
