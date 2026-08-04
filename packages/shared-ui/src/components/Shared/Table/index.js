@@ -804,7 +804,15 @@ const Table = ({
       const isEmpty = !imageUrl
 
       return (
-        <div className="agImgCell">
+        <div
+          className="agImgCell"
+          style={{ cursor: column?.onClick && !isEmpty ? 'pointer' : 'default' }}
+          onClick={() => {
+            if (column?.onClick && !isEmpty) {
+              column.onClick({ value: imageUrl, row: data })
+            }
+          }}
+        >
           <img
             src={src}
             alt=""

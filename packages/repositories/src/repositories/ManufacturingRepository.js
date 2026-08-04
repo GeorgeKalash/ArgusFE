@@ -151,7 +151,8 @@ export const ManufacturingRepository = {
     start: service + 'startJOB',
     stop: service + 'stopJOB',
     wip: service + 'wipJOB',
-    sync: service + 'syncJOB'
+    sync: service + 'syncJOB',
+    qry3: service + 'qryJOB3',
   },
   GenerateAMC:{
     generate: service + 'generateAMC'
