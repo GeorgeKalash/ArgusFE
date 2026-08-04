@@ -20,7 +20,7 @@ import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-hel
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
@@ -1148,15 +1148,24 @@ const Table = ({
 
     gridApiRef.current?.columnApi?.resetColumnState()
 
-   const defaultState = props.columns
-  .filter(col => col.field)
-  .map(col => ({
-    colId: col.field,
-    width: col.width,
-    flex: col.flex,
-    pinned: null,
-    sort: null
-  }))
+    const defaultState = [
+      ...(showCheckboxColumn
+        ? [{
+            colId: checkboxColumn.field,
+            width: checkboxColumn.width,
+            pinned: null,
+            sort: null
+          }]
+        : []),
+      ...props.columns
+          .filter(col => col?.field)
+          .map(col => ({
+            colId: col.field,
+            width: col.width,
+            pinned: null,
+            sort: null
+          }))
+    ]
 
     gridApiRef.current?.columnApi?.applyColumnState({
       state: defaultState,
