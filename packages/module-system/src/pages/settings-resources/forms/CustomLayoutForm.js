@@ -127,7 +127,7 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
     },
     {
       component: 'textfield',
-      label: labels.reportName,
+      label: labels.instanceName,
       name: 'reportName'
     },
     {
@@ -149,7 +149,7 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
     },
     {
       component: 'textfield',
-      label: labels.caption,
+      label: labels.layoutName,
       name: 'caption'
     },
     {
