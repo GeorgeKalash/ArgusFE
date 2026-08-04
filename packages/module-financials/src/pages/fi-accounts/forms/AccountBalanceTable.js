@@ -35,7 +35,7 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
 
     const response = await getRequest({
       extension: FinancialRepository.AccountCreditBalance.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_accountId=${recordId}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_accountId=${accountId}`
     })
 
     return { ...response, _startAt: _startAt }
