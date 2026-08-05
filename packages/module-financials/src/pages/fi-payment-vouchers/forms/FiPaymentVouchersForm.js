@@ -101,7 +101,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       paymentMethod: yup.string().required(),
       cashAccountId: yup.string().required(),
       checkNo: yup
-        .string()
+        .string().nullable()
         .test(
           'check-no-required-if-payment-method-3',
           'Check number is required when payment method is 3.',
