@@ -19,10 +19,10 @@ export const FoundryRepository = {
     unpost: service + 'unpostWAX',
     close: service + 'closeWAX',
     open: service + 'openWAX',
-    reopen: service + 'reopenWAX'
+    reopen: service + 'reopenWAX',
+    get2: service + 'get2WAX',
   },
   WaxJob: {
-    qry: service + 'qryWAJ',
     qry2: service + 'qry2WAJ'
   },
   Mould: {
@@ -111,5 +111,8 @@ export const FoundryRepository = {
     snapshot: service + 'snapshotPADJ',
     post: service + 'postPADJ',
     unpost: service + 'unpostPADJ'
+  },
+  MergedComponent: {
+    qry: service + 'qryWAXC'
   }
 }
