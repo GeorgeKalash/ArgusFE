@@ -14,6 +14,7 @@ import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLev
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
+import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 
 const POPUP_PORTAL_SELECTOR =
   '.MuiPopover-root, .MuiAutocomplete-popper, .MuiMenu-list, .MuiPickersPopper-root'
@@ -634,7 +635,7 @@ export function DataGrid({
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              cursor: 'pointer'
+              cursor: column.colDef?.clickable ? 'pointer' : 'default'
             }}
           />
         </Box>
@@ -947,10 +948,14 @@ export function DataGrid({
     if (params.colDef.component === 'image') {
       const imageUrl = params.data?.[params.colDef.field]
 
-      if (!imageUrl) return
-      params.colDef.onClick?.({
-        value: params.value,
-        row: params.data
+      if (!imageUrl || !params?.colDef?.clickable) return
+
+      stack({
+        Component: ImageViewer,
+        props: {
+          imageUrl,
+          title: params?.colDef?.titleField ? params.data?.[params?.colDef?.titleField] : ''
+        }
       })
       return
     }

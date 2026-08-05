@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -24,11 +24,17 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
+import GetJobOrdersForm from './GetJobOrdersForm'
+import MergedComponentsForm from './MergedComponentsForm'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
 
 export default function FoWaxesForm({ labels, access, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [reCal, setReCal] = useState(false)
+  const imageUploadRef = useRef(null)
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Wax,
@@ -86,7 +92,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           metalColorId: null,
           metalId: null
         }
-      ]
+      ],
+      components: []
     },
     maxAccess,
     validateOnChange: true,
@@ -115,6 +122,12 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           items: items.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         })
       })
+
+      if (imageUploadRef.current) {
+        imageUploadRef.current.value = parseInt(response.recordId)
+        await imageUploadRef.current.submit()
+      }
+
       const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
       toast.success(actionMessage)
       refetchForm(response.recordId)
@@ -137,38 +150,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   const suggestedWgt = reCal
     ? Number((netWgt || 0) * (formik.values.header.factor || 0))
     : Number(formik.values.header.suggestedWgt)
-
-  const getHeaderData = async recordId => {
-    if (!recordId) return
-
-    const response = await getRequest({
-      extension: FoundryRepository.Wax.get,
-      parameters: `_recordId=${recordId}`
-    })
-
-    return {
-      ...response?.record,
-      date: formatDateFromApi(response?.record.date)
-    }
-  }
-
-  const getItems = async recordId => {
-    if (!recordId) return
-
-    const response = await getRequest({
-      extension: FoundryRepository.WaxJob.qry,
-      parameters: `_waxId=${recordId}`
-    })
-
-    return response?.list?.length > 0
-      ? response.list.map((item, index) => {
-          return {
-            ...item,
-            id: index + 1
-          }
-        })
-      : formik.values.items
-  }
 
   const getDesign = async recordId => {
     if (!recordId) return
@@ -269,9 +250,33 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     invalidate()
   }
 
+  const getData = async recordId => {
+    if (!recordId) return
+
+    const response = await getRequest({
+      extension: FoundryRepository.Wax.get2,
+      parameters: `_recordId=${recordId}`
+    })
+
+    return response
+  }
+
   async function refetchForm(recordId) {
-    const header = await getHeaderData(recordId)
-    const items = await getItems(recordId)
+    const res = await getData(recordId)
+
+    const header = {
+      ...res?.record?.header,
+      date: formatDateFromApi(res?.record?.header?.date)
+    }
+
+    const items =
+      res?.record?.items?.length > 0
+        ? res?.record?.items.map((item, index) => ({
+            ...item,
+            id: index + 1
+          }))
+        : formik.values.items
+
     const factor = await getMetalSetting(header.metalId, header.metalColorId)
     formik.resetForm({
       values: {
@@ -282,7 +287,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           ...header,
           factor: factor?.rate
         },
-        items
+        items,
+        components: res?.record?.waxComponents || []
       }
     })
   }
@@ -411,6 +417,55 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     }
   ]
 
+  const isGridEmpty = !formik.values.items.some(item => item.jobId)
+
+  const handleAddJobOrders = rows => {
+    const newItems = rows.map((row, index) => ({
+      id: index + 1,
+      ...row,
+      jobId: row.recordId,
+      jobRef: row.reference,
+      designRef: row.designRef,
+      waxId: recordId || 0,
+      pieces: row.waxPieces,
+      jobPcs: row.pcs,
+      rmWgt: row.RMWeight || 0
+    }))
+
+    formik.setFieldValue('items', newItems)
+    setReCal(true)
+  }
+
+  const onGetJobOrders = () => {
+    stack({
+      Component: GetJobOrdersForm,
+      props: {
+        labels,
+        maxAccess,
+        workCenterId: formik.values.header.workCenterId,
+        onAdd: handleAddJobOrders
+      },
+      width: 1100,
+      height: 600,
+      title: labels.getJobOrders
+    })
+  }
+
+  const onViewMergedComponents = () => {
+    stack({
+      Component: MergedComponentsForm,
+      props: {
+        labels,
+        maxAccess,
+        recordId: formik.values.recordId,
+        components: formik.values.components
+      },
+      width: 800,
+      height: 500,
+      title: labels.mergedComponents
+    })
+  }
+
   const actions = [
     {
       key: 'Locked',
@@ -442,7 +497,19 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       condition: true,
       onClick: 'onClickAttachment',
       disabled: !editMode
-    }
+    },
+    {
+      key: 'GetJobOrders',
+      condition: true,
+      onClick: onGetJobOrders,
+      disabled: editMode || !isGridEmpty || !formik.values.header.workCenterId
+    },
+    {
+      key: 'MergedComponents',
+      condition: true,
+      onClick: onViewMergedComponents,
+      disabled: !editMode
+    },
   ]
 
   useEffect(() => {
@@ -473,7 +540,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} xs={12}>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
@@ -552,7 +619,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
@@ -654,7 +721,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
@@ -714,6 +781,18 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   />
                 </Grid>
               </Grid>
+            </Grid>
+            <Grid item xs={3}>
+              <ImageUpload
+                ref={imageUploadRef}
+                resourceId={ResourceIds.FoWaxes}
+                recordId={formik.values.recordId}
+                seqNo={0}
+                customWidth={300}
+                customHeight={160}
+                disabled={isClosed}
+                isAbsolutePath={true}
+              />
             </Grid>
           </Grid>
         </Fixed>
