@@ -1919,7 +1919,7 @@ export default function SaleTransactionForm({
   useEffect(() => {
     formik.setFieldValue('header.qty', roundTo(totalQty))
     formik.setFieldValue('header.weight', roundTo(totalWeight))
-    formik.setFieldValue('header.volume', roundTo(totalVolume))
+    formik.setFieldValue('header.volume', roundTo(totalVolume, 3))
     formik.setFieldValue('header.amount', roundTo(amount))
 
     const updatedRateRow = getRate({
@@ -2473,6 +2473,7 @@ export default function SaleTransactionForm({
                     maxAccess={maxAccess}
                     label={labels.totVolume}
                     value={totalVolume}
+                    decimalScale={3}
                     readOnly
                   />
                 </Grid>
