@@ -385,7 +385,10 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
             editMode={editMode}
             actions={actions}
             functionId={SystemFunction.InboundTransportation}
-            disabledSubmit={isPosted}
+            disabledSubmit={
+                isPosted ||
+                (!recordId && formik?.values?.items?.length === 0)
+            }
             previewReport={editMode}
         >
             <VertLayout>
