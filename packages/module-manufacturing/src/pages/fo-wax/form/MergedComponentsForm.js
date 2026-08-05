@@ -7,7 +7,6 @@ import { Grid } from '@mui/material'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 
 const MergedComponentsForm = ({ labels, maxAccess, components = [] }) => {
   const { platformLabels } = useContext(ControlContext)
@@ -20,17 +19,8 @@ const MergedComponentsForm = ({ labels, maxAccess, components = [] }) => {
       headerName: labels.image,
       type: 'image',
       flex: 1,
-      onClick: ({ value, row }) => {
-        stack({
-          Component: ImageViewer,
-          props: {
-            imageUrl: value
-          },
-          width: 800,
-          height: 600,
-          title: row.componentSku
-        })
-      }
+      clickable: true,
+      titleField: 'componentSku'
     },
     {
       field: 'componentSku',

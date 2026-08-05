@@ -10,7 +10,6 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { useError } from '@argus/shared-providers/src/providers/error'
-import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
 const GetJobOrdersForm = ({ labels, maxAccess, workCenterId, onAdd, window }) => {
@@ -84,17 +83,8 @@ const GetJobOrdersForm = ({ labels, maxAccess, workCenterId, onAdd, window }) =>
       name: 'imageUrl',
       label: labels.image,
       width: 30,
-      onClick: ({ value, row }) => {
-        stack({
-          Component: ImageViewer,
-          props: {
-            imageUrl: value
-          },
-          width: 800,
-          height: 600,
-          title: row.reference
-        })
-      }
+      clickable: true,
+      titleField: 'reference'
     },
     {
       component: 'textfield',
