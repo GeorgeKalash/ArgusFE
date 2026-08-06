@@ -499,7 +499,6 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 name='header.currencyId'
                 label={labels.currency}
                 valueField='recordId'
-                readOnly={editMode}
                 required
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
