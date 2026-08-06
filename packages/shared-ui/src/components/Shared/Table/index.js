@@ -71,7 +71,6 @@ const Table = ({
   const [menuAnchor, setMenuAnchor] = useState(null)
   const [selectedColId, setSelectedColId] = useState(null)
   const [hoveredTable, setHoveredTable] = useState(false)
-
   const { width } = useWindowDimensions()
 
   const rowHeight =
@@ -280,11 +279,11 @@ const Table = ({
 
     return match && match.accessLevel === ControlAccessLevel.Hidden
   }
-  const filteredColumns = useMemo(
-    () => columns.filter(column => !shouldRemoveColumn(column)),
-    [columns, columnsAccess]
-  )
+  const filteredColumns = useMemo(() => {
+    return columns.filter(column => !shouldRemoveColumn(column))
+  }, [columns, columnsAccess])
 
+  const stableFilteredColumns = useStableValue(filteredColumns)
 
   useEffect(() => {
     const areAllValuesTrue =
@@ -828,6 +827,7 @@ const Table = ({
     enabled: !!tableName
   })
 
+
   const checkboxColumn = useMemo(() => ({
     headerName: '',
     field: 'checked',
@@ -859,20 +859,43 @@ const Table = ({
     suppressMenu: true
   }), [checked, showSelectAll, rowSelection])
 
+  function deepEqualIgnoreFunctions(a, b) {
+    if (a === b) return true
+    if (typeof a === 'function' && typeof b === 'function') return true
+    if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
+      return a === b
+    }
+    if (Array.isArray(a) !== Array.isArray(b)) return false
+
+    const aKeys = Object.keys(a)
+    const bKeys = Object.keys(b)
+    if (aKeys.length !== bKeys.length) return false
+
+    for (const key of aKeys) {
+      if (!deepEqualIgnoreFunctions(a[key], b[key])) return false
+    }
+    return true
+  }
+
+  function useStableValue(value) {
+    const ref = useRef(value)
+    if (!deepEqualIgnoreFunctions(ref.current, value)) {
+      ref.current = value
+    }
+    return ref.current
+  }
+
+
   const columnDefs = useMemo(() => {
     return [
       ...(showCheckboxColumn ? [checkboxColumn] : []),
-      ...filteredColumns.map(column => {
+      ...stableFilteredColumns.map(column => {
         const isLinkedColumn = column.type === 'link' || !!column.linkOpen
-
-        const savedColumn = tableSettings?.find(
-          item => item.colId === column.field
-        )
 
         return {
           ...column,
-          width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
-          flex: column.flex,
+          width: (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
+          flex: undefined,
           sort: column.sort ?? undefined,
           cellRenderer:
             column.type === 'image'
@@ -995,13 +1018,12 @@ const Table = ({
       : [])
       ]
     }, [
-      filteredColumns,
-      additionalWidth,
-      languageId,
-      tableSettings,
-      checkboxColumn,
-      showCheckboxColumn
-    ])
+   stableFilteredColumns,
+   additionalWidth,
+   languageId,
+   checkboxColumn,
+   showCheckboxColumn
+])
 
   const gridOptions = useMemo(
     () => ({
@@ -1019,34 +1041,11 @@ const Table = ({
   useEffect(() => {
     if (!tableSettings || !gridApiRef.current?.columnApi) return
 
-    const hasFlex = columnDefs.some(col => col.flex)
-
-    const stateToApply = hasFlex
-      ? tableSettings.map(col => ({
-          colId: col.colId,
-          pinned: col.pinned,
-          sort: col.sort,
-          sortIndex: col.sortIndex,
-        }))
-      : tableSettings
-
-    gridApiRef.current.columnApi.applyColumnState({
-      state: stateToApply,
-      applyOrder: true
-    })
-
-    if (hasFlex) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          gridApiRef.current?.api?.sizeColumnsToFit?.()
-        })
-      })
-    }
+    gridApiRef.current.columnApi.applyColumnState({ state: tableSettings, applyOrder: true })
   }, [tableSettings])
 
   const onColumnPinned = params => {
     const columnState = params.columnApi.getColumnState()
-
     if (!tableName) return
 
     saveToDB(storeName, tableName, columnState)
@@ -1102,8 +1101,7 @@ const Table = ({
     }
     setTimeout(async () => {
       const columnState = gridApiRef.current?.columnApi?.getColumnState()
-      
-      await saveToDB(storeName, tableName, columnState)
+      saveToDB(storeName, tableName, columnState)
     }, 0)
   }
 
@@ -1115,29 +1113,32 @@ const Table = ({
   }
 
   const onColumnResized = params => {
-    if (tableName && params?.source === 'uiColumnResized') {
-      const hasFlex = columnDefs.some(col => col.flex)
-      
-      if (hasFlex) {
-        const columnState = params.columnApi.getColumnState().map(col => ({
-          colId: col.colId,
-          pinned: col.pinned,
-          sort: col.sort,
-          sortIndex: col.sortIndex,
-        }))
-        saveToDB(storeName, tableName, columnState)
-        return
-      }
-
-      const columnState = params.columnApi.getColumnState()
-      saveToDB(storeName, tableName, columnState)
+    if (!tableName || params.source !== 'uiColumnResized' || !params.finished) {
+      return
     }
+
+    const resizedId = params.column.getColId()
+
+    const state = params.columnApi.getColumnState().map(col => {
+        if (col.colId === resizedId) {
+            return {
+                ...col,
+                width: params.columnApi
+                    .getColumn(col.colId)
+                    ?.getActualWidth(),
+                flex: null
+            }
+        }
+
+        return col
+    })
+
+   saveToDB(storeName, tableName, state)
   }
 
   const onSortChanged = params => {
     if (params.columnApi && tableName && params.source == 'uiColumnSorted') {
       const columnState = params.columnApi.getColumnState()
-
       saveToDB(storeName, tableName, columnState)
     }
   }
