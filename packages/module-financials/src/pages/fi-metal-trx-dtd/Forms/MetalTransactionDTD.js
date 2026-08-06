@@ -14,10 +14,12 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 export default function MetalTransactionDTDForm({ labels, maxAccess, recordId, functionId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const currentResourceId = functionId == SystemFunction.MetalReceiptVoucher ? ResourceIds.MetalTrxReceiptDTD : ResourceIds.MetalTrxPaymentDTD
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FIDocTypeDefaults.page
@@ -70,7 +72,7 @@ export default function MetalTransactionDTDForm({ labels, maxAccess, recordId, f
 
   return (
     <FormShell
-      resourceId={ResourceIds.FIDocTypeDefaults}
+      resourceId={currentResourceId}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

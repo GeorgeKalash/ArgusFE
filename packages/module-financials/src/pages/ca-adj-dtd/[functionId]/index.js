@@ -13,6 +13,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import AdjDocTypeDefaultsForm from './form/AdjDocTypeDefaultsForm'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 const CaDocTypeDefaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -45,7 +46,7 @@ const CaDocTypeDefaults = () => {
   } = useResourceQuery({
     endpointId: CashBankRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.AdjDocumentTypeDefault,
-
+    DatasetIdAccess: SystemFunction.CashIncrease == functionId ? ResourceIds.IncreaseAdjDTD : ResourceIds.DecreaseAdjDTD,
     filter: {
       filterFn: fetchGridData,
       default: { functionId }

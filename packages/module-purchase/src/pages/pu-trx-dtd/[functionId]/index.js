@@ -13,13 +13,26 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import PurchaseDTDForm from './Forms.js/PurchaseDTDForm'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 const PurchaseDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-
   const { functionId } = Router()
+
+  const getResourceId = () => {
+    switch (functionId) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.PurchaseInvDocTypedefault
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.ReturnseInvDocTypedefault
+      case SystemFunction.PUDraftSerialReturn:
+        return ResourceIds.DraftPurchaseDocTypeDefaults
+      default:
+        return
+    }
+  }
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -42,7 +55,8 @@ const PurchaseDTD = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: PurchaseRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.PUDocumentTypeDefaults
+    datasetId: ResourceIds.PUDocTypeDefaults,
+    DatasetIdAccess: getResourceId()
   })
 
   const columns = [

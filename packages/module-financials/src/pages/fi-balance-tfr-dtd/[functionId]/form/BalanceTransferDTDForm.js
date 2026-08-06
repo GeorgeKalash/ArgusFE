@@ -21,6 +21,7 @@ export default function BalanceTransferDTDForm({ labels, maxAccess, recordId, fu
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { userDefaults } = useContext(DefaultsContext)
+  const currentResourceId = SystemFunction.BalanceTransfer == functionId ? ResourceIds.BalanceTfrDocTypeDefaults : ResourceIds.BalanceTfrBetweenAccountsDTD
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FIDocTypeDefaults.page
@@ -71,7 +72,7 @@ export default function BalanceTransferDTDForm({ labels, maxAccess, recordId, fu
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.FIDocTypeDefaults} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={currentResourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

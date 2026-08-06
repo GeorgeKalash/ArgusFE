@@ -15,11 +15,12 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 export default function DraftSerialsInvoiceForm({ labels, maxAccess, recordId, functionId }) {
   const { platformLabels } = useContext(ControlContext)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const currenctResourceId = SystemFunction.DraftSerialsIn == functionId ? ResourceIds.DraftSerialsInvoiceDTD : ResourceIds.DraftSerialsReturnDTD
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.DocumentTypeDefault.page
@@ -73,7 +74,7 @@ export default function DraftSerialsInvoiceForm({ labels, maxAccess, recordId, f
 
   return (
     <FormShell
-      resourceId={ResourceIds.DocumentTypeDefault}
+      resourceId={currenctResourceId}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

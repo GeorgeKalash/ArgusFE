@@ -13,10 +13,12 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, functionId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const currentResourceId = SystemFunction.CashIncrease == functionId ? ResourceIds.IncreaseAdjDTD : ResourceIds.DecreaseAdjDTD
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.DocumentTypeDefault.page
@@ -65,7 +67,7 @@ export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, fu
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.FIDocTypeDefaults} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={currentResourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

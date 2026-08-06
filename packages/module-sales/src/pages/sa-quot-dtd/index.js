@@ -41,7 +41,7 @@ const DocumentTypeDefault = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SaleRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.DocumentTypeDefault
+    datasetId: ResourceIds.SalesQuotationDocTypeDefault
   })
 
   const columns = [

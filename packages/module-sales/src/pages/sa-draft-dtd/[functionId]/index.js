@@ -19,7 +19,6 @@ const DraftSerialsInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-
   const { functionId } = Router()
 
   async function fetchGridData(options = {}) {

@@ -15,11 +15,24 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 export default function PurchaseDTDForm({ labels, maxAccess, recordId, functionId }) {
   const { platformLabels } = useContext(ControlContext)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const getResourceId = () => {
+    switch (functionId) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.PurchaseInvDocTypedefault
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.ReturnseInvDocTypedefault
+      case SystemFunction.PUDraftSerialReturn:
+        return ResourceIds.DraftPurchaseDocTypeDefaults
+      default:
+        return
+    }
+  }
+  
 
   const invalidate = useInvalidate({
     endpointId: PurchaseRepository.DocumentTypeDefault.page
@@ -76,7 +89,7 @@ export default function PurchaseDTDForm({ labels, maxAccess, recordId, functionI
 
   return (
     <FormShell
-      resourceId={ResourceIds.PUDocumentTypeDefaults}
+      resourceId={getResourceId()}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
