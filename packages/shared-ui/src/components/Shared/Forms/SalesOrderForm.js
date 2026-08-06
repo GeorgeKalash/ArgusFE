@@ -1113,7 +1113,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('tdPct', roundTo(_discountObj?.hiddenTdPct) || 0)
+    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct || 0)
 
     return _discountObj?.hiddenTdPct || 0
   }
