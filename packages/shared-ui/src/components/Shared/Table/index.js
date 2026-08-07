@@ -888,7 +888,7 @@ const Table = ({
         return {
           ...column,
           width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
-          flex: savedColumn && Object.prototype.hasOwnProperty.call(savedColumn, 'flex') ? savedColumn.flex : column.flex,
+          flex: tableSettings ? (savedColumn?.flex ?? null) : column.flex,
           sort: column.sort ?? undefined,
           cellRenderer:
             column.type === 'image'
@@ -1113,10 +1113,17 @@ const Table = ({
 
   const onColumnResized = params => {
     if (tableName && params?.source === 'uiColumnResized' && params.finished) {
-      const resizedColId = params.column?.getColId()
+      const allColumnIds = params.columnApi.getAllDisplayedColumns().map(col => col.getColId())
+
+      // Freeze every column to its current actual width, dropping flex grid-wide
+      const freezeState = allColumnIds.map(colId => ({
+        colId,
+        flex: null,
+        width: params.columnApi.getColumn(colId).getActualWidth()
+      }))
 
       params.columnApi.applyColumnState({
-        state: [{ colId: resizedColId, flex: null, width: params.column.getActualWidth() }],
+        state: freezeState,
         applyOrder: false
       })
 
@@ -1126,7 +1133,7 @@ const Table = ({
         pinned: col.pinned,
         sort: col.sort,
         sortIndex: col.sortIndex,
-        flex: col.colId === resizedColId ? null : col.flex,
+        flex: null
       }))
 
       saveToDB(storeName, tableName, columnState).then(() => invalidate())
