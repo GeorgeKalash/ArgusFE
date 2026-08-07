@@ -888,7 +888,7 @@ const Table = ({
         return {
           ...column,
           width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
-          flex: column.flex,
+          flex: savedColumn && Object.prototype.hasOwnProperty.call(savedColumn, 'flex') ? savedColumn.flex : column.flex,
           sort: column.sort ?? undefined,
           cellRenderer:
             column.type === 'image'
@@ -1035,29 +1035,10 @@ const Table = ({
   useEffect(() => {
     if (!tableSettings || !gridApiRef.current?.columnApi) return
 
-    const hasFlex = columnDefs.some(col => col.flex)
-
-    const stateToApply = hasFlex
-      ? tableSettings.map(col => ({
-          colId: col.colId,
-          pinned: col.pinned,
-          sort: col.sort,
-          sortIndex: col.sortIndex,
-        }))
-      : tableSettings
-
     gridApiRef.current.columnApi.applyColumnState({
-      state: stateToApply,
+      state: tableSettings, 
       applyOrder: true
     })
-
-    if (hasFlex) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          gridApiRef.current?.api?.sizeColumnsToFit?.()
-        })
-      })
-    }
   }, [tableSettings])
 
   const onColumnPinned = params => {
@@ -1131,22 +1112,24 @@ const Table = ({
   }
 
   const onColumnResized = params => {
-    if (tableName && params?.source === 'uiColumnResized') {
-      const hasFlex = columnDefs.some(col => col.flex)
-      
-      if (hasFlex) {
-        const columnState = params.columnApi.getColumnState().map(col => ({
-          colId: col.colId,
-          pinned: col.pinned,
-          sort: col.sort,
-          sortIndex: col.sortIndex,
-        }))
-        saveToDB(storeName, tableName, columnState)
-        return
-      }
+    if (tableName && params?.source === 'uiColumnResized' && params.finished) {
+      const resizedColId = params.column?.getColId()
 
-      const columnState = params.columnApi.getColumnState()
-      saveToDB(storeName, tableName, columnState)
+      params.columnApi.applyColumnState({
+        state: [{ colId: resizedColId, flex: null, width: params.column.getActualWidth() }],
+        applyOrder: false
+      })
+
+      const columnState = params.columnApi.getColumnState().map(col => ({
+        colId: col.colId,
+        width: col.width,
+        pinned: col.pinned,
+        sort: col.sort,
+        sortIndex: col.sortIndex,
+        flex: col.colId === resizedColId ? null : col.flex,
+      }))
+
+      saveToDB(storeName, tableName, columnState).then(() => invalidate())
     }
   }
 
