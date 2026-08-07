@@ -71,7 +71,7 @@ export default function RequisitionDocTypeDefaultForm({ labels, maxAccess, recor
 
   return (
     <FormShell
-      resourceId={ResourceIds.PUDocumentTypeDefaults}
+      resourceId={ResourceIds.RequisitionDocumentTypeDefaults}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

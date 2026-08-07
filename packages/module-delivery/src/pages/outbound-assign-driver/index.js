@@ -59,7 +59,7 @@ const OutboundAssignDriver = () => {
       parameters: ``
     })
 
-    const modifiedList =
+    const tripList =
       res?.list?.length > 0
         ? res?.list?.map((item, index) => {
             return {
@@ -70,7 +70,7 @@ const OutboundAssignDriver = () => {
             }
           })
         : []
-    formik.setFieldValue('tripList', modifiedList)
+    formik.resetForm({ values : { tripList } })
   }
 
   const columns = [
@@ -107,6 +107,9 @@ const OutboundAssignDriver = () => {
           { from: 'recordId', to: 'vehicleId' },
           { from: 'name', to: 'vehName' }
         ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        update({ vehicleId: newRow?.vehicleId || null, vehName: newRow?.vehName || null })
       }
     },
     {
@@ -121,6 +124,9 @@ const OutboundAssignDriver = () => {
           { from: 'recordId', to: 'driverId' },
           { from: 'name', to: 'driverName' }
         ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        update({ driverId: newRow?.driverId || null, driverName: newRow?.driverName || null })
       }
     },
     {

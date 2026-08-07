@@ -4,6 +4,9 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { v4 as uuidv4 } from 'uuid'
+import { TabsContext } from '../TabsContext'
+import usePageInteraction from '../usePageInteraction'
+import { useInteractionTracker } from '../InteractionTrackerProvider'
 
 const WindowContext = React.createContext(null)
 const ClearContext = React.createContext(null)
@@ -47,12 +50,21 @@ export function WindowProvider({ children }) {
   const [rerenderFlag, setRerenderFlag] = useState(false)
   const [lockProps, setLockProps] = useState(null)
   const closedWindow = useRef(null)
+  const windowCountRef = useRef({})
   const userId =
     typeof window !== 'undefined'
       ? JSON.parse(window.sessionStorage.getItem('userData'))?.userId
       : null
 
+  const trackInteraction = usePageInteraction()
+  const { clearPageInteractions } = useInteractionTracker()
+
+  const tabsContext = useContext(TabsContext)
+  const currentTab = tabsContext?.currentTab || null
+
   const currentValue = { ...stack[stack.length - 1] }
+  const isImmediateWindow = currentValue?.isImmediateWindow ?? false
+  let lockedWindowResourceId = null
 
   function lockRecord(obj) {
     getRequest({
@@ -60,6 +72,7 @@ export function WindowProvider({ children }) {
       parameters: `_resourceId=${obj.resourceId}&_recordId=${obj.recordId}`
     }).then(res => {
       if (res.record && res.record.userId != userId) {
+        lockedWindowResourceId = res.record?.resourceId || null
         obj.isAlreadyLocked?.(res.record.userName)
         return
       }
@@ -99,20 +112,45 @@ export function WindowProvider({ children }) {
     }
   }
 
+  function incrementWindowCount(resourceId) {
+    if (!resourceId) return
+
+    windowCountRef.current[resourceId] = (windowCountRef.current[resourceId] || 0) + 1
+  }
+
+  function decrementWindowCount(resourceId) {
+    if (!resourceId) return 0
+
+    const next = Math.max((windowCountRef.current[resourceId] || 1) - 1, 0)
+    windowCountRef.current[resourceId] = next
+
+    return next
+  }
+
   function closeWindow() {
     const closingWindow = stack[stack.length - 1]
+    const resourceId = currentTab?.resourceId   
 
+    if (resourceId) {
+      const remaining = decrementWindowCount(resourceId)
+      if (remaining === 0) clearPageInteractions(resourceId, 'Window')   
+    }
     if (
       lockProps &&
       closingWindow?.props?.recordId === lockProps.recordId
     ) {
       unlockRecord()
     }
-
     setStack(stack => stack.slice(0, stack.length - 1))
   }
 
   function closeWindowById(givenId) {
+    const resourceId = currentTab?.resourceId
+
+    if (resourceId) {
+      const remaining = decrementWindowCount(resourceId)
+      if (remaining === 0) clearPageInteractions(resourceId, 'Window')
+    }
     unlockRecord()
     closedWindow.current = currentValue
     setStack(stack => stack.filter(({ id }) => givenId != id))
@@ -123,8 +161,14 @@ export function WindowProvider({ children }) {
   }
 
   function addToStack(options) {
-    const { Component, spacing = true } = options
+    const { Component, spacing = true, trackPage = true, windowType = null} = options
     const dimensions = getWindowDimensions(options.width, options.height, spacing)
+    const resourceId = currentTab?.resourceId
+
+    if (lockedWindowResourceId != resourceId && trackPage && windowType != 'ReportParameterBrowser') {
+      trackInteraction('Window')
+      incrementWindowCount(currentTab?.resourceId)
+    }
 
     setStack(stack => [
       ...stack,
@@ -160,7 +204,7 @@ export function WindowProvider({ children }) {
   }
 
   return (
-    <WindowContext.Provider value={{ stack: addToStack, lockRecord }}>
+    <WindowContext.Provider value={{ stack: addToStack, lockRecord, isImmediateWindow, isInsideWindow: stack.length > 0 }}>
       {children}
       {stack.map(
         ({
@@ -294,6 +338,8 @@ export function ImmediateWindow({
       spacing,
       width,
       height,
+      trackPage: false,
+      isImmediateWindow: true,
       title: _labels[labelKey] || titleName
     })
   }

@@ -33,7 +33,7 @@ const GenerateMaterialPlaning = () => {
       siteCoverageStock: item?.siteCoverageStock ? Number(item.siteCoverageStock?.toFixed(2)) : 0,
       qty: item.qty || 0
     }))
-    formik.setFieldValue('items', items)
+    formik.resetForm({ values: {...formik.values, items} })
   }
 
   async function fetchWithFilter({ filters }) {

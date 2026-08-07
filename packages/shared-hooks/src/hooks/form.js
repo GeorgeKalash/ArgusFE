@@ -1,9 +1,25 @@
 import { useFormik } from 'formik'
-import { useEffect, useRef, useLayoutEffect } from 'react'
+import { useEffect, useRef, useLayoutEffect, useContext } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from '@argus/shared-utils/src/utils/maxAccess'
 import * as yup from 'yup'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
+import { MenuContext } from '@argus/shared-providers/src/providers/MenuContext'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
-export function useForm({ behavior, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
+export function useForm({ behavior, conditionSchema = [], maxAccess, validate = () => {}, isParentLevel = false, ...formikProps }) {
+  const windowContext = useWindow()
+  const isImmediateWindow = windowContext?.isImmediateWindow ?? false
+  const isInsideWindow = windowContext?.isInsideWindow ?? false
+
+  const trackInteraction = usePageInteraction()
+  const { clearPageInteractions } = useInteractionTracker()
+  const {
+    openTabs,
+    currentTabIndex
+  } = useContext(MenuContext)
+  const currentTab = openTabs?.[currentTabIndex] || null
+
   function explode(str) {
     const parts = str.split('.')
 
@@ -169,26 +185,67 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
     if (isEmpty) formik.setFieldValue(fieldName, '')
   }, [isEmpty])
 
-  const normalized = value => {
-    if (value instanceof Date) return value.dateOnly ? value.toDateString() : value.valueOf()
-    if (Array.isArray(value)) return value.map(normalized)
-    if (value && typeof value === 'object')
-      return Object.fromEntries(
-        Object.entries(value)
-          .filter(([, v]) => v !== null && v !== undefined)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([k, v]) => [k, normalized(v)])
-      )
-    
-    return value
+  const areDatesEqual = (a, b) => {
+    const eitherIsDateOnly = (a instanceof Date && a.dateOnly) || (b instanceof Date && b.dateOnly)
+
+    if (eitherIsDateOnly) {
+      return a.toDateString() === b.toDateString()
+    }
+
+    return a.valueOf() === b.valueOf()
   }
 
-  const dirty = JSON.stringify(normalized(formik.values)) !== JSON.stringify(normalized(formik.initialValues))
-  
+  const deepEqual = (a, b) => {
+    if (a instanceof Date || b instanceof Date) {
+      if (!(a instanceof Date) || !(b instanceof Date)) return false
+      return areDatesEqual(a, b)
+    }
+
+    if (Array.isArray(a) || Array.isArray(b)) {
+      if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false
+      return a.every((item, i) => deepEqual(item, b[i]))
+    }
+
+    if (a && typeof a === 'object' && b && typeof b === 'object') {
+      const keysA = Object.keys(a).filter(k => a[k] !== null && a[k] !== undefined)
+      const keysB = Object.keys(b).filter(k => b[k] !== null && b[k] !== undefined)
+      if (keysA.length !== keysB.length) return false
+      return keysA.every(k => keysB.includes(k) && deepEqual(a[k], b[k]))
+    }
+
+    return a === b
+  }
+
+  const getDirtyFields = (values, initialValues) => {
+    const diffs = {}
+    const allKeys = new Set([...Object.keys(values || {}), ...Object.keys(initialValues || {})])
+
+    allKeys.forEach(key => {
+      if (!deepEqual(values?.[key], initialValues?.[key])) {
+        diffs[key] = {
+          from: initialValues?.[key],
+          to: values?.[key]
+        }
+      }
+    })
+
+    return diffs
+  }
+
+  const dirty = !deepEqual(formik.values, formik.initialValues)
+  const dirtyFields = getDirtyFields(formik.values, formik.initialValues) //help us to know faster what are the dirty fields
+
+  useEffect(() => {
+    if (!isImmediateWindow && isInsideWindow) return
+    
+    if (dirty) trackInteraction('form')
+    else clearPageInteractions(currentTab?.resourceId)
+  }, [dirty])
+
   return {
     formik: {
       ...formik,
-      dirty 
+      dirty
     }
   }
 }

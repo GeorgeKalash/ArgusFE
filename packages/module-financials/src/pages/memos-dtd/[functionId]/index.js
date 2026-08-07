@@ -10,17 +10,15 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-
 import MemosDtdForm from './form/MemosDtdForm'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 const Financial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
-
   const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
@@ -45,8 +43,8 @@ const Financial = () => {
     refetch
   } = useResourceQuery({
     endpointId: FinancialRepository.FIDocTypeDefaults.qry,
-    datasetId: ResourceIds.FIDocTypeDefaults,
-
+    datasetId: ResourceIds.CreditDTD,
+    DatasetIdAccess: functionId == SystemFunction.CreditNote ? ResourceIds.CreditDTD : ResourceIds.DebitDTD,
     filter: {
       filterFn: fetchGridData,
       default: { functionId }

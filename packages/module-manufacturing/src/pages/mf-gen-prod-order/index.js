@@ -30,6 +30,8 @@ const GeneratePoductionOrder = () => {
   const { formik } = useForm({
     initialValues: {
       clientId: null,
+      clientRef: '',
+      clientName: '',
       itemSummaries: { list: [] },
       orders: { list: [] }
     },
@@ -176,10 +178,15 @@ const GeneratePoductionOrder = () => {
     }))
 
     formik.setFieldValue('itemSummaries', { list: newlyItemSummaries })
+
+    return { list: newlyItemSummaries || [] }
   }
 
   useEffect(() => {
-    fillSummaryORD()
+    ;(async function () {
+      const resp = await fillSummaryORD()
+      formik.resetForm({ values : {...formik.values, itemSummaries: resp } })
+    })()
   }, [])
 
   const disableCondition = data => {

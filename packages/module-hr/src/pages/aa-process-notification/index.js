@@ -87,7 +87,7 @@ const ProcessNotification = () => {
         templateName
       }
     })
-        formik.setFieldValue('rows',rows)
+        formik.resetForm({ values: {rows} })
   }
 
   const columns = [
@@ -111,6 +111,9 @@ const ProcessNotification = () => {
           { from: 'recordId', to: 'templateId' },
           { from: 'name', to: 'templateName' }
         ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        update({ templateId: newRow?.templateId || null })
       }
     }
   ]

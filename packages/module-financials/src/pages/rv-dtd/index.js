@@ -41,7 +41,8 @@ const RVDocTypeDefaults = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.FIDocTypeDefaults.qry,
-    datasetId: ResourceIds.FIDocTypeDefaults
+    DatasetIdAccess: ResourceIds.RVDocTypeDefaults,
+    datasetId: ResourceIds.CreditDTD
   })
 
   const invalidate = useInvalidate({

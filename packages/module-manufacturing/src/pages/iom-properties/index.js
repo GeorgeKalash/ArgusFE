@@ -1,6 +1,6 @@
 import { useEffect, useContext, useState } from 'react'
 import { Grid } from '@mui/material'
-import { useFormik } from 'formik'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
@@ -23,7 +23,8 @@ const IomProperties = () => {
     datasetId: ResourceIds.IomProperties
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess: access,
     initialValues: {
       mfimd1: null,
       mfimd2: null

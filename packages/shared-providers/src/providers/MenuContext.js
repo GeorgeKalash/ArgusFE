@@ -83,6 +83,7 @@ const MenuProvider = ({ children }) => {
             path: `/${commandLine.nextAPI}`,
             name: commandLine.name,
             folderId: commandLine.folderId,
+            resourceId: commandLine.resourceId,
             iconName: commandLine.addToBookmarks && 'FavIcon'
           }
           Gear.push(GearItem)

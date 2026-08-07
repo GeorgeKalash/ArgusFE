@@ -84,7 +84,7 @@ const RemittanceDefaults = ({ _labels, access }) => {
             }
           }
         }
-        formik.setValues(myObject)
+        formik.resetForm({ values: myObject })
       }
     })()
   }, [systemDefaults])
