@@ -6,7 +6,6 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
-import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
@@ -14,10 +13,15 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 
-const CustomLayoutRecordForm = ({ labels, maxAccess, resourceId, recordId, onSuccess, window }) => {
+const CustomLayoutRecordForm = ({ labels, maxAccess, resourceId, recordId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.ReportTemplate.qry
+  })
 
   const { formik } = useForm({
     maxAccess,
@@ -58,7 +62,7 @@ const CustomLayoutRecordForm = ({ labels, maxAccess, resourceId, recordId, onSuc
       })
 
       toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
-      onSuccess?.()
+      invalidate()
       window.close()
     }
   })
@@ -69,7 +73,7 @@ const CustomLayoutRecordForm = ({ labels, maxAccess, resourceId, recordId, onSuc
         extension: SystemRepository.ReportTemplate.get,
         parameters: `_resourceId=${resourceId}&_id=${recordId}`
       }).then(res => {
-        formik.setValues({ ...formik.values, ...res.record })
+        formik.setValues(res?.record)
       })
     }
   }, [])
