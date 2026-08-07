@@ -11,33 +11,35 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import ReportLayoutObjForm from './ReportLayoutObjForm'
 
 const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const [data, setData] = useState([])
 
   const fetchData = async () => {
     const reportPack = await getRequest({
-      extension: SystemRepository.ReportLayout.get,
+      extension: SystemRepository.ReportLayout.get2,
       parameters: `_resourceId=${row.resourceId}`
     })
 
     const pack = reportPack?.record || {}
 
-    const response2Map = new Map((pack?.reportLayoutOverrides || []).map(item => [item.id, item.isInactive]))
+    const response2Map = new Map((pack?.reportLayoutOverrides || []).map(item => [item.id, item]))
 
     const updatedList = (pack?.layouts || []).map(item => {
-      const isInactive = response2Map.has(item.id)
-        ? response2Map.get(item.id)
-        : false
+      const responseItem = response2Map.get(item.id)
 
       return {
         ...item,
-        isInactive,
-        originalInactive: isInactive
+        isInactive: responseItem?.isInactive ?? false,
+        isConfidential: responseItem?.isConfidential ?? null,
+        sgId: responseItem?.sgId ?? null,
+        originalInactive: responseItem?.isInactive ?? false
       }
     })
 
@@ -50,32 +52,9 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
   }
 
   const { formik } = useForm({
-    validateOnChange: true,
     initialValues: {
       resourceId: row.resourceId,
       resourceName: row.resourceName
-    },
-    onSubmit: async obj => {
-      const inactiveItems = data.list
-        .filter(item => item.isInactive)
-        .map(item => ({
-          resourceId: row.resourceId,
-          id: item.id,
-          isInactive: item.isInactive
-        }))
-
-      const payload = {
-        resourceId: row.resourceId,
-        items: inactiveItems
-      }
-
-      await postRequest({
-        extension: SystemRepository.ReportLayoutObject.set2,
-        record: JSON.stringify(payload)
-      })
-
-      toast.success(platformLabels.Updated)
-      fetchData()
     }
   })
 
@@ -158,8 +137,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
     {
       field: 'isInactive',
       headerName: labels.isInactive,
-      type: 'checkbox',
-      editable: true
+      type: 'checkbox'
     },
     {
       flex: 0.5,
@@ -197,37 +175,59 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
     }
   ]
 
+  function edit(record) {
+    stack({
+      Component: ReportLayoutObjForm,
+      props: {
+        labels,
+        maxAccess,
+        resourceId: row.resourceId,
+        record,
+        onSuccess: fetchData
+      },
+      title: labels.reportLayout,
+      width: 500,
+      height: 550
+    })
+  }
+
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
-      <VertLayout>
-        <Fixed>
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <CustomTextField
-                name='resourceId'
-                label={labels.resourceId}
-                value={formik.values.resourceId}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid xs={5}></Grid>
-            <Grid item xs={4}>
-              <CustomTextField
-                name='resourceName'
-                label={labels.resourceName}
-                value={formik.values.resourceName}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
+    <VertLayout>
+      <Fixed>
+        <Grid container spacing={2} sx={{ p: 2 }}>
+          <Grid item xs={4}>
+            <CustomTextField
+              name='resourceId'
+              label={labels.resourceId}
+              value={formik.values.resourceId}
+              readOnly
+              maxAccess={maxAccess}
+            />
           </Grid>
-        </Fixed>
-        <Grow>
-          <Table columns={columns} gridData={data} rowId={['id']} pagination={false} />
-        </Grow>
-      </VertLayout>
-    </Form>
+          <Grid xs={5}></Grid>
+          <Grid item xs={4}>
+            <CustomTextField
+              name='resourceName'
+              label={labels.resourceName}
+              value={formik.values.resourceName}
+              readOnly
+              maxAccess={maxAccess}
+            />
+          </Grid>
+        </Grid>
+      </Fixed>
+      <Grow>
+        <Table
+          name='reportLayouts'
+          columns={columns} 
+          gridData={data} 
+          rowId={['id']} 
+          pagination={false} 
+          onEdit={edit}
+          maxAccess={maxAccess}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 
