@@ -1,27 +1,39 @@
 import { Box, Grid, Typography } from '@mui/material'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import ReportLayoutObjForm from './ReportLayoutObjForm'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
-const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) => {
+const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: reportLayoutWindow }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  const [data, setData] = useState([])
+  const {
+    query: { data },
+    refetch
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    enabled: !!row.resourceId,
+    endpointId: SystemRepository.ReportLayout.get2,
+    datasetId: ResourceIds.SettingsResources,
+    params: { disabledReqParams: true, maxAccess }
+  })
 
-  const fetchData = async () => {
+  async function fetchGridData() {
+    if (!row.resourceId) return { list: [] }
+
     const reportPack = await getRequest({
       extension: SystemRepository.ReportLayout.get2,
       parameters: `_resourceId=${row.resourceId}`
@@ -31,11 +43,12 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
 
     const response2Map = new Map((pack?.reportLayoutOverrides || []).map(item => [item.id, item]))
 
-    const updatedList = (pack?.layouts || []).map(item => {
+    const list = (pack?.layouts || []).map(item => {
       const responseItem = response2Map.get(item.id)
 
       return {
         ...item,
+        resourceId: row.resourceId,
         isInactive: responseItem?.isInactive ?? false,
         isConfidential: responseItem?.isConfidential ?? null,
         sgId: responseItem?.sgId ?? null,
@@ -43,33 +56,17 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
       }
     })
 
-    setData({
-      count: updatedList.length || 0,
-      list: updatedList || [],
-      statusId: 1,
-      message: ''
-    })
+    return { list }
   }
-
-  const { formik } = useForm({
-    initialValues: {
-      resourceId: row.resourceId,
-      resourceName: row.resourceName
-    }
-  })
 
   const returnURL = async rowData => {
     const response = await getRequest({
       extension: KVSRepository.getAttachement,
-      parameters: `_resourceId=${formik.values.resourceId}&_layoutId=${rowData.id}`
+      parameters: `_resourceId=${row.resourceId}&_layoutId=${rowData.id}`
     })
 
     return response.record.url
   }
-
-  useEffect(() => {
-    fetchData()
-  }, [])
 
   const columns = [
     {
@@ -152,13 +149,13 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
                 await postRequest({
                   extension: SystemRepository.DefaultLayout.setDefaultLayout,
                   record: JSON.stringify({
-                    resourceId: formik.values.resourceId,
+                    resourceId: row.data.resourceId,
                     defaultLayoutId: row.data.id
                   })
                 })
                 toast.success(platformLabels.Updated)
                 invalidate() 
-                w.close()
+                reportLayoutWindow.close()
               }}
               sx={{
                 color: 'green',
@@ -182,8 +179,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
         labels,
         maxAccess,
         resourceId: row.resourceId,
-        record,
-        onSuccess: fetchData
+        record
       },
       title: labels.reportLayout,
       width: 500,
@@ -199,7 +195,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
             <CustomTextField
               name='resourceId'
               label={labels.resourceId}
-              value={formik.values.resourceId}
+              value={row.resourceId}
               readOnly
               maxAccess={maxAccess}
             />
@@ -209,7 +205,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
             <CustomTextField
               name='resourceName'
               label={labels.resourceName}
-              value={formik.values.resourceName}
+              value={row.resourceName}
               readOnly
               maxAccess={maxAccess}
             />

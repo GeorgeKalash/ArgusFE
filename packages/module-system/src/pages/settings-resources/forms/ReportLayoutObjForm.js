@@ -11,10 +11,15 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 
-const ReportLayoutObjForm = ({ labels, maxAccess, resourceId, record, onSuccess }) => {
+const ReportLayoutObjForm = ({ labels, maxAccess, resourceId, record }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.ReportLayout.get2
+  })
 
   const { formik } = useForm({
     maxAccess,
@@ -38,7 +43,7 @@ const ReportLayoutObjForm = ({ labels, maxAccess, resourceId, record, onSuccess 
       })
 
       toast.success(platformLabels.Updated)
-      await onSuccess?.()
+      invalidate()
     }
   })
 

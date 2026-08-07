@@ -1,5 +1,5 @@
 import { Box, Grid, Typography } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -12,31 +12,40 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CustomLayoutRecordForm from './CustomLayoutRecordForm'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  const [data, setData] = useState({ list: [], count: 0 })
+  const {
+    query: { data },
+    invalidate: invalidateCustomLayout
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    enabled: !!row.resourceId,
+    endpointId: SystemRepository.ReportTemplate.qry,
+    datasetId: ResourceIds.SettingsResources,
+    params: { disabledReqParams: true, maxAccess }
+  })
 
-  const fetchData = async () => {
-    const res = await getRequest({
+  async function fetchGridData() {
+    if (!row.resourceId) return { list: [] }
+
+    const response = await getRequest({
       extension: SystemRepository.ReportTemplate.qry,
       parameters: `_resourceId=${row.resourceId}`
     })
 
-    const list = (res?.list || []).map(item => ({
+    response.list = (response?.list || []).map(item => ({
       ...item,
-      originalInactive: item.isInactive
+      originalInactive: item.isInactive    
     }))
 
-    setData({ count: list.length, list })
+    return response
   }
-
-  useEffect(() => {
-    fetchData()
-  }, [])
 
   const edit = obj => {
     openForm(obj)
@@ -53,8 +62,7 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
         labels,
         maxAccess,
         resourceId: row.resourceId,
-        recordId: record?.id,
-        onSuccess: fetchData
+        recordId: record?.id
       },
       title: labels.customLayout,
       width: 600,
@@ -69,7 +77,8 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
     })
 
     toast.success(platformLabels.Deleted)
-    fetchData()
+    invalidateCustomLayout()
+    invalidate()
   }
 
   const columns = [

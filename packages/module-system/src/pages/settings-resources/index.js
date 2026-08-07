@@ -64,8 +64,7 @@ const GlobalAuthorization = () => {
         labels: labels,
         maxAccess: access,
         row: { resourceId: row.data.resourceId, resourceName: row.data.resourceName, moduleId: filters.moduleId },
-        invalidate,
-        resourceId: ResourceIds.SettingsResources
+        invalidate
       },
       width: 1300,
       height: 600,
@@ -81,7 +80,6 @@ const GlobalAuthorization = () => {
         maxAccess: access,
         row: { resourceId: row.data.resourceId, resourceName: row.data.resourceName },
         invalidate,
-        resourceId: ResourceIds.SettingsResources
       },
       width: 1300,
       height: 600,
