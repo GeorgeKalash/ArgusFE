@@ -22,8 +22,6 @@ export default function SalesForm({ labels, maxAccess, store }) {
     initialValues: {
       ...store.record
     },
-    enableReinitialize: true,
-    validateOnChange: true,
     validationSchema: yup.object({
       tdPct: yup
         .number()
@@ -45,14 +43,26 @@ export default function SalesForm({ labels, maxAccess, store }) {
         .transform((value, originalValue) => (originalValue === '' ? null : value))
     }),
     onSubmit: async obj => {
+      const record = {
+        ...store.record,
+        ...obj
+      }
+
       await postRequest({
         extension: SaleRepository.Client.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify(record)
       })
 
       toast.success(platformLabels.Saved)
     }
   })
+
+  useEffect(() => {
+    if (store.record) {
+      formik.setValues(store.record)
+    }
+  }, [store.record])
+
   const editMode = !!formik?.values?.recordId
 
   return (
@@ -74,8 +84,8 @@ export default function SalesForm({ labels, maxAccess, store }) {
                 ]}
                 values={formik?.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('ptId', newValue?.recordId)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('ptId', newValue?.recordId || null)
                 }}
               />
             </Grid>
@@ -87,8 +97,8 @@ export default function SalesForm({ labels, maxAccess, store }) {
                 label={labels.currency}
                 valueField='recordId'
                 displayField={'name'}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || '')
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                 maxAccess={maxAccess}
@@ -109,8 +119,8 @@ export default function SalesForm({ labels, maxAccess, store }) {
                 ]}
                 values={formik?.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('plId', newValue?.recordId)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('plId', newValue?.recordId || null)
                 }}
               />
             </Grid>

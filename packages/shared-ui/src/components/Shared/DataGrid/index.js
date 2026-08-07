@@ -14,6 +14,7 @@ import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLev
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
+import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 
 const POPUP_PORTAL_SELECTOR =
   '.MuiPopover-root, .MuiAutocomplete-popper, .MuiMenu-list, .MuiPickersPopper-root'
@@ -537,7 +538,7 @@ export function DataGrid({
     const isCheckbox = comp === 'checkbox'
 
     if (isCheckbox) {
-      const disabledCheckbox = _disabled || !!column.colDef?.props?.readOnly
+      const disabledCheckbox = _disabled || !!column.colDef?.props?.disabled
 
       return (
         <Box
@@ -547,7 +548,8 @@ export function DataGrid({
             padding: '0',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            pointerEvents: disabledCheckbox ? 'none' : 'auto'
           }}
         >
           <GridCheckbox
@@ -633,7 +635,7 @@ export function DataGrid({
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              cursor: 'pointer'
+              cursor: column.colDef?.clickable ? 'pointer' : 'default'
             }}
           />
         </Box>
@@ -946,10 +948,14 @@ export function DataGrid({
     if (params.colDef.component === 'image') {
       const imageUrl = params.data?.[params.colDef.field]
 
-      if (!imageUrl) return
-      params.colDef.onClick?.({
-        value: params.value,
-        row: params.data
+      if (!imageUrl || !params?.colDef?.clickable) return
+
+      stack({
+        Component: ImageViewer,
+        props: {
+          imageUrl,
+          title: params?.colDef?.titleField ? params.data?.[params?.colDef?.titleField] : ''
+        }
       })
       return
     }
@@ -960,7 +966,7 @@ export function DataGrid({
 
     const nonEditableByClick =
       colDef.component === 'button' || colDef.component === 'checkbox' || colDef.component === 'icon' || colDef.component === 'image'
-
+    
     if (!nonEditableByClick) {
       api.startEditingCell({
         rowIndex: rowIndex,

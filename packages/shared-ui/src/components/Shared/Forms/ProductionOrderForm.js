@@ -4,7 +4,6 @@ import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
-import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
@@ -192,17 +191,8 @@ export default function ProductionOrderForm({ recordId, window }) {
       name: 'pictureUrl',
       label: labels.image,
       width: 70,
-      onClick: ({ value, row }) => {
-        stack({
-          Component: ImageViewer,
-          props: {
-            imageUrl: value
-          },
-          width: 800,
-          height: 600,
-          title: row.sku
-        })
-      }
+      clickable: true,
+      titleField: 'sku'
     },
     {
       component: 'resourcelookup',
@@ -725,6 +715,7 @@ export default function ProductionOrderForm({ recordId, window }) {
             maxAccess={maxAccess}
             initialValues={initialValues?.rows?.[0]}
             columns={columns}
+            enableFilters
             allowAddNewLine={!isPosted && !isClosed}
             allowDelete={!isPosted && !isClosed}
             disabled={isPosted || isClosed}

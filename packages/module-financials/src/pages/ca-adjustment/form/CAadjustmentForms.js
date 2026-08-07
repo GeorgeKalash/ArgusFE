@@ -92,25 +92,9 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-        formik.resetForm({
-          values: {
-            ...obj,
-            baseAmount: !formik.values.baseAmount ? obj.amount : formik.values.baseAmount,
-            recordId: response.recordId
-          }
-        })
-      } else {
-        toast.success(platformLabels.Edited)
-      }
+      toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
 
-      const res = await getRequest({
-        extension: CashBankRepository.CAadjustment.get,
-        parameters: `_recordId=${response.recordId}`
-      })
-
-      formik.setFieldValue('reference', res.record.reference)
+      await refetchForm(response.recordId)
       invalidate()
     }
   })
@@ -209,17 +193,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getRequest({
-          extension: CashBankRepository.CAadjustment.get,
-          parameters: `_recordId=${recordId}`
-        })
-
-        formik.resetForm({
-          values: {
-            ...res.record,
-            date: formatDateFromApi(res.record.date)
-          }
-        })
+        await refetchForm(recordId)
       } else {
         const cashAccountId = formik.values.cashAccountId
         if (cashAccountId) {
@@ -230,6 +204,20 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     })()
   }, [])
 
+  const refetchForm = async (recordId) => {
+    const res = await getRequest({
+      extension: CashBankRepository.CAadjustment.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    formik.resetForm({
+      values: {
+        ...res.record,
+        date: formatDateFromApi(res.record.date)
+      }
+    })
+  }
+
   const onPost = async () => {
     const res = await postRequest({
       extension: CashBankRepository.CAadjustment.post,
@@ -238,15 +226,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
+      await refetchForm(formik.values.recordId)
       invalidate()
-
-      const getRes = await getRequest({
-        extension: CashBankRepository.CAadjustment.get,
-        parameters: `_recordId=${formik.values.recordId}`
-      })
-
-      getRes.record.date = formatDateFromApi(getRes.record.date)
-      formik.setValues(getRes.record)
     }
   }
 
@@ -258,15 +239,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
     if (res?.recordId) {
       toast.success(platformLabels.Unposted)
+      await refetchForm(formik.values.recordId)
       invalidate()
-
-      const getRes = await getRequest({
-        extension: CashBankRepository.CAadjustment.get,
-        parameters: `_recordId=${formik.values.recordId}`
-      })
-
-      getRes.record.date = formatDateFromApi(getRes.record.date)
-      formik.setValues(getRes.record)
     }
   }
 

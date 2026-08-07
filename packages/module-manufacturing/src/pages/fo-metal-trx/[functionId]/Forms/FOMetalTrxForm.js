@@ -258,7 +258,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const totals = calculateGridTotals(formik.values?.items || [], headerPurity)
   
   
-  const qtyIn = formik.values?.header?.qty || 0 + scrapQty || 0
+  const qtyIn = (formik.values?.header?.qty || 0) + (scrapQty || 0)
   const qtyOut = totals.qtyOut
 
   const qtyDiff = recalc ? (qtyOut || 0) - (qtyIn || 0) : formik.values?.header?.qtyDiff || 0

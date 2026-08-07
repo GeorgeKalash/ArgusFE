@@ -28,8 +28,10 @@ import LinkCellRenderer from '@argus/shared-ui/src/components/Shared/Table/LinkC
 import { getStatusBadgeColor } from "@argus/shared-utils/src/utils/status-badge-colors";
 import { getStatusIcon } from "@argus/shared-utils/src/utils/status-icon";
 import Chip from "@mui/material/Chip";
+import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
 import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
+
 
 const Table = ({
   name = 'table',
@@ -838,9 +840,24 @@ const Table = ({
       const imageUrl = data?.[column.field]
       const src = imageUrl ? imageUrl : EMPTY_PHOTO
       const isEmpty = !imageUrl
+      const isClickable = !!column?.clickable && !isEmpty
 
       return (
-        <div className="agImgCell">
+        <div
+          className="agImgCell"
+          style={{ cursor: isClickable ? 'pointer' : 'default' }}
+          onClick={() => {
+            if (!isClickable) return
+
+            stack({
+              Component: ImageViewer,
+              props: {
+                imageUrl,
+                title: column?.titleField ? data?.[column?.titleField] : ''
+              },
+            })
+          }}
+        >
           <img
             src={src}
             alt=""
@@ -909,7 +926,7 @@ const Table = ({
           ...column,
           width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
           flex: column.flex,
-          sort: column.sort || '',
+          sort: column.sort ?? undefined,
           cellRenderer:
             column.type === 'image'
               ? imageRenderer(column)
