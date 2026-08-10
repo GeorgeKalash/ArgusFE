@@ -13,7 +13,6 @@ import CreditOrderForm from '@argus/shared-ui/src/components/Shared/Forms/Credit
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CreditInvoiceForm from '@argus/shared-ui/src/components/Shared/Forms/CreditInvoiceForm'
 import TransactionForm from '@argus/shared-ui/src/components/Shared/Forms/TransactionForm'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import ClientTemplateForm from '@argus/shared-ui/src/components/Shared/Forms/ClientTemplateForm'
 import { RTCLRepository } from '@argus/repositories/src/repositories/RTCLRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -58,8 +57,11 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { userDefaults } = useContext(DefaultsContext)
-  const userId = getStorageData('userData')?.userId || null
-  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value) || null
+
+  const getPlantId = () =>
+    parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value) || null
+
+  const getUserId = () => getStorageData('userData')?.userId || null
 
   const popupConfigs = {
     [SystemFunction.CurrencyCreditOrderSale]: {
@@ -79,11 +81,15 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
     },
     [SystemFunction.CurrencyPurchase]: {
       component: TransactionForm,
-      props: ['plantId']
+      props: {
+        plantId: getPlantId
+      }
     },
     [SystemFunction.CurrencySale]: {
       component: TransactionForm,
-      props: ['plantId']
+      props: {
+        plantId: getPlantId
+      }
     },
     [SystemFunction.KYC]: {
       component: ClientTemplateForm,
@@ -95,7 +101,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
 
         return response?.record?.clientId || null
       },
-      props: ['plantId']
+      props: {
+        plantId: getPlantId
+      }
     },
     [SystemFunction.ResignationRequest]: {
       component: ResignationReqForm
@@ -111,25 +119,36 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
     },
     [SystemFunction.OutwardsOrder]: {
       component: OutwardsForm,
-      props: ['plantId','userId']
+      props: {
+        plantId: getPlantId,
+        userId: getUserId
+      }
     },
     [SystemFunction.CashTransfer]: {
       component: CashTransferTab
     },
     [SystemFunction.OutwardsModification]: {
-      component: OutwardsModificationForm,
+      component: OutwardsModificationForm
     },
     [SystemFunction.OutwardsReturn]: {
       component: OutwardsReturnForm,
-      props: ['plantId']
+      props: {
+        plantId: getPlantId
+      }
     },
     [SystemFunction.InwardTransfer]: {
       component: InwardTransferForm,
-      props: ['plantId','userId']
+      props: {
+        plantId: getPlantId,
+        userId: getUserId
+      }
     },
     [SystemFunction.InwardSettlement]: {
       component: InwardSettlementForm,
-      props: ['plantId','userId']
+      props: {
+        plantId: getPlantId,
+        userId: getUserId
+      }
     },
     [SystemFunction.Sketch]: {
       component: SketchForm
@@ -184,7 +203,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
     },
     [SystemFunction.StockCount]: {
       component: CycleCountsWindow,
-      props: ['plantId']
+      props: {
+        plantId: getPlantId
+      }
     },
     [SystemFunction.FixingSales]: {
       component: FixingForm
@@ -201,19 +222,24 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
   }
 
   const getPopupProps = async (obj, config) => {
-    let preparedRecordId
-    if (config.prepare) preparedRecordId = await config.prepare(obj.recordId)
+    const preparedRecordId = config.prepare
+      ? await config.prepare(obj)
+      : obj.recordId
 
-    const requiredProps = config.props || []
-    const props = {
-      recordId: preparedRecordId || obj.recordId,
-      functionId: obj.functionId
+    const dynamicProps = Object.fromEntries(
+      await Promise.all(
+        Object.entries(config.props || {}).map(async ([key, resolver]) => [
+          key,
+          await resolver(obj)
+        ])
+      )
+    )
+
+    return {
+      recordId: preparedRecordId,
+      functionId: obj.functionId,
+      ...dynamicProps
     }
-
-    if (requiredProps.includes('userId')) props.userId = userId
-    if (requiredProps.includes('plantId')) props.plantId = plantId
-
-    return props
   }
 
   const openPopup = async obj => {

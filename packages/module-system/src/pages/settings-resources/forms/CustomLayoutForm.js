@@ -13,86 +13,34 @@ import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const isRowEmpty = row => {
-    return !row.reportName && !row.caption && !row.assembly && !row.wsName
+  const conditions = {
+    reportName: row => row.reportName,
+    wsName: row => row.wsName,
+    caption: row => row.caption,
+    assembly: row => ({
+      optional: row.reportEngine != 1,
+      valid: row.reportEngine != 1 || !!row.assembly
+    }),
+    schemaFile: row => ({
+      optional: row.reportEngine != 2,
+      valid: row.reportEngine != 2 || !!row.schemaFile
+    })
   }
 
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const { formik } = useForm({
-    validateOnChange: true,
-
+    conditionSchema: ['items'],
     validationSchema: yup.object({
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            reportName: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.reportName || row.caption || row.assembly || row.wsName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            }),
-
-            wsName: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.reportName || row.caption || row.assembly || row.wsName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            }),
-
-            caption: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.reportName || row.caption || row.assembly || row.wsName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            }),
-
-            assembly: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.reportName || row.caption || row.assembly || row.wsName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            })
-          })
-        )
-        .required()
+      items: yup.array().of(schema)
     }),
+    maxAccess,
     initialValues: {
       resourceId: row.resourceId,
       resourceName: row.resourceName,
@@ -110,14 +58,15 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
         }
       ]
     },
-    onSubmit: values => {
-      const { items } = values
+    onSubmit: async values => {
+      const filteredItems = values.items.filter(item =>
+        Object.values(requiredFields)?.every(fn => fn(item))
+      )
 
-      if (items.length === 1 && isRowEmpty(items[0])) {
-        postData({ resourceId: row.resourceId, items: [] })
-      } else {
-        postData(values)
-      }
+      await postData({
+        resourceId: row.resourceId,
+        items: filteredItems
+      })
     }
   })
 
@@ -131,7 +80,7 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
 
     const data = {
       resourceId: row.resourceId,
-      data: items || []
+      data: items
     }
 
     await postRequest({
@@ -148,37 +97,7 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
       component: 'textfield',
       label: labels.id,
       name: 'savedIndex',
-      props: { disabled: true },
-    },
-    {
-      component: 'textfield',
-      label: labels.api,
-      name: 'wsName'
-    },
-    {
-      component: 'textfield',
-      label: labels.reportName,
-      name: 'reportName'
-    },
-    {
-      component: 'textfield',
-      label: labels.assembly,
-      name: 'assembly'
-    },
-    {
-      component: 'textfield',
-      label: labels.params,
-      name: 'parameters'
-    },
-    {
-      component: 'textfield',
-      label: labels.caption,
-      name: 'caption'
-    },
-    {
-      component: 'checkbox',
-      label: labels.isInactive,
-      name: 'isInactive'
+      props: { disabled: true }
     },
     {
       component: 'resourcecombobox',
@@ -193,14 +112,61 @@ const CustomLayoutForm = ({ labels, maxAccess, row, invalidate, window }) => {
           { from: 'key', to: 'reportEngine' },
           { from: 'value', to: 'reportEngineName' }
         ]
+      },
+      async onChange({ row: { update } }) {
+        update({
+          assembly: null,
+          schemaFile: null
+        })
       }
+    },
+    {
+      component: 'textfield',
+      label: labels.api,
+      name: 'wsName'
+    },
+    {
+      component: 'textfield',
+      label: labels.instanceName,
+      name: 'reportName'
+    },
+    {
+      component: 'textfield',
+      label: labels.assembly,
+      name: 'assembly',
+      propsReducer({ row, props }) {
+        return {
+          ...props,
+          readOnly: row.reportEngine != 1,
+          required: row.reportEngine == 1
+        }
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.params,
+      name: 'parameters'
+    },
+    {
+      component: 'textfield',
+      label: labels.layoutName,
+      name: 'caption'
+    },
+    {
+      component: 'checkbox',
+      label: labels.isInactive,
+      name: 'isInactive'
     },
     {
       component: 'textfield',
       label: labels.schemaFile,
       name: 'schemaFile',
       propsReducer({ row, props }) {
-        return { ...props, required: row.reportEngine == 2, readOnly: row.reportEngine != 2 }
+        return {
+          ...props,
+          readOnly: row.reportEngine != 2,
+          required: row.reportEngine == 2
+        }
       }
     },
     {

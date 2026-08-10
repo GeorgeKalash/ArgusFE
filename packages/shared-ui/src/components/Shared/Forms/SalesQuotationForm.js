@@ -65,7 +65,6 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
   const [address, setAddress] = useState({})
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
-  const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
   const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
@@ -99,6 +98,14 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     return spId
   }
 
+  const systemSiteId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'siteId')?.value) || null
+  const salesTD = systemDefaults?.list?.find(obj => obj.key === 'salesTD')?.value || false
+  const plId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'plId')?.value) || null
+
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value) || null
+  const userSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value) || null
+  const spId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value) || null
+
   const initialValues = {
     recordId,
     dtId: null,
@@ -107,7 +114,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     expiryDate: null,
     deliveryDate: null,
     validity: null,
-    plantId: null,
+    plantId,
     clientId: '',
     bpId: null,
     bpRef: null,
@@ -115,7 +122,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     currencyId: parseInt(currency),
     szId: null,
     spId: null,
-    siteId: null,
+    siteId: userSiteId ? userSiteId : systemSiteId,
     description: null,
     status: 1,
     isVattable: false,
@@ -127,7 +134,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     amount: 0,
     vatAmount: 0,
     tdAmount: 0,
-    plId: null,
+    plId,
     ptId: null,
     shipToAddressId: null,
     maxDiscount: 0,
@@ -717,7 +724,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode
+      disabled: !isClosed || !editMode || !isReleased
     },
   ]
 
@@ -1174,36 +1181,6 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
 
     return res?.record?.reference
   }
-  async function getDefaultData() {
-    const systemKeys = ['siteId', 'salesTD', 'plId']
-    const userKeys = ['plantId', 'siteId', 'spId']
-
-    const systemObject = (systemDefaults?.list || []).reduce((acc, { key, value }) => {
-      if (systemKeys.includes(key)) {
-        acc[key] = value === 'True' || value === 'False' ? value : value ? parseInt(value) : null
-      }
-
-      return acc
-    }, {})
-
-    const userObject = (userDefaults?.list || []).reduce((acc, { key, value }) => {
-      if (userKeys.includes(key)) {
-        acc[key] = value ? parseInt(value) : null
-      }
-
-      return acc
-    }, {})
-
-    setDefaults({
-      userDefaultsList: userObject,
-      systemDefaultsList: systemObject
-    })
-
-    return {
-      userDefaultsList: userObject,
-      systemDefaultsList: systemObject
-    }
-  }
 
   async function updateValues(fields) {
     Object.entries(fields).forEach(([key, val]) => {
@@ -1218,10 +1195,12 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       extension: SaleRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
     })
-    const validSpId = await validateSalesPerson(res?.record?.spId || defaults.userDefaultsList.spId)
+
+    const validSpId = await validateSalesPerson(res?.record?.spId || spId || null)
     formik.setFieldValue('spId', validSpId)
-    formik.setFieldValue('plantId', res?.record?.plantId || defaults.userDefaultsList.plantId || null)
+    formik.setFieldValue('plantId', res?.record?.plantId || plantId || null)
   }
+
   useEffect(() => {
     let shipAdd = ''
     const { name, street1, street2, city, phone, phone2, email1 } = address
@@ -1257,28 +1236,17 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
-      const defaultValues = await getDefaultData()
       if (recordId) await refetchForm(recordId)
       else {
-        const defaultSalesTD = defaultValues.systemDefaultsList.salesTD
-        if (defaultSalesTD) {
+        if (salesTD) {
           setCycleButtonState({ text: '%', value: 2 })
           formik.setFieldValue('tdType', 2)
         } else {
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('tdType', 1)
         }
-        const userDefaultSite = defaultValues.userDefaultsList.siteId
-        const userDefaultSASite = defaultValues.systemDefaultsList.siteId
-        const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
-        const plant = defaultValues.userDefaultsList.plantId
-        const salesPerson = defaultValues.userDefaultsList.spId
-        formik.setFieldValue('siteId', parseInt(siteId))
-        const validSpId = await validateSalesPerson(salesPerson)
+        const validSpId = await validateSalesPerson(spId)
         formik.setFieldValue('spId', validSpId)
-
-        formik.setFieldValue('plantId', parseInt(plant))
-        formik.setFieldValue('plId', parseInt(defaultValues?.systemDefaultsList?.plId))
       }
     })()
   }, [])
@@ -1569,7 +1537,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
                     value={formik.values?.isVattable}
                     onChange={event => formik.setFieldValue('isVattable', event.target.checked)}
                     label={labels.VAT}
-                    disabled
+                    disabled={formik.values.items[0]?.itemId}
                     maxAccess={maxAccess}
                   />
                 </Grid>
