@@ -313,7 +313,12 @@ const PostWorkCenterJob = () => {
                   { key: 'workCenterName', value: 'Name' }
                 ]}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('workCenterId', newValue?.workCenterId || null)
+                  formik.resetForm({
+                    values: {
+                      ...formik.values,
+                      workCenterId: newValue?.workCenterId || null
+                    }
+                  })
                 }}
                 required
                 maxAccess={maxAccess}
@@ -348,7 +353,12 @@ const PostWorkCenterJob = () => {
                   { key: 'workCenterName', value: 'Name' }
                 ]}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('toWorkCenterId', newValue?.workCenterId || null)
+                  formik.resetForm({
+                    values: {
+                      ...formik.values,
+                      toWorkCenterId: newValue?.workCenterId || null
+                    }
+                  })
                 }}
                 required={formik.values.routingId}
                 maxAccess={maxAccess}
