@@ -322,7 +322,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       name: 'sku',
       flex: 2,
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
+        endpointId: InventoryRepository.Item.snapshot6,
         parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
         valueField: 'sku',
