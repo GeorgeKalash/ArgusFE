@@ -4,15 +4,18 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import PayrollDetailsWindow from './Windows/PayrollDetailsWindow'
+import toast from 'react-hot-toast'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const PayDetails = () => {
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -36,7 +39,8 @@ const PayDetails = () => {
     filterBy,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: PayrollRepository.GeneratePayroll.page,
@@ -121,6 +125,15 @@ const PayDetails = () => {
     openForm(obj)
   }
 
+  const del = async obj => {
+    await postRequest({
+      extension: PayrollRepository.GeneratePayroll.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
   async function openForm(obj) {
     stack({
       Component: PayrollDetailsWindow,
@@ -148,6 +161,7 @@ const PayDetails = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
+          onDelete={del}
           deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
