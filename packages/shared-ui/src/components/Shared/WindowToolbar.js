@@ -70,7 +70,7 @@ const WindowToolbar = ({
 
     setReportPack(pack)
 
-    const firstStore = (pack?.layouts || []).map(item => ({
+    const store = (pack?.layouts || []).map(item => ({
       id: item.id,
       api_url: item.api,
       reportClass: item.instanceName,
@@ -81,32 +81,7 @@ const WindowToolbar = ({
       assembly: 'ArgusRPT.dll'
     }))
 
-    const secondStore = (pack?.reportTemplates || []).map(item => ({
-      id: item.id,
-      api_url: item.wsName,
-      reportClass: item.reportName,
-      parameters: item.parameters,
-      layoutName: item.caption,
-      schemaFile: item.schemaFile,
-      reportEngine: item.reportEngine,
-      assembly: item.assembly
-    }))
-
-    const filteringItems = pack?.reportLayoutOverrides || []
-
-    const firstStore2 =
-      firstStore?.filter(
-        item =>
-          !filteringItems.some(
-            filterItem =>
-              filterItem.id === item.id &&
-              filterItem.isInactive
-          )
-      ) || []
-
-    const combinedStore = firstStore ? [...firstStore2, ...secondStore] : [...secondStore]
-
-    const finalStore = (combinedStore || []).map(
+    const finalStore = (store || []).map(
       (item, index) => ({
         ...item,
         uniqueId: index + 1
