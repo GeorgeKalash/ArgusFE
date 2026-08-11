@@ -642,6 +642,7 @@ export const ResourceIds = {
   EmployeeMissingDetails: 71407,
   ChangeVendor: 50615,
   EventOrder: 38304,
+  EventOrderInquiry: 38305,
   CompanyPositions: 70103,
   Divisions: 70101,
   Branches: 70102,
