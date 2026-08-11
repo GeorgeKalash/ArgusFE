@@ -45,15 +45,8 @@ export default function CuttingForm({ labels, access, setStore, store }) {
       reference: '',
       date: new Date(),
       castingId: null,
-      castingRef: '',
       laborId: null,
-      statusName: '',
-      status: 1,
-      metalId: null,
-      metalColorId: null,
-      outputWgt: 0,
-      inputWgt: 0,
-      loss: 0
+      status: 1
     },
     maxAccess,
     validationSchema: yup.object({
@@ -89,9 +82,10 @@ export default function CuttingForm({ labels, access, setStore, store }) {
       },
       castingInfo: {
         ...prevStore.castingInfo,
-        outputWgt: source?.outputWgt,
-        inputWgt: source?.inputWgt,
-        scrapWgt: source?.scrapWgt ?? 0
+        outputWgt: source?.outputWgt ?? 0,
+        inputWgt: source?.inputWgt ?? 0,
+        scrapWgt: source?.scrapWgt ?? 0,
+        loss: source?.loss ?? 0,
       }
     }))
   }
@@ -170,6 +164,7 @@ export default function CuttingForm({ labels, access, setStore, store }) {
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
+      previewReport={editMode}
       actions={actions}
       disabledSubmit={isPosted}
     >
@@ -240,16 +235,10 @@ export default function CuttingForm({ labels, access, setStore, store }) {
                   { key: 'metalRef', value: 'Metal' }
                 ]}
                 form={formik}
-                onChange={(event, newValue) => {
+                readOnly={isPosted}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('castingId', newValue?.recordId || null)
                   formik.setFieldValue('castingRef', newValue?.reference || null)
-                  formik.setFieldValue('metalId', newValue?.metalId || null)
-                  formik.setFieldValue('metalColorId', newValue?.metalColorId || null)
-                  formik.setFieldValue('outputWgt', newValue?.outputWgt || 0)
-                  formik.setFieldValue('inputWgt', newValue?.inputWgt || 0)
-                  formik.setFieldValue('loss', newValue?.loss || 0)
-
-                  applyCastingToStore({ ...newValue, castingId: newValue?.recordId })
                 }}
                 errorCheck={'castingId'}
                 maxAccess={maxAccess}

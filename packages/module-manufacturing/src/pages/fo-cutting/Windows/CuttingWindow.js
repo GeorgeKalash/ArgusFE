@@ -14,8 +14,8 @@ export default function FOCuttingWindow({ labels, access, recordId }) {
 
   const tabs = [
     { label: labels.cutting },
-    { label: labels.disassembly, disabled: !store.recordId || !store.castingId },
-    { label: labels.jobs, disabled: !store.recordId || !store.castingId }
+    { label: labels.disassembly, disabled: !store.recordId },
+    { label: labels.jobs, disabled: !store.recordId }
   ]
 
   return (
