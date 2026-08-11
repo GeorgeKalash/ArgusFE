@@ -58,7 +58,7 @@ const EventOrderInquiry = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.Ref,
+      headerName: _labels.reference,
       flex: 1
     },
     {
