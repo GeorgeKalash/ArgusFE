@@ -116,6 +116,7 @@ const HrProcessedPunches = () => {
       </Fixed>
       <Grow>
         <Table
+          name='ProcessedPunchesTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
