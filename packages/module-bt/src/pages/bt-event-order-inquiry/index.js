@@ -9,6 +9,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import EventOrderForm from '@argus/shared-ui/src/components/Shared/Forms/EventOrderForm'
+import GoldPriceTicker from '@argus/shared-ui/src/components/Shared/GoldPriceTicker'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
 const EventOrderInquiry = () => {
@@ -136,9 +137,12 @@ const EventOrderInquiry = () => {
   return (
     <VertLayout>
       <Fixed>
+        <GoldPriceTicker currency='SAR' style={{ marginLeft: 16, marginBottom: 16 }} />
         <RPBGridToolbar hasSearch={false} labels={_labels} maxAccess={access} reportName={'BTEOI'} filterBy={filterBy} />
       </Fixed>
       <Grow>
+        
+        
         <Table
           name='table'
           columns={columns}
