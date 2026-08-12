@@ -122,7 +122,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
               <CustomNumberField
                 name='amount'
                 label={labels.amount}
-                value={row.amount}
+                value={row.subtotal}
                 maxAccess={maxAccess}
                 readOnly
                 onChange={formik.handleChange}
