@@ -151,11 +151,11 @@ const PostWorkCenterJob = () => {
     return response?.list
   }
 
+  const reset = () => formik.resetForm({ values: initialValues })
+
   const fillForm = async newValue => {
     if (!newValue) {
-      formik.resetForm({
-        values: initialValues
-      })
+      reset()
       return
     }
 
@@ -237,6 +237,7 @@ const PostWorkCenterJob = () => {
       isParentWindow={false}
       isInfo={false}
       isSaved={false}
+      onClear={reset}
     >
       <VertLayout>
         <Fixed>
