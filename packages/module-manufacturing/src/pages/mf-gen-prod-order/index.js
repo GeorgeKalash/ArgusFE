@@ -170,6 +170,7 @@ const GeneratePoductionOrder = () => {
     const newlyItemSummaries = response?.record?.itemSummaries.map((item, index) => ({
       ...item,
       id: index + 1,
+      checked: false,
       initialSoQty: item.soQty,
       initialRemainingQty: item.remainingQty,
       orders: response?.record?.orders
@@ -211,9 +212,9 @@ const GeneratePoductionOrder = () => {
     }
   }
 
-  const resetForm = () => {
-    formik.resetForm()
-    fillSummaryORD()
+  const resetForm = async () => {
+    const resp = await fillSummaryORD()
+    formik.resetForm({ values : {...formik.initialValues, itemSummaries: resp } })
   }
 
   return (

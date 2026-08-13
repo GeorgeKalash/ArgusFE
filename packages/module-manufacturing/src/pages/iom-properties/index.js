@@ -14,7 +14,7 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const IomProperties = () => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const [propertyStore, setPropertyStore] = useState([])
@@ -75,7 +75,7 @@ const IomProperties = () => {
         return acc
       }, {}) || {}
 
-    formik.setValues(myObject)
+    formik.resetForm({ values: myObject })
   }, [propertyStore])
 
   return (

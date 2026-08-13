@@ -25,7 +25,11 @@ const IvSettings = ({ _labels, access }) => {
 
   const { formik } = useForm({
     maxAccess: access,
-    initialValues: arrayAllow.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
+    initialValues: {
+      ...arrayAllow.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
+      nraDescription: '',
+      nraRef: ''
+    },
     validationSchema: yup.object({
       iv_minSerialSize: yup.number().min(1).max(20).nullable(),
       minItemSearchTextSize: yup.number().min(3).max(20).required()
@@ -97,7 +101,7 @@ const IvSettings = ({ _labels, access }) => {
                 displayField='value'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('itemSearchStyle', newValue?.key || '')
+                  formik.setFieldValue('itemSearchStyle', newValue?.key || null)
                 }}
                 error={formik.touched.itemSearchStyle && Boolean(formik.errors.itemSearchStyle)}
               />
@@ -111,7 +115,7 @@ const IvSettings = ({ _labels, access }) => {
                 displayField='value'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('itemSearchFields', newValue?.key || '')
+                  formik.setFieldValue('itemSearchFields', newValue?.key || null)
                 }}
                 error={formik.touched.itemSearchFields && Boolean(formik.errors.itemSearchFields)}
               />
@@ -122,7 +126,7 @@ const IvSettings = ({ _labels, access }) => {
                 label={_labels.serial}
                 value={formik.values.iv_minSerialSize}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('iv_minSerialSize', '')}
+                onClear={() => formik.setFieldValue('iv_minSerialSize', null)}
                 error={formik.touched.iv_minSerialSize && Boolean(formik.errors.iv_minSerialSize)}
               />
             </Grid>

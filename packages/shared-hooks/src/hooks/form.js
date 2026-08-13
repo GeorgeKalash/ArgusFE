@@ -195,7 +195,13 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
     return a.valueOf() === b.valueOf()
   }
 
+  const isEmptyValue = v => v === null || v === undefined || v === ''
+
   const deepEqual = (a, b) => {
+    if (isEmptyValue(a) || isEmptyValue(b)) {
+      return isEmptyValue(a) && isEmptyValue(b)
+    }
+
     if (a instanceof Date || b instanceof Date) {
       if (!(a instanceof Date) || !(b instanceof Date)) return false
       return areDatesEqual(a, b)
@@ -207,8 +213,8 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
     }
 
     if (a && typeof a === 'object' && b && typeof b === 'object') {
-      const keysA = Object.keys(a).filter(k => a[k] !== null && a[k] !== undefined)
-      const keysB = Object.keys(b).filter(k => b[k] !== null && b[k] !== undefined)
+      const keysA = Object.keys(a).filter(k => !isEmptyValue(a[k]))
+      const keysB = Object.keys(b).filter(k => !isEmptyValue(b[k]))
       if (keysA.length !== keysB.length) return false
       return keysA.every(k => keysB.includes(k) && deepEqual(a[k], b[k]))
     }
