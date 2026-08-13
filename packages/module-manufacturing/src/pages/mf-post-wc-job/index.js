@@ -237,6 +237,7 @@ const PostWorkCenterJob = () => {
       isParentWindow={false}
       isInfo={false}
       isSaved={false}
+      onClear={() => formik.resetForm({ values: initialValues })}
     >
       <VertLayout>
         <Fixed>
