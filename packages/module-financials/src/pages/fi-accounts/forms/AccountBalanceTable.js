@@ -115,8 +115,7 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
           />
         </Grow>
         <Fixed>
-          <Grid container spacing={2} padding={2}>
-            <Grid item xs={6}></Grid>
+          <Grid container spacing={2} padding={2} justifyContent='flex-end'>
             <Grid item xs={3}>
               <CustomNumberField
                 name='balanceBaseCurrency'
