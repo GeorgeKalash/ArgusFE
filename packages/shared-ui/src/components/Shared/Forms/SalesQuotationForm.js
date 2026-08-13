@@ -73,7 +73,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     editMode: !!recordId
   })
   
-  useSetWindow({ title: labels.SalesQuotations, window })
+  useSetWindow({ title: labels.salesQuotations, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesQuotation,
