@@ -52,6 +52,9 @@ import EventOrderForm from '@argus/shared-ui/src/components/Shared/Forms/EventOr
 import CreditLimitHoldForm from '@argus/shared-ui/src/components/Shared/Forms/CreditLimitHoldForm'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
+import SalesQuotationForm from '@argus/shared-ui/src/components/Shared/Forms/SalesQuotationForm'
+import StandardCostUpdateForm from '@argus/shared-ui/src/components/Shared/Forms/StandardCostUpdateForm'
+import ModellingWindow from '@argus/shared-ui/src/components/Shared/Forms/ModellingWindow'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -218,6 +221,15 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
     },
     [SystemFunction.CreditLimitHold]: {
       component: CreditLimitHoldForm
+    },
+    [SystemFunction.SalesQuotation]: {
+      component: SalesQuotationForm
+    },
+    [SystemFunction.StandardCostUpdate]: {
+      component: StandardCostUpdateForm
+    },
+    [SystemFunction.ModelMaker]: {
+      component: ModellingWindow
     }
   }
 
