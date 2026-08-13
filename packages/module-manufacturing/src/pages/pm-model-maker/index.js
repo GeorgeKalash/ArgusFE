@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
-import ModellingWindow from './Windows/ModellingWindow'
+import ModellingWindow from '@argus/shared-ui/src/components/Shared/Forms/ModellingWindow'
 
 const ModelMaker = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -156,13 +156,8 @@ const ModelMaker = () => {
     stack({
       Component: ModellingWindow,
       props: {
-        labels,
-        access,
         recordId
-      },
-      width: 900,
-      height: 680,
-      title: labels.modelMaker
+      }
     })
   }
 

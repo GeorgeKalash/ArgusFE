@@ -21,12 +21,21 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-export default function StandardCostUpdateForm({ labels, access, recordId, window }) {
+export default function StandardCostUpdateForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const functionId = SystemFunction.StandardCostUpdate
   const [reCal, setReCal] = useState(false)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.StandardCostUpdate,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.StandardCostUpdate, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
@@ -480,3 +489,6 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
     </FormShell>
   )
 }
+
+StandardCostUpdateForm.width = 1000
+StandardCostUpdateForm.height = 700
