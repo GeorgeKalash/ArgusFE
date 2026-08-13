@@ -109,7 +109,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
     return amount + amountValue
   }, 0)
 
-  const balance = row.amount - totalAmount
+  const balance = row.subtotal - totalAmount
 
   const canSubmit = balance > 0 || balance < 0 || readOnly
 
