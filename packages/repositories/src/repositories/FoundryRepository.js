@@ -118,7 +118,6 @@ export const FoundryRepository = {
   },
   Cutting: {
     page: service + 'pageCUT',
-    qry: service + 'qryCUT',
     snapshot: service + 'snapshotCUT',
     get: service + 'getCUT',
     set: service + 'setCUT',

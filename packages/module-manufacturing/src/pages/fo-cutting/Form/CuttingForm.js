@@ -237,8 +237,9 @@ export default function CuttingForm({ labels, access, setStore, store }) {
                 form={formik}
                 readOnly={isPosted}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('castingId', newValue?.recordId || null)
                   formik.setFieldValue('castingRef', newValue?.reference || null)
+                  
+                  formik.setFieldValue('castingId', newValue?.recordId || null)
                 }}
                 errorCheck={'castingId'}
                 maxAccess={maxAccess}
