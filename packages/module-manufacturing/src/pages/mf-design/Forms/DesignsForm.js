@@ -61,7 +61,9 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       itemGroupId: null,
       designerRef: '',
       designerName: '',
-      isInactive: false
+      isInactive: false,
+      developerId: null,
+      parentId: null
     },
     behavior: { fieldBehavior },
     maxAccess,
@@ -422,6 +424,45 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                       formik.setFieldValue('designerId', newValue?.recordId || null)
                     }}
                     errorCheck={'designerId'}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ProductModelingRepository.Developer.qry}
+                    values={formik.values}
+                    name='developerId'
+                    label={labels.productDeveloper}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('developerId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.developerId && formik.errors.developerId}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.Design.qry}
+                    parameters={`_params=&_startAt=0&_pageSize=1000`}
+                    values={formik.values}
+                    name='parentId'
+                    label={labels.parent}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('parentId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.parentId && formik.errors.parentId}
                   />
                 </Grid>
                 <Grid item xs={12}>
