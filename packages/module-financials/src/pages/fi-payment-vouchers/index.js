@@ -25,7 +25,7 @@ const FiPaymentVouchers = () => {
 
     const response = await getRequest({
       extension: FinancialRepository.PaymentVouchers.page3,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     if (response && response?.list) {

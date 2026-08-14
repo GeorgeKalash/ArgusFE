@@ -438,6 +438,7 @@ const PhysicalCountSerialDe = () => {
                 readOnly
                 required
                 error={formik.touched.scDate && Boolean(formik.errors.scDate)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={3}>
@@ -448,6 +449,7 @@ const PhysicalCountSerialDe = () => {
                 readOnly
                 required
                 error={formik.touched.scRef && Boolean(formik.errors.scRef)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={3}></Grid>
@@ -535,6 +537,7 @@ const PhysicalCountSerialDe = () => {
                 readOnly
                 hidden={!formik.values.controllerId}
                 numberField
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={2}>
@@ -545,6 +548,7 @@ const PhysicalCountSerialDe = () => {
                 readOnly
                 hidden={!formik.values.controllerId}
                 numberField
+                maxAccess={access}
               />
             </Grid>
           </Grid>

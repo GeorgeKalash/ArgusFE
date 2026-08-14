@@ -124,7 +124,7 @@ const ModelMaker = () => {
 
     const response = await getRequest({
       extension: ProductModelingRepository.ModelMaker.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }

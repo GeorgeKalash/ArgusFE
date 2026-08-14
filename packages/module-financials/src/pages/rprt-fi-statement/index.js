@@ -390,6 +390,7 @@ const FinancialStatements = () => {
                   label={col.label}
                   value={columnVisibility[col.field] !== false}
                   onChange={handleColumnToggle(col.field)}
+                  maxAccess={access}
                 />
               </Box>
             ))}

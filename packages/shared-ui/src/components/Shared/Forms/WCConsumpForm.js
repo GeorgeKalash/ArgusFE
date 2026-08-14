@@ -639,6 +639,7 @@ export default function WCConsumpForm({ recordId, window }) {
                     label={labels.siteRef}
                     value={formik.values.header?.siteRef}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={6}>

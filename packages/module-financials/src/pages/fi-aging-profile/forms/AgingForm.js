@@ -156,7 +156,7 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
             error={formik.errors.agingLeg}
             allowDelete
             columns={columns}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </FormShell>

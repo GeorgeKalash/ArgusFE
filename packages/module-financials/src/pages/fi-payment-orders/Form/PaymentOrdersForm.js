@@ -394,6 +394,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
                       formik.setFieldValue('currencyName', newValue?.name || '')
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={4}>
@@ -489,10 +490,11 @@ export default function PaymentOrdersForm({ recordId, window }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -534,7 +536,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
                 required
                 readOnly={isClosed || isCancelled}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   if (!newValue?.key) {
                     formik.setFieldValue('accountId', null)
                     formik.setFieldValue('accountRef', '')
@@ -583,7 +585,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
                 firstFieldWidth={4}
                 displayFieldWidth={4}
                 filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('accountGroupName', newValue?.groupName || '')

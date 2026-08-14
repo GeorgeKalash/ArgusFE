@@ -75,11 +75,12 @@ const SmsRequestLog = () => {
                     parameters={`_dataset=${datasetId}&_language=${languageId}`}
                     label={labels.Module}
                     name='moduleId'
+                    maxAccess={access}
                     values={values}
                     valueField='key'
                     displayField='value'
                     required
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       setValues({ moduleId: newValue?.key || '10', resourceId: '' })
                     }}
                     sx={{ pr: 2 }}
@@ -95,7 +96,8 @@ const SmsRequestLog = () => {
                     required
                     valueField='key'
                     displayField='value'
-                    onChange={(event, newValue) => {
+                    maxAccess={access}
+                    onChange={(_, newValue) => {
                       onChange(newValue?.key || '')
                       setValues({ ...values, resourceId: newValue?.key || '' })
                     }}

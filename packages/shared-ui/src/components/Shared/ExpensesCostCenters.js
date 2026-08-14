@@ -163,7 +163,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
             columns={columns}
             allowDelete={!readOnly}
             allowAddNewLine={!readOnly}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

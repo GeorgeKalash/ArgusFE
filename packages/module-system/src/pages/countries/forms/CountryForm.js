@@ -218,6 +218,7 @@ export default function CountryForm({ labels, maxAccess, recordId, setStore }) {
                   formik.setFieldValue('languageId', newValue?.key ?? '')
                 }}
                 error={formik.touched.languageId && Boolean(formik.errors.languageId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

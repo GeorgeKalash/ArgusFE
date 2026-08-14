@@ -30,6 +30,7 @@ export const DocumentReleaseRepository = {
     del: service + 'delGCO'
   },
   CharacteristicsGeneral: {
+    page: service + 'pageCHA',
     qry: service + 'qryCHA',
     get: service + 'getCHA',
     set: service + 'setCHA',
@@ -70,6 +71,7 @@ export const DocumentReleaseRepository = {
     snapshot: service + 'snapshotSTG'
   },
   DocumentsOnHold: {
+    page: service + 'pageTRX',
     qry: service + 'qryTRX',
     get: service + 'getTRX',
     set: service + 'setTRX',

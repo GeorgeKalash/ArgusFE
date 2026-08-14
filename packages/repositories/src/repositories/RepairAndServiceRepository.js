@@ -107,7 +107,7 @@ export const RepairAndServiceRepository = {
     qry: service + 'qryLBR'
   },
   WorkOrder: {
-    page: service + 'qryWO',
+    page: service + 'pageWO',
     get: service + 'getWO',
     set: service + 'setWO',
     del: service + 'delWO',

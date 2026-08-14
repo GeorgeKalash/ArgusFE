@@ -24,7 +24,7 @@ const AgingProfile = () => {
 
     const response = await getRequest({
       extension: FinancialRepository.AgingProfile.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }

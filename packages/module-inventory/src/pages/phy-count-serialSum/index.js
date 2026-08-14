@@ -242,6 +242,7 @@ const PhysicalCountSerial = () => {
                 value={formik.values.date}
                 readOnly={true}
                 error={false}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={2}>
@@ -251,6 +252,7 @@ const PhysicalCountSerial = () => {
                 value={formik.values.reference}
                 readOnly={true}
                 error={false}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}></Grid>
@@ -286,6 +288,7 @@ const PhysicalCountSerial = () => {
                 }}
                 onChange={handleSearchChange}
                 readOnly={data?.list?.length === 0 || data?.length === 0}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={2}>
@@ -322,6 +325,7 @@ const PhysicalCountSerial = () => {
                     value={formik.values.totalCountedPcs}
                     readOnly={true}
                     hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -331,6 +335,7 @@ const PhysicalCountSerial = () => {
                     value={formik.values.totalSystemPcs}
                     readOnly={true}
                     hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -340,6 +345,7 @@ const PhysicalCountSerial = () => {
                     value={formik.values.totalVariancePcs}
                     readOnly={true}
                     hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -349,6 +355,7 @@ const PhysicalCountSerial = () => {
                     value={formik.values.totalWeight}
                     readOnly={true}
                     hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -358,6 +365,7 @@ const PhysicalCountSerial = () => {
                     value={formik.values.totalVarianceWeight}
                     readOnly={true}
                     hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>

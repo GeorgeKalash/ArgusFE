@@ -56,8 +56,6 @@ const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
   const excludeSelectedCode = item => item.codeId !== selectedCodeId
 
   const getCodeId = codeId => {
-    const defaultParams = `_codeId=${codeId}&_groupId=${stgId}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.StrategyCode.get,
       parameters: `_groupId=${recordId}`

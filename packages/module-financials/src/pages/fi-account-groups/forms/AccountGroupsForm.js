@@ -23,7 +23,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.Group.qry
+    endpointId: FinancialRepository.Group.page
   })
 
   const { formik } = useForm({
@@ -126,7 +126,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
                 label={labels.numberRange}
                 secondDisplayField={true}
                 secondValue={formik.values.nraDescription}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   if (newValue) {
                     formik.setFieldValue('nraId', newValue?.recordId)
                     formik.setFieldValue('nraRef', newValue?.reference)
@@ -137,6 +137,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
                     formik.setFieldValue('nraDescription', '')
                   }
                 }}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -145,6 +146,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
                 name='type'
                 label={labels.type}
                 valueField='key'
+
                 required
                 displayField='value'
                 values={formik.values}
@@ -152,6 +154,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
                   formik.setFieldValue('type', newValue?.key || '')
                 }}
                 error={formik.touched.type && Boolean(formik.errors.type)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

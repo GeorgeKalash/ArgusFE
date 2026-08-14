@@ -27,19 +27,16 @@ const Characteristics = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.qry,
+    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.page,
     datasetId: ResourceIds.Characteristics
   })
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
-    var parameters = defaultParams
-
     const response = await getRequest({
-      extension: DocumentReleaseRepository.CharacteristicsGeneral.qry,
-      parameters: parameters
+      extension: DocumentReleaseRepository.CharacteristicsGeneral.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }

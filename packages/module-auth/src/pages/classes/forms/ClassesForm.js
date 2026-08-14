@@ -89,10 +89,10 @@ const ClassesForm = ({ labels, maxAccess, store, setStore }) => {
                 name='characteristicOperator'
                 label={labels.characteristicOperator}
                 required
+                maxAccess={maxAccess}
                 valueField='key'
                 displayField='value'
                 values={formik.values}
-                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('characteristicOperator', null)}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('characteristicOperator', newValue?.key || null)

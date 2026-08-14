@@ -227,7 +227,7 @@ export default function CashCountNotesForm({
             ]}
             allowDelete={false}
             allowAddNewLine={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
         <Fixed>
           <Grid container spacing={2} sx={{ mb: 3, display: 'flex', justifyContent: 'right' }}>

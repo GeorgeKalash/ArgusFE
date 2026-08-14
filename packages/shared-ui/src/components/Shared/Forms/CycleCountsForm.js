@@ -35,7 +35,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   const editMode = !!store.recordId
 
   const invalidate = useInvalidate({
-    endpointId: SCRepository.StockCount.qry
+    endpointId: SCRepository.StockCount.page
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -299,6 +299,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                   formik.setFieldValue('plantId', newValue ? newValue?.recordId : null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

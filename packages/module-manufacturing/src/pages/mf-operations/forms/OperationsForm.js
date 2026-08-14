@@ -112,6 +112,7 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('maxLossPct', '')}
                 error={formik.touched.maxLossPct && Boolean(formik.errors.maxLossPct)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -135,6 +136,7 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
                   }
                 }}
                 error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

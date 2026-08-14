@@ -144,6 +144,7 @@ const JobTab = ({ labels, maxAccess, store, isActive }) => {
               onChange={e => setSearchEmployment(e.target.value)}
               onSearch={val => setSearchEmployment(val)}
               search
+              axAccess={maxAccess}
             />
           </Grid>
         </Grid>
@@ -178,6 +179,7 @@ const JobTab = ({ labels, maxAccess, store, isActive }) => {
               onChange={e => setSearchJobInfo(e.target.value)}
               onSearch={val => setSearchJobInfo(val)}
               search
+              maxAccess={maxAccess}
             />
           </Grid>
         </Grid>

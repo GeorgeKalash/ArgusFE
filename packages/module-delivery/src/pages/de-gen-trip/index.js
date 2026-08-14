@@ -450,7 +450,7 @@ const GenerateOutboundTransportation = () => {
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('vehicleId', newValue?.recordId || null)
                   formik.setFieldValue('capacity', newValue?.capacityVolume || null)
                 }}
@@ -460,7 +460,7 @@ const GenerateOutboundTransportation = () => {
               />
             </Grid>
             <Grid item xs={2}>
-              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly />
+              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly maxAccess={access} />
             </Grid>
             <Grid item xs={5}></Grid>
             <Grid item xs={3}>
@@ -472,6 +472,7 @@ const GenerateOutboundTransportation = () => {
                   formik.setFieldValue('search', '')
                 }}
                 size='small'
+                maxAccess={access}
                 onChange={handleSearchChange}
                 onSearch={e => formik.setFieldValue('search', e)}
                 search={true}
@@ -485,7 +486,7 @@ const GenerateOutboundTransportation = () => {
                 valueField='recordId'
                 displayField={'name'}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('driverId', newValue?.recordId || null)
                 }}
                 error={formik.touched.driverId && Boolean(formik.errors.driverId)}
@@ -497,6 +498,7 @@ const GenerateOutboundTransportation = () => {
                 name='capacity'
                 label={labels.capacity}
                 value={formik.values.capacity}
+                maxAccess={access}
                 readOnly
               />
             </Grid>
@@ -548,6 +550,7 @@ const GenerateOutboundTransportation = () => {
                       <CustomNumberField
                         name='amount'
                         label={labels.amount}
+                        maxAccess={access}
                         value={formik.values.totalAmount}
                         readOnly
                       />
@@ -556,6 +559,7 @@ const GenerateOutboundTransportation = () => {
                       <CustomNumberField
                         name='volume'
                         label={labels.volume}
+                        maxAccess={access}
                         value={formik.values.totalVolume}
                         readOnly
                       />
@@ -591,10 +595,10 @@ const GenerateOutboundTransportation = () => {
             </Grid>
             <Grid item xs={7}></Grid>
             <Grid item xs={1.5}>
-              <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly />
+              <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly maxAccess={access} />
             </Grid>
             <Grid item xs={1.5}>
-              <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly />
+              <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly maxAccess={access} />
             </Grid>
           </Grid>
         </Fixed>

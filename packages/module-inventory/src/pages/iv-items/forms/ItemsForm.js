@@ -42,7 +42,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   const dmgId = parseInt((systemDefaults?.list?.find(({ key }) => key === 'iv_dmgId')?.value)) || null
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Items.qry
+    endpointId: InventoryRepository.Items.page
   })
   const imageUploadRef = useRef(null)
 

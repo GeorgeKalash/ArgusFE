@@ -329,10 +329,11 @@ export default function JobsForm({ labels, maxAccess, store }) {
                     label={labels.outputWgt}
                     value={formik.values.footerOutputWgt}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='assignedWgt' label={labels.assignedWgt} value={assignedWgtBB} readOnly />
+                  <CustomNumberField name='assignedWgt' label={labels.assignedWgt} value={assignedWgtBB} readOnly maxAccess={maxAccess} />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
@@ -340,6 +341,7 @@ export default function JobsForm({ labels, maxAccess, store }) {
                     label={labels.disassemblyWgt}
                     value={formik?.values?.disassemblyWgt}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -349,6 +351,7 @@ export default function JobsForm({ labels, maxAccess, store }) {
                     value={formik.values.balanceWgt}
                     readOnly
                     error={formik.touched.balanceWgt && Boolean(formik.errors.balanceWgt)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
@@ -361,10 +364,11 @@ export default function JobsForm({ labels, maxAccess, store }) {
                     label={labels.totalInputWgt}
                     value={formik?.values?.footerInputWgt}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalLoss' label={labels.totalLoss} value={totalLoss} readOnly />
+                  <CustomNumberField name='totalLoss' label={labels.totalLoss} value={totalLoss} readOnly maxAccess={maxAccess} />
                 </Grid>
               </Grid>
             </Grid>

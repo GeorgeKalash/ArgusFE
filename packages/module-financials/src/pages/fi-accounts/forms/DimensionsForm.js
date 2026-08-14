@@ -138,6 +138,7 @@ export default function DimensionsForm({ store, maxAccess }) {
         displayField='name'
         values={formik.values}
         onChange={(_, newValue) => formik.setFieldValue(f.fieldKey, newValue?.id ?? null)}
+        maxAccess={maxAccess}
       />
     </Grid>
   )

@@ -125,7 +125,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 readOnly={editMode}
                 required
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('plId', newValue ? newValue.recordId : '')
                 }}
                 error={formik.touched.plId && Boolean(formik.errors.plId)}
@@ -146,7 +146,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('muId', newValue?.recordId || '')
                 }}
               />
@@ -166,7 +166,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 readOnly
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik && formik.setFieldValue('currencyId', newValue?.recordId)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
@@ -193,7 +193,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 displayFieldWidth={1}
                 required
                 maxAccess={!editMode && maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('priceType', newValue?.key || '')
                 }}
                 error={formik.touched.priceType && formik.errors.priceType}
@@ -209,7 +209,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 displayField='value'
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('valueType', newValue?.key || '')
                 }}
                 error={formik.touched.valueType && Boolean(formik.errors.valueType)}
@@ -223,6 +223,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('value', '')}
                 required
+                maxAccess={maxAccess}
                 error={formik.touched.value && Boolean(formik.errors.value)}
               />
             </Grid>
@@ -234,6 +235,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('priceWithVat', '')}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -244,6 +246,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('minPrice', '')}
                 error={formik.touched.minPrice && Boolean(formik.errors.minPrice)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

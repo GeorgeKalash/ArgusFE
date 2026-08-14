@@ -22,7 +22,7 @@ const LegalStatus = () => {
 
     const response = await getRequest({
       extension: BusinessPartnerRepository.LegalStatus.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }

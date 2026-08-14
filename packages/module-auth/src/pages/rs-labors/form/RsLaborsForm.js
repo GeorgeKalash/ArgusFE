@@ -186,6 +186,7 @@ export default function RsLaborsForm({ labels, maxAccess, recordId }) {
                 name='rate'
                 label={labels.rate}
                 value={formik.values.rate}
+                maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('rate', null)}
                 decimalScale={2}
