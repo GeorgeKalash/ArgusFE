@@ -13,7 +13,6 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 
 const OpenProductionOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -64,7 +63,8 @@ const OpenProductionOrder = () => {
       ...item,
       id: index + 1,
       date: formatDateFromApi(item.date),
-      balance: item.qty - item.producedQty
+      balance: item.qty - item.producedQty,
+      balancePcs: item.pcs - item.producedPcs,
     }))
 
     formik.setFieldValue('items', res)
@@ -90,33 +90,29 @@ const OpenProductionOrder = () => {
           const items = formik.values.items.map(({ isChecked, ...item }) => ({
             ...item,
             isChecked: checked,
-            producedNow: checked ? item.balance : 0
+            producedNowQty: checked ? item.balancePcs * item.itemWeight : 0,
+            producedNowPcs: checked ? item.balancePcs : 0,
+            jobCount: 1
           }))
-
           formik.setFieldValue('items', items)
         }
       },
 
       async onChange({ row: { update, newRow } }) {
-        update({ producedNow: newRow.isChecked ? newRow.balance : 0 })
+        update({
+          producedNowQty: newRow.isChecked ? newRow.balancePcs * newRow.itemWeight : 0,
+          producedNowPcs: newRow.isChecked ? newRow.balancePcs : 0,
+          jobCount: 1
+        })
       }
     },
     {
       component: 'image',
       name: 'pictureUrl',
       label: labels.image,
-      width: 50,
-      onClick: ({ value, row }) => {
-        stack({
-          Component: ImageViewer,
-          props: {
-            imageUrl: value
-          },
-          width: 800,
-          height: 600,
-          title: row.sku
-        })
-      }
+      width: 30,
+      clickable: true,
+      titleField: 'sku'
     },
     {
       component: 'textfield',
@@ -150,6 +146,19 @@ const OpenProductionOrder = () => {
     },
     {
       component: 'numberfield',
+      label: labels.pcs,
+      name: 'pcs',
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      label: labels.balancePcs,
+      name: 'balancePcs',
+      props: { readOnly: true, decimalScale: 2 }
+    },
+    
+    {
+      component: 'numberfield',
       label: labels.produced,
       name: 'producedQty',
       props: { readOnly: true }
@@ -162,22 +171,67 @@ const OpenProductionOrder = () => {
     },
     {
       component: 'numberfield',
-      label: labels.genQty,
-      name: 'producedNow',
+      label: labels.jobCount,
+      name: 'jobCount',
       updateOn: 'blur',
-      defaultValue: 0,
+      defaultValue: 1,
       propsReducer({ row, props }) {
         return { ...props, readOnly: !row.isChecked }
       },
       async onChange({ row: { update, newRow } }) {
-        const { producedNow, balance } = newRow
-        let value = producedNow
+       update({ jobCount: Math.max(newRow.jobCount, 1) })
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.genPcs,
+      name: 'producedNowPcs',
+      updateOn: 'blur',
+      defaultValue: 0,
+      props: {
+        decimalScale: 2
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.isChecked }
+      },
+      async onChange({ row: { update, newRow } }) {
+        const { producedNowPcs, balancePcs } = newRow
+        let value = producedNowPcs
+        const maxValue = balancePcs
+
+        if (value > maxValue) 
+        value = maxValue
+
+        update({ 
+          producedNowPcs: value || 0,
+          producedNowQty: value * newRow.itemWeight
+        })
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.genQty,
+      name: 'producedNowQty',
+      updateOn: 'blur',
+      defaultValue: 0,
+      props: {
+        decimalScale: 2
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.isChecked }
+      },
+      async onChange({ row: { update, newRow } }) {
+        const { producedNowQty, balance } = newRow
+        let value = producedNowQty
         const maxValue = balance
 
         if (value > maxValue) 
         value = maxValue
 
-        update({ producedNow: value || 0 })
+        update({ 
+          producedNowQty: value || 0,
+          producedNowPcs: value / newRow.itemWeight
+        })
       }
     }
   ]

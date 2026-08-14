@@ -14,6 +14,10 @@ import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLev
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
+import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
+
+const POPUP_PORTAL_SELECTOR =
+  '.MuiPopover-root, .MuiAutocomplete-popper, .MuiMenu-list, .MuiPickersPopper-root'
 
 export function DataGrid({
   name,
@@ -274,6 +278,7 @@ export function DataGrid({
       if (!api) return
       const editing = api.getEditingCells?.() || []
       if (editing.length) {
+        document.activeElement?.blur()
         api.stopEditing()
         api.flushAsyncTransactions?.()
       }
@@ -286,7 +291,7 @@ export function DataGrid({
       const pressedButton = target.closest(BUTTON_SELECTOR)
 
       if (gridApiRef.current?.getEditingCells()?.length == 0) return
-      if (!pressedButton || pressedButton.closest('.MuiPaper-root')) return
+    if (!pressedButton || pressedButton.closest(POPUP_PORTAL_SELECTOR)) return
       if (isInsideAgGridUX(pressedButton, e)) return
       if (gridApiRef.current?.getEditingCells()?.length > 0) {
         commitIfEditing()
@@ -533,7 +538,7 @@ export function DataGrid({
     const isCheckbox = comp === 'checkbox'
 
     if (isCheckbox) {
-      const disabledCheckbox = _disabled || !!column.colDef?.props?.readOnly
+      const disabledCheckbox = _disabled || !!column.colDef?.props?.disabled
 
       return (
         <Box
@@ -543,7 +548,8 @@ export function DataGrid({
             padding: '0',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            pointerEvents: disabledCheckbox ? 'none' : 'auto'
           }}
         >
           <GridCheckbox
@@ -629,7 +635,7 @@ export function DataGrid({
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              cursor: 'pointer'
+              cursor: column.colDef?.clickable ? 'pointer' : 'default'
             }}
           />
         </Box>
@@ -942,10 +948,14 @@ export function DataGrid({
     if (params.colDef.component === 'image') {
       const imageUrl = params.data?.[params.colDef.field]
 
-      if (!imageUrl) return
-      params.colDef.onClick?.({
-        value: params.value,
-        row: params.data
+      if (!imageUrl || !params?.colDef?.clickable) return
+
+      stack({
+        Component: ImageViewer,
+        props: {
+          imageUrl,
+          title: params?.colDef?.titleField ? params.data?.[params?.colDef?.titleField] : ''
+        }
       })
       return
     }
@@ -956,7 +966,7 @@ export function DataGrid({
 
     const nonEditableByClick =
       colDef.component === 'button' || colDef.component === 'checkbox' || colDef.component === 'icon' || colDef.component === 'image'
-
+    
     if (!nonEditableByClick) {
       api.startEditingCell({
         rowIndex: rowIndex,
@@ -984,7 +994,7 @@ export function DataGrid({
 
       if (
         !event.target.closest('.ag-cell') &&
-        !pressedButton?.closest('.MuiPaper-root') &&
+        !pressedButton?.closest(POPUP_PORTAL_SELECTOR) &&
         gridApiRef.current?.getEditingCells()?.length > 0
       ) {
         gridApiRef.current?.stopEditing()

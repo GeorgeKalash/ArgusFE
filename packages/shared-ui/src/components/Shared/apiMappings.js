@@ -1135,6 +1135,17 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.ReleaseCodes]: {
+    type: COMBOBOX,
+    endpoint: DocumentReleaseRepository.ReleaseCode.qry,
+    parameters: `_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
   [ResourceIds.ReleaseIndicators]: {
     type: COMBOBOX,
     endpoint: DocumentReleaseRepository.ReleaseIndicator.qry,

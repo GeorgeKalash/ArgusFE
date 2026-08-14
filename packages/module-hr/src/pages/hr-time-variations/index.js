@@ -78,6 +78,11 @@ export default function TimeVariation() {
       type: 'date'
     },
     {
+      field: 'employeeRef',
+      headerName: labels.employeeRef,
+      flex: 1
+    },
+    {
       field: 'employeeName',
       headerName: labels.name,
       flex: 1

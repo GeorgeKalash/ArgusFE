@@ -906,6 +906,27 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
     canvas.style.width = `${finalWidth}px`
   }, [labels])
 
+  const fitsInsideBar = useCallback((context) => {
+    const chart = context.chart
+    const value = context.dataset.data[context.dataIndex]
+
+    if (!value) return false
+
+    const scale = chart.scales.y
+    const chartHeight = scale.bottom - scale.top
+    const barHeight = (value / scale.max) * chartHeight
+
+    const ctx = chart.ctx
+    ctx.save()
+    ctx.font = `bold ${chartSize.size}px Arial`
+
+    const requiredHeight = ctx.measureText(value.toLocaleString()).width
+
+    ctx.restore()
+
+    return barHeight >= requiredHeight + 8
+  }, [chartSize.size])
+
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -965,27 +986,31 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
           },
 
           datalabels: {
-            display: (data?.length || 0) <= MAX_LABELS_TO_SHOW,
+            display: true,
 
-            anchor: 'end',
-            align: 'end',
-
-            color: context => {
-              const chart = context.chart
-              const value = context.dataset.data[context.dataIndex]
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const barHeight = (value / chart.scales.y.max) * chartHeight
-
-              return barHeight >= 120
-                ? datalabelInsideColor
-                : datalabelOutsideColor
-            },
-
-            offset: 0,
             rotation: -90,
-            font: {
-              size: chartSize.size
-            },
+
+            anchor: context =>
+              fitsInsideBar(context) ? 'center' : 'end',
+
+            align: context =>
+              fitsInsideBar(context) ? 'center' : 'top',
+
+            offset: context =>
+              fitsInsideBar(context) ? 0 : 4,
+
+            color: context =>
+              fitsInsideBar(context)
+                ? datalabelInsideColor
+                : datalabelOutsideColor,
+
+            font: () => ({
+              size: chartSize.size,
+              weight: 'bold'
+            }),
+
+            clip: false,
+            clamp: true,
 
             formatter: value => value.toLocaleString()
           },
@@ -1064,21 +1089,13 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
     chart.options.scales.y.max = yScale.max
     chart.options.scales.y.ticks.stepSize = yScale.step
 
-    chart.options.plugins.datalabels.font.size = chartSize.size
-
     chart.options.plugins.datalabels.display =
       (data?.length || 0) <= MAX_LABELS_TO_SHOW
 
-    chart.options.plugins.datalabels.color = context => {
-      const c = context.chart
-      const value = context.dataset.data[context.dataIndex]
-      const chartHeight = c.scales.y.bottom - c.scales.y.top
-      const barHeight = (value / c.scales.y.max) * chartHeight
-
-      return barHeight >= 120
-        ? datalabelInsideColor
-        : datalabelOutsideColor
-    }
+    chart.options.plugins.datalabels.font = () => ({
+      size: chartSize.size,
+      weight: 'bold'
+    })
 
     chart.options.scales.x.ticks.font.size = chartSize.ticksSize
     chart.options.scales.y.ticks.font.size = chartSize.ticksSize
@@ -1600,50 +1617,53 @@ const getColorForIndex = (index, canvas) => {
 const LEADER_LINE_LENGTH = 10
 const HORIZONTAL_LINE_LENGTH = 28 
 const VALUE_MARGIN = 2
+const CANVAS_EDGE_SAFETY = 4
 
 const leaderLinesPlugin = {
   id: 'leaderLines',
 
- beforeLayout(chart) {
-  const dataset = chart.data.datasets[0]
-  const values = dataset?.data || []
+  beforeLayout(chart) {
+    const dataset = chart.data.datasets[0]
+    const values = dataset?.data || []
 
-  const ctx = chart.ctx
-  ctx.save()
-  ctx.font = 'bold 13px Arial'
+    const ctx = chart.ctx
+    ctx.save()
+    ctx.font = 'bold 13px Arial'
 
-  let maxTextWidth = 0
-  for (let i = 0; i < values.length; i++) {
-    const v = values[i]
-    if (v == null || v === 0) continue
-    maxTextWidth = Math.max(maxTextWidth, ctx.measureText(String(v)).width)
-  }
-
-  ctx.restore()
-  const layout = chart.options.layout || {}
-
-  const nextPadding = {
-    top: LEADER_LINE_LENGTH + 12,
-    bottom: LEADER_LINE_LENGTH + 12,
-    left: 70,  
-    right: 70, 
-  }
-
-  const current = layout.padding || {}
-
-  const changed =
-    current.left !== nextPadding.left ||
-    current.right !== nextPadding.right ||
-    current.top !== nextPadding.top ||
-    current.bottom !== nextPadding.bottom
-
-  if (changed) {
-    chart.options.layout = {
-      ...layout,
-      padding: nextPadding,
+    let maxTextWidth = 0
+    for (let i = 0; i < values.length; i++) {
+      const v = values[i]
+      if (v == null || v === 0) continue
+      maxTextWidth = Math.max(maxTextWidth, ctx.measureText(String(v)).width)
     }
-  }
-},
+
+    ctx.restore()
+    const horizontalPadding = Math.ceil(
+      HORIZONTAL_LINE_LENGTH + LEADER_LINE_LENGTH + maxTextWidth + VALUE_MARGIN + CANVAS_EDGE_SAFETY + 10
+    )
+
+    const layout = chart.options.layout || {}
+    const nextPadding = {
+      top: LEADER_LINE_LENGTH + 12,
+      bottom: LEADER_LINE_LENGTH + 12,
+      left: Math.max(40, horizontalPadding),
+      right: Math.max(40, horizontalPadding),
+    }
+
+    const current = layout.padding || {}
+    const changed =
+      current.left !== nextPadding.left ||
+      current.right !== nextPadding.right ||
+      current.top !== nextPadding.top ||
+      current.bottom !== nextPadding.bottom
+
+    if (changed) {
+      chart.options.layout = {
+        ...layout,
+        padding: nextPadding,
+      }
+    }
+  },
   afterDatasetsDraw(chart) {
     const { ctx, width: canvasWidth } = chart
     const meta = chart.getDatasetMeta(0)
@@ -1672,10 +1692,8 @@ const leaderLinesPlugin = {
       const startRadius = outerRadius * 0.8
       const startX = center.x + Math.cos(angle) * startRadius
       const startY = center.y + Math.sin(angle) * startRadius
-      const bendX =
-        center.x + Math.cos(angle) * (outerRadius + LEADER_LINE_LENGTH)
-      const bendY =
-        center.y + Math.sin(angle) * (outerRadius + LEADER_LINE_LENGTH)
+      const bendX = center.x + Math.cos(angle) * (outerRadius + LEADER_LINE_LENGTH)
+      const bendY = center.y + Math.sin(angle) * (outerRadius + LEADER_LINE_LENGTH)
 
       const rightSide = Math.cos(angle) >= 0
 
@@ -1687,7 +1705,6 @@ const leaderLinesPlugin = {
       const VALUE_SAFE_GAP = VALUE_MARGIN + textWidth + padding
 
       let endX
-
       if (rightSide) {
         const maxX = canvasWidth - VALUE_SAFE_GAP
         endX = Math.min(idealEndX, maxX)
@@ -1699,6 +1716,19 @@ const leaderLinesPlugin = {
       }
 
       const endY = bendY
+      let textDrawX = rightSide ? endX + VALUE_MARGIN : endX - VALUE_MARGIN
+      let textLeft = rightSide ? textDrawX : textDrawX - textWidth
+      let textRight = rightSide ? textDrawX + textWidth : textDrawX
+
+      if (textLeft < CANVAS_EDGE_SAFETY) {
+        const shift = CANVAS_EDGE_SAFETY - textLeft
+        endX += shift
+        textDrawX += shift
+      } else if (textRight > canvasWidth - CANVAS_EDGE_SAFETY) {
+        const shift = textRight - (canvasWidth - CANVAS_EDGE_SAFETY)
+        endX -= shift
+        textDrawX -= shift
+      }
 
       // LINE
       ctx.beginPath()
@@ -1713,16 +1743,12 @@ const leaderLinesPlugin = {
       ctx.fillStyle = '#555'
       ctx.fill()
 
-      // TEXT (single system, no conflicts)
+      // TEXT
       ctx.textBaseline = 'middle'
       ctx.fillStyle = dataset.backgroundColor?.[index] || '#333'
       ctx.textAlign = rightSide ? 'left' : 'right'
 
-      ctx.fillText(
-        text,
-        rightSide ? endX + VALUE_MARGIN : endX - VALUE_MARGIN,
-        endY
-      )
+      ctx.fillText(text, textDrawX, endY)
     })
 
     ctx.restore()
@@ -1886,9 +1912,10 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
         ref={chartBoxRef}
         style={{
           flex: 1,
+          width: '100%',
           display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          justifyContent: 'stretch',
+          alignItems: 'stretch',
           minHeight: 0,
           overflow: 'hidden',
         }}
@@ -1897,8 +1924,6 @@ export const PieChart = memo(({ id, labels, data, label, toolTipText, onLegendCl
           style={{
             width: '100%',
             height: '100%',
-            maxWidth: '100%',
-            maxHeight: '100%',
             position: 'relative',
           }}
         >

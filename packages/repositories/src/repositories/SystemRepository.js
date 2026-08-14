@@ -7,7 +7,8 @@ export const SystemRepository = {
   ParameterDefinition: service + 'qryRP',
   ReportLayout: {
     qry: service + 'qryRL',
-    get: service + 'getPackRL'
+    get: service + 'getPackRL',
+    get2: service + 'getPackRL2'
   },
   DynamicDashboard: {
     qry: service + 'qryUDB',
@@ -17,11 +18,13 @@ export const SystemRepository = {
     setDefaultLayout: service + 'setDefaultLayout'
   },
   ReportLayoutObject: {
-    set2: service + 'set2RLO'
+    set: service + 'setRLO',
   },
   ReportTemplate: {
     qry: service + 'qryRT',
-    set2: service + 'set2RT'
+    set: service + 'setRT',
+    get: service + 'getRT',
+    del: service + 'delRT'
   },
   DocumentType: {
     page: service + 'pageDT',

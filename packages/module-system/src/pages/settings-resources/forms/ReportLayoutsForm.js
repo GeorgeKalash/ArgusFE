@@ -1,96 +1,72 @@
 import { Box, Grid, Typography } from '@mui/material'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import ReportLayoutObjForm from './ReportLayoutObjForm'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
-const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) => {
+const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: reportLayoutWindow }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
-  const [data, setData] = useState([])
+  const {
+    query: { data },
+    refetch
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    enabled: !!row.resourceId,
+    endpointId: SystemRepository.ReportLayout.get2,
+    datasetId: ResourceIds.SettingsResources,
+    params: { disabledReqParams: true, maxAccess }
+  })
 
-  const fetchData = async () => {
+  async function fetchGridData() {
+    if (!row.resourceId) return { list: [] }
+
     const reportPack = await getRequest({
-      extension: SystemRepository.ReportLayout.get,
+      extension: SystemRepository.ReportLayout.get2,
       parameters: `_resourceId=${row.resourceId}`
     })
 
     const pack = reportPack?.record || {}
 
-    const response2Map = new Map((pack?.reportLayoutOverrides || []).map(item => [item.id, item.isInactive]))
+    const response2Map = new Map((pack?.reportLayoutOverrides || []).map(item => [item.id, item]))
 
-    const updatedList = (pack?.layouts || []).map(item => {
-      const isInactive = response2Map.has(item.id)
-        ? response2Map.get(item.id)
-        : false
+    const list = (pack?.layouts || []).map(item => {
+      const responseItem = response2Map.get(item.id)
 
       return {
         ...item,
-        isInactive,
-        originalInactive: isInactive
-      }
-    })
-
-    setData({
-      count: updatedList.length || 0,
-      list: updatedList || [],
-      statusId: 1,
-      message: ''
-    })
-  }
-
-  const { formik } = useForm({
-    validateOnChange: true,
-    initialValues: {
-      resourceId: row.resourceId,
-      resourceName: row.resourceName
-    },
-    onSubmit: async obj => {
-      const inactiveItems = data.list
-        .filter(item => item.isInactive)
-        .map(item => ({
-          resourceId: row.resourceId,
-          id: item.id,
-          isInactive: item.isInactive
-        }))
-
-      const payload = {
         resourceId: row.resourceId,
-        items: inactiveItems
+        isInactive: responseItem?.isInactive ?? false,
+        isConfidential: responseItem?.isConfidential ?? null,
+        sgId: responseItem?.sgId ?? null,
+        originalInactive: responseItem?.isInactive ?? false
       }
+    })
 
-      await postRequest({
-        extension: SystemRepository.ReportLayoutObject.set2,
-        record: JSON.stringify(payload)
-      })
-
-      toast.success(platformLabels.Updated)
-      fetchData()
-    }
-  })
+    return { list }
+  }
 
   const returnURL = async rowData => {
     const response = await getRequest({
       extension: KVSRepository.getAttachement,
-      parameters: `_resourceId=${formik.values.resourceId}&_layoutId=${rowData.id}`
+      parameters: `_resourceId=${row.resourceId}&_layoutId=${rowData.id}`
     })
 
     return response.record.url
   }
-
-  useEffect(() => {
-    fetchData()
-  }, [])
 
   const columns = [
     {
@@ -116,6 +92,16 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
     {
       field: 'layoutName',
       headerName: labels.layoutName,
+      flex: 1
+    },
+    {
+      field: 'reportEngineName',
+      headerName: labels.reportEngineName,
+      flex: 1
+    },
+    {
+      field: 'schemaFile',
+      headerName: labels.schemaFile,
       flex: 1
     },
     {
@@ -148,8 +134,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
     {
       field: 'isInactive',
       headerName: labels.isInactive,
-      type: 'checkbox',
-      editable: true
+      type: 'checkbox'
     },
     {
       flex: 0.5,
@@ -164,13 +149,13 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
                 await postRequest({
                   extension: SystemRepository.DefaultLayout.setDefaultLayout,
                   record: JSON.stringify({
-                    resourceId: formik.values.resourceId,
+                    resourceId: row.data.resourceId,
                     defaultLayoutId: row.data.id
                   })
                 })
                 toast.success(platformLabels.Updated)
                 invalidate() 
-                w.close()
+                reportLayoutWindow.close()
               }}
               sx={{
                 color: 'green',
@@ -187,37 +172,58 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: w }) =>
     }
   ]
 
+  function edit(record) {
+    stack({
+      Component: ReportLayoutObjForm,
+      props: {
+        labels,
+        maxAccess,
+        resourceId: row.resourceId,
+        record
+      },
+      title: labels.reportLayout,
+      width: 500,
+      height: 550
+    })
+  }
+
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
-      <VertLayout>
-        <Fixed>
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <CustomTextField
-                name='resourceId'
-                label={labels.resourceId}
-                value={formik.values.resourceId}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid xs={5}></Grid>
-            <Grid item xs={4}>
-              <CustomTextField
-                name='resourceName'
-                label={labels.resourceName}
-                value={formik.values.resourceName}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
+    <VertLayout>
+      <Fixed>
+        <Grid container spacing={2} sx={{ p: 2 }}>
+          <Grid item xs={4}>
+            <CustomTextField
+              name='resourceId'
+              label={labels.resourceId}
+              value={row.resourceId}
+              readOnly
+              maxAccess={maxAccess}
+            />
           </Grid>
-        </Fixed>
-        <Grow>
-          <Table columns={columns} gridData={data} rowId={['id']} pagination={false} maxAccess={maxAccess}/>
-        </Grow>
-      </VertLayout>
-    </Form>
+          <Grid xs={5}></Grid>
+          <Grid item xs={4}>
+            <CustomTextField
+              name='resourceName'
+              label={labels.resourceName}
+              value={row.resourceName}
+              readOnly
+              maxAccess={maxAccess}
+            />
+          </Grid>
+        </Grid>
+      </Fixed>
+      <Grow>
+        <Table
+          name='reportLayouts'
+          columns={columns} 
+          gridData={data} 
+          rowId={['id']} 
+          pagination={false} 
+          onEdit={edit}
+          maxAccess={maxAccess}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 

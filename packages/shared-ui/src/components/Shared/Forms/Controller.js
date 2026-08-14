@@ -102,7 +102,7 @@ const Controller = ({ store, maxAccess, labels }) => {
       name: 'isChecked',
       flex: 0.2,
       props: {
-        disabled: isPosted || isClosed
+        disabled: isClosed
       }
     },
     {

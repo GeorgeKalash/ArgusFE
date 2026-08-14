@@ -7,10 +7,10 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const HrProcessedPunches = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -22,19 +22,27 @@ const HrProcessedPunches = () => {
     labels,
     paginationParameters,
     access,
-    refetch
+    refetch,
+    filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: TimeAttendanceRepository.PendingPunches.page,
-    datasetId: ResourceIds.ProcessedPunches
+    endpointId: TimeAttendanceRepository.PendingPunches.page2,
+    datasetId: ResourceIds.ProcessedPunches,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+  
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: TimeAttendanceRepository.PendingPunches.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=1|9`
+      extension: TimeAttendanceRepository.PendingPunches.page2,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -104,10 +112,11 @@ const HrProcessedPunches = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar actions={actions} maxAccess={access} onAdd={false} />
+        <RPBGridToolbar hasSearch={false} actions={actions} maxAccess={access} onAdd={false} filterBy={filterBy} reportName={'TAPP2'} />
       </Fixed>
       <Grow>
         <Table
+          name='ProcessedPunchesTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

@@ -40,38 +40,20 @@ const ReportViewer = ({ resourceId }) => {
     })
     const pack = reportPack?.record || {}
 
-    let layouts = pack?.layouts || []
-    if (pack?.reportLayoutOverrides?.length) {
-      const inactiveIds = new Set((pack?.reportLayoutOverrides || []).map(item => item.id))
-      layouts = layouts.filter(item => !inactiveIds.has(item.id))
-    }
-
     setReportStore(prev => {
-      const existingIds = new Set(prev.map(r => r.id))
-
-      const layoutsPack = layouts
-        ?.filter(item => !existingIds.has(item.id))
+      const layoutsPack = (pack?.layouts || [])
         .map(item => ({
           id: item.id,
           api_url: item.api,
           reportClass: item.instanceName,
           parameters: item.parameters,
           layoutName: item.layoutName,
+          schemaFile: item.schemaFile,
+          reportEngine: item.reportEngine,
           assembly: 'ArgusRPT.dll'
         }))
 
-      const templatesPack = (pack?.reportTemplates || [])
-        .filter(item => !item.isInactive)
-        .map(item => ({
-          id: item.id,
-          api_url: item.wsName,
-          reportClass: item.reportName,
-          parameters: item.parameters,
-          layoutName: item.caption,
-          assembly: item.assembly
-        }))
-
-      return [...prev, ...layoutsPack, ...templatesPack]
+      return [...prev, ...layoutsPack]
     })
 
     setDefaultLayoutId(pack?.defaultLayoutId)

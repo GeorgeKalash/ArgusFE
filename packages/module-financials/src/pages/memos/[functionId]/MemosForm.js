@@ -101,24 +101,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          baseAmount: !formik.values.baseAmount ? obj.amount : formik.values.baseAmount,
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
-          recordId: response.recordId
-        })
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-
-      const res = await getRequest({
-        extension: FinancialRepository.FiMemo.get,
-        parameters: `_recordId=${response.recordId}`
-      })
-
-      formik.setFieldValue('reference', res.record.reference)
+      await refetchForm(response.recordId)
       invalidate()
     }
   })
@@ -153,23 +138,24 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     setBaseAmount(calculatedAmount)
   }, [formik.values.isSubjectToVAT, formik.values.subtotal])
 
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: FinancialRepository.FiMemo.get,
-          parameters: `_recordId=${recordId}`
-        })
+  const refetchForm = async (recordId) => {
+    const res = await getRequest({
+      extension: FinancialRepository.FiMemo.get,
+      parameters: `_recordId=${recordId}`
+    })
 
-        formik.resetForm({
-          values: {
-            ...res.record,
-            dueDate: res?.record?.dueDate ? formatDateFromApi(res.record.dueDate) : null,
-            date: formatDateFromApi(res.record.date)
-          }
-        })
+    formik.resetForm({
+      values: {
+        ...res.record,
+        dueDate: res?.record?.dueDate ? formatDateFromApi(res.record.dueDate) : null,
+        date: formatDateFromApi(res.record.date)
       }
-    })()
+    })
+  }
+  useEffect(() => {
+    if (recordId) {
+      refetchForm(recordId)
+    }
   }, [])
 
   const onPost = async () => {
@@ -180,16 +166,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
+      await refetchForm(formik.values.recordId)
       invalidate()
-
-      const getRes = await getRequest({
-        extension: FinancialRepository.FiMemo.get,
-        parameters: `_recordId=${formik.values.recordId}`
-      })
-
-      getRes.record.date = formatDateFromApi(getRes.record.date)
-      getRes.record.dueDate = getRes?.record?.dueDate ? formatDateFromApi(getRes.record.dueDate) : null
-      formik.setValues(getRes.record)
     }
   }
 
@@ -201,16 +179,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
     if (res?.recordId) {
       toast.success(platformLabels.Unposted)
+      await refetchForm(formik.values.recordId)
       invalidate()
-
-      const getRes = await getRequest({
-        extension: FinancialRepository.FiMemo.get,
-        parameters: `_recordId=${formik.values.recordId}`
-      })
-
-      getRes.record.date = formatDateFromApi(getRes.record.date)
-      getRes.record.dueDate = getRes?.record?.dueDate ? formatDateFromApi(getRes.record.dueDate) : null
-      formik.setValues(getRes.record)
     }
   }
 

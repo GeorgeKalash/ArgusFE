@@ -55,7 +55,7 @@ const FiPaymentVouchers = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     filterBy,
     paginationParameters,
     refetch,
@@ -72,55 +72,60 @@ const FiPaymentVouchers = () => {
 
   const columns = [
     {
-      field: 'plantName',
-      headerName: _labels.plant,
+      field: 'dtName',
+      headerName: labels.documentType,
       flex: 1
     },
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'date',
-      headerName: _labels.date,
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
-      field: 'currencyRef',
-      headerName: _labels.currency,
+      field: 'plantName',
+      headerName: labels.plant,
+      flex: 1
+    },
+    {
+      field: 'cashAccountName',
+      headerName: labels.cashAccount,
       flex: 1
     },
     {
       field: 'paymentMethodName',
-      headerName: _labels.paymentMethod,
+      headerName: labels.paymentMethod,
+      flex: 1
+    },
+    {
+      field: 'currencyRef',
+      headerName: labels.currency,
       flex: 1
     },
     {
       field: 'amount',
-      headerName: _labels.amount,
+      headerName: labels.amount,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccount,
-      flex: 1
-    },
-    {
       field: 'notes',
-      headerName: _labels.notes,
+      headerName: labels.notes,
       flex: 1
     },
     {
       field: 'isVerified',
-      headerName: _labels.isVerified,
+      headerName: labels.isVerified,
       type: 'checkbox'
     },
     {
       field: 'statusName',
-      headerName: _labels.status,
+      headerName: labels.status,
       type: 'badge',
       family: 'document',
       valueField: 'status',
@@ -152,20 +157,18 @@ const FiPaymentVouchers = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: FinancialRepository.PaymentVouchers.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: FinancialRepository.PaymentVouchers.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'FIPVb'} filterBy={filterBy} />
+        <RPBGridToolbar labels={labels} onAdd={add} maxAccess={access} reportName={'FIPVb'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
