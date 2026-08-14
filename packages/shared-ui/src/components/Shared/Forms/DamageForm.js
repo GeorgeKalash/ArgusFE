@@ -28,12 +28,11 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import WorkFlow from '../WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
-export default function DamageForm({ recordId, lockRecord }) {
+export default function DamageForm({ recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
@@ -184,24 +183,18 @@ export default function DamageForm({ recordId, lockRecord }) {
         }
       })
 
-      !formik.values.recordId &&
-        lockRecord({
-          recordId: res?.record?.header?.recordId,
-          reference: res?.record?.header?.reference,
-          resourceId: ResourceIds.Damages,
-          onSuccess: () => {
-            addLockedScreen({
-              resourceId: ResourceIds.Damages,
-              recordId: res?.record?.header?.recordId,
-              reference: res?.record?.header?.reference
-            })
-          }
-        })
     })
   }
 
   const editMode = !!formik.values.header.recordId
   const isPosted = formik.values.header.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId,
+    reference: formik.values.header.reference,
+    resourceId: ResourceIds.Damages,
+    enabled: !!recordId && !isPosted
+  })
 
   const onPost = async () => {
     await postRequest({
@@ -211,7 +204,7 @@ export default function DamageForm({ recordId, lockRecord }) {
 
     toast.success(platformLabels.Posted)
     invalidate()
-
+    await releaseLock()
     await refetchForm(formik.values.recordId)
   }
 
