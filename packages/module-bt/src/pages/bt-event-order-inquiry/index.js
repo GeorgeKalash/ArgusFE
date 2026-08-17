@@ -123,6 +123,24 @@ const EventOrderInquiry = () => {
       type: 'number'
     },
     {
+      field: 'isTriggered',
+      headerName: labels.isTriggered,
+      flex: 1,
+      type: 'checkbox'
+    },
+    {
+      field: 'triggeredAt',
+      headerName: labels.triggeredAt,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'triggeredAtPrice',
+      headerName: labels.triggeredAtPrice,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'rsName',
       headerName: labels.rsName,
       flex: 1
