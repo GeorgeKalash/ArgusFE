@@ -33,7 +33,7 @@ const EventOrderInquiry = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     paginationParameters,
     filterBy,
     refetch,
@@ -51,7 +51,7 @@ const EventOrderInquiry = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       refetch()
-    }, 60000) 
+    }, 300000) 
 
     return () => clearInterval(interval)
   }, [refetch])
@@ -59,69 +59,74 @@ const EventOrderInquiry = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'date',
-      headerName: _labels.date,
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
       field: 'expiryDate',
-      headerName: _labels.expiryDate,
+      headerName: labels.expiryDate,
       flex: 1,
       type: 'date'
     },
     {
       field: 'accountRef',
-      headerName: _labels.accountRef,
+      headerName: labels.accountRef,
       flex: 1
     },
     {
       field: 'accountName',
-      headerName: _labels.accountName,
+      headerName: labels.accountName,
       flex: 1
     },
     {
       field: 'directionName',
-      headerName: _labels.directionName,
+      headerName: labels.directionName,
       flex: 1
     },
     {
       field: 'metalRef',
-      headerName: _labels.metalRef,
+      headerName: labels.metalRef,
       flex: 1
     },
     {
       field: 'currencyRef',
-      headerName: _labels.currencyRef,
+      headerName: labels.currencyRef,
       flex: 1
     },
     {
       field: 'qty',
-      headerName: _labels.qty,
+      headerName: labels.qty,
       flex: 1,
       type: 'number'
     },
     {
       field: 'qty_muRef',
-      headerName: _labels.qty_muRef,
+      headerName: labels.qty_muRef,
       flex: 1,
       type: 'number'
     },
     {
       field: 'targetPrice',
-      headerName: _labels.targetPrice,
+      headerName: labels.targetPrice,
       flex: 1,
       type: 'number'
     },
     {
       field: 'amount',
-      headerName: _labels.amount,
+      headerName: labels.amount,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'rsName',
+      headerName: labels.rsName,
+      flex: 1
     }
   ]
 
