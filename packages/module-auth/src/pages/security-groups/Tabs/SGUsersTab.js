@@ -36,7 +36,7 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
           sgId: '',
           sgName: '',
           email: '',
-          userId: ''
+          userId: null
         }
       ]
     },
