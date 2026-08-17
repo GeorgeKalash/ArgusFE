@@ -1,20 +1,34 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
+import { Grid } from '@mui/material'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 const AccountBalanceForm = ({ labels, maxAccess, store }) => {
   const { getRequest } = useContext(RequestsContext)
   const { recordId: accountId } = store
   const { stack } = useWindow()
   const editMode = !!accountId
+
+  const { formik } = useForm({
+    maxAccess,
+    initialValues: {
+      baseCurrencyRef: '',
+      reportMetalRef: '',
+      balanceBaseCurrency: 0,
+      balanceReportMetal: 0
+    }
+  })
 
   const columns = [
     {
@@ -35,7 +49,7 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
 
     const response = await getRequest({
       extension: FinancialRepository.AccountCreditBalance.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_accountId=${recordId}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_accountId=${accountId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -50,6 +64,26 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
     datasetId: ResourceIds.Accounts
   })
 
+  const getTotalBalance = async accountId => {
+    const res = await getRequest({
+      extension: FinancialRepository.AccountCreditBalance.get2,
+      parameters: `_accountId=${accountId}`
+    })
+
+    if (res.record) {
+      formik.setValues({
+        baseCurrencyRef: res.record.baseCurrencyRef,
+        reportMetalRef: res.record.reportMetalRef,
+        balanceBaseCurrency: res.record.balanceBaseCurrency,
+        balanceReportMetal: res.record.balanceReportMetal
+      })
+    }
+  }
+
+  useEffect(() => {
+    accountId && getTotalBalance(accountId)
+  }, [])
+
   const actions = [
     {
       key: 'AccountSummary',
@@ -57,7 +91,7 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
       onClick: () => {
         stack({
           Component: AccountSummary,
-          props: { 
+          props: {
             accountId,
             date: new Date()
           }
@@ -80,6 +114,28 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
             pagination={false}
           />
         </Grow>
+        <Fixed>
+          <Grid container spacing={2} padding={2} justifyContent='flex-end'>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='balanceBaseCurrency'
+                label={formik.values.baseCurrencyRef}
+                value={formik.values.balanceBaseCurrency}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='balanceReportMetal'
+                label={formik.values.reportMetalRef}
+                value={formik.values.balanceReportMetal}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </Form>
   )

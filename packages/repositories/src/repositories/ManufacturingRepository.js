@@ -131,6 +131,7 @@ export const ManufacturingRepository = {
     get: service + 'getDES',
     del: service + 'delDES',
     snapshot: service + 'snapshotDES',
+    snapshot2: service + 'snapshotDES2',
     page: service + 'pageDES'
   },
   MFJobOrder: {
@@ -151,7 +152,8 @@ export const ManufacturingRepository = {
     start: service + 'startJOB',
     stop: service + 'stopJOB',
     wip: service + 'wipJOB',
-    sync: service + 'syncJOB'
+    sync: service + 'syncJOB',
+    qry3: service + 'qryJOB3',
   },
   GenerateAMC:{
     generate: service + 'generateAMC'

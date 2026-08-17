@@ -9,25 +9,16 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import MFDesignsWindow from './Windows/MFDesignsWindow'
+import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
+import FOCuttingWindow from './Windows/CuttingWindow'
 
-const Designs = () => {
+const FoCuttings = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params = [] } = options
-
-    const response = await getRequest({
-      extension: ManufacturingRepository.Design.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}&_sortBy=recordId`
-    })
-
-    return { ...response, _startAt: _startAt }
-  }
 
   const {
     query: { data },
@@ -39,59 +30,77 @@ const Designs = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.Design.page,
-    datasetId: ResourceIds.Design,
+    endpointId: FoundryRepository.Cutting.page,
+    datasetId: ResourceIds.FoCuttings,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
-
-  async function fetchWithFilter({ filters, pagination = {} }) {
-    const { _startAt = 0, _pageSize = 50 } = pagination
-    if (filters?.qry) {
-      const response = await getRequest({
-        extension: ManufacturingRepository.Design.snapshot2,
-        parameters: `_filter=${filters.qry}&_startAt=${_startAt}&_pageSize=${_pageSize}`
-      })
-
-      return { ...response, _startAt: _startAt }
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
-  }
-  
   const columns = [
+    {
+      field: 'dtName',
+      headerName: labels.documentType,
+      flex: 1
+    },
     {
       field: 'reference',
       headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: labels.name,
-      flex: 1
-    },
-    {
-      field: 'designDate',
-      headerName: labels.designDate,
+      field: 'date',
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
-      field: 'description',
-      headerName: labels.description,
+      field: 'castingRef',
+      headerName: labels.casting,
       flex: 1
     },
     {
-      field: 'lineRef',
-      headerName: labels.productionLine,
+      field: 'laborName',
+      headerName: labels.labor,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
       flex: 1
     }
   ]
 
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
+
+    const response = await getRequest({
+      extension: FoundryRepository.Cutting.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: FoundryRepository.Cutting.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.Cutting,
+    action: openForm
+  })
+
   const add = () => {
-    openForm()
+    proxyAction()
   }
 
   const edit = obj => {
@@ -100,21 +109,21 @@ const Designs = () => {
 
   async function openForm(recordId) {
     stack({
-      Component: MFDesignsWindow,
+      Component: FOCuttingWindow,
       props: {
         labels,
-        recordId,
-        maxAccess: access
+        access,
+        recordId
       },
-      width: 900,
-      height: 740,
-      title: labels.Designs
+      width: 1000,
+      height: 550,
+      title: labels.cutting
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.Design.del,
+      extension: FoundryRepository.Cutting.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -124,16 +133,18 @@ const Designs = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'MFDES'} filterBy={filterBy} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'FOCUT'} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           refetch={refetch}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}
@@ -144,4 +155,4 @@ const Designs = () => {
   )
 }
 
-export default Designs
+export default FoCuttings

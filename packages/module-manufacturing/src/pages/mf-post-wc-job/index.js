@@ -151,9 +151,11 @@ const PostWorkCenterJob = () => {
     return response?.list
   }
 
+  const reset = () => formik.resetForm({ values: initialValues })
+
   const fillForm = async newValue => {
     if (!newValue) {
-      formik.resetForm()
+      reset()
       return
     }
 
@@ -235,6 +237,7 @@ const PostWorkCenterJob = () => {
       isParentWindow={false}
       isInfo={false}
       isSaved={false}
+      onClear={reset}
     >
       <VertLayout>
         <Fixed>
@@ -257,8 +260,9 @@ const PostWorkCenterJob = () => {
                 onChange={async (_, newValue) => {
                   formik.setFieldValue('jobRef', newValue?.reference || '')
                   formik.setFieldValue('routingId', newValue?.routingId || null)
-                  formik.setFieldValue('jobId', newValue?.recordId || null)
                   fillForm(newValue)
+                  
+                  formik.setFieldValue('jobId', newValue?.recordId || null)
                 }}
                 errorCheck={'jobId'}
               />
@@ -313,7 +317,12 @@ const PostWorkCenterJob = () => {
                   { key: 'workCenterName', value: 'Name' }
                 ]}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('workCenterId', newValue?.workCenterId || null)
+                  formik.resetForm({
+                    values: {
+                      ...formik.values,
+                      workCenterId: newValue?.workCenterId || null
+                    }
+                  })
                 }}
                 required
                 maxAccess={maxAccess}
@@ -348,7 +357,12 @@ const PostWorkCenterJob = () => {
                   { key: 'workCenterName', value: 'Name' }
                 ]}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('toWorkCenterId', newValue?.workCenterId || null)
+                  formik.resetForm({
+                    values: {
+                      ...formik.values,
+                      toWorkCenterId: newValue?.workCenterId || null
+                    }
+                  })
                 }}
                 required={formik.values.routingId}
                 maxAccess={maxAccess}

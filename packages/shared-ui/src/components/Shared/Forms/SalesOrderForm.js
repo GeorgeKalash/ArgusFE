@@ -322,7 +322,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       name: 'sku',
       flex: 2,
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
+        endpointId: InventoryRepository.Item.snapshot6,
         parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
         valueField: 'sku',
@@ -513,7 +513,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       label: labels.volume,
       name: 'volume',
       props: {
-        decimalScale: 2,
+        decimalScale: 3,
         readOnly: true
       }
     },
@@ -1770,6 +1770,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     maxAccess={maxAccess}
                     label={labels.totVolume}
                     value={totalVolume}
+                    decimalScale={3}
                     readOnly
                   />
                 </Grid>

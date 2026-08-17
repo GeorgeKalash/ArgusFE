@@ -268,7 +268,6 @@ const GeneratePoductionOrder = () => {
                     rowId={['itemId']}
                     pagination={false}
                     maxAccess={access}
-                    disableSorting={true}
                     showCheckboxColumn={true}
                     showSelectAll={true}
                     disable={disableCondition}

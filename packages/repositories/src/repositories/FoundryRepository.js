@@ -19,10 +19,10 @@ export const FoundryRepository = {
     unpost: service + 'unpostWAX',
     close: service + 'closeWAX',
     open: service + 'openWAX',
-    reopen: service + 'reopenWAX'
+    reopen: service + 'reopenWAX',
+    get2: service + 'get2WAX',
   },
   WaxJob: {
-    qry: service + 'qryWAJ',
     qry2: service + 'qry2WAJ'
   },
   Mould: {
@@ -54,7 +54,8 @@ export const FoundryRepository = {
     del: service + 'delCAS',
     cancel: service + 'cancelCAS',
     post: service + 'postCAS',
-    snapshot: service + 'snapshotCAS'
+    snapshot: service + 'snapshotCAS',
+    snapshot2: service + 'snapshotCAS2',
   },
   CastingDisassembly: {
     qry: service + 'qryCDA',
@@ -111,5 +112,17 @@ export const FoundryRepository = {
     snapshot: service + 'snapshotPADJ',
     post: service + 'postPADJ',
     unpost: service + 'unpostPADJ'
+  },
+  MergedComponent: {
+    qry: service + 'qryWAXC'
+  },
+  Cutting: {
+    page: service + 'pageCUT',
+    snapshot: service + 'snapshotCUT',
+    get: service + 'getCUT',
+    set: service + 'setCUT',
+    del: service + 'delCUT',
+    post: service + 'postCUT',
+    unpost: service + 'unpostCUT'
   }
 }

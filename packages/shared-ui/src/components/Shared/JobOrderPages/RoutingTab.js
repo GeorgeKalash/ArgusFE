@@ -189,6 +189,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.qtyIn,
       flex: 1,
       name: 'qtyIn',
+      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -198,6 +199,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.pcsIn,
       flex: 1,
       name: 'pcsIn',
+      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -207,6 +209,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.qty,
       flex: 1,
       name: 'qty',
+      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -216,6 +219,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.pcs,
       flex: 1,
       name: 'pcs',
+      defaultValue: 0,
       props: {
         readOnly: true
       }
