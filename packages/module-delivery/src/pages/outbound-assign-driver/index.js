@@ -107,9 +107,6 @@ const OutboundAssignDriver = () => {
           { from: 'recordId', to: 'vehicleId' },
           { from: 'name', to: 'vehName' }
         ]
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({ vehicleId: newRow?.vehicleId || null, vehName: newRow?.vehName || null })
       }
     },
     {
@@ -124,9 +121,6 @@ const OutboundAssignDriver = () => {
           { from: 'recordId', to: 'driverId' },
           { from: 'name', to: 'driverName' }
         ]
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({ driverId: newRow?.driverId || null, driverName: newRow?.driverName || null })
       }
     },
     {
