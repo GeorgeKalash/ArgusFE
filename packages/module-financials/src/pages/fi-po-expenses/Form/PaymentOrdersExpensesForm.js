@@ -69,7 +69,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     date: new Date(),
     amount: null,
     notes: '',
-    subTotal: null,
+    subtotal: null,
     exRate: 1,
     rateCalcMethod: 1,
     baseAmount: null,
@@ -84,7 +84,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
         pvId: recordId || 0,
         seqNo: 1,
         etId: '',
-        subTotal: null,
+        subtotal: null,
         vatAmount: null,
         amount: null,
         supplierName: '',
@@ -282,7 +282,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   }
 
   const subTotalSum = formik.values?.expenses?.reduce((subTotal, row) => {
-    const subTotalValue = row.subTotal
+    const subTotalValue = row.subtotal
 
     return subTotal + subTotalValue
   }, 0)
@@ -434,12 +434,12 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
 
           let newSubtotal = (newRow?.amount || 0) * (100 / (100 + (vatPct || 0))) || 0
           update({
-            subTotal: roundTo(newSubtotal),
+            subtotal: roundTo(newSubtotal),
             vatAmount: roundTo(((newRow?.amount || 0) - (newSubtotal || 0)))
           })
         } else {
           update({
-            subTotal: roundTo(newRow.amount),
+            subtotal: roundTo(newRow.amount),
             vatAmount: 0
           })
         }
@@ -460,12 +460,12 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
           const newSubTotal = amount * (100 / (100 + vatPct))
 
           update({
-            subTotal: roundTo(newSubTotal),
+            subtotal: roundTo(newSubTotal),
             vatAmount: roundTo(((amount || 0) - (newSubTotal || 0)))
           })
         } else {
           update({
-            subTotal: roundTo(newRow.amount),
+            subtotal: roundTo(newRow.amount),
             vatAmount: 0
           })
         }
@@ -482,7 +482,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     {
       component: 'numberfield',
       label: labels.subtotal,
-      name: 'subTotal',
+      name: 'subtotal',
       props: {
         readOnly: true
       }
