@@ -30,9 +30,7 @@ export default function AccountReconciliations(){
     datasetId: ResourceIds.AccountReconciliations
   })
 
-  const { formik } = useForm({
-    maxAccess: access,
-    initialValues: {
+  const initialValues = {
       recordId: null,
       startDate: null,
       endDate: null,
@@ -46,7 +44,11 @@ export default function AccountReconciliations(){
       tCredits: 0,
       tBalance: 0,
       rows: []
-    },
+    }
+
+  const { formik } = useForm({
+    maxAccess: access,
+    initialValues,
     validationSchema: yup.object({
       startDate: yup.date().required(),
       endDate: yup.date().required(),
@@ -259,6 +261,12 @@ export default function AccountReconciliations(){
     })
   },[formik?.values?.startDate, formik?.values?.endDate, formik?.values?.accountId, formik?.values?.currencyId, formik?.values?.rclStatus])
 
+  function handleClear() {
+    formik.resetForm({values: initialValues})
+
+    setRow(null)
+  }
+  
   return (
     <FormShell
       resourceId={ResourceIds.Reconciliation}
@@ -267,6 +275,7 @@ export default function AccountReconciliations(){
       actions={actions}
       isSaved={false}
       editMode={formik?.values?.recordId}
+      onClear={handleClear}
     >
       <VertLayout>
         <Fixed>
