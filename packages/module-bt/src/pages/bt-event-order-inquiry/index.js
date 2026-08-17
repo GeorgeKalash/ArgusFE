@@ -124,6 +124,24 @@ const EventOrderInquiry = () => {
       type: 'number'
     },
     {
+      field: 'isTriggered',
+      headerName: labels.isTriggered,
+      flex: 1,
+      type: 'checkbox'
+    },
+    {
+      field: 'triggeredAt',
+      headerName: labels.triggeredAt,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'triggeredAtPrice',
+      headerName: labels.triggeredAtPrice,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'rsName',
       headerName: labels.rsName,
       flex: 1
@@ -159,6 +177,15 @@ const EventOrderInquiry = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}
+          highlightRow={{
+            condition: row => row?.direction === 1 || row?.direction === 2,
+
+            color: row => {
+              if (row?.direction === 1) return '#78d580'
+              if (row?.direction === 2) return '#f28b82'
+              return 'transparent'
+            }
+          }}
         />
       </Grow>
     </VertLayout>

@@ -660,6 +660,9 @@ export const ResourceIds = {
   Developer: 48104,
   ItemWeight: 41124,
   OpeningWeight: 41313,
+  Disassembly: 47310,
+  Jobs: 47311,
+  FoCuttings: 47318,
 
   // GL
   GLSalesInvoice: 51604,

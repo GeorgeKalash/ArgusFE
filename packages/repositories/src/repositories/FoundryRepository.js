@@ -54,7 +54,8 @@ export const FoundryRepository = {
     del: service + 'delCAS',
     cancel: service + 'cancelCAS',
     post: service + 'postCAS',
-    snapshot: service + 'snapshotCAS'
+    snapshot: service + 'snapshotCAS',
+    snapshot2: service + 'snapshotCAS2',
   },
   CastingDisassembly: {
     qry: service + 'qryCDA',
@@ -114,5 +115,14 @@ export const FoundryRepository = {
   },
   MergedComponent: {
     qry: service + 'qryWAXC'
+  },
+  Cutting: {
+    page: service + 'pageCUT',
+    snapshot: service + 'snapshotCUT',
+    get: service + 'getCUT',
+    set: service + 'setCUT',
+    del: service + 'delCUT',
+    post: service + 'postCUT',
+    unpost: service + 'unpostCUT'
   }
 }

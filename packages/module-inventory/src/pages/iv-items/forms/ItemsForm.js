@@ -46,10 +46,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   })
   const imageUploadRef = useRef(null)
 
-  const { onFieldChange, maxAccess, fieldBehavior} = useFieldBehavior({
+  const { onFieldChange, maxAccess, fieldBehavior } = useFieldBehavior({
     access,
     fieldName: 'sku',
-    editMode: recordId,
+    editMode: Boolean(recordId),
     enableClearing: !recordId
   })
 
