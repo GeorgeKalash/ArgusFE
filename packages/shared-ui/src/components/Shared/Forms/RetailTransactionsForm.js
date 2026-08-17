@@ -53,26 +53,21 @@ import { LockedScreensContext } from '@argus/shared-providers/src/providers/Lock
 import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 
-export default function RetailTransactionsForm({
-  labels,
-  posUser,
-  access,
-  recordId,
-  functionId,
-  lockRecord,
-  getGLResource,
-  window
-}) {
+export default function RetailTransactionsForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, systemChecks } = useContext(DefaultsContext)
   const [address, setAddress] = useState({})
   const [reCal, setReCal] = useState(false)
   const [addressModified, setAddressModified] = useState(false)
+  const [posUser, setPosUser] = useState(null)
   const filteredCreditCard = useRef([])
   const level2CacheRef = useRef(null)
 
@@ -93,6 +88,27 @@ export default function RetailTransactionsForm({
     [SystemFunction.RetailPurchaseReturn]: ResourceIds.RetailPurchaseReturn
   }
 
+  const getGLResource = {
+    [SystemFunction.RetailInvoice]: ResourceIds.GLRetailInvoice,
+    [SystemFunction.RetailReturn]: ResourceIds.GLRetailInvoiceReturn,
+    [SystemFunction.RetailPurchase]: ResourceIds.GLRetailPurchase,
+    [SystemFunction.RetailPurchaseReturn]: ResourceIds.GLRetailPurchaseReturn
+  }
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.RetailInvoice,
+    editMode: !!recordId
+  })
+
+  const getTitle = {
+    [SystemFunction.RetailInvoice]: labels.RetailInvoice,
+    [SystemFunction.RetailReturn]: labels.RetailReturn,
+    [SystemFunction.RetailPurchase]: labels.RetailPurchase,
+    [SystemFunction.RetailPurchaseReturn]: labels.RetailPurchaseReturn
+  }
+
+  useSetWindow({ title: getTitle[parseInt(functionId)], window })
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
@@ -111,11 +127,11 @@ export default function RetailTransactionsForm({
       reference: null,
       dtId: null,
       functionId: functionId,
-      posId: parseInt(posUser?.posId),
+      posId: null,
       currencyId: null,
       plantId: null,
       siteId: null,
-      spId: parseInt(posUser?.spId),
+      spId: null,
       addressId: null,
       oDocId: null,
       oDocRef: '',
@@ -524,7 +540,7 @@ export default function RetailTransactionsForm({
       condition: true,
       onClick: 'onClickGL',
       valuesPath: { ...formik.values.header, notes: formik.values.header.deliveryNotes },
-      datasetId: getGLResource(functionId),
+      datasetId: getGLResource[parseInt(functionId)],
       disabled: !editMode
     },
     {
@@ -1207,12 +1223,24 @@ export default function RetailTransactionsForm({
     })
   }
 
-  async function getPosInfo() {
-    if (!posUser?.posId) return
+  async function getPOSUser() {
+    const userId = getStorageData('userData')?.userId
+
+    const res = await getRequest({
+      extension: PointofSaleRepository.PosUsers.get,
+      parameters: `_userId=${userId}`
+    })
+
+    return res?.record
+  }
+
+  async function getPosInfo(pu) {
+    const currentPosUser = pu || posUser
+    if (!currentPosUser?.posId) return
 
     return await getRequest({
       extension: PointofSaleRepository.PointOfSales.get,
-      parameters: `_recordId=${parseInt(posUser?.posId)}`
+      parameters: `_recordId=${parseInt(currentPosUser?.posId)}`
     })
   }
 
@@ -1271,10 +1299,13 @@ export default function RetailTransactionsForm({
   }
 
 
-  async function loadLevel2() {
+  async function loadLevel2(pu) {
+    const currentPosUser = pu || posUser
+    if (!currentPosUser?.posId) return
+
     const res = await getRequest({
       extension: PointofSaleRepository.RetailInvoice.level,
-      parameters: `_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`
+      parameters: `_posId=${parseInt(currentPosUser?.posId)}&_functionId=${functionId}`
     })
 
     level2CacheRef.current = res?.record || null
@@ -1390,12 +1421,15 @@ export default function RetailTransactionsForm({
 
   useEffect(() => {
     ;(async function () {
-      await loadLevel2()
+      const posInfo = await getPOSUser()
+      setPosUser(posInfo)
+
+      await loadLevel2(posInfo)
       if (recordId) {
         await refetchForm(recordId)
       } else {
         await setMetalPriceOperations()
-        const res = await getPosInfo()
+        const res = await getPosInfo(posInfo)
         await setDefaults(res?.record)
       }
     })()
@@ -1419,7 +1453,7 @@ export default function RetailTransactionsForm({
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={PointofSaleRepository.RetailInvoice.level}
+                    endpointId={posUser?.posId && PointofSaleRepository.RetailInvoice.level}
                     reducer={response => {
                       return editMode
                         ? response?.record?.documentTypes
@@ -1473,7 +1507,7 @@ export default function RetailTransactionsForm({
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={PointofSaleRepository.RetailInvoice.level}
+                    endpointId={posUser?.posId && PointofSaleRepository.RetailInvoice.level}
                     reducer={response => {
                       return editMode
                         ? response?.record?.salesPeople
@@ -1915,3 +1949,6 @@ export default function RetailTransactionsForm({
     </FormShell>
   )
 }
+
+RetailTransactionsForm.width = 1200
+RetailTransactionsForm.height = 725
