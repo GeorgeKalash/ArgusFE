@@ -30,9 +30,7 @@ export default function AccountReconciliations(){
     datasetId: ResourceIds.AccountReconciliations
   })
 
-  const { formik } = useForm({
-    maxAccess: access,
-    initialValues: {
+  const initialValues = {
       recordId: null,
       startDate: null,
       endDate: null,
@@ -46,7 +44,11 @@ export default function AccountReconciliations(){
       tCredits: 0,
       tBalance: 0,
       rows: []
-    },
+    }
+
+  const { formik } = useForm({
+    maxAccess: access,
+    initialValues,
     validationSchema: yup.object({
       startDate: yup.date().required(),
       endDate: yup.date().required(),
@@ -73,7 +75,7 @@ export default function AccountReconciliations(){
     let totalDebit = 0
     let totalBalance = 0
 
-    const res = (result?.list || []).map(item => {
+    const res = (result?.list || []).map((item, index) => {
       const debits = item?.amount > 0 ? item.amount : 0
       const credits = item?.amount < 0 ? Math.abs(item.amount) : 0
       const balance = debits - credits
@@ -83,6 +85,7 @@ export default function AccountReconciliations(){
 
       return {
         ...item,
+        id: index + 1,
         debits,
         credits,
         balance
@@ -101,44 +104,52 @@ export default function AccountReconciliations(){
     })
   }
 
-  function onRowCheck(row) {
-    const hasCheckedRcl = (formik.values.rows || []).filter(r => r.rclCode && r.checked).length
-    setRow(prev => {
-      if (row?.rclCode) return row.rclCode
-      if (hasCheckedRcl) return prev
+  function onRowCheck(rowOrRows, checked) {
+    const isBulk = Array.isArray(rowOrRows)
 
-      return null
-    })
+    formik.setValues(prev => {
+      const rows = (prev.rows || []).map(item => {
+        const isClickedRow = isBulk
+          ? true
+          : item.recordId === rowOrRows.recordId
 
-    const updatedItems = (formik.values.rows || []).map(item => {
-      if (!item.rclCode) return { ...item, disableRow: false }
-      if (!hasCheckedRcl)  return { ...item, disableRow: false }
-      
+        return isClickedRow ? { ...item, checked } : item
+      })
+
+      const hasCheckedRcl = rows.some(r => r.rclCode && r.checked)
+      const updatedItems = rows.map(item => {
+        if (!item.rclCode || !hasCheckedRcl) return { ...item, disableRow: false }
+
+        return {
+          ...item,
+          disableRow: !item.checked
+        }
+      })
+
+      const { totalDebit, totalCredit, totalBalance } = updatedItems
+        .filter(row => row.checked && !row.rclCode)
+        .reduce(
+          (acc, row) => {
+            acc.totalDebit += row.debits || 0
+            acc.totalCredit += row.credits || 0
+            acc.totalBalance += row.balance || 0
+
+            return acc
+          },
+          { totalDebit: 0, totalCredit: 0, totalBalance: 0 }
+        )
+
       return {
-        ...item,
-        disableRow: !item.checked
-      }
-    })
-    
-    const { totalDebit, totalCredit, totalBalance } = (formik?.values?.rows || [])
-      .filter(row => row.checked && !row.rclCode)
-      .reduce(
-        (acc, row) => {
-          acc.totalDebit += row.debits || 0
-          acc.totalCredit += row.credits || 0
-          acc.totalBalance += row.balance || 0
-          return acc
-        },
-        { totalDebit: 0, totalCredit: 0, totalBalance: 0 }
-      )
-
-      formik.setValues({
-        ...formik.values,
+        ...prev,
         rows: updatedItems,
         debits: totalDebit,
         credits: totalCredit,
         balance: totalBalance
-      })
+      }
+    })
+
+    if (!isBulk && rowOrRows?.rclCode) setRow(checked ? rowOrRows.rclCode : null)
+  
   }
 
   async function applyReconciliation(){
@@ -250,6 +261,12 @@ export default function AccountReconciliations(){
     })
   },[formik?.values?.startDate, formik?.values?.endDate, formik?.values?.accountId, formik?.values?.currencyId, formik?.values?.rclStatus])
 
+  function handleClear() {
+    formik.resetForm({values: initialValues})
+
+    setRow(null)
+  }
+  
   return (
     <FormShell
       resourceId={ResourceIds.Reconciliation}
@@ -258,6 +275,7 @@ export default function AccountReconciliations(){
       actions={actions}
       isSaved={false}
       editMode={formik?.values?.recordId}
+      onClear={handleClear}
     >
       <VertLayout>
         <Fixed>

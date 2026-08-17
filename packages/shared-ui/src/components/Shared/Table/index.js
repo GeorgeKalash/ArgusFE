@@ -873,7 +873,7 @@ const Table = ({
         />
       ),
     suppressMenu: true
-  }), [checked, showSelectAll, rowSelection])
+  }), [checked, showSelectAll, rowSelection, handleCheckboxChange])
 
   const columnDefs = useMemo(() => {
     return [
