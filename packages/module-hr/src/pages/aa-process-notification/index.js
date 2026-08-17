@@ -111,9 +111,6 @@ const ProcessNotification = () => {
           { from: 'recordId', to: 'templateId' },
           { from: 'name', to: 'templateName' }
         ]
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({ templateId: newRow?.templateId || null })
       }
     }
   ]

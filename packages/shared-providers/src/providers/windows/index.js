@@ -4,9 +4,10 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { v4 as uuidv4 } from 'uuid'
-import { TabsContext } from '../TabsContext'
-import usePageInteraction from '../usePageInteraction'
-import { useInteractionTracker } from '../InteractionTrackerProvider'
+import { TabsContext } from '@argus/shared-providers/src/providers/TabsContext'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
+
 
 const WindowContext = React.createContext(null)
 const ClearContext = React.createContext(null)

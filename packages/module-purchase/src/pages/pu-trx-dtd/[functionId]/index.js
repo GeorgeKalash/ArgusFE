@@ -21,18 +21,12 @@ const PurchaseDTD = () => {
   const { stack } = useWindow()
   const { functionId } = Router()
 
-  const getResourceId = () => {
-    switch (functionId) {
-      case SystemFunction.PurchaseInvoice:
-        return ResourceIds.PurchaseInvDocTypedefault
-      case SystemFunction.PurchaseReturn:
-        return ResourceIds.ReturnseInvDocTypedefault
-      case SystemFunction.PUDraftSerialReturn:
-        return ResourceIds.DraftPurchaseDocTypeDefaults
-      default:
-        return
-    }
+  const getResourceId = {
+    [SystemFunction.PurchaseInvoice]: ResourceIds.PurchaseInvDocTypedefault,
+    [SystemFunction.PurchaseReturn]: ResourceIds.ReturnseInvDocTypedefault,
+    [SystemFunction.PUDraftSerialReturn]: ResourceIds.DraftPurchaseDocTypeDefaults
   }
+
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -56,7 +50,7 @@ const PurchaseDTD = () => {
     queryFn: fetchGridData,
     endpointId: PurchaseRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.PUDocTypeDefaults,
-    DatasetIdAccess: getResourceId()
+    DatasetIdAccess: getResourceId[functionId]
   })
 
   const columns = [
@@ -99,7 +93,8 @@ const PurchaseDTD = () => {
         labels,
         recordId: record?.dtId,
         maxAccess: access,
-        functionId
+        functionId,
+        resourceId: getResourceId[functionId]
       },
       width: 500,
       height: 430,
