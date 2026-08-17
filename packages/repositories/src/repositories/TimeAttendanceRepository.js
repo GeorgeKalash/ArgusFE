@@ -15,6 +15,7 @@ export const TimeAttendanceRepository = {
     qry: service + 'qryOTP'
   },
   PendingPunches: {
+    page2: service + 'pagePP2',
     page: service + 'pagePP',
     del: service + 'delPP',
     qry: service + 'qryPP'
