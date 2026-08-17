@@ -155,6 +155,15 @@ const EventOrderInquiry = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}
+          highlightRow={{
+            condition: row => row?.direction === 1 || row?.direction === 2,
+
+            color: row => {
+              if (row?.direction === 1) return '#78d580'
+              if (row?.direction === 2) return '#f28b82'
+              return 'transparent'
+            }
+          }}
         />
       </Grow>
     </VertLayout>

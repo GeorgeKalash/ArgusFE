@@ -1023,14 +1023,31 @@ const Table = ({
     () => ({
       rowClassRules: {
         'even-row': params => params.node.rowIndex % 2 === 0,
+
         'highlighted-row': params => {
           if (!highlightRow) return false
           return highlightRow.condition?.(params.data)
+        }
+      },
+
+      getRowStyle: params => {
+        if (!highlightRow) return {}
+
+        const isHighlighted = highlightRow.condition?.(params.data)
+
+        if (!isHighlighted) return {}
+
+        return {
+          '--highlight-bg': highlightRow.color?.(params.data) || 'transparent'
         }
       }
     }),
     [highlightRow]
   )
+
+  useEffect(() => {
+    gridApiRef.current?.api?.redrawRows()
+  }, [highlightRow])
 
   useEffect(() => {
     if (!tableSettings || !gridApiRef.current?.columnApi) return
@@ -1235,8 +1252,7 @@ const Table = ({
           sx={{
             height: props?.height || '100%',
             maxHeight: props?.maxHeight || 'none',
-            minHeight: 0,
-            '--highlight-bg': highlightRow?.color || 'transparent',
+            minHeight: 0
           }}
             >
           {hoveredTable && !pagination && (
