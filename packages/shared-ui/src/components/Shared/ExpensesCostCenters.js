@@ -110,7 +110,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
     return amount + amountValue
   }, 0)
 
-  const balance = roundTo(row.amount - totalAmount)
+  const balance = roundTo(row.subtotal - totalAmount)
 
   const canSubmit = balance !== 0 || readOnly
 
@@ -123,7 +123,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
               <CustomNumberField
                 name='amount'
                 label={labels.amount}
-                value={row.amount}
+                value={row.subtotal}
                 maxAccess={maxAccess}
                 readOnly
                 onChange={formik.handleChange}
