@@ -69,7 +69,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     date: new Date(),
     amount: null,
     notes: '',
-    subtotal: null,
+    subTotal: null,
     exRate: 1,
     rateCalcMethod: 1,
     baseAmount: null,

@@ -1277,6 +1277,7 @@ export default function SaleTransactionForm({
     const saTrxItems = saTrxPack?.items
     const saTrxTaxes = saTrxPack?.taxes || []
     const balance = saTrxPack?.accountBalance?.balance
+    const creditLimit = saTrxPack?.accountLimit?.limit
     const accountId = saTrxPack?.client?.accountId
     const maxDiscount = saTrxPack?.client?.maxDiscount
     const billAdd = saTrxPack?.formattedAddress
@@ -1339,7 +1340,8 @@ export default function SaleTransactionForm({
           postMetalToFinancials: dtInfo?.record?.postMetalToFinancials,
           maxDiscount: maxDiscount || 0,
           serializedAddress: '',
-          balance
+          balance,
+          creditLimit
         },
         items: modifiedList,
         taxes: saTrxTaxes
