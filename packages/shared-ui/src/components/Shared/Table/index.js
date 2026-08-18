@@ -277,7 +277,7 @@ const Table = ({
   }
 
   const shouldRemoveColumn = column => {
-    const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
+    const match = columnsAccess && columnsAccess.find(item => item.controlId === column.field)
 
     return match && match.accessLevel === ControlAccessLevel.Hidden
   }
@@ -835,8 +835,8 @@ const Table = ({
       )
     }
 
-
-  const tableName = name && `${name}.${props?.maxAccess?.record?.resourceId}`
+  const visibleFieldsKey = filteredColumns.map(col => col.field).join(',')
+  const tableName = name && `${name}.${props?.maxAccess?.record?.resourceId}.${visibleFieldsKey}`
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
     queryKey: [tableName],
