@@ -638,6 +638,7 @@ export default function RetailTransactionsForm({
 
     setAddress({
       ...(addressObj?.record || {}),
+      name: addressObj?.record?.name || retailTrxHeader?.clientName || '',
       countryId: addressObj?.countryId || countryId?.value
     })
 
