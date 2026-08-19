@@ -25,6 +25,7 @@ import CustomTextArea from "@argus/shared-ui/src/components/Inputs/CustomTextAre
 import { useContext, useEffect } from 'react'
 import { Grid } from '@mui/material'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 
 const CreditLimitHoldForm = ({ recordId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -170,6 +171,20 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.accountId),
+            date: formik.values.date
+          }
+        })
+      },
+      disabled: !formik.values.accountId || !formik.values.date
     }
   ]
 
