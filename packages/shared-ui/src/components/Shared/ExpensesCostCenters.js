@@ -12,6 +12,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Form from './Form'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function ExpensesCostCenters({ row, window, updateRow, recordId, readOnly }) {
   const { platformLabels } = useContext(ControlContext)
@@ -109,9 +110,9 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
     return amount + amountValue
   }, 0)
 
-  const balance = row.subtotal - totalAmount
+  const balance = roundTo(row.subtotal - totalAmount)
 
-  const canSubmit = balance > 0 || balance < 0 || readOnly
+  const canSubmit = balance !== 0 || readOnly
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={canSubmit}>
