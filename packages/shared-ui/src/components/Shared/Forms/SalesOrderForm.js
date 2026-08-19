@@ -513,7 +513,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       label: labels.volume,
       name: 'volume',
       props: {
-        decimalScale: 2,
+        decimalScale: 3,
         readOnly: true
       }
     },
@@ -1770,6 +1770,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     maxAccess={maxAccess}
                     label={labels.totVolume}
                     value={totalVolume}
+                    decimalScale={3}
                     readOnly
                   />
                 </Grid>
