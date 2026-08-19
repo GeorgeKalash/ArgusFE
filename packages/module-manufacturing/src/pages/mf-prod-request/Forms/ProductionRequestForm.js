@@ -1,6 +1,6 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import { Grid } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -23,10 +23,23 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import PreviewPR from './PreviewPR'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { useError } from '@argus/shared-providers/src/providers/error'
+
+const PROD_REQ_TYPE = {
+  TopSales: 1,
+  NewItems: 2,
+  SpecialOrder: 3
+}
 
 export default function ProductionRequestForm({ recordId, labels, access, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ProductionRequest,
@@ -59,6 +72,8 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         reference: '',
         date: new Date(),
         plantId: null,
+        type: null,
+        typeName: '',
         notes: '',
         status: 1
       },
@@ -71,13 +86,15 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         itemName: '',
         qty: 0,
         pcs: null,
-        itemWeight: null
+        itemWeight: null,
+        suggestedQty: null
       }]
     },
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required(),
-        plantId: yup.number().required()
+        plantId: yup.number().required(),
+        type: yup.number().required(),
       }),
       items: yup.array().of(schema)
     }),
@@ -102,6 +119,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.header.status === 3
+  const canPreview = [PROD_REQ_TYPE.TopSales, PROD_REQ_TYPE.NewItems].includes(formik.values.header.type)
 
   async function refetchForm(requestId) {
     const { record } = await getRequest({
@@ -137,6 +155,43 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     toast.success(platformLabels.Posted)
     window.close()
     invalidate()
+  }
+
+
+  const onChangeType = (_, { key, value } = {}) => {
+    const type = key ? parseFloat(key) : null
+    const hasFilledItems = formik.values.items?.some(item => item.itemId)
+
+    if (formik.values.header.type && formik.values.header.type !== type && hasFilledItems) {
+      stackError({ message: platformLabels.ChangingType })
+      formik.setFieldValue('items', formik.initialValues.items)
+    }
+
+    formik.setFieldValue('header.type', type || null)
+    formik.setFieldValue('header.typeName', value || '')
+  }
+
+  const onPreview = () => {
+    stack({
+      Component: PreviewPR,
+      props: {
+        type: formik.values.header.type,
+        plantId: formik.values.header.plantId,
+        labels,
+        onSelect: newItems => {
+          const existing = formik.values.items?.filter(row => row.itemId) || []
+          const merged = [...existing, ...newItems].map((item, index) => ({
+            ...item,
+            id: index + 1,
+            seqNo: index + 1
+          }))
+          formik.setFieldValue('items', merged)
+        }
+      },
+      title: platformLabels?.Preview,
+      width: 1300,
+      height: 600
+    })
   }
 
   const actions = [
@@ -244,7 +299,16 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         maxLength: 9,
         allowNegative: false
       }
-    }
+    },
+    {
+      component: 'numberfield',
+      label: labels.suggestedQty,
+      name: 'suggestedQty',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
   ]
 
   return (
@@ -313,7 +377,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.ProductionLine.qry}
+                    endpointId={SystemRepository.Plant.qry}
                     name='header.plantId'
                     label={labels.plant}
                     valueField='recordId'
@@ -330,6 +394,33 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                       formik.setFieldValue('header.plantId', newValue?.recordId || null)
                     }}
                     error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
+                  />
+                </Grid>
+                <Grid item xs={9}>
+                  <ResourceComboBox
+                    datasetId={DataSets.PROD_REQ_TYPE}
+                    name='header.type'
+                    label={labels.type}
+                    required
+                    valueField='key'
+                    displayField='value'
+                    readOnly={editMode}
+                    values={formik.values.header}
+                    onClear={() => {
+                      formik.setFieldValue('header.type', null)
+                      formik.setFieldValue('header.typeName', '')
+                    }}
+                    onChange={onChangeType}
+                    error={formik.touched?.header?.type && Boolean(formik.errors?.header?.type)}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomButton
+                    onClick={onPreview}
+                    label={platformLabels.Preview}
+                    disabled={editMode || !canPreview || !formik.values.header.plantId}
+                    image='preview.png'
+                    color='primary'
                   />
                 </Grid>
               </Grid>

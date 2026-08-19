@@ -662,6 +662,7 @@ export const ResourceIds = {
   Disassembly: 47310,
   Jobs: 47311,
   FoCuttings: 47318,
+  PreviewPR: 42353,
 
   // GL
   GLSalesInvoice: 51604,
