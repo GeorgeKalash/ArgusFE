@@ -51,6 +51,18 @@ const CustomNumberField = ({
       e.preventDefault()
     }
   }
+  
+  const handleInputMouseDown = e => {
+    if (autoSelect) return
+
+    const el = e.target
+    if (document.activeElement === el) return
+    
+    e.preventDefault()
+    el.focus()
+    const len = el.value?.length ?? 0
+    el.setSelectionRange(len, len)
+  }
 
   function isDotFollowedByOnlyZeros(val) {
     if (typeof val !== 'string') return false
@@ -192,6 +204,7 @@ const CustomNumberField = ({
           type: arrow ? 'number' : 'text',
           tabIndex: readOnly ? -1 : 0,
           onKeyPress: handleKeyPress,
+          onMouseDown: handleInputMouseDown
         },
         autoComplete: 'off',
         readOnly: _readOnly,
