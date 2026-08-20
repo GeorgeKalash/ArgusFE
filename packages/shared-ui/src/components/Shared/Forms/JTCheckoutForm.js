@@ -21,7 +21,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateFromISO, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
@@ -154,7 +154,7 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
           recordId: res?.record?.transfer?.recordId || null,
           transfer: {
             ...res?.record?.transfer,
-            date: formatDateFromApi(res?.record?.transfer?.date),
+            date: formatDateFromISO(res?.record?.transfer?.date),
             closedDate: formatDateFromApi(res?.record?.transfer?.closedDate),
             postedDate: formatDateFromApi(res?.record?.transfer?.postedDate),
             maxQty: res?.record?.transfer.qty,
