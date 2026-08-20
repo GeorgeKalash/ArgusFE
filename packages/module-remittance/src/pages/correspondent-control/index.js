@@ -6,7 +6,7 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { useFormik } from 'formik'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
@@ -21,6 +21,17 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 const BeneficiaryFields = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const {
+    labels: labels,
+    filterBy,
+    access
+  } = useResourceQuery({
+    datasetId: ResourceIds.CorrespondentControl,
+    filter: {
+      endpointId: SystemRepository.ResourceControl.qry,
+      filterFn: fetchWithFilter
+    }
+  })
 
   const initialValues = {
     countryId: '',
@@ -40,7 +51,8 @@ const BeneficiaryFields = () => {
     ]
   }
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess: access,
     initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -126,21 +138,7 @@ const BeneficiaryFields = () => {
     }
   }
 
-  const {
-    labels: labels,
-    filterBy,
-    access,
-    filters
-  } = useResourceQuery({
-    datasetId: ResourceIds.CorrespondentControl,
-    filter: {
-      endpointId: SystemRepository.ResourceControl.qry,
-      filterFn: fetchWithFilter
-    }
-  })
-
   const onChange = (index, value) => {
-    console.log(index, value)
     if (value) {
       if (index === 'countryId') filterBy('countryId', value)
       if (index === 'dispersalType') filterBy('dispersalType', value)

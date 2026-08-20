@@ -5,7 +5,6 @@ import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -15,7 +14,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { PointofSaleRepository } from '@argus/repositories/src/repositories/PointofSaleRepository'
 
-export default function RetailDocTypeForm({ labels, maxAccess, recordId, functionId, window }) {
+export default function RetailDocTypeForm({ labels, maxAccess, recordId, functionId, currentResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -66,7 +65,7 @@ export default function RetailDocTypeForm({ labels, maxAccess, recordId, functio
 
   return (
     <FormShell
-      resourceId={ResourceIds.POSDocTypeDefault}
+      resourceId={currentResourceId}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

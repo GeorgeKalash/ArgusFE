@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -11,7 +11,6 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
-import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
@@ -75,7 +74,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.DocumentTypeDefault} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.SalesOrderDocTypDefaults} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

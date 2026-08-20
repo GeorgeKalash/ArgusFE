@@ -507,13 +507,15 @@ const PhysicalCountSerialDe = () => {
         <Grow key={formik?.values?.controllerId}>
           <DataGrid
             onChange={(value, action, row) => handleGridChange(value, action, row)}
-            value={formik.values.controllerId ? formik.values.rows : []}
+            value={formik.values.controllerId ? formik.values.rows : initialValues.rows}
             error={formik.errors?.rows}
             initialValues={initialValues?.rows?.[0]}
             columns={columns}
             enableFilters
-            disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
-            allowDelete={formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
+            disabled={!formik.values.controllerId || formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
+            allowDelete={formik.values.controllerId 
+              ? formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3 
+              : false}
             allowAddNewLine={
               formik.values.controllerId &&
               formik.values?.SCStatus != 3 &&

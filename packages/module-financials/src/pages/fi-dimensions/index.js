@@ -15,7 +15,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const FiDimensions = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const [stagingDimCount, setStagingDimCount] = useState(null)
@@ -87,7 +87,7 @@ const FiDimensions = () => {
         fetchedValues[obj.key] = obj.value
       }
     })
-    formik.setValues(fetchedValues)
+    formik.resetForm({ values: fetchedValues })
 
   }
 

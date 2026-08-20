@@ -56,7 +56,7 @@ const FoGeneralSettings = () => {
         }
       }
 
-      formik.setValues(myObject)
+      formik.resetForm({ values: myObject })
     })()
   }, [])
 

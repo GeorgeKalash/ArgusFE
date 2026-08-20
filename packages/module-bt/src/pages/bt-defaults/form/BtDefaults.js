@@ -45,9 +45,10 @@ const BtDefaults = ({ _labels, access }) => {
       if (arrayAllow.includes(obj.key)) {
         const parsedValue = obj.value ? parseFloat(obj.value) : null
         myObject[obj.key] = parsedValue
-        formik.setFieldValue(obj.key, parsedValue)
       }
     })
+
+    formik.resetForm({ values: myObject })
   })()
   }, [systemDefaults])
 
@@ -70,7 +71,7 @@ const BtDefaults = ({ _labels, access }) => {
                 ]}
                 values={formik.values}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('fixing_msId', newValue?.recordId || '')
+                  formik.setFieldValue('fixing_msId', newValue?.recordId || null)
                 }}
                 error={formik.touched.fixing_msId && Boolean(formik.errors.fixing_msId)}
               />

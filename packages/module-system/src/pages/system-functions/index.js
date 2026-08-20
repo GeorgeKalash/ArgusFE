@@ -22,13 +22,15 @@ const SystemFunction = () => {
       parameters: `_filter=`
     })
 
-    formik.setValues({
-      ...formik.values,
-      rows: resSystemFunction.list.map(({ integrationLevel, ...rest }, index) => ({
-        id: index + 1,
-        integrationLevel: integrationLevel ?? '1',
-        ...rest
-      }))
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        rows: resSystemFunction.list.map(({ integrationLevel, ...rest }, index) => ({
+          id: index + 1,
+          integrationLevel: integrationLevel ?? '1',
+          ...rest
+        }))
+      }
     })
   }
 

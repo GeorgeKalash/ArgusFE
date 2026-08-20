@@ -21,12 +21,14 @@ const FinancialIntegrators = () => {
       extension: SaleRepository.FinancialIntegrators.qry,
       parameters: `_filter=`
     })
-    formik.setValues({
+    formik.resetForm({
+      values: {
       ...formik.values,
       rows: res.list.map(({ ...rest }, index) => ({
         id: index + 1,
         ...rest
       }))
+     }
     })
   }
 
@@ -37,8 +39,6 @@ const FinancialIntegrators = () => {
 
   const { formik } = useForm({
     maxAccess: access,
-    enableReinitialize: true,
-    validateOnChange: true,
     initialValues: {
       rows: []
     },

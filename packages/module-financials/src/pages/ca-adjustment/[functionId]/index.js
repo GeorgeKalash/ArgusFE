@@ -14,14 +14,14 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 const CAadjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
-
   const { functionId } = Router()
+  const currentResourceId = functionId == SystemFunction.CashIncrease ? ResourceIds.IncreaseAdj : ResourceIds.DecreaseAdj
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -51,7 +51,8 @@ const CAadjustment = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashBankRepository.CAadjustment.page,
-    datasetId: ResourceIds.IncreaseDecreaseAdj,
+    datasetId: ResourceIds.IncreaseAdj,
+    DatasetIdAccess: currentResourceId,
     filter: {
       filterFn: fetchWithFilter,
       default: { functionId }
@@ -117,7 +118,7 @@ const CAadjustment = () => {
       Component: CAadjustmentForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId,
         access,
         functionId
       },

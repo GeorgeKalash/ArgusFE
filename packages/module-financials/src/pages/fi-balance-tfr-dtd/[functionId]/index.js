@@ -13,6 +13,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import BalanceTransferDTDForm from './form/BalanceTransferDTDForm'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 const BalanceTransferDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -44,7 +45,8 @@ const BalanceTransferDTD = () => {
     refetch
   } = useResourceQuery({
     endpointId: FinancialRepository.FIDocTypeDefaults.page,
-    datasetId: ResourceIds.FIDocTypeDefaults,
+    datasetId: ResourceIds.CreditDTD,
+    DatasetIdAccess: SystemFunction.BalanceTransfer == functionId ? ResourceIds.BalanceTfrDocTypeDefaults : ResourceIds.BalanceTfrBetweenAccountsDTD,
     filter: {
       filterFn: fetchGridData,
       default: { functionId }

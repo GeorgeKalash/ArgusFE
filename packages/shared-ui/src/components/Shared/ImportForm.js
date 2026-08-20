@@ -251,6 +251,7 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
                     <CustomButton
                       label={`${platformLabels?.Browse}...`}
                       disabled={!!file?.name}
+                      excludeFromDirtyTracking={true}
                       onClick={() => imageInputRef.current.click()}
                       style={{
                         marginLeft: 2,
@@ -269,6 +270,7 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
                       image='clear.png'
                       tooltipText={platformLabels?.Clear}
                       onClick={clearFile}
+                      excludeFromDirtyTracking={true}
                       style={{
                         marginLeft: 2,
                         backgroundColor: '#f44336',

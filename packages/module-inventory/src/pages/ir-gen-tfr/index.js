@@ -36,7 +36,7 @@ export default function IRGenerateTransfer() {
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateTransfers
   })
-  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
+  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value) || null
 
   const conditions = {
     transferNow: row => row?.transferNow > 0,
@@ -50,8 +50,8 @@ export default function IRGenerateTransfer() {
     conditionSchema: ['items'],
     initialValues: {
       dtId: null,
-      fromSiteId: null,
-      toSiteId: null,
+      fromSiteId: siteId,
+      toSiteId: 0,
       date: new Date(),
       reference: '',
       items: []
@@ -293,10 +293,6 @@ export default function IRGenerateTransfer() {
     })
     formik.setFieldValue('items', res.list)
   }
-
-  useEffect(() => {
-    if (siteId) formik.setFieldValue('fromSiteId', siteId)
-  }, [siteId])
 
   useEffect(() => {
     fetchGridData()

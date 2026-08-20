@@ -13,12 +13,10 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 
-export default function PurchaseDTDForm({ labels, maxAccess, recordId, functionId }) {
+export default function PurchaseDTDForm({ labels, maxAccess, recordId, functionId, resourceId }) {
   const { platformLabels } = useContext(ControlContext)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -76,7 +74,7 @@ export default function PurchaseDTDForm({ labels, maxAccess, recordId, functionI
 
   return (
     <FormShell
-      resourceId={ResourceIds.PUDocumentTypeDefaults}
+      resourceId={resourceId}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

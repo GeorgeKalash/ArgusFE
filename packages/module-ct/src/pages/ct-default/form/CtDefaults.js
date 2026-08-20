@@ -41,7 +41,6 @@ const CtDefaults = ({ _labels, access }) => {
 
   const { formik } = useForm({
     maxAccess: access,
-    validateOnChange: true,
     validationSchema: yup.object({
       'otp-expiry-time': yup.number().min(30).max(120).nullable(true),
       'ct-client-trial-days': yup.number().min(0).max(180).nullable(true)
@@ -80,49 +79,67 @@ const CtDefaults = ({ _labels, access }) => {
     getDataResult()
   }, [systemDefaults])
 
-  const getDataResult = () => {
+  const getDataResult = async () => {
     const myObject = {}
 
     systemDefaults.list.forEach(obj => {
       if (arrayAllow.includes(obj.key)) {
         const parsedValue = obj.value ? parseInt(obj.value, 10) : null
-        if (formik.values[obj.key] !== parsedValue) {
-          myObject[obj.key] = parsedValue
-          formik.setFieldValue(obj.key, parsedValue)
-        }
+        if (formik.values[obj.key] !== parsedValue) myObject[obj.key] = parsedValue
       }
 
       if (['ct_default_civ_clientName', 'ct_default_civ_clientRef'].includes(obj.key)) {
         const value = obj.value || null
-        if (formik.values[obj.key] !== value) {
-          myObject[obj.key] = value
-          formik.setFieldValue(obj.key, value)
-        }
+        if (formik.values[obj.key] !== value) myObject[obj.key] = value
       }
     })
-    ;['ct-nra-individual', 'ct-nra-corporate'].forEach(key => {
-      if (myObject[key]) {
-        getNumberRange(myObject[key], key)
+
+    const numberRangeKeys = ['ct-nra-individual', 'ct-nra-corporate']
+    const numberRanges = await Promise.all(
+      numberRangeKeys.map(async key => {
+        if (!myObject[key]) return {}
+
+        return await getNumberRange(myObject[key], key)
+      })
+    )
+
+    numberRanges.forEach(range => {
+      Object.assign(myObject, range)
+    })
+
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        ...myObject
       }
     })
   }
 
-  const getNumberRange = (nraId, key) => {
-    getRequest({
+  const getNumberRange = async (nraId, key) => {
+    const res = await getRequest({
       extension: SystemRepository.NumberRange.get,
       parameters: `_filter=&_recordId=${nraId}`
-    }).then(res => {
-      if (key === 'ct-nra-individual') {
-        formik.setFieldValue('ct-nra-individual', res.record.recordId)
-        formik.setFieldValue('ct-nra-individual-ref', res.record.reference)
-        formik.setFieldValue('ct-nra-individual-description', res.record.description)
-      }
-      if (key === 'ct-nra-corporate') {
-        formik.setFieldValue('ct-nra-corporate', res.record.recordId)
-        formik.setFieldValue('ct-nra-corporate-ref', res.record.reference)
-        formik.setFieldValue('ct-nra-corporate-description', res.record.description)
-      }
     })
+
+    if (!res?.record) return {}
+
+    if (key === 'ct-nra-individual') {
+      return {
+        'ct-nra-individual': res.record.recordId,
+        'ct-nra-individual-ref': res.record.reference,
+        'ct-nra-individual-description': res.record.description
+      }
+    }
+
+    if (key === 'ct-nra-corporate') {
+      return {
+        'ct-nra-corporate': res.record.recordId,
+        'ct-nra-corporate-ref': res.record.reference,
+        'ct-nra-corporate-description': res.record.description
+      }
+    }
+
+    return {}
   }
 
   return (

@@ -48,7 +48,7 @@ const GLSettings = () => {
       myObject[obj.key] = numericKeys.includes(obj.key) ? Number(obj?.value) || null : obj.value
     })
 
-    formik.setValues(myObject)
+    formik.resetForm({ values: myObject })
   }
 
   const { labels, access } = useResourceQuery({

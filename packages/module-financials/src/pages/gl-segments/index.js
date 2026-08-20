@@ -25,7 +25,6 @@ const Segments = () => {
   const [store, setStore] = useState([])
   const { stack: stackError } = useError()
   const { systemDefaults } = useContext(DefaultsContext)
-
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -55,7 +54,8 @@ const Segments = () => {
 
   const { formik } = useForm({
     initialValues: {
-      segmentName: null
+      segmentName: null,
+      defaultSegment: null
     },
     maxAccess: access,
     validateOnChange: true
@@ -139,6 +139,7 @@ const Segments = () => {
     if (filteredList.length > 0) {
       formik.setFieldValue('segmentName', filteredList[0].key)
       formik.setFieldValue('segmentId', filteredList[0].value)
+      formik.setFieldValue('defaultSegment', filteredList[0].value)
     }
   }, [systemDefaults])
 
@@ -149,6 +150,7 @@ const Segments = () => {
           onAdd={add}
           maxAccess={access}
           labels={_labels}
+          resetKey={formik.values.defaultSegment} 
           middleSection={
             <Grid item sx={{ display: 'flex', mr: 2 }}>
               <CustomComboBox

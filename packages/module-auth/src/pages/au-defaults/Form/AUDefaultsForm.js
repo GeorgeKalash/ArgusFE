@@ -52,7 +52,7 @@ export default function AUDefaultsForm({ _labels, access }) {
         return acc
       }, {})
 
-      formik.setValues(myObject)
+      formik.resetForm({ values: myObject })
     })()
   }, [])
 

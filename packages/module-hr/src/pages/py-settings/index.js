@@ -57,7 +57,7 @@ const PYSettings = () => {
       filteredList?.forEach(obj => {
         myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
       })
-      formik.setValues(myObject)
+      formik.resetForm({ values: myObject })
     })()
   }, [systemDefaults])
 

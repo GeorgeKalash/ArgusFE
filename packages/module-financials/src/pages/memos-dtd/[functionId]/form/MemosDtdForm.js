@@ -6,20 +6,19 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 export default function MemosDtdForm({ labels, maxAccess, recordId, functionId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
+  const currentResourceId = functionId == SystemFunction.CreditNote ? ResourceIds.CreditDTD : ResourceIds.DebitDTD
+  
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FIDocTypeDefaults.qry
   })
@@ -68,7 +67,7 @@ export default function MemosDtdForm({ labels, maxAccess, recordId, functionId }
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.FIDocTypeDefaults} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={currentResourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

@@ -112,29 +112,29 @@ const DimensionsValues = () => {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container alignItems='center' spacing={2}>
-          <Grid item>
-            <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
-          </Grid>
-          <Grid item xs={4}>
-            <CustomComboBox
-              label={_labels.dimensions}
-              valueField='key'
-              displayField={['value']}
-              store={tpaValues}
-              value={filters?.qry}
-              maxAccess={access}
-              onChange={(event, newValue) => {
-                if (newValue?.key) {
-                  filterBy('qry', newValue?.key)
-                } else {
-                  clearFilter('qry')
-                }
-              }}
-              error={!filters.qry}
-            />
-          </Grid>
-        </Grid>
+        <GridToolbar onAdd={add} maxAccess={access} labels={_labels}
+          leftSection={
+            <Grid item xs={6}>
+              <CustomComboBox
+                label={_labels.dimensions}
+                name='dimension'
+                valueField='key'
+                displayField='value'
+                store={tpaValues}
+                value={filters?.qry}
+                maxAccess={access}
+                onChange={(_, newValue) => {
+                  if (newValue?.key) {
+                    filterBy('qry', newValue?.key)
+                  } else {
+                    clearFilter('qry')
+                  }
+                }}
+                error={!filters.qry}
+              />
+            </Grid>          
+          }
+        />
       </Fixed>
       <Grow>
         <Table

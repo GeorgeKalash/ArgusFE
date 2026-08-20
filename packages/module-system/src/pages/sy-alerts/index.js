@@ -22,12 +22,14 @@ const SyAlerts = () => {
       parameters: `_filter=`
     })
 
-    formik.setValues({
-      rows: rows.list.map(({ activeStatus, ...item }, index) => ({
-        id: index + 1,
-        activeStatus: activeStatus == 1,
-        ...item
-      }))
+    formik.resetForm({
+      values: {
+        rows: rows.list.map(({ activeStatus, ...item }, index) => ({
+          id: index + 1,
+          activeStatus: activeStatus == 1,
+          ...item
+        }))
+      }
     })
   }
 
