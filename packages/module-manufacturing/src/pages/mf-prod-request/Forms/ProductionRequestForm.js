@@ -26,6 +26,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import PreviewPR from './PreviewPR'
+import PreviewPR2 from './PreviewPR2'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useError } from '@argus/shared-providers/src/providers/error'
 
@@ -55,7 +56,10 @@ export default function ProductionRequestForm({ recordId, labels, access, window
   })
 
   const conditions = {
-    itemId: row => row?.qty != null || row?.pcs != null,
+    itemId: row => ({
+      optional: !row?.qty && !row?.pcs,
+      valid: true
+    })
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
@@ -86,8 +90,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         itemName: '',
         qty: 0,
         pcs: null,
-        itemWeight: null,
-        suggestedQty: null
+        itemWeight: null
       }]
     },
     validationSchema: yup.object({
@@ -167,31 +170,46 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       formik.setFieldValue('items', formik.initialValues.items)
     }
 
-    formik.setFieldValue('header.type', type || null)
     formik.setFieldValue('header.typeName', value || '')
+    
+    formik.setFieldValue('header.type', type || null)
+  }
+
+  const mergePreviewedItems = newItems => {
+    const existing = formik.values.items?.filter(row => row.itemId) || []
+    const merged = [...existing, ...newItems].map((item, index) => ({
+      ...item,
+      id: index + 1,
+      seqNo: index + 1
+    }))
+    formik.setFieldValue('items', merged)
   }
 
   const onPreview = () => {
-    stack({
-      Component: PreviewPR,
-      props: {
-        type: formik.values.header.type,
-        plantId: formik.values.header.plantId,
-        labels,
-        onSelect: newItems => {
-          const existing = formik.values.items?.filter(row => row.itemId) || []
-          const merged = [...existing, ...newItems].map((item, index) => ({
-            ...item,
-            id: index + 1,
-            seqNo: index + 1
-          }))
-          formik.setFieldValue('items', merged)
-        }
-      },
-      title: platformLabels?.Preview,
-      width: 1300,
-      height: 600
-    })
+    if (formik.values.header.type === PROD_REQ_TYPE.TopSales) {
+      stack({
+        Component: PreviewPR,
+        props: {
+          plantId: formik.values.header.plantId,
+          labels,
+          onSelect: mergePreviewedItems
+        },
+        title: platformLabels?.Preview,
+        width: 1300,
+        height: 600
+      })
+    } else if (formik.values.header.type === PROD_REQ_TYPE.NewItems) {
+      stack({
+        Component: PreviewPR2,
+        props: {
+          labels,
+          onSelect: mergePreviewedItems
+        },
+        title: platformLabels?.Preview,
+        width: 1300,
+        height: 600
+      })
+    }
   }
 
   const actions = [
@@ -231,6 +249,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         endpointId: InventoryRepository.Item.snapshot,
         valueField: 'sku',
         displayField: 'sku',
+        readOnly: canPreview,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -297,19 +316,29 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       props: {
         decimalScale: 0,
         maxLength: 9,
-        allowNegative: false
-      }
-    },
-    {
-      component: 'numberfield',
-      label: labels.suggestedQty,
-      name: 'suggestedQty',
-      flex: 1,
-      props: {
-        readOnly: true
+        allowNegative: false,
+        readOnly: canPreview
       }
     },
   ]
+
+  async function onValidationRequired() {
+    const errors = await formik.validateForm()
+
+    if (errors.header && Object.keys(errors.header).length) {
+      const touchedFields = {
+        header: { ...formik.touched.header }
+      }
+
+      Object.keys(errors.header).forEach(key => {
+        if (!formik.touched.header || !formik.touched.header[key]) {
+          touchedFields.header[key] = true
+        }
+      })
+
+      formik.setTouched(touchedFields, true)
+    }
+  }
 
   return (
     <FormShell
@@ -387,7 +416,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik?.values?.header}
-                    readOnly={isPosted}
+                    readOnly={isPosted || (formik.values.header.type === PROD_REQ_TYPE.TopSales && formik.values.items?.some(row => row.itemId))}
                     required
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
@@ -407,8 +436,8 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                     readOnly={editMode}
                     values={formik.values.header}
                     onClear={() => {
-                      formik.setFieldValue('header.type', null)
                       formik.setFieldValue('header.typeName', '')
+                      formik.setFieldValue('header.type', null)
                     }}
                     onChange={onChangeType}
                     error={formik.touched?.header?.type && Boolean(formik.errors?.header?.type)}
@@ -418,7 +447,11 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                   <CustomButton
                     onClick={onPreview}
                     label={platformLabels.Preview}
-                    disabled={editMode || !canPreview || !formik.values.header.plantId}
+                    disabled={
+                      editMode ||
+                      !canPreview ||
+                      (formik.values.header.type === PROD_REQ_TYPE.TopSales && !formik.values.header.plantId)
+                    }
                     image='preview.png'
                     color='primary'
                   />
@@ -450,9 +483,10 @@ export default function ProductionRequestForm({ recordId, labels, access, window
             columns={columns}
             maxAccess={maxAccess}
             name='items'
-            allowDelete={!isPosted}
-            allowAddNewLine={!isPosted}
-            disabled={isPosted}
+            allowDelete={!isPosted && !canPreview}
+            allowAddNewLine={!isPosted && !canPreview}
+            disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'items').length > 0}
+            onValidationRequired={onValidationRequired}
           />
         </Grow>
       </VertLayout>

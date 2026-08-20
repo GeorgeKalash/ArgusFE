@@ -12,8 +12,9 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 
-const PreviewPR = ({ plantId, onSelect, window }) => {
+const PreviewPR2 = ({ onSelect, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -22,7 +23,7 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
     datasetId: ResourceIds.PreviewPR
   })
 
-    const conditions = {
+  const conditions = {
     qty: row => ({
       optional: !row?.checked,
       valid: !row?.checked || row.qty != null
@@ -50,7 +51,15 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
         return
       }
 
-      onSelect(selectedRows)
+      const mappedRows = selectedRows.map(row => ({
+        itemId: row.recordId,
+        sku: row.sku,
+        itemName: row.name,
+        itemWeight: row.weight,
+        qty: row.qty
+      }))
+
+      onSelect(mappedRows)
       window.close()
     }
   })
@@ -74,70 +83,61 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
       label: labels.sku,
       name: 'sku',
       flex: 1,
-      props: { 
+      props: {
         readOnly: true
       }
     },
     {
       component: 'textfield',
       label: labels.itemName,
-      name: 'itemName',
+      name: 'name',
       flex: 1,
-      props: { 
-        readOnly: true 
+      props: {
+        readOnly: true
       }
     },
     {
       component: 'textfield',
-      label: labels.metalRef,
+      label: labels.metal,
       name: 'metalRef',
       flex: 1,
       props: {
-        readOnly: true 
+        readOnly: true
       }
     },
     {
       component: 'textfield',
       label: labels.itemGroupRef,
-      name: 'itemGroupRef',
+      name: 'groupRef',
       flex: 1,
-      props: { 
-        readOnly: true 
+      props: {
+        readOnly: true
       }
     },
     {
       component: 'textfield',
       label: labels.itemGroupName,
-      name: 'itemGroupName',
+      name: 'groupName',
       flex: 1,
-      props: { 
-        readOnly: true 
+      props: {
+        readOnly: true
       }
     },
     {
       component: 'textfield',
       label: labels.weight,
-      name: 'itemWeight',
+      name: 'weight',
       flex: 1,
       props: {
-        readOnly: true 
-      }
-    },
-    {
-      component: 'numberfield',
-      label: labels.st_qty,
-      name: 'st_qty',
-      flex: 1,
-      props: { 
         readOnly: true
       }
     },
     {
-      component: 'numberfield',
-      label: labels.lt_qty,
-      name: 'lt_qty',
+      component: 'date',
+      label: labels.createdDate,
+      name: 'createdDate',
       flex: 1,
-      props: { 
+      props: {
         readOnly: true
       }
     },
@@ -146,9 +146,9 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
       label: labels.qty,
       name: 'qty',
       flex: 1,
-      props: { 
-        decimalScale: 2, 
-        allowNegative: false 
+      props: {
+        decimalScale: 2,
+        allowNegative: false
       },
       propsReducer({ row, props }) {
         return {
@@ -162,15 +162,16 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
   useEffect(() => {
     ;(async function () {
       const res = await getRequest({
-        extension: ManufacturingRepository.ProductionRequest.preview,
-        parameters: `_plantId=${plantId}`
+        extension: ManufacturingRepository.ProductionRequest.preview2,
+        parameters: ''
       })
 
       if (res?.list?.length > 0) {
         const rows = res.list.map((item, index) => ({
           id: index + 1,
           checked: false,
-          ...item
+          ...item,
+          createdDate: item?.createdDate ? formatDateFromApi(item?.createdDate) : null,
         }))
         formik.setValues({ rows })
       }
@@ -195,4 +196,4 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
   )
 }
 
-export default PreviewPR
+export default PreviewPR2
