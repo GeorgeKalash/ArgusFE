@@ -30,7 +30,7 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
       reference: '',
       name: '',
       ccId: null,
-      saleCurrencyId: null,
+      salesCurrencyId: null,
     },
     maxAccess,
     validationSchema: yup.object({
@@ -108,7 +108,7 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('ccId', newValue?.recordId)
                 }}
                 error={formik.touched.ccId && Boolean(formik.errors.ccId)}
@@ -117,7 +117,7 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
-                name='saleCurrencyId'
+                name='salesCurrencyId'
                 label={labels.currency}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -127,8 +127,8 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('saleCurrencyId', newValue?.recordId || null)}
-                error={formik.touched.saleCurrencyId && Boolean(formik.errors.saleCurrencyId)}
+                onChange={(_, newValue) => formik.setFieldValue('salesCurrencyId', newValue?.recordId || null)}
+                error={formik.touched.salesCurrencyId && Boolean(formik.errors.salesCurrencyId)}
               />
             </Grid>
           </Grid>
