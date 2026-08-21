@@ -32,6 +32,12 @@ const SalesTrxForm = ({ functionId, recordId, itemId, clientId, window }) => {
       flex: 1
     },
     {
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
       field: 'sku',
       headerName: labels.sku,
       flex: 1
