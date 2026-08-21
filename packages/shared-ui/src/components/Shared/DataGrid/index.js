@@ -129,7 +129,7 @@ export function DataGrid({
       const colId = focusedCell.column.colId
       const isUpdatedColumn = Object.keys(changes || {}).includes(colId)
 
-      if (isUpdatedColumn && !disableRefocus) {
+      if (isUpdatedColumn && !disableRefocus && colId !== 'actions') {
         params.api.stopEditing()
         setTimeout(() => {
           params.api.startEditingCell({
@@ -444,6 +444,8 @@ export function DataGrid({
 
   const onCellKeyDown = params => {
     const { event, api, node, data, colDef } = params
+
+    if (colDef?.field === 'actions') return
 
     if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && event.key !== 'Enter') {
       isDup.current = true
