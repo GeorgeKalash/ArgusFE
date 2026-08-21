@@ -3,10 +3,6 @@ import { useEffect, useRef, useState, createElement as h } from 'react'
 const API_BASE = 'https://api.gold-api.com/price'
 const GRAMS_PER_OZ = 31.1034768
 
-const PEGGED_RATES = {
-  SAR: 3.75
-}
-
 const REFRESH_MS = 30000 
 
 async function fetchSpotUSD(symbol) {
@@ -17,12 +13,12 @@ async function fetchSpotUSD(symbol) {
   return data.price 
 }
 
-async function fetchSpotInCurrency(symbol, currency) {
+async function fetchSpotInCurrency(symbol, currency, rate) {
   if (currency === 'USD') return fetchSpotUSD(symbol)
 
-  if (PEGGED_RATES[currency]) {
+  if (rate) {
     const usd = await fetchSpotUSD(symbol)
-    return usd * PEGGED_RATES[currency]
+    return usd * rate
   }
 
   const res = await fetch(`${API_BASE}/${symbol}/${currency}`)
@@ -32,7 +28,7 @@ async function fetchSpotInCurrency(symbol, currency) {
   return data.price
 }
 
-function useMetalPrices(karatCurrency) {
+function useMetalPrices(karatCurrency, rate) {
   const [prices, setPrices] = useState(null)
   const [error, setError] = useState(null)
   const prevPrices = useRef({})
@@ -46,7 +42,7 @@ function useMetalPrices(karatCurrency) {
         const needsSeparateUsdFetch = karatCurrency !== 'USD'
 
         const [xauKarat, xagUsd, xauUsd] = await Promise.all([
-          fetchSpotInCurrency('XAU', karatCurrency),
+          fetchSpotInCurrency('XAU', karatCurrency, rate),
           fetchSpotUSD('XAG'),
           needsSeparateUsdFetch ? fetchSpotUSD('XAU') : Promise.resolve(null)
         ])
@@ -78,7 +74,7 @@ function useMetalPrices(karatCurrency) {
       cancelled = true
       clearInterval(id)
     }
-  }, [karatCurrency])
+  }, [karatCurrency, rate])
 
   return { prices, error }
 }
@@ -164,8 +160,9 @@ function PriceCell(props) {
 }
 
 export default function GoldPriceTicker(props) {
-  const karatCurrency = props.currency || 'SAR'
-  const state = useMetalPrices(karatCurrency)
+  const karatCurrency = props.currency
+  const rate=  props.rate
+  const state = useMetalPrices(karatCurrency, rate)
   const prices = state.prices
   const error = state.error
 
