@@ -654,6 +654,10 @@ const Table = ({
           params.api.setFocusedCell(rowIndex, colId)
           params.api.ensureIndexVisible(rowIndex)
 
+          if (handleCheckboxChange) {
+            handleCheckboxChange(params.data, checked)
+          }
+
           if (rowSelection !== 'single') {
             params.node.setDataValue(params.colDef.field, checked)
           } else {
@@ -667,10 +671,6 @@ const Table = ({
           }
 
           syncCheckAllState(params.api)
-
-          if (handleCheckboxChange) {
-            handleCheckboxChange(params.data, checked)
-          }
         }}
       />
     )
@@ -1019,29 +1019,30 @@ const Table = ({
       showCheckboxColumn
     ])
 
-  const gridOptions = useMemo(
+  const rowClassRules = useMemo(
     () => ({
-      rowClassRules: {
-        'even-row': params => params.node.rowIndex % 2 === 0,
+      'even-row': params => params.node.rowIndex % 2 === 0,
 
-        'highlighted-row': params => {
-          if (!highlightRow) return false
-          return highlightRow.condition?.(params.data)
-        }
-      },
-
-      getRowStyle: params => {
-        if (!highlightRow) return {}
-
-        const isHighlighted = highlightRow.condition?.(params.data)
-
-        if (!isHighlighted) return {}
-
-        return {
-          '--highlight-bg': highlightRow.color?.(params.data) || 'transparent'
-        }
+      'highlighted-row': params => {
+        if (!highlightRow) return false
+        return highlightRow.condition?.(params.data)
       }
     }),
+    [highlightRow]
+  )
+
+  const getRowStyle = useMemo(
+    () => params => {
+      if (!highlightRow) return {}
+
+      const isHighlighted = highlightRow.condition?.(params.data)
+
+      if (!isHighlighted) return {}
+
+      return {
+        '--highlight-bg': highlightRow.color?.(params.data) || 'transparent'
+      }
+    },
     [highlightRow]
   )
 
@@ -1281,7 +1282,8 @@ const Table = ({
             suppressDragLeaveHidesColumns={true}
             rowHeight={hasImageColumn ? rowHeightImage : rowHeight}
             onFirstDataRendered={onFirstDataRendered}
-            gridOptions={gridOptions}
+            rowClassRules={rowClassRules}
+            getRowStyle={getRowStyle}
             rowDragManaged={rowDragManaged}
             onRowDragEnd={onRowDragEnd}
             onColumnMoved={onColumnMoved}

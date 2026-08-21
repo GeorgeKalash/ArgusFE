@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -25,6 +25,7 @@ export default function AccountReconciliations(){
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [selectedRow, setRow] = useState(null)
+  const balanceRef = useRef(0)
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.AccountReconciliations
@@ -138,6 +139,8 @@ export default function AccountReconciliations(){
           },
           { totalDebit: 0, totalCredit: 0, totalBalance: 0 }
         )
+
+      balanceRef.current = totalBalance 
 
       return {
         ...prev,
@@ -447,7 +450,7 @@ export default function AccountReconciliations(){
               condition: row => row?.checked && !row?.rclCode,
               color: row => {
                 if (row?.rclCode) return 'transparent'
-                return formik?.values?.balance == 0 ? '#78d580' : '#efc65e'
+                return balanceRef.current == 0 ? '#78d580' : '#efc65e'
               }
             }}
             disable={(row) => row.disableRow}
