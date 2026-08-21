@@ -35,5 +35,8 @@ export const BrokerageTradingRepository = {
     get: service + 'getEO',
     snapshot: service + 'snapshotEO',
     pack: service + 'getPackEO'
+  },
+  EventOrderInquiry: {
+    page: service + 'pageEOI'
   }
 }
