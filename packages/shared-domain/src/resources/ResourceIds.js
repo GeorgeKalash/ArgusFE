@@ -665,6 +665,7 @@ export const ResourceIds = {
   FoCuttings: 47318,
   PPDefaults: 42611,
   UnmarkedJobs: 42354,
+
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,

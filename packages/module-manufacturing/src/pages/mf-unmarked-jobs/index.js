@@ -1,12 +1,10 @@
-import { useContext, useState, useRef } from 'react'
+import { useContext, useState, useRef, useEffect } from 'react'
 import { Grid } from '@mui/material'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -15,13 +13,9 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 
 export default function UnmarkedJobs() {
   const { getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-
   const [unmarkedJobIds, setUnmarkedJobIds] = useState([])
   const [checkedIds, setCheckedIds] = useState([])
-
   const workCenterIdRef = useRef(null)
-
 
   async function fetchGridData() {
     const wcId = workCenterIdRef.current
@@ -61,8 +55,7 @@ export default function UnmarkedJobs() {
   }
 
   function onRowCheck(rowOrRows, checked) {
-    const isBulk = Array.isArray(rowOrRows)
-    const rowIds = isBulk ? rowOrRows.map(r => r.recordId) : [rowOrRows.recordId]
+    const rowIds = (Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows]).map(r => r.recordId)
 
     setCheckedIds(prev => {
       const updated = checked
@@ -77,33 +70,64 @@ export default function UnmarkedJobs() {
 
   const { formik } = useForm({
     maxAccess,
-    initialValues: { workCenterId: null },
-    onSubmit: () => {}
+    initialValues: { workCenterId: null }
   })
 
   const columns = [
-    { field: 'reference', headerName: labels?.reference, flex: 1 },
-    { field: 'date', headerName: labels?.date, flex: 1, type: 'date' },
-    { field: 'designRef', headerName: labels?.design, flex: 1 },
-    { field: 'clientName', headerName: labels?.client, flex: 1 },
-    { field: 'sku', headerName: labels?.sku, flex: 1 },
-    { field: 'itemName', headerName: labels?.item, flex: 1 },
-    { field: 'wcName', headerName: labels?.workCenter, flex: 1 },
-    { field: 'className', headerName: labels?.productionClass, flex: 1 },
-    { field: 'standardRef', headerName: labels?.productionStandard, flex: 1 },
-    { field: 'pcs', headerName: labels?.pcs, flex: 1, type: 'number' },
-    { field: 'qty', headerName: labels?.qty, flex: 1, type: 'number' },
-    {
-      field: 'statusName',
-      headerName: labels?.status,
-      type: 'badge',
-      family: 'document',
-      valueField: 'status',
-      flex: 1
+    { 
+      field: 'reference', 
+      headerName: labels?.reference, 
+      flex: 1 
     },
-    { field: 'startingDT', headerName: labels?.startingDate, flex: 1, type: 'date' },
-    { field: 'deliveryDate', headerName: labels?.deliveryDate, flex: 1, type: 'date' },
-    { field: 'endingDT', headerName: labels?.endingDate, flex: 1, type: 'date' }
+    { 
+      field: 'date', 
+      headerName: labels?.date, 
+      flex: 1, 
+      type: 'date' 
+    },
+    { 
+      field: 'designRef',
+      headerName: labels?.design, 
+      flex: 1 
+    },
+    { 
+      field: 'sku', 
+      headerName: labels?.sku, 
+      flex: 1 
+    },
+    { 
+      field: 'itemName', 
+      headerName: labels?.item, 
+      flex: 1 
+    },
+    { 
+      field: 'className', 
+      headerName: labels?.productionClass, 
+      flex: 1 
+    },
+    { 
+      field: 'standardRef', 
+      headerName: labels?.productionStandard, 
+      flex: 1 
+    },
+    { 
+      field: 'pcs', 
+      headerName: labels?.pcs, 
+      flex: 1, 
+      type: 'number' 
+    },
+    { 
+      field: 'qty', 
+      headerName: labels?.qty, 
+      flex: 1, 
+      type: 'number' 
+    },
+    { 
+      field: 'startingDT', 
+      headerName: labels?.startingDate, 
+      flex: 1, 
+      type: 'date' 
+    }
   ]
 
   const rows = (data?.list || []).map((job, index) => ({
@@ -128,7 +152,7 @@ export default function UnmarkedJobs() {
               displayFieldWidth={2}
               form={formik}
               maxAccess={maxAccess}
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 const wcId = newValue?.recordId || null
 
                 formik.setFieldValue('workCenterId', wcId)
@@ -143,21 +167,13 @@ export default function UnmarkedJobs() {
               error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
             />
           </Grid>
-          <Grid item xs={3}>
-            <CustomButton
-              onClick={() => checkUnmarkedJobs(checkedIds)}
-              label={'Check'}
-              disabled={!checkedIds.length}
-              color='primary'
-            />
-          </Grid>
         </Grid>
       </Fixed>
       <Grow>
         <Table
           name='table'
           columns={columns}
-          gridData={{ list: rows, count: data?.count ?? rows.length }}
+          gridData={{ list: rows }}
           rowId={['recordId']}
           maxAccess={maxAccess}
           pagination={false}
