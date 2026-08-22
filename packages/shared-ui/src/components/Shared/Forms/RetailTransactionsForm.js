@@ -151,7 +151,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
       street2: null,
       countryId: null,
       cityId: null,
-      phone: null,
+      phoneNo: null,
       city: null,
       defPriceType: null,
       posFlags: false,
@@ -226,23 +226,23 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
       header: yup.object({
         date: yup.string().required(),
         name: yup.string().test('Name-Required', 'Name is required when street1 or street2 has a value', function () {
-          const { street1, street2, name, phone, cityId } = this.parent
+          const { street1, street2, name, cityId } = this.parent
 
-          return !(street1 || street2 || cityId || phone) ? true : Boolean(name)
+          return !(street1 || street2 || cityId) ? true : Boolean(name)
         }),
         cityId: yup.string().test('City-Required', 'City is required when street1 or street2 has a value', function () {
-          const { street1, street2, phone, cityId } = this.parent
+          const { street1, street2, cityId } = this.parent
 
-          if (street1 || street2 || phone) {
+          if (street1 || street2) {
             return cityId ? true : this.createError({ message: 'City is required' })
           }
 
           return true
         }),
         street1: yup.string().test('Street1-Required', 'Street1 is required when street2 has a value', function () {
-          const { street1, street2, phone, cityId } = this.parent
+          const { street1, street2, cityId } = this.parent
 
-          return !(street2 || phone || cityId) ? true : Boolean(street1)
+          return !(street2 || cityId) ? true : Boolean(street1)
         })
       }),
       items: yup.array().of(
@@ -640,7 +640,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
           name: addressObj?.record?.name || retailTrxHeader?.clientName || '',
           street1: addressObj?.record?.street1 || '',
           street2: addressObj?.record?.street2 || '',
-          phone: addressObj?.record?.phone || '',
+          phoneNo: addressObj?.record?.phone || retailTrxHeader?.phoneNo || '',
           cityId: addressObj?.record?.cityId || '',
           city: addressObj?.record?.city || '',
           KGmetalPrice: retailTrxHeader?.metalPrice ? retailTrxHeader?.metalPrice * 1000 : 0,
@@ -655,6 +655,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
     setAddress({
       ...(addressObj?.record || {}),
       name: addressObj?.record?.name || retailTrxHeader?.clientName || '',
+      phone: addressObj?.record?.phone || retailTrxHeader?.phoneNo || '',
       countryId: addressObj?.countryId || countryId?.value
     })
 
@@ -1403,7 +1404,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
     formik.setFieldValue('header.street2', address?.street2 || '')
     formik.setFieldValue('header.cityId', address?.cityId || '')
     formik.setFieldValue('header.city', address?.city || '')
-    formik.setFieldValue('header.phone', address?.phone || '')
+    formik.setFieldValue('header.phoneNo', address?.phone || '')
   }, [address])
 
   useEffect(() => {
@@ -1701,9 +1702,9 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='header.phone'
+                    name='header.phoneNo'
                     label={labels.phone}
-                    value={formik.values.header.phone}
+                    value={formik.values.header.phoneNo}
                     readOnly={isPosted}
                     maxLength='15'
                     phone={true}
@@ -1717,14 +1718,14 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
                       setAddressModified(true)
                     }}
                     onClear={() => {
-                      formik.setFieldValue('header.phone', '')
+                      formik.setFieldValue('header.phoneNo', '')
                       setAddress(prevAddress => ({
                         ...prevAddress,
                         phone: ''
                       }))
                       setAddressModified(true)
                     }}
-                    error={formik.touched.header?.phone && Boolean(formik.errors.header?.phone)}
+                    error={formik.touched.header?.phoneNo && Boolean(formik.errors.header?.phoneNo)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
