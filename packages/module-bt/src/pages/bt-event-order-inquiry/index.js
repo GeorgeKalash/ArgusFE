@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -9,11 +9,14 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import EventOrderForm from '@argus/shared-ui/src/components/Shared/Forms/EventOrderForm'
+import GoldPriceTicker from '@argus/shared-ui/src/components/Shared/GoldPriceTicker'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
 const EventOrderInquiry = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const [rate, setRate] = useState(50.86)
+  const [currencyRef, setCurrencyRef] = useState('EGP')
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -159,6 +162,7 @@ const EventOrderInquiry = () => {
   return (
     <VertLayout>
       <Fixed>
+        <GoldPriceTicker currency={currencyRef} rate={rate} style={{ marginLeft: 16, marginBottom: 16 }} />
         <RPBGridToolbar hasSearch={false} labels={labels} maxAccess={access} reportName={'BTEOI'} filterBy={filterBy} />
       </Fixed>
       <Grow>
