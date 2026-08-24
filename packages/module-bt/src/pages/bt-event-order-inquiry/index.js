@@ -7,6 +7,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
+import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import EventOrderForm from '@argus/shared-ui/src/components/Shared/Forms/EventOrderForm'
 import GoldPriceTicker from '@argus/shared-ui/src/components/Shared/GoldPriceTicker'
@@ -15,11 +16,19 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 const EventOrderInquiry = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [rate, setRate] = useState(50.86)
-  const [currencyRef, setCurrencyRef] = useState('EGP')
+  const [rate, setRate] = useState(null)
+  const [currencyRef, setCurrencyRef] = useState(null)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
+
+    const resEd2 = await getRequest({
+      extension: MultiCurrencyRepository.ExchangeRates.get2,
+      parameters: ``
+    })
+
+    setRate(resEd2?.record?.rate)
+    setCurrencyRef(resEd2?.record?.baseCurrencyRef)
 
     const response = await getRequest({
       extension: BrokerageTradingRepository.EventOrderInquiry.page,
@@ -162,7 +171,7 @@ const EventOrderInquiry = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GoldPriceTicker currency={currencyRef} rate={rate} style={{ marginLeft: 16, marginBottom: 16 }} />
+        {currencyRef && rate && (<GoldPriceTicker currency={currencyRef} rate={rate} style={{ marginLeft: 16, marginBottom: 16 }} />)}
         <RPBGridToolbar hasSearch={false} labels={labels} maxAccess={access} reportName={'BTEOI'} filterBy={filterBy} />
       </Fixed>
       <Grow>
