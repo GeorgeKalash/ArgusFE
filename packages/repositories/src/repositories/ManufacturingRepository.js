@@ -517,7 +517,9 @@ export const ManufacturingRepository = {
     set2: service + 'set2PR',
     del: service + 'delPR',
     snapshot: service + 'snapshotPR',
-    post: service + 'postPR'
+    post: service + 'postPR',
+    preview: service + 'previewPR',
+    preview2: service + 'previewPR2',
   },
   WorkCenterGroups: {
     get: service + 'getWCG',
