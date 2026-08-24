@@ -5,17 +5,20 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function UnmarkedJobs() {
+export default function BatchWaxTransfer() {
   const { getRequest } = useContext(RequestsContext)
   const [unmarkedJobIds, setUnmarkedJobIds] = useState([])
   const [checkedIds, setCheckedIds] = useState([])
   const workCenterIdRef = useRef(null)
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData() {
     const wcId = workCenterIdRef.current
@@ -37,7 +40,7 @@ export default function UnmarkedJobs() {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.MFJobOrder.qry4,
-    datasetId: ResourceIds.UnmarkedJobs
+    datasetId: ResourceIds.BatchWorkTransfer
   })
 
   async function checkUnmarkedJobs(ids) {
@@ -48,7 +51,7 @@ export default function UnmarkedJobs() {
 
     const res = await getRequest({
       extension: ManufacturingRepository.MFJobOrder.qryUnmarked,
-      parameters: `_jobIds=${ids.join(',')}`
+      parameters: `_jobIds=${ids.join(',')}&_workCenterId=${workCenterIdRef.current}`
     })
 
     setUnmarkedJobIds(res?.record?.jobIds || [])
@@ -62,7 +65,7 @@ export default function UnmarkedJobs() {
         ? Array.from(new Set([...prev, ...rowIds]))
         : prev.filter(id => !rowIds.includes(id))
 
-      checkUnmarkedJobs(updated)
+      if (!updated.length) setUnmarkedJobIds([])
 
       return updated
     })
@@ -154,7 +157,7 @@ export default function UnmarkedJobs() {
               maxAccess={maxAccess}
               onChange={(_, newValue) => {
                 const wcId = newValue?.recordId || null
-
+                if (wcId === workCenterIdRef.current) return
                 formik.setFieldValue('workCenterId', wcId)
                 formik.setFieldValue('wcRef', newValue?.reference || '')
                 formik.setFieldValue('wcName', newValue?.name || '')
@@ -165,6 +168,13 @@ export default function UnmarkedJobs() {
                 refetch()
               }}
               error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <CustomButton
+              onClick={() => checkUnmarkedJobs(checkedIds)}
+              label={platformLabels.Check}
+              color='primary'
             />
           </Grid>
         </Grid>
