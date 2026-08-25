@@ -78,7 +78,7 @@ const WindowToolbar = ({
       layoutName: item.layoutName,
       schemaFile: item.schemaFile,
       reportEngine: item.reportEngine,
-      assembly: 'ArgusRPT.dll'
+      assembly: item.assembly ?? 'ArgusRPT.dll'
     }))
 
     const finalStore = (store || []).map(
