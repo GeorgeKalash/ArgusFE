@@ -185,7 +185,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
         muRef: '',
         muQty: 0,
         netUnitPrice: 0,
-        netUnitPriceVariation: 0
+        netUnitPriceVariation: 0,
+        lastShipmentDate: null
       }
     ]
   }
@@ -229,7 +230,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
             ...rest,
             seqNo: id,
             applyVat: isVattable,
-            deliveryDate: rest.deliveryDate ? formatDateToApi(rest.deliveryDate) : null
+            deliveryDate: rest.deliveryDate ? formatDateToApi(rest.deliveryDate) : null,
+            lastShipmentDate: rest.lastShipmentDate ? formatDateToApi(rest.lastShipmentDate) : null
           }))
       }
 
@@ -528,6 +530,14 @@ export default function PurchaseOrderForm({ recordId, window }) {
       component: 'date',
       label: labels.deliveryDate,
       name: 'deliveryDate'
+    },
+    {
+      component: 'date',
+      label: labels.lastShipmentDate,
+      name: 'lastShipmentDate',
+      props: {
+        readOnly: true
+      }
     }
   ]
 
@@ -756,6 +766,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
           vatAmount: item.vatAmount ? item.vatAmount : 0,
           extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
           deliveryDate: formatDateFromApi(item.deliveryDate),
+          lastShipmentDate: formatDateFromApi(item.lastShipmentDate),
           puTrx: true,
           taxDetails: puTrxTaxes
         }
