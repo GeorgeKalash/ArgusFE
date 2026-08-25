@@ -291,6 +291,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('header.lineId', newValue?.recordId || null)
+                  
                 }}
                 error={formik.touched?.header?.lineId && Boolean(formik.errors?.header?.lineId)}
               />
