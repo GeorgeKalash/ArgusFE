@@ -599,7 +599,6 @@ const TabsProvider = ({ children }) => {
     if (!shouldManageTabs || !initialLoadDone || !router.asPath || redirectingRef.current) return
 
     const normalizedRoute = normalizeRoute(router.asPath)
-    console.log('lastOpenedPage', lastOpenedPage, normalizedRoute)
 
     if (closingRouteRef.current === normalizedRoute) return
 
