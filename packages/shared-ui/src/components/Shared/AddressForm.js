@@ -28,11 +28,12 @@ const AddressForm = ({
 
   useSetWindow({ title: platformLabels.Address, window })
 
-  const onAddressSubmit = async post => {
+  const onAddressSubmit = async (post, window) => {
     if (!required) {
       setAddress(post)
       onSubmit(post, window)
-
+      window.close()
+      
       return
     }
 
