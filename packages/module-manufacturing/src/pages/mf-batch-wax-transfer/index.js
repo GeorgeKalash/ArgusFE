@@ -1,4 +1,4 @@
-import { useContext, useState, useRef, useEffect } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { Grid } from '@mui/material'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -6,6 +6,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -73,7 +74,7 @@ export default function BatchWaxTransfer() {
 
   const { formik } = useForm({
     maxAccess,
-    initialValues: { workCenterId: null }
+    initialValues: { workCenterId: null, search: '' }
   })
 
   const columns = [
@@ -139,6 +140,14 @@ export default function BatchWaxTransfer() {
     checked: checkedIds.includes(job.recordId)
   }))
 
+  const search = formik.values.search
+
+  const filteredRows = search
+    ? rows.filter(
+        row => row.reference?.toLowerCase().includes(search.toLowerCase())
+      )
+    : rows
+
   return (
     <VertLayout>
       <Fixed>
@@ -170,6 +179,17 @@ export default function BatchWaxTransfer() {
               error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
             />
           </Grid>
+          <Grid item xs={2}>
+            <CustomTextField
+              name='search'
+              value={formik.values.search}
+              label={platformLabels.Search}
+              onClear={() => formik.setFieldValue('search', '')}
+              onChange={formik.handleChange}
+              onSearch={value => formik.setFieldValue('search', value)}
+              search
+            />
+          </Grid>
           <Grid item xs={3}>
             <CustomButton
               onClick={() => checkUnmarkedJobs(checkedIds)}
@@ -183,7 +203,7 @@ export default function BatchWaxTransfer() {
         <Table
           name='table'
           columns={columns}
-          gridData={{ list: rows }}
+          gridData={{ list: filteredRows }}
           rowId={['recordId']}
           maxAccess={maxAccess}
           pagination={false}
