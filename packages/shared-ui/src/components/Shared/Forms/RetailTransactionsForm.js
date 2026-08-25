@@ -221,7 +221,6 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
     maxAccess,
     behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
-    validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
         date: yup.string().required(),
@@ -243,6 +242,12 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
           const { street1, street2, cityId } = this.parent
 
           return !(street2 || cityId) ? true : Boolean(street1)
+        }),
+        phoneNo: yup.string().test(function () {
+          const { street1, cityId, phoneNo } = this.parent
+          const hasAddress = Boolean(street1 || cityId)
+
+          return !hasAddress ? true : Boolean(phoneNo)
         })
       }),
       items: yup.array().of(
@@ -287,7 +292,8 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
       const payload = {
         header: {
           ...obj.header,
-          date: formatDateToApi(obj.header?.date)
+          date: formatDateToApi(obj.header?.date),
+          addressId: (modifiedAddress.street1 && modifiedAddress.cityId) ? obj?.header?.addressId : null,
         },
         items: mapWithSeqNo(obj.items),
         cash: mapWithSeqNo(obj.cash)
@@ -1187,7 +1193,8 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
         address: address,
         setAddress: setAddress,
         isCleared: false,
-        datasetId: ResourceIds.ADDRetailInvoice
+        datasetId: ResourceIds.ADDRetailInvoice,
+        required: false
       }
     })
   }
@@ -1289,6 +1296,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
     formik.setFieldValue('header.plantName', posInfo?.plantName)
     formik.setFieldValue('header.siteId', posInfo?.siteId)
     formik.setFieldValue('header.siteName', posInfo?.siteName)
+    formik.setFieldValue('header.posId', posInfo?.recordId)
     formik.setFieldValue('header.posRef', posInfo?.reference)
     formik.setFieldValue('header.plId', posInfo?.plId)
     formik.setFieldValue('header.dtId', formik.values.header.dtId || posDtId ? posInfo?.dtId : null)
