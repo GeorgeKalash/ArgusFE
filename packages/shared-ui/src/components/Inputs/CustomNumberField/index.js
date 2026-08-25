@@ -65,18 +65,6 @@ const CustomNumberField = ({
     el.setSelectionRange(len, len)
   }
 
-  const handleInputMouseDown = e => {
-    if (autoSelect) return
-
-    const el = e.target
-    if (document.activeElement === el) return
-    
-    e.preventDefault()
-    el.focus()
-    const len = el.value?.length ?? 0
-    el.setSelectionRange(len, len)
-  }
-
   function isDotFollowedByOnlyZeros(val) {
     if (typeof val !== 'string') return false
 
