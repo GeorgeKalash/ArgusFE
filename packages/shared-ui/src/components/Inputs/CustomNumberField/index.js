@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { NumericFormat } from 'react-number-format'
-import { IconButton, InputAdornment, TextField } from '@mui/material'
+import { IconButton, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { getNumberWithoutCommas } from '@argus/shared-domain/src/lib/numberField-helper'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
@@ -43,6 +43,7 @@ const CustomNumberField = ({
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
+  const inputRef = useRef(null)
 
   const handleKeyPress = e => {
     const regex = decimalScale > 0 ? /[0-9.-]/ : /[0-9-]/
@@ -51,7 +52,7 @@ const CustomNumberField = ({
       e.preventDefault()
     }
   }
-  
+
   const handleInputMouseDown = e => {
     if (autoSelect) return
 
@@ -150,6 +151,18 @@ const CustomNumberField = ({
     }
   }
 
+  const handleClearClick = e => {
+    onClear?.(e)
+
+    setTimeout(() => {
+      const el = inputRef.current
+      if (el) {
+        el.focus()
+        el.select()
+      }
+    }, 0)
+  }
+
   const displayButtons = (!_readOnly || allowClear) && !props.disabled && (value || value === 0)
 
   useEffect(() => {
@@ -198,6 +211,7 @@ const CustomNumberField = ({
         }
       }}
       InputProps={{
+        inputRef,
         inputProps: {
           min: min,
           max: max,
@@ -222,7 +236,7 @@ const CustomNumberField = ({
             )}
 
             {displayButtons && (value || value === 0) && (
-              <IconButton tabIndex={-1} onClick={onClear} aria-label='clear input' className={inputs.iconButton}>
+              <IconButton tabIndex={-1} onClick={handleClearClick} aria-label='clear input' className={inputs.iconButton}>
                 <ClearIcon className={inputs.icon} />
               </IconButton>
             )}
@@ -244,4 +258,3 @@ const CustomNumberField = ({
 }
 
 export default CustomNumberField
-
