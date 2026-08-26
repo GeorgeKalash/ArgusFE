@@ -26,6 +26,7 @@ import { useContext, useEffect } from 'react'
 import { Grid } from '@mui/material'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 
 const CreditLimitHoldForm = ({ recordId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -49,10 +50,9 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
     endpointId: FinancialRepository.CreditLimitHold.page
   })
 
-  const { formik } = useForm({
-    maxAccess,
-    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
-    initialValues: {
+  const initialValues = {
+    recordId: recordId || null,
+    header: {
       recordId: recordId || null,
       dtId: null,
       reference: '',
@@ -65,49 +65,105 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
       status: 1,
       wip: 1
     },
+    items: []
+  }
+
+  const { formik } = useForm({
+    maxAccess,
+    behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
+    initialValues,
     validationSchema: yup.object({
-      date: yup.date().required(),
-      accountId: yup.number().required(),
-      validUntil: yup
-        .date()
-        .required()
+      header: yup.object({
+        date: yup.date().required(),
+        accountId: yup.number().required(),
+        validUntil: yup.date().required()
+      }),
     }),
     onSubmit: async obj => {
+      const updatedItems = obj.items
+        .filter(row => row?.limit > 0)
+        .map(({ id, currencyName, ...rest }) => ({
+          ...rest,
+          recordId: obj.header.recordId || 0
+        }))
+
       const res = await postRequest({
-        extension: FinancialRepository.CreditLimitHold.set,
+        extension: FinancialRepository.CreditLimitHold.set2,
         record: JSON.stringify({
-          ...obj,
-          date: formatDateToApi(obj.date),
-          validUntil: formatDateToApi(obj.validUntil)
+          header: {
+            ...obj.header,
+            date: formatDateToApi(obj.header.date),
+            validUntil: formatDateToApi(obj.header.validUntil)
+          },
+          items: updatedItems
         })
       })
-      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      toast.success(obj.header.recordId ? platformLabels.Edited : platformLabels.Added)
 
       refetchForm(res.recordId)
       invalidate()
     }
   })
 
-  const editMode = !!formik.values.recordId
-  const isClosed = formik.values.wip === 2
+  const editMode = !!formik.values.header.recordId
+  const isClosed = formik.values.header.wip === 2
+
+  async function getCurrencies() {
+    const res = await getRequest({
+      extension: SystemRepository.Currency.qry,
+      parameters: `_startAt=0&_pageSize=1000&_filter=`
+    })
+
+    return res?.list || []
+  }
+
+  async function buildItemsFromCurrencies(existingItems = []) {
+    const currencies = await getCurrencies()
+
+    return currencies.map((currency, index) => {
+      const existing = existingItems.find(item => item.currencyId === currency.recordId)
+
+      return {
+        id: index + 1,
+        currencyId: currency.recordId,
+        currencyRef: currency.reference,
+        currencyName: currency.name,
+        limit: existing?.limit ?? 0
+      }
+    })
+  }
 
   async function refetchForm(recordId) {
     const { record } = await getRequest({
-      extension: FinancialRepository.CreditLimitHold.get,
+      extension: FinancialRepository.CreditLimitHold.get2,
       parameters: `_recordId=${recordId}`
     })
 
+    const items = await buildItemsFromCurrencies(record?.items || [])
+
     formik.resetForm({
       values: {
-        ...record,
-        date: formatDateFromApi(record?.date),
-        validUntil: formatDateFromApi(record?.validUntil)
+        ...formik.values,
+        recordId: record?.header?.recordId,
+        header: {
+          ...record?.header,
+          date: formatDateFromApi(record?.header?.date),
+          validUntil: formatDateFromApi(record?.header?.validUntil)
+        },
+        items
       }
     })
   }
 
   useEffect(() => {
-    if (recordId) refetchForm(recordId)
+    ;(async function () {
+      if (recordId) {
+        await refetchForm(recordId)
+      } else {
+        const items = await buildItemsFromCurrencies()
+        formik.setFieldValue('items', items)
+      }
+    })()
   }, [])
 
   async function onWorkFlow() {
@@ -115,7 +171,7 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
       Component: WorkFlow,
       props: {
         functionId: SystemFunction.CreditLimitHold,
-        recordId: formik.values.recordId
+        recordId: formik.values.header.recordId
       }
     })
   }
@@ -123,22 +179,22 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
   async function onReopen() {
     await postRequest({
       extension: FinancialRepository.CreditLimitHold.reopen,
-      record: JSON.stringify({ recordId: formik.values.recordId })
+      record: JSON.stringify({ recordId: formik.values.header.recordId })
     })
 
     toast.success(platformLabels.Reopened)
     invalidate()
-    refetchForm(formik.values.recordId)
+    refetchForm(formik.values.header.recordId)
   }
 
   async function onClose() {
     await postRequest({
       extension: FinancialRepository.CreditLimitHold.close,
-      record: JSON.stringify({ recordId: formik.values.recordId })
+      record: JSON.stringify({ recordId: formik.values.header.recordId })
     })
     toast.success(platformLabels.Closed)
     invalidate()
-    refetchForm(formik.values.recordId)
+    refetchForm(formik.values.header.recordId)
   }
 
   const actions = [
@@ -179,22 +235,43 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
         stack({
           Component: AccountSummary,
           props: {
-            accountId: parseInt(formik.values.accountId),
-            date: formik.values.date
+            accountId: parseInt(formik.values.header.accountId),
+            date: formik.values.header.date
           }
         })
       },
-      disabled: !formik.values.accountId || !formik.values.date
+      disabled: !formik.values.header.accountId || !formik.values.header.date
     }
   ]
 
-  const maxValidUntil = formik.values.date
+  const maxValidUntil = formik.values.header.date
   ? new Date(
-      new Date(formik.values.date).setDate(
-        new Date(formik.values.date).getDate() + 30
+      new Date(formik.values.header.date).setDate(
+        new Date(formik.values.header.date).getDate() + 30
       )
     )
   : null
+
+  const itemColumns = [
+    {
+      component: 'textfield',
+      label: labels.currency,
+      name: 'currencyName',
+      flex: 1,
+      props: { readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      label: labels.CreditLimits,
+      name: 'limit',
+      flex: 1,
+      props: { 
+        maxLength: 12, 
+        decimalScale: 2, 
+        allowNegative: false 
+      }
+    }
+  ]
 
   return (
     <FormShell
@@ -217,7 +294,7 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.CreditLimitHold}`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
-                    name='dtId'
+                    name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -226,66 +303,71 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
                     readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    values={formik.values}
+                    values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.reference}
-                    value={formik?.values?.reference}
+                    value={formik?.values?.header?.reference}
                     maxAccess={!editMode && maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    onClear={() => formik.setFieldValue('header.reference', '')}
+                    error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     label={labels.date}
-                    value={formik.values?.date}
+                    value={formik.values?.header?.date}
                     readOnly={isClosed}
                     required
                     onChange={(name, value) => {
                       formik.setFieldValue(name, value)
                     }}
-                    onClear={() => formik.setFieldValue('date', null)}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    onClear={() => formik.setFieldValue('header.date', null)}
+                    error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
-                    name='validUntil'
+                    name='header.validUntil'
                     label={labels.validUntil}
-                    value={formik.values?.validUntil}
+                    value={formik.values?.header?.validUntil}
                     readOnly={isClosed}
                     required
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('validUntil', null)}
-                    error={formik.touched.validUntil && Boolean(formik.errors.validUntil)}
+                    onClear={() => formik.setFieldValue('header.validUntil', null)}
+                    error={formik.touched.header?.validUntil && Boolean(formik.errors.header?.validUntil)}
                     maxAccess={maxAccess}
-                    min={formik.values.date}
+                    min={formik.values.header.date}
                     max={maxValidUntil}
                   />
                 </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={FinancialRepository.Account.snapshot}
-                    name='accountId'
+                    name='header.accountId'
                     label={labels.account}
                     valueField='reference'
                     displayField='name'
                     valueShow='accountRef'
                     secondValueShow='accountName'
+                    formObject={formik.values.header}
                     form={formik}
                     required
                     maxAccess={maxAccess}
@@ -295,39 +377,50 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
                     ]}
                     displayFieldWidth={2}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('accountName', newValue?.name || '')
-                      formik.setFieldValue('accountRef', newValue?.reference || '')
-                      
-                      formik.setFieldValue('accountId', newValue?.recordId || null)
+                      formik.setFieldValue('header.accountName', newValue?.name || '')
+                      formik.setFieldValue('header.accountRef', newValue?.reference || '')
+                      formik.setFieldValue('header.accountId', newValue?.recordId || null)
                     }}
-                    errorCheck={'accountId'}
+                    errorCheck={'header.accountId'}
                     />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='header.notes'
+                    label={labels.notes}
+                    value={formik.values.header.notes}
+                    rows={5}
+                    readOnly={isClosed}
+                    maxLength={50}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.notes', '')}
+                    error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
+                  />
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <CustomTextArea
-                name='notes'
-                label={labels.notes}
-                value={formik.values.notes}
-                rows={5}
-                readOnly={isClosed}
-                maxLength={50}
-                maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('notes', e.target.value)}
-                onClear={() => formik.setFieldValue('notes', '')}
-                error={formik.touched.notes && Boolean(formik.errors.notes)}
-              />
-            </Grid>
           </Grid>
         </Fixed>
-        <Grow />
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={itemColumns}
+            name='items'
+            maxAccess={maxAccess}
+            allowDelete={false}
+            allowAddNewLine={false}
+            disabled={isClosed}
+          />
+        </Grow>
       </VertLayout>
     </FormShell>
   )
 }
 
-CreditLimitHoldForm.width = 800
-CreditLimitHoldForm.height = 420
+CreditLimitHoldForm.width = 900
+CreditLimitHoldForm.height = 560
 
 export default CreditLimitHoldForm

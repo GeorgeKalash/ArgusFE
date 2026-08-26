@@ -305,8 +305,8 @@ export const FinancialRepository = {
     set2: service + 'set2ACU'
   },
   CreditLimitHold: {
-    get: service + 'getCLHO',
-    set: service + 'setCLHO',
+    get2: service + 'get2CLHO',
+    set2: service + 'set2CLHO',
     del: service + 'delCLHO',
     page: service + 'pageCLHO',
     snapshot: service + 'snapshotCLHO',
