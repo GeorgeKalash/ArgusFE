@@ -13,6 +13,9 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import WaxList from './Forms/WaxList'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function BatchWaxTransfer() {
   const { getRequest } = useContext(RequestsContext)
@@ -20,6 +23,7 @@ export default function BatchWaxTransfer() {
   const [checkedIds, setCheckedIds] = useState([])
   const workCenterIdRef = useRef(null)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData() {
     const wcId = workCenterIdRef.current
@@ -41,7 +45,7 @@ export default function BatchWaxTransfer() {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.MFJobOrder.qry4,
-    datasetId: ResourceIds.BatchWorkTransfer
+    datasetId: ResourceIds.BatchWaxTransfer
   })
 
   async function checkUnmarkedJobs(ids) {
@@ -56,6 +60,18 @@ export default function BatchWaxTransfer() {
     })
 
     setUnmarkedJobIds(res?.record?.jobIds || [])
+    setCheckedIds(prev => Array.from(new Set([...prev, ...(res?.record?.jobIds || [])])))
+
+  }
+
+  function openWaxList(ids) {
+    stack({
+      Component: WaxList,
+      props: { jobIds: ids },
+      width: 900,
+      height: 550,
+      title: labels?.wax
+    })
   }
 
   function onRowCheck(rowOrRows, checked) {
@@ -140,6 +156,10 @@ export default function BatchWaxTransfer() {
     checked: checkedIds.includes(job.recordId)
   }))
 
+  const totalQty = rows
+    .filter(row => checkedIds.includes(row.recordId))
+    .reduce((sum, row) => sum + (row.qty || 0), 0)
+
   const search = formik.values.search
 
   const filteredRows = search
@@ -179,6 +199,14 @@ export default function BatchWaxTransfer() {
               error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
             />
           </Grid>
+          <Grid item xs={.8}>
+            <CustomButton
+              onClick={() => checkUnmarkedJobs(checkedIds)}
+              label={platformLabels.Check}
+              color='primary'
+            />
+          </Grid>
+          
           <Grid item xs={2}>
             <CustomTextField
               name='search'
@@ -190,11 +218,20 @@ export default function BatchWaxTransfer() {
               search
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={.6}>
             <CustomButton
-              onClick={() => checkUnmarkedJobs(checkedIds)}
-              label={platformLabels.Check}
+              onClick={() => openWaxList(checkedIds)}
+              label={labels.wax}
               color='primary'
+              disabled={!checkedIds.length}
+            />
+          </Grid>
+          <Grid item xs={2}>
+            <CustomNumberField
+              name='totalQty'
+              value={totalQty}
+              label={labels?.totalQty}
+              readOnly
             />
           </Grid>
         </Grid>
@@ -203,14 +240,15 @@ export default function BatchWaxTransfer() {
         <Table
           name='table'
           columns={columns}
-          gridData={{ list: filteredRows }}
+          gridData={{ list: filteredRows, count: filteredRows.length }}
           rowId={['recordId']}
           maxAccess={maxAccess}
-          pagination={false}
+          refetch={refetch}
+          pagination={true}
           showCheckboxColumn={true}
           handleCheckboxChange={onRowCheck}
           highlightRow={{
-            condition: row => unmarkedJobIds.includes(row.recordId) && !row.checked,
+            condition: row => unmarkedJobIds.includes(row.recordId),
             color: () => '#f28b82'
           }}
         />

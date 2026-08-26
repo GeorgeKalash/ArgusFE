@@ -665,7 +665,7 @@ export const ResourceIds = {
   FoCuttings: 47318,
   PreviewPR: 42353,
   PPDefaults: 42611,
-  BatchWorkTransfer: 42354,
+  BatchWaxTransfer: 42354,
 
   // GL
   GLSalesInvoice: 51604,
