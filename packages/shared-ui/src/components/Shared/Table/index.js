@@ -804,8 +804,8 @@ const Table = ({
       )
     }
 
-  const visibleFieldsKey = filteredColumns.map(col => col.field).join(',')
-  const tableName = name && `${name}.${props?.maxAccess?.record?.resourceId}.${visibleFieldsKey}`
+    const allFieldsKey = props?.columns?.map(col => col.field).join(',')
+    const tableName = name && `${name}.${props?.maxAccess?.record?.resourceId}.${allFieldsKey}`
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
     queryKey: [tableName],
@@ -844,6 +844,7 @@ const Table = ({
     suppressMenu: true
   }), [checked, showSelectAll, rowSelection])
 
+  const containerWidth = gridRef?.current?.offsetWidth - 2
   const totalFixedColumnWidth = filteredColumns.filter(
         col =>
           col?.width !== undefined &&
@@ -860,42 +861,48 @@ const Table = ({
 
   const columnDefs = useMemo(() => {
     const base = [
-      ...(showCheckboxColumn ? [checkboxColumn] : []),
+      ...(showCheckboxColumn
+        ? [{
+            ...checkboxColumn,
+            width: tableSettings?.find(s => s.colId === checkboxColumn.field)?.width ?? checkboxColumn.width
+          }]
+        : []),
       ...filteredColumns.map(column => {
         const isLinkedColumn = column.type === 'link' || !!column.linkOpen
 
         const savedColumn = tableSettings?.find(
           item => item.colId === column.field
         )
+        const hasSavedWidth = savedColumn?.width != null
 
-    return {
-      ...column,
-      pinned: savedColumn?.pinned ?? null,
-      width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
-      flex: tableSettings ? (savedColumn?.flex ?? null) : column.flex,
-      sort: savedColumn?.sort ?? column.sort ?? undefined,
-      sortIndex: savedColumn?.sortIndex ?? column.sortIndex ?? undefined,
-      cellRenderer:
-        column.type === 'image'
-          ? imageRenderer(column)
-          : isLinkedColumn
-          ? params => (
-              <LinkCellRenderer
-                data={params.data}
-                field={column.field}
-                value={params.value}
-                params={params}
-                wrapText={column.wrapText}
-                onClick={column.onClick}
-                linkOpen={column.linkOpen}
-              />
-            )
-          : column.isTree
-          ? IndentedCellRenderer
-          : column.cellRenderer
-          ? column.cellRenderer
-          : FieldWrapper
-    }
+        return {
+          ...column,
+          pinned: savedColumn?.pinned ?? null,
+          width: hasSavedWidth ? savedColumn.width : column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
+          flex: tableSettings ? (savedColumn?.flex ?? null) : column.flex,
+          sort: savedColumn?.sort ?? column.sort ?? undefined,
+          sortIndex: savedColumn?.sortIndex ?? column.sortIndex ?? undefined,
+          cellRenderer:
+            column.type === 'image'
+              ? imageRenderer(column)
+              : isLinkedColumn
+              ? params => (
+                  <LinkCellRenderer
+                    data={params.data}
+                    field={column.field}
+                    value={params.value}
+                    params={params}
+                    wrapText={column.wrapText}
+                    onClick={column.onClick}
+                    linkOpen={column.linkOpen}
+                  />
+                )
+              : column.isTree
+              ? IndentedCellRenderer
+              : column.cellRenderer
+              ? column.cellRenderer
+              : FieldWrapper
+        }
       }),
     ...(props?.onEdit || props?.onDelete
       ? [
@@ -1046,22 +1053,48 @@ const Table = ({
     if (isResettingRef.current) return
     if (!tableName) return
 
-    const columnState = params.columnApi.getColumnState().map(col => ({
-      ...col,
-      flex: null
-    }))
+    const newState = params.columnApi.getColumnState().map(col => ({ ...col, flex: null }))
+    const merged = mergeColumnState(tableSettings, newState)
 
-    saveToDB(storeName, tableName, columnState).then(() => invalidate())
+    saveToDB(storeName, tableName, merged).then(() => invalidate())
   }
 
   const onColumnMoved = params => {
     if (isResettingRef.current) return
+    if (!params.columnApi || !tableName || (params.source !== 'uiColumnMoved' && params.source !== 'uiColumnDragged')) return
+    const newState = params.columnApi.getColumnState()
+    const merged = mergeColumnState(tableSettings, newState)
+    saveToDB(storeName, tableName, merged).then(() => invalidate())
+  }
 
-    if (params.columnApi && tableName && params.source !== 'gridOptionsChanged') {
-      const columnState = params.columnApi.getColumnState()
+  const mergeColumnState = (prevSettings, newState) => {
+    const prevList = prevSettings || []
+    const newMap = new Map(newState.map(s => [s.colId, s]))
+    const hiddenEntries = []
+    prevList.forEach((item, idx) => {
+      if (!newMap.has(item.colId)) {
+        let anchor = null
+        for (let i = idx - 1; i >= 0; i--) {
+          if (newMap.has(prevList[i].colId)) {
+            anchor = prevList[i].colId
+            break
+          }
+        }
+        hiddenEntries.push({ item, anchor })
+      }
+    })
 
-      saveToDB(storeName, tableName, columnState).then(() => invalidate())
-    }
+    const result = [...newState]
+    hiddenEntries.forEach(({ item, anchor }) => {
+      if (anchor == null) {
+        result.unshift(item)
+      } else {
+        const anchorIdx = result.findIndex(r => r.colId === anchor)
+        anchorIdx === -1 ? result.push(item) : result.splice(anchorIdx + 1, 0, item)
+      }
+    })
+
+    return result
   }
 
   const onColumnResized = async params => {
@@ -1069,77 +1102,66 @@ const Table = ({
     if (!tableName || params?.source !== 'uiColumnResized' || !params.finished) return
     if (!params.columns || params.columns.length === 0) return
 
-    const resizedState = params.columns.map(col => ({ colId: col.getColId(), width: col.getActualWidth(), flex: null }))
-
-    params.columnApi.applyColumnState({
-      state: resizedState,
-      applyOrder: false
-    })
-
-    const columnState = params.columnApi.getColumnState().map(col => ({
+    const newState = params.columnApi.getColumnState().map(col => ({
       colId: col.colId,
-      width: col.getActualWidth ? col.getActualWidth() : col.width,
+      width: col.width,
       pinned: col.pinned,
       sort: col.sort,
       sortIndex: col.sortIndex,
       flex: null
     }))
 
-    queryClient.setQueryData([tableName], columnState)
-    await saveToDB(storeName, tableName, columnState)
+    const merged = mergeColumnState(tableSettings, newState)
+    queryClient.setQueryData([tableName], merged)
+    await saveToDB(storeName, tableName, merged)
   }
 
   const onSortChanged = async params => {
     if (isResettingRef.current) return
     if (!params.columnApi || !tableName || params.source !== 'uiColumnSorted') return
 
-    const columnState = params.columnApi.getColumnState()
-    queryClient.setQueryData([tableName], columnState)
-    await saveToDB(storeName, tableName, columnState)
+    const merged = mergeColumnState(tableSettings, params.columnApi.getColumnState())
+    queryClient.setQueryData([tableName], merged)
+    await saveToDB(storeName, tableName, merged)
   }
 
-  const onReset = async () => {
-    if ( !tableName || !gridApiRef.current?.columnApi ) return
-    isResettingRef.current = true
+const onReset = async () => {
+  if (!tableName || !gridApiRef.current?.columnApi) return
+  isResettingRef.current = true
 
-    try {
-      await deleteFromDB(storeName, tableName)
-      const defaultColumnIds = [
-        ...(showCheckboxColumn ? [checkboxColumn.field] : []),
-        ...props.columns.filter(c => c?.field).map(c => c.field),
-        ...((props?.onEdit || props?.onDelete) ? ['actions'] : [])
-      ]
+  try {
+    await deleteFromDB(storeName, tableName)
 
-      const widthMap = {
-        ...(showCheckboxColumn ? { [checkboxColumn.field]: checkboxColumn.width } : {}),
-        ...Object.fromEntries(props.columns.filter(c => c?.field).map(c => [c.field, c.width ])),
-        ...((props?.onEdit || props?.onDelete) ? { actions: 100 } : {})
-      }
+    const defaultColumnIds = [
+      ...(showCheckboxColumn ? [checkboxColumn.field] : []),
+      ...filteredColumns.filter(c => c?.field).map(c => c.field),
+      ...((props?.onEdit || props?.onDelete) ? ['actions'] : [])
+    ]
 
-      const defaultState =
-        defaultColumnIds.map(
-          colId => ({
-            colId,
-            width:
-              widthMap[colId] ??
-              undefined,
-            pinned: null,
-            sort: null,
-            sortIndex: null,
-            flex: null
-          })
-        )
-      gridApiRef.current.columnApi.applyColumnState(
-        {
-          state: defaultState,
-          applyOrder: true
-        }
-      )
-      await invalidate()
-    } finally {
-      isResettingRef.current = false
+    const widthMap = {
+      ...(showCheckboxColumn ? { [checkboxColumn.field]: checkboxColumn.width } : {}),
+      ...Object.fromEntries(filteredColumns.filter(c => c?.field).map(c => [c.field, c.width])),
+      ...((props?.onEdit || props?.onDelete) ? { actions: 100 } : {})
     }
+
+    const defaultState = defaultColumnIds.map(colId => ({
+      colId,
+      width: widthMap[colId] ?? undefined,
+      pinned: null,
+      sort: null,
+      sortIndex: null,
+      flex: null
+    }))
+
+    gridApiRef.current.columnApi.applyColumnState({
+      state: defaultState,
+      applyOrder: true
+    })
+    await invalidate()
+  } finally {
+    isResettingRef.current = false
   }
+}
 
   const onGridReady = params => {
     const gridElement = gridRef.current
@@ -1193,8 +1215,7 @@ const Table = ({
     setTimeout(async () => {
       if (isResettingRef.current) return
 
-      const columnState =
-        gridApiRef.current?.columnApi?.getColumnState()
+      const columnState = gridApiRef.current?.columnApi?.getColumnState()
 
       const pinnedOrder = {
         left: 0,
@@ -1203,10 +1224,11 @@ const Table = ({
         right: 2
       }
 
-      const orderedState = columnState ? [...columnState].sort((a, b) => (pinnedOrder[ a.pinned ] ?? 1) - (pinnedOrder[ b.pinned] ?? 1)) : columnState
-
-      await saveToDB(storeName, tableName, orderedState)
-
+      const orderedState = columnState
+        ? [...columnState].sort((a, b) => (pinnedOrder[a.pinned] ?? 1) - (pinnedOrder[b.pinned] ?? 1))
+        : columnState
+      const merged = mergeColumnState(tableSettings, orderedState)
+      await saveToDB(storeName, tableName, merged)
       await invalidate()
     }, 0)
   }
