@@ -23,7 +23,7 @@ const Department = () => {
 
     const response = await getRequest({
       extension: RepairAndServiceRepository.Department.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }

@@ -1,2 +1,2 @@
-// AUTO-GENERATED WRAPPER – uses code from @argus/module-manufacturing/src/pages/pm-task
-export { default } from '@argus/module-manufacturing/src/pages/pm-task';
+// AUTO-GENERATED WRAPPER – uses code from @argus/module-rs/src/pages/pm-task
+export { default } from '@argus/module-rs/src/pages/pm-task';
