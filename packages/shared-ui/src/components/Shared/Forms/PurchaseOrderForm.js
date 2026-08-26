@@ -765,8 +765,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
           unitPrice: item.unitPrice ? item.unitPrice : 0,
           vatAmount: item.vatAmount ? item.vatAmount : 0,
           extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
-          deliveryDate: formatDateFromApi(item.deliveryDate),
-          lastShipmentDate: formatDateFromApi(item.lastShipmentDate),
+          deliveryDate: item.deliveryDate ? formatDateFromApi(item.deliveryDate) : null,
+          lastShipmentDate: item.lastShipmentDate ? formatDateFromApi(item.lastShipmentDate) : null,
           puTrx: true,
           taxDetails: puTrxTaxes
         }
