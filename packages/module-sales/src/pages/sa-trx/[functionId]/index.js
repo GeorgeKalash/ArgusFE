@@ -268,6 +268,7 @@ const SaTrx = () => {
           refetch={refetch}
           paginationType='api'
           maxAccess={access}
+          enableFilters
         />
       </Grow>
     </VertLayout>
