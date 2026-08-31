@@ -30,6 +30,8 @@ import { getStatusIcon } from "@argus/shared-utils/src/utils/status-icon";
 import Chip from "@mui/material/Chip";
 import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
+import { CheckboxFilter, CheckboxFloatingFilter } from '@argus/shared-ui/src/components/Shared/Table/CheckBoxFilter'
+import { DateFilter, DateFloatingFilter } from '@argus/shared-ui/src/components/Shared/Table/DatePickerFilter'
 
 const Table = ({
   name = 'table',
@@ -105,32 +107,11 @@ const Table = ({
             cellRenderer: params => params?.value && formatDateDefault(`/Date(${params?.value})/`),
             comparator: dateComparator,
             sortable: !disableSorting,
-            filter: 'agDateColumnFilter',
+            filter: DateFilter,
+            suppressMenu: true,
+            floatingFilterComponent: DateFloatingFilter,
             filterParams: {
-              ...(col.filterParams || {}),
-              suppressFilterButton: true,
-              comparator: (filterLocalDateAtMidnight, cellValue) => {
-                if (cellValue == null) return -1
-
-                const cellDate = new Date(cellValue)
-
-                const cellDateOnly = new Date(
-                  cellDate.getFullYear(),
-                  cellDate.getMonth(),
-                  cellDate.getDate()
-                )
-
-                const filterDateOnly = new Date(
-                  filterLocalDateAtMidnight.getFullYear(),
-                  filterLocalDateAtMidnight.getMonth(),
-                  filterLocalDateAtMidnight.getDate()
-                )
-
-                if (cellDateOnly < filterDateOnly) return -1
-                if (cellDateOnly > filterDateOnly) return 1
-
-                return 0
-              }
+              ...(col.filterParams || {})
             }
           }
         }
@@ -142,32 +123,10 @@ const Table = ({
             cellRenderer: params => params?.value && formatDateTimeDefault(`/Date(${params?.value})/`, col?.dateFormat),
             comparator: dateComparator,
             sortable: !disableSorting,
-            filter: 'agDateColumnFilter',
+            filter: DateFilter,
+            floatingFilterComponent: DateFloatingFilter,
             filterParams: {
-              ...(col.filterParams || {}),
-              suppressFilterButton: true,
-              comparator: (filterLocalDateAtMidnight, cellValue) => {
-                if (cellValue == null) return -1
-
-                const cellDate = new Date(cellValue)
-
-                const cellDateOnly = new Date(
-                  cellDate.getFullYear(),
-                  cellDate.getMonth(),
-                  cellDate.getDate()
-                )
-
-                const filterDateOnly = new Date(
-                  filterLocalDateAtMidnight.getFullYear(),
-                  filterLocalDateAtMidnight.getMonth(),
-                  filterLocalDateAtMidnight.getDate()
-                )
-
-                if (cellDateOnly < filterDateOnly) return -1
-                if (cellDateOnly > filterDateOnly) return 1
-
-                return 0
-              }
+              ...(col.filterParams || {})
             }
           }
         }
@@ -185,7 +144,13 @@ const Table = ({
             filter: 'agNumberColumnFilter',
             filterParams: {
               ...(col.filterParams || {}),
-              suppressFilterButton: true
+              suppressFilterButton: true,
+              allowedCharPattern: '\\d\\-\\,\\.',
+              numberParser: text => (text == null ? null : parseFloat(text.replace(/,/g, ''))),
+              numberFormatter: value =>
+                value == null
+                  ? null
+                  : value.toLocaleString('en-US', { maximumFractionDigits: 20 })
             }
           }
         }
@@ -205,6 +170,10 @@ const Table = ({
           return {
             ...col,
             width: 110,
+            filter: CheckboxFilter,
+            floatingFilter: true,
+            suppressMenu: true,
+            floatingFilterComponent: CheckboxFloatingFilter,
             cellRenderer: ({ data, node }) => {
               const handleCheckboxChange = event => {
                 const checked = event.target.checked
@@ -1414,7 +1383,18 @@ const Table = ({
               onPointerDown={handleDragStart}
               style={{ right: 6, top: 6 }}
             >
-              <IconButton size='small' onClick={() => setShowFilters(v => !v)}>
+              <IconButton
+                size='small'
+                onClick={() => {
+                  setShowFilters(prev => {
+                    const next = !prev
+                    if (!next) {
+                      gridApiRef.current?.api?.setFilterModel(null)
+                    }
+                    return next
+                  })
+                }}
+              >
                 <FilterAltIcon fontSize='small' />
               </IconButton>
             </Box>
@@ -1539,6 +1519,29 @@ const Table = ({
 
         .agGridContainer :global(.ag-floating-filter-button) {
           display: none !important;
+        }
+
+        .dateFloatingFilterInput :global(.MuiOutlinedInput-root),
+        .dateFloatingFilterInput :global(.MuiInputBase-root) {
+          height: 26px;
+          font-size: 12px;
+          background: #fff;
+          border-radius: 0;
+        }
+
+        .dateFloatingFilterInput :global(.MuiOutlinedInput-notchedOutline) {
+          border-radius: 0;
+        }
+
+        .hiddenDateInput {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 1px;
+          height: 1px;
+          opacity: 0;
+          border: none;
+          pointer-events: none;
         }
 
         .paginationWrapper {

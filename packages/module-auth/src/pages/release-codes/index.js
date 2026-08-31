@@ -118,6 +118,7 @@ const ReleaseCodes = () => {
           onEdit={edit}
           onDelete={del}
           pageSize={50}
+          enableFilters
           refetch={refetch}
           paginationType='api'
           paginationParameters={paginationParameters}
