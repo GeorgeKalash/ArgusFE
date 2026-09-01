@@ -1,5 +1,5 @@
 import { useEffect, useContext } from 'react'
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
@@ -23,7 +23,6 @@ const SystemParamsForm = ({ _labels, access }) => {
   const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { formik } = useForm({
-    validateOnChange: true,
     validationSchema: yup.object({
       GLDOEGainAccountId: yup.string().required(),
       GLDOELossAccountId: yup.string().required(),
@@ -85,19 +84,21 @@ const SystemParamsForm = ({ _labels, access }) => {
       'GLFYCDOECheck'
     ]
 
-    const filteredList = systemDefaults?.list?.filter(obj => VALID_OBJ_KEY.includes(obj.key))
+    systemDefaults?.list
+      ?.filter(obj => VALID_OBJ_KEY.includes(obj.key))
+      ?.forEach(obj => {
+        if (obj.key === 'GLFYCDOECheck') {
+          myObject[obj.key] = obj.value === 'true' || obj.value === true
+        } else if (
+          ['GLDOESeg0End', 'GLDOESeg0Start', 'GLFYCSeg0Start', 'GLFYCSeg0End']
+            .includes(obj.key)
+        ) {
+          myObject[obj.key] = obj.value || null
+        } else {
+          myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
+        }
+      })
 
-    filteredList?.forEach(obj => {
-      if (obj.key === 'GLFYCDOECheck') {
-        myObject[obj.key] = obj.value === 'true' || obj.value === true
-      } else if (['GLDOESeg0End', 'GLDOESeg0Start', 'GLFYCSeg0Start', 'GLFYCSeg0End'].includes(obj.key)) {
-        myObject[obj.key] = obj.value || null
-      } else {
-        myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
-      }
-    })
-
-    formik.setValues(myObject)
 
     const accountMappings = [
       { key: 'GLDOEGainAccountId', refField: 'GLDOEGainAccountref', nameField: 'GLDOEGainAccountname' },
@@ -111,19 +112,24 @@ const SystemParamsForm = ({ _labels, access }) => {
     await Promise.all(
       accountMappings.map(async ({ key, refField, nameField }) => {
         const keyValue = myObject[key]
-        if (keyValue) {
-          const response = await getRequest({
-            extension: GeneralLedgerRepository.ChartOfAccounts.get,
-            parameters: `_recordId=${keyValue}`
-          })
-          formik.setFieldValue(refField, response.record.accountRef)
-          formik.setFieldValue(nameField, response.record.name)
-        } else {
-          formik.setFieldValue(refField, null)
-          formik.setFieldValue(nameField, null)
+
+        if (!keyValue) {
+          myObject[refField] = null
+          myObject[nameField] = null
+          return
         }
+
+        const response = await getRequest({
+          extension: GeneralLedgerRepository.ChartOfAccounts.get,
+          parameters: `_recordId=${keyValue}`
+        })
+
+        myObject[refField] = response.record.accountRef
+        myObject[nameField] = response.record.name
       })
     )
+
+    formik.resetForm({ values: {...formik.values, ...myObject} })
   }
 
   const postSystemParams = obj => {

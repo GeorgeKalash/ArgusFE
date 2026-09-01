@@ -95,18 +95,20 @@ const OpenPurchaseOrder = () => {
         })
 
         toast.success(platformLabels.Generated)
-        getData()
+        getData(true)
       }
     }
   })
 
   const { groupId, plantId, siteId, categoryId, vendorId, itemId, marginDefault, poId } = formik.values
 
+  const hasFilters = vendorId || categoryId || groupId || poId || itemId
+
   useEffect(() => {
-    getData()
+    getData(!hasFilters)
   }, [vendorId, categoryId, groupId, poId, itemId])
 
-  async function getData() {
+  async function getData(resetValue = false) {
     const result = await getRequest({
       extension: ReportPuGeneratorRepository.OpenPurchaseOrder.open,
       parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_vendorId=${vendorId}&_itemId=${itemId}&_plantId=${plantId}&_poId=${poId}`
@@ -119,7 +121,9 @@ const OpenPurchaseOrder = () => {
       balance: item.qty - item.receivedQty
     }))
 
-    formik.setFieldValue('items', res)
+    resetValue 
+    ? formik.resetForm({ values: {...formik.values, items: res} })
+    : formik.setFieldValue('items', res)
   }
 
   const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)

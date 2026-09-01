@@ -87,7 +87,7 @@ const ProcessNotification = () => {
         templateName
       }
     })
-        formik.setFieldValue('rows',rows)
+        formik.resetForm({ values: {rows} })
   }
 
   const columns = [

@@ -30,8 +30,8 @@ const IrDefaultForm = ({ _labels, access }) => {
       return obj.key === 'ir_amcShortTerm' || obj.key === 'ir_amcLongTerm' || obj.key === 'ir_tfr_DocTypeId'
     })
     filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    formik.setValues(myObject)
-    formik.setFieldValue('recordId', 'N/A')
+    myObject['recordId'] = 'N/A'
+    formik.resetForm({ values: myObject })
   }
 
   const { formik } = useForm({

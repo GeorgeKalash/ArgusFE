@@ -25,7 +25,11 @@ const IvSettings = ({ _labels, access }) => {
 
   const { formik } = useForm({
     maxAccess: access,
-    initialValues: arrayAllow.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
+    initialValues: {
+      ...arrayAllow.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
+      nraDescription: '',
+      nraRef: ''
+    },
     validationSchema: yup.object({
       iv_minSerialSize: yup.number().min(1).max(20).nullable(),
       minItemSearchTextSize: yup.number().min(3).max(20).required()
@@ -45,35 +49,43 @@ const IvSettings = ({ _labels, access }) => {
     }
   })
 
-  async function fillNbInfo(nraId){
-    if (!nraId) return
+  async function fillNbInfo(nraId) {
+    if (!nraId) return 
 
     const res = await getRequest({
       extension: SystemRepository.NumberRange.get,
       parameters: `_recordId=${nraId}`
     })
 
-    formik.setFieldValue('nraRef', res?.record?.reference || '')
-    formik.setFieldValue('nraDescription', res?.record?.description || '')
+    return {
+      nraRef: res?.record?.reference || '',
+      nraDescription: res?.record?.description || ''
+    }
   }
 
   useEffect(() => {
   ;(async function () {
     const myObject = {}
+    const nbPromises = []
 
     systemDefaults?.list?.forEach(obj => {
-      if (arrayAllow.includes(obj.key)) {
-        const parsedValue = obj.value ? parseFloat(obj.value) : null
-        myObject[obj.key] = parsedValue
-        formik.setFieldValue(obj.key, parsedValue)
+      if (!arrayAllow.includes(obj.key)) return
 
-        if (obj.key === 'iv_clone_srl_nra' && parsedValue) {
-          fillNbInfo(parsedValue)
-        }
-      }
+      const parsedValue = obj.value ? parseFloat(obj.value) : null
+      myObject[obj.key] = parsedValue
+
+      if (obj.key === 'iv_clone_srl_nra' && parsedValue)
+        nbPromises.push(fillNbInfo(parsedValue))
     })
+
+    const nbResults = await Promise.all(nbPromises)
+    nbResults.forEach(result => {
+      Object.assign(myObject, result)
+    })
+
+    formik.resetForm({ values: {...formik.values, ...myObject} })
   })()
-  }, [systemDefaults])
+}, [systemDefaults])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={access}>
@@ -89,7 +101,7 @@ const IvSettings = ({ _labels, access }) => {
                 displayField='value'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('itemSearchStyle', newValue?.key || '')
+                  formik.setFieldValue('itemSearchStyle', newValue?.key || null)
                 }}
                 error={formik.touched.itemSearchStyle && Boolean(formik.errors.itemSearchStyle)}
               />
@@ -103,7 +115,7 @@ const IvSettings = ({ _labels, access }) => {
                 displayField='value'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('itemSearchFields', newValue?.key || '')
+                  formik.setFieldValue('itemSearchFields', newValue?.key || null)
                 }}
                 error={formik.touched.itemSearchFields && Boolean(formik.errors.itemSearchFields)}
               />
@@ -114,7 +126,7 @@ const IvSettings = ({ _labels, access }) => {
                 label={_labels.serial}
                 value={formik.values.iv_minSerialSize}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('iv_minSerialSize', '')}
+                onClear={() => formik.setFieldValue('iv_minSerialSize', null)}
                 error={formik.touched.iv_minSerialSize && Boolean(formik.errors.iv_minSerialSize)}
               />
             </Grid>

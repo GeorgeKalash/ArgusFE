@@ -5,7 +5,8 @@ import ReportParameterBrowser from '@argus/shared-ui/src/components/Shared/Repor
 import { Grid } from '@mui/material'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
 const styles = {
   leftSectionGridItem: 'leftSectionGridItem',
   bottomSectionContainer: 'bottomSectionContainer'
@@ -32,6 +33,8 @@ const RPBGridToolbar = ({
   const [search, setSearch] = useState('')
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const trackInteraction = usePageInteraction()
+  const { clearPageInteractions } = useInteractionTracker()
 
   useEffect(() => {
     setRpbParams([])
@@ -50,10 +53,18 @@ const RPBGridToolbar = ({
   const openRPB = () => {
     stack({
       Component: ReportParameterBrowser,
+      windowType: 'ReportParameterBrowser',
       props: {
         reportName: reportName,
         rpbParams,
         setRpbParams
+      },
+      onClose: () => {
+        const haveEmptyValues = rpbParams?.every(item => {
+          if (item && Object.prototype.hasOwnProperty.call(item, 'value')) return item.value === undefined
+          return Object.values(item ?? {}).every(value => value == null)
+        })
+        if (!Boolean(rpbParams.length) || haveEmptyValues) clearPageInteractions(trackInteraction.currentPageResourceId, 'RPBForm')
       }
     })
   }
@@ -100,6 +111,9 @@ const RPBGridToolbar = ({
       key: 'GO',
       condition: true,
       onClick: () => {
+        const shouldTrack = (search && reportParams) || typeof filterBy !== 'function'
+        if (shouldTrack) trackInteraction('RPBGridToolbar')
+
         if (typeof filterBy === 'function') filters(search, reportParams)
         else
           onApply({
@@ -112,7 +126,10 @@ const RPBGridToolbar = ({
     {
       key: 'Print',
       condition: !!rest?.Print,
-      onClick: () => rest?.Print(rpbParams),
+      onClick: () => {
+        trackInteraction('RPBGridToolbar')
+        rest?.Print(rpbParams)
+      },
       disabled: rest?.disablePrint
     }
   ].filter(item => !item?.hidden)
@@ -204,7 +221,9 @@ const RPBGridToolbar = ({
       `}</style>
 
       <GridToolbar
-        onSearch={value => filters(value, reportParams)}
+        onSearch={value => {
+          filters(value, reportParams)
+        }}
         reportParams={reportParams}
         onSearchClear={() => {
           setSearch('')

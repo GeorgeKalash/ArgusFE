@@ -65,7 +65,7 @@ export default function PaymentOrderDTDForm({ labels, maxAccess, recordId, windo
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.FIDocTypeDefaults} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.PaymentOrderDTD} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

@@ -19,9 +19,15 @@ export default function RebuildAccountBalances({ _labels, access }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    initialValues: { fiscalYear: '', groupId: 0, recordId: 'N/A', accountId: 0 },
+    initialValues: { 
+      recordId: 'N/A',
+      fiscalYear: null,
+      groupId: null, 
+      accountId: null,
+      accountRef: '',
+      accountName: ''
+    },
     maxAccess: access,
-    validateOnChange: true,
     validationSchema: yup.object({
       fiscalYear: yup.string().required()
     }),
@@ -75,7 +81,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
                 values={formik.values}
                 required
                 maxAccess={access}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
@@ -91,8 +97,8 @@ export default function RebuildAccountBalances({ _labels, access }) {
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('accountId', newValue?.recordId || null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                 }}
@@ -112,7 +118,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('groupId', newValue?.recordId || null)
                 }}
                 maxAccess={access}

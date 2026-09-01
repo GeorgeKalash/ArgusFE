@@ -42,7 +42,8 @@ const MetalTransactionDTD = () => {
     paginationParameters
   } = useResourceQuery({
     endpointId: FinancialRepository.FIDocTypeDefaults.page,
-    datasetId: ResourceIds.FIDocTypeDefaults,
+    datasetId: ResourceIds.CreditDTD,
+    DatasetIdAccess: functionId == SystemFunction.MetalReceiptVoucher ? ResourceIds.MetalTrxReceiptDTD : ResourceIds.MetalTrxPaymentDTD,
     filter: {
       filterFn: fetchGridData,
       default: { functionId }

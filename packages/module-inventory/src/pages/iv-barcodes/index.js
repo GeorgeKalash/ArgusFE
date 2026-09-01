@@ -143,20 +143,22 @@ const IvBarcodes = () => {
                 <Grid item sx={{ minWidth: 280 }}>
                   <ResourceLookup
                     endpointId={InventoryRepository.Item.snapshot}
-                    name="itemId"
+                    name='itemId'
                     label={_labels?.sku}
-                    valueField="recordId"
-                    displayField="sku"
-                    valueShow="itemRef"
-                    secondValueShow="itemName"
+                    valueField='sku'
+                    displayField='name'
+                    valueShow='sku'
+                    secondValueShow='itemName'
                     form={formik}
                     columnsInDropDown={[
                       { key: 'sku', value: 'SKU' },
                       { key: 'name', value: 'Name' }
                     ]}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('itemId', newValue?.recordId)
                       setSku(newValue?.recordId)
+                      formik.setFieldValue('itemRef', newValue?.reference || '')
+                      formik.setFieldValue('itemName', newValue?.name || '')
+                      formik.setFieldValue('itemId', newValue?.recordId || null)
                     }}
                     displayFieldWidth={2}
                     maxAccess={access}

@@ -17,6 +17,8 @@ import CustomDateTimePicker from '../Inputs/CustomDateTimePicker'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import usePageInteraction from '@argus/shared-providers/src/providers/usePageInteraction'
+import { useInteractionTracker } from '@argus/shared-providers/src/providers/InteractionTrackerProvider'
 
 const formatDateTo = value => {
   const date = new Date(value)
@@ -75,6 +77,96 @@ const convertCompactFormatToDate = compactDate => {
   return new Date(year, month, day, hour, minute)
 }
 
+const getDirtyParameters = (values, initialValues) => {
+  const current = values?.parameters || {}
+  const initial = initialValues?.parameters || {}
+  const allIds = new Set([...Object.keys(current), ...Object.keys(initial)])
+  const diffs = {}
+
+  allIds.forEach(id => {
+    const currentVal = current[id]?.value
+    const initialVal = initial[id]?.value
+
+    if (currentVal !== initialVal) {
+      diffs[id] = {
+        caption: current[id]?.caption || initial[id]?.caption,
+        from: initialVal,
+        to: currentVal
+      }
+    }
+  })
+
+  return diffs
+}
+
+const buildDefaultParameter = field => {
+  if (field.controlType === 4 && field.value) {
+    return {
+      fieldId: field.id,
+      fieldKey: field.key,
+      value: new Date(field.value.toString())?.getTime() || '',
+      caption: field.caption,
+      controlType: field?.controlType,
+      display: formatDateDefault(new Date(field?.value?.toString()))
+    }
+  }
+
+  if (field.controlType === 7) {
+    if (field.defaultValue) {
+      let defVal
+      switch (field.defaultValue) {
+        case 'today':
+          defVal = new Date()
+          break
+        case 'yesterday':
+          defVal = new Date()
+          defVal.setDate(defVal.getDate() - 1)
+          break
+        case 'boy':
+          defVal = new Date(new Date().getFullYear(), 0, 1)
+          break
+        default:
+          defVal = null
+      }
+
+      if (defVal) {
+        return {
+          fieldId: field.id,
+          fieldKey: field.key,
+          defaultValue: field.defaultValue,
+          value: defVal,
+          controlType: field?.controlType,
+          caption: field.caption,
+          display: formatDateTimeDefault(defVal)
+        }
+      }
+    } else if (field.value) {
+      return {
+        fieldId: field.id,
+        fieldKey: field.key,
+        defaultValue: field.defaultValue,
+        value: new Date(field.value.toString())?.getTime() || '',
+        controlType: field?.controlType,
+        caption: field.caption,
+        display: formatDateTimeDefault(new Date(field?.value?.toString()))
+      }
+    }
+
+    return undefined
+  }
+
+  if (field.controlType === 5 && field.apiDetails?.type === COMBOBOX && field.value) {
+    return {
+      fieldId: field.id,
+      fieldKey: field.key,
+      value: Number(field.value),
+      caption: field.caption
+    }
+  }
+
+  return undefined
+}
+
 const GetLookup = ({ field, formik }) => {
   const apiDetails = field.apiDetails
 
@@ -123,20 +215,9 @@ const GetLookup = ({ field, formik }) => {
   )
 }
 
-const GetComboBox = ({ field, formik, rpbParams }) => {
+const GetComboBox = ({ field, formik }) => {
   const apiDetails = field?.apiDetails
   let newParams = apiDetails?.parameters
-
-  useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
-      formik.setFieldValue(`parameters[${field.id}]`, {
-        fieldId: field.id,
-        fieldKey: field.key,
-        value: Number(field.value),
-        caption: field.caption
-      })
-    }
-  }, [])
 
   if (apiDetails?.endpoint === SystemRepository.DocumentType.qry2) {
     newParams += `&_functionIds=${field?.data}`
@@ -229,20 +310,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
   )
 }
 
-const GetDate = ({ field, formik, rpbParams }) => {
-  useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
-      formik.setFieldValue(`parameters[${field.id}]`, {
-        fieldId: field.id,
-        fieldKey: field.key,
-        value: new Date(field.value.toString())?.getTime() || '',
-        caption: field.caption,
-        controlType: field?.controlType,
-        display: formatDateDefault(new Date(field?.value?.toString()))
-      })
-    }
-  }, [])
-
+const GetDate = ({ field, formik }) => {
   return (
     <Grid item xs={12} key={formik.values?.parameters?.[field.id]?.value ? true : false}>
       <CustomDatePicker
@@ -269,53 +337,7 @@ const GetDate = ({ field, formik, rpbParams }) => {
   )
 }
 
-const GetDateTimePicker = ({ field, formik, rpbParams }) => {
-  useEffect(() => {
-    const currentValue = formik.values?.parameters?.[field.id]?.value
-
-    if (currentValue !== undefined && currentValue !== null) return
-
-    if (field.defaultValue) {
-      let defVal
-      switch (field.defaultValue) {
-        case 'today':
-          defVal = new Date()
-          break
-        case 'yesterday':
-          defVal = new Date()
-          defVal.setDate(defVal.getDate() - 1)
-          break
-        case 'boy':
-          defVal = new Date(new Date().getFullYear(), 0, 1)
-          break
-        default:
-          defVal = null
-      }
-
-      if (defVal) {
-        formik.setFieldValue(`parameters[${field.id}]`, {
-          fieldId: field.id,
-          fieldKey: field.key,
-          defaultValue: field.defaultValue,
-          value: defVal,
-          controlType: field?.controlType,
-          caption: field.caption,
-          display: formatDateTimeDefault(defVal)
-        })
-      }
-    } else if (field.value && rpbParams?.length < 1) {
-      formik.setFieldValue(`parameters[${field.id}]`, {
-        fieldId: field.id,
-        fieldKey: field.key,
-        defaultValue: field.defaultValue,
-        value: new Date(field.value.toString())?.getTime() || '',
-        controlType: field?.controlType,
-        caption: field.caption,
-        display: formatDateTimeDefault(new Date(field?.value?.toString()))
-      })
-    }
-  }, [])
-
+const GetDateTimePicker = ({ field, formik }) => {
   return (
     <Grid item xs={12} key={field.id}>
       <CustomDateTimePicker
@@ -401,6 +423,8 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   const [parameters, setParameters] = useState([])
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const trackInteraction = usePageInteraction()
+  const { clearPageInteractions } = useInteractionTracker()
 
   useSetWindow({ title: platformLabels.ReportParametersBrowser, window })
 
@@ -449,7 +473,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       setRpbParams([])
 
       const array = items.reduce((acc, { id, ...item }) => {
-        const param = values?.parameters?.filter(item => item?.fieldId === id)?.[0]
+        const param = values?.parameters?.[id]
 
         acc[id] = {
           ...param,
@@ -465,10 +489,28 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
         return acc
       }, [])
 
-      setRpbParams(array)
+      setRpbParams(array) 
+      
+     const emptyParams = array?.every(item => {
+        if (item && Object.prototype.hasOwnProperty.call(item, 'value')) return item.value === undefined
+        return Object.values(item ?? {}).every(value => value == null)
+      })
+      
+      if (emptyParams) clearPageInteractions(trackInteraction.currentPageResourceId, 'RPBForm')
+      else trackInteraction('RPBForm')
+
       window.close()
     }
   })
+
+  const dirtyParams = getDirtyParameters(formik.values, formik.initialValues)
+  const isDirty = Object.keys(dirtyParams).length > 0
+  
+  useEffect(() => {      
+    const emptyParams = rpbParams?.every(item => Object.values(item).every(value => value == null))
+    if (isDirty) trackInteraction('RPBForm')
+    else if (emptyParams) clearPageInteractions(trackInteraction.currentPageResourceId, 'RPBForm')
+  }, [formik.values])
 
   const mergeFieldWithApiDetails = async () => {
     const fieldComponentArray = []
@@ -497,7 +539,22 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   }, [parameters])
 
   useEffect(() => {
-    const mappedData = rpbParams.reduce((acc, item) => {
+    if (items.length === 0) return
+
+    const initialParameters = items.reduce((acc, field) => {
+      const defaultParam = buildDefaultParameter(field)
+      if (defaultParam) acc[field.id] = defaultParam
+
+      return acc
+    }, [])
+
+    formik.resetForm({ values: { parameters: initialParameters } })
+  }, [items])
+
+  useEffect(() => {
+    if (!rpbParams || rpbParams.length === 0 || items.length === 0) return
+
+    const rpbMapped = rpbParams.reduce((acc, item) => {
       acc[item?.fieldId] = {
         ...item,
         defaultValue: item?.defaultValue,
@@ -511,9 +568,9 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
 
       return acc
     }, [])
-
-    formik.setFieldValue('parameters', mappedData)
-  }, [])
+    
+    formik.setFieldValue('parameters', { ...formik.values.parameters, ...rpbMapped })
+  }, [rpbParams, items])
 
   useEffect(() => {
     getParameterDefinition(reportName)
@@ -526,15 +583,23 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
           if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {
             return <GetLookup key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 5 && item.apiDetails?.type === COMBOBOX) {
-            return <GetComboBox key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
+            return <GetComboBox key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 4) {
-            return <GetDate key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
+            return <GetDate key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 1) {
             return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           } else if (item.controlType === 2) {
-            return <GetNumberField key={item.fieldId} formik={formik} field={item} decimalScale={item.decimals || 2} separator={item?.separator == "false" ? null : ','} />
+            return (
+              <GetNumberField
+                key={item.fieldId}
+                formik={formik}
+                field={item}
+                decimalScale={item.decimals || 2}
+                separator={item?.separator == 'false' ? null : ','}
+              />
+            )
           } else if (item.controlType === 7) {
-            return <GetDateTimePicker key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
+            return <GetDateTimePicker key={item.fieldId} formik={formik} field={item} />
           }
         })}
       </Grid>

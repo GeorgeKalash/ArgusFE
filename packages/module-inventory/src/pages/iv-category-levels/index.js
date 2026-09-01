@@ -32,11 +32,11 @@ const CategoryLevels = () => {
       extension: InventoryRepository.CategoryLevel.qry
     })
 
-    const processedData = res?.list?.map((item, index) => ({
+    const items = res?.list?.map((item, index) => ({
       id: index + 1,
       ...item
     }))
-    formik.setValues({ items: processedData })
+    formik.resetForm({ values: {items} })
   }
 
   const { formik } = useForm({

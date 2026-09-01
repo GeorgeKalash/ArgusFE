@@ -1,7 +1,7 @@
 import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useFormik } from 'formik'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
@@ -71,14 +71,15 @@ const SystemDefaults = () => {
         myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
       }
     })
-    formik.setValues(myObject)
+    formik.resetForm({ values: myObject })
   }
 
   const { labels: _labels, access } = useResourceQuery({
     datasetId: ResourceIds.SystemDefaults
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess: access,
     validateOnChange: true,
     initialValues: {
       extentionsPath: '',

@@ -21,6 +21,7 @@ const SalesTrxDefaults = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const { functionId } = Router()
+  const currentResourceId = SystemFunction.SalesInvoice == functionId ? ResourceIds.SalesInvoiceDocTypDefaults : ResourceIds.SalesReturnDocTypDefaults
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -44,7 +45,8 @@ const SalesTrxDefaults = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SaleRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.DocumentTypeDefault,
+    datasetId: ResourceIds.SalesQuotationDocTypeDefault,
+    DatasetIdAccess: currentResourceId,
     filter: {
       filterFn: fetchWithFilter,
       default: { functionId }

@@ -108,6 +108,8 @@ const ReportViewer = ({ resourceId }) => {
       ...prev,
       selectedFormat: exportFormat[nextIndex]
     }))
+
+    return exportFormat[nextIndex]?.key
   }
 
   return (
@@ -118,6 +120,7 @@ const ReportViewer = ({ resourceId }) => {
           hasSearch={false}
           reportName={report.selectedReport?.parameters}
           disableActionsPadding
+          resetKey={reportStore}
           leftSection={
             <Grid container spacing={2} alignItems='end' wrap='nowrap'>
               <Grid item xs>
@@ -130,18 +133,21 @@ const ReportViewer = ({ resourceId }) => {
                   values={report}
                   required
                   fullWidth
-                  onChange={(e, newValue) =>
+                  onChange={(e, newValue) => {
                     setReport(prevState => ({
                       ...prevState,
                       selectedReport: newValue
                     }))
-                  }
+                  }}
                 />
               </Grid>
           
               <Grid item>
                 <CustomButton
                   onClick={cycleFormat}
+                  name='formatBtn'
+                  initialValue={exportFormat[0]?.key}
+                  value={report.selectedFormat?.key}
                   image={`${report.selectedFormat?.value || 'PDF'}.png`}
                   disabled={exportFormat.length == 0 || !report.selectedReport}
                 />

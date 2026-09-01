@@ -17,10 +17,23 @@ import { Router } from '@argus/shared-domain/src/lib/useRouter'
 const RetailDtd = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
-
   const { functionId } = Router()
+
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.RetailInvoice:
+        return ResourceIds.RetailInvoiceDocTypeDefault
+      case SystemFunction.RetailReturn:
+        return ResourceIds.RetailReturnDocTypeDefault
+      case SystemFunction.RetailPurchase:
+        return ResourceIds.RetailPurchaseDocTypeDefault
+      default:
+        return null
+    }
+  }
+
+  const currentResourceId = getResourceId(parseInt(functionId))
 
   async function fetchGridData(options = {}) {
     const {
@@ -44,8 +57,8 @@ const RetailDtd = () => {
     refetch
   } = useResourceQuery({
     endpointId: PointofSaleRepository.DocumentTypeDefault.qry,
-    datasetId: ResourceIds.POSDocTypeDefault,
-
+    datasetId: ResourceIds.RetailInvoiceDocTypeDefault,
+    DatasetIdAccess: currentResourceId,
     filter: {
       filterFn: fetchGridData,
       default: { functionId }
@@ -91,7 +104,8 @@ const RetailDtd = () => {
         labels: _labels,
         functionId,
         recordId: record?.dtId,
-        maxAccess: access
+        maxAccess: access,
+        currentResourceId
       },
       width: 500,
       height: 300,

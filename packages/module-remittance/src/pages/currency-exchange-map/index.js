@@ -3,7 +3,7 @@ import { Grid } from '@mui/material'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import * as yup from 'yup'
-import { useFormik } from 'formik'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import WindowToolbar from '@argus/shared-ui/src/components/Shared/WindowToolbar'
@@ -34,7 +34,8 @@ const NumberRange = () => {
     }
   }, [access])
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
       rows: yup

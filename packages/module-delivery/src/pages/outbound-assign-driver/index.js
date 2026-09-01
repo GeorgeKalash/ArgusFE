@@ -59,7 +59,7 @@ const OutboundAssignDriver = () => {
       parameters: ``
     })
 
-    const modifiedList =
+    const tripList =
       res?.list?.length > 0
         ? res?.list?.map((item, index) => {
             return {
@@ -70,7 +70,7 @@ const OutboundAssignDriver = () => {
             }
           })
         : []
-    formik.setFieldValue('tripList', modifiedList)
+    formik.resetForm({ values : { tripList } })
   }
 
   const columns = [

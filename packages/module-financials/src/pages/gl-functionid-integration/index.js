@@ -46,7 +46,7 @@ const SystemFunctionIntegration = () => {
         ...rest
       }
     })
-    formik.setFieldValue('rows', rows)
+    formik.resetForm({ values: {rows} } )
   }
 
   const { labels, access } = useResourceQuery({

@@ -67,7 +67,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.DocumentTypeDefault} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.SalesQuotationDocTypeDefault} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
