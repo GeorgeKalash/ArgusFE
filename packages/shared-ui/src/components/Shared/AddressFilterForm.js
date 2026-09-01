@@ -17,6 +17,7 @@ import Form from './Form'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { BusinessPartnerRepository } from '@argus/repositories/src/repositories/BusinessPartnerRepository'
 
 export default function AddressFilterForm({
   labels,
@@ -98,22 +99,21 @@ export default function AddressFilterForm({
     const canSearch = !!formik.values.search && !!formik.values.countryId && !!formik.values.cityId && !!form.clientId
 
     const response = await getRequest({
-      extension: canSearch ? SaleRepository.FilterAddress.snapshot : SaleRepository.Address.page,
+      extension: canSearch ? SaleRepository.FilterAddress.snapshot : form.clientId ? SaleRepository.Address.page : BusinessPartnerRepository.BPAddress.page,
       parameters: canSearch
         ? `_countryId=${formik.values.countryId}&_cityId=${formik.values.cityId}&_clientId=${form.clientId}&_filter=${formik.values.search}`
-        : `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=1|${form.clientId}`
-    })
+        : form.clientId
+          ? `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=1|${form.clientId}` 
+          : `_startAt=${_startAt}&_pageSize=${_pageSize}&_bpId=${form.bpId}`
+    });
 
-    const list =
-      response?.list?.map(item => ({
-        addressId: item.addressId || item.recordId,
-        address:
-          item.formattedAddress ??
-          `${item.name || ''}, ${item.street1 || ''}, ${item.street2 || ''}, ${item.city || ''}, ${item.phone || ''},${
-            item.phone2 || ''
-          },${item.email1 || ''}`,
-        checked: (item.addressId || item.recordId) === checkedAddressId
-      })) || []
+    const list = response?.list?.map(item => ({
+      addressId: item.addressId || item.recordId,
+      address: form.clientId
+        ? (item.formattedAddress || `${item.name || ''}, ${item.street1 || ''}, ${item.street2 || ''}, ${item.city || ''}, ${item.phone || ''}, ${item.phone2 || ''}, ${item.email1 || ''}`)
+        : `${item.address.name || ''}, ${item.address.street1 || ''}, ${item.address.street2 || ''}, ${item.address.city || ''}, ${item.address.phone || ''}, ${item.address.phone2 || ''}, ${item.address.email1 || ''}`,
+      checked: (item.addressId || item.recordId) === checkedAddressId
+    })) || []
 
     return {
       list,
