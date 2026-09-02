@@ -348,6 +348,22 @@ useEffect(() => {
   }
 }, [msId, labels?.msIdError])
 
+  const onChangeDT = async dtId => {
+    if (dtId) {
+      const res = await getRequest({
+        extension: BrokerageTradingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      formik.setFieldValue('plantId', res?.record?.plantId || null)
+      formik.setFieldValue('spId', res?.record?.spId || null)
+    }
+  }
+
+  useEffect(() => {
+    if (!recordId && formik.values?.dtId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
