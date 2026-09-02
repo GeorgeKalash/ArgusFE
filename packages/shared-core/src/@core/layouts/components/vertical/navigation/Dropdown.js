@@ -5,33 +5,50 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import styles from './Navigation.module.css'
 
-function Dropdown({ Image, TooltipTitle, onClickAction, map, navCollapsed }) {
+function Dropdown({
+  Image,
+  TooltipTitle,
+  onClickAction,
+  map,
+  navCollapsed,
+  controlled = false,
+  anchorPosition,
+  open: controlledOpen,
+  onClose: controlledOnClose
+}) {
   const [anchorEl, setAnchorEl] = React.useState(null)
-  const open = Boolean(anchorEl)
+
+  const isControlled = controlled
+  const open = isControlled ? Boolean(controlledOpen) : Boolean(anchorEl)
 
   const OpenItems = event => {
     setAnchorEl(event.currentTarget)
   }
 
   const handleClose = () => {
-    setAnchorEl(null)
+    if (isControlled) controlledOnClose?.()
+    else setAnchorEl(null)
   }
 
   return (
     <>
-      <Tooltip
-        title={TooltipTitle}
-        placement='bottom'
-        PopperProps={{
-          disablePortal: false
-        }}
-      >
-        <Box onClick={OpenItems} className={styles.box} sx={{ display: navCollapsed ? 'none' : 'flex' }}>
-          <div className={styles.image}>{Image}</div>
-        </Box>
-      </Tooltip>
+      {!isControlled && (
+        <Tooltip
+          title={TooltipTitle}
+          placement='bottom'
+          PopperProps={{
+            disablePortal: false
+          }}
+        >
+          <Box onClick={OpenItems} className={styles.box} sx={{ display: navCollapsed ? 'none' : 'flex' }}>
+            <div className={styles.image}>{Image}</div>
+          </Box>
+        </Tooltip>
+      )}
       <Menu
-        anchorEl={anchorEl}
+        {...(isControlled
+          ? { anchorReference: 'anchorPosition', anchorPosition }
+          : { anchorEl })}
         id='account-menu'
         open={open}
         onClose={handleClose}

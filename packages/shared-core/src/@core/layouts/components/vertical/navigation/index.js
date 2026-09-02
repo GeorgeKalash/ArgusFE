@@ -26,7 +26,6 @@ import Image from 'next/image'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import styles from './Navigation.module.css'
 
 const SwipeableDrawer = MuiSwipeableDrawer
@@ -59,12 +58,11 @@ const Navigation = props => {
     setNavVisible
   } = props
 
-  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex, handleBookmark, setTabSwitch } =
-    useContext(MenuContext)
+  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex, handleBookmark, setTabSwitch, startupPages } = useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
   const [filteredMenu, setFilteredMenu] = useState([])
   const [openFolders, setOpenFolders] = useState([])
-  const [selectedNode, setSelectedNode] = useState(false)
+  const [contextMenu, setContextMenu] = useState(null)
   const menu = props.verticalNavItems
   const gear = useContext(MenuContext)
   const [isArabic, setIsArabic] = useState(false)
@@ -208,11 +206,37 @@ const Navigation = props => {
   }, [props.verticalNavItems])
 
   const onCollapse = () => setOpenFolders([])
-  const closeDialog = () => setSelectedNode(false)
+
+  const closeContextMenu = () => setContextMenu(null)
 
   const handleRightClick = (e, node, imgName) => {
     e.preventDefault()
-    setSelectedNode([node, Boolean(imgName)])
+    const isCurrentStartup = startupPages?.some(page => page.id === node.id)
+
+    setContextMenu({
+      mouseX: e.clientX - 2,
+      mouseY: e.clientY - 4,
+      node,
+      isFav: Boolean(imgName),
+      isStartupPage: isCurrentStartup
+    })
+  }
+  const contextMenuItems = contextMenu
+  ? [
+      { name: contextMenu.isFav ? platformLabels.RemoveFav : platformLabels.AddFav, action: 'favorite' },
+      { name: contextMenu.isStartupPage ? platformLabels.RemoveStartupPage : platformLabels.AddStartupPage, action: 'startup' },
+    ]
+  : []
+
+  const handleContextMenuAction = element => {
+    if (!contextMenu) return
+    const { node, isFav, isStartupPage } = contextMenu
+
+    if (element.action === 'favorite') {
+      handleBookmark(node, isFav, closeContextMenu, false)
+    } else if (element.action === 'startup') {
+      handleBookmark(node, isStartupPage, closeContextMenu, true)
+    }
   }
 
   const toggleFolder = folderId => {
@@ -437,15 +461,15 @@ const Navigation = props => {
             : MenuLockedIcon()}
         </IconButton>
       )}
-      {selectedNode && (
-        <ConfirmationDialog
-          openCondition={Boolean(selectedNode)}
-          closeCondition={closeDialog}
-          DialogText={selectedNode[1] ? platformLabels.RemoveFav : platformLabels.AddFav}
-          okButtonAction={() => handleBookmark(selectedNode[0], selectedNode[1], closeDialog)}
-          cancelButtonAction={closeDialog}
-        />
-      )}
+      <Dropdown
+        map={contextMenuItems}
+        onClickAction={handleContextMenuAction}
+        navCollapsed={false}
+        open={Boolean(contextMenu)}
+        onClose={closeContextMenu}
+        controlled={true}
+        anchorPosition={contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+      />
     </ThemeProvider>
   )
 }
