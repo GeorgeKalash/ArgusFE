@@ -8,8 +8,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { Box, IconButton, Typography } from '@mui/material'
-import Image from 'next/image'
+import { Typography } from '@mui/material'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -17,9 +16,6 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import RightToWorkForm from './RightToWorkForm'
 import BackgroundCheckForm from './BackgroundCheckForm'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import DeleteDialog from '../DeleteDialog'
-import FilePreviewWindow from './FilePreviewWindow'
 
 const LegalsTab = ({ labels, maxAccess, store, isActive }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,9 +25,6 @@ const LegalsTab = ({ labels, maxAccess, store, isActive }) => {
 
   const [searchRTW, setSearchRTW] = useState('')
   const [searchBC, setSearchBC] = useState('')
-
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg']
-  const pdfExtensions = ['.pdf']
 
   function getDaysLeft(expiryDateStr) {
     const expiryMs = formatDateFromApi(expiryDateStr)
@@ -114,71 +107,12 @@ const filteredRTWData = searchRTW
       }
     : bcData
 
-  const handlePreview = row => {
-    const url = row.data.fileUrl
-    const isImage = imageExtensions.some(ext => url?.toLowerCase().includes(ext))
-    const isPdf = pdfExtensions.some(ext => url?.toLowerCase().includes(ext))
-    if (!isImage && !isPdf) return 
-
-    stack({
-      Component: FilePreviewWindow,
-      props: { url, isImage },
-      width: 700,
-      height: 600,
-    })
-  }
-
-  const handleDownload = async row => {
-    const url = row.data.fileUrl
-    if (!url) return
-    const response = await fetch(url)
-    if (!response.ok) return 
-   
-    const blob = await response.blob()
-    const blobUrl = window.URL.createObjectURL(blob)
-
-    const segments = url.split('/')
-    const fileName = segments[segments.length - 1]
-
-    const link = document.createElement('a')
-    link.href = blobUrl
-    link.download = fileName
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(blobUrl)
-  }
-
   const rightToWorkColumns = [
     { field: 'dtName', headerName: labels.dtName, flex: 1 },
     { field: 'documentRef', headerName: labels.dtRef, flex: 1 },
     { field: 'issueDate', headerName: labels.issueDate, flex: 1, type: 'date' },
     { field: 'expiryDate', headerName: labels.expiryDate, flex: 1, type: 'date' },
     { field: 'daysLeft', headerName: labels.daysLeft, flex: 1 },
-    {
-      field: 'deleteAttachment',
-      headerName: ' ',
-      flex: 1,
-      cellRenderer: row => {
-        if (!row.data.fileUrl) return null
-
-        return (
-          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center', gap: 1 }}>
-            <IconButton size='small' onClick={() => handleDownload(row)}>
-              <Image src={'/images/buttonsIcons/download-black.png'} width={18} height={18} />
-            </IconButton>
-
-            <IconButton size='small' onClick={() => handlePreview(row)}>
-              <Image src={'/images/buttonsIcons/preview-black.png'} width={18} height={18} />
-            </IconButton>
-
-            <IconButton size='small' onClick={() => deleteConfirmation(row, 'RTW')}>
-              <Image src={'/images/TableIcons/deleteAtt.png'} width={18} height={18} />
-            </IconButton>
-          </Box>
-        )
-      }
-    }
   ]
 
   const backgroundCheckColumns = [
@@ -186,30 +120,6 @@ const filteredRTWData = searchRTW
     { field: 'date', headerName: labels.issueDate, flex: 1, type: 'date' },
     { field: 'expiryDate', headerName: labels.expiryDate, flex: 1, type: 'date' },
     { field: 'daysLeft', headerName: labels.daysLeft, flex: 1 },
-    {
-      field: 'deleteAttachment',
-      headerName: ' ',
-      flex: 1,
-      cellRenderer: row => {
-        if (!row.data.fileUrl) return null
-
-        return (
-          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center', gap: 1 }}>
-            <IconButton size='small' onClick={() => handleDownload(row)}>
-              <Image src={'/images/buttonsIcons/download-black.png'} width={18} height={18} />
-            </IconButton>
-
-            <IconButton size='small' onClick={() => handlePreview(row)}>
-              <Image src={'/images/buttonsIcons/preview-black.png'} width={18} height={18} />
-            </IconButton>
-
-            <IconButton size='small' onClick={() => deleteConfirmation(row, 'BC')}>
-              <Image src={'/images/TableIcons/deleteAtt.png'} width={18} height={18} />
-            </IconButton>
-          </Box>
-        )
-      }
-    }
   ]
 
   const del = async (obj, type) => {
@@ -222,49 +132,6 @@ const filteredRTWData = searchRTW
     type == 'RTW' ? RTWInvalidate() : BCInvalidate()
   }
 
-  function deleteConfirmation(obj, type) {
-    stack({
-      Component: DeleteDialog,
-      props: {
-        open: [true, {}],
-        fullScreen: false,
-        onConfirm: () => deleteAttachment(obj, type)
-      },
-      refresh: false
-    })
-  }
-
-  const deleteAttachment = async (obj, type) => {
-    const url = obj?.data?.fileUrl
-    let fileName = ''
-    let seqNo = 0
-
-    if (url) {
-      const segments = url.split('/')
-      if (segments.length >= 7) {
-        fileName = segments[6]
-        const namePart = fileName.split('.')[0]
-        const seqParts = namePart.split('-')
-        if (seqParts.length >= 2) seqNo = parseInt(seqParts[1], 10)
-      }
-    }
-
-    const payload = {
-      classId: type == 'RTW' ? ResourceIds.EmployeeRightToWork : ResourceIds.BackgroundCheck,
-      resourceId: type == 'RTW' ? ResourceIds.EmployeeRightToWork : ResourceIds.BackgroundCheck,
-      recordId: obj?.data?.recordId,
-      seqNo,
-      fileName
-    }
-
-    await postRequest({
-      extension: SystemRepository.Attachment.del,
-      record: JSON.stringify(payload)
-    })
-
-    toast.success(platformLabels.Deleted)
-    type == 'RTW' ? RTWInvalidate() : BCInvalidate()
-  }
   const openForm = (obj, type) => {
     stack({
       Component: type == 'RTW' ? RightToWorkForm : BackgroundCheckForm,
