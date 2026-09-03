@@ -41,7 +41,7 @@ export const BrokerageTradingRepository = {
   },
   DocumentTypeDefault: {
     get: service + 'getDTD',  
-    set: service + 'setDTD', 
+    set: service + 'setDTD',
     del: service + 'delDTD',
     page: service + 'pageDTD'
   }
