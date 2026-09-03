@@ -60,7 +60,6 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
       invalidate()
     }
   })
-
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
