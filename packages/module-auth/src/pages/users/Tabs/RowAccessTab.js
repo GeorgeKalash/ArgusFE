@@ -299,6 +299,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
             rowId={['recordId']}
             maxAccess={maxAccess}
             pagination={false}
+            enableFilters
             checkTitle={labels.active}
             showCheckboxColumn={true}
             viewCheckButtons={true}

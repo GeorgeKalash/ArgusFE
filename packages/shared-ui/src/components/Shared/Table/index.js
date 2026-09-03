@@ -29,6 +29,9 @@ import { getStatusBadgeColor } from "@argus/shared-utils/src/utils/status-badge-
 import { getStatusIcon } from "@argus/shared-utils/src/utils/status-icon";
 import Chip from "@mui/material/Chip";
 import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
+import FilterAltIcon from '@mui/icons-material/FilterAlt'
+import { CheckboxFilter, CheckboxFloatingFilter } from '@argus/shared-ui/src/components/Shared/Table/CheckBoxFilter'
+import { DateFilter, DateFloatingFilter } from '@argus/shared-ui/src/components/Shared/Table/DatePickerFilter'
 
 const Table = ({
   name = 'table',
@@ -50,6 +53,7 @@ const Table = ({
   collabsable = true,
   domLayout = 'normal',
   highlightRow,
+  enableFilters,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -72,7 +76,8 @@ const Table = ({
   const [menuAnchor, setMenuAnchor] = useState(null)
   const [selectedColId, setSelectedColId] = useState(null)
   const [hoveredTable, setHoveredTable] = useState(false)
-
+  const [showFilters, setShowFilters] = useState(false)
+  const hoverFilterRef = useRef(null)
   const { width } = useWindowDimensions()
 
   const rowHeight =
@@ -86,172 +91,224 @@ const Table = ({
   const badgeRadius = Math.round(badgeHeight / 3);
 
   const columns = useMemo(() => {
-  return props?.columns
-    .filter(
-      ({ field }) =>
-        accessLevel({
-          maxAccess: props?.maxAccess,
-          name: name ? `${name}.${field}` : field
-        }) !== HIDDEN
-    )
-    .map(col => {
-      if (col.type === 'date') {
-        return {
-          ...col,
-          valueGetter: ({ data }) => parseDateValue(data?.[col.field]),
-          cellRenderer: params => params?.value && formatDateDefault(`/Date(${params?.value})/`),
-          comparator: dateComparator,
-          sortable: !disableSorting
-        }
-      }
-      if (col.type === 'dateTime') {
-        return {
-          ...col,
-          valueGetter: ({ data }) => parseDateValue(data?.[col.field]),
-          cellRenderer: params => params?.value && formatDateTimeDefault(`/Date(${params?.value})/`, col?.dateFormat),
-          comparator: dateComparator,
-          sortable: !disableSorting
-        }
-      }
-      if (col.type === 'number' || col?.type?.field === 'number') {
-        return {
-          ...col,
-          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
-          cellClass: params => `${col?.isBold ? 'bold ' : ''}${languageId == 2 ? '' : 'right'}`,
-          sortable: !disableSorting
-        }
-      }
-      if (col.type === 'timeZone') {
-        return {
-          ...col,
-          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field]),
-          sortable: !disableSorting
-        }
-      }
-      if (col.type === 'checkbox') {
-        return {
-          ...col,
-          width: 110,
-          cellRenderer: ({ data, node }) => {
-            const handleCheckboxChange = event => {
-              const checked = event.target.checked
-              node.setDataValue(col.field, checked)
+    return props?.columns
+      .filter(
+        ({ field }) =>
+          accessLevel({
+            maxAccess: props?.maxAccess,
+            name: name ? `${name}.${field}` : field
+          }) !== HIDDEN
+      )
+      .map(col => {
+        if (col.type === 'date') {
+          return {
+            ...col,
+            valueGetter: ({ data }) => parseDateValue(data?.[col.field]),
+            cellRenderer: params => params?.value && formatDateDefault(`/Date(${params?.value})/`),
+            comparator: dateComparator,
+            sortable: !disableSorting,
+            filter: DateFilter,
+            suppressMenu: true,
+            floatingFilterComponent: DateFloatingFilter,
+            filterParams: {
+              ...(col.filterParams || {})
             }
-
-            return (
-              <Checkbox
-                checked={data?.[col.field]}
-                onChange={col.editable ? handleCheckboxChange : null}
-                className={col.editable ? '' : 'pointerNone'}
-              />
-            )
           }
         }
-      }
-      if (col.type === 'colorCombo') {
-        return {
-          ...col,
-          cellRenderer: ({ data }) => {
-            const color = data?.[col.field]
 
-            return color ? (
-              <div className={'colorComboWrapper'}>
-                <div className={'colorSwatch'} style={{ backgroundColor: color }} />
-                <span>{color}</span>
-              </div>
-            ) : null
+        if (col.type === 'dateTime') {
+          return {
+            ...col,
+            valueGetter: ({ data }) => parseDateValue(data?.[col.field]),
+            cellRenderer: params => params?.value && formatDateTimeDefault(`/Date(${params?.value})/`, col?.dateFormat),
+            comparator: dateComparator,
+            sortable: !disableSorting,
+            filter: DateFilter,
+            floatingFilterComponent: DateFloatingFilter,
+            filterParams: {
+              ...(col.filterParams || {})
+            }
           }
         }
-      }
-      if (col.type === 'badge') {
-        return {
-          ...col,
 
-          valueGetter: ({ data }) => data?.[col.field],
-
-          cellRenderer: params => {
-            const { data } = params;
-
-            const label = data?.[col.field];
-            const code = data?.[col.valueField];
-
-            const isEmpty =
-              label === null ||
-              label === undefined ||
-              label === "" ||
-              String(label).trim() === "";
-
-            if (isEmpty) return null;
-
-            const colors = getStatusBadgeColor(col.family, code);
-
-            return (
-              <FieldWrapper {...params}>
-              <Chip
-                  label={label}
-                  size="small"
-                  sx={{
-                    height: `${badgeHeight}px`,
-                    fontSize: `${badgeFont}px`,
-                    fontWeight: 500,
-                    backgroundColor: colors.bg,
-                    color: colors.text,
-                    border: `1px solid ${colors.border}`,
-                    borderRadius: `${badgeRadius}px`,
-                    "& .MuiChip-label": {
-                      px: 1
-                    }
-                  }}
-                />
-              </FieldWrapper>
-            );
-          },
-
-          sortable: !disableSorting
-        };
-      }
-      if (col.type === "icon") {
-        return {
-          ...col,
-
-          cellRenderer: ({ data }) => {
-            const code = data?.[col.valueField];
-
-            const config = getStatusIcon(col.family, code);
-
-            if (!config) return null;
-
-            const Icon = config.icon;
-
-            return (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Icon
-                  sx={{
-                    fontSize: rowHeight * 0.55,
-                    color: config.color
-                  }}
-                />
-              </div>
-            );
-          },
-
-          cellStyle: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
+        if (col.type === 'number' || col?.type?.field === 'number') {
+          return {
+            ...col,
+            valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
+            filterValueGetter: ({ data }) => {
+              const num = Number(data?.[col.field])
+              return Number.isNaN(num) ? null : num
+            },
+            cellClass: params => `${col?.isBold ? 'bold ' : ''}${languageId == 2 ? '' : 'right'}`,
+            sortable: !disableSorting,
+            filter: 'agNumberColumnFilter',
+            filterParams: {
+              ...(col.filterParams || {}),
+              suppressFilterButton: true,
+              allowedCharPattern: '\\d\\-\\,\\.',
+              numberParser: text => (text == null ? null : parseFloat(text.replace(/,/g, ''))),
+              numberFormatter: value =>
+                value == null
+                  ? null
+                  : value.toLocaleString('en-US', { maximumFractionDigits: 20 })
+            }
           }
-        };
-      }
+        }
+        if (col.type === 'timeZone') {
+          return {
+            ...col,
+            valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field]),
+            sortable: !disableSorting,
+            filter: 'agTextColumnFilter',
+            filterParams: {
+              ...(col.filterParams || {}),
+              suppressFilterButton: true
+            }
+          }
+        }
+        if (col.type === 'checkbox') {
+          return {
+            ...col,
+            width: 110,
+            filter: CheckboxFilter,
+            floatingFilter: true,
+            suppressMenu: true,
+            floatingFilterComponent: CheckboxFloatingFilter,
+            cellRenderer: ({ data, node }) => {
+              const handleCheckboxChange = event => {
+                const checked = event.target.checked
+                node.setDataValue(col.field, checked)
+              }
 
-      return {
-        ...col,
-        sortable: !disableSorting,
-        cellStyle: params => ({
-          fontWeight: params.data?.isBold ? 'bold' : 'normal'
-        })
-      }
-    }
-  )}, [
+              return (
+                <Checkbox
+                  checked={data?.[col.field]}
+                  onChange={col.editable ? handleCheckboxChange : null}
+                  className={col.editable ? '' : 'pointerNone'}
+                />
+              )
+            }
+          }
+        }
+        if (col.type === 'colorCombo') {
+          return {
+            ...col,
+            cellRenderer: ({ data }) => {
+              const color = data?.[col.field]
+
+              return color ? (
+                <div className={'colorComboWrapper'}>
+                  <div className={'colorSwatch'} style={{ backgroundColor: color }} />
+                  <span>{color}</span>
+                </div>
+              ) : null
+            },
+            filter: 'agTextColumnFilter',
+            filterParams: {
+              ...(col.filterParams || {}),
+              suppressFilterButton: true
+            }
+          }
+        }
+        if (col.type === 'badge') {
+          return {
+            ...col,
+
+            valueGetter: ({ data }) => data?.[col.field],
+
+            cellRenderer: params => {
+              const { data } = params;
+
+              const label = data?.[col.field];
+              const code = data?.[col.valueField];
+
+              const isEmpty =
+                label === null ||
+                label === undefined ||
+                label === "" ||
+                String(label).trim() === "";
+
+              if (isEmpty) return null;
+
+              const colors = getStatusBadgeColor(col.family, code);
+
+              return (
+                <FieldWrapper {...params}>
+                  <Chip
+                    label={label}
+                    size="small"
+                    sx={{
+                      height: `${badgeHeight}px`,
+                      fontSize: `${badgeFont}px`,
+                      fontWeight: 500,
+                      backgroundColor: colors.bg,
+                      color: colors.text,
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: `${badgeRadius}px`,
+                      "& .MuiChip-label": {
+                        px: 1
+                      }
+                    }}
+                  />
+                </FieldWrapper>
+              );
+            },
+
+            sortable: !disableSorting,
+            filter: 'agTextColumnFilter',
+            filterParams: {
+              ...(col.filterParams || {}),
+              suppressFilterButton: true
+            }
+          };
+        }
+        if (col.type === "icon") {
+          return {
+            ...col,
+
+            cellRenderer: ({ data }) => {
+              const code = data?.[col.valueField];
+
+              const config = getStatusIcon(col.family, code);
+
+              if (!config) return null;
+
+              const Icon = config.icon;
+
+              return (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Icon
+                    sx={{
+                      fontSize: rowHeight * 0.55,
+                      color: config.color
+                    }}
+                  />
+                </div>
+              );
+            },
+
+            cellStyle: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }
+          };
+        }
+
+        return {
+          ...col,
+          sortable: !disableSorting,
+          cellStyle: params => ({
+            fontWeight: params.data?.isBold ? 'bold' : 'normal'
+          }),
+          filter: col.filter || 'agTextColumnFilter',
+          filterParams: {
+            ...(col.filterParams || {}),
+            suppressFilterButton: true
+          }
+        }
+      })
+  }, [
     props?.columns,
     languageId,
     disableSorting
@@ -872,8 +929,58 @@ const Table = ({
           className={'fullSizeCheckbox'}
         />
       ),
-    suppressMenu: true
+    suppressMenu: true,
+    filter: false
   }), [checked, showSelectAll, rowSelection, handleCheckboxChange])
+
+  const handleDragStart = e => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const container = gridRef.current
+    const button = hoverFilterRef.current
+    const header = container?.querySelector('.ag-header-row.ag-header-row-column')
+
+    if (!container || !button || !header) return
+
+    const c = container.getBoundingClientRect()
+    const h = header.getBoundingClientRect()
+    const b = button.getBoundingClientRect()
+
+    const startX = e.clientX
+    const startY = e.clientY
+    const startLeft = b.left - c.left
+    const startTop = b.top - c.top
+
+    const onMove = ev => {
+      let left = startLeft + (ev.clientX - startX)
+      let top = startTop + (ev.clientY - startY)
+
+      left = Math.max(0, Math.min(left, c.width - b.width))
+      top = Math.max(0, Math.min(top, h.height - b.height))
+
+      button.style.left = `${left}px`
+      button.style.top = `${top}px`
+      button.style.right = 'auto'
+    }
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }
+  
+  useEffect(() => {
+    const button = hoverFilterRef.current
+    if (!button) return
+
+    button.style.left = 'auto'
+    button.style.right = '6px'
+    button.style.top = '6px'
+  }, [width])
 
   const columnDefs = useMemo(() => {
     return [
@@ -890,6 +997,7 @@ const Table = ({
           width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
           flex: column.flex,
           sort: column.sort ?? undefined,
+          floatingFilter: enableFilters && showFilters,
           cellRenderer:
             column.type === 'image'
               ? imageRenderer(column)
@@ -918,6 +1026,7 @@ const Table = ({
             field: 'actions',
             headerName: '',
             width: 100,
+            floatingFilter: false,
             cellRenderer: params => {
               const { data } = params
               const isStatus3 = data.status === 3
@@ -1016,7 +1125,9 @@ const Table = ({
       languageId,
       tableSettings,
       checkboxColumn,
-      showCheckboxColumn
+      showCheckboxColumn,
+      enableFilters,
+      showFilters
     ])
 
   const rowClassRules = useMemo(
@@ -1248,6 +1359,7 @@ const Table = ({
           className={[
             'ag-theme-alpine',
             'agGridContainer',
+            showFilters ? 'filters-open' : 'filters-closed',
             !props.maxHeight && !props.height ? 'agGridFlex' : ''
           ].join(' ')}
           sx={{
@@ -1263,6 +1375,31 @@ const Table = ({
               </IconButton>
             </Box>
           )}
+
+          {enableFilters && (
+            <Box
+              ref={hoverFilterRef}
+              className='hoverFilter'
+              onPointerDown={handleDragStart}
+              style={{ right: 6, top: 6 }}
+            >
+              <IconButton
+                size='small'
+                onClick={() => {
+                  setShowFilters(prev => {
+                    const next = !prev
+                    if (!next) {
+                      gridApiRef.current?.api?.setFilterModel(null)
+                    }
+                    return next
+                  })
+                }}
+              >
+                <FilterAltIcon fontSize='small' />
+              </IconButton>
+            </Box>
+          )}
+
           <AgGridReact
             key="grid"
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
@@ -1359,6 +1496,52 @@ const Table = ({
           box-shadow: var(--shadow-3, 0 1px 2px rgba(0, 0, 0, 0.15));
           border-radius: 4px;
           background: #fff;
+        }
+        
+        .hoverFilter {
+          position: absolute;
+          z-index: 10;
+          background: #fff;
+          border-radius: 4px;
+          cursor: grab;
+          user-select: none;
+          touch-action: none;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+        .hoverFilter:active {
+          cursor: grabbing;
+        }
+
+        .agGridContainer:hover .hoverFilter {
+          opacity: 1;
+        }
+
+        .agGridContainer :global(.ag-floating-filter-button) {
+          display: none !important;
+        }
+
+        .dateFloatingFilterInput :global(.MuiOutlinedInput-root),
+        .dateFloatingFilterInput :global(.MuiInputBase-root) {
+          height: 26px;
+          font-size: 12px;
+          background: #fff;
+          border-radius: 0;
+        }
+
+        .dateFloatingFilterInput :global(.MuiOutlinedInput-notchedOutline) {
+          border-radius: 0;
+        }
+
+        .hiddenDateInput {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 1px;
+          height: 1px;
+          opacity: 0;
+          border: none;
+          pointer-events: none;
         }
 
         .paginationWrapper {
@@ -1540,9 +1723,9 @@ const Table = ({
         }
 
         .agGridContainer :global(.ag-header),
-        .agGridContainer :global(.ag-header-cell) {
-          height: 32px !important;
-          min-height: 32px !important;
+        .agGridContainer :global(.ag-header-cell),
+        .agGridContainer :global(.ag-header-row) {
+          height: 30px !important;
         }
 
         .agGridContainer :global(.ag-header-cell-text),

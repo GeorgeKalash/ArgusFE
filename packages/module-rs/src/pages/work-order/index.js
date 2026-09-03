@@ -138,6 +138,7 @@ const WorkOrder = () => {
           onDelete={del}
           pageSize={50}
           refetch={refetch}
+          enableFilters
           paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}

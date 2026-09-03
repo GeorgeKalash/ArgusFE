@@ -112,6 +112,7 @@ const ModuleDeactivation = () => {
             maxAccess={access}
             showCheckboxColumn={true}
             pagination={false}
+            enableFilters
           />
         </Grow>
       </VertLayout>
