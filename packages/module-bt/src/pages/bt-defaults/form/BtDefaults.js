@@ -17,7 +17,7 @@ const BtDefaults = ({ _labels, access }) => {
   const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const { postRequest } = useContext(RequestsContext)
 
-  const arrayAllow = ['fixing_msId']
+  const arrayAllow = ['fixing_msId', 'bt_reporting_currencyId']
 
   const { formik } = useForm({
     maxAccess: access,
@@ -74,6 +74,24 @@ const BtDefaults = ({ _labels, access }) => {
                   formik.setFieldValue('fixing_msId', newValue?.recordId || '')
                 }}
                 error={formik.touched.fixing_msId && Boolean(formik.errors.fixing_msId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='bt_reporting_currencyId'
+                label={_labels.reportingCurrency}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('bt_reporting_currencyId', newValue?.recordId || '')
+                }}
+                error={formik.touched.bt_reporting_currencyId && Boolean(formik.errors.bt_reporting_currencyId)}
               />
             </Grid>
           </Grid>

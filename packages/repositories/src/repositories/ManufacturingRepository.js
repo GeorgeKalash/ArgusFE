@@ -131,6 +131,7 @@ export const ManufacturingRepository = {
     get: service + 'getDES',
     del: service + 'delDES',
     snapshot: service + 'snapshotDES',
+    snapshot2: service + 'snapshotDES2',
     page: service + 'pageDES'
   },
   MFJobOrder: {
@@ -138,6 +139,7 @@ export const ManufacturingRepository = {
     page: service + 'pageJOB',
     qry: service + 'qryJOB',
     qry2: service + 'qryJOB2',
+    qry4: service + 'qryJOB4',
     set: service + 'setJOB',
     get: service + 'getJOB',
     get2: service + 'get2JOB',
@@ -154,6 +156,7 @@ export const ManufacturingRepository = {
     wip: service + 'wipJOB',
     sync: service + 'syncJOB',
     qry3: service + 'qryJOB3',
+    qryUnmarked: service + 'qryUnmarkedJOB',
   },
   GenerateAMC:{
     generate: service + 'generateAMC'
@@ -517,7 +520,9 @@ export const ManufacturingRepository = {
     set2: service + 'set2PR',
     del: service + 'delPR',
     snapshot: service + 'snapshotPR',
-    post: service + 'postPR'
+    post: service + 'postPR',
+    preview: service + 'previewPR',
+    preview2: service + 'previewPR2',
   },
   WorkCenterGroups: {
     get: service + 'getWCG',

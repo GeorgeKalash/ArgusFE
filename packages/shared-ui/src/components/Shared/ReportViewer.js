@@ -50,7 +50,7 @@ const ReportViewer = ({ resourceId }) => {
           layoutName: item.layoutName,
           schemaFile: item.schemaFile,
           reportEngine: item.reportEngine,
-          assembly: 'ArgusRPT.dll'
+          assembly: item.assembly ?? 'ArgusRPT.dll'
         }))
 
       return [...prev, ...layoutsPack]

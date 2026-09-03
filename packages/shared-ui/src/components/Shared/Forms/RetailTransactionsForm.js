@@ -53,26 +53,21 @@ import { LockedScreensContext } from '@argus/shared-providers/src/providers/Lock
 import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 
-export default function RetailTransactionsForm({
-  labels,
-  posUser,
-  access,
-  recordId,
-  functionId,
-  lockRecord,
-  getGLResource,
-  window
-}) {
+export default function RetailTransactionsForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, systemChecks } = useContext(DefaultsContext)
   const [address, setAddress] = useState({})
   const [reCal, setReCal] = useState(false)
   const [addressModified, setAddressModified] = useState(false)
+  const [posUser, setPosUser] = useState(null)
   const filteredCreditCard = useRef([])
   const level2CacheRef = useRef(null)
 
@@ -93,6 +88,27 @@ export default function RetailTransactionsForm({
     [SystemFunction.RetailPurchaseReturn]: ResourceIds.RetailPurchaseReturn
   }
 
+  const getGLResource = {
+    [SystemFunction.RetailInvoice]: ResourceIds.GLRetailInvoice,
+    [SystemFunction.RetailReturn]: ResourceIds.GLRetailInvoiceReturn,
+    [SystemFunction.RetailPurchase]: ResourceIds.GLRetailPurchase,
+    [SystemFunction.RetailPurchaseReturn]: ResourceIds.GLRetailPurchaseReturn
+  }
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.RetailInvoice,
+    editMode: !!recordId
+  })
+
+  const getTitle = {
+    [SystemFunction.RetailInvoice]: labels.RetailInvoice,
+    [SystemFunction.RetailReturn]: labels.RetailReturn,
+    [SystemFunction.RetailPurchase]: labels.RetailPurchase,
+    [SystemFunction.RetailPurchaseReturn]: labels.RetailPurchaseReturn
+  }
+
+  useSetWindow({ title: getTitle[parseInt(functionId)], window })
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
@@ -111,11 +127,11 @@ export default function RetailTransactionsForm({
       reference: null,
       dtId: null,
       functionId: functionId,
-      posId: parseInt(posUser?.posId),
+      posId: null,
       currencyId: null,
       plantId: null,
       siteId: null,
-      spId: parseInt(posUser?.spId),
+      spId: null,
       addressId: null,
       oDocId: null,
       oDocRef: '',
@@ -135,7 +151,7 @@ export default function RetailTransactionsForm({
       street2: null,
       countryId: null,
       cityId: null,
-      phone: null,
+      phoneNo: null,
       city: null,
       defPriceType: null,
       posFlags: false,
@@ -205,28 +221,33 @@ export default function RetailTransactionsForm({
     maxAccess,
     behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
-    validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
         date: yup.string().required(),
         name: yup.string().test('Name-Required', 'Name is required when street1 or street2 has a value', function () {
-          const { street1, street2, name, phone, cityId } = this.parent
+          const { street1, street2, name, cityId } = this.parent
 
-          return !(street1 || street2 || cityId || phone) ? true : Boolean(name)
+          return !(street1 || street2 || cityId) ? true : Boolean(name)
         }),
         cityId: yup.string().test('City-Required', 'City is required when street1 or street2 has a value', function () {
-          const { street1, street2, phone, cityId } = this.parent
+          const { street1, street2, cityId } = this.parent
 
-          if (street1 || street2 || phone) {
+          if (street1 || street2) {
             return cityId ? true : this.createError({ message: 'City is required' })
           }
 
           return true
         }),
         street1: yup.string().test('Street1-Required', 'Street1 is required when street2 has a value', function () {
-          const { street1, street2, phone, cityId } = this.parent
+          const { street1, street2, cityId } = this.parent
 
-          return !(street2 || phone || cityId) ? true : Boolean(street1)
+          return !(street2 || cityId) ? true : Boolean(street1)
+        }),
+        phoneNo: yup.string().test(function () {
+          const { street1, cityId, phoneNo } = this.parent
+          const hasAddress = Boolean(street1 || cityId)
+
+          return !hasAddress ? true : Boolean(phoneNo)
         })
       }),
       items: yup.array().of(
@@ -271,7 +292,8 @@ export default function RetailTransactionsForm({
       const payload = {
         header: {
           ...obj.header,
-          date: formatDateToApi(obj.header?.date)
+          date: formatDateToApi(obj.header?.date),
+          addressId: (modifiedAddress.street1 && modifiedAddress.cityId) ? obj?.header?.addressId : null,
         },
         items: mapWithSeqNo(obj.items),
         cash: mapWithSeqNo(obj.cash)
@@ -524,7 +546,7 @@ export default function RetailTransactionsForm({
       condition: true,
       onClick: 'onClickGL',
       valuesPath: { ...formik.values.header, notes: formik.values.header.deliveryNotes },
-      datasetId: getGLResource(functionId),
+      datasetId: getGLResource[parseInt(functionId)],
       disabled: !editMode
     },
     {
@@ -624,7 +646,7 @@ export default function RetailTransactionsForm({
           name: addressObj?.record?.name || retailTrxHeader?.clientName || '',
           street1: addressObj?.record?.street1 || '',
           street2: addressObj?.record?.street2 || '',
-          phone: addressObj?.record?.phone || '',
+          phoneNo: addressObj?.record?.phone || retailTrxHeader?.phoneNo || '',
           cityId: addressObj?.record?.cityId || '',
           city: addressObj?.record?.city || '',
           KGmetalPrice: retailTrxHeader?.metalPrice ? retailTrxHeader?.metalPrice * 1000 : 0,
@@ -639,6 +661,7 @@ export default function RetailTransactionsForm({
     setAddress({
       ...(addressObj?.record || {}),
       name: addressObj?.record?.name || retailTrxHeader?.clientName || '',
+      phone: addressObj?.record?.phone || retailTrxHeader?.phoneNo || '',
       countryId: addressObj?.countryId || countryId?.value
     })
 
@@ -1170,7 +1193,8 @@ export default function RetailTransactionsForm({
         address: address,
         setAddress: setAddress,
         isCleared: false,
-        datasetId: ResourceIds.ADDRetailInvoice
+        datasetId: ResourceIds.ADDRetailInvoice,
+        required: false
       }
     })
   }
@@ -1207,12 +1231,24 @@ export default function RetailTransactionsForm({
     })
   }
 
-  async function getPosInfo() {
-    if (!posUser?.posId) return
+  async function getPOSUser() {
+    const userId = getStorageData('userData')?.userId
+
+    const res = await getRequest({
+      extension: PointofSaleRepository.PosUsers.get,
+      parameters: `_userId=${userId}`
+    })
+
+    return res?.record
+  }
+
+  async function getPosInfo(pu) {
+    const currentPosUser = pu || posUser
+    if (!currentPosUser?.posId) return
 
     return await getRequest({
       extension: PointofSaleRepository.PointOfSales.get,
-      parameters: `_recordId=${parseInt(posUser?.posId)}`
+      parameters: `_recordId=${parseInt(currentPosUser?.posId)}`
     })
   }
 
@@ -1260,6 +1296,7 @@ export default function RetailTransactionsForm({
     formik.setFieldValue('header.plantName', posInfo?.plantName)
     formik.setFieldValue('header.siteId', posInfo?.siteId)
     formik.setFieldValue('header.siteName', posInfo?.siteName)
+    formik.setFieldValue('header.posId', posInfo?.recordId)
     formik.setFieldValue('header.posRef', posInfo?.reference)
     formik.setFieldValue('header.plId', posInfo?.plId)
     formik.setFieldValue('header.dtId', formik.values.header.dtId || posDtId ? posInfo?.dtId : null)
@@ -1271,10 +1308,13 @@ export default function RetailTransactionsForm({
   }
 
 
-  async function loadLevel2() {
+  async function loadLevel2(pu) {
+    const currentPosUser = pu || posUser
+    if (!currentPosUser?.posId) return
+
     const res = await getRequest({
       extension: PointofSaleRepository.RetailInvoice.level,
-      parameters: `_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`
+      parameters: `_posId=${parseInt(currentPosUser?.posId)}&_functionId=${functionId}`
     })
 
     level2CacheRef.current = res?.record || null
@@ -1372,7 +1412,7 @@ export default function RetailTransactionsForm({
     formik.setFieldValue('header.street2', address?.street2 || '')
     formik.setFieldValue('header.cityId', address?.cityId || '')
     formik.setFieldValue('header.city', address?.city || '')
-    formik.setFieldValue('header.phone', address?.phone || '')
+    formik.setFieldValue('header.phoneNo', address?.phone || '')
   }, [address])
 
   useEffect(() => {
@@ -1390,12 +1430,15 @@ export default function RetailTransactionsForm({
 
   useEffect(() => {
     ;(async function () {
-      await loadLevel2()
+      const posInfo = await getPOSUser()
+      setPosUser(posInfo)
+
+      await loadLevel2(posInfo)
       if (recordId) {
         await refetchForm(recordId)
       } else {
         await setMetalPriceOperations()
-        const res = await getPosInfo()
+        const res = await getPosInfo(posInfo)
         await setDefaults(res?.record)
       }
     })()
@@ -1419,7 +1462,7 @@ export default function RetailTransactionsForm({
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={PointofSaleRepository.RetailInvoice.level}
+                    endpointId={posUser?.posId && PointofSaleRepository.RetailInvoice.level}
                     reducer={response => {
                       return editMode
                         ? response?.record?.documentTypes
@@ -1473,7 +1516,7 @@ export default function RetailTransactionsForm({
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={PointofSaleRepository.RetailInvoice.level}
+                    endpointId={posUser?.posId && PointofSaleRepository.RetailInvoice.level}
                     reducer={response => {
                       return editMode
                         ? response?.record?.salesPeople
@@ -1667,9 +1710,9 @@ export default function RetailTransactionsForm({
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='header.phone'
+                    name='header.phoneNo'
                     label={labels.phone}
-                    value={formik.values.header.phone}
+                    value={formik.values.header.phoneNo}
                     readOnly={isPosted}
                     maxLength='15'
                     phone={true}
@@ -1683,14 +1726,14 @@ export default function RetailTransactionsForm({
                       setAddressModified(true)
                     }}
                     onClear={() => {
-                      formik.setFieldValue('header.phone', '')
+                      formik.setFieldValue('header.phoneNo', '')
                       setAddress(prevAddress => ({
                         ...prevAddress,
                         phone: ''
                       }))
                       setAddressModified(true)
                     }}
-                    error={formik.touched.header?.phone && Boolean(formik.errors.header?.phone)}
+                    error={formik.touched.header?.phoneNo && Boolean(formik.errors.header?.phoneNo)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -1915,3 +1958,6 @@ export default function RetailTransactionsForm({
     </FormShell>
   )
 }
+
+RetailTransactionsForm.width = 1200
+RetailTransactionsForm.height = 725

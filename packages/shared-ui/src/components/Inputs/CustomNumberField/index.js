@@ -258,4 +258,3 @@ const CustomNumberField = ({
 }
 
 export default CustomNumberField
-

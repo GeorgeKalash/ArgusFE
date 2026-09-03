@@ -108,6 +108,12 @@ export default function TimeVariatrionForm({ recordId, window }) {
       condition: true,
       onClick: onCancel,
       disabled: !editMode || isClosed || isCancelled
+    },
+    {
+      key: 'Attachment',
+      condition: true,
+      onClick: 'onClickAttachment',
+      disabled: !editMode
     }
   ]
 

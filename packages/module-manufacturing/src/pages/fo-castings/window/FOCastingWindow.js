@@ -2,8 +2,8 @@ import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPane
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import CastingForm from '../form/CastingForm'
-import DisassemblyForm from '../form/DisassemblyForm'
-import JobsForm from '../form/JobsForm'
+import DisassemblyForm from '@argus/shared-ui/src/components/Shared/Forms/DisassemblyForm'
+import JobsForm from '@argus/shared-ui/src/components/Shared/Forms/JobsForm'
 
 const FOCastingWindow = ({ recordId, access, labels }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -29,10 +29,10 @@ const FOCastingWindow = ({ recordId, access, labels }) => {
         <CastingForm store={store} setStore={setStore} labels={labels} access={access} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
-        <DisassemblyForm store={store} setStore={setStore} labels={labels} maxAccess={access} />
+        <DisassemblyForm store={store} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab} maxAccess={access}>
-        <JobsForm store={store} labels={labels} maxAccess={access} />
+        <JobsForm store={store} />
       </CustomTabPanel>
     </>
   )

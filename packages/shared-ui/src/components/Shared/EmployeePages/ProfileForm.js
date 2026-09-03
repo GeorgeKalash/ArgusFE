@@ -62,7 +62,6 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
     validationSchema: yup.object({
       reference: yup.string().required(),
       firstName: yup.string().required(),
-      middleName: yup.string().required(),
       lastName: yup.string().required(),
       birthDate: yup.date().required(),
       scType: yup.number().required(),
@@ -221,7 +220,6 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     label={labels.middleName}
                     value={formik.values.middleName}
                     maxAccess={maxAccess}
-                    required
                     maxLength='20'
                     readOnly={!formik.values.isActive}
                     onChange={formik.handleChange}

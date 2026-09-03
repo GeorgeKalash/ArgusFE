@@ -642,6 +642,7 @@ export const ResourceIds = {
   EmployeeMissingDetails: 71407,
   ChangeVendor: 50615,
   EventOrder: 38304,
+  EventOrderInquiry: 38305,
   CompanyPositions: 70103,
   Divisions: 70101,
   Branches: 70102,
@@ -659,6 +660,15 @@ export const ResourceIds = {
   Developer: 48104,
   ItemWeight: 41124,
   OpeningWeight: 41313,
+  Disassembly: 47310,
+  Jobs: 47311,
+  FoCuttings: 47318,
+  PreviewPR: 42353,
+  PPDefaults: 42611,
+  BatchWaxTransfer: 42354,
+  FixingSalesDTD: 38602,
+  FixingPurchaseDTD: 38603,
+  BTDocumentTypeDefault: 38102,
 
   // GL
   GLSalesInvoice: 51604,

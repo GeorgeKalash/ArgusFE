@@ -372,6 +372,12 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
         condition: !isPosted,
         onClick: onPost,
         disabled: !editMode || !isReleased
+      },
+      {
+        key: 'Attachment',
+        condition: true,
+        onClick: 'onClickAttachment',
+        disabled: !editMode
       }
     ]
   } 

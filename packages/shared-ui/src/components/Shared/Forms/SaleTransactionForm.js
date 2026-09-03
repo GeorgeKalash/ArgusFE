@@ -507,7 +507,7 @@ export default function SaleTransactionForm({
       metalId,
       metalPurity,
       metalRef: itemPhysProp?.metalRef || '',
-      volume: itemPhysProp?.volume || 0,
+      volume: roundTo(itemPhysProp?.volume, 3) || 0,
       weight,
       basePrice: isMetal === false ? ItemConvertPrice?.basePrice || 0 : metalPurity > 0 ? basePriceValue : 0,
       baseLaborPrice,
@@ -798,7 +798,7 @@ export default function SaleTransactionForm({
       label: labels.volume,
       name: 'volume',
       props: {
-        decimalScale: 2,
+        decimalScale: 3,
         readOnly: true
       }
     },
@@ -1692,7 +1692,7 @@ export default function SaleTransactionForm({
       upo: item.upo || 0,
       vatAmount: item.vatAmount || 0,
       weight: item.weight || 0,
-      volume: item.volume || 0,
+      volume: roundTo(item.volume, 3) || 0,
       extendedPrice: item.extendedPrice || 0
     }))
 

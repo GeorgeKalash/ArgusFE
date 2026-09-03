@@ -21,12 +21,16 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
+import RetailTransactionsForm from '@argus/shared-ui/src/components/Shared/Forms/RetailTransactionsForm'
 
 export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form, refetchForm, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
+  const { stack, lockRecord } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesInvoice,
@@ -58,6 +62,36 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
   useEffect(() => {
     getDataResult()
   }, [])
+
+  function openGeneratedInvoice(compositeRecordId) {
+    if (!compositeRecordId) return
+
+    const [functionIdRaw, recordIdRaw] = String(compositeRecordId).split(',')
+    const functionId = parseInt(functionIdRaw)
+    const recordId = parseInt(recordIdRaw)
+
+    if (!functionId || !recordId) return
+
+    if (functionId === SystemFunction.SalesInvoice) {
+      stack({
+        Component: SaleTransactionForm,
+        props: {
+          recordId,
+          functionId,
+          getResourceId: () => ResourceIds.SalesInvoice,
+          lockRecord
+        }
+      })
+    } else if (functionId === SystemFunction.RetailInvoice) {
+      stack({
+        Component: RetailTransactionsForm,
+        props: {
+          recordId,
+          functionId
+        }
+      })
+    }
+  }
 
   const { formik } = useForm({
     behavior: { key: 'dtId', value: documentType?.dtId },
@@ -92,6 +126,8 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
       await refetchForm(recordId)
       invalidate()
       window.close()
+
+      openGeneratedInvoice(res?.recordId)
 
       !res.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
     }

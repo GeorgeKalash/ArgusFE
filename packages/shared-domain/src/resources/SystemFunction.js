@@ -140,6 +140,7 @@ export const SystemFunction = {
   ProductionSummary: Module.Manufacturing * 100 + 20,
   ProductionRequest: Module.Manufacturing * 100 + 19,
   CreditLimitHold: Module.Financials * 100 + 14,
+  Cutting: Module.Foundry * 100 + 8,
 }
 
 export const getSystemFunctionModule = functionId => {
