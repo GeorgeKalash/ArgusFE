@@ -441,6 +441,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                     }}
                     onChange={onChangeType}
                     error={formik.touched?.header?.type && Boolean(formik.errors?.header?.type)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={3}>

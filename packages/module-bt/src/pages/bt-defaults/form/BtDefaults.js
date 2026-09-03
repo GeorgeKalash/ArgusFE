@@ -92,6 +92,7 @@ const BtDefaults = ({ _labels, access }) => {
                   formik.setFieldValue('bt_reporting_currencyId', newValue?.recordId || '')
                 }}
                 error={formik.touched.bt_reporting_currencyId && Boolean(formik.errors.bt_reporting_currencyId)}
+                maxAccess={access}
               />
             </Grid>
           </Grid>
