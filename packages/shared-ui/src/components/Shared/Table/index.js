@@ -978,9 +978,9 @@ const Table = ({
     if (!button) return
 
     button.style.left = 'auto'
-    button.style.right = '6px'
-    button.style.top = '6px'
-  }, [width])
+    button.style.right = !pagination ? '40px' : '6px'
+    button.style.top = !pagination ? '0px' : '6px'
+  }, [width, pagination])
 
   const columnDefs = useMemo(() => {
     return [
@@ -998,6 +998,7 @@ const Table = ({
           flex: column.flex,
           sort: column.sort ?? undefined,
           floatingFilter: enableFilters && showFilters,
+          suppressMenu: column.suppressMenu ?? !showFilters,
           cellRenderer:
             column.type === 'image'
               ? imageRenderer(column)
@@ -1160,6 +1161,14 @@ const Table = ({
   useEffect(() => {
     gridApiRef.current?.api?.redrawRows()
   }, [highlightRow])
+
+
+  useEffect(() => {
+    if (!gridApiRef.current?.api || showFilters) return
+
+    gridApiRef.current.api.hidePopupMenu?.()
+    document.activeElement?.blur?.()
+  }, [showFilters])
 
   useEffect(() => {
     if (!tableSettings || !gridApiRef.current?.columnApi) return

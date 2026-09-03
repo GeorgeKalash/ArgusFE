@@ -294,6 +294,26 @@ export const DateFloatingFilter = forwardRef((props, ref) => {
     commitDate(newDate)
   }
 
+  useEffect(() => {
+    if (nativeInputRef.current) {
+      nativeInputRef.current.value = toInputDateString(filterModel)
+    }
+  }, [filterModel])
+
+  useEffect(() => {
+    const input = nativeInputRef.current
+    if (!input) return
+
+    const handleChange = e => {
+      const raw = e.target.value
+      const newDate = raw ? new Date(`${raw}T00:00:00Z`) : null
+      commitDate(newDate)
+    }
+
+    input.addEventListener('change', handleChange)
+    return () => input.removeEventListener('change', handleChange)
+  }, [])
+
   const placeholder = format(new Date(2016, 0, 31), getDateFormat())
 
   return (
@@ -322,10 +342,9 @@ export const DateFloatingFilter = forwardRef((props, ref) => {
       <input
         ref={nativeInputRef}
         type='date'
-        value={toInputDateString(filterModel)}
+        defaultValue={toInputDateString(filterModel)}
         className='hiddenDateInput'
         autoComplete='off'
-        onChange={handleNativeChange}
         onClick={e => e.stopPropagation()}
       />
     </div>

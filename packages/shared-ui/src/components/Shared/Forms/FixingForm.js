@@ -107,8 +107,6 @@ export default function FixingForm({ recordId, functionId, window }) {
       spId: null,
       wip: 1,
       sourceId: null,
-      dueDays: null,
-      dueDate: new Date(),
       sourceNo: '',
       date: new Date(),
       dtId: null,
@@ -129,8 +127,6 @@ export default function FixingForm({ recordId, functionId, window }) {
       qty: yup.number().required(),
       purity: yup.number().required(),
       spId: yup.number().required(),
-      dueDate: yup.date().required(),
-      dueDays: yup.number().required(),
       sourceNo: yup.string().nullable().test( function (value) {
         const { sourceId } = this.parent
         return !(sourceId && !value)
@@ -148,8 +144,6 @@ export default function FixingForm({ recordId, functionId, window }) {
       const values = {
         ...obj,
         date: formatDateToApi(obj?.date),
-        dueDate: formatDateToApi(obj?.dueDate),
-        dueDays: Number(obj?.dueDays),
       }
       const response = await postRequest({
         extension: getEndpoint(functionId).set,
@@ -178,7 +172,6 @@ export default function FixingForm({ recordId, functionId, window }) {
       values: {
         ...res?.record,
         date: formatDateFromApi(res?.record?.date),
-        dueDate: formatDateFromApi(res?.record?.dueDate),
         currencyId_metalId:
           res?.record?.currencyId && res?.record?.metalId
             ? `${res.record.currencyId}${res.record.metalId}`
@@ -322,19 +315,6 @@ export default function FixingForm({ recordId, functionId, window }) {
     vatPct
   ])
 
-  const calculateDueDate = (date, dueDays) => {
-    if (!date) return null
-
-    const days = !dueDays ? 0 : Number(dueDays)
-
-    if (Number.isNaN(days)) return null
-
-    const dueDate = new Date(date)
-    dueDate.setDate(dueDate.getDate() + days)
-
-    return dueDate
-  }
-
 useEffect(() => {
   if (!msId && labels?.msIdError) {
     
@@ -347,6 +327,22 @@ useEffect(() => {
     return
   }
 }, [msId, labels?.msIdError])
+
+  const onChangeDT = async dtId => {
+    if (dtId) {
+      const res = await getRequest({
+        extension: BrokerageTradingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      formik.setFieldValue('plantId', res?.record?.plantId || null)
+      formik.setFieldValue('spId', res?.record?.spId || null)
+    }
+  }
+
+  useEffect(() => {
+    if (!recordId && formik.values?.dtId) onChangeDT(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   return (
     <FormShell
@@ -475,7 +471,6 @@ useEffect(() => {
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
-                  formik.setFieldValue('dueDate', calculateDueDate(newValue, formik.values.dueDays))
 
                   await getMultiCurrencyFormData(formik.values.fi_currencyId, newValue)
                 }}
@@ -483,7 +478,6 @@ useEffect(() => {
                 maxAccess={maxAccess}
                 onClear={() => {
                   formik.setFieldValue('date', null)
-                  formik.setFieldValue('dueDate', null)
                 }}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
@@ -509,43 +503,6 @@ useEffect(() => {
                 readOnly={isClosed}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
                 maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='dueDays'
-                label={labels.dueDays}
-                value={formik?.values?.dueDays}
-                maxAccess={maxAccess}
-                allowNegative={false}
-                required
-                readOnly={isClosed}
-                decimalScale={0}
-                maxLength={3}
-                onChange={e => {
-                  const value = e.target.value
-                  const dueDays = !value ? null : Number(value)
-
-                  formik.setFieldValue('dueDate', calculateDueDate(formik.values.date, dueDays))
-                  
-                  formik.setFieldValue('dueDays', dueDays)
-                }}
-                onClear={() => {
-                  formik.setFieldValue('dueDays', null)
-                  formik.setFieldValue('dueDate', calculateDueDate(formik.values.date, 0))
-                }}
-                error={formik.touched.dueDays && Boolean(formik.errors.dueDays)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='dueDate'
-                required
-                label={labels.dueDate}
-                value={formik.values.dueDate}
-                maxAccess={maxAccess}
-                readOnly
-                error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -583,12 +540,11 @@ useEffect(() => {
                           currencyId: newValue?.currencyId || null,
                           metalId: newValue?.metalId || null,
                           qty_muId: newValue?.defQtyMUId || null,
-                          qty_muQty: newValue?.defQtyMuQty || null,
+                          qty_muQty: newValue?.defQtyMUQty || null,
                           unitPrice_muId: newValue?.defUnitPriceMUId || null,
                           unitPrice_muQty: newValue?.defUnitPriceMUQty || null,
                           currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null
                         })
-                        
                       }}
                       error={formik.touched.currencyId_metalId && Boolean(formik.errors.currencyId_metalId)}
                     />
@@ -647,6 +603,7 @@ useEffect(() => {
                         setReCalc(true)
                         formik.setFieldValue('qty_muId', newValue?.recordId || null)
                         formik.setFieldValue('qty_muQty', newValue?.qty || null)
+                        formik.setFieldValue('qty', 0)
                       }}
                       error={formik.touched.qty_muId && Boolean(formik.errors.qty_muId)}
                     />
@@ -701,6 +658,7 @@ useEffect(() => {
                         setReCalc(true)
                         formik.setFieldValue('unitPrice_muId', newValue?.recordId || null)
                         formik.setFieldValue('unitPrice_muQty', newValue?.qty || null)
+                        formik.setFieldValue('unitPrice', 0)
                       }}
                       error={formik.touched.unitPrice_muId && Boolean(formik.errors.unitPrice_muId)}
                     />

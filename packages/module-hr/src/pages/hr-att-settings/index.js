@@ -17,6 +17,8 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 
 const AttSettings = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -52,6 +54,13 @@ const AttSettings = () => {
       filteredList?.forEach(obj => {
         if (obj.key === 'disableCrossBranchTA') {
           myObject[obj.key] = obj.value || null
+        } else if (
+          obj.key === 'lastReceivedPunch' ||
+          obj.key === 'lastProcessedPunch'
+        ) {
+          myObject[obj.key] = obj.value
+            ? formatDateFromApi(obj.value)
+            : null
         } else {
           myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
         }
@@ -86,13 +95,19 @@ const AttSettings = () => {
     onSubmit: async obj => {
       const data = Object.entries(obj).map(([key, value]) => ({
         key,
-        value
+        value:
+          key === 'lastReceivedPunch' || key === 'lastProcessedPunch'
+            ? value
+              ? formatDateToApi(value)
+              : null
+            : value
       }))
 
       await postRequest({
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
+
       updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
@@ -142,7 +157,7 @@ const AttSettings = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField
+            <CustomDateTimePicker
               name='lastReceivedPunch'
               readOnly
               label={labels.lastReceivedPunch}
@@ -151,7 +166,7 @@ const AttSettings = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField
+            <CustomDateTimePicker
               name='lastProcessedPunch'
               readOnly
               label={labels.lastProcessedPunch}

@@ -16,6 +16,7 @@ export const RepairAndServiceRepository = {
     del: service + 'delWOT'
   },
   RepairType: {
+    qry: service + 'qryRT',
     page: service + 'pageRT',
     get: service + 'getRT',
     set: service + 'setRT',
@@ -141,8 +142,5 @@ export const RepairAndServiceRepository = {
   },
   Employee: {
     snapshot: service + 'snapshotEMP'
-  },
-  RepairType: {
-    qry: service + 'qryRT'
   }
 }

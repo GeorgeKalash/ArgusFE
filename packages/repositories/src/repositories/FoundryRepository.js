@@ -23,7 +23,8 @@ export const FoundryRepository = {
     get2: service + 'get2WAX',
   },
   WaxJob: {
-    qry2: service + 'qry2WAJ'
+    qry2: service + 'qry2WAJ',
+    qry3: service + 'qryWAJ3'
   },
   Mould: {
     qry: service + 'qryMOU',

@@ -138,6 +138,7 @@ export const ManufacturingRepository = {
     pack: service + 'packJOB',
     qry: service + 'qryJOB',
     qry2: service + 'qryJOB2',
+    qry4: service + 'qryJOB4',
     set: service + 'setJOB',
     get: service + 'getJOB',
     get2: service + 'get2JOB',
@@ -154,6 +155,7 @@ export const ManufacturingRepository = {
     wip: service + 'wipJOB',
     sync: service + 'syncJOB',
     qry3: service + 'qryJOB3',
+    qryUnmarked: service + 'qryUnmarkedJOB',
   },
   GenerateAMC:{
     generate: service + 'generateAMC'

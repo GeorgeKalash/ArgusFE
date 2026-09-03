@@ -59,9 +59,9 @@ export default function SalaryTab({
       accountNumber: null,
       comments: '',
       basicAmount: 0,
-      finalAmount: null,
-      eAmount: null,
-      dAmount: null
+      finalAmount: 0,
+      eAmount: 0,
+      dAmount: 0
     },
     validationSchema: yup.object({
       currencyId: yup.number().required(),
