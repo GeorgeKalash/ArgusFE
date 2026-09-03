@@ -31,7 +31,8 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
-import CustomDateTimePicker from '../../Inputs/CustomDateTimePicker'
+import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
+import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 
 export default function EventOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -95,7 +96,10 @@ export default function EventOrderForm({ recordId, window }) {
       currencyId_metalId: '',
       sourceId: null,
       sourceNo: '',
-      time: null
+      time: null,
+      isTriggered: false,
+      triggeredAt: null,
+      triggeredAtPrice: null
     },
     maxAccess,
     validationSchema: yup.object({
@@ -131,7 +135,8 @@ export default function EventOrderForm({ recordId, window }) {
         ...obj,
         date: formatDateToApi(obj?.date),
         expiryDate: obj?.expiryDate ? formatDateToApi(obj?.expiryDate) : null,
-        time: formatDateToApi(obj.time)
+        time: formatDateToApi(obj.time),
+        triggeredAt: obj?.triggeredAt ? formatDateToApi(obj.triggeredAt) : null
       }
       const response = await postRequest({
         extension: BrokerageTradingRepository.EventOrder.set,
@@ -165,7 +170,8 @@ export default function EventOrderForm({ recordId, window }) {
           res?.record?.currencyId && res?.record?.metalId
             ? `${res.record.currencyId}${res.record.metalId}`
             : null,
-        time: formatDateFromApi(res?.record?.time)
+        time: formatDateFromApi(res?.record?.time),
+        triggeredAt: res?.record?.triggeredAt ? formatDateFromApi(res?.record?.triggeredAt) : null
       }
     })
   }
@@ -505,6 +511,34 @@ useEffect(() => {
                 readOnly={isClosed}
                 onClear={() => formik.setFieldValue('time', null)}
                 error={formik.touched.time && Boolean(formik.errors.time)}
+              />
+            </Grid>
+            
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='isTriggered'
+                value={formik.values.isTriggered}
+                label={labels.isTriggered}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomDateTimePicker
+                name='triggeredAt'
+                label={labels.triggeredAt}
+                value={formik.values.triggeredAt}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='triggeredAtPrice'
+                label={labels.triggeredAtPrice}
+                value={formik.values.triggeredAtPrice}
+                maxAccess={maxAccess}
+                readOnly
               />
             </Grid>
             <Grid item xs={12}>
