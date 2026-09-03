@@ -52,7 +52,7 @@ const CustomNumberField = ({
       e.preventDefault()
     }
   }
-  
+
   const handleInputMouseDown = e => {
     if (autoSelect) return
 
@@ -258,4 +258,3 @@ const CustomNumberField = ({
 }
 
 export default CustomNumberField
-

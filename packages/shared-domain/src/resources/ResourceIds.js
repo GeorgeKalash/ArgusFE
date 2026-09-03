@@ -665,7 +665,11 @@ export const ResourceIds = {
   FoCuttings: 47318,
   PreviewPR: 42353,
   PPDefaults: 42611,
-  
+  BatchWaxTransfer: 42354,
+  FixingSalesDTD: 38602,
+  FixingPurchaseDTD: 38603,
+  BTDocumentTypeDefault: 38102,
+
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,
