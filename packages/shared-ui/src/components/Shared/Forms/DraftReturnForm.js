@@ -1205,6 +1205,7 @@ export default function DraftReturnForm({ labels, access, recordId, lockRecord, 
                       formik.setFieldValue('header.spId', newValue?.recordId || null)
                     }}
                     error={formik?.touched?.header?.spId && Boolean(formik?.errors?.header?.spId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={4}>

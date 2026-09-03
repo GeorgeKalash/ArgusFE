@@ -166,6 +166,7 @@ const FSAccountDetails = ({ labels, columnVisibility, columnLabels, breakDowns, 
                         label={item.label}
                         value={item.value}
                         readOnly
+                        maxAccess={access}
                         />
                     </Grid>
                     ))}

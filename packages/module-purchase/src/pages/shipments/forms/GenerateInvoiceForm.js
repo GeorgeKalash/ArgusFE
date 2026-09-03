@@ -133,6 +133,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 displayField={['reference', 'name']}
                 values={formik.values}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -150,6 +151,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 valueShow='vendorRef'
                 secondValueShow='vendorName'
                 errorCheck={'vendorId'}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -160,10 +162,11 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 value={formik.values.currencyName}
                 readOnly
                 error={formik.touched.currencyName && Boolean(formik.errors.currencyName)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='reference' label={labels.shipmentRef} value={formik.values.reference} readOnly />
+              <CustomTextField name='reference' label={labels.shipmentRef} value={formik.values.reference} readOnly maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={12}>
               <CustomTextArea

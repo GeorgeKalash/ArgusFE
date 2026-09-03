@@ -167,7 +167,7 @@ const Controller = ({ store, maxAccess, labels }) => {
             columns={columns}
             allowAddNewLine={false}
             allowDelete={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

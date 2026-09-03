@@ -136,6 +136,7 @@ export const ManufacturingRepository = {
   },
   MFJobOrder: {
     pack: service + 'packJOB',
+    page: service + 'pageJOB',
     qry: service + 'qryJOB',
     qry2: service + 'qryJOB2',
     qry4: service + 'qryJOB4',

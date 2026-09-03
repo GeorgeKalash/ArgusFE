@@ -25,7 +25,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.InventoryOpeningQtys.qry
+    endpointId: InventoryRepository.InventoryOpeningQtys.page
   })
 
   const { formik } = useForm({

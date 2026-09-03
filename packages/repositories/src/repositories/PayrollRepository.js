@@ -21,6 +21,7 @@ export const PayrollRepository = {
     del: service + 'delSB'
   },
   Paycode: {
+    page: service + 'pagePC',
     qry: service + 'qryPC',
     set: service + 'setPC',
     del: service + 'delPC',
@@ -37,6 +38,7 @@ export const PayrollRepository = {
     del: service + 'delIS'
   },
   LedgerGroup: {
+    page: service + 'pageGLG',
     qry: service + 'qryGLG',
     get: service + 'getGLG',
     set: service + 'setGLG',

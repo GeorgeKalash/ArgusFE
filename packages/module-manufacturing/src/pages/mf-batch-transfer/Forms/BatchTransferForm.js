@@ -532,10 +532,10 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
         <Fixed>
           <Grid container spacing={2} direction='row' wrap='nowrap' sx={{ justifyContent: 'flex-end' }}>
             <Grid item xs={3}>
-              <CustomNumberField name='totalQty' label={labels.totalQty} value={totalQty} readOnly />
+              <CustomNumberField name='totalQty' label={labels.totalQty} value={totalQty} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='totalPcs' label={labels.totalPcs} value={totalPcs} readOnly />
+              <CustomNumberField name='totalPcs' label={labels.totalPcs} value={totalPcs} readOnly maxAccess={maxAccess} />
             </Grid>
           </Grid>
         </Fixed>

@@ -269,7 +269,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
                 datasetId={DataSets.ROW_ACCESS}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('classId', newValue ? newValue.key : ResourceIds.Plants)
                   fetchGridData(newValue ? newValue.key : ResourceIds.Plants)
                 }}
@@ -280,6 +280,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
               <CustomTextField
                 name='search'
                 value={search}
+                maxAccess={maxAccess}
                 label={platformLabels.Search}
                 onClear={() => {
                   setSearch('')

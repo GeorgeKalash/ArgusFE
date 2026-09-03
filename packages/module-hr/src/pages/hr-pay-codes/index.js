@@ -22,7 +22,7 @@ const PayCodes = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: PayrollRepository.Paycode.qry,
+      extension: PayrollRepository.Paycode.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
   }
@@ -36,7 +36,7 @@ const PayCodes = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PayrollRepository.Paycode.qry,
+    endpointId: PayrollRepository.Paycode.page,
     datasetId: ResourceIds.PayCode
   })
 

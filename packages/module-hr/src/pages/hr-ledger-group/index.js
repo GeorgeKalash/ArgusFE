@@ -22,7 +22,7 @@ const LedgerGroup = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: PayrollRepository.LedgerGroup.qry,
+      extension: PayrollRepository.LedgerGroup.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
   }
@@ -36,7 +36,7 @@ const LedgerGroup = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PayrollRepository.LedgerGroup.qry,
+    endpointId: PayrollRepository.LedgerGroup.page,
     datasetId: ResourceIds.LedgerGroup
   })
 

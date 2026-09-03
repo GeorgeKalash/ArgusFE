@@ -264,6 +264,7 @@ export default function CuttingForm({ labels, access, setStore, store }) {
                   formik.setFieldValue('laborId', newValue?.recordId || null)
                 }}
                 error={formik.touched.laborId && Boolean(formik.errors.laborId)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

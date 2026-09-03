@@ -181,12 +181,13 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
             label={labels.plant}
             valueField='recordId'
             displayField={['reference', 'name']}
+            maxAccess={maxAccess}
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' }
             ]}
             values={formik.values}
-            onChange={(event, newValue) => {
+            onChange={(_, newValue) => {
               formik.setFieldValue('plantId', newValue?.recordId || null)
             }}
             error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -212,7 +213,8 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
             valueField='recordId'
             displayField='name'
             values={formik.values}
-            onChange={(event, newValue) => {
+            maxAccess={maxAccess}
+            onChange={(_, newValue) => {
               formik.setFieldValue('maintTplId', newValue?.recordId || null)
             }}
             error={formik.touched.maintTplId && Boolean(formik.errors.maintTplId)}
@@ -225,6 +227,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
             value={formik.values.year}
             onChange={formik.handleChange}
             maxLength='4'
+            maxAccess={maxAccess}
             decimalScale={0}
             onClear={() => formik.setFieldValue('year', null)}
             error={formik.touched.year && Boolean(formik.errors.year)}
@@ -278,6 +281,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
                   value={formik.values.currentPM}
                   onChange={formik.handleChange}
                   maxLength='18'
+                  maxAccess={maxAccess}
                   decimalScale={3}
                   readOnly={!formik.values.hasMeter}
                   onClear={() => formik.setFieldValue('currentPM', null)}
@@ -292,6 +296,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
                   onChange={formik.handleChange}
                   maxLength='18'
                   decimalScale={3}
+                  maxAccess={maxAccess}
                   readOnly={!formik.values.hasMeter}
                   onClear={() => formik.setFieldValue('purc_primMeter', null)}
                   error={formik.touched.purc_primMeter && Boolean(formik.errors.purc_primMeter)}
@@ -307,7 +312,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
                   displayField='value'
                   readOnly={!formik.values.primaryMeter}
                   maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik.setFieldValue('secondaryMeter', newValue?.key || null)
                   }}
                   error={formik.touched.secondaryMeter && Boolean(formik.errors.secondaryMeter)}
@@ -319,6 +324,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
                   label={labels.current}
                   value={formik.values.currentSM}
                   onChange={formik.handleChange}
+                  maxAccess={maxAccess}
                   readOnly={!formik.values.primaryMeter}
                   maxLength='18'
                   decimalScale={3}
@@ -333,6 +339,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
                   value={formik.values.purc_secMeter}
                   onChange={formik.handleChange}
                   readOnly={!formik.values.primaryMeter}
+                  maxAccess={maxAccess}
                   maxLength='18'
                   decimalScale={3}
                   onClear={() => formik.setFieldValue('purc_secMeter', null)}
@@ -365,8 +372,9 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
               { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' }
             ]}
+            maxAccess={maxAccess}
             values={formik.values}
-            onChange={(event, newValue) => {
+            onChange={(_, newValue) => {
               formik.setFieldValue('purc_vendorId', newValue?.recordId || null)
             }}
             error={formik.touched.purc_vendorId && Boolean(formik.errors.purc_vendorId)}
@@ -384,7 +392,8 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
               { key: 'firstName', value: 'Name' }
             ]}
             values={formik.values}
-            onChange={(event, newValue) => {
+            maxAccess={maxAccess}
+            onChange={(_, newValue) => {
               formik.setFieldValue('operatorId', newValue?.recordId || null)
             }}
             error={formik.touched.operatorId && Boolean(formik.errors.operatorId)}
@@ -397,6 +406,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
             value={formik.values.purc_price}
             onChange={formik.handleChange}
             maxLength='16'
+            maxAccess={maxAccess}
             decimalScale={2}
             onClear={() => formik.setFieldValue('purc_price', null)}
             error={formik.touched.purc_price && Boolean(formik.errors.purc_price)}
@@ -411,7 +421,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
             valueField='key'
             displayField='value'
             maxAccess={maxAccess}
-            onChange={(event, newValue) => {
+            onChange={(_, newValue) => {
               formik.setFieldValue('activeStatus', newValue?.key || null)
             }}
             error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}

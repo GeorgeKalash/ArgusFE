@@ -28,7 +28,7 @@ const RetailDtd = () => {
     } = options
 
     const response = await getRequest({
-      extension: PointofSaleRepository.DocumentTypeDefault.qry,
+      extension: PointofSaleRepository.DocumentTypeDefault.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
@@ -43,7 +43,7 @@ const RetailDtd = () => {
     invalidate,
     refetch
   } = useResourceQuery({
-    endpointId: PointofSaleRepository.DocumentTypeDefault.qry,
+    endpointId: PointofSaleRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.POSDocTypeDefault,
 
     filter: {

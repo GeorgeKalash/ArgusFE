@@ -247,6 +247,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
                   }
                 }}
                 onChange={e => setSearchText(e.target.value)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

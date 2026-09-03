@@ -139,7 +139,7 @@ export default function SaleTransactionForm({
   })
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.SalesTransaction.qry
+    endpointId: SaleRepository.SalesTransaction.page
   })
 
   const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'

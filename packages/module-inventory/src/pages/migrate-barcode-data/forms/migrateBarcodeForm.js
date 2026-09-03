@@ -116,6 +116,7 @@ const MigrateBarcodeForm = () => {
                       label={labels?.BarcodeSku}
                       value={formik?.values?.fromBarcodeSku}
                       readOnly
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={5}></Grid>
@@ -125,6 +126,7 @@ const MigrateBarcodeForm = () => {
                       label={labels?.BarcodeItemName}
                       value={formik?.values?.fromBarcodeItemName}
                       readOnly
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={7}>
@@ -133,6 +135,7 @@ const MigrateBarcodeForm = () => {
                       label={labels?.BarcodeMeasUnit}
                       value={formik?.values?.fromBarcodeMeasUnit}
                       readOnly
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={5}></Grid>
@@ -142,6 +145,7 @@ const MigrateBarcodeForm = () => {
                       label={labels?.BarcodePosDescr}
                       value={formik?.values?.fromBarcodePosDescr}
                       readOnly
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -150,6 +154,7 @@ const MigrateBarcodeForm = () => {
                       label={labels?.BarcodeScaleDescr}
                       value={formik?.values?.fromBarcodeScaleDescr}
                       readOnly
+                      maxAccess={access}
                     />
                   </Grid>
                 </Grid>
@@ -196,6 +201,7 @@ const MigrateBarcodeForm = () => {
                       label={labels?.BarcodeSku}
                       value={formik?.values?.toBarcodeSku}
                       readOnly
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={5}></Grid>
@@ -205,6 +211,7 @@ const MigrateBarcodeForm = () => {
                       label={labels?.BarcodeItemName}
                       value={formik?.values?.toBarcodeItemName}
                       readOnly
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={7}>
@@ -213,6 +220,7 @@ const MigrateBarcodeForm = () => {
                       label={labels?.BarcodeMeasUnit}
                       value={formik?.values?.toBarcodeMeasUnit}
                       readOnly
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={5}></Grid>
@@ -222,6 +230,7 @@ const MigrateBarcodeForm = () => {
                       label={labels?.BarcodePosDescr}
                       value={formik?.values?.toBarcodePosDescr}
                       readOnly
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -230,6 +239,7 @@ const MigrateBarcodeForm = () => {
                       label={labels?.BarcodeScaleDescr}
                       value={formik?.values?.toBarcodeScaleDescr}
                       readOnly
+                      maxAccess={access}
                     />
                   </Grid>
                 </Grid>

@@ -5,7 +5,7 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import SiteGroupsForm from './forms/SiteGroupsForm'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -32,7 +32,7 @@ const SiteGroups = () => {
     query: { data },
     labels: _labels,
     access,
-
+    invalidate,
     search,
     clear,
     refetch
@@ -60,10 +60,6 @@ const SiteGroups = () => {
 
     return { ...response, list: filteredData }
   }
-
-  const invalidate = useInvalidate({
-    endpointId: InventoryRepository.SiteGroups.qry
-  })
 
   const columns = [
     {

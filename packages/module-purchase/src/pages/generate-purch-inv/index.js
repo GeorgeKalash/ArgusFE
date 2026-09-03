@@ -377,7 +377,7 @@ const GeneratePurchaseInvoice = () => {
               />
             </Grid>
             <Grid item xs={3} p={2}>
-              <CustomNumberField name='amount' label='' value={formik?.values?.amount} readOnly />
+              <CustomNumberField name='amount' label='' value={formik?.values?.amount} readOnly maxAccess={access}/>
             </Grid>
           </Grid>
         </Fixed>

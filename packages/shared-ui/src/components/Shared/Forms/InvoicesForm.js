@@ -146,7 +146,7 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
                 width: 200
               }
             ]}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

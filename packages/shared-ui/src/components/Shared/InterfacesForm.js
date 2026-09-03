@@ -151,7 +151,7 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
             error={formik.errors.rows}
             columns={columns}
             allowDelete={false}
-          />
+            maxAccess={access}/>
         </Grow>
       </VertLayout>
     </Form>

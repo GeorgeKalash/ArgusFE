@@ -191,7 +191,7 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
             columns={columns}
             allowAddNewLine={false}
             allowDelete={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

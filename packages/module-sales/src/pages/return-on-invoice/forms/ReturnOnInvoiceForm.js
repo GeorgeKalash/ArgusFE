@@ -1721,6 +1721,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       label={labels.invoice}
                       value={formik?.values?.header?.invoiceRef}
                       readOnly
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 )}
@@ -2055,7 +2056,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField name='header.totalQTY' label={labels.totalQty} value={totalQty} readOnly />
+                  <CustomNumberField name='header.totalQTY' label={labels.totalQty} value={totalQty} readOnly maxAccess={maxAccess}/>
                 </Grid>
               </Grid>
             </Grid>

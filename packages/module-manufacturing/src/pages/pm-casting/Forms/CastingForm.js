@@ -414,6 +414,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                   formik.setFieldValue('laborId', newValue?.recordId || null)
                 }}
                 error={formik.touched.laborId && Boolean(formik.errors.laborId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

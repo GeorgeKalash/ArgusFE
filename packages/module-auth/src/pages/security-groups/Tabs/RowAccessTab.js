@@ -119,7 +119,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
                 datasetId={DataSets.AU_RESOURCE_ROW_ACCESS}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('classId', newValue?.key ?? ResourceIds.DocumentTypes)
                   await fetchGridData(newValue?.key)
                 }}
@@ -135,6 +135,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
                   formik.setFieldValue('search', '')
                 }}
                 onChange={handleSearchChange}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

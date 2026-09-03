@@ -111,8 +111,9 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               valueField='recordId'
               displayField='name'
               values={formik.values}
+              maxAccess={maxAccess}
               required
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 formik.setFieldValue('pmtId', newValue?.recordId || null)
               }}
               error={formik.touched.pmtId && Boolean(formik.errors.pmtId)}
@@ -126,7 +127,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               values={formik.values}
               valueField='key'
               displayField='value'
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 formik.setFieldValue('activeStatus', newValue?.key || null)
               }}
               required
@@ -160,6 +161,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               maxLength={4}
               allowNegative={false}
               required={formik.values.tbd}
+              maxAccess={maxAccess}
               readOnly={!formik.values.tbd}
               onClear={() => formik.setFieldValue('tbdEvery', null)}
               error={formik.values.tbd && formik.touched.tbdEvery && Boolean(formik.errors.tbdEvery)}
@@ -175,7 +177,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               required={formik.values.tbd}
               readOnly={!formik.values.tbd}
               maxAccess={maxAccess}
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 formik.setFieldValue('tbdFrequency', newValue?.key || 1)
               }}
               error={formik.values.tbd && formik.touched.tbdFrequency && Boolean(formik.errors.tbdFrequency)}
@@ -189,6 +191,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               onChange={formik.handleChange}
               required={formik.values.tbd}
               readOnly={!formik.values.tbd}
+              maxAccess={maxAccess}
               decimalScale={0}
               maxLength={4}
               allowNegative={false}
@@ -222,6 +225,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               onChange={formik.handleChange}
               required={formik.values.tbh}
               decimalScale={0}
+              maxAccess={maxAccess}
               maxLength={4}
               allowNegative={false}
               readOnly={!formik.values.tbh}
@@ -241,6 +245,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               decimalScale={0}
               maxLength={4}
               allowNegative={false}
+              maxAccess={maxAccess}
               required={formik.values.tbh}
               readOnly={!formik.values.tbh}
               onClear={() => formik.setFieldValue('tbhReminder', null)}
@@ -260,6 +265,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               maxLength={4}
               allowNegative={false}
               onClear={() => formik.setFieldValue('expectedLaborHrs', null)}
+              maxAccess={maxAccess}
               error={formik.touched.expectedLaborHrs && Boolean(formik.errors.expectedLaborHrs)}
             />
           </Grid>

@@ -143,10 +143,12 @@ const DeductionTab = ({ store, labels }) => {
               label={labels.loanAmount}
               value={parseFloat(store.loanAmount).toFixed(2)}
               readOnly
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={4}>
-            <CustomNumberField name='deductedAmount' label={labels.deductedAmount} value={deductedAmount} readOnly />
+            <CustomNumberField name='deductedAmount' label={labels.deductedAmount} value={deductedAmount} readOnly             maxAccess={access}
+            />
           </Grid>
           <Grid item xs={4}>
             <CustomNumberField
@@ -154,6 +156,7 @@ const DeductionTab = ({ store, labels }) => {
               label={labels.remainingBalance}
               value={remainingBalance}
               readOnly
+              maxAccess={access}
             />
           </Grid>
         </Grid>

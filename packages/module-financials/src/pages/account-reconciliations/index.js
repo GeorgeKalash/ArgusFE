@@ -381,6 +381,7 @@ export default function AccountReconciliations(){
                     value={formik.values.debits}
                     readOnly
                     decimalScale={3}
+                    maxAccess={access}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -390,6 +391,7 @@ export default function AccountReconciliations(){
                     value={formik.values.credits}
                     readOnly
                     decimalScale={3}
+                    maxAccess={access}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -399,6 +401,7 @@ export default function AccountReconciliations(){
                     value={formik.values.balance}
                     readOnly
                     decimalScale={3}
+                    maxAccess={access}
                   />
                 </Grid>
               </Grid>
@@ -412,6 +415,7 @@ export default function AccountReconciliations(){
                     value={formik.values.tDebits}
                     readOnly
                     decimalScale={3}
+                    maxAccess={access}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -421,6 +425,7 @@ export default function AccountReconciliations(){
                     value={formik.values.tCredits}
                     readOnly
                     decimalScale={3}
+                    maxAccess={access}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -430,6 +435,7 @@ export default function AccountReconciliations(){
                     value={formik.values.tBalance}
                     readOnly
                     decimalScale={3}
+                    maxAccess={access}
                   />
                 </Grid>
               </Grid>

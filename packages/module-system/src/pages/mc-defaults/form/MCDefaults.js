@@ -90,6 +90,7 @@ const MCDefault = ({ _labels, access }) => {
                   values={formik.values}
                   onChange={(_, newValue) => formik.setFieldValue(name, newValue?.recordId || null)}
                   error={formik.touched[name] && Boolean(formik.errors[name])}
+                  maxAccess={access}
                 />
               </Grid>
             ))}
@@ -108,6 +109,7 @@ const MCDefault = ({ _labels, access }) => {
                 onChange={(_, newValue) => formik.setFieldValue('baseMetalCuId', newValue?.recordId || null)}
                 error={formik.touched.baseMetalCuId && Boolean(formik.errors.baseMetalCuId)}
                 readOnly={isReadOnly('baseMetalCuId')}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -121,6 +123,7 @@ const MCDefault = ({ _labels, access }) => {
                 onChange={(_, newValue) => formik.setFieldValue('baseSalesMetalId', newValue?.recordId || null)}
                 error={formik.touched.baseSalesMetalId && Boolean(formik.errors.baseSalesMetalId)}
                 readOnly={isReadOnly('baseSalesMetalId')}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -138,6 +141,7 @@ const MCDefault = ({ _labels, access }) => {
                 values={formik.values}
                 onChange={(_, newValue) => formik.setFieldValue('mf_damageOperationId', newValue?.recordId || null)}
                 error={formik.touched.mf_damageOperationId && Boolean(formik.errors.mf_damageOperationId)}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

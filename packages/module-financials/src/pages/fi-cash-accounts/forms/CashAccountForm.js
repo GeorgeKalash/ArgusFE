@@ -155,7 +155,7 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('currencyId', '')}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik && formik.setFieldValue('currencyId', newValue?.recordId)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
@@ -175,7 +175,7 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('plantId', '')}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik && formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -191,7 +191,8 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
                 displayField='value'
                 values={formik.values}
                 onClear={() => formik.setFieldValue('activeStatus', '')}
-                onChange={(event, newValue) => {
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('activeStatus', newValue?.key)
                 }}
                 error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
@@ -211,7 +212,7 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('groupId', '')}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik && formik.setFieldValue('groupId', newValue?.recordId)
                 }}
                 error={formik.touched.groupId && Boolean(formik.errors.groupId)}
@@ -230,7 +231,7 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
                 secondValue={formik.values.accountName}
                 errorCheck={'accountId'}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')

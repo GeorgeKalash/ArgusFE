@@ -27,8 +27,8 @@ const CycleCounts = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: SCRepository.StockCount.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
+      extension: SCRepository.StockCount.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -55,7 +55,7 @@ const CycleCounts = () => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SCRepository.StockCount.qry,
+    endpointId: SCRepository.StockCount.page,
     datasetId: ResourceIds.StockCounts,
     filter: {
       filterFn: fetchWithFilter

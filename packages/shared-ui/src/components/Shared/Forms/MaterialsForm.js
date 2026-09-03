@@ -438,7 +438,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
             name='items'
             value={formik.values.items}
             error={formik.errors.items}
-            maxAccess={access}
+            maxAccess={maxAccess}
             columns={[
               {
                 component: 'resourcelookup',
@@ -541,16 +541,16 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
             </Grid>
             <Grid item xs={1}></Grid>
             <Grid item xs={2}>
-              <CustomNumberField name='totalExpQty' label={labels.totalExpQty} value={totalExpQty} readOnly />
+              <CustomNumberField name='totalExpQty' label={labels.totalExpQty} value={totalExpQty} readOnly maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={2}>
-              <CustomNumberField name='totalExpPcs' label={labels.totalExpPcs} value={totalExpPcs} readOnly />
+              <CustomNumberField name='totalExpPcs' label={labels.totalExpPcs} value={totalExpPcs} readOnly maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={2}>
-              <CustomNumberField name='totalQty' label={labels.totalQty} value={totalQty} readOnly />
+              <CustomNumberField name='totalQty' label={labels.totalQty} value={totalQty} readOnly maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={2}>
-              <CustomNumberField name='totalPcs' label={labels.totalPcs} value={totalPcs} readOnly />
+              <CustomNumberField name='totalPcs' label={labels.totalPcs} value={totalPcs} readOnly maxAccess={maxAccess}/>
             </Grid>
           </Grid>
         </Fixed>

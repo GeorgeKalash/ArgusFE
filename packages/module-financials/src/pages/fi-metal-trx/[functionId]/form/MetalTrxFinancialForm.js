@@ -751,7 +751,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                   isInactive: val => val !== true
                 }}
                 readOnly={isPosted}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId)
                   formik.setFieldValue('accountRef', newValue?.reference)
                   formik.setFieldValue('accountName', newValue?.name)
@@ -766,6 +766,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 value={formik.values.accountGroupName}
                 readOnly
                 error={formik.touched.accountGroupName && Boolean(formik.errors.accountGroupName)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
@@ -860,16 +861,16 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             </Grid>
             <Grid item xs={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly />
+                  <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly maxAccess={maxAccess} />
                 </Grid>
             </Grid>
             <Grid item xs={2}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={2} readOnly />
+                  <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={2} readOnly maxAccess={maxAccess} />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.totalLabor} value={totalLabor} decimalScale={2} readOnly />
+                  <CustomNumberField label={labels.totalLabor} value={totalLabor} decimalScale={2} readOnly maxAccess={maxAccess} />
                 </Grid>
                 {metal?.reference && (
                   <Grid item xs={12}>
@@ -878,6 +879,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                       value={totalMetal}
                       decimalScale={2}
                       readOnly
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 )}

@@ -992,6 +992,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           }}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           onClear={() => formik.setFieldValue('birthDate', '')}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
                       <Grid item xs={6}>
@@ -1494,10 +1495,10 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                   <Grid item xs={3}>
                     <Grid container spacing={2}>
                       <Grid item xs={12}>
-                        <CustomNumberField label={labels.netAmount} value={total} readOnly />
+                        <CustomNumberField label={labels.netAmount} value={total} readOnly maxAccess={maxAccess}/>
                       </Grid>
                       <Grid item xs={12}>
-                        <CustomNumberField label={labels.amountReceived} value={receivedTotal} readOnly />
+                        <CustomNumberField label={labels.amountReceived} value={receivedTotal} readOnly maxAccess={maxAccess} />
                       </Grid>
                       <Grid item xs={12}>
                         <CustomNumberField
@@ -1505,6 +1506,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           label={labels.balanceToPay}
                           value={balance}
                           readOnly
+                          maxAccess={maxAccess}
                         />
                       </Grid>
                     </Grid>

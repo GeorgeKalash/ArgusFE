@@ -52,7 +52,7 @@ const RetailTrx = () => {
   } = useResourceQuery({
     enabled: !!posObj?.current?.posId,
     queryFn: fetchGridData,
-    endpointId: PointofSaleRepository.RetailInvoice.qry,
+    endpointId: PointofSaleRepository.RetailInvoice.page,
     datasetId: ResourceIds.RetailInvoice,
     DatasetIdAccess: getResourceId[parseInt(functionId)],
     filter: {
@@ -92,7 +92,7 @@ const RetailTrx = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: PointofSaleRepository.RetailInvoice.qry,
+      extension: PointofSaleRepository.RetailInvoice.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_functionId=${functionId}&_posId=${posObj?.current?.posId}&_filter=`
     })
 

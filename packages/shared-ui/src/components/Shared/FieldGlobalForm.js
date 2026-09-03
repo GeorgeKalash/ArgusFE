@@ -221,7 +221,7 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
             columns={columns}
             allowDelete={false}
             allowAddNewLine={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

@@ -184,6 +184,7 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('email', '')}
                 error={formik.touched.email && Boolean(formik.errors.email)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

@@ -689,6 +689,7 @@ const calculateTotal = key =>
                     value={totalMetal}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -697,6 +698,7 @@ const calculateTotal = key =>
                     value={totalRmQty}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -705,6 +707,7 @@ const calculateTotal = key =>
                     value={totalRmNewQty}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -713,6 +716,7 @@ const calculateTotal = key =>
                     value={totalDiffQty}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess} 
                   />
                 </Grid>
               </Grid>
@@ -723,6 +727,7 @@ const calculateTotal = key =>
                     value={avgPurity}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -731,6 +736,7 @@ const calculateTotal = key =>
                     value={avgStdPurity}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -739,6 +745,7 @@ const calculateTotal = key =>
                     value={totalDiffPurity}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>

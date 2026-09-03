@@ -41,7 +41,7 @@ const Drivers = () => {
 
     const response = await getRequest({
       extension: DeliveryRepository.Driver.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }

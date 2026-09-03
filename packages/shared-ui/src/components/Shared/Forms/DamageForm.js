@@ -699,6 +699,7 @@ export default function DamageForm({ recordId, lockRecord }) {
                       formik.setFieldValue('header.laborId', newValue?.recordId || null)
                     }}
                     error={formik?.touched?.header?.laborId && Boolean(formik?.errors?.header?.laborId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
