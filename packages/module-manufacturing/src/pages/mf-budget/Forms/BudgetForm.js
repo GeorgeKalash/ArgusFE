@@ -19,7 +19,7 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 export default function BudgetForm ({ labels, record, recordId, maxAccess, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const {fiscalYear, periodId, seqNo} = record
+  const {fiscalYear, periodId, seqNo} = record || {}
   
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.Budget.page

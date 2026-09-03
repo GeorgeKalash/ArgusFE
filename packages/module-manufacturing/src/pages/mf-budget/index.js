@@ -89,7 +89,7 @@ export default function MFBudget () {
           name='table'
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['fiscalYear', 'periodId', 'seqNo']}
           onEdit={edit}
           onDelete={del}
           pageSize={50}
