@@ -666,6 +666,7 @@ export const ResourceIds = {
   PreviewPR: 42353,
   PPDefaults: 42611,
   BatchWaxTransfer: 42354,
+  Budget: 42145,
 
   // GL
   GLSalesInvoice: 51604,
