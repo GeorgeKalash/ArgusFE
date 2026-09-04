@@ -26,7 +26,6 @@ import Image from 'next/image'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import styles from './Navigation.module.css'
 
 const SwipeableDrawer = MuiSwipeableDrawer
@@ -59,12 +58,12 @@ const Navigation = props => {
     setNavVisible
   } = props
 
-  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex, handleBookmark, setTabSwitch } =
-    useContext(MenuContext)
+  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex, handleBookmark, setTabSwitch, startupPages } = useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
   const [filteredMenu, setFilteredMenu] = useState([])
   const [openFolders, setOpenFolders] = useState([])
-  const [selectedNode, setSelectedNode] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [contextMenu, setContextMenu] = useState(null)
   const menu = props.verticalNavItems
   const gear = useContext(MenuContext)
   const [isArabic, setIsArabic] = useState(false)
@@ -159,34 +158,47 @@ const Navigation = props => {
   }
 
   const handleSearch = e => {
-    const term = e.target.value
-    if (term === '') {
-      setFilteredMenu(menu)
-      setOpenFolders([])
-    } else {
-      const [filteredChildren] = filterMenu(menu, term)
-      setFilteredMenu(filteredChildren)
-    }
+    setSearchTerm(e.target.value)
   }
 
-  const filterMenu = (items, term) => {
-    const filteredItems = items.map(item => {
+  const filterMenu = (items, term, foldersToOpen = []) => {
+    const filteredItems = []
+  
+    items?.forEach(item => {
       if (item.children) {
-        const [filteredChildren, hasMatchingChild] = filterMenu(item.children, term)
-        if (filteredChildren.length > 0 || hasMatchingChild) {
-          setOpenFolders(prev => [...prev, item.id])
-
-          return { ...item, children: filteredChildren, isOpen: true }
+        const childFoldersToOpen = []
+        const [filteredChildren] = filterMenu(
+          item.children,
+          term,
+          childFoldersToOpen
+        )
+  
+        const isMatch = item.title.toLowerCase().includes(term.toLowerCase())
+  
+        if (filteredChildren.length > 0 || isMatch) {
+          if (filteredChildren.length > 0) {
+            foldersToOpen.push(item.id, ...childFoldersToOpen)
+          }
+  
+          filteredItems.push({
+            ...item,
+            children: filteredChildren,
+            isOpen: true
+          })
+        }
+      } else {
+        const isMatch = item.title.toLowerCase().includes(term.toLowerCase())
+  
+        if (isMatch) {
+          filteredItems.push({
+            ...item,
+            isOpen: true
+          })
         }
       }
-      const isMatch = item.title.toLowerCase().includes(term.toLowerCase())
-
-      return isMatch ? { ...item, isOpen: true } : null
     })
-    const filteredItemsWithoutNull = filteredItems.filter(item => item !== null)
-    const hasMatchingItem = filteredItemsWithoutNull.some(item => item.isOpen)
-
-    return [filteredItemsWithoutNull, hasMatchingItem]
+  
+    return [filteredItems, foldersToOpen]
   }
 
   const filterFav = menu => {
@@ -204,15 +216,53 @@ const Navigation = props => {
   }
 
   useEffect(() => {
-    setFilteredMenu(props.verticalNavItems)
-  }, [props.verticalNavItems])
+    if (!searchTerm.trim()) {
+      setFilteredMenu(props.verticalNavItems)
+      setOpenFolders([])
+      return
+    }
+  
+    const [filteredItems, foldersToOpen] = filterMenu(
+      props.verticalNavItems,
+      searchTerm
+    )
+  
+    setFilteredMenu(filteredItems)
+    setOpenFolders(foldersToOpen)
+  }, [props.verticalNavItems, searchTerm])
 
   const onCollapse = () => setOpenFolders([])
-  const closeDialog = () => setSelectedNode(false)
+
+  const closeContextMenu = () => setContextMenu(null)
 
   const handleRightClick = (e, node, imgName) => {
     e.preventDefault()
-    setSelectedNode([node, Boolean(imgName)])
+    const isCurrentStartup = startupPages?.some(page => page.id === node.id)
+
+    setContextMenu({
+      mouseX: e.clientX - 2,
+      mouseY: e.clientY - 4,
+      node,
+      isFav: Boolean(imgName),
+      isStartupPage: isCurrentStartup
+    })
+  }
+  const contextMenuItems = contextMenu
+  ? [
+      { name: contextMenu.isFav ? platformLabels.RemoveFav : platformLabels.AddFav, action: 'favorite' },
+      { name: contextMenu.isStartupPage ? platformLabels.RemoveStartupPage : platformLabels.AddStartupPage, action: 'startup' },
+    ]
+  : []
+
+  const handleContextMenuAction = element => {
+    if (!contextMenu) return
+    const { node, isFav, isStartupPage } = contextMenu
+
+    if (element.action === 'favorite') {
+      handleBookmark(node, isFav, closeContextMenu, false)
+    } else if (element.action === 'startup') {
+      handleBookmark(node, isStartupPage, closeContextMenu, true)
+    }
   }
 
   const toggleFolder = folderId => {
@@ -383,6 +433,7 @@ const Navigation = props => {
             fullWidth
             size='small'
             onChange={handleSearch}
+            value={searchTerm}
             autoComplete='off'
             className={styles['search-field']}
             InputProps={{
@@ -437,15 +488,15 @@ const Navigation = props => {
             : MenuLockedIcon()}
         </IconButton>
       )}
-      {selectedNode && (
-        <ConfirmationDialog
-          openCondition={Boolean(selectedNode)}
-          closeCondition={closeDialog}
-          DialogText={selectedNode[1] ? platformLabels.RemoveFav : platformLabels.AddFav}
-          okButtonAction={() => handleBookmark(selectedNode[0], selectedNode[1], closeDialog)}
-          cancelButtonAction={closeDialog}
-        />
-      )}
+      <Dropdown
+        map={contextMenuItems}
+        onClickAction={handleContextMenuAction}
+        navCollapsed={false}
+        open={Boolean(contextMenu)}
+        onClose={closeContextMenu}
+        isControlled={true}
+        anchorPosition={contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+      />
     </ThemeProvider>
   )
 }
