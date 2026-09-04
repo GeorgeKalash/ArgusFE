@@ -657,6 +657,35 @@ const TabsProvider = ({ children }) => {
   ])
 
   useEffect(() => {
+    if (!shouldManageTabs || !initialLoadDone || !menuLoaded) return
+    if (!startupPages?.length) return
+  
+    const newStartupPage = startupPages.find(startupPage => {
+      if (!startupPage?.path) return false
+  
+      const normalizedRoute = normalizeRoute(startupPage.path)
+  
+      return !openTabs.some(
+        tab => normalizeRoute(tab.route) === normalizedRoute
+      )
+    })
+  
+    if (!newStartupPage?.path) return
+  
+    const startupRoute = newStartupPage.path.replace(/\/+$/, '') + '/'
+  
+    navigateTo(startupRoute)
+  }, [
+    startupPages,
+    openTabs,
+    initialLoadDone,
+    menuLoaded,
+    shouldManageTabs,
+    normalizeRoute,
+    navigateTo
+  ])
+
+  useEffect(() => {
     if (!shouldManageTabs) return
     if (openTabs?.[currentTabIndex]?.route === reloadOpenedPage?.path + '/') {
       reopenTab(reloadOpenedPage?.path + '/')

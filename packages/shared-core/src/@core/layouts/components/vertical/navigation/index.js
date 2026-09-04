@@ -62,6 +62,7 @@ const Navigation = props => {
   const { platformLabels } = useContext(ControlContext)
   const [filteredMenu, setFilteredMenu] = useState([])
   const [openFolders, setOpenFolders] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [contextMenu, setContextMenu] = useState(null)
   const menu = props.verticalNavItems
   const gear = useContext(MenuContext)
@@ -157,34 +158,47 @@ const Navigation = props => {
   }
 
   const handleSearch = e => {
-    const term = e.target.value
-    if (term === '') {
-      setFilteredMenu(menu)
-      setOpenFolders([])
-    } else {
-      const [filteredChildren] = filterMenu(menu, term)
-      setFilteredMenu(filteredChildren)
-    }
+    setSearchTerm(e.target.value)
   }
 
-  const filterMenu = (items, term) => {
-    const filteredItems = items.map(item => {
+  const filterMenu = (items, term, foldersToOpen = []) => {
+    const filteredItems = []
+  
+    items?.forEach(item => {
       if (item.children) {
-        const [filteredChildren, hasMatchingChild] = filterMenu(item.children, term)
-        if (filteredChildren.length > 0 || hasMatchingChild) {
-          setOpenFolders(prev => [...prev, item.id])
-
-          return { ...item, children: filteredChildren, isOpen: true }
+        const childFoldersToOpen = []
+        const [filteredChildren] = filterMenu(
+          item.children,
+          term,
+          childFoldersToOpen
+        )
+  
+        const isMatch = item.title.toLowerCase().includes(term.toLowerCase())
+  
+        if (filteredChildren.length > 0 || isMatch) {
+          if (filteredChildren.length > 0) {
+            foldersToOpen.push(item.id, ...childFoldersToOpen)
+          }
+  
+          filteredItems.push({
+            ...item,
+            children: filteredChildren,
+            isOpen: true
+          })
+        }
+      } else {
+        const isMatch = item.title.toLowerCase().includes(term.toLowerCase())
+  
+        if (isMatch) {
+          filteredItems.push({
+            ...item,
+            isOpen: true
+          })
         }
       }
-      const isMatch = item.title.toLowerCase().includes(term.toLowerCase())
-
-      return isMatch ? { ...item, isOpen: true } : null
     })
-    const filteredItemsWithoutNull = filteredItems.filter(item => item !== null)
-    const hasMatchingItem = filteredItemsWithoutNull.some(item => item.isOpen)
-
-    return [filteredItemsWithoutNull, hasMatchingItem]
+  
+    return [filteredItems, foldersToOpen]
   }
 
   const filterFav = menu => {
@@ -202,8 +216,20 @@ const Navigation = props => {
   }
 
   useEffect(() => {
-    setFilteredMenu(props.verticalNavItems)
-  }, [props.verticalNavItems])
+    if (!searchTerm.trim()) {
+      setFilteredMenu(props.verticalNavItems)
+      setOpenFolders([])
+      return
+    }
+  
+    const [filteredItems, foldersToOpen] = filterMenu(
+      props.verticalNavItems,
+      searchTerm
+    )
+  
+    setFilteredMenu(filteredItems)
+    setOpenFolders(foldersToOpen)
+  }, [props.verticalNavItems, searchTerm])
 
   const onCollapse = () => setOpenFolders([])
 
@@ -407,6 +433,7 @@ const Navigation = props => {
             fullWidth
             size='small'
             onChange={handleSearch}
+            value={searchTerm}
             autoComplete='off'
             className={styles['search-field']}
             InputProps={{
@@ -467,7 +494,7 @@ const Navigation = props => {
         navCollapsed={false}
         open={Boolean(contextMenu)}
         onClose={closeContextMenu}
-        controlled={true}
+        isControlled={true}
         anchorPosition={contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
       />
     </ThemeProvider>
