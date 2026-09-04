@@ -67,7 +67,8 @@ const RightToWorkForm = ({ recordId, employeeId, labels, maxAccess, window, isAc
     formik.setValues({
       ...res.record,
       expiryDate: formatDateFromApi(res.record?.expiryDate),
-      issueDate: res.record?.issueDate ? formatDateFromApi(res.record.issueDate) : null
+      issueDate: res.record?.issueDate ? formatDateFromApi(res.record.issueDate) : null,
+      isInActive: !isActive
     })
   }
 
@@ -76,7 +77,7 @@ const RightToWorkForm = ({ recordId, employeeId, labels, maxAccess, window, isAc
       key: 'Attachment',
       condition: true,
       onClick: 'onClickAttachment',
-      disabled: !editMode || !isActive
+      disabled: !editMode
     }
   ]
 
@@ -106,6 +107,7 @@ const RightToWorkForm = ({ recordId, employeeId, labels, maxAccess, window, isAc
                 valueField='recordId'
                 displayField='name'
                 required
+                readOnly={!isActive}
                 values={formik?.values}
                 onChange={async (_, newValue) => formik.setFieldValue('dtId', newValue?.recordId || null)}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -118,6 +120,8 @@ const RightToWorkForm = ({ recordId, employeeId, labels, maxAccess, window, isAc
                 label={labels.dtRef}
                 value={formik.values.documentRef}
                 required
+                maxLength='20'
+                readOnly={!isActive}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('documentRef', '')}
@@ -131,8 +135,8 @@ const RightToWorkForm = ({ recordId, employeeId, labels, maxAccess, window, isAc
                 value={formik.values.issueDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
-                max={formik.values.expiryDate}
                 readOnly={!isActive}
+                max={formik.values.expiryDate}
                 onClear={() => formik.setFieldValue('issueDate', null)}
                 error={formik.touched.issueDate && Boolean(formik.errors.issueDate)}
               />

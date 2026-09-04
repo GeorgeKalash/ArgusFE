@@ -53,6 +53,7 @@ export const EmployeeRepository = {
   },
   BgCheck: {
     page: service + 'pageCT',
+    qry: service + 'qryCT',
     set: service + 'setCT',
     get: service + 'getCT',
     del: service + 'delCT'
@@ -178,9 +179,6 @@ export const EmployeeRepository = {
     get: service + 'getBC',
     set: service + 'setBC',
     del: service + 'delBC'  
-  },
-  CheckType: {
-    qry: service + 'qryCT'
   }
 }
 

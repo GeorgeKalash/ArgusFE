@@ -64,7 +64,8 @@ const BackgroundCheckForm = ({ recordId, employeeId, labels, maxAccess, window, 
     formik.setValues({
       ...res.record,
       expiryDate: formatDateFromApi(res.record?.expiryDate),
-      date: res.record?.date ? formatDateFromApi(res.record.date) : null
+      date: res.record?.date ? formatDateFromApi(res.record.date) : null,
+      isInActive: !isActive
     })
   }
 
@@ -73,7 +74,7 @@ const BackgroundCheckForm = ({ recordId, employeeId, labels, maxAccess, window, 
       key: 'Attachment',
       condition: true,
       onClick: 'onClickAttachment',
-      disabled: !editMode || !isActive
+      disabled: !editMode 
     }
   ]
 
@@ -97,12 +98,13 @@ const BackgroundCheckForm = ({ recordId, employeeId, labels, maxAccess, window, 
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={EmployeeRepository.CheckType.qry}
+                endpointId={EmployeeRepository.BgCheck.qry}
                 name='ctId'
                 label={labels.checkType}
                 valueField='recordId'
                 displayField='name'
                 required
+                readOnly={!isActive}
                 values={formik?.values}
                 onChange={async (_, newValue) => formik.setFieldValue('ctId', newValue?.recordId || null)}
                 error={formik.touched.ctId && Boolean(formik.errors.ctId)}

@@ -12,7 +12,6 @@ import { Typography } from '@mui/material'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import RightToWorkForm from './RightToWorkForm'
 import BackgroundCheckForm from './BackgroundCheckForm'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
@@ -22,9 +21,6 @@ const LegalsTab = ({ labels, maxAccess, store, isActive }) => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const { recordId } = store
-
-  const [searchRTW, setSearchRTW] = useState('')
-  const [searchBC, setSearchBC] = useState('')
 
   function getDaysLeft(expiryDateStr) {
     const expiryMs = formatDateFromApi(expiryDateStr)
@@ -86,27 +82,6 @@ const LegalsTab = ({ labels, maxAccess, store, isActive }) => {
     params: { disabledReqParams: true, maxAccess }
   })
 
-
-const filteredRTWData = searchRTW
-  ? {
-      list: rtwData?.list?.filter(item =>
-        [item.dtName, item.documentRef, item.issueDate, item.expiryDate, item.daysLeft]
-          .filter(field => field !== null && field !== undefined) 
-          .some(field => String(field).toLowerCase().includes(searchRTW.toLowerCase()))
-      )
-    }
-  : rtwData
-
-  const filteredBCData = searchBC
-    ? {
-        list: bcData?.list?.filter(item =>
-          [item.ctName, item.date, item.expiryDate, item.DaysLeft]
-            .filter(field => field !== null && field !== undefined) 
-            .some(field => String(field).toLowerCase().includes(searchBC.toLowerCase()))
-        )
-      }
-    : bcData
-
   const rightToWorkColumns = [
     { field: 'dtName', headerName: labels.dtName, flex: 1 },
     { field: 'documentRef', headerName: labels.dtRef, flex: 1 },
@@ -154,25 +129,13 @@ const filteredRTWData = searchRTW
         <Typography variant='h6' padding={2}>
           {labels.rightToWork}
         </Typography>
-        <GridToolbar onAdd={() => openForm(null, 'RTW')} disableAdd={!isActive} maxAccess={maxAccess} 
-          rightSection={
-            <CustomTextField
-            name='searchRTW'
-            value={searchRTW}
-            label={platformLabels.Search}
-            onClear={() => setSearchRTW('')}
-            onChange={e => setSearchRTW(e.target.value)}
-            onSearch={val => setSearchRTW(val)}
-            search
-            />
-          }
-        />
+        <GridToolbar onAdd={() => openForm(null, 'RTW')} disableAdd={!isActive} maxAccess={maxAccess} />
       </Fixed>
       <Grow>
         <Table
           name='RTWTable'
           columns={rightToWorkColumns}
-          gridData={filteredRTWData}
+          gridData={rtwData}
           rowId={['recordId']}
           onEdit={obj => openForm(obj, 'RTW')}
           onDelete={obj => del(obj, 'RTW')}
@@ -186,25 +149,13 @@ const filteredRTWData = searchRTW
         <Typography variant='h6' padding={2}>
           {labels.backgroundCheck}
         </Typography>
-        <GridToolbar onAdd={() => openForm(null, 'BC')} disableAdd={!isActive} maxAccess={maxAccess} 
-          rightSection={
-            <CustomTextField
-              name='searchBC'
-              value={searchBC}
-              label={platformLabels.Search}
-              onClear={() => setSearchBC('')}
-              onChange={e => setSearchBC(e.target.value)}
-              onSearch={val => setSearchBC(val)}
-              search
-            />
-          }
-          />
+        <GridToolbar onAdd={() => openForm(null, 'BC')} disableAdd={!isActive} maxAccess={maxAccess} />
       </Fixed>
       <Grow>
         <Table
           name='BCTable'
           columns={backgroundCheckColumns}
-          gridData={filteredBCData}
+          gridData={bcData}
           rowId={['recordId']}
           onEdit={obj => openForm(obj, 'BC')}
           onDelete={obj => del(obj, 'BC')}
