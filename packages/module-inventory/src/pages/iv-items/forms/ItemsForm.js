@@ -335,6 +335,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     dataGrid
                     store={store?.categories}
                     endpointId={InventoryRepository.Category.qry}
+                    parameters='_pagesize=30&_startAt=0&_name='
                     values={formik.values}
                     name='categoryId'
                     label={labels.category}
@@ -515,6 +516,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   <ResourceComboBox
                     store={store?.measurementSchedules}
                     endpointId={InventoryRepository.Measurement.qry}
+                    parameters='_name='
                     values={formik.values}
                     name='msId'
                     label={labels.measure}

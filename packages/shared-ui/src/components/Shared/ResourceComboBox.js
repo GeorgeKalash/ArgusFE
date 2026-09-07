@@ -41,7 +41,6 @@ export default function ResourceComboBox({
   const key = endpointId || datasetId
   const noCache = Boolean(dynamicParams)
   const hasStore = Object.prototype.hasOwnProperty.call(rest, 'store')
-  const hasStoreOrDataset = hasStore || datasetId
 
   function fetch({ datasetId, endpointId, parameters, refresh }) {
     if (endpointId) {
@@ -67,12 +66,14 @@ export default function ResourceComboBox({
       await fetchData(false)
     }
 
-    if (!hasStoreOrDataset && !noCache) fetchDataAsync()
-  }, [parameters, hasStoreOrDataset])
+    if (!hasStore && !noCache && (datasetId || endpointId)) fetchDataAsync()
+  }, [parameters, hasStore, datasetId, endpointId, noCache])
 
-  const fetchData = async (isRefresh = true) => {
+  const fetchData = async (isRefresh = false) => {
     if (rest?.readOnly && dataGrid) return
-    if (!parameters || (!datasetId && !endpointId) || (hasStoreOrDataset && !isRefresh)) return
+    if (!parameters || (!datasetId && !endpointId)) return
+    if (!isRefresh && (hasStore || cacheStore?.[key])) return
+
     setIsLoading(true)
 
     const response = cacheAvailable
@@ -94,32 +95,32 @@ export default function ResourceComboBox({
 
   let finalItemsList
   if (apiResponse) finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
-  else if (data)  finalItemsList = data
-  else finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
+  else if (data) finalItemsList = data
+  else finalItemsList = []
 
   if (cacheStore?.[key] && !noCache) finalItemsList = cacheStore[key]
   finalItemsListRef.current = rest?.options || finalItemsList || []
   const fieldPath = rest?.name?.split('.')
-  const [child] = fieldPath
+  const [parent, child] = fieldPath
   const name = child || rest?.name
 
   const _value =
     (typeof values[name] === 'object'
       ? values[name]
-      : datasetId
-      ? finalItemsList?.find(item => item[valueField] === values[name]?.toString())
-      : finalItemsList?.find(item => item[valueField] === (values[name] || values))) ||
+      : finalItemsList?.find(
+          item => item[valueField]?.toString() === (values[name] ?? values)?.toString()
+        )) ||
     value ||
     ''
 
   const onBlur = (e, HighlightedOption, options, allowSelect) => {
-    if (allowSelect) {
-      finalItemsListRef.current = options || finalItemsListRef.current
-      if (HighlightedOption) {
-        rest.onChange('', HighlightedOption)
-      } else if (finalItemsListRef.current?.[0]) {
-        selectFirstOption()
-      }
+    if (!allowSelect) return
+
+    finalItemsListRef.current = options || finalItemsListRef.current
+    if (HighlightedOption) {
+      rest.onChange('', HighlightedOption)
+    } else if (!_value && finalItemsListRef.current?.[0]) {
+      selectFirstOption()
     }
   }
 
@@ -159,7 +160,7 @@ export default function ResourceComboBox({
         store: finalItemsList,
         valueField,
         value: _value,
-        onOpen: () => noCache && fetchData(),
+        onOpen: () => noCache && fetchData(true),
         onBlur,
         isLoading
       }}
