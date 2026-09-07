@@ -546,5 +546,11 @@ export const ManufacturingRepository = {
     page: service + 'pagePSG',
     qry: service + 'qryPSG',
     snapshot: service + 'snapshotPSG'
+  },
+  Budget: {
+    get: service + 'getBUD',
+    set: service + 'setBUD',
+    del: service + 'delBUD',
+    page: service + 'pageBUD'
   }
 }
