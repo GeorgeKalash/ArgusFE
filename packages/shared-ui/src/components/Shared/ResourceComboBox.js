@@ -40,6 +40,8 @@ export default function ResourceComboBox({
 
   const key = endpointId || datasetId
   const noCache = Boolean(dynamicParams)
+  const hasStore = Object.prototype.hasOwnProperty.call(rest, 'store')
+  const hasStoreOrDataset = hasStore || datasetId
 
   function fetch({ datasetId, endpointId, parameters, refresh }) {
     if (endpointId) {
@@ -65,40 +67,40 @@ export default function ResourceComboBox({
       await fetchData(false)
     }
 
-    !noCache && fetchDataAsync()
-  }, [parameters])
+    if (!hasStoreOrDataset && !noCache) fetchDataAsync()
+  }, [parameters, hasStoreOrDataset])
 
-  const fetchData = async (refresh = true) => {
+  const fetchData = async (isRefresh = true) => {
     if (rest?.readOnly && dataGrid) return
+    if (!parameters || (!datasetId && !endpointId) || (hasStoreOrDataset && !isRefresh)) return
+    setIsLoading(true)
 
-    if (parameters && !data && (datasetId || endpointId)) {
-      setIsLoading(true)
+    const response = cacheAvailable
+      ? await fetchWithCache({
+          queryKey: [datasetId || endpointId, parameters],
+          queryFn: () => fetch({ datasetId, endpointId, parameters, refresh: isRefresh })
+        })
+      : await fetch({ datasetId, endpointId, parameters, refresh: isRefresh
+        })
 
-      const data =
-        cacheStore?.[key] && !refresh
-          ? cacheStore?.[key]
-          : cacheAvailable
-          ? await fetchWithCache({
-              queryKey: [datasetId || endpointId, parameters],
-              queryFn: () => fetch({ datasetId, endpointId, parameters, refresh })
-            })
-          : await fetch({ datasetId, endpointId, parameters, refresh })
+    const result = datasetId ? { list: response } : response
+    setApiResponse(result)
 
-      setApiResponse(!!datasetId ? { list: data } : data)
-
-      if (!cacheStore?.[key]) {
-        endpointId ? updateCacheStore(endpointId, data.list) : updateCacheStore(datasetId, data)
-      }
-      if (typeof setData == 'function') setData(!!datasetId ? { list: data } : data)
-      setIsLoading(false)
-    }
+    if (endpointId) updateCacheStore(endpointId, response?.list)
+    else if (datasetId) updateCacheStore(datasetId, response)
+    if (typeof setData === 'function') setData(result)
+    setIsLoading(false)
   }
-  let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
-  finalItemsList = cacheStore?.[key] && !noCache ? cacheStore?.[key] : finalItemsList
 
+  let finalItemsList
+  if (apiResponse) finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
+  else if (data)  finalItemsList = data
+  else finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
+
+  if (cacheStore?.[key] && !noCache) finalItemsList = cacheStore[key]
   finalItemsListRef.current = rest?.options || finalItemsList || []
   const fieldPath = rest?.name?.split('.')
-  const [parent, child] = fieldPath
+  const [child] = fieldPath
   const name = child || rest?.name
 
   const _value =
