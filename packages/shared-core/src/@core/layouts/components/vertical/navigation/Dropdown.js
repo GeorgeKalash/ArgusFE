@@ -11,14 +11,13 @@ function Dropdown({
   onClickAction,
   map,
   navCollapsed,
-  controlled = false,
+  isControlled = false,
   anchorPosition,
   open: controlledOpen,
   onClose: controlledOnClose
 }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
 
-  const isControlled = controlled
   const open = isControlled ? Boolean(controlledOpen) : Boolean(anchorEl)
 
   const OpenItems = event => {
