@@ -39,6 +39,7 @@ export const ResourceIds = {
   RightToWork: 70114,
   Salaries: 71206,
   EmployeeRightToWork: 71210,
+  BackgroundCheck: 71202,
   Probation: 71215,
   CasePleads: 76210,
   EmploymentReview: 71601,
