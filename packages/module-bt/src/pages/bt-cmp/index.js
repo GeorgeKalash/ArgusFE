@@ -102,7 +102,6 @@ const CommodityPairs = () => {
           onEdit={popup}
           onDelete={del}
           pageSize={50}
-          enableFilters
           paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}

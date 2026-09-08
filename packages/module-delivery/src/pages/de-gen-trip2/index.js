@@ -15,7 +15,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { DeliveryRepository } from '@argus/repositories/src/repositories/DeliveryRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import UnallocatedOrdersForm from './Forms/UnallocatedOrders'
@@ -43,7 +42,6 @@ const GenerateOutboundTransportation2 = () => {
 
   const { formik } = useForm({
     initialValues: {
-      search: '',
       departureDate: null,
       itemCategoryId: null,
       szId: null,
@@ -452,23 +450,7 @@ const GenerateOutboundTransportation2 = () => {
     formik.resetForm()
   }
 
-  const handleSearchChange = event => {
-    const { value } = event.target
-    if (formik.values.search !== value) {
-      formik.setFieldValue('search', value)
-    }
-  }
-
-  const filteredSalesZones = useMemo(() => {
-    return {
-      ...formik?.values?.salesZones,
-      list: formik?.values?.salesZones?.list.filter(item =>
-        item?.name?.toString().toLowerCase().includes(formik?.values?.search?.toLowerCase())
-      )
-    }
-  }, [formik?.values?.salesZones, formik.values.search])
-
-  const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
+  const filteredData = formik?.values?.salesZones
 
   const handleImport = async () => {
     setSelectedSaleZones(prevState => {
@@ -543,7 +525,7 @@ const GenerateOutboundTransportation2 = () => {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} p={2}>
-            <Grid item xs={1.33}>
+            <Grid item xs={2.66}>
               <ResourceComboBox
                 endpointId={DeliveryRepository.GenerateTrip.root}
                 parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
@@ -565,21 +547,6 @@ const GenerateOutboundTransportation2 = () => {
                 }}
                 error={formik.touched.szId && Boolean(formik.errors.szId)}
                 maxAccess={access}
-              />
-            </Grid>
-
-            <Grid item xs={1.33}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                size='small'
-                onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('search', e)}
-                search={true}
               />
             </Grid>
 

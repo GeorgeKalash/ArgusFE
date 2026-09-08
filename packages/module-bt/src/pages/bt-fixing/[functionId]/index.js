@@ -220,7 +220,6 @@ export default function BTFixing() {
           onDelete={del}
           deleteConfirmationType={'strict'}
           pageSize={50}
-          enableFilters
           paginationParameters={paginationParameters}
           refetch={refetch}
           paginationType='api'

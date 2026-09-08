@@ -53,7 +53,6 @@ const Table = ({
   collabsable = true,
   domLayout = 'normal',
   highlightRow,
-  enableFilters,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -100,6 +99,15 @@ const Table = ({
           }) !== HIDDEN
       )
       .map(col => {
+        if (col.type === 'image') {
+          return {
+            ...col,
+            sortable: !disableSorting,
+            filter: false,
+            floatingFilter: false,
+            suppressMenu: false
+          }
+        }
         if (col.type === 'date') {
           return {
             ...col,
@@ -930,8 +938,10 @@ const Table = ({
         />
       ),
     suppressMenu: true,
-    filter: false
-  }), [checked, showSelectAll, rowSelection, handleCheckboxChange])
+    filter: CheckboxFilter,
+    floatingFilter: showFilters,
+    floatingFilterComponent: CheckboxFloatingFilter
+  }), [checked, showSelectAll, rowSelection, handleCheckboxChange, showFilters])
 
   const handleDragStart = e => {
     e.preventDefault()
@@ -997,8 +1007,8 @@ const Table = ({
           width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
           flex: column.flex,
           sort: column.sort ?? undefined,
-          floatingFilter: enableFilters && showFilters,
-          suppressMenu: column.suppressMenu ?? !showFilters,
+          floatingFilter: column.type === 'image' ? false : showFilters,
+          suppressMenu: column.type === 'image' ? false : column.suppressMenu ?? !showFilters,
           cellRenderer:
             column.type === 'image'
               ? imageRenderer(column)
@@ -1127,7 +1137,6 @@ const Table = ({
       tableSettings,
       checkboxColumn,
       showCheckboxColumn,
-      enableFilters,
       showFilters
     ])
 
@@ -1385,29 +1394,27 @@ const Table = ({
             </Box>
           )}
 
-          {enableFilters && (
-            <Box
-              ref={hoverFilterRef}
-              className='hoverFilter'
-              onPointerDown={handleDragStart}
-              style={{ right: 6, top: 6 }}
+          <Box
+            ref={hoverFilterRef}
+            className='hoverFilter'
+            onPointerDown={handleDragStart}
+            style={{ right: 6, top: 6 }}
+          >
+            <IconButton
+              size='small'
+              onClick={() => {
+                setShowFilters(prev => {
+                  const next = !prev
+                  if (!next) {
+                    gridApiRef.current?.api?.setFilterModel(null)
+                  }
+                  return next
+                })
+              }}
             >
-              <IconButton
-                size='small'
-                onClick={() => {
-                  setShowFilters(prev => {
-                    const next = !prev
-                    if (!next) {
-                      gridApiRef.current?.api?.setFilterModel(null)
-                    }
-                    return next
-                  })
-                }}
-              >
-                <FilterAltIcon fontSize='small' />
-              </IconButton>
-            </Box>
-          )}
+              <FilterAltIcon fontSize='small' />
+            </IconButton>
+          </Box>
 
           <AgGridReact
             key="grid"
@@ -1689,6 +1696,13 @@ const Table = ({
           display: flex;
           justify-content: center;
           align-items: center;
+          overflow: hidden;
+        }
+
+        .agGridContainer :global(.ag-floating-filter .MuiCheckbox-root) {
+          width: 32px !important;
+          height: 32px !important;
+          border-radius: 50% !important;
           overflow: hidden;
         }
 

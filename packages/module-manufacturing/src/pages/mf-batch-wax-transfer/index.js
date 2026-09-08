@@ -6,7 +6,6 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -90,7 +89,7 @@ export default function BatchWaxTransfer() {
 
   const { formik } = useForm({
     maxAccess,
-    initialValues: { workCenterId: null, search: '' }
+    initialValues: { workCenterId: null }
   })
 
   const columns = [
@@ -160,14 +159,6 @@ export default function BatchWaxTransfer() {
     .filter(row => checkedIds.includes(row.recordId))
     .reduce((sum, row) => sum + (row.qty || 0), 0)
 
-  const search = formik.values.search
-
-  const filteredRows = search
-    ? rows.filter(
-        row => row.reference?.toLowerCase().includes(search.toLowerCase())
-      )
-    : rows
-
   return (
     <VertLayout>
       <Fixed>
@@ -207,17 +198,6 @@ export default function BatchWaxTransfer() {
             />
           </Grid>
           
-          <Grid item xs={2}>
-            <CustomTextField
-              name='search'
-              value={formik.values.search}
-              label={platformLabels.Search}
-              onClear={() => formik.setFieldValue('search', '')}
-              onChange={formik.handleChange}
-              onSearch={value => formik.setFieldValue('search', value)}
-              search
-            />
-          </Grid>
           <Grid item xs={.6}>
             <CustomButton
               onClick={() => openWaxList(checkedIds)}
@@ -240,7 +220,7 @@ export default function BatchWaxTransfer() {
         <Table
           name='table'
           columns={columns}
-          gridData={{ list: filteredRows, count: filteredRows.length }}
+          gridData={{ list: rows, count: rows.length }}
           rowId={['recordId']}
           maxAccess={maxAccess}
           refetch={refetch}

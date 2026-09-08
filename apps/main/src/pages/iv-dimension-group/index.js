@@ -101,7 +101,6 @@ const DimensionGroup = () => {
           onDelete={del}
           pageSize={50}
           paginationType='api'
-          enableFilters
           paginationParameters={paginationParameters}
           refetch={refetch}
           maxAccess={access}

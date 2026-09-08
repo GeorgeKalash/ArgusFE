@@ -142,7 +142,6 @@ const PuCostAllocations = () => {
           deleteConfirmationType={'strict'}
           pageSize={50}
           maxAccess={access}
-          enableFilters
           paginationParameters={paginationParameters}
           paginationType='api'
         />
