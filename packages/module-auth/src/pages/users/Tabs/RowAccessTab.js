@@ -15,7 +15,6 @@ import { AccessControlRepository } from '@argus/repositories/src/repositories/Ac
 import toast from 'react-hot-toast'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { PointofSaleRepository } from '@argus/repositories/src/repositories/PointofSaleRepository'
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
@@ -25,7 +24,6 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [search, setSearch] = useState('')
 
   const rowColumns = [
     {
@@ -123,8 +121,8 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     const workCenterRequestPromise =
       classId == ResourceIds.WorkCenters &&
       getRequest({
-      extension: ManufacturingRepository.WorkCenter.qry,
-      parameters: `_filter=`
+        extension: ManufacturingRepository.WorkCenter.qry,
+        parameters: `_filter=`
       })
 
     const rowAccessUserPromise = getRequest({
@@ -234,26 +232,12 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     )
   }
 
-  const handleSearchChange = event => {
-    setSearch(event?.target?.value ?? '')
-  }
-
   useEffect(() => {
     if (storeRecordId) {
       formik.setFieldValue('classId', ResourceIds.Plants)
       fetchGridData()
     }
   }, [storeRecordId])
-
-  const filteredData = search
-    ? {
-        list: data?.list?.filter(
-          item =>
-            (item?.name && item?.name?.toLowerCase().includes(search.toLowerCase())) ||
-            (item?.reference && item?.reference?.toLowerCase().includes(search.toLowerCase()))
-        )
-      }
-    : data
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!storeRecordId} isParentWindow={false}>
@@ -276,26 +260,13 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
                 error={formik.touched.classId && Boolean(formik.errors.classId)}
               />
             </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='search'
-                value={search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  setSearch('')
-                }}
-                onChange={handleSearchChange}
-                onSearch={e => setSearch(e)}
-                search={true}
-              />
-            </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <Table
             name='rowAccess'
             columns={rowColumns}
-            gridData={filteredData}
+            gridData={data}
             rowId={['recordId']}
             maxAccess={maxAccess}
             pagination={false}
