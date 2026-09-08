@@ -20,7 +20,7 @@ import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-hel
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
@@ -72,6 +72,8 @@ const Table = ({
   const storeName = 'tableSettings'
   const gridRef = useRef(null)
   const gridApiRef = useRef(null)
+  const isResettingRef = useRef(false)
+  const queryClient = useQueryClient()
   const [menuAnchor, setMenuAnchor] = useState(null)
   const [selectedColId, setSelectedColId] = useState(null)
   const [hoveredTable, setHoveredTable] = useState(false)
@@ -342,8 +344,8 @@ const Table = ({
   }
 
   const shouldRemoveColumn = column => {
-    const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
-
+    const match = columnsAccess && columnsAccess.find(item => item.controlId === column.field)
+    
     return match && match.accessLevel === ControlAccessLevel.Hidden
   }
   const filteredColumns = useMemo(
@@ -775,10 +777,6 @@ const Table = ({
       selection.addRange(range)
     }
 
-    const handleClick = event => {
-      handleSelectText(event)
-    }
-
     const handleDoubleClick = params => {
       navigator.clipboard.writeText(params.target.innerText).then(() => {
         setTooltipOpen(true)
@@ -793,7 +791,7 @@ const Table = ({
       <>
         {tooltipOpen && <Box className={'copiedTooltip'}>Copied!</Box>}
         <Box
-          onClick={handleClick}
+          onClick={handleSelectText}
           onDoubleClick={handleDoubleClick}
           className={`fieldWrapper ${params.colDef?.wrapText ? 'wrap' : 'nowrap'}`}
         >
@@ -802,19 +800,6 @@ const Table = ({
       </>
     )
   }
-
-  const containerWidth = gridRef?.current?.offsetWidth - 2
-
-  const totalFixedColumnWidth =
-    filteredColumns
-      .filter(col => col?.width !== undefined && col.type !== 'checkbox')
-      ?.reduce((sum, col) => sum + col.width, 0) +
-    (filteredColumns?.some(column => column.field === 'actions') ? 100 : 0)
-
-  const additionalWidth =
-    totalFixedColumnWidth > 0 && filteredColumns?.length > 0 && containerWidth > totalFixedColumnWidth
-      ? (containerWidth - totalFixedColumnWidth) / filteredColumns?.length
-      : 0
 
   const IndentedCellRenderer = props => {
     const { data, value } = props
@@ -900,8 +885,8 @@ const Table = ({
       )
     }
 
-
-  const tableName = name && `${name}.${props?.maxAccess?.record?.resourceId}`
+    const allFieldsKey = props?.columns?.map(col => col.field).join(',')
+    const tableName = name && `${name}.${props?.maxAccess?.record?.resourceId}.${allFieldsKey}`
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
     queryKey: [tableName],
@@ -992,21 +977,44 @@ const Table = ({
     button.style.top = !pagination ? '0px' : '6px'
   }, [width, pagination])
 
+  const containerWidth = gridRef?.current?.offsetWidth - 2
+  const totalFixedColumnWidth = filteredColumns.filter(
+        col =>
+          col?.width !== undefined &&
+          col.type !== 'checkbox'
+      )?.reduce((sum, col) => sum + col.width, 0) + (filteredColumns?.some( column => column.field === 'actions')
+        ? 100
+        : 0)
+
+  const additionalWidth = totalFixedColumnWidth > 0 && filteredColumns?.length > 0 && containerWidth > totalFixedColumnWidth
+    ? (containerWidth -
+        totalFixedColumnWidth) /
+      filteredColumns?.length
+    : 0
+
   const columnDefs = useMemo(() => {
-    return [
-      ...(showCheckboxColumn ? [checkboxColumn] : []),
+    const base = [
+      ...(showCheckboxColumn
+        ? [{
+            ...checkboxColumn,
+            width: tableSettings?.find(s => s.colId === checkboxColumn.field)?.width ?? checkboxColumn.width
+          }]
+        : []),
       ...filteredColumns.map(column => {
         const isLinkedColumn = column.type === 'link' || !!column.linkOpen
 
         const savedColumn = tableSettings?.find(
           item => item.colId === column.field
         )
+        const hasSavedWidth = savedColumn?.width != null
 
         return {
           ...column,
-          width: savedColumn?.width ?? (column.width + (column?.type !== 'checkbox' ? additionalWidth : 0)),
-          flex: column.flex,
-          sort: column.sort ?? undefined,
+          pinned: savedColumn?.pinned ?? null,
+          width: hasSavedWidth ? savedColumn.width : column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
+          flex: tableSettings ? (savedColumn?.flex ?? null) : column.flex,
+          sort: savedColumn?.sort ?? column.sort ?? undefined,
+          sortIndex: savedColumn?.sortIndex ?? column.sortIndex ?? undefined,
           floatingFilter: column.type === 'image' ? false : showFilters,
           suppressMenu: column.type === 'image' ? false : column.suppressMenu ?? !showFilters,
           cellRenderer:
@@ -1130,6 +1138,31 @@ const Table = ({
         ]
       : [])
       ]
+
+      if (!tableSettings) return base
+
+      const pinnedOrder = {
+        left: 0,
+        null: 1,
+        undefined: 1,
+        right: 2
+      }
+
+      const indexOf = colId => {
+        const i = tableSettings.findIndex(s => s.colId === colId)
+      
+        return i === -1 ? Number.MAX_SAFE_INTEGER : i
+      }
+
+      return [...base].sort((a, b) => {
+        const pa = pinnedOrder[a.pinned ?? null] ?? 1
+
+        const pb = pinnedOrder[b.pinned ?? null] ?? 1
+
+        if (pa !== pb)  return pa - pb
+
+        return (indexOf(a.field) - indexOf(b.field))
+      })
     }, [
       filteredColumns,
       additionalWidth,
@@ -1208,11 +1241,117 @@ const Table = ({
   }, [tableSettings])
 
   const onColumnPinned = params => {
-    const columnState = params.columnApi.getColumnState()
-
+    if (isResettingRef.current) return
     if (!tableName) return
 
-    saveToDB(storeName, tableName, columnState)
+    const newState = params.columnApi.getColumnState().map(col => ({ ...col, flex: null }))
+    const merged = mergeColumnState(tableSettings, newState)
+
+    saveToDB(storeName, tableName, merged).then(() => invalidate())
+  }
+
+  const onColumnMoved = params => {
+    if (isResettingRef.current) return
+    if (!params.columnApi || !tableName || (params.source !== 'uiColumnMoved' && params.source !== 'uiColumnDragged')) return
+    const newState = params.columnApi.getColumnState()
+    const merged = mergeColumnState(tableSettings, newState)
+    saveToDB(storeName, tableName, merged).then(() => invalidate())
+  }
+
+  const mergeColumnState = (prevSettings, newState) => {
+    const prevList = prevSettings || []
+    const newMap = new Map(newState.map(s => [s.colId, s]))
+    const hiddenEntries = []
+    prevList.forEach((item, idx) => {
+      if (!newMap.has(item.colId)) {
+        let anchor = null
+        for (let i = idx - 1; i >= 0; i--) {
+          if (newMap.has(prevList[i].colId)) {
+            anchor = prevList[i].colId
+            break
+          }
+        }
+        hiddenEntries.push({ item, anchor })
+      }
+    })
+
+    const result = [...newState]
+    hiddenEntries.forEach(({ item, anchor }) => {
+      if (anchor == null) {
+        result.unshift(item)
+      } else {
+        const anchorIdx = result.findIndex(r => r.colId === anchor)
+        anchorIdx === -1 ? result.push(item) : result.splice(anchorIdx + 1, 0, item)
+      }
+    })
+
+    return result
+  }
+
+  const onColumnResized = async params => {
+    if (isResettingRef.current) return
+    if (!tableName || params?.source !== 'uiColumnResized' || !params.finished) return
+    if (!params.columns || params.columns.length === 0) return
+
+    const newState = params.columnApi.getColumnState().map(col => ({
+      colId: col.colId,
+      width: col.width,
+      pinned: col.pinned,
+      sort: col.sort,
+      sortIndex: col.sortIndex,
+      flex: null
+    }))
+
+    const merged = mergeColumnState(tableSettings, newState)
+    queryClient.setQueryData([tableName], merged)
+    await saveToDB(storeName, tableName, merged)
+  }
+
+  const onSortChanged = async params => {
+    if (isResettingRef.current) return
+    if (!params.columnApi || !tableName || params.source !== 'uiColumnSorted') return
+
+    const merged = mergeColumnState(tableSettings, params.columnApi.getColumnState())
+    queryClient.setQueryData([tableName], merged)
+    await saveToDB(storeName, tableName, merged)
+  }
+
+  const onReset = async () => {
+    if (!tableName || !gridApiRef.current?.columnApi) return
+    isResettingRef.current = true
+
+    try {
+      await deleteFromDB(storeName, tableName)
+
+      const defaultColumnIds = [
+        ...(showCheckboxColumn ? [checkboxColumn.field] : []),
+        ...filteredColumns.filter(c => c?.field).map(c => c.field),
+        ...((props?.onEdit || props?.onDelete) ? ['actions'] : [])
+      ]
+
+      const widthMap = {
+        ...(showCheckboxColumn ? { [checkboxColumn.field]: checkboxColumn.width } : {}),
+        ...Object.fromEntries(filteredColumns.filter(c => c?.field).map(c => [c.field, c.width])),
+        ...((props?.onEdit || props?.onDelete) ? { actions: 100 } : {})
+      }
+
+      const defaultState = defaultColumnIds.map(colId => ({
+        colId,
+        width: widthMap[colId] ?? undefined,
+        pinned: null,
+        sort: null,
+        sortIndex: null,
+        flex: null
+      }))
+
+      gridApiRef.current.columnApi.applyColumnState({
+        state: defaultState,
+        applyOrder: true
+      })
+      await invalidate()
+    } finally {
+      isResettingRef.current = false
+    }
   }
 
   const onGridReady = params => {
@@ -1251,91 +1390,47 @@ const Table = ({
 
     const originalOrder = columnDefs.map(col => col.field)
 
-    gridApiRef.current?.columnApi?.applyColumnState({
-      state: [{ colId, pinned }],
-      applyOrder: false
-    })
+    gridApiRef?.current?.columnApi?.applyColumnState(
+      {
+        state: [{ colId, pinned }],
+        applyOrder: false
+      }
+    )
 
     if (!pinned) {
       const targetIndex = originalOrder.indexOf(colId)
-      
       if (targetIndex > -1) {
-        gridApiRef.current?.columnApi?.moveColumn(colId, targetIndex)
+        gridApiRef?.current?.columnApi?.moveColumn(colId, targetIndex)
       }
     }
     setTimeout(async () => {
+      if (isResettingRef.current) return
+
       const columnState = gridApiRef.current?.columnApi?.getColumnState()
-      
-      await saveToDB(storeName, tableName, columnState)
+
+      const pinnedOrder = {
+        left: 0,
+        null: 1,
+        undefined: 1,
+        right: 2
+      }
+
+      const orderedState = columnState
+        ? [...columnState].sort((a, b) => (pinnedOrder[a.pinned] ?? 1) - (pinnedOrder[b.pinned] ?? 1))
+        : columnState
+      const merged = mergeColumnState(tableSettings, orderedState)
+      await saveToDB(storeName, tableName, merged)
+      await invalidate()
     }, 0)
   }
 
-  const onColumnMoved = params => {
-    if (params.columnApi && tableName && params.source != 'gridOptionsChanged') {
-      const columnState = params.columnApi.getColumnState()
-      saveToDB(storeName, tableName, columnState)
-    }
-  }
+  const isLastUnpinnedColumn =
+    useMemo(() => {
+      const state = gridApiRef.current?.columnApi?.getColumnState?.() || []
+      const unpinnedColumns = state.filter(col => !col.pinned)
 
-  const onColumnResized = params => {
-    if (tableName && params?.source === 'uiColumnResized') {
-      const hasFlex = columnDefs.some(col => col.flex)
-      
-      if (hasFlex) {
-        const columnState = params.columnApi.getColumnState().map(col => ({
-          colId: col.colId,
-          pinned: col.pinned,
-          sort: col.sort,
-          sortIndex: col.sortIndex,
-        }))
-        saveToDB(storeName, tableName, columnState)
-        return
-      }
-
-      const columnState = params.columnApi.getColumnState()
-      saveToDB(storeName, tableName, columnState)
-    }
-  }
-
-  const onSortChanged = params => {
-    if (params.columnApi && tableName && params.source == 'uiColumnSorted') {
-      const columnState = params.columnApi.getColumnState()
-
-      saveToDB(storeName, tableName, columnState)
-    }
-  }
-
-  const onReset = async () => {
-    await deleteFromDB(storeName, tableName)
-
-    gridApiRef.current?.columnApi?.resetColumnState()
-
-    const defaultState = [
-      ...(showCheckboxColumn
-        ? [{
-            colId: checkboxColumn.field,
-            width: checkboxColumn.width,
-            pinned: null,
-            sort: null
-          }]
-        : []),
-      ...props.columns
-          .filter(col => col?.field)
-          .map(col => ({
-            colId: col.field,
-            width: col.width,
-            pinned: null,
-            sort: null
-          }))
-    ]
-
-    gridApiRef.current?.columnApi?.applyColumnState({
-      state: defaultState,
-      applyOrder: true
-    })
-
-    invalidate()
-  }
+      return ( unpinnedColumns.length === 1 && unpinnedColumns[0]?.colId === selectedColId?.colId)
+    }, [selectedColId])
 
   const hoverTimeoutRef = useRef(null)
 
@@ -1353,17 +1448,6 @@ const Table = ({
     }
   }
 
-
-  const isLastUnpinnedColumn = useMemo(() => {
-    const state = gridApiRef.current?.columnApi?.getColumnState?.() || []
-
-    const unpinnedColumns = state.filter(col => !col.pinned)
-
-    return (
-      unpinnedColumns.length === 1 &&
-      unpinnedColumns[0]?.colId === selectedColId?.colId
-    )
-  }, [selectedColId])
 
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
 
@@ -1423,7 +1507,6 @@ const Table = ({
             ensureDomOrder={true}
             enableRangeSelection={true}
             columnDefs={columnDefs}
-            maintainColumnOrder={true}
             domLayout={domLayout}
             {...(hasRowId && {
               getRowId: params => params?.data?.id
