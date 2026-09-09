@@ -194,6 +194,21 @@ const formatDayId = dayId => {
   return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+// from yyyymmdd to a string formatted per defaultSettings.dateFormat
+const formatDayIdToDefault = dayId => {
+  if (!dayId || dayId.length !== 8) return dayId
+
+  const year = dayId.slice(0, 4)
+  const month = dayId.slice(4, 6)
+  const day = dayId.slice(6, 8)
+  const date = new Date(Number(year), Number(month) - 1, Number(day))
+
+  const defaultSettings = JSON.parse(window.localStorage.getItem('default') || '{}')
+  const dateFormat = defaultSettings.dateFormat || 'dd/MM/yyyy'
+
+  return format(date, dateFormat)
+}
+
 const formatTimeToApi = time => {
   return new Date(time).toLocaleTimeString([], {
     hour: '2-digit',
@@ -249,5 +264,6 @@ export {
   formatDateTimeForGetAPI,
   formatDayId,
   formatTimeToApi,
-  formatDateTimeFromApi
+  formatDateTimeFromApi,
+  formatDayIdToDefault
 }
