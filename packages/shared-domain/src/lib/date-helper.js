@@ -224,6 +224,14 @@ const formatDateToSlashDate = dateStr => {
   return `${value.substring(0, 4)}/${value.substring(4, 6)}/${value.substring(6, 8)}`
 }
 
+// Format date of this structure YYYY-MM-DD HH:MM:SS
+const formatDateTimeFromApi = dateString => {
+  if (!dateString) return null
+  const parsed = dayjs(dateString)
+
+  return parsed.isValid() ? parsed.toDate() : null
+}
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -240,5 +248,6 @@ export {
   formatDateToISO,
   formatDateTimeForGetAPI,
   formatDayId,
-  formatTimeToApi
+  formatTimeToApi,
+  formatDateTimeFromApi
 }

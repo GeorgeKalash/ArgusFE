@@ -18,7 +18,8 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateTimeFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import dayjs from 'dayjs'
 
 const AttSettings = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -59,7 +60,7 @@ const AttSettings = () => {
           obj.key === 'lastProcessedPunch'
         ) {
           myObject[obj.key] = obj.value
-            ? formatDateFromApi(obj.value)
+            ? formatDateTimeFromApi(obj.value)
             : null
         } else {
           myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
@@ -98,7 +99,7 @@ const AttSettings = () => {
         value:
           key === 'lastReceivedPunch' || key === 'lastProcessedPunch'
             ? value
-              ? formatDateToApi(value)
+              ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
               : null
             : value
       }))
