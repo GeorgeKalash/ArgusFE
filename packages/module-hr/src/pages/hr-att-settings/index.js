@@ -18,7 +18,8 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateTimeFromApi, formatDayIdToDefault } from '@argus/shared-domain/src/lib/date-helper'
+import dayjs from 'dayjs'
 
 const AttSettings = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -37,7 +38,7 @@ const AttSettings = () => {
         return (
           obj.key === 'caId' ||
           obj.key === 'fdowCombo' ||
-          obj.key === 'lastGenFSDateTime' ||
+          obj.key === 'lastGenFSDayId' ||
           obj.key === 'lastReceivedPunch' ||
           obj.key === 'lastProcessedPunch' ||
           obj.key === 'lastGenTATV' ||
@@ -52,14 +53,14 @@ const AttSettings = () => {
         )
       })
       filteredList?.forEach(obj => {
-        if (obj.key === 'disableCrossBranchTA') {
+        if (obj.key === 'disableCrossBranchTA' || obj.key === 'lastGenFSDayId' || obj.key === 'lastGenTATV') {
           myObject[obj.key] = obj.value || null
         } else if (
           obj.key === 'lastReceivedPunch' ||
           obj.key === 'lastProcessedPunch'
         ) {
           myObject[obj.key] = obj.value
-            ? formatDateFromApi(obj.value)
+            ? formatDateTimeFromApi(obj.value)
             : null
         } else {
           myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
@@ -75,7 +76,7 @@ const AttSettings = () => {
     initialValues: {
       caId: null,
       fdowCombo: null,
-      lastGenFSDateTime: null,
+      lastGenFSDayId: null,
       lastReceivedPunch: null,
       lastProcessedPunch: null,
       lastGenTATV: null,
@@ -98,7 +99,7 @@ const AttSettings = () => {
         value:
           key === 'lastReceivedPunch' || key === 'lastProcessedPunch'
             ? value
-              ? formatDateToApi(value)
+              ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
               : null
             : value
       }))
@@ -149,10 +150,10 @@ const AttSettings = () => {
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
-              name='lastGenFSDateTime'
+              name='lastGenFSDayId'
               readOnly
               label={labels.lastGenFSDateTime}
-              value={formik.values?.lastGenFSDateTime}
+              value={formatDayIdToDefault(formik.values?.lastGenFSDayId)}
               maxAccess={access}
             />
           </Grid>
@@ -178,7 +179,7 @@ const AttSettings = () => {
             <CustomTextField
               name='lastGenTATV'
               label={labels.lastGenTATV}
-              value={formik.values.lastGenTATV}
+              value={formatDayIdToDefault(formik.values.lastGenTATV)}
               maxAccess={access}
               readOnly
               onChange={formik.handleChange}
