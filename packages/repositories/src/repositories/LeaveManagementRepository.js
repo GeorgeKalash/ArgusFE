@@ -28,6 +28,7 @@ export const LeaveManagementRepository = {
     get: service + 'getBA',
     del: service + 'delBA',
     post: service + 'postBA',
+    unpost: service + 'unpostBA',
     snapshot: service + 'snapshotBA'
   },
   EarnedLeave: {
