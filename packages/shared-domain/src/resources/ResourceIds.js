@@ -671,6 +671,7 @@ export const ResourceIds = {
   FixingPurchaseDTD: 38603,
   BTDocumentTypeDefault: 38102,
   Budget: 42145,
+  Calendar: 72106,
 
   // GL
   GLSalesInvoice: 51604,

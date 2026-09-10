@@ -1303,5 +1303,11 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  }
+  },
+  [ResourceIds.Calendar]: {
+    type: COMBOBOX,
+    endpoint: TimeAttendanceRepository.Calendar.qry,
+    valueField: 'recordId',
+    displayField: 'name'
+  },
 }
