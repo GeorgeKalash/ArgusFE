@@ -110,6 +110,12 @@ function formatDateandTime(date, recFormat = '', showDate = true) {
   return format(new Date(timestamp), formatString);
 }
 
+function toLocalDisplayDate(ms) {
+  const d = new Date(ms)
+  const shifted = new Date(d.getTime() + d.getTimezoneOffset() * 60000)
+  return `/Date(${shifted.getTime()})/`
+}
+
 //Omar
 function formatTimestampToDate(timestamp) {
   if (!timestamp) return
@@ -265,5 +271,6 @@ export {
   formatDayId,
   formatTimeToApi,
   formatDateTimeFromApi,
-  formatDayIdToDefault
+  formatDayIdToDefault,
+  toLocalDisplayDate
 }

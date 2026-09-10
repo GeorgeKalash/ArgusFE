@@ -15,7 +15,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from '../DeleteDialog'
 import StrictConfirmation from '../StrictConfirmation'
 import { HIDDEN, accessLevel } from '@argus/shared-utils/src/utils/maxAccess'
-import { formatDateDefault, getTimeInTimeZone, formatDateTimeDefault } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateDefault, getTimeInTimeZone, formatDateTimeDefault, toLocalDisplayDate } from '@argus/shared-domain/src/lib/date-helper'
 import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -98,7 +98,7 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => parseDateValue(data?.[col.field]),
-          cellRenderer: params => params?.value && formatDateDefault(`/Date(${params?.value})/`),
+          cellRenderer: params => params?.value && formatDateDefault(toLocalDisplayDate(params?.value)),
           comparator: dateComparator,
           sortable: !disableSorting
         }
