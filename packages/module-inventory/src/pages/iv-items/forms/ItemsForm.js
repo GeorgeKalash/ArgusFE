@@ -335,7 +335,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     dataGrid
                     store={store?.categories}
                     endpointId={InventoryRepository.Category.qry}
-                    parameters='_pagesize=30&_startAt=0&_name='
+                    parameters='_pagesize=50&_startAt=0&_name='
                     values={formik.values}
                     name='categoryId'
                     label={labels.category}

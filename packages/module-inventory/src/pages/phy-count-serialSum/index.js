@@ -258,6 +258,9 @@ const PhysicalCountSerial = () => {
               <ResourceComboBox
                 name='siteId'
                 store={siteStore}
+                endpointId={formik.values?.stockCountId ? SCRepository.Sites.qry : null}
+                parameters={`_stockCountId=${formik.values?.stockCountId}`}  
+                filter={item => item.isChecked}   
                 label={_labels.site}
                 valueField='siteId'
                 displayField={['siteRef', 'siteName']}
