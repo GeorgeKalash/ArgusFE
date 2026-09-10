@@ -14,8 +14,8 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import SalesQuotationForm from './Tabs/SalesQuotationForm'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import SalesQuotationForm from '@argus/shared-ui/src/components/Shared/Forms/SalesQuotationForm'
 
 const SalesQuotations = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -164,14 +164,9 @@ const SalesQuotations = () => {
     stack({
       Component: SalesQuotationForm,
       props: {
-        labels,
-        access,
         currency,
         recordId
-      },
-      width: 1300,
-      height: 730,
-      title: labels.salesQuotations
+      }
     })
   }
 

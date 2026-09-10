@@ -63,7 +63,7 @@ export default function JobInfoForm({ recordId, window }) {
       status: 1,
       wip: 1
     },
-    validateOnChange: true,
+    maxAccess,
     validationSchema: yup.object({
       employeeId: yup.number().required(),
       date: yup.date().max(new Date(), 'Date cannot be in the future').required(),
