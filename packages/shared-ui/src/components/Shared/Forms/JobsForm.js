@@ -6,18 +6,27 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
-
 import toast from 'react-hot-toast'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-export default function JobsForm({ labels, maxAccess, store }) {
+export default function JobsForm({ store, window, castingId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const recordId = store?.recordId
+  const recordId = castingId ?? store?.recordId
+
+  const { labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.Jobs,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.jobs, window })
 
   const { formik } = useForm({
     validateOnChange: true,
@@ -374,3 +383,6 @@ export default function JobsForm({ labels, maxAccess, store }) {
     </Form>
   )
 }
+
+JobsForm.width = 1150
+JobsForm.height = 750

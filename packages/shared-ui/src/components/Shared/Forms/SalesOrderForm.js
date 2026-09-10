@@ -172,6 +172,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         overheadId: '',
         vatAmount: 0,
         mdAmount: 0,
+        onHand: 0,
         upo: 0,
         extendedPrice: 0,
         mdAmountPct: null,
@@ -315,6 +316,17 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   }
 
+  async function getOnHand (rowValues) {
+    if (!rowValues?.itemId && !rowValues.siteId) return 0
+
+    const res = await getRequest({
+      extension: InventoryRepository.Availability.get,
+      parameters: `_itemId=${rowValues.itemId}&_seqNo=0&_siteId=${rowValues.siteId}`
+    })
+    
+    return res?.record?.onhand || 0
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -322,7 +334,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       name: 'sku',
       flex: 2,
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
+        endpointId: InventoryRepository.Item.snapshot6,
         parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
         valueField: 'sku',
@@ -408,6 +420,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           taxId: rowTax,
           taxDetails: rowTaxDetails || null,
           mdType: 1,
+          onHand: await getOnHand({ itemId: newRow?.itemId, siteId: formik?.values?.siteId }),
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId)
         })
@@ -440,6 +453,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow.siteId) {
+          update({ onHand: 0 })
+
+          return
+        }
+        const currentOnHand = await getOnHand(newRow)
+        update({ onHand: currentOnHand })
       }
     },
     {
@@ -480,6 +502,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       },
       propsReducer({ props }) {
         return { ...props, store: filteredMeasurements?.current }
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.onHand,
+      name: 'onHand',
+      props: {
+        decimalScale: 2,
+        readOnly: true
       }
     },
     {

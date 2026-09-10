@@ -151,9 +151,11 @@ const PostWorkCenterJob = () => {
     return response?.list
   }
 
+  const reset = () => formik.resetForm({ values: initialValues })
+
   const fillForm = async newValue => {
     if (!newValue) {
-      formik.resetForm()
+      reset()
       return
     }
 
@@ -235,6 +237,7 @@ const PostWorkCenterJob = () => {
       isParentWindow={false}
       isInfo={false}
       isSaved={false}
+      onClear={reset}
     >
       <VertLayout>
         <Fixed>
@@ -257,8 +260,9 @@ const PostWorkCenterJob = () => {
                 onChange={async (_, newValue) => {
                   formik.setFieldValue('jobRef', newValue?.reference || '')
                   formik.setFieldValue('routingId', newValue?.routingId || null)
-                  formik.setFieldValue('jobId', newValue?.recordId || null)
                   fillForm(newValue)
+                  
+                  formik.setFieldValue('jobId', newValue?.recordId || null)
                 }}
                 errorCheck={'jobId'}
               />

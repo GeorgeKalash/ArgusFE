@@ -9,12 +9,23 @@ import toast from 'react-hot-toast'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
-export default function DisassemblyForm({ labels, maxAccess, store, setStore }) {
+export default function DisassemblyForm({ store, setStore, window, castingId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const recordId = store?.recordId
+  const recordId = castingId ?? store?.recordId
   const metalInfo = store?.metalInfo
+
+
+  const { labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.Disassembly,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.disassembly, window })
 
   const { formik } = useForm({
     maxAccess,
@@ -177,3 +188,6 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore }) 
     </Form>
   )
 }
+
+DisassemblyForm.width = 1150
+DisassemblyForm.height = 750

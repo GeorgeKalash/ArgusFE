@@ -104,9 +104,9 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         lineId: yup.number().required(),
         metalId: yup.number().required(),
         metalColorId: yup.number().required(),
-        grossWgt: yup.number().required(),
+        grossWgt: yup.number().min(0.01).required(),
         rmWgt: yup.number().required(),
-        mouldWgt: yup.number().required(),
+        mouldWgt: yup.number().min(0.01).required(),
         netWgt: yup.number().min(0).required(),
         suggestedWgt: yup.number().required()
       }),

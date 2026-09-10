@@ -10,20 +10,22 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import DepartmentForm from './Form/DepartmentForm'
-import { RepairAndServiceRepository } from '@argus/repositories/src/repositories/RepairAndServiceRepository'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
+import EvenOrderDTDForm from './Form/EvenOrderDTDForm'
 
-const Department = () => {
+const EventOrderDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const functionId = SystemFunction.EventOrder
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairAndServiceRepository.Department.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      extension: BrokerageTradingRepository.DocumentTypeDefault.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -33,25 +35,33 @@ const Department = () => {
     query: { data },
     labels,
     invalidate,
-    paginationParameters,
     refetch,
-    access
+    access,
+    paginationParameters
   } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.Department.page,
-    datasetId: ResourceIds.Department
+    endpointId: BrokerageTradingRepository.DocumentTypeDefault.page,
+    datasetId: ResourceIds.BTDocumentTypeDefault,
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
   })
 
   const columns = [
-    {
-      field: 'reference',
-      headerName: labels.reference,
-      flex: 1
+    { 
+      field: 'dtName', 
+      headerName: labels.documentType, 
+      flex: 1 
     },
-    {
-      field: 'name',
-      headerName: labels.name,
-      flex: 1
+    { 
+      field: 'plantName', 
+      headerName: labels.plant, 
+      flex: 1 
+    },
+    { 
+      field: 'spName', 
+      headerName: labels.sp, 
+      flex: 1 
     }
   ]
 
@@ -61,29 +71,29 @@ const Department = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.Department.del,
+      extension: BrokerageTradingRepository.DocumentTypeDefault.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(recordId) {
+  function openForm(record) {
     stack({
-      Component: DepartmentForm,
+      Component: EvenOrderDTDForm,
       props: {
         labels,
-        recordId,
+        recordId: record?.dtId,
         maxAccess: access
       },
-      width: 500,
-      height: 250,
-      title: labels.Department
+      width: 600,
+      height: 300,
+      title: labels.dtd
     })
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj)
   }
 
   return (
@@ -96,13 +106,13 @@ const Department = () => {
           name='table'
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['dtId']}
           onEdit={edit}
           onDelete={del}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
           paginationType='api'
+          paginationParameters={paginationParameters}
           maxAccess={access}
         />
       </Grow>
@@ -110,4 +120,4 @@ const Department = () => {
   )
 }
 
-export default Department
+export default EventOrderDTD

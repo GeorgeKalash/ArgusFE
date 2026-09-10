@@ -29,6 +29,7 @@ export const MultiCurrencyRepository = {
   },
   ExchangeRates: {
     set2: service + 'set2ED',
-    qry2: service + 'qryED2'
+    qry2: service + 'qryED2',
+    get2: service + 'getED2'
   }
 }

@@ -47,12 +47,15 @@ const Designs = () => {
   })
 
 
-  async function fetchWithFilter({ filters, pagination }) {
+  async function fetchWithFilter({ filters, pagination = {} }) {
+    const { _startAt = 0, _pageSize = 50 } = pagination
     if (filters?.qry) {
-      return await getRequest({
-        extension: ManufacturingRepository.Design.snapshot,
-        parameters: `_filter=${filters.qry}&_startAt=${pagination._startAt || 0}&_size=${pagination._size || 50}`
+      const response = await getRequest({
+        extension: ManufacturingRepository.Design.snapshot2,
+        parameters: `_filter=${filters.qry}&_startAt=${_startAt}&_pageSize=${_pageSize}`
       })
+
+      return { ...response, _startAt: _startAt }
     } else {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
     }

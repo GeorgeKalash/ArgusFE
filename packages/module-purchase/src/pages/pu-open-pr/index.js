@@ -199,7 +199,7 @@ const OpenPurchaseRequisition = () => {
       component: 'numberfield',
       label: labels.balance,
       name: 'balance',
-      props: { readOnly: true }
+      props: { readOnly: true, decimalScale: 2 }
     },
     {
       component: 'numberfield',
@@ -207,7 +207,8 @@ const OpenPurchaseRequisition = () => {
       name: 'orderNow',
       updateOn: 'blur',
       props: {
-        allowNegative: false
+        allowNegative: false,
+        decimalScale: 2
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: !row.isChecked }

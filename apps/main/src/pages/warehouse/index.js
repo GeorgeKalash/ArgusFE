@@ -1,2 +1,2 @@
-// AUTO-GENERATED WRAPPER – uses code from @argus/module-auth/src/pages/warehouse
-export { default } from '@argus/module-auth/src/pages/warehouse';
+// AUTO-GENERATED WRAPPER – uses code from @argus/module-rs/src/pages/warehouse
+export { default } from '@argus/module-rs/src/pages/warehouse';

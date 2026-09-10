@@ -59,6 +59,7 @@ export const BusinessPartnerRepository = {
   },
   Relation: {
     qry: service + 'qryREL',
+    qry2: service + 'qryREL2',
     page: service + 'pageREL',
     get: service + 'getREL',
     set: service + 'setREL',

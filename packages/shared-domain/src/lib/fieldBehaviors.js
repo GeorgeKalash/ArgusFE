@@ -14,7 +14,7 @@ const getData = async (getRequest, id) => {
   }
 }
 
-const mergeWithMaxAccess = (maxAccess, field, fieldName) => {
+const mergeWithMaxAccess = (maxAccess, field, fieldName, editMode) => {
   maxAccess = JSON.parse(JSON.stringify(maxAccess))
   let controls = maxAccess.record.controls
 
@@ -37,6 +37,7 @@ const mergeWithMaxAccess = (maxAccess, field, fieldName) => {
 
   return {
     ...maxAccess,
+    editMode,
     record: {
       ...maxAccess.record,
       controls
@@ -64,7 +65,7 @@ const fieldBehavior = async (getRequest, fieldName = 'reference', maxAccess, sel
   }
 
   if (maxAccess) {
-    maxAccess = mergeWithMaxAccess(maxAccess, field, fieldName)
+    maxAccess = mergeWithMaxAccess(maxAccess, field, fieldName, editMode)
   }
 
   return {
