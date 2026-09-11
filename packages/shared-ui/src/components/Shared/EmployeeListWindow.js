@@ -74,7 +74,7 @@ export default function EmployeeListWindow ({ recordId, employeeStatus, onSucces
             resourceId={ResourceIds.EmployeeFilter}
             seqNo={0}
             recordId={recordId}
-            disabled={!!recordId}
+            disabled={!isActive}
           />
 
           {recordId && (
