@@ -56,40 +56,42 @@ export default function ProductionRequestForm({ recordId, labels, access, window
   })
 
   const conditions = {
-    itemId: row => (row?.qty != null && row.qty !== 0) || row?.pcs != null
+    itemId: row => (row?.qty != null && row.qty !== 0) || row?.pcs != null || !!row?.itemId
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
+  const initialValues = {
+    recordId,
+    header: {
+      recordId,
+      dtId: null,
+      reference: '',
+      date: new Date(),
+      plantId: null,
+      type: null,
+      typeName: '',
+      notes: '',
+      status: 1
+    },
+    items: [{
+      id: 1,
+      requestId: recordId || null,
+      seqNo: 1,
+      itemId: null,
+      sku: '',
+      itemName: '',
+      qty: 0,
+      pcs: null,
+      itemWeight: null
+    }]
+  }
+    
   const { formik } = useForm({
     maxAccess,
     conditionSchema: ['items'],
     behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
-    initialValues: {
-      recordId,
-      header: {
-        recordId,
-        dtId: null,
-        reference: '',
-        date: new Date(),
-        plantId: null,
-        type: null,
-        typeName: '',
-        notes: '',
-        status: 1
-      },
-      items: [{
-        id: 1,
-        requestId: recordId || null,
-        seqNo: 1,
-        itemId: null,
-        sku: '',
-        itemName: '',
-        qty: 0,
-        pcs: null,
-        itemWeight: null
-      }]
-    },
+    initialValues,
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required(),
@@ -141,7 +143,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
               id: index + 1
             }
           })
-          : formik.initialValues.items
+          : initialValues.items
       }
     })
   }
@@ -164,7 +166,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
 
     if (formik.values.header.type && formik.values.header.type !== type && hasFilledItems) {
       stackError({ message: platformLabels.ChangingType })
-      formik.setFieldValue('items', formik.initialValues.items)
+      formik.setFieldValue('items', initialValues.items)
     }
 
     formik.setFieldValue('header.typeName', value || '')
