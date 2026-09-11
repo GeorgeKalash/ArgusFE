@@ -4,6 +4,7 @@ import axios from 'axios'
 import SHA1 from 'crypto-js/sha1'
 import jwt from 'jwt-decode'
 import { getFromDB, saveToDB } from '@argus/shared-domain/src/lib/indexDB'
+import { useClientConfig } from '@argus/shared-hooks/src/hooks/useClientConfig'
 
 const defaultProvider = {
   user: null,
@@ -102,6 +103,7 @@ const AuthProvider = ({ children }) => {
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
   const [errorMsg, setErrorMsg] = useState(null)
+  const { config } = useClientConfig()
   const router = useRouter()
 
   const initAuth = async () => {
@@ -120,9 +122,10 @@ const AuthProvider = ({ children }) => {
 
   const fetchData = async () => {
     setErrorMsg(null)
-    const matchHostname = window.location.hostname.match(/^(.+)\.(softmachine\.co|argus-bup\.com)$/)
-    const isDeploy = !matchHostname || matchHostname?.[1]?.toLowerCase() == 'deploy'
-    const accountName = isDeploy ? companyName : matchHostname?.[1]
+    const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
+    const accountOnPrem = config?.onPremCode
+    const isDeploy =!accountOnPrem && (!matchHostname || matchHostname?.[1]?.toLowerCase() == 'deploy')
+    const accountName = accountOnPrem || (isDeploy ? companyName : matchHostname?.[1])
     setDeployHost(isDeploy)
     try {
       if (!accountName) {
@@ -137,10 +140,10 @@ const AuthProvider = ({ children }) => {
         return
       }
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
+      const response = await axios.get(`${config?.authUrl}/MA.asmx/getAC?_accountName=${accountName}`)
       const record = response?.data?.record
       setGetAC(response || null)
-      
+
       if (!record || (isDeploy && !record.trial)) {
         setErrorMsg(`Invalid deploy account: ${accountName}`)
         setValidCompanyName(false)
@@ -149,7 +152,6 @@ const AuthProvider = ({ children }) => {
         setValidCompanyName(!!record.accountName)
         window.localStorage.setItem('apiUrl', record.api || '')
         await saveToDB('authSettings', 'companyName', record.accountName)
-
       }
     } catch (error) {
       console.error('Error Fetching Data: ', error)
@@ -158,13 +160,14 @@ const AuthProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    fetchData()
-  }, [companyName])
+    initAuth()
+  }, [])
 
   useEffect(() => {
-    initAuth()
+    if (!config) return
+
     fetchData()
-  }, [])
+  }, [config, companyName])
 
   const handleLogin = async (params, errorCallback) => {
     try {
@@ -185,7 +188,7 @@ const AuthProvider = ({ children }) => {
         getAC.data.record.accountId
       }&_userId=${getUS2.data.record.recordId}`
 
-      const signIn3 = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`, {
+      const signIn3 = await axios.get(`${config?.authUrl}/MA.asmx/signIn3?${signIn3Params}`, {
         headers: {
           accountId: JSON.parse(getAC.data.record.accountId),
           dbe: JSON.parse(getAC.data.record.dbe),
@@ -275,7 +278,7 @@ const AuthProvider = ({ children }) => {
             })
           )
           axios
-            .post(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/newAT`, bodyFormData, {
+            .post(`${config?.authUrl}/MA.asmx/newAT`, bodyFormData, {
               headers: {
                 authorization: 'Bearer ' + user.accessToken,
                 'Content-Type': 'multipart/form-data'

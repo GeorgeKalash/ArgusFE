@@ -13,12 +13,14 @@ import NewPassword from '@argus/shared-ui/src/components/Shared/NewPassword'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
+import { useClientConfig } from '@argus/shared-hooks/src/hooks/useClientConfig'
 
 const ResetPassForm = ({ labels, username = '' }) => {
   const [score, setScore] = useState(0)
   const { stack: stackError } = useError()
   const auth = useAuth()
   const { encryptePWD } = useContext(AuthContext)
+  const { config } = useClientConfig()
   const router = useRouter()
 
   const { formik } = useForm({
@@ -45,7 +47,7 @@ const ResetPassForm = ({ labels, username = '' }) => {
         bodyFormData.append('record', JSON.stringify(resetPWVal))
 
         axios
-          .post(`${process.env.NEXT_PUBLIC_AuthURL}MA.asmx/resetPW`, bodyFormData)
+          .post(`${config?.authUrl}MA.asmx/resetPW`, bodyFormData)
           .then(res => {
             toast.success(labels.passSuccess)
             router.push('/login')

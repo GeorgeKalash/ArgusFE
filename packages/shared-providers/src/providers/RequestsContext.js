@@ -6,6 +6,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { Box, CircularProgress } from '@mui/material'
 import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import { useClientConfig } from '@argus/shared-hooks/src/hooks/useClientConfig'
 
 const RequestsContext = createContext()
 
@@ -42,6 +43,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
   const errorModel = useError()
   const [activeRequests, setActiveRequests] = useState(0)
+  const { config } = useClientConfig()
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
@@ -159,7 +161,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
     return axios({
       method: 'GET',
-      url: process.env.NEXT_PUBLIC_AuthURL + body.extension + '?' + body.parameters,
+      url: config?.authUrl + body.extension + '?' + body.parameters,
       headers: {
         Authorization: 'Bearer ' + accessToken,
         'Content-Type': 'multipart/form-data',
@@ -189,7 +191,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     return new Promise(async (resolve, reject) => {
       axios({
         method: 'POST',
-        url: process.env.NEXT_PUBLIC_AuthURL + body.extension,
+        url: config?.authUrl + body.extension,
         headers: {
           Authorization: 'Bearer ' + token,
           'Content-Type': 'multipart/form-data',
@@ -283,7 +285,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
               const res = await axios({
                 method: 'POST',
-                url: process.env.NEXT_PUBLIC_AuthURL + 'MA.asmx/' + 'newAT',
+                url: config?.authUrl + 'MA.asmx/' + 'newAT',
                 headers: {
                   authorization: 'Bearer ' + user.accessToken,
                   'Content-Type': 'multipart/form-data'
