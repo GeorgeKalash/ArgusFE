@@ -938,8 +938,7 @@ export const apiMappings = {
   },
   [ResourceIds.AttendanceSchedule]: {
     type: COMBOBOX,
-    endpoint: TimeAttendanceRepository.AttendanceScheduleFilters.qry,
-    parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId&_scId=0`,
+    endpoint: TimeAttendanceRepository.Schedule.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
