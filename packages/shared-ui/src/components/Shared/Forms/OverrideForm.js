@@ -196,6 +196,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                 displayField='dtRange'
                 required
                 store={shiftStore?.current}
+                fetchData={() => fillShift(formik.values?.employeeId, formik.values?.date)}
                 value={formik.values.shiftId}
                 onChange={(_, newValue) => formik.setFieldValue('shiftId', newValue?.recordId || null)}
                 error={formik.touched.shiftId && Boolean(formik.errors.shiftId)}
