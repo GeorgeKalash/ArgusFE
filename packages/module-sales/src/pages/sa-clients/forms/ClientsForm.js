@@ -337,10 +337,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Items.pack}
-                reducer={response => {
-                  return response?.record?.taxSchedules
-                }}
+                endpointId={FinancialRepository.TaxSchedules.qry}
                 values={formik.values}
                 name='taxId'
                 label={labels.tax}
@@ -349,7 +346,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 displayFieldWidth={1}
                 maxAccess={maxAccess}
                 readOnly={!formik.values?.isSubjectToVAT}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('taxId', newValue?.recordId || '')
                 }}
                 error={formik.touched.taxId && formik.errors.taxId}

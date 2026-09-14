@@ -30,6 +30,9 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialsTransferForm'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
 
 export default function DraftTransfer({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -38,6 +41,12 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const [reCal, setReCal] = useState(false)
+  const [store, setStore] = useState({
+    documentTypes: [],
+    sites: [],
+    notificationGroups: [],
+    carriers: []
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftTransfer,
@@ -570,6 +579,20 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     )
   }
 
+  const fillCombos = async () => {
+    const res = await getRequest({
+      extension: InventoryRepository.DraftTransfer.pack,
+      parameters: ``
+    })
+
+    setStore({
+      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
+      sites: res?.record?.sites || [],
+      notificationGroups: res?.record?.notificationGroups || [], 
+      carriers: res?.record?.carriers || []
+    })
+  }
+
   useEffect(() => {
     if (!formik.values.items?.length) return
     const totals = calculateTotalWeightFromSerials(formik.values.items)
@@ -580,6 +603,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
   useEffect(() => {
     ;(async function () {
+      await fillCombos()
       if (formik?.values?.recordId) await refetchForm(formik?.values?.recordId)
       else formik.setFieldValue('header.fromSiteId', defUserSiteId || defSiteId || null)    
     })()
@@ -626,8 +650,9 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.DraftTransfer.pack}
-                    reducer={response => response?.record?.documentTypes}
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_dgId=${SystemFunction.DraftTransfer}&_startAt=0&_pageSize=1000`}                                                   
+                    store={store?.documentTypes}
                     name='header.dtId'
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     label={labels.documentType}
@@ -649,8 +674,8 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.DraftTransfer.pack}
-                    reducer={response => response?.record?.sites}
+                    endpointId={InventoryRepository.Site.qry}
+                    store={store?.sites}
                     name='header.fromSiteId'
                     readOnly={isPosted || formik?.values?.items?.some(serial => serial.srlNo)}
                     label={labels.fromSite}
@@ -692,8 +717,8 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.DraftTransfer.pack}
-                    reducer={response => response?.record?.sites}
+                    endpointId={InventoryRepository.Site.qry}
+                    store={store?.sites}
                     name='header.toSiteId'
                     readOnly={isPosted}
                     label={labels.toSite}
@@ -737,8 +762,8 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.DraftTransfer.pack}
-                    reducer={response => response?.record?.notificationGroups}
+                    endpointId={AccessControlRepository.NotificationGroup.qry}
+                    store={store?.notificationGroups}
                     name='header.notificationGroupId'
                     label={labels.notificationGroup}
                     valueField='recordId'
@@ -756,8 +781,8 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.DraftTransfer.pack}
-                    reducer={response => response?.record?.carriers}
+                    endpointId={LogisticsRepository.LoCarrier.qry}
+                    store={store?.carriers}
                     name='header.carrierId'
                     label={labels.carrier}
                     values={formik.values.header}
