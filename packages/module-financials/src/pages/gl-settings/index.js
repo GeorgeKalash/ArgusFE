@@ -206,7 +206,6 @@ const GLSettings = () => {
                 displayField='value'
                 datasetId={DataSets.JV_AUTO_CALC_METHOD}
                 values={formik.values}
-                required
                 maxAccess={access}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('JV_autoCalcMethod', newValue ? newValue.key : '')
