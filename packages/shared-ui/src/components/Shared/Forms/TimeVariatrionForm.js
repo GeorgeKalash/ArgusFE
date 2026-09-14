@@ -359,6 +359,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
                 valueField='recordId'
                 displayField='dtRange'
                 store={shiftStore?.current}
+                fetchData={() => fillShift(formik.values?.employeeId, formik.values?.date, formik.values?.timeCode)}
                 value={formik.values.shiftId}
                 readOnly={isCancelled || isClosed || formik.values?.timeCode == 20}
                 onChange={(_, newValue) => formik.setFieldValue('shiftId', newValue?.recordId || null)}

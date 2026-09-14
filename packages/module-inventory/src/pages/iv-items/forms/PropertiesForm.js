@@ -182,9 +182,10 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+           <Grid item xs={12}>
               <ResourceComboBox
                 store={store?.dimensionGroups}
+                endpointId={InventoryRepository.DimensionGroup.qry}
                 name='dmgId'
                 label={labels.dmgName}
                 values={formik.values}
@@ -200,43 +201,38 @@ const PropertiesForm = ({ labels, store, maxAccess }) => {
                 error={formik.touched.dmgId && Boolean(formik.errors.dmgId)}
               />
             </Grid>
-            {
-              dimensions && dimensions.length > 0 && (
-                
-                  <Grid item xs={6}>
-                    <FieldSet title={labels.dimensions}>
-                    {dimensions?.map((dimension, index) => {
-                      const dimensionNumber = dimension.dimensionId
 
-                      const options =
-                        (store.packB?.dimensions || [])
-                          .filter(d => d.dimension === dimensionNumber)
-                      return (
-                        <Grid container mt={0.2} spacing={2} key={index}>
-                          <Grid item xs={12}>
-                            <ResourceComboBox
-                              store={options}
-                              name={`${dimension.dimensionId}`}
-                              label={dimension.dimensionName}
-                              valueField='id'
-                              displayField='name'
-                              values={formik.values}
-                              onChange={(_, newValue) =>
-                                formik.setFieldValue(
-                                  `${dimension.dimensionId}`,
-                                  newValue?.id || null
-                                )
-                              }
-                            />
-                          </Grid>
+            {dimensions && dimensions.length > 0 && (
+              <Grid item xs={6}>
+                <FieldSet title={labels.dimensions}>
+                  {dimensions?.map((dimension, index) => {
+                    const dimensionNumber = dimension.dimensionId
+                    const options = (store.packB?.dimensions || [])
+                      .filter(d => d.dimension === dimensionNumber)
+
+                    return (
+                      <Grid container mt={0.2} spacing={2} key={index}>
+                        <Grid item xs={12}>
+                         <ResourceComboBox
+                            store={options}
+                            endpointId={InventoryRepository.Dimension.qry}
+                            parameters={`_filter=&_dimension=${dimension.dimensionId}`}
+                            name={`${dimension.dimensionId}`}
+                            label={dimension.dimensionName}
+                            valueField='id'
+                            displayField='name'
+                            values={formik.values}
+                            onChange={(_, newValue) =>
+                              formik.setFieldValue(`${dimension.dimensionId}`, newValue?.id || null)
+                            }
+                          />
                         </Grid>
-                      )
-                    })}
-                    
+                      </Grid>
+                    )
+                  })}
                 </FieldSet>
-                  </Grid>
-              )
-            }
+              </Grid>
+            )}
             
           
             <Grid item xs={6}>

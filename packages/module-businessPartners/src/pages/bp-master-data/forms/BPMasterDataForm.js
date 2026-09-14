@@ -6,7 +6,6 @@ import toast from 'react-hot-toast'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import { Grid } from '@mui/material'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
@@ -16,7 +15,6 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
@@ -314,13 +312,24 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomComboBox
+                  <ResourceComboBox
                     name='defaultInc'
                     label={labels.idCategory}
                     valueField='recordId'
                     displayField='name'
                     readOnly={!formik.values.category || !store?.category?.length > 0}
                     store={store.category}
+                    endpointId={BusinessPartnerRepository.CategoryID.qry}
+                    filter={item => {
+                      const category = parseInt(formik.values?.category)
+                      if (!category) return 
+
+                      return (
+                        (category === 1 && item.person) ||
+                        (category === 2 && item.org) ||
+                        (category === 3 && item.group)
+                      )
+                    }}  
                     value={store?.category?.filter(item => item.recordId === parseInt(formik.values.defaultInc))[0]}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {

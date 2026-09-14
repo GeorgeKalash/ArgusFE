@@ -14,6 +14,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { DirtyField, GeometricShape, PhysicalPropertyCalculatorCtrl } from '@argus/shared-utils/src/utils/PhysicalPropertyCalc'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -140,6 +141,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                     key: parseInt(item.key),
                     value: item.value
                   }))}
+                  datasetId={DataSets.GEOMETRIC_SHAPE}
                   values={formik.values}
                   name='shape'
                   label={labels.shape}
@@ -261,6 +263,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               <Grid item xs={12}>
                 <ResourceComboBox
                   store={store.metals}
+                  endpointId={InventoryRepository.Metals.qry}
                   values={formik.values}
                   name='metalId'
                   label={labels.metal}
@@ -281,6 +284,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               <Grid item xs={12}>
                 <ResourceComboBox
                   store={store.metalColors}
+                  endpointId={InventoryRepository.MetalColor.qry}
                   values={formik.values}
                   name='metalColorId'
                   label={labels.metalColor}

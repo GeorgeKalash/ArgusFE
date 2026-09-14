@@ -98,7 +98,7 @@ const DimensionsValues = () => {
     })
   }
 
-  useEffect(() => {
+  const reloadTpaValues = async () => {
     if (!systemDefaults?.list) return
 
     const result = systemDefaults.list.filter(
@@ -107,6 +107,10 @@ const DimensionsValues = () => {
 
     setTpaValues(result)
     filterBy('qry', result[0]?.key)
+  }
+
+  useEffect(() => {
+    reloadTpaValues()
   }, [systemDefaults])
 
   return (
@@ -124,7 +128,8 @@ const DimensionsValues = () => {
               store={tpaValues}
               value={filters?.qry}
               maxAccess={access}
-              onChange={(event, newValue) => {
+              fetchData={reloadTpaValues}
+              onChange={(_, newValue) => {
                 if (newValue?.key) {
                   filterBy('qry', newValue?.key)
                 } else {

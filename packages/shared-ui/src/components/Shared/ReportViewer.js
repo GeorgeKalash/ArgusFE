@@ -5,11 +5,11 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
-import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { generateReport } from '@argus/shared-utils/src/utils/ReportUtils'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import CustomComboBox from '../Inputs/CustomComboBox'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,22 +40,18 @@ const ReportViewer = ({ resourceId }) => {
     })
     const pack = reportPack?.record || {}
 
-    setReportStore(prev => {
-      const layoutsPack = (pack?.layouts || [])
-        .map(item => ({
-          id: item.id,
-          api_url: item.api,
-          reportClass: item.instanceName,
-          parameters: item.parameters,
-          layoutName: item.layoutName,
-          schemaFile: item.schemaFile,
-          reportEngine: item.reportEngine,
-          assembly: item.assembly ?? 'ArgusRPT.dll'
-        }))
+    const layoutsPack = (pack?.layouts || []).map(item => ({
+      id: item.id,
+      api_url: item.api,
+      reportClass: item.instanceName,
+      parameters: item.parameters,
+      layoutName: item.layoutName,
+      schemaFile: item.schemaFile,
+      reportEngine: item.reportEngine,
+      assembly: item.assembly ?? 'ArgusRPT.dll'
+    }))
 
-      return [...prev, ...layoutsPack]
-    })
-
+    setReportStore(layoutsPack)
     setDefaultLayoutId(pack?.defaultLayoutId)
   }
 
@@ -121,13 +117,14 @@ const ReportViewer = ({ resourceId }) => {
           leftSection={
             <Grid container spacing={2} alignItems='end' wrap='nowrap'>
               <Grid item xs>
-                <ResourceComboBox
+                <CustomComboBox
                   store={reportStore}
+                  fetchData={getReportLayout}
                   label='Select a report template'
                   name='selectedReport'
                   valueField='layoutName'
                   displayField='layoutName'
-                  values={report}
+                  value={report?.selectedReport}
                   required
                   fullWidth
                   onChange={(e, newValue) =>

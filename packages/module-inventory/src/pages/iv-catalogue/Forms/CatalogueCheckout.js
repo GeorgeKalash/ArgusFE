@@ -11,6 +11,7 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
 import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 
 const LineRow = memo(({ line, itemId, onUpdateLine, onRemoveLine, onAddLine, isLast, labels, expectedDeliveryDaysStore }) => {
   const [localNote, setLocalNote] = useState(line.notes || '')
@@ -80,8 +81,9 @@ const LineRow = memo(({ line, itemId, onUpdateLine, onRemoveLine, onAddLine, isL
               onUpdateLine(itemId, line.lineId, { notes: '' })
             }}
           />
-          <CustomComboBox
+          <ResourceComboBox
             name='expectedDeliveryDays'
+            datasetId={DataSets.EXPECTED_DELIVERY_DAYS}
             label={labels?.expectedDeliveryDays}
             store={expectedDeliveryDaysStore}
             valueField='key'
@@ -180,7 +182,6 @@ const CatalogueCheckout = ({
 }) => {
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [expectedDeliveryDaysStore, setExpectedDeliveryDaysStore] = useState([])
-
   const totalQty   = cartItems.reduce((s, i) => s + i.lines.reduce((ls, l) => ls + l.qty, 0), 0)
   const total      = cartItems.reduce((s, i) => s + (parseFloat(i.unitPrice) || 0) * i.lines.reduce((ls, l) => ls + l.qty, 0), 0)
 

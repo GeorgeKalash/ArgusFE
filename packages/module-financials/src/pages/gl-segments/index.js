@@ -115,7 +115,7 @@ const Segments = () => {
     }
   }
 
-  useEffect(() => {
+  async function loadSegments() {
     if (!systemDefaults?.list) return
 
     const filteredList = systemDefaults.list
@@ -140,6 +140,10 @@ const Segments = () => {
       formik.setFieldValue('segmentName', filteredList[0].key)
       formik.setFieldValue('segmentId', filteredList[0].value)
     }
+  }
+
+  useEffect(() => {
+    loadSegments()
   }, [systemDefaults])
 
   return (
@@ -160,7 +164,8 @@ const Segments = () => {
                 displayField='key'
                 value={formik.values.segmentName}
                 required
-                onChange={(event, newValue) => {
+                fetchData={loadSegments}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('segmentName', newValue?.key)
                   formik.setFieldValue('segmentId', newValue?.value)
                 }}
