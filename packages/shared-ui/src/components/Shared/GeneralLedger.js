@@ -25,11 +25,14 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
+  const JV_autoCalcMethod = systemDefaults?.list?.find(({ key }) => key === 'JV_autoCalcMethod')?.value
   const [formik, setformik] = useState(null)
   const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 })
   const [exRateValue, setExRateValue] = useState(null)
@@ -645,7 +648,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                     exRate: newRow?.exRate,
                     baseAmount: newRow?.baseAmount,
                     rateCalcMethod: newRow?.rateCalcMethod,
-                    dirtyField: DIRTYFIELD_BASE_AMOUNT
+                    dirtyField: DIRTYFIELD_BASE_AMOUNT,
+                    autoCalcMethod: JV_autoCalcMethod
                   })
                   update({
                     exRate: updatedRateRow.exRate || null,
