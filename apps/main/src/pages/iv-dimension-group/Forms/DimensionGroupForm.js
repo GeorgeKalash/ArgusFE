@@ -28,6 +28,7 @@ export default function DimensionGroupForm({ recordId, labels, maxAccess }) {
       recordId: null,
       header: {
         name: '',
+        reference: ''
       },
       items: [{ id: 1, recordId, seqNo: 1, dimensionId: null }]
     },
@@ -109,6 +110,18 @@ export default function DimensionGroupForm({ recordId, labels, maxAccess }) {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='header.reference'
+                label={labels.reference}
+                value={formik.values.header.reference}
+                maxAccess={maxAccess}
+                maxLength='10'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.reference', '')}
+                error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
+              />
+            </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='header.name'

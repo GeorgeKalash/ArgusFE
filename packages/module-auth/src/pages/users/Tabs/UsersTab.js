@@ -115,7 +115,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
               userName: copy.username,
               password: copy.password,
               passwordExpiryDays: copy.passwordExpiryDays,
-              userId: copy.recordId
+              userId: copy.recordId,
+              email: copy.email
             })
           },
           {

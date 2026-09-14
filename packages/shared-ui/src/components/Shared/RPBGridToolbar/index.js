@@ -24,6 +24,7 @@ const RPBGridToolbar = ({
   paramsRequired = false,
   leftSection,
   disableActionsPadding,
+  actions: customActions = [],
   ...rest
 }) => {
   const { stack } = useWindow()
@@ -87,6 +88,7 @@ const RPBGridToolbar = ({
   const reportParams = formatDataForApi(rpbParams)
 
   const actions = [
+    ...customActions,
     {
       key: 'OpenRPB',
       condition: true,

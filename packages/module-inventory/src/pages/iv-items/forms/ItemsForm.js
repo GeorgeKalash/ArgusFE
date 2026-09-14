@@ -46,10 +46,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   })
   const imageUploadRef = useRef(null)
 
-  const { onFieldChange, maxAccess, fieldBehavior} = useFieldBehavior({
+  const { onFieldChange, maxAccess, fieldBehavior } = useFieldBehavior({
     access,
     fieldName: 'sku',
-    editMode: recordId,
+    editMode: Boolean(recordId),
     enableClearing: !recordId
   })
 
@@ -615,7 +615,11 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    store={store?.productionLevels}
+                    store={store?.productionLevels?.map(PL => (({
+                        key: parseInt(PL?.key) || null,
+                        value: PL?.value || ''
+                      })))
+                    }
                     name='productionLevel'
                     label={labels.productionLevel}
                     valueField='key'

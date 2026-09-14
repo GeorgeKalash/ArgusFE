@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
 import DepartmentsForm from './Forms/DepartmentsForm'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import Tree from '@argus/shared-ui/src/components/Shared/Tree'
 
 const Departments = () => {
@@ -20,11 +20,11 @@ const Departments = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: companyStructureRepository.Departments.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return {
@@ -33,12 +33,6 @@ const Departments = () => {
     }
   }
 
-  async function fetchWithSearch({ qry }) {
-    return await getRequest({
-      extension: companyStructureRepository.Departments.snapshot,
-      parameters: `_filter=${qry}`
-    })
-  }
 
   const {
     query: { data },
@@ -47,17 +41,26 @@ const Departments = () => {
     refetch,
     access: maxAccess,
     invalidate,
-    search,
-    clear
+    filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: companyStructureRepository.Departments.page,
     datasetId: ResourceIds.Departments,
-    search: {
-      endpointId: companyStructureRepository.Departments.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: companyStructureRepository.Departments.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
 
   const columns = [
     {
@@ -149,16 +152,7 @@ const Departments = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={maxAccess}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={labels}
-          inputSearch={true}
-          previewReport={ResourceIds.Departments}
-          actions={actions}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={maxAccess} reportName={'CSDE'} filterBy={filterBy} actions={actions} previewReport={ResourceIds.Departments}/>
       </Fixed>
       <Grow>
         <Table

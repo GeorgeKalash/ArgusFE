@@ -53,6 +53,11 @@ const BiometricDevices = () => {
       field: 'name',
       headerName: labels.name,
       flex: 1
+    },
+    {
+      field: 'branchName',
+      headerName: labels.branch,
+      flex: 1
     }
   ]
 

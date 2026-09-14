@@ -520,8 +520,7 @@ export default function SamplesForm({ recordId, window }) {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={ManufacturingRepository.MFJobOrder.snapshot3}
-                    parameters={{ _status: 4 }}
+                    endpointId={ManufacturingRepository.MFJobOrder.snapshot5}
                     valueField='reference'
                     displayField='reference'
                     secondDisplayField={false}

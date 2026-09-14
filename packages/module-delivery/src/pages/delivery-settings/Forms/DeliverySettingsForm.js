@@ -37,7 +37,7 @@ export default function DeliverySettingsForm({ _labels, access }) {
 
   async function fillSalesInvReportLayout(){
     const reportPack = await getRequest({
-      extension: SystemRepository.ReportLayout.get,
+      extension: SystemRepository.ReportLayout.get2,
       parameters: `_resourceId=${ResourceIds.SalesInvoice}`
     })
     const pack = reportPack?.record || {}

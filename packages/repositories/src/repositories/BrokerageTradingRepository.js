@@ -35,5 +35,14 @@ export const BrokerageTradingRepository = {
     get: service + 'getEO',
     snapshot: service + 'snapshotEO',
     pack: service + 'getPackEO'
+  },
+  EventOrderInquiry: {
+    page: service + 'pageEOI'
+  },
+  DocumentTypeDefault: {
+    get: service + 'getDTD',  
+    set: service + 'setDTD',
+    del: service + 'delDTD',
+    page: service + 'pageDTD'
   }
 }

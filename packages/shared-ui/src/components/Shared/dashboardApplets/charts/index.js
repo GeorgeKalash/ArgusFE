@@ -906,6 +906,27 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
     canvas.style.width = `${finalWidth}px`
   }, [labels])
 
+  const fitsInsideBar = useCallback((context) => {
+    const chart = context.chart
+    const value = context.dataset.data[context.dataIndex]
+
+    if (!value) return false
+
+    const scale = chart.scales.y
+    const chartHeight = scale.bottom - scale.top
+    const barHeight = (value / scale.max) * chartHeight
+
+    const ctx = chart.ctx
+    ctx.save()
+    ctx.font = `bold ${chartSize.size}px Arial`
+
+    const requiredHeight = ctx.measureText(value.toLocaleString()).width
+
+    ctx.restore()
+
+    return barHeight >= requiredHeight + 8
+  }, [chartSize.size])
+
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -965,27 +986,31 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
           },
 
           datalabels: {
-            display: (data?.length || 0) <= MAX_LABELS_TO_SHOW,
+            display: true,
 
-            anchor: 'end',
-            align: 'end',
-
-            color: context => {
-              const chart = context.chart
-              const value = context.dataset.data[context.dataIndex]
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const barHeight = (value / chart.scales.y.max) * chartHeight
-
-              return barHeight >= 120
-                ? datalabelInsideColor
-                : datalabelOutsideColor
-            },
-
-            offset: 0,
             rotation: -90,
-            font: {
-              size: chartSize.size
-            },
+
+            anchor: context =>
+              fitsInsideBar(context) ? 'center' : 'end',
+
+            align: context =>
+              fitsInsideBar(context) ? 'center' : 'top',
+
+            offset: context =>
+              fitsInsideBar(context) ? 0 : 4,
+
+            color: context =>
+              fitsInsideBar(context)
+                ? datalabelInsideColor
+                : datalabelOutsideColor,
+
+            font: () => ({
+              size: chartSize.size,
+              weight: 'bold'
+            }),
+
+            clip: false,
+            clamp: true,
 
             formatter: value => value.toLocaleString()
           },
@@ -1064,21 +1089,13 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
     chart.options.scales.y.max = yScale.max
     chart.options.scales.y.ticks.stepSize = yScale.step
 
-    chart.options.plugins.datalabels.font.size = chartSize.size
-
     chart.options.plugins.datalabels.display =
       (data?.length || 0) <= MAX_LABELS_TO_SHOW
 
-    chart.options.plugins.datalabels.color = context => {
-      const c = context.chart
-      const value = context.dataset.data[context.dataIndex]
-      const chartHeight = c.scales.y.bottom - c.scales.y.top
-      const barHeight = (value / c.scales.y.max) * chartHeight
-
-      return barHeight >= 120
-        ? datalabelInsideColor
-        : datalabelOutsideColor
-    }
+    chart.options.plugins.datalabels.font = () => ({
+      size: chartSize.size,
+      weight: 'bold'
+    })
 
     chart.options.scales.x.ticks.font.size = chartSize.ticksSize
     chart.options.scales.y.ticks.font.size = chartSize.ticksSize

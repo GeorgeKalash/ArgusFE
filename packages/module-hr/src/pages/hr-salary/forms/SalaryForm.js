@@ -54,7 +54,6 @@ export default function SalaryForm({ employeeInfo, maxAccess, labels }) {
     return response.list.map(record => ({
       ...record,
       effectiveDate: record.effectiveDate ? formatDateFromApi(record.effectiveDate) : null,
-      basicAmount: `${record.currencyRef} ${getFormattedNumber(record.basicAmount, 2)}`,
       finalAmount: `${record.currencyRef} ${getFormattedNumber(record.finalAmount, 2)}`
     }))
   }
@@ -65,11 +64,6 @@ export default function SalaryForm({ employeeInfo, maxAccess, labels }) {
       headerName: labels.date,
       flex: 1,
       type: 'date'
-    },
-    {
-      field: 'basicAmount',
-      headerName: labels.basicAmount,
-      flex: 1
     },
     {
       field: 'finalAmount',

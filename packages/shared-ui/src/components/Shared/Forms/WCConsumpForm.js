@@ -261,7 +261,6 @@ export default function WCConsumpForm({ recordId, window }) {
         recordId: header.recordId,
         header: {
           ...formik.values.header,
-          totalCostField: roundTo(totalCostField) || 0,
           ...header
         },
         items
@@ -498,8 +497,7 @@ export default function WCConsumpForm({ recordId, window }) {
 
   useEffect(() => {
     formik.setFieldValue('header.totalQty', roundTo(totalQty))
-    formik.setFieldValue('header.totalCostField', roundTo(totalCostField))
-  }, [totalQty, totalCostField])
+  }, [totalQty])
 
   useEffect(() => {
     ;(async function () {

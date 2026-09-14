@@ -510,7 +510,7 @@ export default function SaleTransactionForm({
       metalId,
       metalPurity,
       metalRef: itemPhysProp?.metalRef || '',
-      volume: itemPhysProp?.volume || 0,
+      volume: roundTo(itemPhysProp?.volume, 3) || 0,
       weight,
       basePrice: isMetal === false ? ItemConvertPrice?.basePrice || 0 : metalPurity > 0 ? basePriceValue : 0,
       baseLaborPrice,
@@ -801,7 +801,7 @@ export default function SaleTransactionForm({
       label: labels.volume,
       name: 'volume',
       props: {
-        decimalScale: 2,
+        decimalScale: 3,
         readOnly: true
       }
     },
@@ -1258,6 +1258,7 @@ export default function SaleTransactionForm({
     const saTrxItems = saTrxPack?.items
     const saTrxTaxes = saTrxPack?.taxes || []
     const balance = saTrxPack?.accountBalance?.balance
+    const creditLimit = saTrxPack?.accountLimit?.limit
     const accountId = saTrxPack?.client?.accountId
     const maxDiscount = saTrxPack?.client?.maxDiscount
     const billAdd = saTrxPack?.formattedAddress
@@ -1304,6 +1305,8 @@ export default function SaleTransactionForm({
           ...formik.values.header,
           ...saTrxHeader,
           amount: roundTo(saTrxHeader?.amount) ?? 0,
+          vatAmount: roundTo(saTrxHeader?.vatAmount || 0),
+          baseAmount: roundTo(saTrxHeader?.baseAmount || 0),
           billAddress: billAdd,
           currentDiscount:
             saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null
@@ -1318,7 +1321,8 @@ export default function SaleTransactionForm({
           postMetalToFinancials: dtInfo?.record?.postMetalToFinancials,
           maxDiscount: maxDiscount || 0,
           serializedAddress: '',
-          balance
+          balance,
+          creditLimit
         },
         items: modifiedList,
         taxes: saTrxTaxes
@@ -1655,7 +1659,7 @@ export default function SaleTransactionForm({
       upo: item.upo || 0,
       vatAmount: item.vatAmount || 0,
       weight: item.weight || 0,
-      volume: item.volume || 0,
+      volume: roundTo(item.volume, 3) || 0,
       extendedPrice: item.extendedPrice || 0
     }))
 
@@ -1884,7 +1888,7 @@ export default function SaleTransactionForm({
   useEffect(() => {
     formik.setFieldValue('header.qty', roundTo(totalQty))
     formik.setFieldValue('header.weight', roundTo(totalWeight))
-    formik.setFieldValue('header.volume', roundTo(totalVolume))
+    formik.setFieldValue('header.volume', roundTo(totalVolume, 3))
     formik.setFieldValue('header.amount', roundTo(amount))
 
     const updatedRateRow = getRate({
@@ -2438,6 +2442,7 @@ export default function SaleTransactionForm({
                     maxAccess={maxAccess}
                     label={labels.totVolume}
                     value={totalVolume}
+                    decimalScale={3}
                     readOnly
                   />
                 </Grid>

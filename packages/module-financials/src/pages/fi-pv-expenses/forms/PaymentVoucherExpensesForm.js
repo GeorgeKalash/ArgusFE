@@ -131,7 +131,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       const payload = getPayload(obj)
 
       const response = await postRequest({
-        extension: FinancialRepository.PaymentVouchers.set2,
+        extension: FinancialRepository.PaymentVoucherExpenses.set2,
         record: JSON.stringify(payload)
       })
 

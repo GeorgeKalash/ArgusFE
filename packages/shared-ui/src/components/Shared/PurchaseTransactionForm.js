@@ -604,8 +604,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     {
       component: 'numberfield',
       label: labels.pcs,
-      name: 'pieces',
-      updateOn: 'blur'
+      name: 'pieces'
     },
     {
       component: 'numberfield',

@@ -5,14 +5,13 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import toast from 'react-hot-toast'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function RowAccessTab({ labels, maxAccess, recordId }) {
@@ -37,7 +36,6 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
     maxAccess,
     validateOnChange: true,
     initialValues: {
-      search: '',
       classId: ResourceIds.DocumentTypes
     },
     onSubmit: async () => {
@@ -82,23 +80,6 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
     setData(moduleRes)
   }
 
-  const filtered = useMemo(
-    () => ({
-      ...data,
-      list: data?.list?.filter(
-        item =>
-          (item.rowRef && item.rowRef.toString().includes(formik.values.search)) ||
-          (item.rowName && item.rowName.toLowerCase().includes(formik.values.search.toLowerCase()))
-      )
-    }),
-    [formik.values.search, data]
-  )
-
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('search', value)
-  }
-
   useEffect(() => {
     ;(async function () {
       if (recordId) await fetchGridData()
@@ -126,24 +107,13 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
                 error={formik.touched.classId && Boolean(formik.errors.classId)}
               />
             </Grid>
-            <Grid xs={6} item>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={labels.search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                onChange={handleSearchChange}
-              />
-            </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <Table
             name='rowAccess'
             columns={rowColumns}
-            gridData={filtered}
+            gridData={data}
             rowId={['recordId']}
             maxAccess={maxAccess}
             pagination={false}

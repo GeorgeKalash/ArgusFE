@@ -21,7 +21,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
-import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 
 export default function BalanceAdjustmentForm({ labels, access, recordId, window }) {
@@ -92,10 +91,12 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({
-      ...res.record,
-      effectiveDate: formatDateFromApi(res?.record?.effectiveDate),
-      date: formatDateFromApi(res?.record?.date)
+    formik.resetForm({
+      values: {
+        ...res.record,
+        effectiveDate: formatDateFromApi(res?.record?.effectiveDate),
+        date: formatDateFromApi(res?.record?.date)
+      }
     })
   }
 
@@ -128,12 +129,24 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
     invalidate()
   }
 
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: LeaveManagementRepository.BalanceAdjustment.unpost,
+      record: JSON.stringify({ recordId: formik?.values?.recordId })
+    })
+
+    toast.success(platformLabels.Unposted)
+    invalidate()
+
+    refetchForm(res?.recordId)
+  }
+
   const actions = [
     {
       key: 'Locked',
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
-      disabled: true
+      onSuccess: onUnpost
     },
     {
       key: 'Unlocked',
@@ -223,7 +236,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 required
                 secondValue={formik.values.employeeName}
                 onChange={async (_, newValue) => {
-                  const lsRes = await getEmployeeSchedule(newValue?.recordId, formik.values.ltId)
+                  const lsRes = await getEmployeeSchedule(formik.values.ltId, newValue?.recordId)
                   formik.setFieldValue('scheduleName', lsRes?.lsName || null)
                   formik.setFieldValue('lsId', lsRes?.lsId || null)
                   
@@ -290,7 +303,6 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 onChange={formik.handleChange}
                 maxLength={5}
                 decimalScale={2}
-                allowNegative={false}
                 maxAccess={maxAccess}
                 required
                 readOnly={isPosted}
@@ -306,7 +318,6 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
                 onChange={formik.handleChange}
                 maxLength={6}
                 decimalScale={2}
-                allowNegative={false}
                 maxAccess={maxAccess}
                 required
                 readOnly={isPosted}

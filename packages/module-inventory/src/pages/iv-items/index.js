@@ -80,6 +80,16 @@ const IvItems = () => {
       flex: 1
     },
     {
+      field: 'groupName',
+      headerName: _labels.itemGroup,
+      flex: 1
+    },
+    {
+      field: 'collectionName',
+      headerName: _labels.collection,
+      flex: 1
+    },
+    {
       field: 'description',
       headerName: _labels.description,
       flex: 1

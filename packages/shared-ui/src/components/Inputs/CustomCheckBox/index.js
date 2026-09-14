@@ -31,8 +31,15 @@ const CustomCheckBox = ({
     if (onChange) onChange(event)
   }
 
+  const handleLabelClick = event => {
+    if (event.target.tagName !== 'INPUT') {
+      event.preventDefault()
+    }
+  }
+
   return _hidden ? null : (
     <FormControlLabel
+      onClick={handleLabelClick}
       control={
         <Checkbox
           name={name}

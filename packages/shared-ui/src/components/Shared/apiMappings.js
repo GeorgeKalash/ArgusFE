@@ -938,8 +938,7 @@ export const apiMappings = {
   },
   [ResourceIds.AttendanceSchedule]: {
     type: COMBOBOX,
-    endpoint: TimeAttendanceRepository.AttendanceScheduleFilters.qry,
-    parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId&_scId=0`,
+    endpoint: TimeAttendanceRepository.Schedule.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -1135,6 +1134,17 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.ReleaseCodes]: {
+    type: COMBOBOX,
+    endpoint: DocumentReleaseRepository.ReleaseCode.qry,
+    parameters: `_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
   [ResourceIds.ReleaseIndicators]: {
     type: COMBOBOX,
     endpoint: DocumentReleaseRepository.ReleaseIndicator.qry,
@@ -1292,5 +1302,11 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  }
+  },
+  [ResourceIds.Calendar]: {
+    type: COMBOBOX,
+    endpoint: TimeAttendanceRepository.Calendar.qry,
+    valueField: 'recordId',
+    displayField: 'name'
+  },
 }

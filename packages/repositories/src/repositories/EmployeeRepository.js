@@ -53,6 +53,7 @@ export const EmployeeRepository = {
   },
   BgCheck: {
     page: service + 'pageCT',
+    qry: service + 'qryCT',
     set: service + 'setCT',
     get: service + 'getCT',
     del: service + 'delCT'
@@ -166,6 +167,18 @@ export const EmployeeRepository = {
     get: service + 'getLS',
     qry: service + 'qryLS',
     set2: service + 'set2LS',
+  },
+  EmployeeRightToWork: {
+    qry: service + 'qryRW',
+    get: service + 'getRW',
+    set: service + 'setRW',
+    del: service + 'delRW'
+  },
+  EmployeeBackgroundCheck: {
+    qry: service + 'qryBC',
+    get: service + 'getBC',
+    set: service + 'setBC',
+    del: service + 'delBC'  
   }
 }
 

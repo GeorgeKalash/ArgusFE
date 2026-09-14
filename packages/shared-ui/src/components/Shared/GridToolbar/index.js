@@ -58,16 +58,37 @@ const GridToolbar = ({
       parameters: `_resourceId=${previewReport}`
     }).then(res => {
       if (res?.list) {
-        const formattedReports = res.list.map(item => ({
-          api_url:
-            item.api.includes('_params=') && props?.reportParams
-              ? item.api.replace('_params=', `_params=${props.reportParams}`)
-              : item.api,
+       const formattedReports = res.list.map(item => {
+        let apiUrl = item.api
+
+        if (props?.reportParams) {
+          if (apiUrl.includes('_params=')) {
+            apiUrl = apiUrl.replace(
+              /_params=([^&]*)/,
+              (_, params) => `_params=${props.reportParams}${params ? `|${params}` : ''}`
+            )
+          } else {
+            const separator = apiUrl.includes('?') ? '&' : '?'
+            apiUrl = `${apiUrl}${separator}_params=${props.reportParams}`
+          }
+        }
+
+        if (props?.reportExtraParams) {
+          apiUrl += apiUrl.endsWith('&')
+            ? props.reportExtraParams
+            : apiUrl.includes('?')
+              ? `&${props.reportExtraParams}`
+              : `?${props.reportExtraParams}`
+        }
+
+        return {
+          api_url: apiUrl,
           reportClass: item.instanceName,
           parameters: item.parameters,
           layoutName: item.layoutName,
           assembly: 'ArgusRPT.dll'
-        }))
+        }
+      })
         setReportStore(formattedReports)
         if (formattedReports.length > 0) {
           setReport(prev => ({

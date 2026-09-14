@@ -7,10 +7,8 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ReportRepository } from '@argus/repositories/src/repositories/ReportRepository'
-import { Grid } from '@mui/material'
 import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import EmployeeMissingList from './Form/EmployeeMissingList'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
@@ -20,7 +18,6 @@ export default function EmployeeMissingDetails () {
   const { stack } = useWindow()
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [data, setData] = useState([])
-  const [status, setStatus] = useState('0')
 
   async function getMissingValues() {
     return new Promise((resolve, reject) => {
@@ -39,7 +36,7 @@ export default function EmployeeMissingDetails () {
       getMissingValues(),
       getRequest({
        extension: ReportRepository.EmployeeMissingDetails.RT107,
-       parameters: `_activeStatus=${status}`
+       parameters: `_activeStatus=1`
       })
     ])
 
@@ -47,9 +44,9 @@ export default function EmployeeMissingDetails () {
         const matched = (response?.list || []).find(item => Number(item.fieldId) === Number(missing.key))
 
         return {
-        fieldId: Number(missing.key),
-        fieldName: missing.value,
-        count: matched?.count || 0
+          fieldId: Number(missing.key),
+          fieldName: missing.value,
+          count: matched?.count || 0
         }
     })
    setData(modifiedList)
@@ -85,7 +82,6 @@ export default function EmployeeMissingDetails () {
       Component: EmployeeMissingList,
       props: {
         fieldId,
-        status,
         maxAccess: access,
         labels,
         onSuccess: fetchGridData
@@ -98,28 +94,12 @@ export default function EmployeeMissingDetails () {
 
   useEffect(() => {
     fetchGridData()
-  },[status])
+  },[])
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          maxAccess={access}
-          leftSection={
-            <Grid item xs={3}>
-                <ResourceComboBox
-                    datasetId={DataSets.EMPLOYEE_STATUS}
-                    name='status'
-                    label={labels.status}
-                    valueField='key'
-                    displayField='value'
-                    value={status}
-                    onClear={() => setStatus('2')}
-                    onChange={(_, newValue) => setStatus(newValue?.key || '2') }
-                />
-            </Grid>
-          }
-        />
+        <GridToolbar maxAccess={access} />
       </Fixed>
       <Grow>
         <Table

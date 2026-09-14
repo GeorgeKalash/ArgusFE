@@ -1,6 +1,9 @@
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { Box } from '@mui/material'
 
-export default function ImageViewer({ imageUrl }) {
+const ImageViewer = ({ imageUrl, title, window }) => {
+  useSetWindow({ title, window })
+
   return (
     <Box
       sx={{
@@ -22,3 +25,8 @@ export default function ImageViewer({ imageUrl }) {
     </Box>
   )
 }
+
+ImageViewer.width = 800
+ImageViewer.height = 600
+
+export default ImageViewer

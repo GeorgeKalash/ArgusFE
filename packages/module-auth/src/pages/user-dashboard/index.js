@@ -1,6 +1,5 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-import { Grid } from '@mui/material'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
@@ -8,10 +7,8 @@ import { Module } from '@argus/shared-domain/src/resources/Module'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
-import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
@@ -21,8 +18,6 @@ const UserDashboard = () => {
   const userData = getStorageData('userData')
   const _userId = userData.userId
   const { platformLabels } = useContext(ControlContext)
-
-  const [search, setSearch] = useState('')
 
   const {
     query: { data },
@@ -74,18 +69,6 @@ const UserDashboard = () => {
     }
   ]
 
-  const filteredData = search
-    ? data?.list?.filter(
-        item =>
-          item.appletId.toString().includes(search.toLowerCase()) ||
-          (item.appletName && item.appletName.toLowerCase().includes(search.toLowerCase()))
-      )
-    : data?.list
-
-  const handleSearchChange = event => {
-    setSearch(event?.target?.value ?? '')
-  }
-
   const handleSubmit = async () => {
     var seqNo = 0
 
@@ -115,25 +98,10 @@ const UserDashboard = () => {
   return (
     <Form onSave={handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
-        <Fixed>
-          <Grid container xs={12} p={2}>
-            <Grid item xs={3}>
-              <CustomTextField
-                name='search'
-                value={search}
-                label={platformLabels.Search}
-                onClear={() => setSearch('')}
-                onChange={handleSearchChange}
-                onSearch={e => setSearch(e)}
-                search={true}
-              />
-            </Grid>
-          </Grid>
-        </Fixed>
         <Grow>
           <Table
             columns={columns}
-            gridData={{ list: filteredData }}
+            gridData={data}
             rowId={['appletId']}
             maxAccess={access}
             showCheckboxColumn={true}

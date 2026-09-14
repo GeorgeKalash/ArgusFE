@@ -14,6 +14,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 const RelationList = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const [relationGridData, setRelationGridData] = useState([])
+  const [relation2GridData, setRelation2GridData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -24,8 +25,13 @@ const RelationList = ({ store, labels, maxAccess }) => {
       extension: BusinessPartnerRepository.Relation.qry,
       parameters: `_bpId=${bpId}`
     })
+    const res2 = await getRequest({
+      extension: BusinessPartnerRepository.Relation.qry2,
+      parameters: `_bpId=${bpId}`
+    })
 
     setRelationGridData(res)
+    setRelation2GridData(res2)
   }
 
   const delRelation = async obj => {
@@ -51,6 +57,36 @@ const RelationList = ({ store, labels, maxAccess }) => {
     },
     {
       field: 'toBPName',
+      headerName: labels.businessPartner,
+      flex: 1
+    },
+    {
+      field: 'startDate',
+      headerName: labels.from,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'endDate',
+      headerName: labels.to,
+      flex: 1,
+      type: 'date'
+    }
+  ]
+
+  const columns2 = [
+    {
+      field: 'relationName',
+      headerName: labels.relation,
+      flex: 1
+    },
+    {
+      field: 'fromBPRef',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
+      field: 'fromBPName',
       headerName: labels.businessPartner,
       flex: 1
     },
@@ -107,9 +143,18 @@ const RelationList = ({ store, labels, maxAccess }) => {
           columns={columns}
           gridData={relationGridData}
           rowId={['recordId']}
-          api={getRelationGridData}
           onEdit={editRelation}
           onDelete={delRelation}
+          maxAccess={maxAccess}
+          pagination={false}
+        />
+      </Grow> 
+      <Grow>
+        <Table
+          name="relation2Table"
+          columns={columns2}
+          gridData={relation2GridData}
+          rowId={['recordId']}
           maxAccess={maxAccess}
           pagination={false}
         />

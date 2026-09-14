@@ -318,11 +318,16 @@ export default function CastingForm({ store, setStore, access, labels }) {
   }
 
   useEffect(() => {
-    formik.setFieldValue('loss', loss || 0)
-    formik.setFieldValue('lossPct', lossPct || 0)
-    formik.setFieldValue('lossVariationPct', lossVariationPct || 0)
-    formik.setFieldValue('netInputWgt', netInputWgt || 0)
-    formik.setFieldValue('scrapWgt', store?.castingInfo?.scrapWgt || 0)
+    formik.resetForm({
+      values: {
+        ...formik.values,
+        scrapWgt: store?.castingInfo?.scrapWgt,
+        loss: loss || 0,
+        lossPct: lossPct || 0,
+        lossVariationPct: lossVariationPct || 0,
+        netInputWgt: netInputWgt || 0
+      }
+    })
     setStore(prevStore => ({
       ...prevStore,
       castingInfo: {

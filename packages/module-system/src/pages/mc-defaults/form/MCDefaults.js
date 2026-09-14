@@ -24,6 +24,7 @@ const MCDefault = ({ _labels, access }) => {
     'mc_defaultRTPU',
     'mc_defaultRTMF',
     'mc_defaultRTFI',
+    'mc_defaultRTBT',
     'mc_defaultRTTAX',
     'baseMetalCuId',
     'baseSalesMetalId',
@@ -65,6 +66,7 @@ const MCDefault = ({ _labels, access }) => {
     { name: 'mc_defaultRTPU', label: _labels.mc_defaultRTPU },
     { name: 'mc_defaultRTMF', label: _labels.mc_defaultRTMF },
     { name: 'mc_defaultRTFI', label: _labels.mc_defaultRTFI },
+    { name: 'mc_defaultRTBT', label: _labels.mc_defaultRTBT },
     { name: 'mc_defaultRTTAX', label: _labels.mc_defaultRTTAX }
   ]
 

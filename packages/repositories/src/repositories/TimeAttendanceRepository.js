@@ -1,9 +1,6 @@
 const service = 'TA.asmx/'
 
 export const TimeAttendanceRepository = {
-  AttendanceScheduleFilters: {
-    qry: service + 'qrySD'
-  },
   ProcessedShiftPunches: {
     retry: service + 'retryPSP'
   },
@@ -15,6 +12,7 @@ export const TimeAttendanceRepository = {
     qry: service + 'qryOTP'
   },
   PendingPunches: {
+    page2: service + 'pagePP2',
     page: service + 'pagePP',
     del: service + 'delPP',
     qry: service + 'qryPP'

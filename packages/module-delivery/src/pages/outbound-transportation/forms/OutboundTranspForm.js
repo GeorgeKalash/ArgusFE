@@ -68,6 +68,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     tripOrders: [
       {
         id: 1,
+        tripId: recordId || 0,
         soRef: null,
         soId: null,
         soDate: null,
@@ -292,7 +293,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         mapping: [
           { from: 'recordId', to: 'soId' },
           { from: 'reference', to: 'soRef' },
-          { from: 'date', to: 'soDate' },
+          { from: 'date', to: 'date' },
           { from: 'clientRef', to: 'clientRef' },
           { from: 'clientName', to: 'clientName' },
           { from: 'volume', to: 'soVolume' },
@@ -308,8 +309,8 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       },
       onChange({ row: { update, newRow } }) {
         update({
-          soDate: newRow.soDate ? formatDateFromApi(newRow.soDate) : null,
-          tripId: formik.values.recordId
+          soDate: newRow.date ? formatDateFromApi(newRow.date) : null,
+          tripId: formik.values.recordId || 0
         })
       }
     },

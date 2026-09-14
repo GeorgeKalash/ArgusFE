@@ -91,8 +91,9 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
         .number()
         .nullable()
         .test('hours-validation', 'Hours must be greater than 0 and cannot exceed leave balance', function (value) {
-          const { summary } = this.parent
-          if (value == null) return true
+          const { summary, trackByHours } = this.parent
+
+          if (!trackByHours || value == null) return true
 
           return value > 0 && value <= (summary?.balance ?? 0)
         }),
@@ -126,6 +127,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
 
     if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
     toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+    await fetchRecord(response.recordId)
     invalidate()
   }
 
@@ -248,36 +250,37 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
 
     return { amount: parseFloat(amount.toFixed(2)) }
   }
+  
+  const fetchRecord = async (recordId) => {
+    if (!recordId) return
+
+    const res = await getRequest({
+      extension: PayrollRepository.LeavePayment.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    const record = res?.record || {}
+    const effDate = formatDateFromApi(record.effectiveDate)
+
+    const [ltInfo, employeeQuickView] = await Promise.all([
+      fetchLeaveScheduleAndType(record.lsId),
+      fetchEmployeeQuickView(record.employeeId, effDate)
+    ])
+
+    const summary = await fillLeaveBalances(record.employeeId, record.lsId, effDate, ltInfo?.ltName)
+
+    formik.setValues({
+      ...record,
+      date: formatDateFromApi(record.date),
+      effectiveDate: effDate,
+      ...ltInfo,
+      ...employeeQuickView,
+      summary: { ...(record.summary || {}), ...summary }
+    })
+  }
 
   useEffect(() => {
-    const fetchRecord = async () => {
-      if (!recordId) return
-
-      const res = await getRequest({
-        extension: PayrollRepository.LeavePayment.get,
-        parameters: `_recordId=${recordId}`
-      })
-
-      const record = res?.record || {}
-      const effDate = formatDateFromApi(record.effectiveDate)
-
-      const [ltInfo, employeeQuickView] = await Promise.all([
-        fetchLeaveScheduleAndType(record.lsId),
-        fetchEmployeeQuickView(record.employeeId, effDate)
-      ])
-
-      const summary = await fillLeaveBalances(record.employeeId, record.lsId, effDate, ltInfo?.ltName)
-
-      formik.setValues({
-        ...record,
-        date: formatDateFromApi(record.date),
-        effectiveDate: effDate,
-        ...ltInfo,
-        ...employeeQuickView,
-        summary: { ...(record.summary || {}), ...summary }
-      })
-    }
-    fetchRecord()
+    fetchRecord(recordId)
   }, [])
 
   return (

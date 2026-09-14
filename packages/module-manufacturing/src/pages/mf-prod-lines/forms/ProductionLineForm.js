@@ -9,12 +9,12 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 
 export default function ProductionLineForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,10 +29,10 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
       recordId: null,
       reference: '',
       name: '',
-      ccId: null
+      ccId: null,
+      salesCurrencyId: null,
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required()
@@ -108,10 +108,27 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('ccId', newValue?.recordId)
                 }}
                 error={formik.touched.ccId && Boolean(formik.errors.ccId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='salesCurrencyId'
+                label={labels.currency}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('salesCurrencyId', newValue?.recordId || null)}
+                error={formik.touched.salesCurrencyId && Boolean(formik.errors.salesCurrencyId)}
               />
             </Grid>
           </Grid>

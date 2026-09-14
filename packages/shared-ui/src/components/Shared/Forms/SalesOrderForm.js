@@ -142,6 +142,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     initialTdPct: 0,
     baseAmount: 0,
     volume: 0,
+    pieces: 0,
     weight: 0,
     qty: 0,
     serializedAddress: '',
@@ -171,6 +172,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         overheadId: '',
         vatAmount: 0,
         mdAmount: 0,
+        onHand: 0,
         upo: 0,
         extendedPrice: 0,
         mdAmountPct: null,
@@ -314,6 +316,17 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   }
 
+  async function getOnHand (rowValues) {
+    if (!rowValues?.itemId && !rowValues.siteId) return 0
+
+    const res = await getRequest({
+      extension: InventoryRepository.Availability.get,
+      parameters: `_itemId=${rowValues.itemId}&_seqNo=0&_siteId=${rowValues.siteId}`
+    })
+    
+    return res?.record?.onhand || 0
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -321,7 +334,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       name: 'sku',
       flex: 2,
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
+        endpointId: InventoryRepository.Item.snapshot6,
         parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
         valueField: 'sku',
@@ -407,6 +420,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           taxId: rowTax,
           taxDetails: rowTaxDetails || null,
           mdType: 1,
+          onHand: await getOnHand({ itemId: newRow?.itemId, siteId: formik?.values?.siteId }),
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId)
         })
@@ -439,6 +453,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow.siteId) {
+          update({ onHand: 0 })
+
+          return
+        }
+        const currentOnHand = await getOnHand(newRow)
+        update({ onHand: currentOnHand })
       }
     },
     {
@@ -483,6 +506,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     },
     {
       component: 'numberfield',
+      label: labels.onHand,
+      name: 'onHand',
+      props: {
+        decimalScale: 2,
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
@@ -500,10 +532,19 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     },
     {
       component: 'numberfield',
+      label: labels.pcs,
+      name: 'pieces',
+      props: {
+        decimalScale: 2,
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
       label: labels.volume,
       name: 'volume',
       props: {
-        decimalScale: 2,
+        decimalScale: 3,
         readOnly: true
       }
     },
@@ -1103,7 +1144,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('tdPct', roundTo(_discountObj?.hiddenTdPct) || 0)
+    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct || 0)
 
     return _discountObj?.hiddenTdPct || 0
   }
@@ -1760,6 +1801,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     maxAccess={maxAccess}
                     label={labels.totVolume}
                     value={totalVolume}
+                    decimalScale={3}
                     readOnly
                   />
                 </Grid>

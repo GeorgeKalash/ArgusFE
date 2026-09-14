@@ -11,7 +11,6 @@ import { PointofSaleRepository } from '@argus/repositories/src/repositories/Poin
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import RetailTransactionsForm from './forms/RetailTransactionsForm'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import toast from 'react-hot-toast'
@@ -19,6 +18,7 @@ import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import RetailTransactionsForm from '@argus/shared-ui/src/components/Shared/Forms/RetailTransactionsForm'
 
 const RetailTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -170,33 +170,6 @@ const RetailTrx = () => {
     openForm(obj?.recordId, obj?.status == 3)
   }
 
-  const getCorrectLabel = functionId => {
-    if (functionId === SystemFunction.RetailInvoice) {
-      return labels.RetailInvoice
-    } else if (functionId === SystemFunction.RetailReturn) {
-      return labels.RetailReturn
-    } else if (functionId === SystemFunction.RetailPurchase) {
-      return labels.RetailPurchase
-    } else if (functionId === SystemFunction.RetailPurchaseReturn) {
-      return labels.RetailPurchaseReturn
-    }
-  }
-
-  const getGLResource = functionId => {
-    const fn = Number(functionId)
-    switch (fn) {
-      case SystemFunction.RetailInvoice:
-        return ResourceIds.GLRetailInvoice
-      case SystemFunction.RetailReturn:
-        return ResourceIds.GLRetailInvoiceReturn
-      case SystemFunction.RetailPurchase:
-        return ResourceIds.GLRetailPurchase
-      case SystemFunction.RetailPurchaseReturn:
-        return ResourceIds.GLRetailPurchaseReturn
-      default:
-        return null
-    }
-  }
 
   async function openForm(recordId, disabled) {
     const canOpen = await checkLock({
@@ -210,16 +183,9 @@ const RetailTrx = () => {
     stack({
       Component: RetailTransactionsForm,
       props: {
-        labels,
         recordId,
-        access,
-        posUser: posObj?.current,
         functionId,
-        getGLResource
-      },
-      width: 1200,
-      height: 725,
-      title: getCorrectLabel(parseInt(functionId))
+      }
     })
   }
 

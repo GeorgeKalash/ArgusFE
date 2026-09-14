@@ -748,5 +748,19 @@ export const getButtons = platformLabels => [
     image: 'undo-arrow-icon.png',
     main: false
   },
+  {
+    key: 'GetJobOrders',
+    label: platformLabels.GetJobOrders,
+    color: '#01a49c',
+    image: 'hierarchy.png',
+    main: false
+  },
+  {
+    key: 'MergedComponents',
+    label: platformLabels.MergedComponents,
+    color: '#01a437',
+    image: 'file.png',
+    main: false
+  },
   
 ]

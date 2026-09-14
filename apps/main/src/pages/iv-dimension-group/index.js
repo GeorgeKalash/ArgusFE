@@ -44,6 +44,11 @@ const DimensionGroup = () => {
 
   const columns = [
     {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
       field: 'name',
       headerName: labels.name,
       flex: 1
