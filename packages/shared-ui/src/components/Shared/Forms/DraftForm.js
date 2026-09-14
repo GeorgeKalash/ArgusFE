@@ -269,25 +269,19 @@ const DraftForm = ({ labels, access, recordId, lockRecord, invalidate }) => {
         lineItem: lastLine
       }
 
-      const response = await postRequest({
+      await postRequest({
         extension: SaleRepository.DraftInvoiceSerial.append,
         record: JSON.stringify(LastSerPack),
-        noHandleError: true
+        throwError: true
       })
+      .then(() => {
+        toast.success(platformLabels.Saved)
+        invalidate()
+        refetchForm(draftId)
 
-      if (response?.error) {
-        stackError({
-          message: response?.error
-        })
-
-        return false
-      }
-      
-      toast.success(platformLabels.Saved)
-      invalidate()
-      refetchForm(draftId)
-
-      return true
+        return true
+      })
+      .catch(() => false)
     }
   }
 
