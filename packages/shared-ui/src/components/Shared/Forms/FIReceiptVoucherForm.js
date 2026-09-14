@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -34,14 +34,26 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const [store, setStore] = useState({
+    documentTypes: [],
+    plants: [],
+    salesPeople: [],
+    paymentMethods: [],
+    cashAccounts: [],
+    currencies: [],
+    collectors: [],
+    descriptionTemplates: []
+  })
 
-  
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.ReceiptVoucher,
     editMode: !!recordId
@@ -229,8 +241,28 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
     return res?.record?.balance
   }
 
+  async function fillCombos() {
+    const res = await getRequest({
+      extension: FinancialRepository.ReceiptVouchers.pack,
+      parameters: ``
+    })
+    
+    const targetType = formik.values.paymentMethod == 2 ? 1 : 2
+    setStore({
+      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
+      plants: res?.record?.plants || [],
+      salesPeople: res?.record?.salesPeople || [],
+      paymentMethods: res?.record?.paymentMethods || [],
+      cashAccounts: res?.record?.cashAccounts?.filter(item => Number(item.type) == targetType) || [],
+      currencies: res?.record?.currencies?.filter(item => item.currencyType === 1) || [],
+      collectors: res?.record?.collectors || [],
+      descriptionTemplates: res?.record?.descriptionTemplates || []
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
+      await fillCombos()
       if (recordId) {
         await getData(recordId)
       } else {
@@ -420,8 +452,9 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={FinancialRepository.ReceiptVouchers.pack}
-                reducer={response => response?.record?.documentTypes}
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_dgId=${SystemFunction.ReceiptVoucher}&_startAt=0&_pageSize=1000`}  
+                store={store?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
@@ -469,8 +502,8 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={FinancialRepository.ReceiptVouchers.pack}
-                reducer={response => response?.record?.plants}
+                endpointId={SystemRepository.Plant.qry}
+                store={store?.plants}
                 name='plantId'
                 readOnly={isCancelled || isPosted}
                 label={labels.plant}
@@ -530,8 +563,8 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={FinancialRepository.ReceiptVouchers.pack}
-                reducer={response => response?.record?.salesPeople}
+                endpointId={SaleRepository.SalesPerson.qry}
+                store={store?.salesPeople}
                 name='spId'
                 readOnly={!formik.values.accountId || isCancelled || isPosted}
                 label={labels.salePerson}
@@ -552,8 +585,8 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={FinancialRepository.ReceiptVouchers.pack}
-                reducer={response => response?.record?.paymentMethods}
+                datasetId={DataSets.PAYMENT_METHOD}
+                store={store?.paymentMethods}
                 name='paymentMethod'
                 readOnly={isCancelled || isPosted}
                 label={labels.receiptMethod}
@@ -589,9 +622,9 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
 
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={FinancialRepository.ReceiptVouchers.pack}
-                reducer={response => response?.record?.cashAccounts}
-                filter={item => formik.values.paymentMethod != 2 || Number(item.type) == 1}
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={formik.values.paymentMethod == 2 ? `_type=1` : `_type=2` }
+                store={store?.cashAccounts}
                 name='cashAccountId'
                 readOnly={isCancelled || isPosted}
                 required
@@ -638,8 +671,8 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
               <Grid container spacing={1} alignItems='center'>
                 <Grid item xs={7}>
                   <ResourceComboBox
-                    endpointId={FinancialRepository.ReceiptVouchers.pack}
-                    reducer={response => response?.record?.currencies}
+                    endpointId={SystemRepository.Currency.qry}
+                    store={store?.currencies}
                     name='currencyId'
                     readOnly={isCancelled || isPosted}
                     required
@@ -729,8 +762,8 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={FinancialRepository.ReceiptVouchers.pack}
-                reducer={response => response?.record?.collectors}
+                endpointId={LogisticsRepository.LoCollector.qry}
+                store={store?.collectors}
                 name='collectorId'
                 readOnly={isCancelled || isPosted}
                 label={labels.collector}
@@ -751,8 +784,8 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 neverPopulate={true}
-                endpointId={FinancialRepository.ReceiptVouchers.pack}
-                reducer={response => response?.record?.descriptionTemplates}
+                endpointId={FinancialRepository.DescriptionTemplate.qry}
+                store={store?.descriptionTemplates}
                 name='templateId'
                 label={labels.descriptionTemplate}
                 readOnly={isCancelled || isPosted}

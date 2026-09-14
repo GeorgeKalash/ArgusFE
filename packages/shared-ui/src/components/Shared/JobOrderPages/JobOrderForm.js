@@ -681,7 +681,7 @@ export default function JobOrderForm({
               <Grid item xs={12}>
                 <ResourceComboBox
                   endpointId={ManufacturingRepository.MFJobOrder.pack}
-                  reducer={response => response?.record?.documentTypes}
+                  store={store?.documentTypes}
                   filter={!editMode ? item => item.activeStatus === 1 : undefined}
                   name='dtId'
                   label={labels.documentType}
@@ -766,7 +766,7 @@ export default function JobOrderForm({
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={ManufacturingRepository.MFJobOrder.pack}
-                        reducer={response => response?.record?.plants}
+                        store={store?.plants}
                         name='plantId'
                         label={platformLabels.plant}
                         valueField='recordId'
@@ -818,7 +818,7 @@ export default function JobOrderForm({
                     <Grid item>
                       <ResourceComboBox
                         endpointId={ManufacturingRepository.MFJobOrder.pack}
-                        reducer={response => response?.record?.itemSizes}
+                        store={store?.itemSizes}
                         name='sizeId'
                         label={labels.size}
                         readOnly={isCancelled || isReleased || isPosted}
@@ -950,7 +950,7 @@ export default function JobOrderForm({
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={ManufacturingRepository.MFJobOrder.pack}
-                        reducer={response => response?.record?.productionLines}
+                        store={store?.productionLines}
                         name='lineId'
                         label={labels.line}
                         values={formik.values}
@@ -1043,7 +1043,7 @@ export default function JobOrderForm({
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={ManufacturingRepository.MFJobOrder.pack}
-                        reducer={response => response?.record?.productionClasses}
+                        store={store?.productionClasses}
                         values={formik.values}
                         name='classId'
                         label={labels.productionClass}
@@ -1060,7 +1060,7 @@ export default function JobOrderForm({
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={ManufacturingRepository.MFJobOrder.pack}
-                        reducer={response => response?.record?.productionStandards}
+                        store={store?.productionStandards}
                         values={formik.values}
                         name='standardId'
                         label={labels.productionStandard}
@@ -1106,7 +1106,7 @@ export default function JobOrderForm({
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={ManufacturingRepository.MFJobOrder.pack}
-                      reducer={response => response?.record?.jobCategories}
+                      store={store?.jobCategories}
                       name='categoryId'
                       label={labels.category}
                       columnsInDropDown={[
@@ -1127,7 +1127,7 @@ export default function JobOrderForm({
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={ManufacturingRepository.MFJobOrder.pack}
-                      reducer={response => response?.record?.categories}
+                      store={store?.categories}
                       name='itemCategoryId'
                       label={labels.itemCategory}
                       readOnly
@@ -1180,7 +1180,7 @@ export default function JobOrderForm({
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={ManufacturingRepository.MFJobOrder.pack}
-                      reducer={response => response?.record?.salesPeople}
+                      store={store?.salesPeople}
                       name='spId'
                       label={labels.orderedBy}
                       columnsInDropDown={[

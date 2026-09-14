@@ -71,6 +71,7 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import CommissionDetailsForm from '@argus/module-sales/src/pages/sa-trx/[functionId]/Forms/CommissionDetailsForm'
 import FIReceiptVoucherForm from './FIReceiptVoucherForm'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 
 export default function SaleTransactionForm({
   recordId,
@@ -94,6 +95,15 @@ export default function SaleTransactionForm({
   const [reCal, setReCal] = useState(false)
   const filteredMeasurements = useRef([])
   const [taxDetails, setTaxDetails] = useState([])
+  const [store, setStore] = useState({
+    documentTypes: [],
+    plants: [],
+    currencies: [],
+    salesPeople: [],
+    sites: [],
+    saleZones: [],
+    taxSchedules: []
+  })
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.SalesInvoice,
@@ -1918,6 +1928,23 @@ export default function SaleTransactionForm({
     }
   }
 
+  async function fillCombos() {
+    const res = await getRequest({
+      extension: SaleRepository.SaleTransaction.pack,
+      parameters: `_functionId=${functionId}`
+    })
+
+    setStore({
+      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
+      plants: res?.record?.plants || [],
+      currencies: res?.record?.currencies?.filter(item => item.currencyType === 1) || [],
+      salesPeople: res?.record?.salesPeople?.filter(item => !item.isInactive) || [],
+      sites: res?.record?.sites || [],
+      saleZones: res?.record?.saleZones || [],
+      taxSchedules: res?.record?.taxSchedules || [],
+    })
+  }
+
   useEffect(() => {
     formik.setFieldValue('header.qty', roundTo(totalQty))
     formik.setFieldValue('header.weight', roundTo(totalWeight))
@@ -1951,6 +1978,7 @@ export default function SaleTransactionForm({
 
   useEffect(() => {
     ;(async function () {
+      await fillCombos()
       const res = await getPackData()
       setTaxDetails(res?.taxDetails || [])
       setMeasurements(res?.measurementUnits)
@@ -2058,9 +2086,9 @@ export default function SaleTransactionForm({
           <Grid container spacing={2}>
             <Grid item xs={3}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.documentTypes}
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}                          
+                store={store?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 readOnly={editMode || formik.values.items?.some(item => item.sku)}
@@ -2090,9 +2118,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={3}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.salesPeople}
+                endpointId={SaleRepository.SalesPerson.qry}
+                store={store?.salesPeople}
                 name='header.spId'
                 readOnly={isPosted}
                 label={labels.salesPerson}
@@ -2114,9 +2141,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={3}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.plants}
+                endpointId={SystemRepository.Plant.qry}
+                store={store?.plants}
                 name='header.plantId'
                 label={labels.plant}
                 columnsInDropDown={[
@@ -2137,9 +2163,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.currencies}
+                endpointId={SystemRepository.Currency.qry}
+                store={store?.currencies}
                 name='header.currencyId'
                 label={labels.currency}
                 filter={item => item.currencyType == 1}
@@ -2206,10 +2231,9 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
+                endpointId={InventoryRepository.Site.qry}
                 triggerOnDefault={formik.values.header.siteId && !formik.values.header.siteRef}
-                reducer={response => response?.record?.sites}
+                store={store?.sites}
                 name='header.siteId'
                 label={labels.site}
                 columnsInDropDown={[
@@ -2248,9 +2272,9 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.saleZones}
+                endpointId={SaleRepository.SalesZone.qry}
+                parameters={`_startAt=0&_pageSize=1000&_sortField=recordId&_filter=`}
+                store={store?.saleZones}
                 name='header.szId'
                 label={labels.saleZone}
                 readOnly={isPosted}
@@ -2339,9 +2363,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.taxSchedules}
+                endpointId={FinancialRepository.TaxSchedules.qry}
+                store={store?.taxSchedules}
                 name='header.taxId'
                 label={labels.tax}
                 valueField='recordId'

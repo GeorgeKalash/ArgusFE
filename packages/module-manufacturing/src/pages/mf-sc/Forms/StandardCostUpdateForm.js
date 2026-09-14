@@ -21,12 +21,21 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 export default function StandardCostUpdateForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const functionId = SystemFunction.StandardCostUpdate
   const [reCal, setReCal] = useState(false)
+  const [store, setStore] = useState({
+    documentTypes: [],
+    itemGroups: [],
+    categories: [],
+    collections: [],
+    productionLines: []
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
@@ -261,8 +270,24 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
     },
   ]
 
+  const fillCombos = async () => {
+    const res = await getRequest({
+      extension: ManufacturingRepository.StandardCostUpdate.pack,
+      parameters: ``
+    })
+
+    setStore({
+      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
+      itemGroups: res?.record?.itemGroups || [],
+      categories: res?.record?.categories || [], 
+      collections: res?.record?.collections || [],
+      productionLines: res?.record?.productionLines || []
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
+      await fillCombos()
       if (recordId) {
         refetchForm(recordId)
       } else {
@@ -290,8 +315,9 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.StandardCostUpdate.pack}
-                    reducer={response => response?.record?.documentTypes}
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}        
+                    store={store?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
@@ -343,8 +369,9 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.StandardCostUpdate.pack}
-                    reducer={response => response?.record?.itemGroups}
+                    endpointId={InventoryRepository.Group.qry}
+                    parameters={`_startAt=0&_pageSize=1000`}        
+                    store={store?.itemGroups}
                     values={formik.values.header}
                     name='header.itemGroupId'
                     label={labels.itemGroup}
@@ -364,8 +391,9 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.StandardCostUpdate.pack}
-                    reducer={response => response?.record?.categories}
+                    endpointId={InventoryRepository.Category.qry}
+                    parameters='_pagesize=1000&_startAt=0&_name='
+                    store={store?.categories}
                     values={formik.values.header}
                     name='header.itemCategoryId'
                     label={labels.category}
@@ -384,8 +412,8 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.StandardCostUpdate.pack}
-                    reducer={response => response?.record?.collections}
+                    endpointId={InventoryRepository.Collections.qry}
+                    store={store?.collections}
                     name='header.collectionId'
                     label={labels.collection}
                     valueField='recordId'
@@ -406,8 +434,8 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.StandardCostUpdate.pack}
-                    reducer={response => response?.record?.productionLines}
+                    endpointId={ManufacturingRepository.ProductionLine.qry}
+                    store={store?.productionLines}
                     values={formik.values.header}
                     name='header.productionLineId'
                     label={labels.productionLine}
