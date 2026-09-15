@@ -94,15 +94,18 @@ const AttSettings = () => {
       minPunchInterval: yup.number().min(5).max(15).nullable()
     }),
     onSubmit: async obj => {
-      const data = Object.entries(obj).map(([key, value]) => ({
-        key,
-        value:
-          key === 'lastReceivedPunch' || key === 'lastProcessedPunch'
-            ? value
-              ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
-              : null
-            : value
-      }))
+      const readOnlyFields = ['lastGenFSDayId', 'lastReceivedPunch', 'lastProcessedPunch', 'lastGenTATV']
+
+      const data = Object.entries(obj)
+        .filter(([key]) => !readOnlyFields.includes(key)).map(([key, value]) => ({
+          key,
+          value:
+            key === 'lastReceivedPunch' || key === 'lastProcessedPunch'
+              ? value
+                ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
+                : null
+              : value
+        }))
 
       await postRequest({
         extension: SystemRepository.Defaults.set,
