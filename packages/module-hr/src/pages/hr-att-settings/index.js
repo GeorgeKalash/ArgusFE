@@ -99,12 +99,7 @@ const AttSettings = () => {
       const data = Object.entries(obj)
         .filter(([key]) => !readOnlyFields.includes(key)).map(([key, value]) => ({
           key,
-          value:
-            key === 'lastReceivedPunch' || key === 'lastProcessedPunch'
-              ? value
-                ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
-                : null
-              : value
+          value
         }))
 
       await postRequest({
