@@ -1,8 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Window from '@argus/shared-ui/src/components/Shared/Window'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { v4 as uuidv4 } from 'uuid'
 
 const WindowContext = React.createContext(null)
@@ -43,77 +41,18 @@ function getWindowDimensions(width, height, spacing = true) {
 
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
-  const { postRequest, getRequest } = useContext(RequestsContext)
   const [rerenderFlag, setRerenderFlag] = useState(false)
-  const [lockProps, setLockProps] = useState(null)
   const closedWindow = useRef(null)
-  const userId =
-    typeof window !== 'undefined'
-      ? JSON.parse(window.sessionStorage.getItem('userData'))?.userId
-      : null
 
   const currentValue = { ...stack[stack.length - 1] }
 
-  function lockRecord(obj) {
-    getRequest({
-      extension: AccessControlRepository.LockedRecords.get,
-      parameters: `_resourceId=${obj.resourceId}&_recordId=${obj.recordId}`
-    }).then(res => {
-      if (res.record && res.record.userId != userId) {
-        obj.isAlreadyLocked?.(res.record.userName)
-        return
-      }
-
-      const body = {
-        resourceId: obj.resourceId,
-        recordId: obj.recordId,
-        reference: obj.reference,
-        userId,
-        clockStamp: new Date()
-      }
-
-      postRequest({
-        extension: AccessControlRepository.lockRecord,
-        record: JSON.stringify(body)
-      }).then(() => {
-        setLockProps(obj)
-        obj.onSuccess?.()
-      })
-    })
-  }
-
-  function unlockRecord() {
-    if (lockProps) {
-      const body = {
-        resourceId: lockProps.resourceId,
-        recordId: lockProps.recordId,
-        reference: lockProps.reference,
-        userId: userId,
-        clockStamp: new Date()
-      }
-      postRequest({
-        extension: AccessControlRepository.unlockRecord,
-        record: JSON.stringify(body)
-      })
-      setLockProps(null)
-    }
-  }
 
   function closeWindow() {
-    const closingWindow = stack[stack.length - 1]
-
-    if (
-      lockProps &&
-      closingWindow?.props?.recordId === lockProps.recordId
-    ) {
-      unlockRecord()
-    }
 
     setStack(stack => stack.slice(0, stack.length - 1))
   }
 
   function closeWindowById(givenId) {
-    unlockRecord()
     closedWindow.current = currentValue
     setStack(stack => stack.filter(({ id }) => givenId != id))
   }
@@ -160,7 +99,7 @@ export function WindowProvider({ children }) {
   }
 
   return (
-    <WindowContext.Provider value={{ stack: addToStack, lockRecord }}>
+    <WindowContext.Provider value={{ stack: addToStack }}>
       {children}
       {stack.map(
         ({

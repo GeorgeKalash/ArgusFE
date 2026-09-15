@@ -29,6 +29,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function InboundTranspForm({ labels, maxAccess: access, recordId }) {
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -134,6 +135,14 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     const isPosted = formik.values.status == 3
     const editMode = !!formik.values.recordId
 
+    const { releaseLock } = useRecordLock({
+        recordId,
+        reference: formik.values.reference,
+        resourceId: ResourceIds.InboundTransportation,
+        enabled: !!recordId && !isPosted
+    })
+
+
     async function getInboundTransp(recordId) {
         return await getRequest({
             extension: DeliveryRepository.InboundTransp.get2,
@@ -194,6 +203,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
         toast.success(platformLabels.Posted)     
         await refetchInbound()
         invalidate()
+        await releaseLock()
 
         stack({
         Component: ThreadProgress,
