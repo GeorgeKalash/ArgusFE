@@ -31,7 +31,7 @@ const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
-  const { stack, lockRecord } = useWindow()
+  const { stack } = useWindow()
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateInvoices
@@ -98,8 +98,7 @@ const GeneratePurchaseInvoice = () => {
       props: {
         recordId,
         functionId: SystemFunction.SalesInvoice,
-        getResourceId: () => ResourceIds.SalesInvoice,
-        lockRecord
+        getResourceId: () => ResourceIds.SalesInvoice
       },
     })
   }

@@ -56,7 +56,7 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack, lockRecord } = useWindow()
+  const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
@@ -769,8 +769,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       props: {
         recordId: res.recordId,
         functionId: SystemFunction.SalesInvoice,
-        getResourceId: () => ResourceIds.SalesInvoice,
-        lockRecord
+        getResourceId: () => ResourceIds.SalesInvoice
       }
     })
   }
