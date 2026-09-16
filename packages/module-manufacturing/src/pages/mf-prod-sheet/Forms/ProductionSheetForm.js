@@ -33,7 +33,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.ProductionSheet.qry
+    endpointId: ManufacturingRepository.ProductionSheet.page
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({

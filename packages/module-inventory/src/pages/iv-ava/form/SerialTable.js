@@ -13,7 +13,7 @@ const SerialTable = ({ labels, obj, access }) => {
 
   async function fetchGridData() {
     const response = await getRequest({
-      extension: InventoryRepository.AvailabilitySerial.qry,
+      extension: InventoryRepository.AvailabilitySerial.page,
       parameters: `_itemId=${obj.itemId}&_siteId=${obj.siteId}&_srlNo=&_startAt=0&_pageSize=50`
     })
     setData(response)
@@ -21,7 +21,7 @@ const SerialTable = ({ labels, obj, access }) => {
 
   const { refetch, paginationParameters } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.AvailabilitySerial.qry
+    endpointId: InventoryRepository.AvailabilitySerial.page
   })
 
   useEffect(() => {

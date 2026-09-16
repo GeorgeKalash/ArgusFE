@@ -302,7 +302,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       name: 'muRef',
       props: {
         endpointId: InventoryRepository.MeasurementUnit.qry,
-        parameters: `_msId=0&filter=`,
+        parameters: `_msId=0`,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [

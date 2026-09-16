@@ -606,13 +606,13 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
         <Fixed>
           <Grid container spacing={2} justifyContent='flex-end'>
             <Grid item xs={3}>
-              <CustomNumberField name='totalPcs' value={totalPcs} label={labels.totalPcs} readOnly />
+              <CustomNumberField name='totalPcs' value={totalPcs} label={labels.totalPcs} readOnly maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='totalQty' value={totalQty} label={labels.totalQty} readOnly />
+              <CustomNumberField name='totalQty' value={totalQty} label={labels.totalQty} readOnly maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='totalCost' value={totalCost} label={labels.totalCost} readOnly />
+              <CustomNumberField name='totalCost' value={totalCost} label={labels.totalCost} readOnly maxAccess={maxAccess}/>
             </Grid>
           </Grid>
         </Fixed>

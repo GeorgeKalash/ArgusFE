@@ -23,7 +23,7 @@ const BusinessRules = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SystemRepository.BusinessRules.qry,
+      extension: SystemRepository.BusinessRules.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_countryId=0&_stateId=0`
     })
 
@@ -39,7 +39,7 @@ const BusinessRules = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.BusinessRules.qry,
+    endpointId: SystemRepository.BusinessRules.page,
     datasetId: ResourceIds.BusinessRules
   })
 

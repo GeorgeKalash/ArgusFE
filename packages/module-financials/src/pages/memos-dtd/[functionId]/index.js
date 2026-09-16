@@ -29,7 +29,7 @@ const Financial = () => {
     } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.FIDocTypeDefaults.qry,
+      extension: FinancialRepository.FIDocTypeDefaults.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
@@ -44,7 +44,7 @@ const Financial = () => {
     invalidate,
     refetch
   } = useResourceQuery({
-    endpointId: FinancialRepository.FIDocTypeDefaults.qry,
+    endpointId: FinancialRepository.FIDocTypeDefaults.page,
     datasetId: ResourceIds.FIDocTypeDefaults,
 
     filter: {

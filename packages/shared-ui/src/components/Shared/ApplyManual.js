@@ -160,7 +160,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
             columns={columns}
             allowAddNewLine={!readOnly}
             allowDelete={!readOnly}
-          />
+            maxAccess={access}/>
         </Grow>
       </VertLayout>
     </Form>

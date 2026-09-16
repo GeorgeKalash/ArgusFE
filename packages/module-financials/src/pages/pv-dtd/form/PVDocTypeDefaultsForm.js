@@ -22,7 +22,7 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.FIDocTypeDefaults.qry
+    endpointId: FinancialRepository.FIDocTypeDefaults.page
   })
   const { platformLabels } = useContext(ControlContext)
 

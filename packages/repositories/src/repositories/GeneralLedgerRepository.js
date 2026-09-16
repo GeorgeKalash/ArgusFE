@@ -91,6 +91,7 @@ export const GeneralLedgerRepository = {
     set2: service + 'set2ISF'
   },
   Segments: {
+    page: service + 'pageSEG',
     qry: service + 'qrySEG',
     get: service + 'getSEG',
     set: service + 'setSEG',

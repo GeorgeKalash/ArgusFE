@@ -95,6 +95,7 @@ export default function HRPayrollConstantForm({ labels, maxAccess, recordId, win
                 required
                 onClear={() => formik.setFieldValue('value', null)}
                 error={formik.touched.value && Boolean(formik.errors.value)}
+                maxAccess={maxAccess}
             />
             </Grid>
           </Grid>

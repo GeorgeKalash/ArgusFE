@@ -163,10 +163,10 @@ const PartsForm = ({ access, labels, store: { reference, isPosted, recordId }, d
           <Fixed>
             <Grid container xs={4} spacing={2}>
               <Grid item xs={12}>
-                <CustomTextField name='workOrder' label={labels.workOrder} value={reference} readOnly />
+                <CustomTextField name='workOrder' label={labels.workOrder} value={reference} readOnly maxAccess={access} />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField name='taskName' label={labels.task} value={taskName} readOnly />
+                <CustomTextField name='taskName' label={labels.task} value={taskName} readOnly maxAccess={access} />
               </Grid>
             </Grid>
           </Fixed>

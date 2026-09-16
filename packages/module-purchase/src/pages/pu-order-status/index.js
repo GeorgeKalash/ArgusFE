@@ -23,8 +23,8 @@ const PUOrderStatus = () => {
 
     try {
       const response = await getRequest({
-        extension: PurchaseRepository.PUOrderStatus.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+        extension: PurchaseRepository.PUOrderStatus.page,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
       })
 
       return { ...response, _startAt: _startAt }
@@ -40,7 +40,7 @@ const PUOrderStatus = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PurchaseRepository.PUOrderStatus.qry,
+    endpointId: PurchaseRepository.PUOrderStatus.page,
     datasetId: ResourceIds.PUOrderStatus
   })
 

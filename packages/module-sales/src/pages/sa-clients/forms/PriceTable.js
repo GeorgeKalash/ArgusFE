@@ -44,12 +44,9 @@ const PriceTab = ({ labels, maxAccess, store }) => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_clientId=${recordId}`
-    var parameters = defaultParams
-
     const response = await getRequest({
       extension: SaleRepository.Price.qry,
-      parameters: parameters
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_clientId=${recordId}`
     })
     setData(response)
 

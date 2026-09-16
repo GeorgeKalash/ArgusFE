@@ -180,7 +180,7 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
             columns={columns}
             allowDelete={false}
             allowAddNewLine={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

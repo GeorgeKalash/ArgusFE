@@ -149,6 +149,7 @@ const GlobalAuthorization = () => {
                   onChange(newValue?.key)
                 }}
                 error={!filters.moduleId}
+                maxAccess={access}
               />
             </Grid>
           }

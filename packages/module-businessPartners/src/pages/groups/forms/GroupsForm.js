@@ -115,9 +115,10 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
                 displayField='description'
                 name='nraRef'
                 label={labels.numberRange}
+                maxAccess={maxAccess}
                 secondDisplayField={true}
                 secondValue={formik.values.nraDescription}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   if (newValue) {
                     formik.setFieldValue('nraId', newValue?.recordId)
                     formik.setFieldValue('nraRef', newValue?.reference)

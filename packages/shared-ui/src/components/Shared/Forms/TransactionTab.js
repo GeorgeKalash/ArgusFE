@@ -185,7 +185,7 @@ const TransactionTab = ({ store, labels, access, setStore }) => {
       <Fixed>
         <Grid container justifyContent='flex-end' sx={{ p: 2 }}>
           <Grid item xs={3}>
-            <CustomNumberField name='baseAmounts' label={labels.totalBaseAmounts} value={baseAmounts} readOnly />
+            <CustomNumberField name='baseAmounts' label={labels.totalBaseAmounts} value={baseAmounts} readOnly maxAccess={access}/>
           </Grid>
         </Grid>
       </Fixed>

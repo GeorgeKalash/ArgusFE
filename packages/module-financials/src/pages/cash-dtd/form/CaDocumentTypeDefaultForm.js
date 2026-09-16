@@ -116,7 +116,8 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || '')
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}

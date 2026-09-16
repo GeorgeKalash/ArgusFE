@@ -116,7 +116,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record, onSuccess }) =
                 ]}
                 valueShow='vendorRef'
                 secondValueShow='vendorName'
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('vendorId', newValue.recordId || '')
                   formik.setFieldValue('vendorName', newValue.name || '')
                   formik.setFieldValue('vendorRef', newValue.reference || '')
@@ -139,7 +139,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record, onSuccess }) =
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
@@ -153,6 +153,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record, onSuccess }) =
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('baseLaborPrice', '')}
                 required
+                maxAccess={maxAccess}
                 error={formik.touched.baseLaborPrice && Boolean(formik.errors.baseLaborPrice)}
               />
             </Grid>
@@ -164,6 +165,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record, onSuccess }) =
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('priceList', '')}
                 required
+                maxAccess={maxAccess}
                 error={formik.touched.priceList && Boolean(formik.errors.priceList)}
               />
             </Grid>
@@ -174,6 +176,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record, onSuccess }) =
                 value={formik.values.markdown}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('markdown', '')}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -202,6 +205,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record, onSuccess }) =
                 value={formik.values.deliveryLeadDays}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('deliveryLeadDays', '')}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
