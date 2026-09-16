@@ -31,7 +31,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
-  const { stack, lockRecord } = useWindow()
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesInvoice,
@@ -79,8 +79,8 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
         props: {
           recordId,
           functionId,
-          getResourceId: () => ResourceIds.SalesInvoice,
-          lockRecord
+          getResourceId: () => ResourceIds.SalesInvoice
+          
         }
       })
     } else if (functionId === SystemFunction.RetailInvoice) {
