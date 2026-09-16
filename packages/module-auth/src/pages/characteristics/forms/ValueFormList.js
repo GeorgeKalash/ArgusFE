@@ -60,11 +60,9 @@ const ValueFormList = ({ labels, store, maxAccess }) => {
   }
 
   const getValueGridData = chId => {
-    const defaultParams = `_chId=${chId}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.CharacteristicsValues.qry,
-      parameters: parameters
+      parameters: `_chId=${chId}`
     }).then(res => {
       setValueGridData(res)
       const maxSeq = Math.max(...res.list.map(item => item.seqNo), 0)

@@ -109,7 +109,7 @@ const TargetForm = ({ labels, maxAccess, store }) => {
             columns={columns}
             allowDelete={false}
             allowAddNewLine={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

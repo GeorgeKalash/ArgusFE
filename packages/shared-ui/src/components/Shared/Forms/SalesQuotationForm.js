@@ -1407,6 +1407,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
                       formik.setFieldValue('spId', newValue?.recordId)
                     }}
                     error={formik.touched.spId && Boolean(formik.errors.spId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1458,6 +1459,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
                       formik.setFieldValue('szId', newValue?.recordId)
                     }}
                     error={formik.touched.szId && Boolean(formik.errors.szId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
@@ -1656,7 +1658,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess}/>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField

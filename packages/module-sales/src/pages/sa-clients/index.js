@@ -50,12 +50,10 @@ const SAClients = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortField=recordId asc`
-    var parameters = defaultParams
-
+   
     const response = await getRequest({
       extension: SaleRepository.Client.page,
-      parameters: parameters
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortField=recordId asc`
     })
 
     return { ...response, _startAt: _startAt }

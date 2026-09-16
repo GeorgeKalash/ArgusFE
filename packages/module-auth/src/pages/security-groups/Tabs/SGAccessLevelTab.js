@@ -174,6 +174,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
               onChange={(_, newValue) => {
                 onChange(newValue?.key)
               }}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid
@@ -199,6 +200,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
               onClear={() => formik.setFieldValue('search', '')}
               onChange={handleSearchChange}
               fullWidth
+              maxAccess={maxAccess}
             />
           </Grid>
         </Grid>

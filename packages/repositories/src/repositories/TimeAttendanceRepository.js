@@ -78,6 +78,7 @@ export const TimeAttendanceRepository = {
     del: service + 'delDT'
   },
   AttendanceDay: {
+    page: service + 'pageAD',
     qry: service + 'qryAD'
   },
   Schedule: {

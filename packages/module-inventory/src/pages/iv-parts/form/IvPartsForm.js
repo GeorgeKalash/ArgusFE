@@ -18,7 +18,7 @@ export default function IvPartsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Parts.qry
+    endpointId: InventoryRepository.Parts.page
   })
 
   const { formik } = useForm({

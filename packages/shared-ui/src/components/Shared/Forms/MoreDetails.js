@@ -99,6 +99,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
                 onClear={() => formik.setFieldValue('trxCountPerYear', '')}
                 value={formik.values.trxCountPerYear}
                 error={formik.touched.trxCountPerYear && Boolean(formik.errors.trxCountPerYear)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -110,6 +111,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
                 value={formik.values.trxAmountPerYear}
                 onClear={() => formik.setFieldValue('trxAmountPerYear', '')}
                 error={formik.touched.trxAmountPerYear && Boolean(formik.errors.trxAmountPerYear)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -199,6 +201,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
                 label={labels.extraIncome}
                 value={formik.values.extraIncome}
                 error={formik.touched.extraIncome && Boolean(formik.errors.extraIncome)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

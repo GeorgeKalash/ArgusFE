@@ -587,6 +587,7 @@ const GenerateOutboundTransportation2 = () => {
                 onBlur={async e => {
                   handleTruckNoChange(e.target.value)
                 }}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={1.33}>
@@ -608,6 +609,7 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.trucksVolume}
                 value={totalTrucksVolume}
                 readOnly
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={1.33}>
@@ -616,10 +618,11 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.ordersVolume}
                 value={ordersVolume}
                 readOnly
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={1.33}>
-              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly />
+              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly maxAccess={access} />
             </Grid>
             <Grid item xs={1.33}>
               <CustomNumberField
@@ -627,6 +630,7 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.zonesVolume}
                 value={formik.values.zonesVolume}
                 readOnly
+                maxAccess={access}
               />
             </Grid>
           </Grid>
@@ -707,7 +711,7 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsTrucks}
                     allowAddNewLine={false}
                     allowDelete={false}
-                  />
+                    maxAccess={access}/>
                 </Grid>
                 <Grid item xs={9} sx={{ display: 'flex' }}>
                   <Table
@@ -750,6 +754,7 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.totalCategVolume}
                 value={totalFilteredCategoryVolume.toFixed(2)}
                 readOnly
+                maxAccess={access}
               />
             </Grid>
 
@@ -759,6 +764,7 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.totalCategVolPct}
                 value={totalPct}
                 readOnly
+                maxAccess={access}
               />
             </Grid>
 
@@ -795,8 +801,6 @@ const GenerateOutboundTransportation2 = () => {
                 color='#231f20'
                 tooltipText={platformLabels.Generate}
                 image={'generate.png'}
-
-                //disabled={balance + 0.1 * totalTrucksVolume < 0}
               />
             </Grid>
           </Grid>

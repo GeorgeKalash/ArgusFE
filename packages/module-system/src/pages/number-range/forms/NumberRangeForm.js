@@ -6,10 +6,8 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Checkbox from '@mui/material/Checkbox'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi, formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
@@ -27,7 +25,7 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.NumberRange.qry
+    endpointId: SystemRepository.NumberRange.page
   })
 
   const { formik } = useForm({

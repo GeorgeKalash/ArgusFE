@@ -23,7 +23,7 @@ const PaymentTerms = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.PaymentTerms.qry,
+        extension: SaleRepository.PaymentTerms.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
       })
 
@@ -40,7 +40,7 @@ const PaymentTerms = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.PaymentTerms.qry,
+    endpointId: SaleRepository.PaymentTerms.page,
     datasetId: ResourceIds.PaymentTerm
   })
 

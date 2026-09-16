@@ -35,19 +35,25 @@ const DimensionsValues = () => {
     access
   } = useResourceQuery({
     datasetId: ResourceIds.DimensionsValues,
-    endpointId: FinancialRepository.DimensionValue.qry,
+    endpointId: FinancialRepository.DimensionValue.page,
     filter: {
       filterFn: fetchWithSearch
     }
   })
 
-  async function fetchWithSearch({ filters }) {
-    const data = await getRequest({
-      extension: FinancialRepository.DimensionValue.qry,
-      parameters: `_filter=${filters.qry}&_dimension=${filters.qry.match(/\d+/)?.[0]}`
+  async function fetchWithSearch({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+  
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: FinancialRepository.DimensionValue.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_dimension=${filters.qry.match(/\d+/)?.[0]}`
     })
 
-    return data
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
@@ -89,7 +95,6 @@ const DimensionsValues = () => {
         labels: _labels,
         recordId: id,
         maxAccess: access,
-        invalidate,
         dimValue: filters?.qry
       },
       width: 600,

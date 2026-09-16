@@ -63,6 +63,7 @@ const BtDefaults = ({ _labels, access }) => {
                 name='fixing_msId'
                 label={_labels.measurementSchedule}
                 valueField='recordId'
+                maxAccess={access}
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -91,6 +92,7 @@ const BtDefaults = ({ _labels, access }) => {
                   formik.setFieldValue('bt_reporting_currencyId', newValue?.recordId || '')
                 }}
                 error={formik.touched.bt_reporting_currencyId && Boolean(formik.errors.bt_reporting_currencyId)}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

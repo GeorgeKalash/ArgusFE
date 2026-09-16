@@ -199,16 +199,16 @@ export default function SizesTab({ labels, maxAccess, store }) {
         <Fixed>
           <Grid container spacing={2} p={1}>
             <Grid item xs={3}>
-              <CustomNumberField name='totExpectedPcs' label={labels.totExpectedPcs} value={totExpectedPcs} readOnly />
+              <CustomNumberField name='totExpectedPcs' label={labels.totExpectedPcs} value={totExpectedPcs} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='totExpectedQty' label={labels.totExpectedQty} value={totExpectedQty} readOnly />
+              <CustomNumberField name='totExpectedQty' label={labels.totExpectedQty} value={totExpectedQty} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='totPcs' label={labels.totPcs} value={totPcs} readOnly />
+              <CustomNumberField name='totPcs' label={labels.totPcs} value={totPcs} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='totQty' label={labels.totQty} value={totQty} readOnly />
+              <CustomNumberField name='totQty' label={labels.totQty} value={totQty} readOnly maxAccess={maxAccess} />
             </Grid>
           </Grid>
         </Fixed>

@@ -119,6 +119,7 @@ export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }
                 label={labels.totalQty}
                 value={totalQty}
                 readOnly
+                maxAccess={maxAccess}
               />
           </Grid>
           <Grid item xs={2}>
@@ -126,6 +127,7 @@ export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }
                 label={labels.totalPcs}
                 value={totalPcs}
                 readOnly
+                maxAccess={maxAccess}
               />
           </Grid>
           <Grid item xs={1}/>

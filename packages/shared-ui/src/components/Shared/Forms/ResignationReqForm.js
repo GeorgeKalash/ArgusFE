@@ -287,7 +287,8 @@ export default function ResignationReqForm({ recordId, window }) {
                   formik.setFieldValue('employeeName', newValue?.fullName || null)
                   fillJob(newValue?.recordId)
                 }}
-                error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
+                error={formik.touched.employeeId && Boolean(formik.errors.employeeId)} 
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>

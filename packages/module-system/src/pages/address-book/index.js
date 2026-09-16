@@ -35,7 +35,7 @@ const AddressBook = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.Address.qry,
+    endpointId: SystemRepository.Address.page,
     datasetId: ResourceIds.Address,
     search: {
       searchFn: fetchWithSearch
@@ -45,12 +45,9 @@ const AddressBook = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
-    var parameters = defaultParams
-
     const response = await getRequest({
-      extension: SystemRepository.Address.qry,
-      parameters: parameters
+      extension: SystemRepository.Address.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }

@@ -23,7 +23,7 @@ const DeliveryMethods = () => {
 
     try {
       const response = await getRequest({
-        extension: PurchaseRepository.DeliveryMethods.qry,
+        extension: PurchaseRepository.DeliveryMethods.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
       })
 
@@ -40,7 +40,7 @@ const DeliveryMethods = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PurchaseRepository.DeliveryMethods.qry,
+    endpointId: PurchaseRepository.DeliveryMethods.page,
     datasetId: ResourceIds.DeliveryMethods
   })
 

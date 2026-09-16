@@ -24,7 +24,7 @@ const FiCashTransfers = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: CashBankRepository.CashTransfers.qry,
+      extension: CashBankRepository.CashTransfers.page,
       parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=reference desc&_pageSize=${_pageSize}&_params=${
         params || ''
       }`
@@ -54,7 +54,7 @@ const FiCashTransfers = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CashBankRepository.CashTransfers.qry,
+    endpointId: CashBankRepository.CashTransfers.page,
     datasetId: ResourceIds.CashTransfers,
     filter: {
       filterFn: fetchWithFilter

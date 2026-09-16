@@ -3,6 +3,7 @@ import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
@@ -14,9 +15,14 @@ import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalidate }) {
+export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: FinancialRepository.ExpenseTypes.page
+  })
+
 
   const { formik } = useForm({
     initialValues: {

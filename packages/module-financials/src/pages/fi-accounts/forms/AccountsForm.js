@@ -134,6 +134,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     endpointId={FinancialRepository.Group.qry}
                     name='groupId'
                     required
+                    maxAccess={maxAccess}
                     label={labels.accountGroup}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -238,6 +239,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     datasetId={DataSets.FI_GROUP_TYPE}
                     required
                     values={formik.values}
+                    maxAccess={maxAccess}
                     valueField='key'
                     displayField='value'
                     onChange={(_, newValue) => formik.setFieldValue('type', newValue?.key || null)}
@@ -275,6 +277,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                       }
                     }}
                     error={formik.touched.szId && Boolean(formik.errors.szId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -288,6 +291,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     values={formik.values}
                     onChange={(_, newValue) => formik.setFieldValue('spId', newValue?.recordId || null)}
                     error={formik.touched.spId && Boolean(formik.errors.spId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -305,7 +309,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={AccessControlRepository.SecurityGroup.qry}
-                    parameters={`_startAt=0&_pageSize=1000&filter=`}
+                    parameters={`_startAt=0&_pageSize=1000`}
                     name='sgId'
                     label={labels.securityGrp}
                     values={formik.values}
