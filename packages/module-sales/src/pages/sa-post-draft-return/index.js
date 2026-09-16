@@ -15,16 +15,15 @@ import { IconButton, Box } from '@mui/material'
 import Image from 'next/image'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import DraftReturnForm from '@argus/shared-ui/src/components/Shared/Forms/DraftReturnForm'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const PostDraftReturn = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const { platformLabels } = useContext(ControlContext)
 
-  const { stack, lockRecord } = useWindow()
-  const { addLockedScreen } = useContext(LockedScreensContext)
+  const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -158,47 +157,25 @@ const PostDraftReturn = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId, obj?.reference, obj?.wip)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
-  async function openForm(recordId, reference, wip) {
-    if (recordId && wip !== 2) {
-      await lockRecord({
-        recordId: recordId,
-        reference: reference,
-        resourceId: ResourceIds.DraftSerialReturns,
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: ResourceIds.DraftSerialReturns,
-            recordId,
-            reference
-          })
-          openStack(recordId)
-        },
-        isAlreadyLocked: name => {
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              title: platformLabels.Dialog
-            }
-          })
-        }
-      })
-    } else {
-      openStack(recordId)
-    }
-  }
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.DraftSerialReturns,
+      recordId,
+      disabled
+    })
 
-  async function openStack(recordId) {
+    if (!canOpen) return
+
     stack({
       Component: DraftReturnForm,
       props: {
         labels,
         access,
         recordId,
-        invalidate,
-        lockRecord
+        invalidate
       },
       width: 1300,
       height: 750,

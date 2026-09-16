@@ -664,29 +664,6 @@ const TabsProvider = ({ children }) => {
   }, [openTabs, currentTabIndex, reloadOpenedPage, reopenTab, shouldManageTabs])
 
 
-  function unlockRecord(resourceId) {
-    const body = {
-      resourceId,
-      recordId: 0,
-      reference: '',
-      userId,
-      clockStamp: new Date()
-    }
-
-    postRequest({
-      extension: AccessControlRepository.unlockRecord,
-      record: JSON.stringify(body)
-    })
-
-    removeLockedScreen(resourceId)
-  }
-
-  const unlockIfLocked = tab => {
-    if (!tab?.resourceId) return
-    const locked = lockedScreens.some(screen => screen.resourceId === tab.resourceId)
-    if (locked) unlockRecord(tab.resourceId)
-  }
-
   if (!shouldManageTabs) {
     return children
   }
@@ -739,7 +716,6 @@ const TabsProvider = ({ children }) => {
                       onClick={async e => {
                         e.preventDefault()
                         e.stopPropagation()
-                        if (activeTab) unlockIfLocked(activeTab)
                         await closeTab(activeTab.route)
                       }}
                     >
