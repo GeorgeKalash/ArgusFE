@@ -18,6 +18,8 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -36,6 +38,8 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       reference: null,
       name: '',
       keywords: null,
+      currencyId: null,
+      marginPct: null,
       flName: null,
       type: null,
       BpRef: null,
@@ -52,6 +56,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       type: yup.string().required(),
       groupId: yup.string().required(),
       reference: yup.string().required(),
+      marginPct: yup.number().min(0).max(100).nullable(),
       sgId: yup
         .number()
         .nullable()
@@ -203,6 +208,25 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     maxAccess={maxAccess}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    name='currencyId'
+                    label={labels.defaultCurrency}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('currencyId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={6}>
@@ -292,6 +316,17 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     required={formik.values.isConfidential}
                     readOnly={!formik.values.isConfidential}
                     error={formik.touched.sgId && Boolean(formik.errors.sgId)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='marginPct'
+                    label={labels.marginPct}
+                    value={formik.values.marginPct}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('marginPct', e.target.value)}
+                    onClear={() => formik.setFieldValue('marginPct', null)}
+                    error={formik.touched.marginPct && Boolean(formik.errors.marginPct)}
                   />
                 </Grid>
               </Grid>
