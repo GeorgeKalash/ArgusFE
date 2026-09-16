@@ -277,14 +277,16 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       await postRequest({
         extension: SaleRepository.DraftInvoiceSerial.append,
         record: JSON.stringify(LastSerPack),
-        noHandleError: true
+        throwError: true
       })
-      
-      toast.success(platformLabels.Saved)
-      invalidate()
-      refetchForm(draftId)
+      .then(() => {
+        toast.success(platformLabels.Saved)
+        invalidate()
+        refetchForm(draftId)
 
-      return true
+        return true
+      })
+      .catch(() => false)
     }
   }
 
