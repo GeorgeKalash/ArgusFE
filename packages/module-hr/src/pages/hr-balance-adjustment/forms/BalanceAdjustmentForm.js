@@ -129,12 +129,24 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
     invalidate()
   }
 
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: LeaveManagementRepository.BalanceAdjustment.unpost,
+      record: JSON.stringify({ recordId: formik?.values?.recordId })
+    })
+
+    toast.success(platformLabels.Unposted)
+    invalidate()
+
+    refetchForm(res?.recordId)
+  }
+
   const actions = [
     {
       key: 'Locked',
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
-      disabled: true
+      onSuccess: onUnpost
     },
     {
       key: 'Unlocked',

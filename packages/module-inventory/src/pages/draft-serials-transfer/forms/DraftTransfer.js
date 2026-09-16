@@ -313,16 +313,15 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
             ? await autoSave(formik?.values?.header, lineObj.changes)
             : await saveHeader(lineObj.changes)
 
-          if (!successSave) 
+          if (!successSave) {
             update({
-              ...initialValues?.items,
+              ...initialValues?.items?.[0],
               id: newRow?.id,
               srlNo: ''
             })
-          else {
-            await addRow(lineObj)
-            
+          } else {
             if (formik.values?.recordId) {
+              await addRow(lineObj)
               await refetchForm(formik.values.recordId)
             }
           }      
@@ -574,7 +573,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     if (!formik.values.items?.length) return
     const totals = calculateTotalWeightFromSerials(formik.values.items)
 
-    formik.setFieldValue('header.totalWeight', totals.totalWeight || 0)
+    formik.setFieldValue('header.totalWeight', roundTo(totals.totalWeight) || 0)
 
   }, [formik.values.items])
 

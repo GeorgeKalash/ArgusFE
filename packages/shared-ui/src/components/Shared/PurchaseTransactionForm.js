@@ -1674,7 +1674,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
 
   useEffect(() => {
     formik.setFieldValue('header.qty', roundTo(totalQty))
-    formik.setFieldValue('header.weight', roundTo(totalWeight))
+    formik.setFieldValue('header.weight', roundTo(totalWeight, 3))
     formik.setFieldValue('header.volume', roundTo(totalVolume))
     formik.setFieldValue('header.amount', roundTo(amount))
     formik.setFieldValue('header.baseAmount', roundTo(amount))

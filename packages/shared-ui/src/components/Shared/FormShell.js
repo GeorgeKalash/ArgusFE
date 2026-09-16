@@ -317,7 +317,8 @@ export default function FormShell({
               props: {
                 recordId: form.values?.recordId,
                 resourceId,
-                functionId
+                functionId,
+                isActive: !form.values?.isInActive 
               }
             })
           }

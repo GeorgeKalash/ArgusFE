@@ -83,7 +83,7 @@ const ComponentBOM = ({ store, labels }) => {
   })
 
   const totalQty = data?.list?.reduce((qtySum, row) => {
-    const qtyValue = parseFloat(row.baseQty) || 0
+    const qtyValue = parseFloat(row.qty) || 0
 
     return qtySum + qtyValue
   }, 0)

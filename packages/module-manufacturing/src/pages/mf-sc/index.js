@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import StandardCostUpdateForm from './Forms/StandardCostUpdateForm'
+import StandardCostUpdateForm from '@argus/shared-ui/src/components/Shared/Forms/StandardCostUpdateForm'
 
 const StandardCostUpdate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -145,13 +145,8 @@ const StandardCostUpdate = () => {
     stack({
       Component: StandardCostUpdateForm,
       props: {
-        labels,
-        recordId,
-        access
-      },
-      width: 1000,
-      height: 700,
-      title: labels.StandardCostUpdate
+        recordId
+      }
     })
   }
 

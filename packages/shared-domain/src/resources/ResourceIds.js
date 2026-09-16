@@ -39,6 +39,7 @@ export const ResourceIds = {
   RightToWork: 70114,
   Salaries: 71206,
   EmployeeRightToWork: 71210,
+  BackgroundCheck: 71202,
   Probation: 71215,
   CasePleads: 76210,
   EmploymentReview: 71601,
@@ -669,6 +670,8 @@ export const ResourceIds = {
   FixingSalesDTD: 38602,
   FixingPurchaseDTD: 38603,
   BTDocumentTypeDefault: 38102,
+  Budget: 42145,
+  Calendar: 72106,
 
   // GL
   GLSalesInvoice: 51604,

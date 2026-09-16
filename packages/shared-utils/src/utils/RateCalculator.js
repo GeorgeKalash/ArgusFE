@@ -7,12 +7,13 @@ const MULTIPLY = 1
 const DIVIDE = 2
 
 class RateCalculator {
-  constructor(_amount, _exRate, _baseAmount, _rateCalcMethod, _dirtyField) {
+  constructor(_amount, _exRate, _baseAmount, _rateCalcMethod, _dirtyField, _autoCalcMethod) {
     this.amount = _amount
     this.exRate = _exRate
     this.baseAmount = _baseAmount
     this.rateCalcMethod = _rateCalcMethod
     this.dirtyField = _dirtyField
+    this.autoCalcMethod = _autoCalcMethod
   }
 }
 
@@ -72,7 +73,8 @@ function recalcRateCalc(rateRow) {
       break
     case DIRTYFIELD_BASE_AMOUNT:
       if (rateRow.exRate == 0) rateRow = recalcExRate(rateRow)
-      else rateRow = recalcAmount(rateRow)
+      else if(rateRow.autoCalcMethod == 1) rateRow = recalcAmount(rateRow)
+      else if(rateRow.autoCalcMethod == 2) rateRow = recalcExRate(rateRow)
       break
     case DIRTYFIELD_BASE_AMOUNT_MCR:
       if (rateRow.baseAmount != 0) rateRow = recalcExRate(rateRow)

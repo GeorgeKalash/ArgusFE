@@ -14,20 +14,19 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import toast from 'react-hot-toast'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import RetailTransactionsForm from '@argus/shared-ui/src/components/Shared/Forms/RetailTransactionsForm'
 
 const RetailTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
-  const { stack, lockRecord } = useWindow()
+  const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { addLockedScreen } = useContext(LockedScreensContext)
+  const { checkLock } = useRecordLock()
 
   const { functionId } = Router()
 
@@ -168,11 +167,19 @@ const RetailTrx = () => {
   })
 
   const edit = obj => {
-    openForm(obj?.recordId, obj?.reference, obj?.status)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
 
-  function openStack(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: getResourceId[parseInt(functionId)],
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: RetailTransactionsForm,
       props: {
@@ -180,35 +187,6 @@ const RetailTrx = () => {
         functionId,
       }
     })
-  }
-
-  async function openForm(recordId, reference, status) {
-    if (recordId && status !== 3) {
-      await lockRecord({
-        recordId: recordId,
-        reference: reference,
-        resourceId: getResourceId[parseInt(functionId)],
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: getResourceId[parseInt(functionId)],
-            recordId,
-            reference
-          })
-          openStack(recordId)
-        },
-        isAlreadyLocked: name => {
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              title: platformLabels.Dialog
-            }
-          })
-        }
-      })
-    } else {
-      openStack(recordId)
-    }
   }
 
   const add = async () => {

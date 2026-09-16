@@ -13,7 +13,6 @@ import CreditOrderForm from '@argus/shared-ui/src/components/Shared/Forms/Credit
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CreditInvoiceForm from '@argus/shared-ui/src/components/Shared/Forms/CreditInvoiceForm'
 import TransactionForm from '@argus/shared-ui/src/components/Shared/Forms/TransactionForm'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import ClientTemplateForm from '@argus/shared-ui/src/components/Shared/Forms/ClientTemplateForm'
 import { RTCLRepository } from '@argus/repositories/src/repositories/RTCLRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -51,10 +50,221 @@ import CycleCountsWindow from '@argus/shared-ui/src/components/Shared/Forms/Cycl
 import FixingForm from '@argus/shared-ui/src/components/Shared/Forms/FixingForm'
 import EventOrderForm from '@argus/shared-ui/src/components/Shared/Forms/EventOrderForm'
 import CreditLimitHoldForm from '@argus/shared-ui/src/components/Shared/Forms/CreditLimitHoldForm'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { getStorageData } from '@argus/shared-domain/src/storage/storage'
+import SalesQuotationForm from '@argus/shared-ui/src/components/Shared/Forms/SalesQuotationForm'
+import StandardCostUpdateForm from '@argus/shared-ui/src/components/Shared/Forms/StandardCostUpdateForm'
+import ModellingWindow from '@argus/shared-ui/src/components/Shared/Forms/ModellingWindow'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { userDefaults } = useContext(DefaultsContext)
+
+  const getPlantId = () =>
+    parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value) || null
+
+  const getUserId = () => getStorageData('userData')?.userId || null
+
+  const popupConfigs = {
+    [SystemFunction.CurrencyCreditOrderSale]: {
+      component: CreditOrderForm
+    },
+    [SystemFunction.CurrencyCreditOrderPurchase]: {
+      component: CreditOrderForm
+    },
+    [SystemFunction.CreditInvoiceSales]: {
+      component: CreditInvoiceForm
+    },
+    [SystemFunction.CreditInvoicePurchase]: {
+      component: CreditInvoiceForm
+    },
+    [SystemFunction.CashCountTransaction]: {
+      component: CashCountForm
+    },
+    [SystemFunction.CurrencyPurchase]: {
+      component: TransactionForm,
+      props: {
+        plantId: getPlantId
+      }
+    },
+    [SystemFunction.CurrencySale]: {
+      component: TransactionForm,
+      props: {
+        plantId: getPlantId
+      }
+    },
+    [SystemFunction.KYC]: {
+      component: ClientTemplateForm,
+      prepare: async ({ recordId }) => {
+        const response = await getRequest({
+          extension: RTCLRepository.CtClientIndividual.get,
+          parameters: `_recordId=${recordId}`
+        })
+
+        return response?.record?.clientId || null
+      },
+      props: {
+        plantId: getPlantId
+      }
+    },
+    [SystemFunction.ResignationRequest]: {
+      component: ResignationReqForm
+    },
+    [SystemFunction.LeaveRequest]: {
+      component: LeaveRequestForm
+    },
+    [SystemFunction.Samples]: {
+      component: SamplesForm
+    },
+    [SystemFunction.PayrollList]: {
+      component: PayrollListForm
+    },
+    [SystemFunction.OutwardsOrder]: {
+      component: OutwardsForm,
+      props: {
+        plantId: getPlantId,
+        userId: getUserId
+      }
+    },
+    [SystemFunction.CashTransfer]: {
+      component: CashTransferTab
+    },
+    [SystemFunction.OutwardsModification]: {
+      component: OutwardsModificationForm
+    },
+    [SystemFunction.OutwardsReturn]: {
+      component: OutwardsReturnForm,
+      props: {
+        plantId: getPlantId
+      }
+    },
+    [SystemFunction.InwardTransfer]: {
+      component: InwardTransferForm,
+      props: {
+        plantId: getPlantId,
+        userId: getUserId
+      }
+    },
+    [SystemFunction.InwardSettlement]: {
+      component: InwardSettlementForm,
+      props: {
+        plantId: getPlantId,
+        userId: getUserId
+      }
+    },
+    [SystemFunction.Sketch]: {
+      component: SketchForm
+    },
+    [SystemFunction.SalesOrder]: {
+      component: SalesOrderForm
+    },
+    [SystemFunction.ThreeDDesign]: {
+      component: ThreeDDesignForm
+    },
+    [SystemFunction.LoanRequest]: {
+      component: LoanWindow
+    },
+    [SystemFunction.PurchaseRequisition]: {
+      component: PurchaseRquisitionForm
+    },
+    [SystemFunction.PurchaseOrder]: {
+      component: PurchaseOrderForm
+    },
+    [SystemFunction.MaterialRequest]: {
+      component: MaterialRequestForm
+    },
+    [SystemFunction.CostAllocation]: {
+      component: PuCostAllocationWindow
+    },
+    [SystemFunction.MRP]: {
+      component: MatPlaningForm
+    },
+    [SystemFunction.ReturnFromLeave]: {
+      component: LeaveReturnForm
+    },
+    [SystemFunction.Penalty]: {
+      component: EmpPenaltyForm
+    },
+    [SystemFunction.TimeVariation]: {
+      component: TimeVariatrionForm
+    },
+    [SystemFunction.DuringShiftLeave]: {
+      component: TaDslForm
+    },
+    [SystemFunction.JobInfo]: {
+      component: JobInfoForm
+    },
+    [SystemFunction.PaymentOrder]: {
+      component: PaymentOrdersForm
+    },
+    [SystemFunction.WorkCenterConsumption]: {
+      component: WCConsumpForm
+    },
+    [SystemFunction.ProductionOrder]: {
+      component: ProductionOrderForm
+    },
+    [SystemFunction.StockCount]: {
+      component: CycleCountsWindow,
+      props: {
+        plantId: getPlantId
+      }
+    },
+    [SystemFunction.FixingSales]: {
+      component: FixingForm
+    },
+    [SystemFunction.FixingPurchases]: {
+      component: FixingForm
+    },
+    [SystemFunction.EventOrder]: {
+      component: EventOrderForm
+    },
+    [SystemFunction.CreditLimitHold]: {
+      component: CreditLimitHoldForm
+    },
+    [SystemFunction.SalesQuotation]: {
+      component: SalesQuotationForm
+    },
+    [SystemFunction.StandardCostUpdate]: {
+      component: StandardCostUpdateForm
+    },
+    [SystemFunction.ModelMaker]: {
+      component: ModellingWindow
+    }
+  }
+
+  const getPopupProps = async (obj, config) => {
+    const preparedRecordId = config.prepare
+      ? await config.prepare(obj)
+      : obj.recordId
+
+    const dynamicProps = Object.fromEntries(
+      await Promise.all(
+        Object.entries(config.props || {}).map(async ([key, resolver]) => [
+          key,
+          await resolver(obj)
+        ])
+      )
+    )
+
+    return {
+      recordId: preparedRecordId,
+      functionId: obj.functionId,
+      ...dynamicProps
+    }
+  }
+
+  const openPopup = async obj => {
+    const config = popupConfigs[obj.functionId]
+    if (!config) return
+
+    const props = await getPopupProps(obj, config)
+
+    stack({
+      Component: config.component,
+      props
+    })
+  }
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0 } = options
@@ -95,167 +305,6 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         parameters: `&_reference=${filters.qry}&_sortBy=reference desc&_pageSize=${pageSize}&_startAt=${_startAt}`
       }))
     )
-  }
-
-  const getPlantId = async userData => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userData && userData.userId}&_key=plantId`
-      })
-
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
-  }
-
-  const popupComponent = async obj => {
-    let relevantComponent
-    let recordId = obj.recordId
-
-    switch (obj.functionId) {
-       case SystemFunction.CurrencyCreditOrderSale:
-      case SystemFunction.CurrencyCreditOrderPurchase:
-        relevantComponent = CreditOrderForm
-        break
-      case SystemFunction.CreditInvoiceSales:
-      case SystemFunction.CreditInvoicePurchase:
-        relevantComponent = CreditInvoiceForm
-        break
-      case SystemFunction.CashCountTransaction:
-        relevantComponent = CashCountForm
-        break
-      case SystemFunction.CurrencyPurchase:
-      case SystemFunction.CurrencySale:
-        relevantComponent = TransactionForm
-        break
-
-      case SystemFunction.KYC:
-        await getRequest({
-          extension: RTCLRepository.CtClientIndividual.get,
-          parameters: `_recordId=${obj.recordId}`
-        }).then(res => {
-          recordId = res.record.clientId
-        })
-
-        relevantComponent = ClientTemplateForm
-        break
-      case SystemFunction.ResignationRequest:
-        relevantComponent = ResignationReqForm
-        break
-      case SystemFunction.LeaveRequest:
-        relevantComponent = LeaveRequestForm
-      break
-      case SystemFunction.Samples:
-        relevantComponent = SamplesForm
-      break
-      case SystemFunction.PayrollList:
-        relevantComponent = PayrollListForm
-      break
-      case SystemFunction.OutwardsOrder:
-        relevantComponent = OutwardsForm
-        break
-      case SystemFunction.CashTransfer:
-        relevantComponent = CashTransferTab
-        break
-      case SystemFunction.OutwardsModification:
-        relevantComponent = OutwardsModificationForm
-        break
-      case SystemFunction.OutwardsReturn:
-        relevantComponent = OutwardsReturnForm
-        break
-      case SystemFunction.InwardTransfer:
-        relevantComponent = InwardTransferForm
-        break
-      case SystemFunction.InwardSettlement:
-        relevantComponent = InwardSettlementForm
-        break
-      case SystemFunction.Sketch:
-        relevantComponent = SketchForm
-        break
-      case SystemFunction.SalesOrder:
-        relevantComponent = SalesOrderForm
-        break
-      case SystemFunction.ThreeDDesign:
-        relevantComponent = ThreeDDesignForm
-        break
-      case SystemFunction.LoanRequest:
-        relevantComponent = LoanWindow
-        break
-      case SystemFunction.PurchaseRequisition:
-        relevantComponent = PurchaseRquisitionForm
-        break
-      case SystemFunction.PurchaseOrder:
-        relevantComponent = PurchaseOrderForm
-        break
-      case SystemFunction.MaterialRequest:
-        relevantComponent = MaterialRequestForm
-        break
-      case SystemFunction.CostAllocation:
-        relevantComponent = PuCostAllocationWindow
-        break
-      case SystemFunction.MRP:
-        relevantComponent = MatPlaningForm
-        break
-      case SystemFunction.ReturnFromLeave:
-        relevantComponent = LeaveReturnForm
-        break
-      case SystemFunction.Penalty:
-        relevantComponent = EmpPenaltyForm
-        break
-      case SystemFunction.TimeVariation:
-        relevantComponent = TimeVariatrionForm
-        break
-      case SystemFunction.DuringShiftLeave:
-        relevantComponent = TaDslForm
-        break
-      case SystemFunction.JobInfo:
-        relevantComponent = JobInfoForm
-        break
-      case SystemFunction.PaymentOrder:
-        relevantComponent = PaymentOrdersForm
-        break
-      case SystemFunction.WorkCenterConsumption:
-        relevantComponent = WCConsumpForm
-        break
-      case SystemFunction.ProductionOrder:
-        relevantComponent = ProductionOrderForm
-        break
-      case SystemFunction.StockCount:
-        relevantComponent = CycleCountsWindow
-      case SystemFunction.FixingSales:
-      case SystemFunction.FixingPurchases:
-        relevantComponent = FixingForm
-      case SystemFunction.EventOrder:
-        relevantComponent = EventOrderForm
-      case SystemFunction.CreditLimitHold:
-        relevantComponent = CreditLimitHoldForm
-      default:
-        break
-    }
-
-    if (relevantComponent) {
-      const userData = window.sessionStorage.getItem('userData')
-        ? JSON.parse(window.sessionStorage.getItem('userData'))
-        : null
-
-      const plantId = await getPlantId(userData)
-
-      stack({
-        Component: relevantComponent,
-        props: {
-          recordId: recordId,
-          functionId: obj.functionId,
-          plantId: plantId,
-          userData: userData
-        }
-      })
-    }
-  }
-
-  const openPopup = async obj => {
-    await popupComponent(obj)
   }
 
   const columns = [

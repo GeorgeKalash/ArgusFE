@@ -49,19 +49,18 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import TaxDetails from '@argus/shared-ui/src/components/Shared/TaxDetails'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function RetailTransactionsForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
-  const { stack, lockRecord } = useWindow()
+  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, systemChecks } = useContext(DefaultsContext)
   const [address, setAddress] = useState({})
@@ -484,6 +483,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
 
     toast.success(platformLabels.Posted)
     invalidate()
+    await releaseLock()
     window.close()
   }
 
@@ -493,30 +493,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
       record: JSON.stringify(formik.values.header)
     }).then(res => {
       toast.success(platformLabels.Posted)
-      lockRecord({
-        recordId: res.recordId,
-        reference: formik.values.header.reference,
-        resourceId: getResourceId[parseInt(functionId)],
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: getResourceId[parseInt(functionId)],
-            recordId,
-            reference: formik.values.header.reference
-          })
-          refetchForm(res.recordId)
-        },
-        isAlreadyLocked: name => {
-          window.close()
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              title: platformLabels.Dialog
-            },
-            title: platformLabels.Dialog
-          })
-        }
-      })
+      refetchForm(res.recordId)
 
       invalidate()
     })
@@ -664,21 +641,14 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
       phone: addressObj?.record?.phone || retailTrxHeader?.phoneNo || '',
       countryId: addressObj?.countryId || countryId?.value
     })
-
-    !formik.values.recordId &&
-      lockRecord({
-        recordId: retailTrxHeader.recordId,
-        reference: retailTrxHeader.reference,
-        resourceId: getResourceId[parseInt(functionId)],
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: getResourceId[parseInt(functionId)],
-            recordId: retailTrxHeader.recordId,
-            reference: retailTrxHeader.reference
-          })
-        }
-      })
   }
+
+  const { releaseLock } = useRecordLock({
+      recordId,
+      reference: formik.values.header.reference,
+      resourceId: getResourceId[parseInt(functionId)],
+      enabled: !!recordId && !isPosted
+    })
 
   async function getRetailTransactionPack(transactionId) {
     const res = await getRequest({

@@ -14,6 +14,8 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 const GLSettings = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -29,6 +31,7 @@ const GLSettings = () => {
 
     const filteredList = systemDefaults?.list?.filter(obj => {
       return (
+        obj.key === 'JV_autoCalcMethod' ||
         obj.key === 'GLACSegments' ||
         obj.key === 'GLACSeg0' ||
         obj.key === 'GLACSeg1' ||
@@ -58,6 +61,7 @@ const GLSettings = () => {
   const { formik } = useForm({
     maxAccess: access,
     initialValues: {
+      JV_autoCalcMethod: null,
       GLACSegments: null,
       GLACSeg0: null,
       GLACSeg1: null,
@@ -142,6 +146,7 @@ const GLSettings = () => {
     var dataToPost = []
 
     dataToPost.push({ key: 'GLACSegments', value: obj.GLACSegments })
+    dataToPost.push({ key: 'JV_autoCalcMethod', value: obj.JV_autoCalcMethod })
     for (let i = 0; i < 5; i++) {
       const segKey = `GLACSeg${i}`
       const nameKey = `GLACSegName${i}`
@@ -193,6 +198,22 @@ const GLSettings = () => {
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                name='JV_autoCalcMethod'
+                label={labels.JV_autoCalcMethod}
+                valueField='key'
+                displayField='value'
+                datasetId={DataSets.JV_AUTO_CALC_METHOD}
+                values={formik.values}
+                maxAccess={access}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('JV_autoCalcMethod', newValue ? newValue.key : '')
+                }}
+                error={formik.touched.JV_autoCalcMethod && Boolean(formik.errors.JV_autoCalcMethod)}
+              />
+            </Grid>
+            <Grid item xs={9}>  </Grid>
             <Grid item xs={3}>
               <CustomNumberField
                 name='GLACSegments'

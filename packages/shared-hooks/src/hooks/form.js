@@ -182,7 +182,8 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
     
     return value
   }
-
+  
+  //const dirty = false
   const dirty = JSON.stringify(normalized(formik.values)) !== JSON.stringify(normalized(formik.initialValues))
   
   return {
