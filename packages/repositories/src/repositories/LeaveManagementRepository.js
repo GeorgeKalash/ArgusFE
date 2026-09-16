@@ -37,8 +37,7 @@ export const LeaveManagementRepository = {
     get2: service + 'get2EL',
     del: service + 'delEL',
     preview: service + 'previewEL',
-    post: service + 'postEL',
-    unpost: service + 'unpostEL'
+    post: service + 'postEL'
   },
   LeavePeriod: {
     qry: service + 'qryLP',

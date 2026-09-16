@@ -176,17 +176,6 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
     )
   }
 
-  const onUnpost = async () => {
-    const res = await postRequest({
-      extension: LeaveManagementRepository.EarnedLeave.unpost,
-      record: JSON.stringify(formik.values)
-    })
-
-    toast.success(platformLabels.Posted)
-    invalidate()
-    getData(res?.recordId)
-  }
-
   const actions = [
     {
       key: 'Unlocked',
@@ -198,8 +187,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
       key: 'Locked',
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
-      onSuccess: onUnpost,
-      disabled: !editMode
+      disabled: true
     }
   ]
 
