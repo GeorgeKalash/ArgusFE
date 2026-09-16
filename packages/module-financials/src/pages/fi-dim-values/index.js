@@ -41,13 +41,19 @@ const DimensionsValues = () => {
     }
   })
 
-  async function fetchWithSearch({ filters }) {
-    const data = await getRequest({
+  async function fetchWithSearch({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+  
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
       extension: FinancialRepository.DimensionValue.page,
-      parameters: `_dimension=${filters.qry.match(/\d+/)?.[0]}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_dimension=${filters.qry.match(/\d+/)?.[0]}`
     })
 
-    return data
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [

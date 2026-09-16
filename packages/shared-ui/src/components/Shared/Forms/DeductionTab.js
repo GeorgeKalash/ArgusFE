@@ -147,8 +147,7 @@ const DeductionTab = ({ store, labels }) => {
             />
           </Grid>
           <Grid item xs={4}>
-            <CustomNumberField name='deductedAmount' label={labels.deductedAmount} value={deductedAmount} readOnly             maxAccess={access}
-            />
+            <CustomNumberField name='deductedAmount' label={labels.deductedAmount} value={deductedAmount} readOnly maxAccess={access} />
           </Grid>
           <Grid item xs={4}>
             <CustomNumberField

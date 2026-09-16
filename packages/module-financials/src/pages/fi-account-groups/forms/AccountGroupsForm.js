@@ -146,7 +146,6 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
                 name='type'
                 label={labels.type}
                 valueField='key'
-
                 required
                 displayField='value'
                 values={formik.values}
