@@ -10,12 +10,9 @@ const CommonProvider = ({ children }) => {
   const { user } = useContext(AuthContext)
 
   const fillDocumentTypeStore = ({ _startAt = 0, _pageSize = 30, _dgId = 0, callback }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams + `&_dgId=${_dgId}`
-
     getRequest({
       extension: SystemRepository.DocumentType.qry,
-      parameters: parameters
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_dgId=${_dgId}`
     }).then(res => {
       callback(res.list)
     })

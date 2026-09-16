@@ -969,7 +969,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
           columns={columns}
           allowDelete={!isPosted && !isCancelled}
           allowAddNewLine={!isPosted && !isCancelled}
-        />
+          maxAccess={maxAccess}/>
       </VertLayout>
     </FormShell>
   )

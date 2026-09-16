@@ -8,7 +8,7 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import CityForm from './Forms/CityForm.js'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -37,6 +37,7 @@ const City = () => {
     search,
     clear,
     refetch,
+    invalidate,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -56,10 +57,6 @@ const City = () => {
 
     return response
   }
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.City.page
-  })
 
   const columns = [
     {

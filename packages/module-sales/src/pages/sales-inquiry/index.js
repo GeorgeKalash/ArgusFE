@@ -16,8 +16,8 @@ const SalesInquiries = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: SaleRepository.SalesInquiries.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=itemId`
+      extension: SaleRepository.SalesInquiries.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     const transformedData = response.list.map(sale => ({
@@ -41,7 +41,7 @@ const SalesInquiries = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesInquiries.qry,
+    endpointId: SaleRepository.SalesInquiries.page,
     datasetId: ResourceIds.SalesInquiries,
     filter: {
       filterFn: fetchWithFilter

@@ -146,13 +146,13 @@ export default function Samples({ labels, maxAccess, recordId }) {
         <Fixed>
           <Grid container sx={{ pt: 2 }}>
             <Grid item xs={4}>
-              <CustomNumberField name='avgWeight' label={labels.average} value={avgWeight} decimalScale={3} readOnly />
+              <CustomNumberField name='avgWeight' label={labels.average} value={avgWeight} decimalScale={3} readOnly maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={4}>
-              <CustomNumberField name='totalCount' label={labels.totalCount} value={totalCount} readOnly />
+              <CustomNumberField name='totalCount' label={labels.totalCount} value={totalCount} readOnly maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={4}>
-              <CustomNumberField name='totWeight' label={labels.totWeight} value={totWeight} decimalScale={3} readOnly />
+              <CustomNumberField name='totWeight' label={labels.totWeight} value={totWeight} decimalScale={3} readOnly maxAccess={maxAccess}/>
             </Grid>
           </Grid>
         </Fixed>

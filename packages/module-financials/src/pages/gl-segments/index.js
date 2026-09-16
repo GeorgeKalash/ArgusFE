@@ -33,7 +33,7 @@ const Segments = () => {
       const { _startAt = 0, _pageSize = 50 } = options
 
       const response = await getRequest({
-        extension: GeneralLedgerRepository.Segments.qry,
+        extension: GeneralLedgerRepository.Segments.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_segmentId=${formik.values.segmentId}`
       })
 
@@ -49,7 +49,7 @@ const Segments = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: GeneralLedgerRepository.Segments.qry,
+    endpointId: GeneralLedgerRepository.Segments.page,
     datasetId: ResourceIds.Segments
   })
 

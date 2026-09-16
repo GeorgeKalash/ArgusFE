@@ -213,7 +213,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
   }
 
   const invalidate = useInvalidate({
-    endpointId: PointofSaleRepository.RetailInvoice.qry
+    endpointId: PointofSaleRepository.RetailInvoice.page
   })
 
   const { formik } = useForm({

@@ -16,7 +16,7 @@ const CurrentCost = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.CurrentCost.qry,
+      extension: InventoryRepository.CurrentCost.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=itemId&_size=50&_params=${
         params || ''
       }`
@@ -34,7 +34,7 @@ const CurrentCost = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.CurrentCost.qry,
+    endpointId: InventoryRepository.CurrentCost.page,
     datasetId: ResourceIds.CurrentCosts,
     filter: {
       filterFn: fetchWithFilter

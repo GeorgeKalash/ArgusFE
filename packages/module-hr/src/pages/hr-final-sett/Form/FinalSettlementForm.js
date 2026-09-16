@@ -284,6 +284,7 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('loanBalance', '')}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -318,6 +319,7 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('indemnity', null)}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -328,6 +330,7 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('salary', null)}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>

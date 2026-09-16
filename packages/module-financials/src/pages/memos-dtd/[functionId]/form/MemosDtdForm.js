@@ -21,7 +21,7 @@ export default function MemosDtdForm({ labels, maxAccess, recordId, functionId }
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.FIDocTypeDefaults.qry
+    endpointId: FinancialRepository.FIDocTypeDefaults.page
   })
 
   const { formik } = useForm({

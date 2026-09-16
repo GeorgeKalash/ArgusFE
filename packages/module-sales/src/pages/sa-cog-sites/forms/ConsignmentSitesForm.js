@@ -22,7 +22,7 @@ export default function ConsignmentSitesForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.ConsignmentSites.qry
+    endpointId: SaleRepository.ConsignmentSites.page
   })
 
   const { formik } = useForm({

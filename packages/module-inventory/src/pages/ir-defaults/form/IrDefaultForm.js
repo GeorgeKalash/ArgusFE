@@ -87,7 +87,7 @@ const IrDefaultForm = ({ _labels, access }) => {
                 displayField={'name'}
                 values={formik.values}
                 maxAccess={access}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik && formik.setFieldValue('ir_tfr_DocTypeId', newValue?.recordId || null)
                 }}
                 error={formik.touched.ir_tfr_DocTypeId && Boolean(formik.errors.ir_tfr_DocTypeId)}
@@ -99,6 +99,7 @@ const IrDefaultForm = ({ _labels, access }) => {
                 name='ir_amcShortTerm'
                 onChange={formik.handleChange}
                 label={_labels.shortTerm}
+                maxAccess={access}
                 value={formik.values.ir_amcShortTerm}
                 error={formik.touched.ir_amcShortTerm && Boolean(formik.errors.ir_amcShortTerm)}
               />
@@ -109,6 +110,7 @@ const IrDefaultForm = ({ _labels, access }) => {
                 name='ir_amcLongTerm'
                 onChange={formik.handleChange}
                 label={_labels.longTerm}
+                maxAccess={access}
                 value={formik.values.ir_amcLongTerm}
                 error={formik.touched.ir_amcLongTerm && Boolean(formik.errors.ir_amcLongTerm)}
               />

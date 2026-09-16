@@ -3,7 +3,6 @@ import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -169,7 +168,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || '')
                   changeDT(newValue)
                 }}
@@ -178,7 +177,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomDatePicker name='date' label={labels.date} value={formik.values?.date} readOnly />
+              <CustomDatePicker name='date' label={labels.date} value={formik.values?.date} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
@@ -189,6 +188,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 displayField={['reference', 'name']}
                 values={formik.values}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -204,6 +204,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 readOnly
                 valueShow='clientRef'
                 secondValueShow='clientName'
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -212,6 +213,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 label={labels.currency}
                 value={formik.values.currencyName}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -220,6 +222,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 label={labels.deliveryOrderReference}
                 value={formik.values.reference}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

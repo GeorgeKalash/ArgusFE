@@ -5,7 +5,7 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import CbBankAccountsForm from './forms/CbBankAccountsForm'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -22,16 +22,12 @@ const CbBankAccounts = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: CashBankRepository.CbBankAccounts.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_type=1&_params=`
+      extension: CashBankRepository.CbBankAccounts.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_type=1`
     })
 
     return { ...response, _startAt: _startAt }
   }
-
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CbBankAccounts.qry
-  })
 
   const {
     query: { data },
@@ -40,10 +36,11 @@ const CbBankAccounts = () => {
     clearFilter,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CashBankRepository.CbBankAccounts.qry,
+    endpointId: CashBankRepository.CbBankAccounts.page,
     datasetId: ResourceIds.CbBankAccounts,
     filter: {
       filterFn: fetchWithSearch
@@ -128,8 +125,7 @@ const CbBankAccounts = () => {
       props: {
         labels: labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        maxAccess: access
       },
       width: 600,
       height: 500,

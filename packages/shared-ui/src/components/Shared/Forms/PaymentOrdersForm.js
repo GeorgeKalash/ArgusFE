@@ -343,6 +343,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
                   formik.setFieldValue('currencyName', newValue?.name || '')
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={2}>
@@ -458,6 +459,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
                   formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>

@@ -139,6 +139,7 @@ export const InventoryRepository = {
     set2: service + 'set2MTS'
   },
   InventoryOpeningQtys: {
+    page: service + 'pageOQ',
     qry: service + 'qryOQ',
     snapshot: service + 'snapshotOQ',
     get: service + 'getOQ',
@@ -185,12 +186,14 @@ export const InventoryRepository = {
     get: service + 'getBCD',
     set: service + 'setBCD',
     del: service + 'delBCD',
+    page: service + 'pageBCD',
     qry: service + 'qryBCD',
     get2: service + 'getBCD2'
   },
   MetalColor: {
     get: service + 'getMTC',
     set: service + 'setMTC',
+    page: service + 'pageMTC',
     qry: service + 'qryMTC',
     del: service + 'delMTC'
   },
@@ -228,6 +231,7 @@ export const InventoryRepository = {
     get: service + 'getOC',
     set: service + 'setOC',
     del: service + 'delOC',
+    page: service + 'pageOC',
     qry: service + 'qryOC'
   },
   Transaction: {
@@ -239,15 +243,13 @@ export const InventoryRepository = {
   GenerateFiscalYear: {
     gen: service + 'genFIS'
   },
-  IVMDParts: {
-    qry: service + 'qryIT'
-  },
   ItemParts: {
     qry: service + 'qryITP',
     set2: service + 'set2ITP'
   },
   CurrentCost: {
     get: service + 'getCOS',
+    page: service + 'pageCOS',
     qry: service + 'qryCOS',
     snapshot: service + 'snapshotCOS'
   },
@@ -256,6 +258,7 @@ export const InventoryRepository = {
     qry: service + 'qryAVA'
   },
   Parts: {
+    page: service + 'pagePRT',
     qry: service + 'qryPRT',
     del: service + 'delPRT',
     get: service + 'getPRT',
@@ -269,6 +272,7 @@ export const InventoryRepository = {
     set: service + 'setDTD'
   },
   Serial: {
+    page: service + 'pageSRL',
     qry: service + 'qrySRL',
     get2: service + 'get2SRL',
     set: service + 'setSRL',

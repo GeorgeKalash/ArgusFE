@@ -20,7 +20,7 @@ export default function TaxSchedulesForm({ labels, maxAccess, setStore, store, e
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.TaxSchedules.qry
+    endpointId: FinancialRepository.TaxSchedules.page
   })
 
   const { formik } = useForm({

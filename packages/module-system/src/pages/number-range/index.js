@@ -4,7 +4,7 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -23,7 +23,7 @@ const NumberRange = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SystemRepository.NumberRange.qry,
+      extension: SystemRepository.NumberRange.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -36,11 +36,12 @@ const NumberRange = () => {
     paginationParameters,
     refetch,
     access,
+    invalidate,
     search,
     clear
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.NumberRange.qry,
+    endpointId: SystemRepository.NumberRange.page,
     datasetId: ResourceIds.NumberRange,
     search: {
       endpointId: SystemRepository.NumberRange.snapshot,
@@ -55,10 +56,6 @@ const NumberRange = () => {
 
     return response
   }
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.NumberRange.qry
-  })
 
   const columns = [
     {

@@ -599,6 +599,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 label={labels.totVol}
                                 value={formik.values.totalVolume}
                                 readOnly
+                                maxAccess={maxAccess}
                             />
                         </Grid>
                         <Grid item xs={3}>
@@ -607,6 +608,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 label={labels.totalWeight}
                                 value={formik.values.totalWeight}
                                 readOnly
+                                maxAccess={maxAccess}
                             />
                         </Grid>
                     </Grid>

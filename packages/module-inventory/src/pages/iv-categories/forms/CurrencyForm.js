@@ -157,7 +157,7 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
             initialValues={formik?.initialValues?.data?.[0]}
             error={formik.errors.data}
             columns={columns}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </FormShell>

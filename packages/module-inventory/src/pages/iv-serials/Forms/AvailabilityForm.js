@@ -12,7 +12,7 @@ const AvailabilityForm = ({ labels, recordId: srlNo, access }) => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
     const response = await getRequest({
-      extension: InventoryRepository.AvailabilitySerial.qry,
+      extension: InventoryRepository.AvailabilitySerial.page,
       parameters: `_itemId=0&_siteId=0&_srlNo=${srlNo}&_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
@@ -27,7 +27,7 @@ const AvailabilityForm = ({ labels, recordId: srlNo, access }) => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.AvailabilitySerial.qry,
+    endpointId: InventoryRepository.AvailabilitySerial.page,
     datasetId: ResourceIds.IVSerials
   })
 

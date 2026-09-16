@@ -1262,7 +1262,7 @@ export default function PuQtnForm({ recordId, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess}/>
                 </Grid>
               </Grid>
             </Grid>

@@ -26,7 +26,7 @@ const ProductionSheet = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.ProductionSheet.qry,
+      extension: ManufacturingRepository.ProductionSheet.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
@@ -43,7 +43,7 @@ const ProductionSheet = () => {
     filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.ProductionSheet.qry,
+    endpointId: ManufacturingRepository.ProductionSheet.page,
     datasetId: ResourceIds.ProductionSheet,
     filter: {
       filterFn: fetchWithFilter
