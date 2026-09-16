@@ -411,6 +411,7 @@ useEffect(() => {
                 displayFieldWidth={2}
                 readOnly={isClosed}
                 onChange={(_, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.currencyId || null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
 
