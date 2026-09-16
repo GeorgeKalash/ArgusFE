@@ -151,10 +151,10 @@ export default function AuditForm({ labels, formik }) {
                   </Box>
                 )
               }}
-            />
+            /> 
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField
+           <CustomTextField
               name='corBaseAmount'
               readOnly
               label={labels.corBaseAmount}
