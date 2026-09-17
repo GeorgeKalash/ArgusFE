@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Box, Grid, InputAdornment, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -33,6 +33,7 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 
 export default function EventOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -352,6 +353,10 @@ useEffect(() => {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
+                  formik.setFieldValue('spId', null)
+                  formik.setFieldValue('spRef', '')
+                  formik.setFieldValue('spName', '')
+                  
                   formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 required
@@ -382,7 +387,7 @@ useEffect(() => {
                 filter={item => item.currencyType === 1}
                 label={labels.currency}
                 valueField='recordId'
-                displayField={['reference', 'name']}
+                displayField={['reference', 'name', 'groupName']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -407,14 +412,25 @@ useEffect(() => {
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'groupName', value: 'Group Name' }
+                ]}
                 required
                 displayFieldWidth={2}
                 readOnly={isClosed}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.currencyId || null)
-                  formik.setFieldValue('accountRef', newValue?.reference || '')
-                  formik.setFieldValue('accountName', newValue?.name || '')
+                  if (newValue?.isInactive) {
+                    stackError({
+                      message: platformLabels.inactiveAccount
+                    })
+                  }
 
+                  formik.setFieldValue('fi_currencyId', !newValue?.isInactive ? newValue?.currencyId || null : null)
+                  formik.setFieldValue('fi_currencyRef', !newValue?.isInactive ? newValue?.currencyRef || '' : '')
+                  formik.setFieldValue('accountRef', !newValue?.isInactive ? newValue?.reference || null : null)
+                  formik.setFieldValue('accountName', !newValue?.isInactive ? newValue?.name || '' : '')
                   formik.setFieldValue('accountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
@@ -423,25 +439,32 @@ useEffect(() => {
             </Grid>
             
             <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                parameters={msId && `_msId=${msId}`}
-                reducer={response => response?.record?.salesPeople}
+              <ResourceLookup
+                endpointId={formik.values.plantId && SaleRepository.SalesPerson.snapshot2}
+                parameters={{
+                  _plantId: formik?.values?.plantId
+                }}
                 name='spId'
                 label={labels.spName}
+                form={formik}
+                displayFieldWidth={2}
+                valueField='spRef'
+                displayField='name'
+                readOnly={isClosed || !formik.values.plantId}
                 columnsInDropDown={[
                   { key: 'spRef', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                valueField='recordId'
-                displayField='name'
-                values={formik.values}
+                valueShow='spRef'
+                required
+                secondValueShow='spName'
                 onChange={(_, newValue) => {
+                  formik.setFieldValue('spRef', newValue?.spRef || '')
+                  formik.setFieldValue('spName', newValue?.name || '')
+                  
                   formik.setFieldValue('spId', newValue?.recordId || null)
                 }}
-                required
-                readOnly={isClosed}
-                error={formik.touched.spId && Boolean(formik.errors.spId)}
+                errorCheck={'spId'}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -592,6 +615,7 @@ useEffect(() => {
                           ...formik.values,
                           purity: res?.purity ?? null,
                           currencyId: newValue?.currencyId || null,
+                          currencyRef: newValue?.currencyRef || '',
                           metalId: newValue?.metalId || null,
                           qty_muId: newValue?.eo_defQtyMUId || null,
                           qty_muQty: newValue?.eo_defQtyMUQty || null,
@@ -792,8 +816,18 @@ useEffect(() => {
                 name='amount'
                 label={labels.totalAmount}
                 value={formik.values.amount}
-                maxAccess={maxAccess}
                 readOnly
+                maxAccess={maxAccess}
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: (
+                    <InputAdornment position='end' sx={{ maxHeight: '2em', mr: 0.5 }}>
+                      <Typography component='span' sx={{ color: 'red', fontSize: 'small', lineHeight: 1 }}>
+                        {formik.values.currencyRef}
+                      </Typography>
+                    </InputAdornment>
+                  )
+                }}
               />
             </Grid>
           </Grid>
