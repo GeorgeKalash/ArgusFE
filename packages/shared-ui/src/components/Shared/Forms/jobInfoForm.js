@@ -233,6 +233,10 @@ export default function JobInfoForm({ recordId, window }) {
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('departmentId', newValue?.recordId || null)
+                  formik.setFieldValue('reportToId', newValue?.supervisorId || null)
+                  formik.setFieldValue('reportToRef', newValue?.managerRef || '')
+                  formik.setFieldValue('reportToName', newValue?.managerName || '')
+
                 }}
                 error={formik.touched.departmentId && Boolean(formik.errors.departmentId)}
               />
