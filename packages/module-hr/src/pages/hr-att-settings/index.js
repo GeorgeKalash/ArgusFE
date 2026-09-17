@@ -49,6 +49,7 @@ const AttSettings = () => {
           obj.key === 'punchSource' ||
           obj.key === 'weeklyTAHours' ||
           obj.key === 'prevDayTVTime' ||
+          obj.key === 'maxTAFSGenerateTime' ||
           obj.key === 'disableCrossBranchTA'
         )
       })
@@ -87,11 +88,13 @@ const AttSettings = () => {
       punchSource: null,
       weeklyTAHours: null,
       prevDayTVTime: null,
-      disableCrossBranchTA: null
+      disableCrossBranchTA: null,
+      maxTAFSGenerateTime: null
     },
     validationSchema: yup.object().shape({
       prevDayTVTime: yup.number().min(7).max(15).nullable(),
-      minPunchInterval: yup.number().min(5).max(15).nullable()
+      minPunchInterval: yup.number().min(5).max(15).nullable(),
+      maxTAFSGenerateTime: yup.number().min(0).max(16).nullable()
     }),
     onSubmit: async obj => {
       const readOnlyFields = ['lastGenFSDayId', 'lastReceivedPunch', 'lastProcessedPunch', 'lastGenTATV']
@@ -287,6 +290,20 @@ const AttSettings = () => {
               onChange={event => formik.setFieldValue('disableCrossBranchTA', event.target.checked)}
               label={labels.disableCrossBranchTA}
               maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='maxTAFSGenerateTime'
+              label={labels.maxTAFSGenerateTime}
+              value={formik.values.maxTAFSGenerateTime}
+              maxAccess={access}
+              thousandSeparator={false}
+              decimalScale={0}
+              maxLength={2}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('maxTAFSGenerateTime', null)}
+              error={formik.touched.maxTAFSGenerateTime && Boolean(formik.errors.maxTAFSGenerateTime)}
             />
           </Grid>
         </Grid>
