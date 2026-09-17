@@ -298,7 +298,6 @@ const AttSettings = () => {
               label={labels.maxTAFSGenerateTime}
               value={formik.values.maxTAFSGenerateTime}
               maxAccess={access}
-              thousandSeparator={false}
               decimalScale={0}
               maxLength={2}
               onChange={formik.handleChange}
