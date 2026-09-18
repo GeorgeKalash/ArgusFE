@@ -25,7 +25,8 @@ export const SaleRepository = {
     set: service + 'setSP',
     del: service + 'delSP',
     page: service + 'pageSP',
-    snapshot: service + 'snapshotSP'
+    snapshot: service + 'snapshotSP',
+    snapshot2: service + 'snapshotSP2'
   },
   SalesZone: {
     qry: service + 'qrySZ',
