@@ -323,6 +323,7 @@ export default function JobInfoForm({ recordId, window }) {
                 ]}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('reportToName', newValue?.fullName || '')
+                  formik.setFieldValue('reportToRef', newValue?.reference || '')
                   formik.setFieldValue('reportToId', newValue?.recordId || null)
                 }}
                 errorCheck={'reportToId'}
