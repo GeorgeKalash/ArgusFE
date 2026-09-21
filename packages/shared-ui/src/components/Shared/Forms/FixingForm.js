@@ -98,7 +98,6 @@ export default function FixingForm({ recordId, functionId, window }) {
       plantId: null,
       accountId: null,
       fi_currencyId: null,
-      currencyRef: '',
       metalId: null,
       currencyId: null,
       qty: null,
@@ -561,18 +560,12 @@ useEffect(() => {
                     stackError({
                       message: platformLabels.inactiveAccount
                     })
-                    formik.setFieldValue('accountId', null)
-                    formik.setFieldValue('accountRef', null)
-                    formik.setFieldValue('accountName', '')
-
-                    return
                   }
 
-                  formik.setFieldValue('fi_currencyId', newValue?.currencyId || null)
-                  formik.setFieldValue('fi_currencyRef', newValue?.currencyRef || '')
-                  formik.setFieldValue('accountRef', newValue?.reference || '')
-                  formik.setFieldValue('accountName', newValue?.name || '')
-
+                  formik.setFieldValue('fi_currencyId', !newValue?.isInactive ? newValue?.currencyId || null : null)
+                  formik.setFieldValue('fi_currencyRef', !newValue?.isInactive ? newValue?.currencyRef || '' : '')
+                  formik.setFieldValue('accountRef', !newValue?.isInactive ? newValue?.reference || null : null)
+                  formik.setFieldValue('accountName', !newValue?.isInactive ? newValue?.name || '' : '')
                   formik.setFieldValue('accountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
