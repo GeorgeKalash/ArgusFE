@@ -582,40 +582,6 @@ export default function CastingForm({ store, setStore, access, labels }) {
                   </Grid>
                   <Grid item>
                     <CustomNumberField
-                      name='inputWgtPurity'
-                      label={labels.inputWgtPurity}
-                      value={formik.values.inputWgtPurity}
-                      readOnly={isPosted || isCancelled}
-                      maxLength={10}
-                      decimalScale={5}
-                      maxAccess={maxAccess}
-                      onChange={e => {
-                          setRecal(true)
-                          formik.setFieldValue('inputWgtPurity', e.target.value)
-                      }}
-                      onClear={() => formik.setFieldValue('inputWgtPurity', 0)}
-                      error={formik.touched.inputWgtPurity && Boolean(formik.errors.inputWgtPurity)}
-                    />
-                  </Grid>
-                  <Grid item>
-                    <CustomNumberField
-                      name='outputWgtPurity'
-                      label={labels.outputWgtPurity}
-                      value={formik.values.outputWgtPurity}
-                      readOnly={isPosted || isCancelled}
-                      maxLength={10}
-                      decimalScale={5}
-                      maxAccess={maxAccess}
-                      onChange={e => {
-                        setRecal(true)
-                        formik.setFieldValue('outputWgtPurity', e.target.value)
-                      }}
-                      onClear={() => formik.setFieldValue('outputWgtPurity', 0)}
-                      error={formik.touched.outputWgtPurity && Boolean(formik.errors.outputWgtPurity)}
-                    />
-                  </Grid>
-                  <Grid item>
-                    <CustomNumberField
                       name='wipWeight'
                       label={labels.wipWeight}
                       value={wipWeight}
@@ -708,30 +674,51 @@ export default function CastingForm({ store, setStore, access, labels }) {
                     />
                   </Grid>
                   <Grid item>
-                    <CustomNumberField
-                      name='inputWgt'
-                      label={labels.inputWgt}
-                      value={formik.values.inputWgt}
-                      required
-                      decimalScale={3}
-                      readOnly={isPosted || isCancelled}
-                      maxAccess={maxAccess}
-                      onChange={e => {
-                        let value = Number(e.target.value) > 32767 ? 0 : Number(e.target.value)
-                        formik.setFieldValue('inputWgt', value)
-                        setLastEdited('inputWgt')
-                        setStore(prevStore => ({
-                          ...prevStore,
-                          castingInfo: {
-                            ...prevStore.castingInfo,
-                            inputWgt: roundTo(value, 3) || 0
-                          }
-                        }))
-                        setRecal(true)
-                      }}
-                      onClear={() => formik.setFieldValue('inputWgt', 0)}
-                      error={formik.touched.inputWgt && Boolean(formik.errors.inputWgt)}
-                    />
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <CustomNumberField
+                          name='inputWgt'
+                          label={labels.inputWgt}
+                          value={formik.values.inputWgt}
+                          required
+                          decimalScale={3}
+                          readOnly={isPosted || isCancelled}
+                          maxAccess={maxAccess}
+                          onChange={e => {
+                            let value = Number(e.target.value) > 32767 ? 0 : Number(e.target.value)
+                            formik.setFieldValue('inputWgt', value)
+                            setLastEdited('inputWgt')
+                            setStore(prevStore => ({
+                              ...prevStore,
+                              castingInfo: {
+                                ...prevStore.castingInfo,
+                                inputWgt: roundTo(value, 3) || 0
+                              }
+                            }))
+                            setRecal(true)
+                          }}
+                          onClear={() => formik.setFieldValue('inputWgt', 0)}
+                          error={formik.touched.inputWgt && Boolean(formik.errors.inputWgt)}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <CustomNumberField
+                          name='inputWgtPurity'
+                          label={labels.inputWgtPurity}
+                          value={formik.values.inputWgtPurity}
+                          readOnly={isPosted || isCancelled}
+                          maxLength={10}
+                          decimalScale={5}
+                          maxAccess={maxAccess}
+                          onChange={e => {
+                            setRecal(true)
+                            formik.setFieldValue('inputWgtPurity', e.target.value)
+                          }}
+                          onClear={() => formik.setFieldValue('inputWgtPurity', 0)}
+                          error={formik.touched.inputWgtPurity && Boolean(formik.errors.inputWgtPurity)}
+                        />
+                      </Grid>
+                    </Grid>
                   </Grid>
                   <Grid item>
                     <CustomNumberField
@@ -750,30 +737,51 @@ export default function CastingForm({ store, setStore, access, labels }) {
                     />
                   </Grid>
                   <Grid item>
-                    <CustomNumberField
-                      name='outputWgt'
-                      label={labels.outputWgt}
-                      value={formik.values.outputWgt}
-                      required
-                      decimalScale={3}
-                      maxAccess={maxAccess}
-                      readOnly={isPosted || isCancelled}
-                      onChange={e => {
-                        setRecal(true)
-                        setLastEdited('outputWgt')
-                        let value = Number(e.target.value) > 32767 ? 0 : Number(e.target.value)
-                        formik.setFieldValue('outputWgt', value)
-                        setStore(prevStore => ({
-                          ...prevStore,
-                          castingInfo: {
-                            ...prevStore.castingInfo,
-                            outputWgt: roundTo(value, 3) || 0
-                          }
-                        }))
-                      }}
-                      onClear={() => formik.setFieldValue('outputWgt', 0)}
-                      error={formik.touched.outputWgt && Boolean(formik.errors.outputWgt)}
-                    />
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <CustomNumberField
+                          name='outputWgt'
+                          label={labels.outputWgt}
+                          value={formik.values.outputWgt}
+                          required
+                          decimalScale={3}
+                          maxAccess={maxAccess}
+                          readOnly={isPosted || isCancelled}
+                          onChange={e => {
+                            setRecal(true)
+                            setLastEdited('outputWgt')
+                            let value = Number(e.target.value) > 32767 ? 0 : Number(e.target.value)
+                            formik.setFieldValue('outputWgt', value)
+                            setStore(prevStore => ({
+                              ...prevStore,
+                              castingInfo: {
+                                ...prevStore.castingInfo,
+                                outputWgt: roundTo(value, 3) || 0
+                              }
+                            }))
+                          }}
+                          onClear={() => formik.setFieldValue('outputWgt', 0)}
+                          error={formik.touched.outputWgt && Boolean(formik.errors.outputWgt)}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <CustomNumberField
+                          name='outputWgtPurity'
+                          label={labels.outputWgtPurity}
+                          value={formik.values.outputWgtPurity}
+                          readOnly={isPosted || isCancelled}
+                          maxLength={10}
+                          decimalScale={5}
+                          maxAccess={maxAccess}
+                          onChange={e => {
+                            setRecal(true)
+                            formik.setFieldValue('outputWgtPurity', e.target.value)
+                          }}
+                          onClear={() => formik.setFieldValue('outputWgtPurity', 0)}
+                          error={formik.touched.outputWgtPurity && Boolean(formik.errors.outputWgtPurity)}
+                        />
+                      </Grid>
+                    </Grid>
                   </Grid>
                   <Grid item>
                     <CustomNumberField
