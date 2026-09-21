@@ -153,73 +153,74 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
 
   const isProcessed = formValues.status == 3
 
-  useEffect(() => {
-    if (formik2 && formik2.values && formik2.values.glTransactions && Array.isArray(formik2.values.glTransactions)) {
-      const generalAccountData = formik2.values.glTransactions
+  const calculateTotals = generalAccountData => {
+    if (!Array.isArray(generalAccountData)) {
+      return
+    }
 
-      const parseNumber = value => {
-        const number = parseFloat(value)
+    const parseNumber = value => {
+      const number = parseFloat(value)
 
-        return isNaN(number) ? 0 : number
-      }
+      return isNaN(number) ? 0 : number
+    }
 
-      const baseCreditAmount = generalAccountData.reduce((acc, curr) => {
-        return curr.sign == '2' ? acc + parseNumber(curr.baseAmount) : acc
-      }, 0)
-      const baseCredit = parseFloat(baseCreditAmount).toFixed(2)
+    const baseCreditAmount = generalAccountData.reduce((acc, curr) => {
+      return curr.sign == '2' ? acc + parseNumber(curr.baseAmount) : acc
+    }, 0)
+    const baseCredit = parseFloat(baseCreditAmount).toFixed(2)
 
-      const baseDebitAmount = generalAccountData.reduce((acc, curr) => {
-        return curr.sign == '1' ? acc + parseNumber(curr.baseAmount) : acc
-      }, 0)
-      const baseDebit = parseFloat(baseDebitAmount).toFixed(2)
+    const baseDebitAmount = generalAccountData.reduce((acc, curr) => {
+      return curr.sign == '1' ? acc + parseNumber(curr.baseAmount) : acc
+    }, 0)
+    const baseDebit = parseFloat(baseDebitAmount).toFixed(2)
 
-      const baseBalance = parseFloat((baseDebit - baseCredit).toFixed(2))
-      setBaseGridData({
-        base: 'Base',
-        credit: baseCredit,
-        debit: baseDebit,
-        balance: baseBalance
-      })
+    const baseBalance = parseFloat((baseDebit - baseCredit).toFixed(2))
 
-      const currencyTotals = generalAccountData.reduce((acc, curr) => {
-        if (curr.currencyId) {
-          const currency = curr.currencyRef
+    setBaseGridData({
+      base: 'Base',
+      credit: baseCredit,
+      debit: baseDebit,
+      balance: baseBalance
+    })
 
-          if (currency) {
-            if (!acc[currency]) {
-              acc[currency] = { credit: 0, debit: 0 }
-            }
-            if (curr.sign) {
-              if (curr.sign == '2') {
-                acc[currency].credit += parseFloat(curr.amount || 0)
-              } else if (curr.sign == '1') {
-                acc[currency].debit += parseFloat(curr.amount || 0)
-              }
+    const currencyTotals = generalAccountData.reduce((acc, curr) => {
+      if (curr.currencyId) {
+        const currency = curr.currencyRef
+
+        if (currency) {
+          if (!acc[currency]) {
+            acc[currency] = { credit: 0, debit: 0 }
+          }
+          if (curr.sign) {
+            if (curr.sign == '2') {
+              acc[currency].credit += parseFloat(curr.amount || 0)
+            } else if (curr.sign == '1') {
+              acc[currency].debit += parseFloat(curr.amount || 0)
             }
           }
         }
+      }
 
-        return acc
-      }, {})
+      return acc
+    }, {})
 
-      const filteredCurrencyTotals = Object.entries(currencyTotals).reduce((acc, [currency, data]) => {
-        if (currency) {
-          acc[currency] = data
-        }
+    const filteredCurrencyTotals = Object.entries(currencyTotals).reduce((acc, [currency, data]) => {
+      if (currency) {
+        acc[currency] = data
+      }
 
-        return acc
-      }, {})
+      return acc
+    }, {})
 
-      const currencyData = Object.entries(filteredCurrencyTotals).map(([currency, { credit, debit }]) => ({
-        currency,
-        credit: credit.toLocaleString(),
-        debit: debit.toLocaleString(),
-        balance: (debit - credit).toLocaleString()
-      }))
+    const currencyData = Object.entries(filteredCurrencyTotals).map(([currency, { credit, debit }]) => ({
+      currency,
+      credit: credit.toLocaleString(),
+      debit: debit.toLocaleString(),
+      balance: (debit - credit).toLocaleString()
+    }))
 
-      setCurrencyGridData(currencyData)
-    }
-  }, [formik2?.values])
+    setCurrencyGridData(currencyData)
+  }
 
   useEffect(() => {
     if (data && data?.list?.length > 0 && Array.isArray(data?.list)) {
@@ -236,7 +237,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         costCenterName: row.costCenterName,
         currencyRef: row.currencyRef,
         currencyId: row.currencyId,
-
         sign: row.sign,
         signName: row.signName,
         sourceReference: row.sourceReference,
@@ -248,6 +248,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
       }))
 
       formik2.setFieldValue('glTransactions', glTransactions)
+      calculateTotals(glTransactions)
     }
   }, [data])
 
@@ -389,6 +390,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
 
               formik2.setFieldValue('editStatus', 2)
               formik2.setFieldValue('glTransactions', updatedRows)
+              calculateTotals(updatedRows)
             }}
             allowDelete={!isProcessed}
             allowAddNewLine={!isProcessed}
