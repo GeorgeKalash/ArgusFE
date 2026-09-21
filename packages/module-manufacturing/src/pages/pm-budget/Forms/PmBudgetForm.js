@@ -49,16 +49,16 @@ export default function PmBudgetForm ({ labels, recordId, maxAccess }) {
     maxAccess,
     validationSchema: yup.object({
       header: yup.object({
-        fiscalYear: yup.string().required(),
-        periodId: yup.string().required(),
-        developerId: yup.string().required()
+        fiscalYear: yup.number().required(),
+        periodId: yup.number().required(),
+        developerId: yup.number().required()
       }),
       items: yup.array().of(
         yup.object().shape({
           metalRef: yup.string().required(),
           collectionRef: yup.string().required(),
           itemGroupRef: yup.string().required(),
-          designCount: yup.number().required().notOneOf([0])
+          designCount: yup.number().max(32767).required().notOneOf([0])
         })
       )
     }),
