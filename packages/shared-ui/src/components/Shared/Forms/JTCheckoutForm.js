@@ -105,7 +105,8 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
       })
     }),
     onSubmit: async obj => {
-      if (Number(totalQty) != Number(obj.transfer.jobQty)) {
+      const round = (n, decimals = 3) => Number(n.toFixed(decimals))
+      if (round(Number(totalQty)) != round(Number(obj.transfer.qty))) {
         stackError({
           message: labels.QtyNotMatching
         })
