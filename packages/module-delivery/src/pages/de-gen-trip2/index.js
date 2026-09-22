@@ -510,10 +510,13 @@ const GenerateOutboundTransportation2 = () => {
   const balance = totalTrucksVolume - ordersVolume
 
   const getSelectedZonesTotals = () => {
-    const totalFilteredCategoryVolume = (selectedSaleZones?.list || [])?.reduce((sum, zone) => {
+    const totalFilteredCategoryVolume = (selectedSaleZones?.list || []).reduce((sum, zone) => {
       return sum + (parseFloat(zone.filteredCategoryVolme) || 0)
     }, 0)
-    const totalPct = ordersVolume ? ((totalFilteredCategoryVolume * 100) / ordersVolume).toFixed(2) : 0
+
+    const totalPct = ordersVolume
+      ? Number(((totalFilteredCategoryVolume * 100) / ordersVolume).toFixed(2))
+      : 0
 
     return { totalFilteredCategoryVolume, totalPct }
   }
