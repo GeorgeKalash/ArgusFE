@@ -198,7 +198,7 @@ const GenerateOutboundTransportation2 = () => {
       type: 'number'
     },
     {
-      field: 'filteredCategoryVolme',
+      field: 'filteredCategoryVolume',
       headerName: labels.categVol,
       type: 'number',
       flex: 1
@@ -460,7 +460,7 @@ const GenerateOutboundTransportation2 = () => {
         .filter(item => item.checked)
         .map(item => ({
           ...item,
-          filteredCategoryVolme: (item?.filteredCategoryVolme ?? 0).toFixed(2),
+          filteredCategoryVolume: item.filteredCategoryVolume.toFixed(2),
           orders: item.orders?.map(order => ({ ...order, checked: true }))
         }))
 
@@ -510,13 +510,10 @@ const GenerateOutboundTransportation2 = () => {
   const balance = totalTrucksVolume - ordersVolume
 
   const getSelectedZonesTotals = () => {
-    const totalFilteredCategoryVolume = (selectedSaleZones?.list || []).reduce((sum, zone) => {
-      return sum + (parseFloat(zone.filteredCategoryVolme) || 0)
+    const totalFilteredCategoryVolume = (selectedSaleZones?.list || [])?.reduce((sum, zone) => {
+      return sum + (parseFloat(zone.filteredCategoryVolume) || 0)
     }, 0)
-
-    const totalPct = ordersVolume
-      ? Number(((totalFilteredCategoryVolume * 100) / ordersVolume).toFixed(2))
-      : 0
+    const totalPct = ordersVolume ? ((totalFilteredCategoryVolume * 100) / ordersVolume).toFixed(2) : 0
 
     return { totalFilteredCategoryVolume, totalPct }
   }
