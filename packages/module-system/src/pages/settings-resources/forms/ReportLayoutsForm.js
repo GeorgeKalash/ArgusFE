@@ -95,7 +95,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, invalidate, window: reportL
       flex: 1
     },
     {
-      field: 'reportEngineName',
+      field: 'reportEngine',
       headerName: labels.reportEngineName,
       flex: 1
     },
