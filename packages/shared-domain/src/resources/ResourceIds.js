@@ -720,6 +720,8 @@ export const ResourceIds = {
   GLWorkOrder: 45600,
   GLPayrollList: 75600,
   GLItemDisposal: 42610,
+  GLFixingSales: 38604,
+  GLFixingPurchases: 38605,
 
   BtDefaults: 38601,
   CommodityPair: 38101,

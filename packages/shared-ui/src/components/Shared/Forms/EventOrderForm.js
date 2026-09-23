@@ -387,7 +387,7 @@ useEffect(() => {
                 filter={item => item.currencyType === 1}
                 label={labels.currency}
                 valueField='recordId'
-                displayField={['reference', 'name', 'groupName']}
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -429,7 +429,7 @@ useEffect(() => {
 
                   formik.setFieldValue('fi_currencyId', !newValue?.isInactive ? newValue?.currencyId || null : null)
                   formik.setFieldValue('fi_currencyRef', !newValue?.isInactive ? newValue?.currencyRef || '' : '')
-                  formik.setFieldValue('accountRef', !newValue?.isInactive ? newValue?.reference || null : null)
+                  formik.setFieldValue('accountRef', !newValue?.isInactive ? newValue?.reference || '' : null)
                   formik.setFieldValue('accountName', !newValue?.isInactive ? newValue?.name || '' : '')
                   formik.setFieldValue('accountId', newValue?.recordId || null)
                 }}
