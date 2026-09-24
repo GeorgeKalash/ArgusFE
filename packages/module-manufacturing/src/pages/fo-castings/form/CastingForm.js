@@ -261,6 +261,19 @@ export default function CastingForm({ store, setStore, access, labels }) {
     return res?.record
   }
 
+  async function getMetalInfo(metalId) {
+    if (!metalId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Metals.get,
+      parameters: `_recordId=${metalId}`
+    })
+
+    return res?.record
+  }
+
+  
+
   async function onPost() {
     await postRequest({
       extension: FoundryRepository.Casting.post,
@@ -435,6 +448,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         setRecal(true)
                         const factorStdLoss = await getfactorStdLoss(newValue?.metalId, newValue?.metalColorId)
                         const waxInfo = await getWaxInfo(newValue?.recordId)
+                        const metalInfo = await getMetalInfo(newValue?.metalId)
                         formik.setFieldValue('grossWgt', waxInfo?.grossWgt || 0)
                         formik.setFieldValue('rmWgt', waxInfo?.rmWgt || 0)
                         formik.setFieldValue('mouldWgt', waxInfo?.mouldWgt || 0)
@@ -444,6 +458,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         formik.setFieldValue('stdLossRate', factorStdLoss?.stdLossRate || 0)
                         formik.setFieldValue('mouldId', newValue?.mouldId || null)
                         formik.setFieldValue('metalId', newValue?.metalId || null)
+                        formik.setFieldValue('inputWgtPurity', metalInfo?.purity || null)
+                        formik.setFieldValue('outputWgtPurity', metalInfo?.purity || null)
                         formik.setFieldValue('metalColorId', newValue?.metalColorId || null)
                         formik.setFieldValue('lineId', newValue?.lineId || null)
                         formik.setFieldValue('waxRef', newValue?.reference || null)
