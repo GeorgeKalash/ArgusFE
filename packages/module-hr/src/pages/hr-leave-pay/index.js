@@ -11,7 +11,9 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import LeavePaymentForm from './Forms/LeavePaymentForm'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 
 const LeavePayment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -57,7 +59,12 @@ const LeavePayment = () => {
 
   const columns = [
     {
-      field: 'paymentRef',
+      field: 'dtName',
+      headerName: labels.documentType,
+      flex: 1
+    },
+    {
+      field: 'reference',
       headerName: labels.reference,
       flex: 1
     },
@@ -93,10 +100,23 @@ const LeavePayment = () => {
       headerName: labels.hours,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
+      flex: 1
     }
   ]
 
-  const add = () => openForm()
+   const { proxyAction } = useDocumentTypeProxy({
+      functionId: SystemFunction.LeavePayment,
+      action: openForm
+    })
+
+  const add = () => proxyAction()
 
   const edit = obj => openForm(obj?.recordId)
 
