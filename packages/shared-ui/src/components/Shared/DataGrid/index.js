@@ -80,6 +80,12 @@ export function DataGrid({
     return (value?.length || 0) < limit
   }
   
+  const isInsidePopup = element => {
+    if (!element) return false
+
+    return !!element.closest(POPUP_PORTAL_SELECTOR)
+  }
+
   const GridCheckbox = ({ checked, disabled, onChange }) => {
     return (
       <Checkbox
@@ -287,6 +293,7 @@ export function DataGrid({
     const onPointerDownCapture = e => {
       const target = e.target
       if (!target) return
+      if (isInsidePopup(target)) return
 
       const pressedButton = target.closest(BUTTON_SELECTOR)
 
@@ -992,6 +999,7 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
+      if (isInsidePopup(event.target))   return
       const pressedButton = event.target.closest(BUTTON_SELECTOR)
 
       if (
