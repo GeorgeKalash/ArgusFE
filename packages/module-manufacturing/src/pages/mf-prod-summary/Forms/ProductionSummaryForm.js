@@ -39,7 +39,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
   })
 
   const conditions = {
-    itemId: row => row?.qty != null || row?.pcs != null || row?.clientId != null,
+    itemId: row => row?.qty != 0 || row?.pcs != null || row?.clientId != null,
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
@@ -68,9 +68,10 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
         sku: '',
         itemName: '',
         clientId: null,
-        qty: null,
+        qty: 0,
         pcs: null,
-        itemWeight: null
+        itemWeight: null,
+        onhand: null
       }
     ]
   }
@@ -203,6 +204,17 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
     }
   }, [])
 
+  async function getOnHand(itemId) {
+    if (!itemId) return 0
+
+    const res = await getRequest({
+      extension: InventoryRepository.Availability.get,
+      parameters: `_itemId=${itemId}&_seqNo=0&_siteId=0`
+    })
+
+    return res?.record?.onhand || 0
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -238,7 +250,8 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
         }
 
         update({
-          itemWeight
+          itemWeight,
+          onhand: await getOnHand(newRow?.itemId)
         })
       }
     },
@@ -255,6 +268,15 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       component: 'numberfield',
       label: labels.weight,
       name: 'itemWeight',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.onhand,
+      name: 'onhand',
       flex: 1,
       props: {
         readOnly: true
