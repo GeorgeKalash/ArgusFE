@@ -1,6 +1,6 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -22,13 +22,13 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import PreviewPR from './PreviewPR'
 import PreviewPR2 from './PreviewPR2'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 
 const PROD_REQ_TYPE = {
   TopSales: 1,
@@ -49,17 +49,9 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     objectName: 'header'
   })
 
-
-
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionRequest.page
   })
-
-  const conditions = {
-    itemId: row => (row?.qty != null && row.qty !== 0) || row?.pcs != null || !!row?.itemId
-  }
-
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const initialValues = {
     recordId,
@@ -69,6 +61,9 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       reference: '',
       date: new Date(),
       plantId: null,
+      siteId: null,
+      fiscalYear: null,
+      periodId: null,
       type: null,
       typeName: '',
       notes: '',
@@ -83,29 +78,39 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       itemName: '',
       qty: 0,
       pcs: null,
-      itemWeight: null
+      itemWeight: null,
+      onhand: 0,
+      metalId: null
     }]
   }
     
   const { formik } = useForm({
     maxAccess,
-    conditionSchema: ['items'],
     behavior: { key: 'header.dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues,
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required(),
         plantId: yup.number().required(),
+        siteId: yup.number().required(),
+        fiscalYear: yup.number().required(),
+        periodId: yup.number().required(),
         type: yup.number().required(),
       }),
-      items: yup.array().of(schema)
+      items: yup.array().of(
+        yup.object().shape({
+          sku: yup.string().required(),
+          qty: yup.number().required(),
+          onhand: yup.number().required(),
+        })
+      )
     }),
     onSubmit: async obj => {
       const res = await postRequest({
         extension: ManufacturingRepository.ProductionRequest.set2,
         record: JSON.stringify({
           header: { ...obj.header, date: formatDateToApi(obj.header.date) },
-          items: obj.items?.filter(row => Object.values(requiredFields)?.every(fn => fn(row))).map((item, index) => ({
+          items: obj.items?.map((item, index) => ({
             ...item,
             requestId: recordId,
             seqNo: index + 1
@@ -174,9 +179,33 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     formik.setFieldValue('header.type', type || null)
   }
 
-  const mergePreviewedItems = newItems => {
+  useEffect(() => {
+    const date = formik.values.header.date
+    const year = date ? new Date(date).getFullYear() : null
+
+    if (year !== formik.values.header.fiscalYear) {
+      formik.setValues({
+        ...formik.values,
+        header: {
+          ...formik.values.header,
+          fiscalYear: year,
+          periodId: null
+        }
+      })
+    }
+  }, [formik.values.header.date])
+
+  const mergePreviewedItems = async newItems => {
     const existing = formik.values.items?.filter(row => row.itemId) || []
-    const merged = [...existing, ...newItems].map((item, index) => ({
+
+    const itemsWithOnhand = await Promise.all(
+      newItems.map(async item => ({
+        ...item,
+        onhand: await getOnHand({ itemId: item.itemId, siteId: formik?.values?.header?.siteId })
+      }))
+    )
+
+    const merged = [...existing, ...itemsWithOnhand].map((item, index) => ({
       ...item,
       id: index + 1,
       seqNo: index + 1
@@ -211,11 +240,27 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     }
   }
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.ProductionRequest,
+        recordId: formik.values.recordId
+      }
+    })
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -238,11 +283,22 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     }
   }, [])
 
+  async function getOnHand(rowValues) {
+    if (!rowValues?.itemId && !rowValues.siteId) return 0
+
+    const res = await getRequest({
+      extension: InventoryRepository.Availability.get,
+      parameters: `_itemId=${rowValues.itemId}&_seqNo=0&_siteId=${formik?.values?.header?.siteId}`
+    })
+    
+    return res?.record?.onhand || 0
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
       label: labels.sku,
-      name: 'itemId',
+      name: 'sku',
       flex: 1,
       props: {
         endpointId: InventoryRepository.Item.snapshot,
@@ -261,7 +317,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        let itemWeight = null
+        let itemWeight = null, metalRef = null, metalId = null
 
         if (newRow?.itemId) {
           const res = await getRequest({
@@ -270,10 +326,15 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           })
 
           itemWeight = res?.record?.weight
+          metalId = res?.record?.metalId
+          metalRef = res?.record?.metalRef
         }
 
         update({
-          itemWeight
+          itemWeight,
+          metalRef,
+          metalId,
+          onhand: await getOnHand({ itemId: newRow?.itemId, siteId: formik?.values?.siteId }),
         })
       }
     },
@@ -290,6 +351,24 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       component: 'numberfield',
       label: labels.weight,
       name: 'itemWeight',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.metal,
+      name: 'metalRef',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.onhand,
+      name: 'onhand',
       flex: 1,
       props: {
         readOnly: true
@@ -398,11 +477,46 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                     readOnly={isPosted}
                     required
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('header.date', null)}
+                    onClear={() => {
+                      formik.setFieldValue('header.date', null)
+                      formik.setFieldValue('header.fiscalYear', null)
+                      formik.setFieldValue('header.periodId', null)
+                    }}
                     error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='header.fiscalYear'
+                    label={labels.fiscalYear}
+                    value={formik?.values?.header?.fiscalYear}
+                    readOnly
+                    required
+                    maxAccess={maxAccess}
+                    error={formik?.touched?.header?.fiscalYear && Boolean(formik?.errors?.header?.fiscalYear)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={formik.values.header.fiscalYear && SystemRepository.Period.qry}
+                    parameters={formik.values.header.fiscalYear ? `_fiscalYear=${formik.values.header.fiscalYear}` : ''}
+                    name='header.periodId'
+                    label={labels.period}
+                    valueField='periodId'
+                    displayField='periodName'
+                    values={formik.values.header}
+                    required
+                    readOnly={isPosted || !formik.values.header.fiscalYear}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('header.periodId', newValue?.periodId || null)}
+                    error={formik.touched.header?.periodId && Boolean(formik.errors.header?.periodId)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
@@ -424,6 +538,41 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                     error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Site.qry}
+                    name='header.siteId'
+                    label={labels.site}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik?.values?.header}
+                    readOnly={isPosted || formik.values.items?.some(row => row.itemId)}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('header.siteId', newValue?.recordId || null)
+                    }}
+                    error={formik?.touched?.header?.siteId && Boolean(formik?.errors?.header?.siteId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='header.notes'
+                    label={labels.notes}
+                    value={formik?.values?.header?.notes}
+                    rows={3}
+                    readOnly={isPosted}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.notes', '')}
+                    error={formik?.touched?.header?.notes && Boolean(formik?.errors?.header?.notes)}
+                  />
+                </Grid>
+                
                 <Grid item xs={9}>
                   <ResourceComboBox
                     datasetId={DataSets.PROD_REQ_TYPE}
@@ -458,19 +607,6 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <CustomTextArea
-                name='header.notes'
-                label={labels.notes}
-                value={formik?.values?.header?.notes}
-                rows={3}
-                readOnly={isPosted}
-                maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('header.notes', e.target.value)}
-                onClear={() => formik.setFieldValue('header.notes', '')}
-                error={formik?.touched?.header?.notes && Boolean(formik?.errors?.header?.notes)}
-              />
-            </Grid>
           </Grid>
         </Fixed>
         <Grow>
@@ -482,6 +618,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
             error={formik?.errors?.items}
             columns={columns}
             maxAccess={maxAccess}
+            enableFilters
             name='items'
             allowDelete={!isPosted && !canPreview}
             allowAddNewLine={!isPosted && !canPreview}
