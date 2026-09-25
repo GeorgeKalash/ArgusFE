@@ -121,9 +121,19 @@ export default function Holidays () {
       }
     },
     {
+      component: 'textfield',
+      label: labels.dow,
+      name: 'dowName',
+      props: { readOnly: true }
+    },
+    {
       component: 'date',
       label: labels.day,
-      name: 'dayId'
+      name: 'dayId',
+      props: {
+        min: formik.values.fiscalYear ? new Date(formik.values.fiscalYear, 0, 1) : null,
+        max: formik.values.fiscalYear ? new Date(formik.values.fiscalYear, 11, 31) : null
+      }
     }
   ]
 
@@ -151,7 +161,7 @@ export default function Holidays () {
       maxAccess={maxAccess}
       editMode={true}
       isInfo={false}
-      isCleared={false}
+      isSavedClear={false}
       disabledSubmit={!hasFilters}
       onClear={() => formik.resetForm()}
     >
@@ -167,8 +177,13 @@ export default function Holidays () {
                 displayField='fiscalYear'
                 values={formik.values}
                 required
+                readOnly={formik?.values?.items?.some(item => item.caId || item.scId || item.dayId)}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)}
+                onChange={(_, newValue) => {
+                   formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
+                   formik.setFieldValue('items', formik.initialValues.items)
+                  }
+                }
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
                />
             </Grid>
@@ -182,7 +197,12 @@ export default function Holidays () {
                 values={formik.values}
                 maxAccess={maxAccess}
                 required
-                onChange={(_, newValue) => formik.setFieldValue('dayTypeId', newValue?.recordId || null)}
+                readOnly={formik?.values?.items?.some(item => item.caId || item.scId || item.dayId)}
+                onChange={(_, newValue) => {
+                   formik.setFieldValue('dayTypeId', newValue?.recordId || null)
+                   formik.setFieldValue('items', formik.initialValues.items)
+                  }
+                }
                 error={formik.touched.dayTypeId && Boolean(formik.errors.dayTypeId)}
               />
             </Grid>
