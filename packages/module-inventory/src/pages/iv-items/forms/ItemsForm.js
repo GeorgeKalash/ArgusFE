@@ -37,6 +37,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
+  const [categoryNraId, setCategoryNraId] = useState(null)
+  const [groupNraId, setGroupNraId] = useState(null)
+
   const currencyId = systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value
   const plId = systemDefaults?.list?.find(({ key }) => key === 'plId')?.value
   const dmgId = parseInt((systemDefaults?.list?.find(({ key }) => key === 'iv_dmgId')?.value)) || null
@@ -169,11 +172,11 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       extension: InventoryRepository.Items.get2IT,
       parameters: `_recordId=${recordId}`
     }) 
-    const { item, category } = res.record
+    const { item, category, itemGroup } = res.record
 
     if (window.setTitle && showTitle) window.setTitle(item?.sku ? `${labels.items} ${item?.sku}` : labels.items)
 
-    const isExternal = await getData(category?.nraId)
+    const isExternal = await getData(category?.nraId || itemGroup?.nraId)
 
     setFormikInitial(item)
 
@@ -184,7 +187,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     setStore(prevStore => ({
       ...prevStore,
       ...res.record,
-      nraId: category?.nraId,
+      nraId: category?.nraId || itemGroup?.nraId,
       _msId: item?.msId,
       _kit: item?.kitItem,
       productionLevel: item?.productionLevel,
@@ -321,6 +324,24 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     }
   }, [formik.values.kitItem])
 
+  useEffect(() => {
+    const effectiveNraId = categoryNraId || groupNraId
+
+    onFieldChange(effectiveNraId)
+    setStore(prevStore => ({ ...prevStore, nraId: effectiveNraId }))
+
+    if (editMode) return
+
+    if (!effectiveNraId) {
+      formik.setFieldValue('isExternal', false)
+      return
+    }
+
+    getData(effectiveNraId).then(isExternal => {
+      formik.setFieldValue('isExternal', !!isExternal)
+    })
+  }, [categoryNraId, groupNraId])
+
   return (
     <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions} onPrint={ConfirmationPrint}>
       <VertLayout>
@@ -345,16 +366,15 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     required
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      onFieldChange(newValue?.nraId)
                       setShowLotCategories(newValue?.trackBy === '2' || newValue?.trackBy === 2)
                       setShowSerialProfiles(newValue?.trackBy === '1' || newValue?.trackBy === 1)
+                      setCategoryNraId(newValue?.nraId || null)
                       setStore(prevStore => ({
                         ...prevStore,
                         _metal: formik.values.metalId,
                         _isMetal: newValue?.isMetal,
                         nraId: newValue?.nraId
                       }))
-
                       formik.setValues(prev => ({
                         ...prev,
                         categoryId: newValue?.recordId || null,
@@ -480,6 +500,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onChange={async (_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
                       if (!editMode) formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
+                      setGroupNraId(newValue?.nraId || null)
                     }}
                     error={formik.touched.groupId && formik.errors.groupId}
                   />
