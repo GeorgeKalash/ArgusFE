@@ -31,7 +31,10 @@ export default function Holidays () {
   const conditions = {
     caId: row => row?.caId,
     scId: row => row?.scId,
-    dayId: row => row?.dayId
+    dayId: row =>
+      row?.dayId &&
+      (!formik.values.fiscalYear ||
+        new Date(row.dayId).getFullYear() === Number(formik.values.fiscalYear))
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
