@@ -16,10 +16,12 @@ import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
 import FixingForm from '@argus/shared-ui/src/components/Shared/Forms/FixingForm'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function BTFixing() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   const { functionId } = Router()
 
   const FixingEndpoints = {
@@ -174,10 +176,18 @@ export default function BTFixing() {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: getResourceId(parseInt(functionId)),
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: FixingForm,
       props: {

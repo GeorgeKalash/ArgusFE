@@ -29,11 +29,13 @@ import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDateP
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
-const UndeliveredItems = () => {
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+const UndeliveredItems = async (disabled) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   const { stack: stackError } = useError()
 
   const { labels, access } = useResourceQuery({
@@ -98,6 +100,14 @@ const UndeliveredItems = () => {
         })
       }).then(res => {
         if (res.recordId) {
+          const canOpen = await checkLock({
+            resourceId: ResourceIds.DeliveriesOrders,
+            recordId: res.recordId,
+            disabled: disabled
+          })
+
+          if (!canOpen) return
+
           stack({
             Component: DeliveriesOrdersForm,
             props: {

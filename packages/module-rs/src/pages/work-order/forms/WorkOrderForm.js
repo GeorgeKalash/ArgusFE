@@ -23,6 +23,7 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function WorkOrderForm({ labels, access, setStore, store, window }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -80,6 +81,13 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
   const isRaw = formik.values.status === 1
   const isPosted = store.isPosted
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.WorkOrder,
+    enabled: !!recordId && !isPosted
+  })
+
   const refetchForm = async recordId => {
     if (recordId) {
       const res = await getRequest({
@@ -121,6 +129,7 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }

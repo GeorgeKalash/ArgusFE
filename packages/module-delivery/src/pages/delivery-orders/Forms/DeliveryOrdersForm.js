@@ -32,6 +32,7 @@ import GenerateInvoiceForm from './GenerateInvoiceForm'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId, refresh = true, ...props }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -176,6 +177,13 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   const isCancelled = formik.values.status == -1
   const editMode = !!formik.values.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.DeliveriesOrders,
+    enabled: !!recordId && !(isPosted || isCancelled)
+  })
+
   async function refetchForm(recordId) {
     const res = await getDeliveryOrder(recordId)
 
@@ -247,6 +255,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
 
     await refetchForm(formik.values.recordId)

@@ -16,11 +16,13 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const Financial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const { functionId } = Router()
 
@@ -148,7 +150,7 @@ const Financial = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == -1 || obj?.status == 3)
   }
 
   const getcorrectLabel = functionId => {
@@ -196,7 +198,15 @@ const Financial = () => {
     }
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: getResourceId(parseInt(formik.values.functionId)),
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: MemosForm,
       props: {

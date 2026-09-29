@@ -28,6 +28,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ItemDisposalForm({ recordId, access, labels, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -130,6 +131,13 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
 
   const editMode = !!formik.values.recordId
   const isPosted = formik?.values?.header?.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.ItemDisposal,
+    enabled: !!recordId && !isPosted
+  })
 
   const calculateTotals = items => {
     return (items || []).reduce(
@@ -340,6 +348,7 @@ export default function ItemDisposalForm({ recordId, access, labels, window }) {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }

@@ -32,6 +32,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ShipmentsForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -195,6 +196,13 @@ export default function ShipmentsForm({ recordId, window }) {
   const isPosted = formik.values.header?.status === 3
   const editMode = !!formik.values.header?.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.Shipments,
+    enabled: !!recordId && !isPosted
+  })
+
   async function refetchForm(recordId) {
     const res = await getShipment(recordId)
 
@@ -265,6 +273,7 @@ export default function ShipmentsForm({ recordId, window }) {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
 
     await refetchForm(formik.values.recordId)

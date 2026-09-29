@@ -15,10 +15,12 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import AssemblyWindow from './window/AssemblyWindow'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const Assembly = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -130,10 +132,18 @@ const Assembly = () => {
   }
 
   const editASM = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.Assemblies,
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: AssemblyWindow,
       props: {

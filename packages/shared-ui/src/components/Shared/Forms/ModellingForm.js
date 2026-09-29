@@ -25,6 +25,7 @@ import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextAre
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ModellingForm({ labels, access, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -93,6 +94,13 @@ export default function ModellingForm({ labels, access, setStore, store }) {
   })
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip == 2
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.ModelMaker,
+    enabled: !!recordId && !isClosed
+  })
   const isPosted = formik.values.status == 3
 
   async function refetchForm(recordId) {
@@ -155,6 +163,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     refetchForm(res.recordId)
   }

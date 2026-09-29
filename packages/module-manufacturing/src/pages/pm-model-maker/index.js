@@ -15,10 +15,12 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import ModellingWindow from '@argus/shared-ui/src/components/Shared/Forms/ModellingWindow'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const ModelMaker = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -149,10 +151,18 @@ const ModelMaker = () => {
   }
 
   const editMDL = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.ModelMaker,
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: ModellingWindow,
       props: {

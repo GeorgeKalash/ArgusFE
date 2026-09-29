@@ -30,6 +30,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function CashTransfersForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -160,6 +161,13 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.CashTransfers,
+    enabled: !!recordId && !isPosted
+  })
+
   async function getData(recordId) {
     const res = await getRequest({
       extension: CashBankRepository.CashTransfers.get,
@@ -181,6 +189,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     await refetchForm(formik.values.recordId)
   }

@@ -15,10 +15,12 @@ import AssetsForm from './form/AssetsForm'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const AssetsDescription = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -104,7 +106,15 @@ const AssetsDescription = () => {
     }
   ]
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.Depreciation,
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: AssetsForm,
       props: {
@@ -124,7 +134,7 @@ const AssetsDescription = () => {
   })
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
   const add = async () => {

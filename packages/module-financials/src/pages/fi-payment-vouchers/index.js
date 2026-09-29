@@ -15,10 +15,12 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -143,7 +145,15 @@ const FiPaymentVouchers = () => {
     openForm(obj?.recordId)
   }
 
-  function openOutWardsWindow(recordId) {
+  async function openOutWardsWindow(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.PaymentVouchers,
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: FiPaymentVouchersForm,
       props: {

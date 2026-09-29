@@ -15,10 +15,12 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import SamplesForm from '@argus/shared-ui/src/components/Shared/Forms/SamplesForm'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const PMSamples = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -152,10 +154,18 @@ const PMSamples = () => {
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj.recordId, obj?.wip == 2)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.Samples,
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: SamplesForm,
       props: {

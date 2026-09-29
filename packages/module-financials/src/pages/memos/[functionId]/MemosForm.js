@@ -34,6 +34,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
@@ -166,6 +167,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       await refetchForm(formik.values.recordId)
       invalidate()
     }
@@ -207,6 +209,13 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   const postedOrCanceled = formik.values.status === -1 || formik.values.status === 3
   const isPosted = formik.values.status === 3
   const isCancelled = formik.values.status === -1
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: getResourceId(parseInt(formik.values.functionId)),
+    enabled: !!recordId && !(isCancelled || isPosted)
+  })
 
   async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
     if (currencyId && date && rateType) {

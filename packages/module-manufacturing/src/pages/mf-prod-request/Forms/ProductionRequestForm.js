@@ -30,6 +30,7 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const PROD_REQ_TYPE = {
   TopSales: 1,
   NewItems: 2,
@@ -126,6 +127,13 @@ export default function ProductionRequestForm({ recordId, labels, access, window
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.header.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.ProductionRequest,
+    enabled: !!recordId && !isPosted
+  })
   const canPreview = [PROD_REQ_TYPE.TopSales, PROD_REQ_TYPE.NewItems].includes(formik.values.header.type)
 
   async function refetchForm(requestId) {
@@ -160,6 +168,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }

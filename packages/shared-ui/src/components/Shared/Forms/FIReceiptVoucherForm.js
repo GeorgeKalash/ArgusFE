@@ -35,6 +35,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -192,6 +193,13 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.ReceiptVoucher,
+    enabled: !!recordId && !(isPosted || isCancelled)
+  })
   const isVerified = formik.values.isVerified
 
   const getDefaultFields = async cashAccountId => {
@@ -303,6 +311,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
 
     if (res) {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       invalidate()
       await getData(formik.values.recordId)
       window.close()

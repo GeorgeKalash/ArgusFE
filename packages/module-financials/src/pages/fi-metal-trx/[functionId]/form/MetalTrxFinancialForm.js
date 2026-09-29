@@ -30,6 +30,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, getGLResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -174,6 +175,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: getResourceId(parseInt(formik.values.functionId)),
+    enabled: !!recordId && !isPosted
+  })
   const isVerified = formik.values.isVerified
   const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + ((item[key]) || 0), 0)
   const totalQty = calculateTotal('qty')
@@ -195,6 +203,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
   }

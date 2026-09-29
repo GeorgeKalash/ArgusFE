@@ -36,6 +36,7 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ImportTransfer from '@argus/shared-ui/src/components/Shared/Forms/ImportTransfer'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -244,6 +245,13 @@ export default function MaterialsTransferForm({ recordId, window }) {
   const isPosted = formik.values.status === 3
   const isClosed = formik.values.wip === 2
   const editMode = !!formik.values.recordId
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.MaterialsTransfer,
+    enabled: !!recordId && !(isPosted || isClosed)
+  })
 
   const getWeightAndMetalId = async itemId => {
     const res = await getRequest({
@@ -753,6 +761,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     await refetchForm(formik.values.recordId)
   }

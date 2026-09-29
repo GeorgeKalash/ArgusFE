@@ -15,10 +15,12 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import BalanceTransferMultiForm from './Forms/BalanceTransferMultiForm'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const BalanceTransferMultiAccounts = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -125,10 +127,18 @@ const BalanceTransferMultiAccounts = () => {
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj.recordId, obj?.status == 3)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.BalanceTransferMultiAccounts,
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: BalanceTransferMultiForm,
       props: {

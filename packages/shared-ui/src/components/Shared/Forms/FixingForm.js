@@ -35,6 +35,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function FixingForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -175,6 +176,13 @@ export default function FixingForm({ recordId, functionId, window }) {
 
   const editMode = !!formik.values?.recordId
   const isClosed = formik.values.wip == 2
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: getResourceId(parseInt(functionId)),
+    enabled: !!recordId && !isClosed
+  })
   const isPosted = formik.values.status == 3
 
   async function refetchForm(recordId) {
@@ -248,6 +256,7 @@ export default function FixingForm({ recordId, functionId, window }) {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     refetchForm(formik.values.recordId)
   }

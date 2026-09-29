@@ -15,10 +15,12 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 import BalanceTransferBetweenAccForm from './forms/BalanceTransferBetweenAccForm'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const BalanceTrfBetweenAcc = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -146,9 +148,17 @@ const BalanceTrfBetweenAcc = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.FIBalanceTfr,
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: BalanceTransferBetweenAccForm,
       props: {

@@ -28,6 +28,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function JobOrderWizardForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -150,6 +151,13 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.header.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.JobOrderWizard,
+    enabled: !!recordId && !isPosted
+  })
+
   async function onPost() {
     const res = await postRequest({
       extension: ManufacturingRepository.JobOrderWizard.post,
@@ -161,6 +169,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
 
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       invalidate()
       refetchForm(res?.recordId)
     }

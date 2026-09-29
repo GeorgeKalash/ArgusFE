@@ -21,6 +21,7 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function CuttingForm({ labels, access, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -72,6 +73,13 @@ export default function CuttingForm({ labels, access, setStore, store }) {
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status == 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.FoCuttings,
+    enabled: !!recordId && !isPosted
+  })
+
   function applyCastingToStore(source) {
     setStore(prevStore => ({
       ...prevStore,
@@ -121,6 +129,7 @@ export default function CuttingForm({ labels, access, setStore, store }) {
       })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     refetchForm(res.recordId)
   }

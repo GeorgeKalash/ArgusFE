@@ -25,11 +25,13 @@ import toast from 'react-hot-toast'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GeneratePUInvoices
@@ -85,12 +87,20 @@ const GeneratePurchaseInvoice = () => {
 
       if (res.recordId) {
         toast.success(platformLabels.Generated)
-        await openForm(res.recordId)
+        await openForm(res.recordId, res?.status == 3)
       }
     }
   })
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: getResourceId(parseInt(functionId)),
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: PurchaseTransactionForm,
       props: {

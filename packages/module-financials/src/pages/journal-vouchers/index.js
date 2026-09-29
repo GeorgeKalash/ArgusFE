@@ -15,10 +15,12 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -96,7 +98,15 @@ const JournalVoucher = () => {
     },
   ]
 
-  const openForm = recordId => {
+  const openForm = async recordId => {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.JournalVoucher,
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: JournalVoucherForm,
       props: {

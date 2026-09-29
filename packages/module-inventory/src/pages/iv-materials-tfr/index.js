@@ -17,12 +17,14 @@ import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const IvMaterialsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { userDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
   async function fetchGridData(options = {}) {
@@ -176,10 +178,18 @@ const IvMaterialsTransfer = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3 || obj?.wip == 2)
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.MaterialsTransfer,
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: MaterialsTransferForm,
       props: {

@@ -26,6 +26,7 @@ import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepositor
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function CastingForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -101,6 +102,13 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
   const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.Casting,
+    enabled: !!recordId && !isPosted
+  })
+
   async function getData(recordId) {
     const res = await getRequest({
       extension: ProductModelingRepository.Casting.get,
@@ -123,6 +131,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
 
     await getData(formik.values.recordId)
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
   }
 

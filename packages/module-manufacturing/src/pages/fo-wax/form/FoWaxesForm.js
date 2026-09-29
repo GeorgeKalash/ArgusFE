@@ -29,6 +29,7 @@ import MergedComponentsForm from './MergedComponentsForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function FoWaxesForm({ labels, access, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -139,6 +140,13 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   const isPosted = formik?.values?.header?.status === 3
   const isClosed = formik?.values?.header?.wip === 2
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.FoWaxes,
+    enabled: !!recordId && !isClosed
+  })
+
   const rmWgt = reCal
     ? formik.values.items.reduce((sum, item) => sum + (Number(item?.rmWgt) || 0), 0)
     : formik.values?.header.rmWgt || 0
@@ -216,6 +224,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
   }

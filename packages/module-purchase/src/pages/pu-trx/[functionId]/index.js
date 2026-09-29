@@ -18,11 +18,13 @@ import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import toast from 'react-hot-toast'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const PuTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   const { stack: stackError } = useError()
 
   const { functionId } = Router()
@@ -194,10 +196,18 @@ const PuTrx = () => {
   })
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: getResourceId(parseInt(functionId)),
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: PurchaseTransactionForm,
       props: {

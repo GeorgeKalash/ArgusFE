@@ -16,10 +16,12 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import MetalTrxFinancialForm from './form/MetalTrxFinancialForm'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function MetalTrxFinancial() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const { functionId } = Router()
 
@@ -181,7 +183,7 @@ export default function MetalTrxFinancial() {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
   const getcorrectLabel = functionId => {
@@ -194,7 +196,15 @@ export default function MetalTrxFinancial() {
     }
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: getResourceId(parseInt(formik.values.functionId)),
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: MetalTrxFinancialForm,
       props: {

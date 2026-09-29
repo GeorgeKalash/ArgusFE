@@ -15,10 +15,12 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import FOCastingWindow from './window/FOCastingWindow'
 import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const FoCastings = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -163,10 +165,18 @@ const FoCastings = () => {
   }
 
   const editCAS = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == -1 || obj?.status == 3)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.FoCastings,
+      recordId,
+      disabled: disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: FOCastingWindow,
       props: {

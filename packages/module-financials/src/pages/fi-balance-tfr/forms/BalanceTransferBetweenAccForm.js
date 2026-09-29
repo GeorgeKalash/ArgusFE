@@ -30,6 +30,7 @@ import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function BalanceTransferForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -107,6 +108,13 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.FIBalanceTfr,
+    enabled: !!recordId && !isPosted
+  })
+
   const refetchForm = async recordId => {
     const { record } = await getRequest({
       extension: FinancialRepository.BalanceTransfer.get,
@@ -137,6 +145,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
   }
