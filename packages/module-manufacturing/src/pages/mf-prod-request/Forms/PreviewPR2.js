@@ -187,6 +187,7 @@ const PreviewPR2 = ({ onSelect, window }) => {
             value={formik.values.rows}
             error={formik.errors.rows}
             columns={columns}
+            enableFilters={true}
             allowDelete={false}
             allowAddNewLine={false}
             maxAccess={maxAccess}/>

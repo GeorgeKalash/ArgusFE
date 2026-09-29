@@ -1,5 +1,5 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, findPeriod } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
@@ -64,6 +64,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       siteId: null,
       fiscalYear: null,
       periodId: null,
+      periodName: null,
       type: null,
       typeName: '',
       notes: '',
@@ -94,7 +95,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         plantId: yup.number().required(),
         siteId: yup.number().required(),
         fiscalYear: yup.number().required(),
-        periodId: yup.number().required(),
+        periodName: yup.string().required(),
         type: yup.number().required(),
       }),
       items: yup.array().of(
@@ -180,18 +181,44 @@ export default function ProductionRequestForm({ recordId, labels, access, window
   }
 
   useEffect(() => {
-    const date = formik.values.header.date
-    const year = date ? new Date(date).getFullYear() : null
+    if (recordId) return
 
-    if (year !== formik.values.header.fiscalYear) {
-      formik.setValues({
-        ...formik.values,
-        header: {
-          ...formik.values.header,
-          fiscalYear: year,
-          periodId: null
-        }
-      })
+    const date = formik.values.header.date
+
+    if (!date) {
+      formik.setFieldValue('header.fiscalYear', null)
+      formik.setFieldValue('header.periodId', null)
+      return
+    }
+
+    let cancelled = false
+
+    ;(async () => {
+      const year = new Date(date).getFullYear()
+
+      try {
+        const res = await getRequest({
+          extension: SystemRepository.Period.qry,
+          parameters: `_fiscalYear=${year}`
+        })
+
+        if (cancelled) return
+
+        const period = findPeriod(res?.list || [], date)
+
+        formik.setFieldValue('header.fiscalYear', period?.fiscalYear ?? year)
+        formik.setFieldValue('header.periodId', period?.periodId ?? null)
+        formik.setFieldValue('header.periodName', period?.periodName ?? null)
+      } catch (e) {
+        if (cancelled) return
+        formik.setFieldValue('header.fiscalYear', year)
+        formik.setFieldValue('header.periodId', null)
+        formik.setFieldValue('header.periodName', null)
+      }
+    })()
+
+    return () => {
+      cancelled = true
     }
   }, [formik.values.header.date])
 
@@ -481,6 +508,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                       formik.setFieldValue('header.date', null)
                       formik.setFieldValue('header.fiscalYear', null)
                       formik.setFieldValue('header.periodId', null)
+                      formik.setFieldValue('header.periodName', null)
                     }}
                     error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
                     maxAccess={maxAccess}
@@ -498,19 +526,14 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={formik.values.header.fiscalYear && SystemRepository.Period.qry}
-                    parameters={formik.values.header.fiscalYear ? `_fiscalYear=${formik.values.header.fiscalYear}` : ''}
-                    name='header.periodId'
+                  <CustomTextField
+                    name='header.periodName'
                     label={labels.period}
-                    valueField='periodId'
-                    displayField='periodName'
-                    values={formik.values.header}
+                    value={formik?.values?.header?.periodName}
+                    readOnly
                     required
-                    readOnly={isPosted || !formik.values.header.fiscalYear}
                     maxAccess={maxAccess}
-                    onChange={(_, newValue) => formik.setFieldValue('header.periodId', newValue?.periodId || null)}
-                    error={formik.touched.header?.periodId && Boolean(formik.errors.header?.periodId)}
+                    error={formik?.touched?.header?.periodName && Boolean(formik?.errors?.header?.periodName)}
                   />
                 </Grid>
               </Grid>

@@ -188,6 +188,7 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
             columns={columns}
             allowDelete={false}
             allowAddNewLine={false}
+            enableFilters={true}
             maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
