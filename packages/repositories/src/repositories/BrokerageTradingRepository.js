@@ -13,7 +13,10 @@ export const BrokerageTradingRepository = {
     del: service + 'delFIS',
     close: service + 'closeFIS',
     get: service + 'getFIS',
-    snapshot: service + 'snapshotFIS'
+    snapshot: service + 'snapshotFIS',
+    post: service + 'postFIS',
+    unpost: service + 'unpostFIS',
+    reopen: service + 'reopenFIS',
   },
   FixingPurchases: {
     page: service + 'pageFIP',
@@ -21,7 +24,10 @@ export const BrokerageTradingRepository = {
     del: service + 'delFIP',
     close: service + 'closeFIP',
     get: service + 'getFIP',
-    snapshot: service + 'snapshotFIP'
+    snapshot: service + 'snapshotFIP',
+    post: service + 'postFIP',
+    reopen: service + 'reopenFIP',
+    unpost: service + 'unpostFIP',
   },
   Fixing: {
     pack: service + 'getPackFIX',

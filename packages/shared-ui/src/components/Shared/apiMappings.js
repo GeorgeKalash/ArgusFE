@@ -1309,4 +1309,14 @@ export const apiMappings = {
     valueField: 'recordId',
     displayField: 'name'
   },
+  [ResourceIds.Developer]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Developer.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  }
 }

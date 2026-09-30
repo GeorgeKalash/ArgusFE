@@ -80,15 +80,13 @@ export default function DimensionsForm({ store, maxAccess }) {
         item => item.id !== '' && item.id !== undefined && item.id !== null
       )
 
-      if (filteredData.length > 0) {
-        await postRequest({
-          extension: FinancialRepository.AccountDimensions.set2,
-          record: JSON.stringify({
-            accountId,
-            data: filteredData
-          })
+      await postRequest({
+        extension: FinancialRepository.AccountDimensions.set2,
+        record: JSON.stringify({
+          accountId,
+          data: filteredData
         })
-      }
+      })
 
       toast.success(platformLabels.Edited)
     }

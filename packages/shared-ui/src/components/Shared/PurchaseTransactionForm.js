@@ -1025,6 +1025,12 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       disabled: !editMode
     },
     {
+      key: 'FI Trx',
+      condition: true,
+      onClick: 'onClickIT',
+      disabled: !editMode
+    },
+    {
       key: 'IV',
       condition: true,
       onClick: 'onInventoryTransaction',

@@ -673,6 +673,7 @@ export const ResourceIds = {
   BTDocumentTypeDefault: 38102,
   Budget: 42145,
   Calendar: 72106,
+  PM_Budget: 48105,
 
   // GL
   GLSalesInvoice: 51604,
@@ -721,6 +722,8 @@ export const ResourceIds = {
   GLWorkOrder: 45600,
   GLPayrollList: 75600,
   GLItemDisposal: 42610,
+  GLFixingSales: 38604,
+  GLFixingPurchases: 38605,
 
   BtDefaults: 38601,
   CommodityPair: 38101,

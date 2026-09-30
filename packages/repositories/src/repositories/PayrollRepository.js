@@ -129,6 +129,8 @@ export const PayrollRepository = {
     get: service + 'getLP',
     set: service + 'setLP',
     del: service + 'delLP',
-    snapshot: service + 'snapshotLP'
+    snapshot: service + 'snapshotLP',
+    post: service + 'postLP',
+    unpost: service + 'unpostLP'
   }
 }

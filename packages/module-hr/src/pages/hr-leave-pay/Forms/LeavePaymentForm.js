@@ -16,19 +16,28 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
-export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
+export default function LeavePaymentForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
 
-  const monthWorkHrs = parseFloat(systemDefaults?.list?.find(({ key }) => key === 'monthWorkHrs')?.value || 0)
-  const dayWorkHrs = parseFloat(systemDefaults?.list?.find(({ key }) => key === 'dayWorkHrs')?.value || 0)
+  const monthWorkHrs = roundTo(systemDefaults?.list?.find(({ key }) => key === 'monthWorkHrs')?.value || 0, 0)
+  const dayWorkHrs = roundTo(systemDefaults?.list?.find(({ key }) => key === 'dayWorkHrs')?.value || 0, 0)
+
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: SystemFunction.LeavePayment,
+    access,
+    enabled: !recordId
+  })
 
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.LeavePayment.page
@@ -36,7 +45,9 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
 
   const initialValues = {
     recordId: recordId || null,
-    paymentRef: '',
+    reference: '',
+    dtId: null,
+    status: 1,
     date: new Date(),
     employeeId: null,
     employeeName: '',
@@ -70,6 +81,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
   }
 
   const { formik } = useForm({
+    behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     maxAccess,
     initialValues,
     validationSchema: yup.object({
@@ -132,6 +144,49 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
   }
 
   const editMode = !!formik.values.recordId
+  const isPosted = formik.values.status === 3
+
+  const onPost = async () => {
+    const res = await postRequest({
+      extension: PayrollRepository.LeavePayment.post,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Posted)
+      invalidate()
+      fetchRecord(res.recordId)
+    }
+  }
+
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: PayrollRepository.LeavePayment.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Unposted)
+      invalidate()
+      fetchRecord(res.recordId)
+    }
+  }
+
+  const actions = [
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode
+    }
+  ]
 
   async function fetchLeaveScheduleAndType(lsId) {
     if (!lsId) return { trackByHours: false }
@@ -236,8 +291,8 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
     const amount = (s / monthWorkHrs) * dayWorkHrs * d
 
     return {
-      hours: parseFloat(hours.toFixed(2)),
-      amount: parseFloat(amount.toFixed(2))
+      hours: roundTo(hours),
+      amount: roundTo(amount)
     }
   }
 
@@ -248,7 +303,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
     const s = parseFloat(salary) || 0
     const amount = (s / monthWorkHrs) * h
 
-    return { amount: parseFloat(amount.toFixed(2)) }
+    return { amount: roundTo(amount) }
   }
   
   const fetchRecord = async (recordId) => {
@@ -269,13 +324,15 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
 
     const summary = await fillLeaveBalances(record.employeeId, record.lsId, effDate, ltInfo?.ltName)
 
-    formik.setValues({
-      ...record,
-      date: formatDateFromApi(record.date),
-      effectiveDate: effDate,
-      ...ltInfo,
-      ...employeeQuickView,
-      summary: { ...(record.summary || {}), ...summary }
+    formik.resetForm({
+      values:{
+        ...record,
+        date: formatDateFromApi(record.date),
+        effectiveDate: effDate,
+        ...ltInfo,
+        ...employeeQuickView,
+        summary: { ...(record.summary || {}), ...summary }
+      }
     })
   }
 
@@ -290,6 +347,9 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
       maxAccess={maxAccess}
       previewReport={editMode}
       editMode={editMode}
+      actions={actions}
+      functionId={SystemFunction.LeavePayment}
+      disabledSubmit={isPosted}
     >
       <VertLayout>
         <Grow>
@@ -297,12 +357,35 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
             <Grid item xs={6}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomTextField
-                    name='paymentRef'
-                    label={labels.reference}
-                    value={formik.values.paymentRef}
+                  <ResourceComboBox
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.LeavePayment}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
+                    name='dtId'
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    label={labels.documentType}
+                    readOnly={editMode}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    values={formik.values}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                      changeDT(newValue)
+                    }}
+                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     maxAccess={maxAccess}
-                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='reference'
+                    label={labels.reference}
+                    value={formik.values.reference}
+                    readOnly={editMode}
+                    maxAccess={!editMode && maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -311,6 +394,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                     label={labels.date}
                     value={formik.values.date}
                     required
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('date', null)}
@@ -329,6 +413,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                     secondValueShow='employeeName'
                     form={formik}
                     required
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     displayFieldWidth={2}
                     columnsInDropDown={[
@@ -362,6 +447,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                     label={labels.effectiveDate}
                     value={formik.values.effectiveDate}
                     required
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={async (_, value) => {
                       const [employeeQuickView, summary] = await Promise.all([
@@ -392,6 +478,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                     values={formik.values}
                     required
                     defaultIndex={0}
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       const lsId = newValue?.recordId || null
@@ -436,7 +523,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                     label={labels.hours}
                     value={formik.values.hours}
                     maxAccess={maxAccess}
-                    readOnly={!formik.values.trackByHours}
+                    readOnly={!formik.values.trackByHours || isPosted}
                     onChange={e => {
                       const hours = e.target.value
 
@@ -459,7 +546,7 @@ export default function LeavePaymentForm({ labels, maxAccess, recordId }) {
                     label={labels.days}
                     value={formik.values.days}
                     maxAccess={maxAccess}
-                    readOnly={formik.values.trackByHours}
+                    readOnly={formik.values.trackByHours || isPosted}
                     onChange={e => {
                       const days = e.target.value
 
