@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
@@ -18,15 +18,24 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { formatDateToYYYYMMDD } from '@argus/shared-domain/src/lib/date-helper'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { useError } from '@argus/shared-providers/src/providers/error'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 
 export default function Holidays () {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack: stackError } = useError()
+  const { getAllKvsByDataset } = useContext(CommonContext)
+  const [days, setDays] = useState([])
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Holidays
   })
+
+  useEffect(() => {
+    getAllKvsByDataset({
+      _dataset: DataSets.WEEK_DAY,
+      callback: result => setDays(result || [])
+    })
+  }, [])
 
   const conditions = {
     caId: row => row?.caId,
@@ -36,14 +45,16 @@ export default function Holidays () {
       (!formik.values.fiscalYear ||
         new Date(row.dayId).getFullYear() === Number(formik.values.fiscalYear))
   }
+  
+  const initialValues = {
+    fiscalYear: null,
+    dayTypeId: null,
+    items: []
+  }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
   const { formik } = useForm({
-    initialValues: {
-      fiscalYear: null,
-      dayTypeId: null,
-      items: []
-    },
+    initialValues,
     maxAccess,
     validationSchema: yup.object({
       fiscalYear: yup.string().required(),
@@ -51,21 +62,6 @@ export default function Holidays () {
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
-      const seen = new Set()
-      const hasDuplicates = (obj?.items || []).some(row => {
-        const key = `${row.caId}-${row.dayId}`
-        if (seen.has(key)) return true
-        seen.add(key)
-
-        return false
-      })
-
-      if (hasDuplicates) {
-        stackError({ message: labels.duplicateRows })
-        
-        return
-      }
-
       const payload = {
         year: obj.fiscalYear,
         dayTypeId: obj.dayTypeId,
@@ -127,7 +123,9 @@ export default function Holidays () {
       component: 'textfield',
       label: labels.dow,
       name: 'dowName',
-      props: { readOnly: true }
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'date',
@@ -136,12 +134,21 @@ export default function Holidays () {
       props: {
         min: formik.values.fiscalYear ? new Date(formik.values.fiscalYear, 0, 1) : null,
         max: formik.values.fiscalYear ? new Date(formik.values.fiscalYear, 11, 31) : null
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow?.dayId) return update({ dow: null, dowName: '' })
+
+        const jsDay = newRow?.dayId.getDay()
+        const dow = jsDay === 0 ? 7 : jsDay
+        update({
+          dow,
+          dowName: days.find(item => item.key === String(dow))?.value || ''
+        })
       }
     }
   ]
 
   const loadHolidays = async () => {
-    
     const items = await getRequest({
       extension: TimeAttendanceRepository.CalendarDay.qry3,
       parameters: `_year=${formik.values.fiscalYear}&_dayTypeId=${formik.values.dayTypeId}`
@@ -166,7 +173,7 @@ export default function Holidays () {
       isInfo={false}
       isSavedClear={false}
       disabledSubmit={!hasFilters}
-      onClear={() => formik.resetForm()}
+      onClear={() => formik.resetForm({values: initialValues})}
     >
       <VertLayout>
         <Fixed>
