@@ -346,7 +346,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        let itemWeight = null, metalRef = null, metalId = null
+        let itemWeight = null, metalRef = null, metalId = null, pcs=0, qty =0
 
         if (newRow?.itemId) {
           const res = await getRequest({
@@ -357,12 +357,16 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           itemWeight = res?.record?.weight
           metalId = res?.record?.metalId
           metalRef = res?.record?.metalRef
+          if (newRow?.pcs) qty = itemWeight ? newRow?.pcs * itemWeight : 0
+          else if (newRow?.qty) pcs = itemWeight ? newRow?.qty / itemWeight : 0
         }
 
         update({
           itemWeight,
           metalRef,
-          metalId
+          metalId,
+          qty,
+          pcs
         })
       }
     },
@@ -402,7 +406,16 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       props: {
         decimalScale: 2,
         maxLength: 10,
-        allowNegative: false
+        allowNegative: false,
+        readOnly: canPreview
+      },
+      async onChange({ row: { update, newRow } }) {
+        let  pcs=0
+        
+        if (newRow?.qty) pcs = newRow?.itemWeight ? newRow?.qty / newRow?.itemWeight : 0
+        
+
+        update({pcs})
       }
     },
     {
@@ -415,6 +428,14 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         maxLength: 9,
         allowNegative: false,
         readOnly: canPreview
+      },
+      async onChange({ row: { update, newRow } }) {
+        let  qty=0
+        
+        if (newRow?.pcs) qty = newRow?.itemWeight ? newRow?.pcs * newRow?.itemWeight : 0
+        
+
+        update({qty})
       }
     },
   ]

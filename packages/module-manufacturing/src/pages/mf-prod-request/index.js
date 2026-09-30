@@ -77,8 +77,13 @@ const ProductionRequest = () => {
       type: 'date'
     },
     {
-      field: 'plantName',
-      headerName: labels.plant,
+      field: 'plantGroupName',
+      headerName: labels.plantGroup,
+      flex: 1
+    },
+    {
+      field: 'typeName',
+      headerName: labels.type,
       flex: 1
     },
     {
