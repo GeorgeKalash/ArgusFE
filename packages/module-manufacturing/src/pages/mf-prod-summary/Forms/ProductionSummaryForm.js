@@ -193,7 +193,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
   async function onImportClick() {
     const res = await getRequest({
       extension: ManufacturingRepository.ProductionRequestItems.import,
-      parameters: `_year=${formik.values.header.fiscalYear}&_periodId=${formik.values.header.periodId}`
+      parameters: `_fiscalYear=${formik.values.header.fiscalYear}&_periodId=${formik.values.header.periodId}`
     })
 
     if (res?.list?.length > 0) {
