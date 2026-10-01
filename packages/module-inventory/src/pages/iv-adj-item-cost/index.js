@@ -108,7 +108,7 @@ const AdjustItemCost = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.AdjustItemCost,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

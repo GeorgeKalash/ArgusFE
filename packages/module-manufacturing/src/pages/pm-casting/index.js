@@ -127,7 +127,7 @@ const Casting = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.Casting,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

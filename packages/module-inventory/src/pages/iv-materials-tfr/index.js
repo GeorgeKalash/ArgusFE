@@ -185,7 +185,7 @@ const IvMaterialsTransfer = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.MaterialsTransfer,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

@@ -102,7 +102,7 @@ const JournalVoucher = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.JournalVoucher,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

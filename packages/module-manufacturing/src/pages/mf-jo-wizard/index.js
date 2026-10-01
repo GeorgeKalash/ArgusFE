@@ -141,7 +141,7 @@ const JobOrderWizard = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.JobOrderWizard,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

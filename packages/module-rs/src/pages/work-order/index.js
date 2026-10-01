@@ -115,7 +115,7 @@ const WorkOrder = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.WorkOrder,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

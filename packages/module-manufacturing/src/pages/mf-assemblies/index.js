@@ -139,7 +139,7 @@ const Assembly = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.Assemblies,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

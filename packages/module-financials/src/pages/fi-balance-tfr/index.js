@@ -154,7 +154,7 @@ const BalanceTrfBetweenAcc = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.FIBalanceTfr,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

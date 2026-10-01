@@ -185,7 +185,7 @@ const BalanceTfrTrx = () => {
     const canOpen = await checkLock({
       resourceId: resourceId,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

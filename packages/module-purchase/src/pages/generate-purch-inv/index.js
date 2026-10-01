@@ -94,9 +94,9 @@ const GeneratePurchaseInvoice = () => {
 
   async function openForm(recordId, disabled) {
     const canOpen = await checkLock({
-      resourceId: getResourceId(parseInt(functionId)),
+      resourceId: ResourceIds.PurchaseInvoice,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

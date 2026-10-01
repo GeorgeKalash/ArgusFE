@@ -95,7 +95,7 @@ const EarnedLeaves = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.EarnedLeave,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

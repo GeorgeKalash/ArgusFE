@@ -158,7 +158,7 @@ const ModelMaker = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.ModelMaker,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

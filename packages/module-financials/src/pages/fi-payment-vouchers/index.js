@@ -14,8 +14,8 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -142,14 +142,14 @@ const FiPaymentVouchers = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
-  async function openOutWardsWindow(recordId, disabled) {
+  async function openForm(recordId, disabled) {
     const canOpen = await checkLock({
       resourceId: ResourceIds.PaymentVouchers,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return
@@ -160,10 +160,6 @@ const FiPaymentVouchers = () => {
         recordId
       },
     })
-  }
-
-  async function openForm(recordId) {
-    openOutWardsWindow(recordId)
   }
 
   const { proxyAction } = useDocumentTypeProxy({

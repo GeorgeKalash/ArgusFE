@@ -131,7 +131,7 @@ const ProductionOrder = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.ProductionOrder,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

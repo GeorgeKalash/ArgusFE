@@ -131,7 +131,7 @@ export default function ItemDisposal() {
     const canOpen = await checkLock({
       resourceId: ResourceIds.ItemDisposal,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

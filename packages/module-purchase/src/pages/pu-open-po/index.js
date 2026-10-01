@@ -25,9 +25,9 @@ import { ReportPuGeneratorRepository } from '@argus/repositories/src/repositorie
 import ShipmentsForm from '../shipments/forms/ShipmentsForm'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
-const OpenPurchaseOrder = async (disabled) => {
+
+const OpenPurchaseOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
@@ -92,7 +92,7 @@ const OpenPurchaseOrder = async (disabled) => {
         const canOpen = await checkLock({
           resourceId: ResourceIds.Shipments,
           recordId: res.recordId,
-          disabled: disabled
+          disabled: true
         })
 
         if (!canOpen) return

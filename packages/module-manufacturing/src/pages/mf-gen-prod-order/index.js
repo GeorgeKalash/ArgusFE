@@ -17,9 +17,9 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
-const GeneratePoductionOrder = async (disabled) => {
+
+const GeneratePoductionOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -57,7 +57,7 @@ const GeneratePoductionOrder = async (disabled) => {
       const canOpen = await checkLock({
         resourceId: ResourceIds.ProductionOrder,
         recordId: res?.recordId,
-        disabled: disabled
+        disabled: true
       })
 
       if (!canOpen) return

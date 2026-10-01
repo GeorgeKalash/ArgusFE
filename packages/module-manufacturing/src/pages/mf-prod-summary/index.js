@@ -113,7 +113,7 @@ const ProductionSummary = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.ProductionSummary,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

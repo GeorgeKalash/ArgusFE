@@ -156,7 +156,7 @@ const ThreeDPrinting = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.Printing,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

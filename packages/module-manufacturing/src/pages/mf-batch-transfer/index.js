@@ -120,7 +120,7 @@ const BatchTransfer = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.BatchTransfer,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

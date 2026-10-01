@@ -14,12 +14,11 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import WorksheetWindow from '@argus/shared-ui/src/components/Shared/Forms/WorksheetWindow'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 const MfWorksheet = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [params, setParams] = useState('')
   const { stack } = useWindow()
   const { checkLock } = useRecordLock()
 
@@ -135,7 +134,7 @@ const MfWorksheet = () => {
 
   async function openForm(obj) {
     const canOpen = await checkLock({
-      resourceId: resourceId,
+      resourceId: ResourceIds.Worksheet,
       recordId: obj?.recordId,
       disabled: obj?.status == 3
     })

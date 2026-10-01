@@ -26,7 +26,7 @@ export default function CurrencyTrading() {
     const canOpen = await checkLock({
       resourceId: ResourceIds.ReceiptVoucher,
       recordId: recordId || null,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

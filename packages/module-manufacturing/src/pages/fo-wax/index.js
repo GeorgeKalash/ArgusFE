@@ -161,7 +161,7 @@ const FoWax = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.FoWaxes,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

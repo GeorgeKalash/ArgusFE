@@ -132,7 +132,7 @@ const WorkCenterConsump = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.WorkCenterConsumptions,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

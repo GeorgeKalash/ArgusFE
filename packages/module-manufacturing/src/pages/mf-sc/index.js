@@ -147,7 +147,7 @@ const StandardCostUpdate = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.StandardCostUpdate,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

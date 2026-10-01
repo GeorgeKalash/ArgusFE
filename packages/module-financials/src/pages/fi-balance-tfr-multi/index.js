@@ -134,7 +134,7 @@ const BalanceTransferMultiAccounts = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.BalanceTransferMultiAccounts,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

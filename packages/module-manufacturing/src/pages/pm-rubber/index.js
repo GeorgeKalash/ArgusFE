@@ -148,7 +148,7 @@ const Rubber = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.Rubber,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

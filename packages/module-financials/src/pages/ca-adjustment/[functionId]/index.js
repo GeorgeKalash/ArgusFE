@@ -118,7 +118,7 @@ const CAadjustment = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.IncreaseDecreaseAdj,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

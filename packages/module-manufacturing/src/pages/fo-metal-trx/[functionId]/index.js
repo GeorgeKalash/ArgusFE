@@ -146,7 +146,7 @@ export default function FOMetalTrx() {
     const canOpen = await checkLock({
       resourceId: getResourceId(Number(functionId)),
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

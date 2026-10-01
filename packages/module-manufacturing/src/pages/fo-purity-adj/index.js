@@ -112,7 +112,7 @@ export default function PurityAdjustment() {
     const canOpen = await checkLock({
       resourceId: ResourceIds.PurityAdjustment,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

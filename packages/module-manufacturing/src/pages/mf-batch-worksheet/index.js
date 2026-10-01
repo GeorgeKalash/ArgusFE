@@ -108,7 +108,7 @@ const MfBatchWorksheet = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.BatchWorksheet,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

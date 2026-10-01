@@ -113,7 +113,7 @@ const FoCuttings = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.FoCuttings,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

@@ -118,7 +118,7 @@ const Shipments = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.Shipments,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

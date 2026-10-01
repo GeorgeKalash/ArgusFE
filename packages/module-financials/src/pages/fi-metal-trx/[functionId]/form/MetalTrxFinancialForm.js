@@ -29,8 +29,8 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, getGLResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -173,6 +173,17 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     return payload
   }
 
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.MetalReceiptVoucher:
+        return ResourceIds.MetalReceiptVoucher
+      case SystemFunction.MetalPaymentVoucher:
+        return ResourceIds.MetalPaymentVoucher
+      default:
+        return
+    }
+  }
+
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.status === 3
 
@@ -236,17 +247,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
     formik.setFieldValue('siteId', res?.record?.siteId || null)
     formik.setFieldValue('plantId', res?.record?.plantId || null)
-  }
-
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.MetalReceiptVoucher:
-        return ResourceIds.MetalReceiptVoucher
-      case SystemFunction.MetalPaymentVoucher:
-        return ResourceIds.MetalPaymentVoucher
-      default:
-        return
-    }
   }
 
   function getFilteredMetal(metalId) {

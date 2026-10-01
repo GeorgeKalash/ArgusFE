@@ -27,9 +27,9 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsumpForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
-export default async function IRGenerateConsumption(disabled) {
+
+export default async function IRGenerateConsumption() {
   const { stack } = useWindow()
   const { checkLock } = useRecordLock()
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -103,7 +103,7 @@ export default async function IRGenerateConsumption(disabled) {
       const canOpen = await checkLock({
         resourceId: ResourceIds.WorkCenterConsumptions,
         recordId: res.recordId,
-        disabled: disabled
+        disabled: true
       })
 
       if (!canOpen) return

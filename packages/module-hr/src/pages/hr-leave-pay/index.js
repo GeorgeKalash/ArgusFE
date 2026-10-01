@@ -135,7 +135,7 @@ const LeavePayment = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.LeavePayment,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

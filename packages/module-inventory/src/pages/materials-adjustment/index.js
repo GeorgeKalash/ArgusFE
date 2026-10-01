@@ -140,7 +140,7 @@ const MaterialsAdjustment = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.MaterialsAdjustment,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

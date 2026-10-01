@@ -203,7 +203,7 @@ const PuTrx = () => {
     const canOpen = await checkLock({
       resourceId: getResourceId(parseInt(functionId)),
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

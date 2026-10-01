@@ -146,7 +146,7 @@ const ReturnOnInvoice = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.ReturnOnInvoice,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

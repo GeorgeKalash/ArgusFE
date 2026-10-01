@@ -101,7 +101,7 @@ const PriceListUpdate = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.PriceListUpdates,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

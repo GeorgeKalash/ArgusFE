@@ -144,7 +144,7 @@ const BalanceAdjustment = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.BalanceAdjustment,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

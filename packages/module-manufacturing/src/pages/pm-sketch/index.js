@@ -156,7 +156,7 @@ const Sketch = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.Sketch,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

@@ -143,7 +143,7 @@ const PayList = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.PayrollHeader,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

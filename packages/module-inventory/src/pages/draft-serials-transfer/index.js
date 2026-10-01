@@ -140,7 +140,7 @@ const DraftSerialsTranfer = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.DraftTransfer,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

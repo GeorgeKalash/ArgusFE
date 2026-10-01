@@ -161,7 +161,7 @@ const PMSamples = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.Samples,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

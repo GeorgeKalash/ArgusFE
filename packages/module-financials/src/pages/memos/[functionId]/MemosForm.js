@@ -33,8 +33,8 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
@@ -108,6 +108,22 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       invalidate()
     }
   })
+
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.CreditNote:
+        return ResourceIds.CreditNote
+      case SystemFunction.DebitNote:
+        return ResourceIds.DebitNote
+      case SystemFunction.ServiceBill:
+        return ResourceIds.ServiceBillReceived
+      case SystemFunction.ServiceInvoice:
+        return ResourceIds.ServiceInvoice
+      default:
+        return null
+    }
+  }
+
   const editMode = !!formik.values.recordId || !!recordId
 
   function setBaseAmount(amount) {
@@ -318,21 +334,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       disabled: !editMode || !formik.values.accountId || !formik.values.currencyId
     }
   ]
-
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.CreditNote:
-        return ResourceIds.CreditNote
-      case SystemFunction.DebitNote:
-        return ResourceIds.DebitNote
-      case SystemFunction.ServiceBill:
-        return ResourceIds.ServiceBillReceived
-      case SystemFunction.ServiceInvoice:
-        return ResourceIds.ServiceInvoice
-      default:
-        return null
-    }
-  }
 
   const getResourceMCR = functionId => {
     const fn = Number(functionId)

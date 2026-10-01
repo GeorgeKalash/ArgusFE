@@ -125,7 +125,7 @@ const PUDraftSerialsReturns = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.PUDraftSerialReturns,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

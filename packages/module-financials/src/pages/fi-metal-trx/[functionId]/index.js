@@ -198,9 +198,9 @@ export default function MetalTrxFinancial() {
 
   async function openForm(recordId, disabled) {
     const canOpen = await checkLock({
-      resourceId: getResourceId(parseInt(formik.values.functionId)),
+      resourceId: getResourceId(parseInt(functionId)),
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

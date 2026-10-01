@@ -118,7 +118,7 @@ const Damages = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.DamageReturn,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

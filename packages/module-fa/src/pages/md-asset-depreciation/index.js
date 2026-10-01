@@ -110,7 +110,7 @@ const AssetsDescription = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.Depreciation,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

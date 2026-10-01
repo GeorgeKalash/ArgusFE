@@ -152,7 +152,7 @@ const FiPaymentVouchers = () => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.PaymentVoucherExpenses,
       recordId,
-      disabled: disabled
+      disabled
     })
 
     if (!canOpen) return

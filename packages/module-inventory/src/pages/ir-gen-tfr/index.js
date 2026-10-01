@@ -25,9 +25,9 @@ import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
-export default async function IRGenerateTransfer(disabled) {
+
+export default async function IRGenerateTransfer() {
   const { stack } = useWindow()
   const { checkLock } = useRecordLock()
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -101,7 +101,7 @@ export default async function IRGenerateTransfer(disabled) {
       const canOpen = await checkLock({
         resourceId: ResourceIds.MaterialsTransfer,
         recordId: res?.recordId,
-        disabled: disabled
+        disabled: true
       })
 
       if (!canOpen) return
