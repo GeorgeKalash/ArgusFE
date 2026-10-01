@@ -155,12 +155,12 @@ export default function CastingForm({ store, setStore, access, labels }) {
   const wipWeight = recal ? formik?.values?.inputWgtPurity 
     ? Number(formik?.values?.outputWgt || 0) * Number(formik?.values?.outputWgtPurity || 0) / Number(formik?.values?.inputWgtPurity) : 0 : formik?.values?.wipWeight
 
+  const lossCastingCalc = recal ? (netInputWgt || 0) - (wipWeight || 0) - Number(formik?.values?.lossDisassembly || 0) : Number(formik?.values?.lossCasting) || 0
+
   useEffect(() => {
     if (!recal || !lastEdited) return
 
     const netInput = Number(formik?.values?.inputWgt || 0) + Number(formik?.values?.rmWgt || 0)
-
-    const output = Number(formik?.values?.outputWgt || 0)
     const disassembly = Number(formik?.values?.lossDisassembly || 0)
     let casting = Number(formik?.values?.lossCasting || 0)
 
@@ -168,10 +168,9 @@ export default function CastingForm({ store, setStore, access, labels }) {
 
     switch (lastEdited) {
       case 'outputWgt': {
-        totalLoss = netInput - output
-        casting = totalLoss - disassembly
+        totalLoss = netInput - wipWeight
 
-        formik.setFieldValue('lossCasting', casting)
+        formik.setFieldValue('lossCasting', lossCastingCalc)
         formik.setFieldValue('loss', totalLoss)
         break
       }
@@ -354,7 +353,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
         lossPct: lossPct || 0,
         lossVariationPct: lossVariationPct || 0,
         netInputWgt: netInputWgt || 0,
-        wipWeight: wipWeight
+        wipWeight,
+        lossCasting: lossCastingCalc
       }
     })
     setStore(prevStore => ({
@@ -364,7 +364,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
         loss: Number(loss)
       }
     }))
-  }, [loss, lossPct, lossVariationPct, store?.castingInfo?.scrapWgt, wipWeight])
+  }, [loss, lossPct, lossVariationPct, store?.castingInfo?.scrapWgt, wipWeight, lossCastingCalc])
 
   useEffect(() => {
     refetchForm(recordId)
@@ -467,8 +467,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         formik.setFieldValue('stdLossRate', factorStdLoss?.stdLossRate || 0)
                         formik.setFieldValue('mouldId', newValue?.mouldId || null)
                         formik.setFieldValue('metalId', newValue?.metalId || null)
-                        formik.setFieldValue('inputWgtPurity', metalInfo?.purity || null)
-                        formik.setFieldValue('outputWgtPurity', metalInfo?.purity || null)
+                        formik.setFieldValue('inputWgtPurity', metalInfo?.purity ? metalInfo.purity * 1000 : null)
+                        formik.setFieldValue('outputWgtPurity', metalInfo?.purity ? metalInfo.purity * 1000 : null)
                         formik.setFieldValue('metalColorId', newValue?.metalColorId || null)
                         formik.setFieldValue('lineId', newValue?.lineId || null)
                         formik.setFieldValue('waxRef', newValue?.reference || null)

@@ -14,7 +14,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 
-const PreviewPR2 = ({ onSelect, window }) => {
+const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -52,11 +52,10 @@ const PreviewPR2 = ({ onSelect, window }) => {
       }
 
       const mappedRows = selectedRows.map(row => ({
+        ...row, 
         itemId: row.recordId,
         sku: row.sku,
         itemName: row.name,
-        itemWeight: row.weight,
-        qty: row.qty
       }))
 
       onSelect(mappedRows)
@@ -126,7 +125,7 @@ const PreviewPR2 = ({ onSelect, window }) => {
     {
       component: 'textfield',
       label: labels.weight,
-      name: 'weight',
+      name: 'itemWeight',
       flex: 1,
       props: {
         readOnly: true
@@ -143,18 +142,38 @@ const PreviewPR2 = ({ onSelect, window }) => {
     },
     {
       component: 'numberfield',
-      label: labels.qty,
-      name: 'qty',
+      label: labels.pcs,
+      name: 'pcs',
       flex: 1,
-      props: {
-        decimalScale: 2,
-        allowNegative: false
+      props: { 
+        decimalScale: 2, 
+        allowNegative: false ,
+      },
+      async onChange({ row: { update, newRow } }) {
+        let qty = 0
+
+        qty = newRow.itemWeight ? newRow.pcs * newRow.itemWeight : 0
+        
+        update({
+          qty: qty
+        })
       },
       propsReducer({ row, props }) {
         return {
           ...props,
           readOnly: !row.checked
         }
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.qty,
+      name: 'qty',
+      flex: 1,
+      props: {
+        decimalScale: 2,
+        allowNegative: false,
+        readOnly: true
       }
     }
   ]
@@ -163,16 +182,28 @@ const PreviewPR2 = ({ onSelect, window }) => {
     ;(async function () {
       const res = await getRequest({
         extension: ManufacturingRepository.ProductionRequest.preview2,
-        parameters: ''
+        parameters: `_requestId=${requestId}`
       })
 
       if (res?.list?.length > 0) {
-        const rows = res.list.map((item, index) => ({
-          id: index + 1,
-          checked: false,
-          ...item,
-          createdDate: item?.createdDate ? formatDateFromApi(item?.createdDate) : null,
-        }))
+        const selectedItems = parentFormik.values.items || []
+
+        const selectedItemsMap = new Map(
+          selectedItems.map(item => [item.itemId, item])
+        )
+
+        const rows = res.list.map((item, index) => {
+          const selectedItem = selectedItemsMap.get(item.recordId)
+
+          return {
+            id: index + 1,
+            ...item,
+            checked: !!selectedItem,
+            qty: selectedItem ? selectedItem.qty : item.qty,
+            createdDate: item?.createdDate ? formatDateFromApi(item?.createdDate) : null
+          }
+        })
+
         formik.setValues({ rows })
       }
     })()
@@ -187,6 +218,7 @@ const PreviewPR2 = ({ onSelect, window }) => {
             value={formik.values.rows}
             error={formik.errors.rows}
             columns={columns}
+            enableFilters={true}
             allowDelete={false}
             allowAddNewLine={false}
             maxAccess={maxAccess}/>
