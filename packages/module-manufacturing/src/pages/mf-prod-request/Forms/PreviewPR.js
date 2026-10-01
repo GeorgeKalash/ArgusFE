@@ -13,7 +13,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
-const PreviewPR = ({ plantId, onSelect, window }) => {
+const PreviewPR = ({ requestId, plantGroupId, parentFormik, onSelect, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -88,6 +88,15 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
       }
     },
     {
+      component: 'numberfield',
+      label: labels.weight,
+      name: 'itemWeight',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
       component: 'textfield',
       label: labels.metalRef,
       name: 'metalRef',
@@ -143,18 +152,38 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
     },
     {
       component: 'numberfield',
-      label: labels.qty,
-      name: 'qty',
+      label: labels.pcs,
+      name: 'pcs',
       flex: 1,
       props: { 
         decimalScale: 2, 
-        allowNegative: false 
+        allowNegative: false ,
+      },
+      async onChange({ row: { update, newRow } }) {
+        let qty = 0
+
+        qty = newRow.itemWeight ? newRow.pcs * newRow.itemWeight : 0
+        
+        update({
+          qty: qty
+        })
       },
       propsReducer({ row, props }) {
         return {
           ...props,
           readOnly: !row.checked
         }
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.qty,
+      name: 'qty',
+      flex: 1,
+      props: { 
+        decimalScale: 2, 
+        allowNegative: false,
+        readOnly: true
       }
     }
   ]
@@ -163,15 +192,27 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
     ;(async function () {
       const res = await getRequest({
         extension: ManufacturingRepository.ProductionRequest.preview,
-        parameters: `_plantId=${plantId}`
+        parameters: `_requestId=${requestId}&_plantGroupId=${plantGroupId}`
       })
 
       if (res?.list?.length > 0) {
-        const rows = res.list.map((item, index) => ({
-          id: index + 1,
-          checked: false,
-          ...item
-        }))
+        const selectedItems = parentFormik.values.items || []
+
+        const selectedItemsMap = new Map(
+          selectedItems.map(item => [item.itemId, item])
+        )
+
+        const rows = res.list.map((item, index) => {
+          const selectedItem = selectedItemsMap.get(item.itemId)
+
+          return {
+            id: index + 1,
+            ...item,
+            checked: !!selectedItem,
+            qty: selectedItem ? selectedItem.qty : item.qty
+          }
+        })
+
         formik.setValues({ rows })
       }
     })()
@@ -188,6 +229,7 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
             columns={columns}
             allowDelete={false}
             allowAddNewLine={false}
+            enableFilters={true}
             maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
