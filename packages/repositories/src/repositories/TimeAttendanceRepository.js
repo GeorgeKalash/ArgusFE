@@ -99,5 +99,9 @@ export const TimeAttendanceRepository = {
   },
   FlatPunch: {
     qry: service + 'qryFP'
+  },
+  CalendarDay: {
+    qry3: service + 'qryCD3',
+    set2: service + 'set2CD'
   }
 }
