@@ -67,7 +67,7 @@ const SalesQuotations = () => {
       flex: 1
     },
     {
-      field: 'leadName',
+      field: 'bpName',
       headerName: labels.lead,
       flex: 1
     },
