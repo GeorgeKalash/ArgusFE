@@ -35,8 +35,8 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ImportTransfer from '@argus/shared-ui/src/components/Shared/Forms/ImportTransfer'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)

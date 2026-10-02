@@ -167,7 +167,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
-  const { releaseLock } = useRecordLock({
+  useRecordLock({
     recordId: recordId,
     reference: formik?.values?.reference,
     resourceId: ResourceIds.MaterialsAdjustment,

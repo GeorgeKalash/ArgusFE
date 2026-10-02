@@ -27,7 +27,7 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
-export default async function IRGenerateTransfer() {
+export default function IRGenerateTransfer() {
   const { stack } = useWindow()
   const { checkLock } = useRecordLock()
   const { getRequest, postRequest } = useContext(RequestsContext)

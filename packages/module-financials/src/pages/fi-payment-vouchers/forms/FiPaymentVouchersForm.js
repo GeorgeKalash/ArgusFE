@@ -211,7 +211,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
 
   const { releaseLock } = useRecordLock({
     recordId: recordId,
-    reference: formik?.values?.header?.reference,
+    reference: formik?.values?.reference,
     resourceId: ResourceIds.PaymentVouchers,
     enabled: !!recordId && !(isPosted || isCancelled)
   })

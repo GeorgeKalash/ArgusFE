@@ -141,7 +141,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
   const { releaseLock } = useRecordLock({
     recordId: recordId,
-    reference: formik?.values?.header?.reference,
+    reference: formik?.values?.reference,
     resourceId: ResourceIds.Assemblies,
     enabled: !!recordId && !isPosted
   })

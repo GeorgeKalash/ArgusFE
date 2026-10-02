@@ -27,8 +27,8 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { useError } from '@argus/shared-providers/src/providers/error'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export default function JTCheckoutForm({ recordId, window, refetch }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -173,7 +173,7 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
 
   const { releaseLock } = useRecordLock({
     recordId: recordId,
-    reference: formik?.values?.reference,
+    reference: formik?.values?.transfer.reference,
     resourceId: ResourceIds.JTCheckOut,
     enabled: !!recordId && !isClosed
   })

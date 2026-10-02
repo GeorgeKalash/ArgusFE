@@ -29,7 +29,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
-export default async function IRGenerateConsumption() {
+export default function IRGenerateConsumption() {
   const { stack } = useWindow()
   const { checkLock } = useRecordLock()
   const { getRequest, postRequest } = useContext(RequestsContext)

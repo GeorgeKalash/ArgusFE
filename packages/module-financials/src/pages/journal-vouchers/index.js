@@ -98,7 +98,7 @@ const JournalVoucher = () => {
     },
   ]
 
-  const openForm = async recordId => {
+  const openForm = async (recordId, disabled) => {
     const canOpen = await checkLock({
       resourceId: ResourceIds.JournalVoucher,
       recordId,
@@ -130,7 +130,7 @@ const JournalVoucher = () => {
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj.recordId, obj.status == 3)
   }
 
   const del = async obj => {
