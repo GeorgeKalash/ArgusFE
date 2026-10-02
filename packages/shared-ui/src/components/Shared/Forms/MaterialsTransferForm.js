@@ -573,8 +573,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       props: {
         onCondition: row => {
           return {
-            decimalScale: row?.decimals,
-            readOnly: isClosed
+            decimalScale: row?.decimals
           }
         }
       },
