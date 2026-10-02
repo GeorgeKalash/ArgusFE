@@ -287,6 +287,15 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -347,6 +356,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
           rowTaxDetails = details
         }
 
+        const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
         const filteredMU = measurements?.filter(item => item.msId === itemInfo?.msId)
         getFilteredMU(newRow?.itemId, itemInfo?.msId)
 
@@ -365,6 +375,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
           msId: itemInfo?.msId,
           muRef: filteredMU?.[0]?.reference,
           muId: filteredMU?.[0]?.recordId,
+          decimals: measurementSchedule?.decimals,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
@@ -418,7 +429,14 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
-      onChange({ row: { update, newRow } }) {
+      props: {
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
+      },
+      async onChange({ row: { update, newRow } }) {
         getFilteredMU(newRow?.itemId, newRow?.msId)
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
@@ -979,7 +997,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? roundTo(itemPriceRow?.qty, 2) : 0,
+      qty: itemPriceRow?.qty ? roundTo(itemPriceRow?.qty, newRow?.decimals || 2) : 0,
       volume: itemPriceRow?.volume ? roundTo(itemPriceRow.volume, 2) : 0,
       weight: roundTo(itemPriceRow?.weight, 2),
       basePrice: itemPriceRow?.basePrice ? roundTo(itemPriceRow.basePrice, 5) : 0,

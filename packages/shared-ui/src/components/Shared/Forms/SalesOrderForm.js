@@ -327,6 +327,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return res?.record?.onhand || 0
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -371,6 +380,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+        const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update, defaultMu?.recordId || 0)
         let rowTax = null
@@ -415,6 +425,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           muRef: defaultMu?.reference || '',
           muId: defaultMu?.recordId || null,
           muQty: defaultMu?.qty || 0,
+          decimals: measurementSchedule?.decimals,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
@@ -519,7 +530,11 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 2
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         getFilteredMU(newRow?.itemId, newRow?.msId)

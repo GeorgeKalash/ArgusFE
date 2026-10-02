@@ -419,6 +419,15 @@ export default function ShipmentsForm({ recordId, window }) {
     })
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   async function getFilteredMU(itemId, msId) {
     if (!itemId) return
 
@@ -435,7 +444,6 @@ export default function ShipmentsForm({ recordId, window }) {
         store: unpostedOrders?.current?.orders,
         displayField: 'reference',
         valueField: 'reference',
-        readOnly: isPosted,
         mapping: [
           { from: 'poId', to: 'poId' },
           { from: 'reference', to: 'poRef' }
@@ -511,7 +519,9 @@ export default function ShipmentsForm({ recordId, window }) {
         //lot store
 
         getFilteredMU(newRow?.itemId, newRow?.msId)
+        const measurementSchedule = await getMeasurementObject(newRow?.msId)
         update({
+          decimals: measurementSchedule?.decimals,
           muRef: filteredMeasurements?.current?.[0]?.reference || null,
           muId: filteredMeasurements?.current?.[0]?.recordId || null,
           muQty: filteredMeasurements?.current?.[0]?.qty || 0,
@@ -532,7 +542,6 @@ export default function ShipmentsForm({ recordId, window }) {
       label: labels.MU,
       name: 'muRef',
       props: {
-        readOnly: isPosted,
         store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
@@ -570,7 +579,11 @@ export default function ShipmentsForm({ recordId, window }) {
       label: labels.qty,
       name: 'shippedNowQty',
       props: {
-        readOnly: isPosted
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
       },
       updateOn: 'blur',
       async onChange({ row: { update, oldRow, newRow } }) {
@@ -603,7 +616,6 @@ export default function ShipmentsForm({ recordId, window }) {
         endpointId: InventoryRepository.Site.qry,
         displayField: 'name',
         valueField: 'recordId',
-        readOnly: isPosted,
         mapping: [
           { from: 'recordId', to: 'siteId' },
           { from: 'reference', to: 'siteRef' },
