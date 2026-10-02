@@ -31,6 +31,7 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export const LeaveForm = ({ recordId, resourceId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -156,6 +157,13 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
   }
 
   const isClosed = formik.values.wip == 2
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: resourceId,
+    enabled: !!recordId && !isClosed
+  })
   const isReleased = formik.values.status == 4
   const isPosted = formik.values.status === 3
 
@@ -227,6 +235,7 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
   }

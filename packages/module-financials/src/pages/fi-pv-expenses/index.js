@@ -16,11 +16,13 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
@@ -143,10 +145,18 @@ const FiPaymentVouchers = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3 || obj?.status == -1)
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.PaymentVoucherExpenses,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: FiPaymentVoucherExpensesForm,
       props: {

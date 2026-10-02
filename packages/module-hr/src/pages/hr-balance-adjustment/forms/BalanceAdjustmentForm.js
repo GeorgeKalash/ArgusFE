@@ -23,6 +23,7 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function BalanceAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -103,6 +104,13 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
   const editMode = !!formik.values.recordId
   const isPosted = formik?.values?.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.BalanceAdjustment,
+    enabled: !!recordId && !isPosted
+  })
+
   useEffect(() => {
     recordId && refetchForm(recordId)
   }, [])
@@ -125,6 +133,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId, window
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }

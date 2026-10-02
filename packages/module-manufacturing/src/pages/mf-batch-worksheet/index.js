@@ -15,10 +15,12 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import BatchWorksheetWindow from './Windows/BatchWorksheetWindow'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const MfBatchWorksheet = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -102,7 +104,15 @@ const MfBatchWorksheet = () => {
     await proxyAction()
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.BatchWorksheet,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: BatchWorksheetWindow,
       props: {
@@ -116,7 +126,7 @@ const MfBatchWorksheet = () => {
   }
 
   const onEdit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
   return (

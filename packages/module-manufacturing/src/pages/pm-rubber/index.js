@@ -15,9 +15,11 @@ import RubberForm from './Forms/RubberForm'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const Rubber = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   const { platformLabels } = useContext(ControlContext)
 
   const {
@@ -142,7 +144,15 @@ const Rubber = () => {
     await proxyAction()
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.Rubber,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: RubberForm,
       props: {
@@ -157,7 +167,7 @@ const Rubber = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 4 || obj?.status == 3)
   }
 
   return (

@@ -32,6 +32,7 @@ import LotForm from './LotForm'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function AssemblyForm({ labels, maxAccess: access, store, setStore, totalOverhead }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -137,6 +138,13 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
   const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.Assemblies,
+    enabled: !!recordId && !isPosted
+  })
 
   const totalCost = roundTo(formik.values.items
     .reduce((currentCost, row) => {
@@ -496,6 +504,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       record: JSON.stringify(formik.values)
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     await refetchForm(formik.values.recordId)
     setStore(prevStore => ({

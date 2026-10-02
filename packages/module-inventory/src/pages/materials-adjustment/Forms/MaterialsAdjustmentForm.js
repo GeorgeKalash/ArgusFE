@@ -30,6 +30,7 @@ import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function MaterialsAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -165,6 +166,13 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
+
+  useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.MaterialsAdjustment,
+    enabled: !!recordId && !isPosted
+  })
   const rowsUpdate = useRef(formik?.values?.rows)
 
   const { totalQty, totalCost, totalWeight } = formik?.values?.rows?.reduce(

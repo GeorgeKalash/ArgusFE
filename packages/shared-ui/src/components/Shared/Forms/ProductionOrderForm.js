@@ -33,6 +33,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ProductionOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -141,6 +142,13 @@ export default function ProductionOrderForm({ recordId, window }) {
   const isPosted = formik.values.status === 3
   const isClosed = formik.values.wip === 2
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.ProductionOrder,
+    enabled: !!recordId && !(isPosted || isClosed)
+  })
+
   const totalQty = formik.values?.rows
     ?.reduce((qtySum, row) => {
       const qtyValue = row.qty || 0
@@ -162,6 +170,7 @@ export default function ProductionOrderForm({ recordId, window }) {
       })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }

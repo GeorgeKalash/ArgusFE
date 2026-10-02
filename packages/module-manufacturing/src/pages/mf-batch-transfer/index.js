@@ -15,10 +15,12 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import BatchTransferForm from './Forms/BatchTransferForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const BatchTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -111,10 +113,18 @@ const BatchTransfer = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.BatchTransfer,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: BatchTransferForm,
       props: {

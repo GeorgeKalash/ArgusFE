@@ -26,6 +26,7 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import { useError } from '@argus/shared-providers/src/providers/error'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ProductionSummaryForm({ recordId, labels, access, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -156,6 +157,13 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.header.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.ProductionSummary,
+    enabled: !!recordId && !isPosted
+  })
+
   const isGridEmpty = !formik.values.items?.some(item => item.itemId)
 
   async function refetchForm(summaryId) {
@@ -186,6 +194,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       record: JSON.stringify({ recordId: formik.values.recordId })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }

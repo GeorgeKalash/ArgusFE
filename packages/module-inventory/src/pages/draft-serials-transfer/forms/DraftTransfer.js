@@ -31,6 +31,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialsTransferForm'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function DraftTransfer({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -195,6 +196,13 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values?.header?.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.DraftTransfer,
+    enabled: !!recordId && !isPosted
+  })
 
   const autoDelete = async row => {
     if (!row?.draftTransferId) return true
@@ -389,6 +397,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
 

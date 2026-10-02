@@ -16,11 +16,13 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const ProductionSheet = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -98,7 +100,7 @@ const ProductionSheet = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj)
   }
 
   const getPlantId = async () => {
@@ -121,12 +123,20 @@ const ProductionSheet = () => {
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
-  function OpenProductionSheetForm(plantId, recordId) {
+  async function OpenProductionSheetForm(plantId, obj) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.ProductionSheet,
+      recordId: obj?.recordId,
+      disabled: obj?.status == 3
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: ProductionSheetForm,
       props: {
         labels: _labels,
-        recordId,
+        recordId: obj?.recordId,
         plantId,
         maxAccess: access
       },
@@ -136,10 +146,10 @@ const ProductionSheet = () => {
     })
   }
 
-  async function openForm(recordId) {
+  async function openForm(obj) {
     const plantId = await getPlantId()
 
-    OpenProductionSheetForm(plantId, recordId)
+    OpenProductionSheetForm(plantId, obj)
   }
 
   const del = async obj => {

@@ -26,6 +26,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ProductionSheetQueue from './ProductionSheetQueue'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ProductionSheetForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -144,6 +145,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
 
     const res2 = await getData(res?.recordId)
@@ -165,6 +167,13 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.ProductionSheet,
+    enabled: !!recordId && !isPosted
+  })
 
   const onUnpost = async () => {
     const copy = { ...formik.values }

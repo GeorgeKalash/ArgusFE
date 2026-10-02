@@ -27,6 +27,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function CastingForm({ store, setStore, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -127,6 +128,13 @@ export default function CastingForm({ store, setStore, access, labels }) {
   const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.FoCastings,
+    enabled: !!recordId && !(isCancelled || isPosted)
+  })
 
   const netInputWgt = roundTo(
     recal
@@ -282,6 +290,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
       })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     refetchForm(formik.values.recordId)
   }

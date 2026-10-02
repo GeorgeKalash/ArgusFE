@@ -40,6 +40,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/PurchaseTransactionForm'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function PUDraftReturnForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -262,6 +263,13 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.header?.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.PUDraftSerialReturns,
+    enabled: !!recordId && !isPosted
+  })
 
   const FilteredListByTaxId = (store, taxId) => {
     if (Array.isArray(store)) {
@@ -580,6 +588,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
       })
     }).then(async res => {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       window.close();
       invalidate()
       openPurchaseReturn(res?.recordId)

@@ -23,6 +23,7 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function PriceListUpdateForm({ labels, maxAccess: access, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -80,6 +81,13 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.PriceListUpdates,
+    enabled: !!recordId && !isPosted
+  })
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -130,6 +138,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
 
     if (res) {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       invalidate()
       await getData(formik.values.recordId)
     }

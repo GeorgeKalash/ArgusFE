@@ -25,6 +25,7 @@ import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function LeavePaymentForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -146,6 +147,13 @@ export default function LeavePaymentForm({ labels, maxAccess: access, recordId }
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.LeavePayment,
+    enabled: !!recordId && !isPosted
+  })
+
   const onPost = async () => {
     const res = await postRequest({
       extension: PayrollRepository.LeavePayment.post,
@@ -154,6 +162,7 @@ export default function LeavePaymentForm({ labels, maxAccess: access, recordId }
 
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       invalidate()
       fetchRecord(res.recordId)
     }

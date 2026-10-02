@@ -29,6 +29,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
   const { platformLabels } = useContext(ControlContext)
   const { userDefaults, systemDefaults } = useContext(DefaultsContext)
@@ -130,6 +131,13 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   const editMode = !!formik.values?.recordId
   const isPosted = formik?.values?.header?.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.BatchTransfer,
+    enabled: !!recordId && !isPosted
+  })
+
   async function onChangeDT(dtId) {
     if (dtId) {
       const res = await getRequest({
@@ -148,6 +156,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     refetchForm(formik.values.recordId)
   }

@@ -71,6 +71,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ChangeVendor from '@argus/shared-ui/src/components/Shared/ChangeVendor'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function PurchaseTransactionForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -385,6 +386,13 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
 
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: getResourceId(parseInt(functionId)),
+    enabled: !!recordId && !isPosted
+  })
 
   const iconKey = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
@@ -916,6 +924,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     await refetchForm(formik.values.recordId)
     invalidate()
     window.close()
