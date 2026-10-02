@@ -370,7 +370,11 @@ export default function PurchaseOrderForm({ recordId, window }) {
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 3
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -809,6 +813,15 @@ export default function PurchaseOrderForm({ recordId, window }) {
     })
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   async function fillVendorData(object) {
     const currenctTdType = object?.tradeDiscount ? DIRTYFIELD_TDPCT : formik.values.header.tdType
     if (currenctTdType == DIRTYFIELD_TDPCT) setCycleButtonState({ text: '%', value: 2 })
@@ -911,6 +924,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
     }
 
     const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+    const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
     return {
       sku: itemInfo?.sku || '',
@@ -928,6 +942,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       priceType: itemInfo?.priceType || 1,
       qty: 0,
       msId: itemInfo?.msId,
+      decimals: measurementSchedule?.decimals,
       muRef: filteredMeasurements?.[0]?.reference,
       muId: filteredMeasurements?.[0]?.recordId,
       muQty: filteredMeasurements?.[0]?.qty,
