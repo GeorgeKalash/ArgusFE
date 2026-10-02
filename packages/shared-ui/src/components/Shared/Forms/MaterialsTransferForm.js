@@ -360,6 +360,15 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const fillSkuData = async (newRow, update, addRow) => {
     const itemIdValue = formik.values.disableSKULookup ? newRow?.recordId : newRow?.itemId
     const itemNameValue = formik.values.disableSKULookup ? newRow?.name : newRow?.itemName
@@ -371,6 +380,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       const itemInfo = await getItem(itemIdValue)
       getFilteredMU(itemIdValue)
       const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+      const measurementSchedule = await getMeasurementObject(newRow?.msId)
 
       const data = {
         qty: jumpToNextLine ? 1 : 0,
@@ -382,6 +392,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         totalCost,
         msId: itemInfo?.msId,
         caName: itemInfo?.categoryName,
+        decimals: measurementSchedule?.decimals,
         muRef: filteredMeasurements?.[0]?.reference,
         muId: filteredMeasurements?.[0]?.recordId,
         muQty: filteredMeasurements?.[0]?.qty,
@@ -560,7 +571,12 @@ export default function MaterialsTransferForm({ recordId, window }) {
       label: labels.qty,
       name: 'qty',
       props: {
-        readOnly: isClosed
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals,
+            readOnly: isClosed
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
