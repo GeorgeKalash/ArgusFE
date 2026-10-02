@@ -87,16 +87,16 @@ const GeneratePurchaseInvoice = () => {
 
       if (res.recordId) {
         toast.success(platformLabels.Generated)
-        await openForm(res.recordId, res?.status == 3)
+        await openForm(res.recordId)
       }
     }
   })
 
-  async function openForm(recordId, disabled) {
+  async function openForm(recordId) {
     const canOpen = await checkLock({
       resourceId: ResourceIds.PurchaseInvoice,
       recordId,
-      disabled
+      disabled: true
     })
 
     if (!canOpen) return
