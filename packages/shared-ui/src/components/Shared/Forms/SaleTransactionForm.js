@@ -93,7 +93,7 @@ export default function SaleTransactionForm({
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
   const [taxDetails, setTaxDetails] = useState([])
   const [store, setStore] = useState({
     documentTypes: [],
@@ -623,13 +623,14 @@ export default function SaleTransactionForm({
       name: 'barcode',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        delete muStoreByRowRef.current[newRow.id]
+
         if (!newRow?.barcode) return
 
         const ItemConvertPrice = await getItemConvertPrice2(newRow)
         if (ItemConvertPrice) {
           const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
           const itemInfo = await getItem(ItemConvertPrice?.itemId)
-          getFilteredMU(itemInfo?.itemId, itemInfo?.msId)
 
           const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
           await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true, defaultMu)
@@ -664,10 +665,11 @@ export default function SaleTransactionForm({
         displayFieldWidth: 5
       },
       async onChange({ row: { update, newRow } }) {
+        delete muStoreByRowRef.current[newRow.id]
+
         if (!newRow.itemId) return
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        getFilteredMU(newRow?.itemId, newRow?.msId)
 
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
 
@@ -729,9 +731,6 @@ export default function SaleTransactionForm({
       label: labels.measurementUnit,
       name: 'muRef',
       props: {
-        endpointId: InventoryRepository.Measurement.qry,
-        parameters: '_name=',
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -746,7 +745,8 @@ export default function SaleTransactionForm({
         }
 
         const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const muList = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.msId)
+        const filteredItems = muList.filter(item => item.recordId === newRow?.muId)
         const qtyInBase = newRow?.qty * filteredItems?.muQty
 
         const unitPrice =
@@ -781,7 +781,17 @@ export default function SaleTransactionForm({
         update(data)
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.msId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
@@ -1285,6 +1295,7 @@ export default function SaleTransactionForm({
   }
 
   async function fillForm(saTrxPack, dtInfo) {
+    muStoreByRowRef.current = {}
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
     const saTrxTaxes = saTrxPack?.taxes || []
@@ -1688,11 +1699,10 @@ export default function SaleTransactionForm({
     return itemPriceRow?.totalWeightPerG ? roundTo(itemPriceRow.totalWeightPerG) : 0
   }
 
-  async function getFilteredMU(itemId, msId) {
-    if (!itemId) return
+  function getFilteredMU(msId) {
+    if (!msId) return []
 
-    const arrayMU = measurements?.filter(item => item.msId === msId) || []
-    filteredMeasurements.current = arrayMU
+    return measurements?.filter(item => item.msId === msId) || []
   }
 
   const parsedItemsArray = formik.values.items
@@ -2428,9 +2438,6 @@ export default function SaleTransactionForm({
             value={formik.values.items}
             error={formik.errors.items}
             initialValues={initialValues?.items[0]}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
-            }}
             name='items'
             showCounterColumn={true}
             columns={columns}

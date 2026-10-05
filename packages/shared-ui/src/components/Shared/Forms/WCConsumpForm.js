@@ -35,7 +35,7 @@ export default function WCConsumpForm({ recordId, window }) {
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
   const { stack: stackError } = useError()
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
@@ -167,11 +167,10 @@ export default function WCConsumpForm({ recordId, window }) {
     })
   }
 
-  async function getFilteredMU(itemId, msId) {
-    if (!itemId) return
+  function getFilteredMU(msId) {
+    if (!msId) return
 
-    const arrayMU = measurements?.filter(item => item.msId == msId) || []
-    filteredMeasurements.current = arrayMU
+    return measurements?.filter(item => item.msId == msId) || []
   }
 
   const getHeaderData = async recordId => {
@@ -252,6 +251,7 @@ export default function WCConsumpForm({ recordId, window }) {
   }
 
   async function refetchForm(recordId) {
+    muStoreByRowRef.current = {}
     const header = await getHeaderData(recordId)
     const items = await getItems(recordId)
 
@@ -310,8 +310,8 @@ export default function WCConsumpForm({ recordId, window }) {
         ]
       },
       async onChange({ row: { update, newRow } }) {
+        delete muStoreByRowRef.current[newRow.id]
         if (!newRow?.itemId) {
-          filteredMeasurements.current = []
           update({
             muRef: null,
             muId: null,
@@ -336,14 +336,15 @@ export default function WCConsumpForm({ recordId, window }) {
           return
         }
         if (newRow?.itemId) {
-          getFilteredMU(newRow?.itemId, newRow.msId)
           const currentCost = newRow?.itemId ? await getCost(newRow?.itemId) : 0
+          const filteredMUs = getFilteredMU(newRow?.msId)
+          
           update({
             unitCost: currentCost || 0,
-            muRef: filteredMeasurements?.current?.[0]?.reference || null,
-            muId: filteredMeasurements?.current?.[0]?.recordId || null,
-            muQty: filteredMeasurements?.current?.[0]?.qty || 0,
-            baseQty: filteredMeasurements?.current?.[0]?.qty || newRow?.qty,
+            muRef: filteredMUs?.[0]?.reference || null,
+            muId: filteredMUs?.[0]?.recordId || null,
+            muQty: filteredMUs?.[0]?.qty || 0,
+            baseQty: filteredMUs?.[0]?.qty || newRow?.qty,
             qty: newRow?.qty || 0
           })
         }
@@ -363,7 +364,6 @@ export default function WCConsumpForm({ recordId, window }) {
       label: labels.MU,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         readOnly: isClosed,
@@ -373,6 +373,19 @@ export default function WCConsumpForm({ recordId, window }) {
           { from: 'qty', to: 'muQty' },
           { from: 'recordId', to: 'muId' }
         ]
+      },
+      propsReducer({ row, props }) {
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.msId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       },
       async onChange({ row: { update, newRow } }) {
         setReCal(true)
@@ -386,9 +399,6 @@ export default function WCConsumpForm({ recordId, window }) {
               })
         }
       },
-      propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
-      }
     },
     {
       component: 'numberfield',
@@ -675,9 +685,6 @@ export default function WCConsumpForm({ recordId, window }) {
               if (action === 'delete') {
                 setReCal(true)
               }
-            }}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik.values.items}
             error={formik.errors.items}

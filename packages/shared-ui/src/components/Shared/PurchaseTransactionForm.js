@@ -78,7 +78,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [measurements, setMeasurements] = useState([])
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
   const [initialPromotionType, setInitialPromotionType] = useState()
   const [metalPriceVisibility, setmetalPriceVisibility] = useState(false)
   const [defaultsDataState, setDefaultsDataState] = useState(null)
@@ -404,13 +404,10 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     })
   }
 
-  async function getFilteredMU(itemId) {
-    if (!itemId) return
-
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
-    filteredMeasurements.current = arrayMU
+  function getFilteredMU(msId) {
+    if (!msId) return
+    
+    return measurements?.filter(item => item.msId === msId) || []
   }
 
   async function fillSkuData(update, addRow, newRow) {
@@ -556,7 +553,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       label: labels.mu,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -567,8 +563,9 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
-          const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
-          const qtyInBase = filteredItems[0]?.muQty ? newRow?.qty * filteredItems[0]?.muQty : newRow?.qty
+          const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.msId)
+          const filteredItems = store.filter(item => item.recordId === newRow?.muId)
+          const qtyInBase = filteredItems?.muQty ? newRow?.qty * filteredItems?.muQty : newRow?.qty
 
           update({
             baseQty: qtyInBase,
@@ -577,7 +574,17 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
         }
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.msId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
@@ -1083,6 +1090,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   ]
 
   async function fillForm(puTrxPack) {
+    muStoreByRowRef.current = {}
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
     const puTrxTaxes = puTrxPack?.taxCodes
@@ -1319,7 +1327,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
         : ''
       : itemInfo.taxName ?? ''
 
-    const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+    const filteredMUs = getFilteredMU(itemInfo?.msId)
     const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
     const updatedRowValues = {
@@ -1340,9 +1348,9 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       priceType: itemInfo?.priceType || 1,
       qty: jumpToNextLine ? 1 : 0,
       msId: itemInfo?.msId,
-      muRef: filteredMeasurements?.[0]?.reference,
-      muId: filteredMeasurements?.[0]?.recordId,
-      muQty: filteredMeasurements?.[0]?.qty,
+      muRef: filteredMUs?.[0]?.reference,
+      muId: filteredMUs?.[0]?.recordId,
+      muQty: filteredMUs?.[0]?.qty,
       mdAmount: formik.values.header.maxDiscount ? formik.values.header.maxDiscount : 0,
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
@@ -1353,6 +1361,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       taxDetails: null,
       isVatable: Boolean(effectiveTaxId)
     }
+    delete muStoreByRowRef.current[newRow.id]
     let data = getItemPriceRow(updatedRowValues, DIRTYFIELD_QTY)
 
     const dirtyField = isValidPrice(updatedRowValues.baseLaborPrice)
@@ -2233,9 +2242,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
               itemsUpdate.current = value
 
               action === 'delete' && setReCal(true)
-            }}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             initialValues={initialValues.items[0]}
             value={formik?.values?.items}

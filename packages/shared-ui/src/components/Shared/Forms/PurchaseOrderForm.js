@@ -67,7 +67,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [measurements, setMeasurements] = useState([])
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
   const [reCal, setReCal] = useState(false)
   const functionId = SystemFunction.PurchaseOrder
   const { stack: stackError } = useError()
@@ -262,11 +262,10 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
   const editMode = !!formik.values.header.recordId
 
-  async function getFilteredMU(itemId, msId) {
-    if (!itemId) return
+  function getFilteredMU(msId) {
+    if (!msId) return []
 
-    const arrayMU = measurements?.filter(item => item.msId === msId) || []
-    filteredMeasurements.current = arrayMU
+    return measurements?.filter(item => item.msId === msId) || []
   }
 
   const iconKey = ({ value, data }) => {
@@ -303,6 +302,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
         minChars: 2
       },
       async onChange({ row: { update, newRow } }) {
+        delete muStoreByRowRef.current[newRow.id]
+
         if (!newRow?.itemId) {
           update({
             enabled: false
@@ -321,7 +322,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
           return
         }
-        getFilteredMU(newRow?.itemId, newRow?.msId)
         const data = await getDataRow(newRow.itemId)
         update(data)
       }
@@ -340,7 +340,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
       label: labels.mu,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -351,7 +350,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
-          const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+          const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.msId)
+          const filteredItems = store.filter(item => item.recordId === newRow?.muId)
           const qtyInBase = filteredItems?.muQty ? newRow?.qty * filteredItems?.muQty : newRow?.qty
 
           update({
@@ -360,8 +360,18 @@ export default function PurchaseOrderForm({ recordId, window }) {
           })
         }
       },
-      propsReducer({ props }) {
-        return { ...props, store: filteredMeasurements?.current }
+      propsReducer({ row, props }) {
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.msId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
@@ -747,6 +757,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
   ]
 
   async function fillForm(puTrxPack) {
+    muStoreByRowRef.current = {}
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
 
@@ -1594,9 +1605,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
-            }}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik?.values?.items}
             initialValues={initialValues.items[0]}

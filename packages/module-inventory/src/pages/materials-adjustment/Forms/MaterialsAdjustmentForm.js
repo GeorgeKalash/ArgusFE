@@ -36,8 +36,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   const { userDefaults, systemChecks } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
   const [measurements, setMeasurements] = useState([])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -270,11 +269,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     return res?.record?.currentCost
   }
 
-  async function getFilteredMU(itemId, msId) {
-    if (!itemId) return
+  function getFilteredMU(msId) {
+    if (!msId) return
 
-    const arrayMU = measurements?.filter(item => item.msId === msId) || []
-    filteredMeasurements.current = arrayMU
+    return measurements?.filter(item => item.msId === msId) || []
   }
 
   const getMeasurementUnits = async () => {
@@ -333,8 +331,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       const unitCost = (await getUnitCost(itemIdValue)) ?? 0
       const totalCost = calcTotalCost(newRow)
       const itemInfo = await getItem(itemIdValue)
-      await getFilteredMU(itemIdValue, newRow?.msId)
-      const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+      const filteredMUs = getFilteredMU(itemInfo?.msId)
       const measurementSchedule = await getMeasurementObject(newRow?.msId)
 
       let data = {
@@ -348,14 +345,14 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         msId: itemInfo?.msId,
         categoryName: itemInfo?.categoryName,
         decimals: measurementSchedule?.decimals,
-        muRef: filteredMeasurements?.[0]?.reference,
-        muId: filteredMeasurements?.[0]?.recordId,
-        muQty: filteredMeasurements?.[0]?.qty,
+        muRef: filteredMUs?.[0]?.reference,
+        muId: filteredMUs?.[0]?.recordId,
+        muQty: filteredMUs?.[0]?.qty,
         metalId: metalId || null,
         metalRef: metalRef || null,
         priceType: newRow?.priceType
       }
-
+      delete muStoreByRowRef.current[newRow.id]
       update(data)
       if (jumpToNextLine) await addRow({ changes: null })
     }
@@ -480,7 +477,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       label: labels.muId,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -490,8 +486,9 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
-        const qtyInBase = filteredItems[0]?.qty ? newRow?.qty * filteredItems[0]?.qty : newRow?.qty
+        const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.msId)
+        const selected = store.find(item => item.recordId === newRow?.muId)
+        const qtyInBase = selected?.qty ? newRow?.qty * selected.qty : newRow?.qty
 
         update({
           qtyInBase: roundTo(qtyInBase, 3),
@@ -499,7 +496,17 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         })
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.msId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
@@ -617,6 +624,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   }
 
   async function refetchForm(recordId) {
+    muStoreByRowRef.current = {}
     const res = await getRequest({
       extension: InventoryRepository.MaterialsAdjustment.get,
       parameters: `_recordId=${recordId}`
@@ -913,9 +921,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             error={formik.errors.rows}
             name='rows'
             maxAccess={maxAccess}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
-            }}
             initialValues={initialValues?.rows[0]}
             enableFilters
             showCounterColumn={true}

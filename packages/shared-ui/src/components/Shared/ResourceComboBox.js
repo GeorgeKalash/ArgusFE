@@ -5,6 +5,32 @@ import { CommonContext } from '@argus/shared-providers/src/providers/CommonConte
 import { useCacheDataContext } from '@argus/shared-providers/src/providers/CacheDataContext'
 import { useCacheStoreContext } from '@argus/shared-providers/src/providers/CacheStoreContext'
 
+  const refreshListeners = new Map()
+
+  function subscribeRefresh(key, callback) {
+    if (!refreshListeners.has(key)) {
+      refreshListeners.set(key, new Set())
+    }
+
+    const listeners = refreshListeners.get(key)
+    listeners.add(callback)
+
+    return () => {
+      listeners.delete(callback)
+
+      if (!listeners.size) {
+        refreshListeners.delete(key)
+      }
+    }
+  }
+
+  function publishRefresh(key, list) {
+    const listeners = refreshListeners.get(key)
+    if (!listeners) return
+
+    listeners.forEach(callback => callback(list))
+  }
+
 export default function ResourceComboBox({
   endpointId,
   datasetId,
@@ -21,6 +47,8 @@ export default function ResourceComboBox({
   allowClear,
   setData,
   triggerOnDefault = false,
+  onRefreshed,
+  refreshKey,
   ...rest
 }) {
   const { store: data } = rest
@@ -34,6 +62,7 @@ export default function ResourceComboBox({
 
   const [apiResponse, setApiResponse] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [refreshedList, setRefreshedList] = useState(null)
   const finalItemsListRef = useRef([])
 
   const didTriggerDefaultRef = useRef(false)
@@ -62,6 +91,12 @@ export default function ResourceComboBox({
   }
 
   useEffect(() => {
+    if (!refreshKey || !hasStore) return
+
+    return subscribeRefresh(refreshKey, list => setRefreshedList(list))
+  }, [refreshKey, hasStore])
+
+  useEffect(() => {
     const fetchDataAsync = async () => {
       await fetchData(false)
     }
@@ -85,20 +120,28 @@ export default function ResourceComboBox({
         })
 
     const result = datasetId ? { list: response } : response
-    setApiResponse(result)
 
-    if (endpointId) updateCacheStore(endpointId, response?.list)
-    else if (datasetId) updateCacheStore(datasetId, response)
+    if (hasStore) {
+      const list = reducer(result)?.filter?.(filter) || []
+      if (refreshKey) publishRefresh(refreshKey, list)
+      else setRefreshedList(list)
+      if (typeof onRefreshed === 'function') onRefreshed(list)
+    } else {
+      setApiResponse(result)
+      if (endpointId) updateCacheStore(endpointId, response?.list)
+      else if (datasetId) updateCacheStore(datasetId, response)
+    }
+
     if (typeof setData === 'function') setData(result)
     setIsLoading(false)
   }
 
   let finalItemsList
-  if (apiResponse) finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
-  else if (data) finalItemsList = data
+  if (hasStore) finalItemsList = refreshedList ?? data ?? []
+  else if (apiResponse) finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
   else finalItemsList = []
 
-  if (cacheStore?.[key] && !noCache) finalItemsList = cacheStore[key]
+  if (cacheStore?.[key] && !noCache && !hasStore) finalItemsList = cacheStore[key]
   finalItemsListRef.current = rest?.options || finalItemsList || []
   const fieldPath = rest?.name?.split('.')
   const [parent, child] = fieldPath

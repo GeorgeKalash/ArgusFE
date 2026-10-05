@@ -1,7 +1,7 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -35,7 +35,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
   const { platformLabels } = useContext(ControlContext)
   const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
-  const [filteredContacts, setFilteredContacts] = useState({})
+  const contactStoreByRowRef = useRef({})
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BalanceTransferMultiAccount,
@@ -183,25 +183,14 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
   }, [formik.values.header.dtId])
 
   async function fillContactStore(rowId, accountId) {
-    if (!rowId) return
-
-    if (!accountId) {
-      setFilteredContacts(prev => ({
-        ...prev,
-        [rowId]: []
-      }))
-      return
-    }
+    if (!rowId || !accountId) return
 
     const res = await getRequest({
       extension: FinancialRepository.Contact.qry,
       parameters: `_accountId=${accountId}`
     })
 
-    setFilteredContacts(prev => ({
-      ...prev,
-      [rowId]: res?.list || []
-    }))
+    contactStoreByRowRef.current[rowId] = res?.list || []
   }
 
   const columns = [
@@ -226,7 +215,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
         ]
       },
       onChange: async ({ row: { update, newRow } }) => {
-        await fillContactStore(newRow?.id, newRow?.accountId)
+        delete contactStoreByRowRef.current[newRow?.id]
 
         update({
           contactId: null,
@@ -263,7 +252,6 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       label: labels.contact,
       name: 'contactId',
       props: {
-        store: [],
         valueField: 'recordId',
         displayField: ['name', 'reference'],
         mapping: [
@@ -280,7 +268,14 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       propsReducer({ row, props }) {
         return {
           ...props,
-          store: filteredContacts[row?.id] || []
+          store: contactStoreByRowRef.current[row?.id] ?? [],
+          onRefreshed: list => {
+            contactStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.accountId && {
+            endpointId: FinancialRepository.Contact.qry,
+            parameters: `_accountId=${row.accountId}`
+          })
         }
       }
     },
@@ -302,6 +297,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
   }
 
   async function refetchForm(recordId) {
+    contactStoreByRowRef.current = {}
     const res = await getRequest({
       extension: FinancialRepository.BalanceTransferMultiAccounts.get2,
       parameters: `_recordId=${recordId}`

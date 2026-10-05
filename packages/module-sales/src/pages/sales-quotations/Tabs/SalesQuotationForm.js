@@ -61,7 +61,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
@@ -263,13 +263,13 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const isReleased = formik.values.status == 4
   const isClosed = formik.values.wip == 2
 
-  async function getFilteredMU(itemId, msId = null) {
-    if (!itemId) return
+  function getFilteredMU(itemId, msId = null) {
+    if (!itemId) return []
 
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-    const updatedMsId = currentItemId == 0 ? msId || currentItemId : currentItemId
-    const arrayMU = measurements?.filter(item => item.msId == updatedMsId) || []
-    filteredMeasurements.current = arrayMU
+    const currentMsId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
+    const updatedMsId = currentMsId == 0 ? msId || currentMsId : currentMsId
+
+    return measurements?.filter(item => item.msId == updatedMsId) || []
   }
 
   const iconKey = ({ value, data }) => {
@@ -339,9 +339,10 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         }
 
         const filteredMU = measurements?.filter(item => item.msId === itemInfo?.msId)
-        getFilteredMU(newRow?.itemId, itemInfo?.msId)
+        const rowMUList = getFilteredMU(newRow?.itemId, itemInfo?.msId)
+        delete muStoreByRowRef.current[newRow.id]
 
-        const filteredItems = filteredMeasurements?.current?.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = rowMUList.filter(item => item.recordId === newRow?.muId)
 
         update({
           volume: itemPhysProp?.volume || 0,
@@ -383,7 +384,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       label: labels.measurementUnit,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -393,7 +393,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.itemId, newRow?.msId)
+        const filteredItems = store.find(item => item.recordId === newRow?.muId)
         const muQty = newRow?.muQty ?? filteredItems?.qty
 
         update({
@@ -401,7 +402,17 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         })
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.itemId, row?.msId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
@@ -410,9 +421,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       name: 'qty',
       updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
-        getFilteredMU(newRow?.itemId, newRow?.msId)
+        const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.itemId, newRow?.msId)
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        const filteredItems = store.find(item => item.recordId === newRow?.muId)
 
         const muQty = newRow?.muQty ?? filteredItems?.qty
         update({
@@ -1120,6 +1131,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   }
 
   async function refetchForm(recordId) {
+    muStoreByRowRef.current = {}
     const sqHeader = await getSalesQuotation(recordId)
     const sqItems = await getSalesQuotationItems(recordId)
     const clientDiscount = await getClientInfo(sqHeader.record.clientId)
@@ -1471,6 +1483,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
+                      muStoreByRowRef.current = {}
                       formik.setFieldValue('items', [{ id: 1 }])
                       formik.setFieldValue('currencyId', newValue?.recordId || null)
                     }}
@@ -1598,9 +1611,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
-            }}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             initialValues={initialValues?.items?.[0]}
             value={formik.values.items}
