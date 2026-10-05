@@ -201,7 +201,7 @@ export default function ItemDetailsForm({
                       await getlastIVI(newValue?.recordId)
                       await getCurrentCost(newValue?.recordId)
                       formik.setFieldValue('details.msId', newValue?.msId || null)
-                      const measurementSchedule = await getMeasurementObject(newRow?.msId)
+                      const measurementSchedule = await getMeasurementObject(newValue?.msId)
                       formik.setFieldValue('details.decimals', measurementSchedule?.decimals)
                       formik.setFieldValue('details.muId', null)
                       formik.setFieldValue(
