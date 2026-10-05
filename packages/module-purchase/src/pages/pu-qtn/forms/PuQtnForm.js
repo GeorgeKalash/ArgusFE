@@ -214,6 +214,15 @@ export default function PuQtnForm({ recordId, window }) {
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -275,6 +284,7 @@ export default function PuQtnForm({ recordId, window }) {
 
         const filteredMU = measurements?.filter(item => item.msId === itemInfo?.msId)
         getFilteredMU(newRow?.itemId, itemInfo?.msId)
+        const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
         const filteredItems = filteredMeasurements?.current?.filter(item => item.recordId === newRow?.muId)
 
@@ -287,6 +297,7 @@ export default function PuQtnForm({ recordId, window }) {
           priceType: itemInfo?.priceType || 1,
           mdAmount: 0,
           qty: 0,
+          decimals: measurementSchedule?.decimals,
           msId: itemInfo?.msId,
           muRef: filteredMU?.[0]?.reference,
           muId: filteredMU?.[0]?.recordId,
@@ -335,6 +346,13 @@ export default function PuQtnForm({ recordId, window }) {
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
+      props: {
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
+      },
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         getFilteredMU(newRow?.itemId, newRow?.msId)
@@ -717,7 +735,7 @@ export default function PuQtnForm({ recordId, window }) {
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
+      qty: itemPriceRow?.qty ? itemPriceRow?.qty : 0,
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(4) : 0,
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
