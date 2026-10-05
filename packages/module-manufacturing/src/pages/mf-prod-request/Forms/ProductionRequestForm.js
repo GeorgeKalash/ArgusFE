@@ -11,6 +11,7 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import PRItemSize from '@argus/shared-ui/src/components/Shared/PRItemSize'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -82,7 +83,8 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       pcs: null,
       itemWeight: null,
       metalId: null
-    }]
+    }],
+    sizes: []
   }
     
   const { formik } = useForm({
@@ -105,15 +107,31 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       )
     }),
     onSubmit: async obj => {
+      const items = obj.items.map(({ sizes, ...item }, index) => ({
+        ...item,
+        requestId: recordId,
+        seqNo: index + 1
+      }))
+
+      const sizes = obj.items.flatMap((item, index) =>
+        (item.sizes || [])
+          .filter(s => s.sizeId)
+          .map((s, i) => ({
+            requestId: recordId,
+            seqNo: index + 1,
+            sizeSeqNo: i + 1,
+            sizeId: s.sizeId,
+            pcs: s.pcs || 0,
+            qty: s.qty || 0
+          }))
+      )
+
       const res = await postRequest({
         extension: ManufacturingRepository.ProductionRequest.set2,
         record: JSON.stringify({
           header: { ...obj.header, date: formatDateToApi(obj.header.date) },
-          items: obj.items?.map((item, index) => ({
-            ...item,
-            requestId: recordId,
-            seqNo: index + 1
-          }))
+          items,
+          sizes
         })
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -151,6 +169,11 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       extension: ManufacturingRepository.ProductionRequest.get2,
       parameters: `_recordId=${requestId}`
     })
+
+    const sizesBySeq = (record?.sizes || []).reduce((acc, s) => {
+      ;(acc[s.seqNo] ||= []).push(s)
+      return acc
+    }, {})
       
     formik.resetForm({
       values: {
@@ -163,7 +186,8 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           record?.items?.map((item, index) => {
             return {
               ...item,
-              id: index + 1
+              id: index + 1,
+              sizes: (sizesBySeq[item.seqNo] || []).map((s, i) => ({ ...s, id: i + 1 }))
             }
           })
           : initialValues.items
@@ -249,11 +273,17 @@ export default function ProductionRequestForm({ recordId, labels, access, window
   }, [formik.values.header.date])
 
   const mergePreviewedItems = async newItems => {
+    const sizesByItem = new Map(
+      (formik.values.items || [])
+        .filter(item => item.itemId)
+        .map(item => [item.itemId, item.sizes || []])
+    )
 
     const merged = newItems.map((item, index) => ({
       ...item,
       id: index + 1,
-      seqNo: index + 1
+      seqNo: index + 1,
+      sizes: sizesByItem.get(item.itemId) || []
     }))
 
     await formik.setFieldValue('items', merged)
@@ -447,6 +477,33 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         update({qty})
       }
     },
+    {
+      component: 'button',
+      name: 'sizes',
+      label: labels.sizes,
+      flex: 0.5,
+      props: {
+        onCondition: row => {
+          return {
+            disabled: !row?.itemId
+          }
+        }
+      },
+      onClick: (e, row) => {
+        stack({
+          Component: PRItemSize,
+          props: {
+            readOnly: isPosted,
+            sizes: row.sizes || [],
+            onSave: sizes =>
+              formik.setFieldValue(
+                'items',
+                formik.values.items.map(r => (r.id === row.id ? { ...r, sizes } : r))
+              )
+          }
+        })
+      }
+    }
   ]
 
   async function onValidationRequired() {

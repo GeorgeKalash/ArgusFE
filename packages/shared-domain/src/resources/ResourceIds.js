@@ -667,6 +667,7 @@ export const ResourceIds = {
   PreviewPR: 42353,
   PPDefaults: 42611,
   BatchWaxTransfer: 42354,
+  PRItemSize: 42355,
   FixingSalesDTD: 38602,
   FixingPurchaseDTD: 38603,
   BTDocumentTypeDefault: 38102,
