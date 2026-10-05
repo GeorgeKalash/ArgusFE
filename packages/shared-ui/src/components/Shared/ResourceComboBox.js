@@ -69,36 +69,43 @@ export default function ResourceComboBox({
     if (!hasStore && !noCache && (datasetId || endpointId)) fetchDataAsync()
   }, [parameters, hasStore, datasetId, endpointId, noCache])
 
-  const fetchData = async (isRefresh = false) => {
+  const fetchData = async (arg = false) => {
+    const isRefresh = !!arg
     if (rest?.readOnly && dataGrid) return
     if (!parameters || (!datasetId && !endpointId)) return
     if (!isRefresh && (hasStore || cacheStore?.[key])) return
 
     setIsLoading(true)
 
-    const response = cacheAvailable
-      ? await fetchWithCache({
-          queryKey: [datasetId || endpointId, parameters],
-          queryFn: () => fetch({ datasetId, endpointId, parameters, refresh: isRefresh })
-        })
-      : await fetch({ datasetId, endpointId, parameters, refresh: isRefresh
-        })
+    const doFetch = () => fetch({ datasetId, endpointId, parameters, refresh: isRefresh })
+
+    const response =
+      cacheAvailable && !isRefresh && !hasStore
+        ? await fetchWithCache({ queryKey: [datasetId || endpointId, parameters], queryFn: doFetch })
+        : await doFetch()
 
     const result = datasetId ? { list: response } : response
     setApiResponse(result)
 
-    if (endpointId) updateCacheStore(endpointId, response?.list)
-    else if (datasetId) updateCacheStore(datasetId, response)
+    if (!hasStore) {
+      if (endpointId) updateCacheStore(endpointId, response?.list)
+      else if (datasetId) updateCacheStore(datasetId, response)
+    }
+
     if (typeof setData === 'function') setData(result)
     setIsLoading(false)
   }
+
+  useEffect(() => {
+    setApiResponse(null)
+  }, [parameters])
 
   let finalItemsList
   if (apiResponse) finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
   else if (data) finalItemsList = data
   else finalItemsList = []
 
-  if (cacheStore?.[key] && !noCache) finalItemsList = cacheStore[key]
+  if (!hasStore && cacheStore?.[key] && !noCache) finalItemsList = cacheStore[key].filter?.(filter) || []
   finalItemsListRef.current = rest?.options || finalItemsList || []
   const fieldPath = rest?.name?.split('.')
   const [parent, child] = fieldPath

@@ -155,7 +155,9 @@ export default function WCConsumpForm({ recordId, window }) {
   const isClosed = formik?.values?.header?.wip === 2
 
   const totalCostField = formik.values.items.reduce((sum, item) => sum + (Number(item?.totalCost) || 0), 0) || 0
-
+console.log(
+formik.values.items
+)
   const totalQty = reCal
     ? formik.values.items.reduce((sum, item) => sum + (Number(item?.qty) || 0), 0)
     : formik.values?.header.totalQty || 0
@@ -363,7 +365,6 @@ export default function WCConsumpForm({ recordId, window }) {
       label: labels.MU,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         readOnly: isClosed,
@@ -373,6 +374,16 @@ export default function WCConsumpForm({ recordId, window }) {
           { from: 'qty', to: 'muQty' },
           { from: 'recordId', to: 'muId' }
         ]
+      },
+      propsReducer({ row, props }) {
+        return {
+          ...props,
+          store: filteredMeasurements?.current,
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       },
       async onChange({ row: { update, newRow } }) {
         setReCal(true)
@@ -386,9 +397,6 @@ export default function WCConsumpForm({ recordId, window }) {
               })
         }
       },
-      propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
-      }
     },
     {
       component: 'numberfield',

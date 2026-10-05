@@ -56,6 +56,7 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 
 export default function RetailTransactionsForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -1134,7 +1135,17 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
         }
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredCreditCard.current, readOnly: row.type == 2 }
+        const currentBankId = level2CacheRef?.current?.cashAccounts?.find(
+          account => parseInt(account.recordId) === row?.cashAccountId
+        )?.bankId
+
+        return { 
+          ...props, 
+          store: filteredCreditCard.current, 
+          readOnly: row.type == 2,
+          endpointId: CashBankRepository.CreditCard.qry,
+          filter: (item) => item.bankId == currentBankId 
+         }
       }
     },
     {

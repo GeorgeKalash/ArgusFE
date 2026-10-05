@@ -360,8 +360,15 @@ export default function PurchaseOrderForm({ recordId, window }) {
           })
         }
       },
-      propsReducer({ props }) {
-        return { ...props, store: filteredMeasurements?.current }
+      propsReducer({ row, props }) {
+        return {
+          ...props,
+          store: filteredMeasurements?.current,
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {

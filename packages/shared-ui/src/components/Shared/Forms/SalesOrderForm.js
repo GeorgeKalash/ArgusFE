@@ -489,8 +489,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         )
         update(data)
       },
-      propsReducer({ props }) {
-        return { ...props, store: filteredMeasurements?.current }
+      propsReducer({ row, props }) {
+        return {
+          ...props,
+          store: filteredMeasurements?.current,
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
