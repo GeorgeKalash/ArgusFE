@@ -562,7 +562,14 @@ export default function ShipmentsForm({ recordId, window }) {
           store = filteredMeasurements?.current
         }
 
-        return { ...props, store }
+         return {
+          ...props,
+          store,
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {

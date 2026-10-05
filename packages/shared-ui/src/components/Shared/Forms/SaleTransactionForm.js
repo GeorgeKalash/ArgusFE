@@ -729,8 +729,6 @@ export default function SaleTransactionForm({
       label: labels.measurementUnit,
       name: 'muRef',
       props: {
-        endpointId: InventoryRepository.Measurement.qry,
-        parameters: '_name=',
         store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
@@ -781,7 +779,14 @@ export default function SaleTransactionForm({
         update(data)
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        return {
+          ...props,
+          store: filteredMeasurements?.current,
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {

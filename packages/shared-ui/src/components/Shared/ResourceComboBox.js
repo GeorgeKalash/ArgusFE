@@ -21,6 +21,7 @@ export default function ResourceComboBox({
   allowClear,
   setData,
   triggerOnDefault = false,
+  onRefreshed,
   ...rest
 }) {
   const { store: data } = rest
@@ -34,6 +35,7 @@ export default function ResourceComboBox({
 
   const [apiResponse, setApiResponse] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [refreshedList, setRefreshedList] = useState(null)
   const finalItemsListRef = useRef([])
 
   const didTriggerDefaultRef = useRef(false)
@@ -85,20 +87,27 @@ export default function ResourceComboBox({
         })
 
     const result = datasetId ? { list: response } : response
-    setApiResponse(result)
 
-    if (endpointId) updateCacheStore(endpointId, response?.list)
-    else if (datasetId) updateCacheStore(datasetId, response)
+    if (hasStore) {
+      const list = reducer(result)?.filter?.(filter) || []
+      setRefreshedList(list)
+      if (typeof onRefreshed === 'function') onRefreshed(list)
+    } else {
+      setApiResponse(result)
+      if (endpointId) updateCacheStore(endpointId, response?.list)
+      else if (datasetId) updateCacheStore(datasetId, response)
+    }
+
     if (typeof setData === 'function') setData(result)
     setIsLoading(false)
   }
 
   let finalItemsList
-  if (apiResponse) finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
-  else if (data) finalItemsList = data
+  if (hasStore) finalItemsList = refreshedList ?? data ?? []
+  else if (apiResponse) finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
   else finalItemsList = []
 
-  if (cacheStore?.[key] && !noCache) finalItemsList = cacheStore[key]
+  if (cacheStore?.[key] && !noCache && !hasStore) finalItemsList = cacheStore[key]
   finalItemsListRef.current = rest?.options || finalItemsList || []
   const fieldPath = rest?.name?.split('.')
   const [parent, child] = fieldPath

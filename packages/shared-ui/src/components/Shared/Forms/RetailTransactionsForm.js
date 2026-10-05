@@ -56,6 +56,7 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 
 export default function RetailTransactionsForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -68,9 +69,9 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
   const [reCal, setReCal] = useState(false)
   const [addressModified, setAddressModified] = useState(false)
   const [posUser, setPosUser] = useState(null)
-  const filteredCreditCard = useRef([])
+  const [ccStoreByRow, setCcStoreByRow] = useState({})
+  
   const level2CacheRef = useRef(null)
-
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
@@ -567,6 +568,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
   ]
 
   async function fillForm(retailTrxPack) {
+    setCcStoreByRow({})
     const retailTrxHeader = retailTrxPack?.header || {}
     const retailTrxItems = retailTrxPack?.items || []
     const retailTrxCash = retailTrxPack?.cash || []
@@ -1096,9 +1098,12 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
         displayFieldWidth: 3
       },
       async onChange({ row: { update, newRow } }) {
+        setCcStoreByRow(prev => { 
+          const n = { ...prev }
+          delete n[newRow.id]
+          return n
+         })
         if (cashAmount == 0) update({ amount: roundTo(Number(amount) || 0) })
-        getFilteredCC(newRow?.cashAccountId)
-
         if (newRow?.type == 1) {
           update({ bankFees: roundTo(calculateBankFees(newRow?.ccId, newRow?.amount)) || 0 })
         } else {
@@ -1119,7 +1124,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
       label: labels.creditCard,
       name: 'ccRef',
       props: {
-        store: filteredCreditCard?.current,
+        endpointId: CashBankRepository.CreditCard.qry,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -1134,7 +1139,17 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
         }
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredCreditCard.current, readOnly: row.type == 2 }
+        const currentBankId = level2CacheRef?.current?.cashAccounts?.find(
+          account => parseInt(account.recordId) === row?.cashAccountId
+        )?.bankId
+
+        return {
+          ...props,
+          store: ccStoreByRow[row.id] ?? getFilteredCC(row.cashAccountId),
+          onRefreshed: list => setCcStoreByRow(prev => ({ ...prev, [row.id]: list })),
+          filter: card => card.bankId == 14,
+          readOnly: row.type == 2
+        }
       }
     },
     {
@@ -1320,15 +1335,18 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
     level2CacheRef.current = res?.record || null
   }
 
-  async function getFilteredCC(cashAccountId) {
-    if (!cashAccountId) return
+  function getFilteredCC(cashAccountId) {
+    if (!cashAccountId) return []
 
-    const currentBankId = level2CacheRef?.current?.cashAccounts?.find(
-      account => parseInt(account.recordId) === cashAccountId
+    const currentBankId = level2CacheRef.current?.cashAccounts?.find(
+      account => parseInt(account.recordId) === parseInt(cashAccountId)
     )?.bankId
 
-    const arrayCC = level2CacheRef?.current?.creditCards?.filter(card => card.bankId == currentBankId) || []
-    filteredCreditCard.current = arrayCC
+    return (
+      level2CacheRef.current?.creditCards?.filter(
+        c => c.bankId == currentBankId
+      ) || []
+    )
   }
 
   async function sKULookupInfo(dtId) {
@@ -1882,9 +1900,6 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
                 value={formik?.values?.cash}
                 error={formik.errors.cash}
                 name='cash'
-                onSelectionChange={(row, update, field) => {
-                  if (field == 'ccRef') getFilteredCC(row?.cashAccountId)
-                }}
                 columns={cashColumns}
                 maxAccess={maxAccess}
                 disabled={isPosted}

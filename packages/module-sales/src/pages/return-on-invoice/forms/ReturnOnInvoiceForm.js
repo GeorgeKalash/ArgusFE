@@ -698,7 +698,14 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         )
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: row.invoiceId, store: filteredMeasurements?.current }
+        return {
+          ...props,
+          store: filteredMeasurements?.current,
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
