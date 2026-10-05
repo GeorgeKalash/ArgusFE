@@ -1,5 +1,5 @@
 import { Box, DialogContent } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import { TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -29,6 +29,19 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
   const editMode = props.editMode
   const maxAccess = props.maxAccess
   const form = props?.form
+  const saving = useRef(false)
+
+  const save = async () => {
+    if (saving.current || loading) return
+
+    saving.current = true
+
+    try {
+      await (props.onSave || form?.submitForm)?.()
+    } finally {
+      saving.current = false
+    }
+  }
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -77,6 +90,13 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
               })
         }}
         onKeyDownCapture={e => {
+          if (saving.current || loading) {
+            e.preventDefault()
+            e.stopPropagation()
+            e.nativeEvent?.stopImmediatePropagation?.()
+            return
+          }
+
           const activeEl = document.activeElement
           const isFocusedFilterInput =
             activeEl?.classList?.contains('ag-text-field-input') &&
@@ -109,11 +129,7 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
             }
             
             e.preventDefault()
-            if (props?.onSave) {
-              props.onSave()
-            } else {
-              form?.submitForm?.()
-            }
+            save()
 
             return
           }
@@ -134,11 +150,7 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
             const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
             if (!isEqual) {
               e.preventDefault()
-              if (props.onSave) {
-                props?.onSave()
-              } else {
-                form?.submitForm?.()
-              }
+              save()
             }
           }
         }}
@@ -150,13 +162,7 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
         <WindowToolbar
           {...props}
           isSaved={isSaved}
-          onSave={() => {
-            if (props.onSave) {
-              props.onSave()
-            } else {
-              form?.submitForm?.()
-            }
-          }}
+          onSave={save}
         />
       )}
     </>
