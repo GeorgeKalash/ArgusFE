@@ -172,10 +172,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
                 label={_labels.startDate}
                 max={formik.values.endDate}
                 value={formik.values?.startDate}
-                onChange={(name, value) => {
-                  formik.setFieldValue(name, value)
-                  if (value) isPeriodClosed(value)
-                }}
+                onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
                 required
                 onClear={() => formik.setFieldValue('startDate', '')}
