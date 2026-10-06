@@ -46,6 +46,7 @@ export const ResourceIds = {
   EmployeesBirthday: 71604,
   TermEndDate: 71602,
   WorkAnniversary: 71603,
+  Holidays: 72601,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
