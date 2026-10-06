@@ -53,19 +53,17 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record && record.incId && record.groupId && recordId) {
-          const res = await getRequest({
-            extension: BusinessPartnerRepository.GroupLegalDocument.get,
-            parameters: `_groupId=${record?.groupId}&_incId=${record?.incId}`
-          })
+      if (record && record.incId && record.groupId && recordId) {
+        const res = await getRequest({
+          extension: BusinessPartnerRepository.GroupLegalDocument.get,
+          parameters: `_groupId=${record?.groupId}&_incId=${record?.incId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            recordId: res.record.groupId * 10000 + res.record.incId
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          recordId: res.record.groupId * 10000 + res.record.incId
+        })
+      }
     })()
   }, [])
 

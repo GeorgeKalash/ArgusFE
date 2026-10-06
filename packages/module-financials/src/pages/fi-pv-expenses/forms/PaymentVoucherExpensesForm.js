@@ -237,17 +237,15 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   const isVerified = formik.values.isVerified
 
   const onPost = async () => {
-    try {
-      const res = await postRequest({
-        extension: FinancialRepository.PaymentVouchers.post,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.post,
+      record: JSON.stringify(formik.values)
+    })
 
-      toast.success(platformLabels.Posted)
-      await releaseLock()
-      invalidate()
-      refetchForm(res.recordId)
-    } catch (exception) {}
+    toast.success(platformLabels.Posted)
+    await releaseLock()
+    invalidate()
+    refetchForm(res.recordId)
   }
   async function onChangeDT(dtId) {
     if (dtId) {
@@ -323,16 +321,14 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   }
 
   const onCancel = async () => {
-    try {
-      const res = await postRequest({
-        extension: FinancialRepository.PaymentVouchers.cancel,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.cancel,
+      record: JSON.stringify(formik.values)
+    })
 
-      toast.success(platformLabels.Cancelled)
-      invalidate()
-      refetchForm(res.recordId)
-    } catch (e) {}
+    toast.success(platformLabels.Cancelled)
+    invalidate()
+    refetchForm(res.recordId)
   }
 
   const onVerify = async () => {

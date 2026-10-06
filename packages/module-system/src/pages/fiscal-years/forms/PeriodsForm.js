@@ -127,29 +127,27 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
   }, [recordId])
 
   const getPeriods = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Period.qry,
-        parameters: `_fiscalYear=${recordId}`
+    const res = await getRequest({
+      extension: SystemRepository.Period.qry,
+      parameters: `_fiscalYear=${recordId}`
+    })
+    if (res.list?.length > 0) {
+      const periods = res.list.map(({ id, periodId, startDate, endDate, ...rest }, index) => {
+        return {
+          id: index + 1,
+          periodId: index + 1,
+          startDate: formatDateFromApi(startDate),
+          endDate: formatDateFromApi(endDate),
+          saved: true,
+          ...rest
+        }
       })
-      if (res.list?.length > 0) {
-        const periods = res.list.map(({ id, periodId, startDate, endDate, ...rest }, index) => {
-          return {
-            id: index + 1,
-            periodId: index + 1,
-            startDate: formatDateFromApi(startDate),
-            endDate: formatDateFromApi(endDate),
-            saved: true,
-            ...rest
-          }
-        })
 
-        formik.setValues({
-          recordId: recordId,
-          periods: periods
-        })
-      }
-    } catch (error) {}
+      formik.setValues({
+        recordId: recordId,
+        periods: periods
+      })
+    }
   }
 
   return (

@@ -55,23 +55,21 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
           dow: schedule.dow
         }))
       }
-      try {
-        const res = await postRequest({
-          extension: SystemRepository.PlantsSchedule.set2,
-          record: JSON.stringify(data)
-        })
+      const res = await postRequest({
+        extension: SystemRepository.PlantsSchedule.set2,
+        record: JSON.stringify(data)
+      })
 
-        if (res) toast.success(platformLabels.Edited)
-        setStore(prevStore => ({
-          ...prevStore,
-          schedules: values.schedules.map((item, index) => ({
-            ...item,
-            id: index + 1,
-            plantId: recordId,
-            dow: item.dow
-          }))
+      if (res) toast.success(platformLabels.Edited)
+      setStore(prevStore => ({
+        ...prevStore,
+        schedules: values.schedules.map((item, index) => ({
+          ...item,
+          id: index + 1,
+          plantId: recordId,
+          dow: item.dow
         }))
-      } catch (error) {}
+      }))
     }
   })
 

@@ -87,14 +87,12 @@ const City = () => {
   ]
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SystemRepository.City.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SystemRepository.City.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const edit = obj => {

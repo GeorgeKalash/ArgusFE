@@ -34,37 +34,33 @@ export default function GlIntegrationForm({ labels, maxAccess, recordId }) {
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: GeneralLedgerRepository.IntegrationPostTypes.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: GeneralLedgerRepository.IntegrationPostTypes.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else {
+        toast.success(platformLabels.Edited)
+      }
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: GeneralLedgerRepository.IntegrationPostTypes.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: GeneralLedgerRepository.IntegrationPostTypes.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

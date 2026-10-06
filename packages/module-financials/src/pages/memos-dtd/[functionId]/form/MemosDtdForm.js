@@ -54,16 +54,14 @@ export default function MemosDtdForm({ labels, maxAccess, recordId, functionId }
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.FIDocTypeDefaults.get,
-            parameters: `_dtId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.FIDocTypeDefaults.get,
+          parameters: `_dtId=${recordId}`
+        })
 
-          formik.setValues({ ...res.record, recordId: recordId })
-        }
-      } catch (exception) {}
+        formik.setValues({ ...res.record, recordId: recordId })
+      }
     })()
   }, [])
 
