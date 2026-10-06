@@ -1,5 +1,5 @@
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'

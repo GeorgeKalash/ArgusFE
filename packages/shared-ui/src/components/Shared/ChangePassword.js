@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Grid, IconButton, InputAdornment } from '@mui/material'
+import { Grid, IconButton } from '@mui/material'
 import Icon from '@argus/shared-core/src/@core/components/icon'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
