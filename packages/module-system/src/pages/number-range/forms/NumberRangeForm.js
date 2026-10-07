@@ -20,8 +20,6 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
   const [dateRanges, setDateRange] = useState(false)
   const { platformLabels } = useContext(ControlContext)
 
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -78,10 +76,11 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
         toast.success(platformLabels.Edited)
       }
 
-      setEditMode(true)
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

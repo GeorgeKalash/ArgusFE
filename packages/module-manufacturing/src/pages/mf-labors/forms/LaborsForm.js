@@ -19,7 +19,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function LaborsForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [hourRate, setHourRate] = useState(false)
@@ -68,10 +67,11 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
         })
       } else toast.success(platformLabels.Edited)
 
-      setEditMode(true)
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

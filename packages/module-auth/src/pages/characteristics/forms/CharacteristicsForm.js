@@ -18,7 +18,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
-const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
+const CharacteristicsForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -52,6 +52,8 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   const postCharacteristics = async obj => {
     const recordId = obj?.recordId || ''
     const date = obj?.validFrom && formatDateToApi(obj?.validFrom)
@@ -61,7 +63,6 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
       record: JSON.stringify(data)
     }).then(res => {
       if (!recordId) {
-        setEditMode(true)
         setStore(prevStore => ({
           ...prevStore,
           recordId: res.recordId
@@ -88,7 +89,6 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
     }).then(res => {
       res.record.validFrom = formatDateFromApi(res.record.validFrom)
       formik.setValues(res.record)
-      setEditMode(true)
     })
   }
 

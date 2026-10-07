@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -16,7 +16,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 
 export default function GroupsForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -54,10 +53,11 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
           recordId: response.recordId
         })
       } else toast.success(platformLabels.Edited)
-      setEditMode(true)
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
