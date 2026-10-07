@@ -24,7 +24,6 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
-import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
