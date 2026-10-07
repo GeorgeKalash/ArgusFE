@@ -226,7 +226,10 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
-      type: 'number'
+      type: {
+        field: 'number',
+        decimal: 5
+      }
     },
     {
       field: 'deliveryDate',
