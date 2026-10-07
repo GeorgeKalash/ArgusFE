@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import TransactionLog from './TransactionLog'
 import { ClientRelationList } from './ClientRelationList'
 import { useGlobalRecord, useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -12,6 +12,7 @@ import FinancialTransaction from './FinancialTransaction'
 import Aging from './Aging'
 import MetalSummary from './MetalSummary'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
 import InventoryTransaction from './InventoryTransaction'
@@ -52,7 +53,19 @@ export default function FormShell({
   const { stack } = useWindow()
   const { clear, open, setRecord } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
+  const { loading } = useContext(RequestsContext)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
+
+  const guarded = async fn => {
+    if (isSubmitting || loading) return
+    setIsSubmitting(true)
+    try {
+      await fn()
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const { stack: stackError } = useError()
 
@@ -144,13 +157,13 @@ export default function FormShell({
         case 'onPost':
           action.onClick = () => {
             form.setFieldValue('isOnPostClicked', true)
-            form.handleSubmit()
+            guarded(() => form.submitForm())
           }
           break
         case 'onTFR':
           action.onClick = () => {
             form.setFieldValue('isTFRClicked', true)
-            form.handleSubmit()
+            guarded(() => form.submitForm())
           }
           break
         case 'onClickGL':
@@ -354,11 +367,13 @@ export default function FormShell({
   }
 
   async function handleSaveAndClear() {
-    const errors = await form.validateForm()
-    await form.submitForm()
-    if (Object.keys(errors).length == 0) {
-      await performPostSubmissionTasks()
-    }
+    await guarded(async () => {
+      const errors = await form.validateForm()
+      await form.submitForm()
+      if (Object.keys(errors).length == 0) {
+        await performPostSubmissionTasks()
+      }
+    })
   }
 
   const performPostSubmissionTasks = async () => {
@@ -372,9 +387,8 @@ export default function FormShell({
     <Form
       form={form}
       previewBtnClicked={previewBtnClicked}
-      onSave={() => {
-        form?.handleSubmit()
-      }}
+      submitting={isSubmitting}
+      onSave={() => guarded(() => form.submitForm())}
       onSaveClear={() => {
         handleSaveAndClear()
       }}
