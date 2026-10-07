@@ -16,7 +16,6 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'

@@ -27,9 +27,7 @@ function getFiles(dir) {
 
   const files = []
 
-  for (const entry of fs.readdirSync(dir, {
-    withFileTypes: true
-  })) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const fullPath = path.join(dir, entry.name)
 
     if (entry.isDirectory()) {
@@ -51,49 +49,27 @@ function getFiles(dir) {
 }
 
 /*
- * Check whether an identifier is actually used
- * somewhere outside its import declaration.
+ * Collect every identifier name used OUTSIDE import declarations.
+ * One walk per file instead of one walk per imported name.
+ * JSX tags like <CustomNumberField /> are identifiers in the AST,
+ * so they are counted as usage.
  */
-function isIdentifierUsed(sourceFile, identifier) {
-  const name = identifier.text
-
-  let used = false
+function collectUsedNames(sourceFile) {
+  const names = new Set()
 
   function visit(node) {
-    if (used) return
+    if (ts.isImportDeclaration(node)) return
 
-    /*
-     * Don't count the import declaration itself
-     * as usage.
-     */
-    let parent = node
-
-    while (parent) {
-      if (ts.isImportDeclaration(parent)) {
-        return
-      }
-
-      parent = parent.parent
-    }
-
-    if (
-      ts.isIdentifier(node) &&
-      node.text === name
-    ) {
-      used = true
-      return
+    if (ts.isIdentifier(node)) {
+      names.add(node.text)
     }
 
     ts.forEachChild(node, visit)
   }
 
-  for (const statement of sourceFile.statements) {
-    if (!ts.isImportDeclaration(statement)) {
-      visit(statement)
-    }
-  }
+  visit(sourceFile)
 
-  return used
+  return names
 }
 
 /*
@@ -107,11 +83,7 @@ function hasJsx(sourceFile) {
   function visit(node) {
     if (found) return
 
-    if (
-      ts.isJsxElement(node) ||
-      ts.isJsxSelfClosingElement(node) ||
-      ts.isJsxFragment(node)
-    ) {
+    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node)) {
       found = true
       return
     }
@@ -125,17 +97,9 @@ function hasJsx(sourceFile) {
 }
 
 function getScriptKind(file) {
-  if (file.endsWith('.tsx')) {
-    return ts.ScriptKind.TSX
-  }
-
-  if (file.endsWith('.ts')) {
-    return ts.ScriptKind.TS
-  }
-
-  if (file.endsWith('.jsx')) {
-    return ts.ScriptKind.JSX
-  }
+  if (file.endsWith('.tsx')) return ts.ScriptKind.TSX
+  if (file.endsWith('.ts')) return ts.ScriptKind.TS
+  if (file.endsWith('.jsx')) return ts.ScriptKind.JSX
 
   return ts.ScriptKind.JS
 }
@@ -143,37 +107,22 @@ function getScriptKind(file) {
 function cleanFile(file) {
   const original = fs.readFileSync(file, 'utf8')
 
-  const sourceFile = ts.createSourceFile(
-    file,
-    original,
-    ts.ScriptTarget.Latest,
-    true,
-    getScriptKind(file)
-  )
+  const sourceFile = ts.createSourceFile(file, original, ts.ScriptTarget.Latest, true, getScriptKind(file))
 
   const fileHasJsx = hasJsx(sourceFile)
+  const usedNames = collectUsedNames(sourceFile)
 
-  const isUsed = identifier =>
-    (identifier.text === 'React' && fileHasJsx) ||
-    isIdentifierUsed(sourceFile, identifier)
+  const isUsed = identifier => (identifier.text === 'React' && fileHasJsx) || usedNames.has(identifier.text)
 
   const replacements = []
 
   let removedCount = 0
 
   for (const statement of sourceFile.statements) {
-    if (!ts.isImportDeclaration(statement)) {
-      continue
-    }
+    if (!ts.isImportDeclaration(statement)) continue
 
-    /*
-     * Keep:
-     *
-     * import './something.css'
-     */
-    if (!statement.importClause) {
-      continue
-    }
+    // Keep side-effect imports: import './something.css'
+    if (!statement.importClause) continue
 
     const clause = statement.importClause
 
@@ -184,74 +133,36 @@ function cleanFile(file) {
 
     let somethingRemoved = false
 
-    // --------------------------------
     // DEFAULT IMPORT
-    // --------------------------------
-
     if (clause.name) {
       if (isUsed(clause.name)) {
-        defaultImport =
-          clause.name.getText(sourceFile)
+        defaultImport = clause.name.getText(sourceFile)
       } else {
         somethingRemoved = true
         removedCount++
       }
     }
 
-    // --------------------------------
     // NAMED / NAMESPACE IMPORTS
-    // --------------------------------
-
     if (clause.namedBindings) {
-      /*
-       * import * as Something from '...'
-       */
-      if (
-        ts.isNamespaceImport(
-          clause.namedBindings
-        )
-      ) {
-        const identifier =
-          clause.namedBindings.name
+      // import * as Something from '...'
+      if (ts.isNamespaceImport(clause.namedBindings)) {
+        const identifier = clause.namedBindings.name
 
         if (isUsed(identifier)) {
-          namespaceImport =
-            identifier.getText(sourceFile)
+          namespaceImport = identifier.getText(sourceFile)
         } else {
           somethingRemoved = true
           removedCount++
         }
       }
 
-      /*
-       * import { A, B, C } from '...'
-       */
-      if (
-        ts.isNamedImports(
-          clause.namedBindings
-        )
-      ) {
-        for (
-          const element
-          of clause.namedBindings.elements
-        ) {
-          /*
-           * Important for aliases:
-           *
-           * import {
-           *   Something as OtherName
-           * } from '...'
-           *
-           * We check OtherName because that's
-           * the local variable used by the file.
-           */
-          const localIdentifier = element.name
-
-          if (isUsed(localIdentifier)) {
-            // Preserve exact original text
-            namedImports.push(
-              element.getText(sourceFile)
-            )
+      // import { A, B as C } from '...'
+      if (ts.isNamedImports(clause.namedBindings)) {
+        for (const element of clause.namedBindings.elements) {
+          // For aliases we check the LOCAL name (element.name)
+          if (isUsed(element.name)) {
+            namedImports.push(element.getText(sourceFile))
           } else {
             somethingRemoved = true
             removedCount++
@@ -260,85 +171,39 @@ function cleanFile(file) {
       }
     }
 
-    /*
-     * Nothing unused in this import.
-     *
-     * DON'T rewrite it.
-     */
-    if (!somethingRemoved) {
-      continue
-    }
+    // Nothing unused in this import -> don't rewrite it
+    if (!somethingRemoved) continue
 
-    /*
-     * EVERYTHING from this import is unused.
-     *
-     * Remove the entire import.
-     */
-    if (
-      !defaultImport &&
-      !namespaceImport &&
-      namedImports.length === 0
-    ) {
-      let start = statement.getFullStart()
+    // EVERYTHING in this import is unused -> remove the whole statement
+    if (!defaultImport && !namespaceImport && namedImports.length === 0) {
+      // getStart() skips leading trivia (the previous line's newline).
+      // getFullStart() would eat it and glue two imports together.
+      const start = statement.getStart(sourceFile)
       let end = statement.getEnd()
 
-      /*
-       * Include newline after the import so
-       * we don't leave empty lines everywhere.
-       */
-      if (original[end] === '\r') {
-        end++
-      }
+      // Swallow trailing spaces + the line ending of THIS import only
+      while (original[end] === ' ' || original[end] === '\t') end++
+      if (original[end] === '\r') end++
+      if (original[end] === '\n') end++
 
-      if (original[end] === '\n') {
-        end++
-      }
-
-      replacements.push({
-        start,
-        end,
-        text: ''
-      })
+      replacements.push({ start, end, text: '' })
 
       continue
     }
 
-    /*
-     * Reconstruct ONLY this import.
-     */
+    // Rebuild ONLY this import
     const parts = []
 
-    if (defaultImport) {
-      parts.push(defaultImport)
-    }
+    if (defaultImport) parts.push(defaultImport)
+    if (namespaceImport) parts.push(`* as ${namespaceImport}`)
+    if (namedImports.length) parts.push(`{ ${namedImports.join(', ')} }`)
 
-    if (namespaceImport) {
-      parts.push(
-        `* as ${namespaceImport}`
-      )
-    }
+    const moduleSpecifier = statement.moduleSpecifier.getText(sourceFile)
 
-    if (namedImports.length) {
-      parts.push(
-        `{ ${namedImports.join(', ')} }`
-      )
-    }
+    let newImport = `import ${parts.join(', ')} from ${moduleSpecifier}`
 
-    const moduleSpecifier =
-      statement.moduleSpecifier.getText(
-        sourceFile
-      )
-
-    let newImport =
-      `import ${parts.join(', ')} from ${moduleSpecifier}`
-
-    /*
-     * Preserve semicolon style.
-     */
-    const oldImport = original.slice(
-      statement.getStart(sourceFile),
-      statement.getEnd()
-    )
+    // Preserve semicolon style
+    const oldImport = original.slice(statement.getStart(sourceFile), statement.getEnd())
 
     if (oldImport.trimEnd().endsWith(';')) {
       newImport += ';'
@@ -352,67 +217,36 @@ function cleanFile(file) {
   }
 
   if (!replacements.length) {
-    return {
-      changed: false,
-      removed: 0
-    }
+    return { changed: false, removed: 0 }
   }
 
-  /*
-   * Work backwards so offsets don't move.
-   */
-  replacements.sort(
-    (a, b) => b.start - a.start
-  )
+  // Work backwards so offsets don't move
+  replacements.sort((a, b) => b.start - a.start)
 
   let result = original
 
   for (const replacement of replacements) {
-    result =
-      result.slice(0, replacement.start) +
-      replacement.text +
-      result.slice(replacement.end)
+    result = result.slice(0, replacement.start) + replacement.text + result.slice(replacement.end)
   }
 
-  // -----------------------------------
   // SAFETY CHECK
-  // -----------------------------------
-
-  const testFile = ts.createSourceFile(
-    file,
-    result,
-    ts.ScriptTarget.Latest,
-    true,
-    getScriptKind(file)
-  )
+  const testFile = ts.createSourceFile(file, result, ts.ScriptTarget.Latest, true, getScriptKind(file))
 
   if (testFile.parseDiagnostics.length) {
+    console.error(`❌ SKIPPED - syntax error: ${path.relative(packagesDir, file)}`)
     console.error(
-      `❌ SKIPPED - syntax error: ${path.relative(
-        packagesDir,
-        file
-      )}`
+      testFile.parseDiagnostics
+        .map(d => `   ${ts.flattenDiagnosticMessageText(d.messageText, '\n')}`)
+        .join('\n')
     )
 
-    return {
-      changed: false,
-      removed: 0
-    }
+    return { changed: false, removed: 0 }
   }
 
-  /*
-   * Only write AFTER syntax validation.
-   */
-  fs.writeFileSync(
-    file,
-    result,
-    'utf8'
-  )
+  // Only write AFTER syntax validation
+  fs.writeFileSync(file, result, 'utf8')
 
-  return {
-    changed: true,
-    removed: removedCount
-  }
+  return { changed: true, removed: removedCount }
 }
 
 // =====================================
@@ -423,9 +257,7 @@ console.log('\nScanning packages...\n')
 
 const files = getFiles(packagesDir)
 
-console.log(
-  `\nChecking ${files.length} JS/JSX/TS/TSX files...\n`
-)
+console.log(`\nChecking ${files.length} JS/JSX/TS/TSX files...\n`)
 
 let changedFiles = 0
 let removedImports = 0
@@ -433,19 +265,12 @@ let removedImports = 0
 for (const file of files) {
   const result = cleanFile(file)
 
-  if (!result.changed) {
-    continue
-  }
+  if (!result.changed) continue
 
   changedFiles++
   removedImports += result.removed
 
-  console.log(
-    `Cleaned: ${path.relative(
-      packagesDir,
-      file
-    )} (${result.removed} removed)`
-  )
+  console.log(`Cleaned: ${path.relative(packagesDir, file)} (${result.removed} removed)`)
 }
 
 console.log('\n================================')

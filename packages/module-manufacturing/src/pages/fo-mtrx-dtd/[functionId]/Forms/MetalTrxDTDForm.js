@@ -6,7 +6,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
-import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
