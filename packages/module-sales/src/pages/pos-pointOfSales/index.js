@@ -22,14 +22,12 @@ const PointOfSales = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: PointofSaleRepository.PointOfSales.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=`
-      })
+    const response = await getRequest({
+      extension: PointofSaleRepository.PointOfSales.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -85,14 +83,12 @@ const PointOfSales = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: PointofSaleRepository.PointOfSales.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: PointofSaleRepository.PointOfSales.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {

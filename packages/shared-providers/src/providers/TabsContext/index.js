@@ -7,7 +7,6 @@ import PropTypes from 'prop-types'
 import { MenuContext } from '@argus/shared-providers/src/providers/MenuContext'
 import { v4 as uuidv4 } from 'uuid'
 import { RequestsContext } from '../RequestsContext'
-import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { LockedScreensContext } from '../LockedScreensContext'
 import styles from './TabsProvider.module.css'
 

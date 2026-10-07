@@ -1,5 +1,5 @@
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'

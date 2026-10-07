@@ -57,16 +57,14 @@ export default function WorkCentersForm({ labels, recordId, maxAccess }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FoundryRepository.WorkCenter.get,
-            parameters: `_workCenterId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: FoundryRepository.WorkCenter.get,
+          parameters: `_workCenterId=${recordId}`
+        })
 
-          formik.setValues({ ...res.record, recordId: recordId })
-        }
-      } catch (exception) {}
+        formik.setValues({ ...res.record, recordId: recordId })
+      }
     })()
   }, [])
 

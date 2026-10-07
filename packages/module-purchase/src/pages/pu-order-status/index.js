@@ -21,14 +21,12 @@ const PUOrderStatus = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: PurchaseRepository.PUOrderStatus.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-      })
+    const response = await getRequest({
+      extension: PurchaseRepository.PUOrderStatus.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -57,14 +55,12 @@ const PUOrderStatus = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: PurchaseRepository.PUOrderStatus.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: PurchaseRepository.PUOrderStatus.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {

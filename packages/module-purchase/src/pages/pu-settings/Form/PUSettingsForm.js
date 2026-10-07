@@ -42,39 +42,35 @@ const PUSettingsForm = () => {
       POSHPVarPct: yup.number().min(0).max(100)
     }),
     onSubmit: async obj => {
-      try {
-        var data = []
+      var data = []
 
-        Object.entries(obj).forEach(([key, value], i) => {
-          if (arrayAllow.includes(key)) {
-            const newObj = { key: key, value: value }
-            data.push(newObj)
-          }
-        })
-
-        const response = await postRequest({
-          extension: SystemRepository.Defaults.set,
-          record: JSON.stringify({ sysDefaults: data })
-        })
-
-        updateSystemDefaults(data)
-
-        if (response) {
-          toast.success(platformLabels.Added)
+      Object.entries(obj).forEach(([key, value], i) => {
+        if (arrayAllow.includes(key)) {
+          const newObj = { key: key, value: value }
+          data.push(newObj)
         }
-      } catch (error) {}
+      })
+
+      const response = await postRequest({
+        extension: SystemRepository.Defaults.set,
+        record: JSON.stringify({ sysDefaults: data })
+      })
+
+      updateSystemDefaults(data)
+
+      if (response) {
+        toast.success(platformLabels.Added)
+      }
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        systemDefaults.list.forEach(obj => {
-          if (arrayAllow.includes(obj.key)) {
-            formik.setFieldValue(obj.key, parseInt(obj.value))
-          }
-        })
-      } catch (error) {}
+      systemDefaults.list.forEach(obj => {
+        if (arrayAllow.includes(obj.key)) {
+          formik.setFieldValue(obj.key, parseInt(obj.value))
+        }
+      })
     })()
   }, [])
 

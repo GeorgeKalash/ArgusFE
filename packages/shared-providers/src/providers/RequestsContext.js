@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import axios from 'axios'
 import jwt from 'jwt-decode'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'

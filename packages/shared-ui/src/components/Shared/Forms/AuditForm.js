@@ -15,66 +15,56 @@ export default function AuditForm({ labels, formik }) {
   const [corCurSymbol, setCorCurSymbol] = useState('')
 
   async function getDefaultBaseCurrency() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=baseCurrencyId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=baseCurrencyId`
+    })
 
-      return res?.record?.value
-    } catch (error) {}
+    return res?.record?.value
   }
 
   async function getBaseCurrencySymbol() {
-    try {
-      const getBaseCurId = await getDefaultBaseCurrency()
-      const symbol = await getCurrencySymbol(getBaseCurId)
-      setBaseCurSymbol(symbol)
-    } catch (error) {}
+    const getBaseCurId = await getDefaultBaseCurrency()
+    const symbol = await getCurrencySymbol(getBaseCurId)
+    setBaseCurSymbol(symbol)
   }
 
   async function getCorCurrencySymbol(corCurrencyId) {
-    try {
-      const symbol = await getCurrencySymbol(corCurrencyId)
-      setCorCurSymbol(symbol)
-    } catch (error) {}
+    const symbol = await getCurrencySymbol(corCurrencyId)
+    setCorCurSymbol(symbol)
   }
 
   async function getCurrencySymbol(currencyId) {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Currency.get,
-        parameters: `_recordId=${currencyId}`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.Currency.get,
+      parameters: `_recordId=${currencyId}`
+    })
 
-      return res?.record?.symbol
-    } catch (error) {}
+    return res?.record?.symbol
   }
 
   useEffect(() => {
     ;(async function () {
-      try {
-        const res = await getRequest({
-          extension: RemittanceOutwardsRepository.InwardGLInformation.get,
-          parameters: `_recordId=${formik.values?.recordId}`
-        })
+      const res = await getRequest({
+        extension: RemittanceOutwardsRepository.InwardGLInformation.get,
+        parameters: `_recordId=${formik.values?.recordId}`
+      })
 
-        res.record.corExRate = parseFloat(res.record.corExRate).toFixed(5)
-        res.record.corEvalExRate = parseFloat(res.record.corEvalExRate).toFixed(2)
-        res.record.corCommission = parseFloat(res.record.corCommission).toFixed(2)
-        res.record.corBaseAmount = parseFloat(res.record.corBaseAmount).toFixed(2)
-        res.record.corAmount = parseFloat(res.record.corAmount).toFixed(2)
-        res.record.amount = parseFloat(res.record.amount).toFixed(2)
-        res.record.baseCorCommission = parseFloat(res.record.baseCorCommission).toFixed(2)
-        res.record.commission = parseFloat(res.record.commission).toFixed(2)
-        res.record.exRate = parseFloat(res.record.exRate).toFixed(5)
-        res.record.netCommissionRevenue = parseFloat(res.record.netCommissionRevenue).toFixed(2)
-        res.record.taxAmount = parseFloat(res.record.taxAmount).toFixed(2)
+      res.record.corExRate = parseFloat(res.record.corExRate).toFixed(5)
+      res.record.corEvalExRate = parseFloat(res.record.corEvalExRate).toFixed(2)
+      res.record.corCommission = parseFloat(res.record.corCommission).toFixed(2)
+      res.record.corBaseAmount = parseFloat(res.record.corBaseAmount).toFixed(2)
+      res.record.corAmount = parseFloat(res.record.corAmount).toFixed(2)
+      res.record.amount = parseFloat(res.record.amount).toFixed(2)
+      res.record.baseCorCommission = parseFloat(res.record.baseCorCommission).toFixed(2)
+      res.record.commission = parseFloat(res.record.commission).toFixed(2)
+      res.record.exRate = parseFloat(res.record.exRate).toFixed(5)
+      res.record.netCommissionRevenue = parseFloat(res.record.netCommissionRevenue).toFixed(2)
+      res.record.taxAmount = parseFloat(res.record.taxAmount).toFixed(2)
 
-        setiwiFieldsIFields(res.record)
-        await getBaseCurrencySymbol()
-        await getCorCurrencySymbol(res?.record?.corCurrencyId)
-      } catch (error) {}
+      setiwiFieldsIFields(res.record)
+      await getBaseCurrencySymbol()
+      await getCorCurrencySymbol(res?.record?.corCurrencyId)
     })()
   }, [])
 

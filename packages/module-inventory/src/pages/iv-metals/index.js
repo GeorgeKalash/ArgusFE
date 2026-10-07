@@ -70,14 +70,12 @@ const TaxCodes = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: InventoryRepository.Metals.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (e) {}
+    await postRequest({
+      extension: InventoryRepository.Metals.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {

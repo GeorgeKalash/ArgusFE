@@ -13,7 +13,6 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -53,16 +52,14 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.FIDocTypeDefaults.get,
-            parameters: `_dtId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.FIDocTypeDefaults.get,
+          parameters: `_dtId=${recordId}`
+        })
 
-          formik.setValues({ ...res.record, recordId: recordId })
-        }
-      } catch (exception) {}
+        formik.setValues({ ...res.record, recordId: recordId })
+      }
     })()
   }, [])
 

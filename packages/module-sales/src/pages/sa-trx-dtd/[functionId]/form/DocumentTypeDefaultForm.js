@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -55,46 +55,42 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, f
         })
     }),
     onSubmit: async obj => {
-      try {
-        const submitObj = {
-          ...obj,
-          allocateBy: obj.allocateBy === null ? '' : obj.allocateBy
-        }
+      const submitObj = {
+        ...obj,
+        allocateBy: obj.allocateBy === null ? '' : obj.allocateBy
+      }
 
-        const response = await postRequest({
-          extension: SaleRepository.DocumentTypeDefault.set,
-          record: JSON.stringify(submitObj)
-        })
+      const response = await postRequest({
+        extension: SaleRepository.DocumentTypeDefault.set,
+        record: JSON.stringify(submitObj)
+      })
 
-        if (!formik.values.recordId) {
-          formik.setFieldValue('recordId', formik.values.dtId)
+      if (!formik.values.recordId) {
+        formik.setFieldValue('recordId', formik.values.dtId)
 
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SaleRepository.DocumentTypeDefault.get,
-            parameters: `_dtId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            recordId: res.record.dtId,
-            allocateBy: res.record.allocateBy || '',
-            disableSKULookup: Boolean(res.record.disableSKULookup)
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          recordId: res.record.dtId,
+          allocateBy: res.record.allocateBy || '',
+          disableSKULookup: Boolean(res.record.disableSKULookup)
+        })
+      }
     })()
   }, [])
 

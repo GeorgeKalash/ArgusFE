@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -38,20 +38,18 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
       dtId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: SaleRepository.DocumentTypeDefault.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: SaleRepository.DocumentTypeDefault.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!formik.values.recordId) {
-          formik.setFieldValue('recordId', formik.values.dtId)
+      if (!formik.values.recordId) {
+        formik.setFieldValue('recordId', formik.values.dtId)
 
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
@@ -60,16 +58,14 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SaleRepository.DocumentTypeDefault.get,
-            parameters: `_dtId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${recordId}`
+        })
 
-          formik.setValues({ ...res.record, recordId: res.record.dtId })
-        }
-      } catch (exception) {}
+        formik.setValues({ ...res.record, recordId: res.record.dtId })
+      }
     })()
   }, [])
 
