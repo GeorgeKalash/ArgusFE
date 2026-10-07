@@ -34,7 +34,6 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 const CashCountForm = ({ recordId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [editMode, setEditMode] = useState(!!recordId)
   const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -92,7 +91,7 @@ const CashCountForm = ({ recordId, window }) => {
     functionId: SystemFunction.CashCountTransaction,
     access: access,
     hasDT: false,
-    enabled: !editMode
+    enabled: !recordId
   })
 
   const { formik } = useForm({
@@ -176,11 +175,12 @@ const CashCountForm = ({ recordId, window }) => {
         toast.success(platformLabels.Added)
         getData(_recordId)
       } else toast.success(platformLabels.Edited)
-      setEditMode(true)
 
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     !editMode && getDefaultDT()
