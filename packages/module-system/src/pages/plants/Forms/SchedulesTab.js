@@ -121,9 +121,8 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId)
-        try {
-          const days = await getDays()
+      if (recordId) {
+        const days = await getDays()
 
           const res = await getRequest({
             extension: SystemRepository.PlantsSchedule.qry,
@@ -163,7 +162,7 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
               id: index + 1
             }))
           }))
-        } catch (error) {}
+      }
     })()
   }, [recordId])
 
