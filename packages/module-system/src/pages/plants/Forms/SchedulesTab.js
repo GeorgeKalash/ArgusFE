@@ -55,23 +55,21 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
           dow: schedule.dow
         }))
       }
-      try {
-        const res = await postRequest({
-          extension: SystemRepository.PlantsSchedule.set2,
-          record: JSON.stringify(data)
-        })
+      const res = await postRequest({
+        extension: SystemRepository.PlantsSchedule.set2,
+        record: JSON.stringify(data)
+      })
 
-        if (res) toast.success(platformLabels.Edited)
-        setStore(prevStore => ({
-          ...prevStore,
-          schedules: values.schedules.map((item, index) => ({
-            ...item,
-            id: index + 1,
-            plantId: recordId,
-            dow: item.dow
-          }))
+      if (res) toast.success(platformLabels.Edited)
+      setStore(prevStore => ({
+        ...prevStore,
+        schedules: values.schedules.map((item, index) => ({
+          ...item,
+          id: index + 1,
+          plantId: recordId,
+          dow: item.dow
         }))
-      } catch (error) {}
+      }))
     }
   })
 
@@ -123,9 +121,8 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId)
-        try {
-          const days = await getDays()
+      if (recordId) {
+        const days = await getDays()
 
           const res = await getRequest({
             extension: SystemRepository.PlantsSchedule.qry,
@@ -165,7 +162,7 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
               id: index + 1
             }))
           }))
-        } catch (error) {}
+      }
     })()
   }, [recordId])
 

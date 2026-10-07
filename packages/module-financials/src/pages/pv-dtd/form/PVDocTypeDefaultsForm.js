@@ -60,16 +60,14 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.FIDocTypeDefaults.get,
-            parameters: `_dtId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.FIDocTypeDefaults.get,
+          parameters: `_dtId=${recordId}`
+        })
 
-          formik.setValues({ ...res.record, recordId: res.record.dtId })
-        }
-      } catch (exception) {}
+        formik.setValues({ ...res.record, recordId: res.record.dtId })
+      }
     })()
   }, [])
 

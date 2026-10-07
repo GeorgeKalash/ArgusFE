@@ -59,16 +59,14 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: DocumentReleaseRepository.ReleaseIndicator.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: DocumentReleaseRepository.ReleaseIndicator.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

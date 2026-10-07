@@ -43,16 +43,14 @@ const ReleaseCodeTab = ({ labels, maxAccess, storeRecordId }) => {
   })
 
   async function fetchGridData() {
-    try {
-      if (!storeRecordId) {
-        return { list: [] }
-      }
+    if (!storeRecordId) {
+      return { list: [] }
+    }
 
-      return await getRequest({
-        extension: AccessControlRepository.UserReleaseCode.qry,
-        parameters: `_userId=${storeRecordId}&_filter=`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: AccessControlRepository.UserReleaseCode.qry,
+      parameters: `_userId=${storeRecordId}&_filter=`
+    })
   }
 
   function openForm() {
@@ -75,14 +73,12 @@ const ReleaseCodeTab = ({ labels, maxAccess, storeRecordId }) => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: AccessControlRepository.UserReleaseCode.del,
-        record: JSON.stringify(obj)
-      })
-      toast.success(platformLabels.Deleted)
-      invalidate()
-    } catch (error) {}
+    await postRequest({
+      extension: AccessControlRepository.UserReleaseCode.del,
+      record: JSON.stringify(obj)
+    })
+    toast.success(platformLabels.Deleted)
+    invalidate()
   }
 
   return (

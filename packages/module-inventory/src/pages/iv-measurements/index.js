@@ -21,14 +21,12 @@ const Measurement = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-    try {
-      const response = await getRequest({
-        extension: InventoryRepository.Measurement.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
-      })
+    const response = await getRequest({
+      extension: InventoryRepository.Measurement.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -71,14 +69,12 @@ const Measurement = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: InventoryRepository.Measurement.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: InventoryRepository.Measurement.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {

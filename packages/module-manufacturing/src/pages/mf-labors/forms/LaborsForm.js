@@ -75,15 +75,13 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: ManufacturingRepository.Labor.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: ManufacturingRepository.Labor.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [recordId])
 

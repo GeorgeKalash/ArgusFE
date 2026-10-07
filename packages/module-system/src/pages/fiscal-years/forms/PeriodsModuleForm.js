@@ -19,26 +19,24 @@ const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
   const editMode = !!recordId
 
   const post = async obj => {
-    try {
-      const data = {
-        fiscalYear: recordId,
-        periodId: row.periodId,
-        fiscalModules: obj
-          .filter(({ status }) => status !== 0)
-          .map(({ id, status, ...rest }) => ({
-            status: parseInt(status, 10),
-            ...rest
-          }))
-      }
+    const data = {
+      fiscalYear: recordId,
+      periodId: row.periodId,
+      fiscalModules: obj
+        .filter(({ status }) => status !== 0)
+        .map(({ id, status, ...rest }) => ({
+          status: parseInt(status, 10),
+          ...rest
+        }))
+    }
 
-      await postRequest({
-        extension: SystemRepository.FiscalModulePack.set2,
-        record: JSON.stringify(data)
-      })
+    await postRequest({
+      extension: SystemRepository.FiscalModulePack.set2,
+      record: JSON.stringify(data)
+    })
 
-      toast.success(platformLabels.Edited)
-      window.close()
-    } catch (error) {}
+    toast.success(platformLabels.Edited)
+    window.close()
   }
 
   const { formik } = useForm({
@@ -86,44 +84,42 @@ const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
 
   const getModules = () => {
     ;(async function () {
-      try {
-        const moduleData = await getAllModules()
+      const moduleData = await getAllModules()
 
-        const res = await getRequest({
-          extension: SystemRepository.FiscalModule.qry,
-          parameters: `_fiscalYear=${recordId}&_periodId=${row.periodId}`
-        })
-        const modules = []
+      const res = await getRequest({
+        extension: SystemRepository.FiscalModule.qry,
+        parameters: `_fiscalYear=${recordId}&_periodId=${row.periodId}`
+      })
+      const modules = []
 
-        moduleData.forEach(x => {
-          const obj = {
-            fiscalYear: recordId,
-            periodId: row.periodId,
-            moduleId: parseInt(x.key, 10),
-            moduleName: x.value,
-            status: 0,
-            statusName: null
-          }
+      moduleData.forEach(x => {
+        const obj = {
+          fiscalYear: recordId,
+          periodId: row.periodId,
+          moduleId: parseInt(x.key, 10),
+          moduleName: x.value,
+          status: 0,
+          statusName: null
+        }
 
-          res?.list?.forEach(module => {
-            if (module.moduleId === obj.moduleId) {
-              obj.status = module.status
-              obj.statusName = module.statusName
-            }
-          })
-
-          modules.push(obj)
-        })
-
-        const mappedModules = modules.map(({ id, ...rest }, index) => {
-          return {
-            id: index + 1,
-            ...rest
+        res?.list?.forEach(module => {
+          if (module.moduleId === obj.moduleId) {
+            obj.status = module.status
+            obj.statusName = module.statusName
           }
         })
 
-        formik.setFieldValue('modules', mappedModules)
-      } catch (error) {}
+        modules.push(obj)
+      })
+
+      const mappedModules = modules.map(({ id, ...rest }, index) => {
+        return {
+          id: index + 1,
+          ...rest
+        }
+      })
+
+      formik.setFieldValue('modules', mappedModules)
     })()
   }
 

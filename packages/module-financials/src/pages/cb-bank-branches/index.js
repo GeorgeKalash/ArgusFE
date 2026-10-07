@@ -46,16 +46,14 @@ const BankBranches = () => {
   })
 
   async function fetchWithFilter({ filters, pagination }) {
-    try {
-      if (filters?.qry) {
-        return await getRequest({
-          extension: CashBankRepository.BankBranches.snapshot,
-          parameters: `_filter=${filters.qry}`
-        })
-      } else {
-        return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-      }
-    } catch (error) {}
+    if (filters?.qry) {
+      return await getRequest({
+        extension: CashBankRepository.BankBranches.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   const columns = [
@@ -104,14 +102,12 @@ const BankBranches = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: CashBankRepository.BankBranches.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: CashBankRepository.BankBranches.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (

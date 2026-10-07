@@ -64,14 +64,12 @@ const CostCenterGroup = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: GeneralLedgerRepository.CostCenterGroup.del,
-        record: JSON.stringify(obj)
-      })
-      toast.success(platformLabels.Deleted)
-      invalidate()
-    } catch (error) {}
+    await postRequest({
+      extension: GeneralLedgerRepository.CostCenterGroup.del,
+      record: JSON.stringify(obj)
+    })
+    toast.success(platformLabels.Deleted)
+    invalidate()
   }
   function openForm(recordId) {
     stack({
