@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography'
 import Icon from '@argus/shared-core/src/@core/components/icon'
 import { useAuth } from '@argus/shared-hooks/src/hooks/useAuth'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { KVSRepository } from '@argus/shared-repositories/src/repositories/KVSRepository'
+import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 import styles from './Navigation.module.css'
 
 const groupByModule = (guides, section) => {
