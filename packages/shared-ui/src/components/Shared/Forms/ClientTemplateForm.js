@@ -1,4 +1,4 @@
-import { Grid, Button, CircularProgress } from '@mui/material'
+import { Grid, CircularProgress } from '@mui/material'
 import { useEffect, useState, useContext } from 'react'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import * as yup from 'yup'

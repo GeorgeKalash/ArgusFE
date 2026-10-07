@@ -1,5 +1,5 @@
 // ** React Imports
-import { useContext, useEffect } from 'react'
+import { useEffect } from 'react'
 
 // ** Emotion Imports
 import createCache from '@emotion/cache'

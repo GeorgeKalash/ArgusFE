@@ -1,5 +1,5 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi, formatDateForGetApI, formatDateToISO } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateForGetApI, formatDateToISO } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'

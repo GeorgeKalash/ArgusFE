@@ -19,7 +19,6 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 import { formatDateTimeFromApi, formatDayIdToDefault } from '@argus/shared-domain/src/lib/date-helper'
-import dayjs from 'dayjs'
 
 const AttSettings = () => {
   const { postRequest } = useContext(RequestsContext)
