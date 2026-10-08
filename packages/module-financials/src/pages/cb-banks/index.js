@@ -33,7 +33,8 @@ const CbBank = () => {
     query: { data },
     labels: _labels,
     invalidate,
-    access
+    access,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashBankRepository.CbBank.page,
@@ -108,6 +109,7 @@ const CbBank = () => {
           onDelete={del}
           pageSize={50}
           paginationType='api'
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
