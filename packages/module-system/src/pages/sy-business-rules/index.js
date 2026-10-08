@@ -119,6 +119,7 @@ const BusinessRules = () => {
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'
+          refetch={refetch}
         />
       </Grow>
     </VertLayout>
