@@ -433,8 +433,8 @@ const Navigation = props => {
               <>
                 <NotificationRing
                   labels={{
-                    whatsNew: platformLabels.WhatsNew,
-                    otherModules: platformLabels.OtherModules
+                    whatsNew: platformLabels.whatsNew,
+                    otherModules: platformLabels.otherModules
                   }}
                 />
                 <UserDropdown settings={settings} />

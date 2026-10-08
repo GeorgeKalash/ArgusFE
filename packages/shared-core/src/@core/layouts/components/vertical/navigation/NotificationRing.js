@@ -108,7 +108,10 @@ const NotificationRing = ({ labels = {} }) => {
 
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(_, reason) => {
+          if (reason === 'backdropClick') return
+          handleClose()
+        }}
         maxWidth={false}
         classes={{ paper: `${styles.releaseDialog} ${maximized ? styles.releaseDialogMax : ''}` }}
       >
