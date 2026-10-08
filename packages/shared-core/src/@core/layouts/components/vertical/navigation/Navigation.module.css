@@ -343,6 +343,10 @@
   height: 1.3rem !important;
 }
 
+.releaseRing {
+  margin-inline-start: auto !important;
+}
+
 .userMenu {
   background-color: #f4f5fa !important;
   margin-top: 12px !important;
@@ -848,3 +852,195 @@
     font-size: 0.52rem !important;
   }
 }
+/* ---------- Release notifications ---------- */
+.releaseDialog {
+  --rel-title: 1rem;
+  --rel-subject: 0.9rem;
+  --rel-text: 0.8rem;
+
+  background-color: #f4f5fa !important;
+  width: 900px;
+  max-width: 92vw !important;
+  height: 560px;
+  max-height: 85vh !important;
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden !important;
+  border-radius: 8px !important;
+}
+
+.releaseHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid #dfe3ec;
+}
+
+.releaseHeaderTitle {
+  color: #383838 !important;
+  font-weight: 700 !important;
+  font-size: calc(var(--rel-title) * 1.1) !important;
+  line-height: 1.2 !important;
+}
+
+.releaseClose {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #383838;
+}
+
+.releaseBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
+.releaseSide,
+.releaseDetail {
+  background-color: #fff;
+  border: 1px solid #dfe3ec;
+  border-radius: 8px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.releaseSide {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 6px;
+}
+
+.releaseDetail {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px;
+}
+
+.releaseModule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #383838;
+  font-size: var(--rel-subject);
+  line-height: 1.2;
+  user-select: none;
+}
+
+.releaseModule:hover {
+  background-color: #eef0f7;
+}
+
+.releaseModuleActive,
+.releaseModuleActive:hover {
+  background-color: #e3e7f5;
+  font-weight: 600;
+}
+
+.releaseModuleCount {
+  color: #6b7087;
+  font-size: var(--rel-text);
+}
+
+.releaseOther {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #dfe3ec;
+}
+
+.releaseOtherToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  color: #383838;
+  font-weight: 600;
+  font-size: var(--rel-subject);
+  line-height: 1.2;
+  user-select: none;
+}
+
+.releaseOtherToggle svg {
+  flex-shrink: 0;
+}
+
+.releaseDetailTitle {
+  color: #383838 !important;
+  font-weight: 700 !important;
+  font-size: var(--rel-title) !important;
+  line-height: 1.2 !important;
+  padding-bottom: 8px;
+}
+
+.releaseItem {
+  padding: 8px 0;
+}
+
+.releaseItem + .releaseItem {
+  border-top: 1px solid #dfe3ec;
+}
+
+.releaseSubject {
+  color: #383838 !important;
+  font-weight: 600 !important;
+  font-size: var(--rel-subject) !important;
+  line-height: 1.2 !important;
+}
+
+.releaseGuide {
+  color: #4e515e !important;
+  font-size: var(--rel-text) !important;
+  line-height: 1.4 !important;
+  padding-top: 3px;
+  white-space: pre-line; 
+}
+
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .releaseDialog { --rel-title: 0.8rem; --rel-subject: 0.74rem; --rel-text: 0.68rem; width: 800px; height: 500px; }
+  .releaseSide { width: 220px; }
+}
+
+@media (max-width: 1366px) {
+  .releaseDialog { --rel-title: 0.74rem; --rel-subject: 0.7rem; --rel-text: 0.64rem; width: 740px; height: 460px; }
+  .releaseSide { width: 200px; }
+}
+
+@media (max-width: 1024px) {
+  .releaseDialog { --rel-title: 0.7rem; --rel-subject: 0.66rem; --rel-text: 0.6rem; width: 640px; }
+  .releaseSide { width: 180px; }
+}
+
+@media (max-width: 768px) {
+  .releaseDialog { --rel-title: 0.68rem; --rel-subject: 0.64rem; --rel-text: 0.6rem; }
+  .releaseBody { flex-direction: column; }
+  .releaseSide { width: auto; max-height: 38%; }
+}
+
+@media (max-width: 600px) {
+  .releaseDialog { --rel-title: 0.64rem; --rel-subject: 0.6rem; --rel-text: 0.56rem; }
+}
+
+.releaseActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.releaseDialogMax {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
