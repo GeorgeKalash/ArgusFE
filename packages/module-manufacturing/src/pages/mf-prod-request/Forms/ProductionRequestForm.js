@@ -11,6 +11,7 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import PRItemSize from '@argus/shared-ui/src/components/Shared/PRItemSize'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -29,8 +30,10 @@ import PreviewPR2 from './PreviewPR2'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 const PROD_REQ_TYPE = {
   TopSales: 1,
   NewItems: 2,
@@ -67,6 +70,9 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       periodId: null,
       periodName: null,
       type: null,
+      metalId: null,
+      pcs: 0,
+      qty: 0,
       typeName: '',
       notes: '',
       status: 1
@@ -80,9 +86,9 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       itemName: '',
       qty: 0,
       pcs: null,
-      itemWeight: null,
-      metalId: null
-    }]
+      itemWeight: null
+    }],
+    sizes: []
   }
     
   const { formik } = useForm({
@@ -105,15 +111,31 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       )
     }),
     onSubmit: async obj => {
+      const items = obj.items.map(({ sizes, ...item }, index) => ({
+        ...item,
+        requestId: recordId,
+        seqNo: index + 1
+      }))
+
+      const sizes = obj.items.flatMap((item, index) =>
+        (item.sizes || [])
+          .filter(s => s.sizeId)
+          .map((s, i) => ({
+            requestId: recordId,
+            seqNo: index + 1,
+            sizeSeqNo: i + 1,
+            sizeId: s.sizeId,
+            pcs: s.pcs || 0,
+            qty: s.qty || 0
+          }))
+      )
+
       const res = await postRequest({
         extension: ManufacturingRepository.ProductionRequest.set2,
         record: JSON.stringify({
           header: { ...obj.header, date: formatDateToApi(obj.header.date) },
-          items: obj.items?.map((item, index) => ({
-            ...item,
-            requestId: recordId,
-            seqNo: index + 1
-          }))
+          items,
+          sizes
         })
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -140,17 +162,23 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       formik.values.header.type
     )
 
+  const { type, plantGroupId, metalId } = formik.values.header;
+
   const isPreviewDisabled =
     !canPreview ||
     disablePreview ||
-    (formik.values.header.type === PROD_REQ_TYPE.TopSales &&
-      !formik.values.header.plantGroupId)
+    (type === PROD_REQ_TYPE.TopSales && (!plantGroupId || !metalId));
 
   async function refetchForm(requestId) {
     const { record } = await getRequest({
       extension: ManufacturingRepository.ProductionRequest.get2,
       parameters: `_recordId=${requestId}`
     })
+
+    const sizesBySeq = (record?.sizes || []).reduce((acc, s) => {
+      ;(acc[s.seqNo] ||= []).push(s)
+      return acc
+    }, {})
       
     formik.resetForm({
       values: {
@@ -163,7 +191,8 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           record?.items?.map((item, index) => {
             return {
               ...item,
-              id: index + 1
+              id: index + 1,
+              sizes: (sizesBySeq[item.seqNo] || []).map((s, i) => ({ ...s, id: i + 1 }))
             }
           })
           : initialValues.items
@@ -187,6 +216,13 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     invalidate()
   }
 
+  const setTotals = items => {
+    const totalQty = (items || []).reduce((sum, row) => sum + (Number(row.qty) || 0), 0)
+    const totalPcs = (items || []).reduce((sum, row) => sum + (Number(row.pcs) || 0), 0)
+
+    formik.setFieldValue('header.qty', totalQty)
+    formik.setFieldValue('header.pcs', totalPcs)
+  }
 
   const onChangeType = (_, { key, value } = {}) => {
     const type = key ? parseFloat(key) : null
@@ -195,6 +231,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     if (formik.values.header.type && formik.values.header.type !== type && hasFilledItems) {
       stackError({ message: platformLabels.ChangingType })
       formik.setFieldValue('items', initialValues.items)
+      setTotals(initialValues.items)
     }
 
     formik.setFieldValue('header.typeName', value || '')
@@ -249,14 +286,21 @@ export default function ProductionRequestForm({ recordId, labels, access, window
   }, [formik.values.header.date])
 
   const mergePreviewedItems = async newItems => {
+    const sizesByItem = new Map(
+      (formik.values.items || [])
+        .filter(item => item.itemId)
+        .map(item => [item.itemId, item.sizes || []])
+    )
 
     const merged = newItems.map((item, index) => ({
       ...item,
       id: index + 1,
-      seqNo: index + 1
+      seqNo: index + 1,
+      sizes: sizesByItem.get(item.itemId) || []
     }))
 
     await formik.setFieldValue('items', merged)
+    setTotals(merged)
     setDisablePreview(true)
   }
 
@@ -266,6 +310,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         Component: PreviewPR,
         props: {
           plantGroupId: formik.values.header.plantGroupId,
+          metalId: formik.values.header.metalId,
           requestId: formik.values.recordId || 0,
           parentFormik: formik,
           onSelect: mergePreviewedItems
@@ -355,7 +400,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        let itemWeight = null, metalRef = null, metalId = null, pcs=0, qty =0
+        let itemWeight = null, pcs=0, qty =0
 
         if (newRow?.itemId) {
           const res = await getRequest({
@@ -364,16 +409,12 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           })
 
           itemWeight = res?.record?.weight
-          metalId = res?.record?.metalId
-          metalRef = res?.record?.metalRef
           if (newRow?.pcs) qty = itemWeight ? newRow?.pcs * itemWeight : 0
           else if (newRow?.qty) pcs = itemWeight ? newRow?.qty / itemWeight : 0
         }
 
         update({
           itemWeight,
-          metalRef,
-          metalId,
           qty,
           pcs
         })
@@ -392,15 +433,6 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       component: 'numberfield',
       label: labels.weight,
       name: 'itemWeight',
-      flex: 1,
-      props: {
-        readOnly: true
-      }
-    },
-    {
-      component: 'textfield',
-      label: labels.metal,
-      name: 'metalRef',
       flex: 1,
       props: {
         readOnly: true
@@ -447,6 +479,33 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         update({qty})
       }
     },
+    {
+      component: 'button',
+      name: 'sizes',
+      label: labels.sizes,
+      flex: 0.5,
+      props: {
+        onCondition: row => {
+          return {
+            disabled: !row?.itemId
+          }
+        }
+      },
+      onClick: (e, row) => {
+        stack({
+          Component: PRItemSize,
+          props: {
+            readOnly: isPosted,
+            sizes: row.sizes || [],
+            onSave: sizes =>
+              formik.setFieldValue(
+                'items',
+                formik.values.items.map(r => (r.id === row.id ? { ...r, sizes } : r))
+              )
+          }
+        })
+      }
+    }
   ]
 
   async function onValidationRequired() {
@@ -584,6 +643,27 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Metals.qry}
+                    name='header.metalId'
+                    label={labels.metal}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik?.values?.header}
+                    readOnly={isPosted || formik.values.items?.some(row => row.itemId)}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('header.metalId', newValue?.recordId || null)
+                    }}
+                    error={formik?.touched?.header?.metalId && Boolean(formik?.errors?.header?.metalId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <CustomTextArea
                     name='header.notes'
                     label={labels.notes}
@@ -633,6 +713,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           <DataGrid
             onChange={value => {
               formik.setFieldValue('items', value)
+              setTotals(value)
               setDisablePreview(true)
             }}
             value={formik?.values?.items}
@@ -647,6 +728,30 @@ export default function ProductionRequestForm({ recordId, labels, access, window
             onValidationRequired={onValidationRequired}
           />
         </Grow>
+        <Fixed>
+          <Grid container spacing={2} sx={{ pt: 2 }} justifyContent='flex-end'>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='header.qty'
+                label={labels.qty}
+                value={formik.values.header.qty}
+                decimalScale={2}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='header.pcs'
+                label={labels.pcs}
+                value={formik.values.header.pcs}
+                decimalScale={0}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )

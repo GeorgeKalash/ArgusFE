@@ -13,7 +13,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
-const PreviewPR = ({ requestId, plantGroupId, parentFormik, onSelect, window }) => {
+const PreviewPR = ({ requestId, plantGroupId, metalId, parentFormik, onSelect, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -192,7 +192,7 @@ const PreviewPR = ({ requestId, plantGroupId, parentFormik, onSelect, window }) 
     ;(async function () {
       const res = await getRequest({
         extension: ManufacturingRepository.ProductionRequest.preview,
-        parameters: `_requestId=${requestId}&_plantGroupId=${plantGroupId}`
+        parameters: `_requestId=${requestId}&_plantGroupId=${plantGroupId}&_metalId=${metalId}`
       })
 
       if (res?.list?.length > 0) {
