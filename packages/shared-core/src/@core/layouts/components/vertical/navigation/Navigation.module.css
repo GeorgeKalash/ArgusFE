@@ -343,6 +343,10 @@
   height: 1.3rem !important;
 }
 
+.releaseRing {
+  margin-inline-start: auto !important;
+}
+
 .userMenu {
   background-color: #f4f5fa !important;
   margin-top: 12px !important;

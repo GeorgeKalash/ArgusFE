@@ -101,7 +101,7 @@ const NotificationRing = ({ labels = {} }) => {
         max={9}
         overlap='circular'
         onClick={handleOpen}
-        className={styles.userDropdownIcon}
+        className={`${styles.userDropdownIcon} ${styles.releaseRing}`}
       >
         <Icon icon='mdi:bell-outline' color='white' fontSize='1.8rem' />
       </Badge>
