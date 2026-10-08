@@ -240,16 +240,11 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         data: bodyFormData
       })
         .then(response => {
-          if (!disableLoading) decrementRequests()
-
-          if (body?.noHandleError) return resolve(response.data)
           resolve(response.data)
         })
         .catch(error => {
-          if (!disableLoading) decrementRequests()
-
           if (body?.noHandleError) {
-            return resolve(error.response.data)
+            return resolve(error?.response?.data ?? {})
           }
           showError({
             message: error,
@@ -257,6 +252,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
           })
 
           if (throwError) reject(error)
+          else resolve({}) 
+        })
+        .finally(() => {
+          if (!disableLoading) decrementRequests()
         })
     })
   }
