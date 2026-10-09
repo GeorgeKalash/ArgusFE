@@ -186,6 +186,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       {
         id: 1,
         orderId: recordId || 0,
+        barcode: null,
         itemId: null,
         sku: '',
         itemName: '',
@@ -421,7 +422,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     filteredMeasurements.current = arrayMU
   }
 
-  async function fillSkuData(update, addRow, newRow) {
+  async function barcodeSkuSelection(update, addRow, newRow) {
     const phycialProperty = await getItemPhysProp(newRow?.itemId)
     const itemInfo = await getItem(newRow?.itemId)
 
@@ -432,12 +433,66 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     await fillItemObject(update, addRow, newRow, phycialProperty, itemInfo, vendorPrice)
   }
 
+  const getBarcodeData = async barcode => {
+    if (!formik.values?.header?.siteId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Barcodes.get2,
+      parameters: `_barcode=${barcode}&_siteId=${formik.values?.header?.siteId}`
+    })
+
+    return res?.record
+  }
+
+  const getVendorInvoice = async (vendorId, vendorDocRef = '') => {
+    if (!vendorId) return 
+
+    const res = await postRequest({
+      extension: PurchaseRepository.PurchaseInvoiceHeader.assert,
+      record: JSON.stringify({vendorId, vendorDocRef})
+    })
+    return res.record == null
+  }
+
   const columns = [
+    {
+      component: 'textfield',
+      label: labels.barcode,
+      name: 'barcode',
+      updateOn: 'blur',
+      jumpToNextLine,
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
+        if (!newRow?.barcode) return update({ barcode: null })
+        const barcodeInfo = await getBarcodeData(newRow?.barcode)
+
+        const resetRow = () => {
+          update({
+            ...initialValues.items[0],
+            id: newRow.id
+          })
+        }
+        if (!barcodeInfo) {
+          resetRow()
+        } else {
+          await barcodeSkuSelection(
+            update,
+            addRow,
+            {
+              ...newRow,
+              taxId: barcodeInfo?.taxId ?? newRow?.taxId, 
+              muId: barcodeInfo?.muId ?? newRow?.muId,
+              itemId: barcodeInfo?.itemId ?? newRow?.itemId,
+              sku: barcodeInfo?.sku ?? newRow?.sku,
+              itemName: barcodeInfo?.itemName ?? newRow?.itemName
+            }
+          )
+        }
+      }
+    },
     {
       component: 'resourcecombobox',
       name: 'promotionTypeName',
       label: labels.promotionType,
-      hidden: true,
       props: {
         datasetId: DataSets.PROMOTION_TYPE,
         valueField: 'key',
@@ -446,7 +501,10 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
           { from: 'key', to: 'promotionType' },
           { from: 'value', to: 'promotionTypeName' }
         ]
-      }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row?.itemId }
+      },
     },
     {
       component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
@@ -495,7 +553,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
             return
           }
 
-          return fillSkuData(update, addRow, newRow)
+          return barcodeSkuSelection(update, addRow, newRow)
         }
 
         if (!newRow?.sku) return resetRow(newRow.id)
@@ -521,7 +579,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
           return
         }
 
-        return fillSkuData(update, addRow, {
+        return barcodeSkuSelection(update, addRow, {
           ...newRow,
           itemId: record.recordId
         })
@@ -685,7 +743,10 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
         update(data)
-      }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row?.promotionType == 3 || row?.promotionType == 4 }
+      },
     },
     {
       component: 'button',
@@ -1339,6 +1400,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
 
     const updatedRowValues = {
       id: newRow?.id,
+      barcode: newRow?.barcode,
       decimals: measurementSchedule?.decimals,
       sku: itemInfo?.sku || '',
       itemName: itemInfo?.name || '',
@@ -1949,6 +2011,22 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     )
   }
 
+  const validateVendorInvoice = async (vendorId, vendorDocRef) => {
+    const invoiceExist = await getVendorInvoice(vendorId, vendorDocRef)
+
+    if (!invoiceExist) {
+      stackError({ message: labels.invoiceExist })
+      formik.setFieldValue('header.vendorDocRef', '')
+      formik.setFieldValue('header.vendorRef', '')
+      formik.setFieldValue('header.vendorName', '')
+      formik.setFieldValue('header.vendorId', null)
+
+      return false
+    }
+
+    return true
+  }
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -2059,6 +2137,16 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                 readOnly={isPosted}
                 maxLength='15'
                 onChange={formik.handleChange}
+                onBlur={async e => {
+                  const vendorDocRef = e?.target?.value ?? ''
+
+                  if(!editMode && vendorDocRef){
+                    const isValid = await validateVendorInvoice(formik.values?.header?.vendorId, vendorDocRef)
+                    if (!isValid) return
+                  }
+                 
+                  formik.setFieldValue('header.vendorDocRef', vendorDocRef)
+                }}
                 onClear={() => formik.setFieldValue('header.vendorDocRef', '')}
                 error={formik.touched.header?.vendorDocRef && Boolean(formik.errors.header?.vendorDocRef)}
               />
@@ -2166,7 +2254,12 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                   { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'FL Name' }
                 ]}
-                onChange={(event, newValue) => {
+                onChange={async (_, newValue) => {
+                  if (!editMode && newValue?.recordId){
+                    const isValid = await validateVendorInvoice(newValue.recordId, formik.values?.header?.vendorDocRef)
+                    if (!isValid) return
+                  }
+
                   fillVendorData(newValue)
                 }}
                 secondFieldName={'header.vendorName'}
