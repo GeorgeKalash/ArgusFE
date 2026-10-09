@@ -63,13 +63,15 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       designerName: '',
       isInactive: false,
       developerId: null,
+      fileReference: '',
       parentId: null
     },
     behavior: { fieldBehavior },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required()
+      name: yup.string().required(),
+      fileReference: yup.string().required()
     }),
     onSubmit: async obj => {
       const data = {
@@ -86,13 +88,14 @@ export default function DesignsForm({ labels, access, store, setStore }) {
 
         await imageUploadRef.current.submit()
       }
-      fetchData(res.recordId)
 
       if (!obj.recordId) {
         formik.setFieldValue('recordId', res.recordId)
-        setStore({ recordId: res.recordId })
+        setStore({ recordId: res?.recordId })
       }
-      toast.success(!obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      
+      fetchData(res.recordId)
       invalidate()
     }
   })
@@ -106,6 +109,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
   }, [])
 
   async function fetchData(recordId) {
+    if (!recordId) return
     getRequest({
       extension: ManufacturingRepository.Design.get,
       parameters: `_recordId=${recordId}`
@@ -125,7 +129,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       })
 
       setStore({
-        recordId: res.record.recordId
+        recordId: res?.record?.recordId
       })
     })
   }
@@ -396,6 +400,18 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     seqNo={0}
                     recordId={formik?.values?.recordId}
                     height={250}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='fileReference'
+                    required
+                    label={labels.fileReference}
+                    value={formik.values.fileReference}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('fileReference ', '')}
+                    error={formik.touched.fileReference && Boolean(formik.errors.fileReference)}
                   />
                 </Grid>
                 <Grid item xs={12}>
