@@ -71,7 +71,8 @@ export const PurchaseRepository = {
     generate: service + 'generateIVC',
     preview: service + 'previewIVC',
     sync: service + 'syncIVC',
-    verify: service + 'verifyIVC'
+    verify: service + 'verifyIVC',
+    assert: service + 'assertIVC'
   },
   Invoice: {
     snapshot: service + 'snapshotINV'

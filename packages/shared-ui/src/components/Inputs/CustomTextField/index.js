@@ -32,6 +32,8 @@ const CustomTextField = ({
   startIcons = [],
   endIcons = [],
   InputLabelProps,
+  onBlur,
+  onFocus,
   ...props
 }) => {
   const name = props.name
@@ -169,11 +171,15 @@ const CustomTextField = ({
       size={size}
       fullWidth={fullWidth}
       autoFocus={focus}
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => {
+      onFocus={e => {
+        setIsFocused(true)
+        onFocus?.(e)
+      }}
+      onBlur={e => {
         setIsFocused(false)
         setFocus(false)
         setHasValue(value !== null && value !== undefined && String(value).length > 0)
+        onBlur?.(e)
       }}
       inputProps={{
         autoComplete: 'off',
