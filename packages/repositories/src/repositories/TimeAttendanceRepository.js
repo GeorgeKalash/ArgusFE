@@ -103,5 +103,8 @@ export const TimeAttendanceRepository = {
   CalendarDay: {
     qry3: service + 'qryCD3',
     set2: service + 'set2CD'
+  },
+  batchCloseTV: {
+    batch: service + 'batchCloseTV',
   }
 }
