@@ -45,6 +45,7 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
       version: '',
       date: new Date(),
       qty: null,
+      designId: null,
       description: null
     },
     maxAccess,
@@ -130,6 +131,28 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
     }
   ]
 
+  const getDesign = async itemId => {
+    if (!itemId) return null
+
+    const res = await getRequest({
+      extension: InventoryRepository.ItemProduction.get,
+      parameters: `_recordId=${itemId}`
+    })
+
+    return res?.record || null
+  }
+
+  const getDesignDetails = async designId => {
+    if (!designId) return null
+
+    const res = await getRequest({
+      extension: ManufacturingRepository.Design.get,
+      parameters: `_recordId=${designId}`
+    })
+
+    return res?.record || null
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.BillOfMaterials}
@@ -198,10 +221,25 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
                   { key: 'sku', value: 'SKU' },
                   { key: 'name', value: 'Name' }
                 ]}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId || null)
+                onChange={async (_, newValue) => {
+                  const itemId = newValue?.recordId || null
+
+                  formik.setFieldValue('itemId', itemId)
                   formik.setFieldValue('itemName', newValue?.name || null)
                   formik.setFieldValue('sku', newValue?.sku || null)
+
+                  const design = await getDesign(itemId)
+
+                  if (design?.designId) {
+                    const designDetails = await getDesignDetails(design.designId)
+                    if (designDetails?.stdWeight != null && newValue?.priceType == 1) {
+                      formik.setFieldValue('qty', designDetails.stdWeight)
+                    }
+                  }
+
+                  formik.setFieldValue('designId', design?.designId || null)
+                  formik.setFieldValue('designRef', design?.designRef || '')
+                  formik.setFieldValue('designName', design?.designName || '')
                 }}
                 maxAccess={maxAccess}
                 errorCheck={'itemId'}
@@ -272,6 +310,23 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
                 error={formik.touched.qty && Boolean(formik.errors.qty)}
                 decimalScale={3}
                 maxLength={12}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={ManufacturingRepository.Design.snapshot}
+                valueField='reference'
+                displayField='name'
+                displayFieldWidth={2}
+                name='designId'
+                label={labels.design}
+                form={formik}
+                readOnly
+                secondDisplayField={true}
+                firstValue={formik.values.designRef}
+                secondValue={formik.values.designName}
+                errorCheck={'designId'}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
