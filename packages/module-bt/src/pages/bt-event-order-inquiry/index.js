@@ -119,8 +119,7 @@ const EventOrderInquiry = () => {
     {
       field: 'qty_muRef',
       headerName: labels.qty_muRef,
-      flex: 1,
-      type: 'number'
+      flex: 1
     },
     {
       field: 'targetPrice',
