@@ -229,8 +229,10 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
                   formik.setFieldValue('sku', newValue?.sku || null)
 
                   const design = await getDesign(itemId)
-                  const weight = await getWeight(newValue?.recordId)
-                  formik.setFieldValue('qty', weight != null && newValue?.priceType == 1 ? weight : null)
+                  if (newValue?.priceType == 1) {
+                    const weight = await getWeight(newValue?.recordId)
+                    formik.setFieldValue('qty', weight)
+                  }
 
                   formik.setFieldValue('designId', design?.designId || null)
                   formik.setFieldValue('designRef', design?.designRef || '')
