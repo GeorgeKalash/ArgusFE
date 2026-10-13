@@ -100,6 +100,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       date: yup.string().required(),
       paymentMethod: yup.string().required(),
       cashAccountId: yup.string().required(),
+      accountId: yup.string().required(),
       checkNo: yup
         .string().nullable()
         .test(
@@ -568,12 +569,13 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 ]}
                 firstFieldWidth={4}
                 displayFieldWidth={4}
+                required
                 filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
                 onChange={async (_, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('accountGroupName', newValue?.groupName || '')
+                  formik.setFieldValue('accountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
