@@ -46,6 +46,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       szId: null,
       spId: null,
       sgId: null,
+      isSubjectToVAT: false,
       isInactive: false,
       isConfidential: false
     },
@@ -198,6 +199,15 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('flName', '')}
                     error={formik.touched.flName && Boolean(formik.errors.flName)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomCheckBox
+                    name='isSubjectToVAT'
+                    value={formik.values?.isSubjectToVAT}
+                    onChange={event => formik.setFieldValue('isSubjectToVAT', event.target.checked)}
+                    label={labels.isSubjectToVAT}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
