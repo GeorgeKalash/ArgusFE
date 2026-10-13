@@ -5,6 +5,32 @@ import { CommonContext } from '@argus/shared-providers/src/providers/CommonConte
 import { useCacheDataContext } from '@argus/shared-providers/src/providers/CacheDataContext'
 import { useCacheStoreContext } from '@argus/shared-providers/src/providers/CacheStoreContext'
 
+const refreshListeners = new Map()
+
+function subscribeRefresh(key, callback) {
+  if (!refreshListeners.has(key)) {
+    refreshListeners.set(key, new Set())
+  }
+
+  const listeners = refreshListeners.get(key)
+  listeners.add(callback)
+
+  return () => {
+    listeners.delete(callback)
+
+    if (!listeners.size) {
+      refreshListeners.delete(key)
+    }
+  }
+}
+
+function publishRefresh(key, list) {
+  const listeners = refreshListeners.get(key)
+  if (!listeners) return
+
+  listeners.forEach(callback => callback(list))
+}
+
 export default function ResourceComboBox({
   endpointId,
   datasetId,
@@ -22,6 +48,7 @@ export default function ResourceComboBox({
   setData,
   triggerOnDefault = false,
   onRefreshed,
+  refreshKey,
   ...rest
 }) {
   const { store: data } = rest
@@ -64,6 +91,12 @@ export default function ResourceComboBox({
   }
 
   useEffect(() => {
+    if (!refreshKey || !hasStore) return
+
+    return subscribeRefresh(refreshKey, list => setRefreshedList(list))
+  }, [refreshKey, hasStore])
+
+  useEffect(() => {
     const fetchDataAsync = async () => {
       await fetchData(false)
     }
@@ -90,7 +123,8 @@ export default function ResourceComboBox({
 
     if (hasStore) {
       const list = reducer(result)?.filter?.(filter) || []
-      setRefreshedList(list)
+      if (refreshKey) publishRefresh(refreshKey, list)
+      else setRefreshedList(list)
       if (typeof onRefreshed === 'function') onRefreshed(list)
     } else {
       setApiResponse(result)

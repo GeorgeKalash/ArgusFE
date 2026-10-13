@@ -69,8 +69,8 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
   const [reCal, setReCal] = useState(false)
   const [addressModified, setAddressModified] = useState(false)
   const [posUser, setPosUser] = useState(null)
-  const [ccStoreByRow, setCcStoreByRow] = useState({})
-  
+  const ccStoreByRowRef = useRef({})
+
   const level2CacheRef = useRef(null)
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
@@ -568,7 +568,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
   ]
 
   async function fillForm(retailTrxPack) {
-    setCcStoreByRow({})
+    ccStoreByRowRef.current = {}
     const retailTrxHeader = retailTrxPack?.header || {}
     const retailTrxItems = retailTrxPack?.items || []
     const retailTrxCash = retailTrxPack?.cash || []
@@ -1098,11 +1098,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
         displayFieldWidth: 3
       },
       async onChange({ row: { update, newRow } }) {
-        setCcStoreByRow(prev => { 
-          const n = { ...prev }
-          delete n[newRow.id]
-          return n
-         })
+        delete ccStoreByRowRef.current[newRow.id]
         if (cashAmount == 0) update({ amount: roundTo(Number(amount) || 0) })
         if (newRow?.type == 1) {
           update({ bankFees: roundTo(calculateBankFees(newRow?.ccId, newRow?.amount)) || 0 })
@@ -1145,8 +1141,10 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
 
         return {
           ...props,
-          store: ccStoreByRow[row.id] ?? getFilteredCC(row.cashAccountId),
-          onRefreshed: list => setCcStoreByRow(prev => ({ ...prev, [row.id]: list })),
+          store: ccStoreByRowRef.current[row.id] ?? getFilteredCC(row.cashAccountId),
+          onRefreshed: list => {
+            ccStoreByRowRef.current[row.id] = list
+          },
           filter: card => card.bankId == 14,
           readOnly: row.type == 2
         }
