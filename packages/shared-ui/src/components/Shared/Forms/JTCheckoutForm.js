@@ -316,7 +316,19 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed || isPosted || !editMode
-    }
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      valuesPath: {
+        ...formik.values.transfer,
+        date: formik.values.transfer.postedDate,
+        notes: formik.values.transfer.jobDescription
+      },
+      datasetId: ResourceIds.GLJTCheckout,
+      disabled: !editMode
+    },
   ]
 
   return (
