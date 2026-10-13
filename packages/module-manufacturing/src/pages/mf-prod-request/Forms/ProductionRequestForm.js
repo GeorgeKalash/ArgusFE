@@ -106,7 +106,8 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       items: yup.array().of(
         yup.object().shape({
           sku: yup.string().required(),
-          qty: yup.number().required()
+          qty: yup.number().required(),
+          pcs: yup.number().required().moreThan(0)
         })
       )
     }),

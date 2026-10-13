@@ -22,12 +22,17 @@ const PreviewPR = ({ requestId, plantGroupId, metalId, parentFormik, onSelect, w
     datasetId: ResourceIds.PreviewPR
   })
 
-    const conditions = {
+  const conditions = {
     qty: row => ({
       optional: !row?.checked,
       valid: !row?.checked || row.qty != null
+    }),
+    pcs: row => ({
+      optional: !row?.checked,
+      valid: !row?.checked || Number(row.pcs) > 0
     })
   }
+  
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
 
   const { formik } = useForm({
