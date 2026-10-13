@@ -724,6 +724,7 @@ export const ResourceIds = {
   GLItemDisposal: 42610,
   GLFixingSales: 38604,
   GLFixingPurchases: 38605,
+  GLJTCheckout: 31631,
 
   BtDefaults: 38601,
   CommodityPair: 38101,
