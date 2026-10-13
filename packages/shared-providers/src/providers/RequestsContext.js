@@ -250,9 +250,9 @@ const RequestsProvider = ({ showLoading = false, children }) => {
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
+          error.isHandledApiError = true
 
-          if (throwError) reject(error)
-          else resolve({}) 
+          reject(error)
         })
         .finally(() => {
           if (!disableLoading) decrementRequests()
