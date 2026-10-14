@@ -172,7 +172,7 @@ export default function EventOrderForm({ recordId, window }) {
       parameters: `_recordId=${metalId}`
     })
 
-    const marketPrice = await getMultiCurrencyFormData(fromCurrencyId, res?.record?.currencyId, date)
+    const marketPrice = await getMultiCurrencyFormData(res?.record?.currencyId, fromCurrencyId, date)
     return marketPrice?.exRate || null
   }
 
@@ -240,21 +240,6 @@ export default function EventOrderForm({ recordId, window }) {
 
     toast.success(platformLabels.Posted)
     await releaseLock()
-    invalidate()
-
-    await refetchForm(formik.values.recordId)
-  }
-
-  const onUnpost = async () => {
-    await postRequest({
-      extension: BrokerageTradingRepository.EventOrder.unpost,
-      record: JSON.stringify({
-        ...formik.values,
-        triggeredAt: formik.values?.triggeredAt ? formatDateToApi(formik.values.triggeredAt) : null
-      })
-    })
-
-    toast.success(platformLabels.Unposted)
     invalidate()
 
     await refetchForm(formik.values.recordId)
@@ -492,11 +477,11 @@ useEffect(() => {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, newValue?.metalId, formik.values.date)
+                  const marketPrice = await getMarketPrice(newValue?.recordId, newValue?.metalId, formik.values.date)
 
                   formik.setValues({
                     ...formik.values,
-                    marketPrice: marketPrice || null,
+                    marketPrice: marketPrice,
                     fi_currencyId: newValue?.recordId || null
                   })
                 }}
@@ -576,12 +561,15 @@ useEffect(() => {
                 label={labels.date}
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
-                  const rate = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue)
-                  formik.setValues({ ...formik.values, marketPrice: rate?.marketPrice || null, date: newValue })
+                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue)
+                  formik.setValues({ ...formik.values, marketPrice, date: newValue })
                 }}
                 readOnly={isClosed}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', null)}
+                onClear={() => {
+                  formik.setFieldValue('date', null)
+                  formik.setFieldValue('marketPrice', 0)
+                }}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
@@ -720,7 +708,7 @@ useEffect(() => {
                         setReCalc(true)
                         formik.setValues({
                           ...formik.values,
-                          marketPrice: marketPrice || null,
+                          marketPrice,
                           purity: res?.purity ?? null,
                           currencyId: newValue?.currencyId || null,
                           currencyRef: newValue?.currencyRef || '',
