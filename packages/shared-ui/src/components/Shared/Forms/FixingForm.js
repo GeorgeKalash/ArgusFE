@@ -299,6 +299,7 @@ export default function FixingForm({ recordId, functionId, window }) {
   }
 
   async function getMarketPrice(fromCurrencyId, metalId, date) {
+    if(!(fromCurrencyId && metalId && date)) return null
     const res = await getRequest({
       extension: InventoryRepository.Metals.get,
       parameters: `_recordId=${metalId}`
