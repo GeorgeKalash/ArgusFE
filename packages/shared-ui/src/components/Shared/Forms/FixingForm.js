@@ -162,7 +162,6 @@ export default function FixingForm({ recordId, functionId, window }) {
       discount: yup
         .number()
         .nullable()
-        .min(0)
         .test(function (value) {
           const { unitPrice } = this.parent
 
@@ -438,6 +437,7 @@ export default function FixingForm({ recordId, functionId, window }) {
     formik.values.miscAmount,
     formik.values.exRate,
     formik.values.rateCalcMethod,
+    formik.values.isTaxable,
     vatPct
   ])
 
@@ -624,7 +624,8 @@ useEffect(() => {
 
                   formik.setFieldValue('fi_currencyId', !newValue?.isInactive ? newValue?.currencyId || null : null)
                   formik.setFieldValue('fi_currencyRef', !newValue?.isInactive ? newValue?.currencyRef || '' : '')
-                  formik.setFieldValue('isTaxable', !newValue?.isInactive ? newValue?.isTaxable || false : false)
+                  formik.setFieldValue('isTaxable', !newValue?.isInactive && !!newValue?.isTaxable)
+                  setReCalc(true)
                   formik.setFieldValue('accountRef', !newValue?.isInactive ? newValue?.reference || null : null)
                   formik.setFieldValue('accountName', !newValue?.isInactive ? newValue?.name || '' : '')
                   formik.setFieldValue('accountId', newValue?.recordId || null)
@@ -862,6 +863,7 @@ useEffect(() => {
                       maxLength={12}
                       decimalScale={2}
                       readOnly={isClosed}
+                      allowNegative={false}
                       onChange={(e) => {
                         setReCalc(true)
                         formik.setFieldValue('discount', e.target.value || 0)

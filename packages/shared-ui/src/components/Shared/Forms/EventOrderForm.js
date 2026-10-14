@@ -477,7 +477,7 @@ useEffect(() => {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  const marketPrice = await getMarketPrice(newValue?.recordId, newValue?.metalId, formik.values.date)
+                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date)
 
                   formik.setValues({
                     ...formik.values,
