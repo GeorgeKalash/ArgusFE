@@ -11,7 +11,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
@@ -36,6 +36,7 @@ import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomD
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
+import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 
 export default function EventOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -46,6 +47,7 @@ export default function EventOrderForm({ recordId, window }) {
   const functionId = SystemFunction.EventOrder
   const { stack: stackError } = useError()
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
+  const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
   
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.EventOrder,
@@ -163,6 +165,16 @@ export default function EventOrderForm({ recordId, window }) {
     enabled: !!recordId && !(isPosted || isClosed)
   })
 
+  async function getMarketPrice(fromCurrencyId, metalId, date) {
+    const res = await getRequest({
+      extension: InventoryRepository.Metals.get,
+      parameters: `_recordId=${metalId}`
+    })
+
+    const marketPrice = await getMultiCurrencyFormData(fromCurrencyId, res?.record?.currencyId, date)
+    return marketPrice?.exRate || null
+  }
+
   async function getMultiCurrencyFormData(fromCurrencyId, toCurrencyId, date) {
     if (!(fromCurrencyId && toCurrencyId && date)) return null
 
@@ -172,7 +184,7 @@ export default function EventOrderForm({ recordId, window }) {
     })
 
     return {
-      marketPrice: res.record?.exRate,
+      exRate: res.record?.exRate,
     }
   }
 
@@ -479,10 +491,11 @@ useEffect(() => {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  const rate = await getMultiCurrencyFormData(newValue?.recordId, formik.values.currencyId, formik.values.date)
+                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, newValue?.metalId, formik.values.date)
+
                   formik.setValues({
                     ...formik.values,
-                    marketPrice: rate?.exRate || null,
+                    marketPrice: marketPrice || null,
                     fi_currencyId: newValue?.recordId || null
                   })
                 }}
@@ -562,7 +575,7 @@ useEffect(() => {
                 label={labels.date}
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
-                  const rate = await getMultiCurrencyFormData(formik.values.fi_currencyId, formik.values.currencyId, newValue)
+                  const rate = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue)
                   formik.setValues({ ...formik.values, marketPrice: rate?.marketPrice || null, date: newValue })
                 }}
                 readOnly={isClosed}
@@ -697,16 +710,16 @@ useEffect(() => {
                       readOnly={isClosed}
                       onChange={async (_, newValue) => {
                         const res = await getMetalPurity(newValue?.metalId)
-                        const rate = await getMultiCurrencyFormData(
+                        const marketPrice = await getMarketPrice(
                           formik.values.fi_currencyId,
-                          newValue?.currencyId,
+                          newValue?.metalId,
                           formik.values.date
                         )
 
                         setReCalc(true)
                         formik.setValues({
                           ...formik.values,
-                          marketPrice: rate?.exRate || null,
+                          marketPrice: marketPrice || null,
                           purity: res?.purity ?? null,
                           currencyId: newValue?.currencyId || null,
                           currencyRef: newValue?.currencyRef || '',
@@ -932,6 +945,8 @@ useEffect(() => {
                     label={labels.marketPrice}
                     value={formik.values.marketPrice}
                     readOnly
+                    maxLength={17}
+                    decimalScale={5}
                     maxAccess={maxAccess}
                   />
                 </Grid>

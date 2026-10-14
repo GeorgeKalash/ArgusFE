@@ -581,10 +581,14 @@ useEffect(() => {
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(newValue?.recordId, formik.values.currencyId, formik.values.date)
+
+                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date)
+
                   setReCalc(true)
                   formik.setValues({
                     ...formik.values,
                     ...(rate || {}),
+                    marketPrice: marketPrice || null,
                     fi_currencyRef: newValue?.reference || '',
                     fi_currencyId: newValue?.recordId || null
                   })
@@ -636,8 +640,11 @@ useEffect(() => {
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
                   const rate = await getMultiCurrencyFormData(formik.values.fi_currencyId, formik.values.currencyId, newValue)
+
+                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik?.values?.metalId, newValue)
+
                   setReCalc(true)
-                  formik.setValues({ ...formik.values, ...(rate || {}), date: newValue })
+                  formik.setValues({ ...formik.values, ...(rate || {}), marketPrice: marketPrice || null, date: newValue })
                 }}
                 readOnly={isClosed}
                 maxAccess={maxAccess}
