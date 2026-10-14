@@ -96,11 +96,6 @@ export default function FixingForm({ recordId, functionId, window }) {
 
   const getMaxAllowedDiscount = unitPrice => {
     const price = Number(unitPrice) || 0
-
-    console.log(price)
-    console.log(Math.min(maxDiscount, price))
-    console.log(maxDiscount)
-
     return maxDiscount ? Math.min(maxDiscount, price) : price
   }
 
