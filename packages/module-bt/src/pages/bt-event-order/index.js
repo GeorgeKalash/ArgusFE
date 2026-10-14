@@ -14,11 +14,13 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
 import EventOrderForm from '@argus/shared-ui/src/components/Shared/Forms/EventOrderForm'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function BTEventOrder() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -162,10 +164,18 @@ export default function BTEventOrder() {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.EventOrder,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: EventOrderForm,
       props: {
