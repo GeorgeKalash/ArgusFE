@@ -46,7 +46,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       szId: null,
       spId: null,
       sgId: null,
-      isSubjectToVAT: false,
+      isTaxable: false,
       isInactive: false,
       isConfidential: false
     },
@@ -203,10 +203,10 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <CustomCheckBox
-                    name='isSubjectToVAT'
-                    value={formik.values?.isSubjectToVAT}
-                    onChange={event => formik.setFieldValue('isSubjectToVAT', event.target.checked)}
-                    label={labels.isSubjectToVAT}
+                    name='isTaxable'
+                    value={formik.values?.isTaxable}
+                    onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
+                    label={labels.isTaxable}
                     maxAccess={maxAccess}
                   />
                 </Grid>

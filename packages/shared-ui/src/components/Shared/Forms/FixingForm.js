@@ -124,6 +124,7 @@ export default function FixingForm({ recordId, functionId, window }) {
       taxAmount: null,
       amount: null,
       exRate: 1,
+      isTaxable: false,
       marketPrice: null,
       rateCalcMethod: 1,
       baseAmount: 0,
@@ -297,6 +298,15 @@ export default function FixingForm({ recordId, functionId, window }) {
     refetchForm(formik.values.recordId)
   }
 
+  async function getMarketPrice(fromCurrencyId, metalId, date) {
+    const res = await getRequest({
+      extension: InventoryRepository.Metals.get,
+      parameters: `_recordId=${metalId}`
+    })
+
+    const marketPrice = await getMultiCurrencyFormData(fromCurrencyId, res?.record?.currencyId, date)
+    return marketPrice?.exRate || null
+  }
   async function getMultiCurrencyFormData(fromCurrencyId, toCurrencyId, date) {
     if (!(fromCurrencyId && toCurrencyId && date)) return null
 
@@ -307,7 +317,6 @@ export default function FixingForm({ recordId, functionId, window }) {
 
     return {
       exRate: res.record?.exRate,
-      marketPrice: res.record?.exRate,
       rateCalcMethod: res.record?.rateCalcMethod
     }
   }
@@ -399,7 +408,7 @@ export default function FixingForm({ recordId, functionId, window }) {
     const netUnitPrice = roundTo(formik?.values?.unitPrice + formik?.values?.premium - formik?.values?.discount) || 0
     const baseUnitPrice = roundTo(netUnitPrice / formik?.values?.unitPrice_muQty) || 0
     const subtotal = roundTo(baseQty * baseUnitPrice) || 0
-    const taxAmount = formik.values.isSubjectToVAT ? roundTo((subtotal + roundTo(formik?.values?.miscAmount)) * vatPct / 100) : 0
+    const taxAmount = formik.values.isTaxable ? roundTo((subtotal + roundTo(formik?.values?.miscAmount)) * vatPct / 100) : 0
     const amount = roundTo(subtotal) + roundTo(formik?.values?.miscAmount) + roundTo(taxAmount)
 
     formik.setValues({
@@ -610,7 +619,7 @@ useEffect(() => {
 
                   formik.setFieldValue('fi_currencyId', !newValue?.isInactive ? newValue?.currencyId || null : null)
                   formik.setFieldValue('fi_currencyRef', !newValue?.isInactive ? newValue?.currencyRef || '' : '')
-                  formik.setFieldValue('isSubjectToVAT', !newValue?.isInactive ? newValue?.isSubjectToVAT || null : null)
+                  formik.setFieldValue('isTaxable', !newValue?.isInactive ? newValue?.isTaxable || false : false)
                   formik.setFieldValue('accountRef', !newValue?.isInactive ? newValue?.reference || null : null)
                   formik.setFieldValue('accountName', !newValue?.isInactive ? newValue?.name || '' : '')
                   formik.setFieldValue('accountId', newValue?.recordId || null)
@@ -701,11 +710,14 @@ useEffect(() => {
                           formik.values.date
                         )
 
+                        const marketPrice = await getMarketPrice(formik.values.fi_currencyId, newValue?.metalId, formik.values.date)
+
                         setReCalc(true)
                         formik.setValues({
                           ...formik.values,
                           ...(rate || {}),
                           purity: res?.purity ?? null,
+                          marketPrice: marketPrice || null,
                           currencyId: newValue?.currencyId || null,
                           currencyRef: newValue?.currencyRef || '',
                           metalId: newValue?.metalId || null,
@@ -1026,6 +1038,8 @@ useEffect(() => {
                         label={labels.marketPrice}
                         value={formik.values.marketPrice}
                         readOnly
+                        maxLength={17}
+                        decimalScale={5}
                         maxAccess={maxAccess}
                       />
                     </Grid>
