@@ -24,6 +24,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
 import RetailTransactionsForm from '@argus/shared-ui/src/components/Shared/Forms/RetailTransactionsForm'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form, refetchForm, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

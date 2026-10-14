@@ -39,7 +39,6 @@ export default function Holidays () {
 
   const conditions = {
     caId: row => row?.caId,
-    scId: row => row?.scId,
     dayId: row =>
       row?.dayId &&
       (!formik.values.fiscalYear ||
@@ -101,25 +100,6 @@ export default function Holidays () {
       }
     },
     {
-      component: 'resourcecombobox',
-      label: labels.schedule,
-      name: 'scId',
-      props: {
-        endpointId: TimeAttendanceRepository.Schedule.qry,
-        displayField: 'reference',
-        valueField: 'recordId',
-        mapping: [
-          { from: 'recordId', to: 'scId' },
-          { from: 'reference', to: 'scRef' },
-          { from: 'name', to: 'scName' }
-        ],
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
-        ]
-      }
-    },
-    {
       component: 'textfield',
       label: labels.dow,
       name: 'dowName',
@@ -159,7 +139,7 @@ export default function Holidays () {
         dayId: item?.dayId 
         ? new Date(item?.dayId.slice(0, 4), item?.dayId.slice(4, 6) - 1, item?.dayId.slice(6, 8)) 
         : null})) 
-      : [{id: 1, caId: null, scId: null, dayId: null, dow: 0 }]
+      : [{id: 1, caId: null, dayId: null, dow: 0 }]
 
     formik.setFieldValue('items', CDList)
   }
@@ -187,7 +167,7 @@ export default function Holidays () {
                 displayField='fiscalYear'
                 values={formik.values}
                 required
-                readOnly={formik?.values?.items?.some(item => item.caId || item.scId || item.dayId)}
+                readOnly={formik?.values?.items?.some(item => item.caId || item.dayId)}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                    formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
@@ -207,7 +187,7 @@ export default function Holidays () {
                 values={formik.values}
                 maxAccess={maxAccess}
                 required
-                readOnly={formik?.values?.items?.some(item => item.caId || item.scId || item.dayId)}
+                readOnly={formik?.values?.items?.some(item => item.caId || item.dayId)}
                 onChange={(_, newValue) => {
                    formik.setFieldValue('dayTypeId', newValue?.recordId || null)
                    formik.setFieldValue('items', formik.initialValues.items)
