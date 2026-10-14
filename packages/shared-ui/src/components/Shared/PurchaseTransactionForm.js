@@ -70,6 +70,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ChangeVendor from '@argus/shared-ui/src/components/Shared/ChangeVendor'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
+import BarcodesLookup from '../../../../../apps/main/src/pages/pu-trx/[functionId]/BarcodesTable'
 
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function PurchaseTransactionForm({ recordId, functionId, window }) {
@@ -442,6 +443,25 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     return res?.record
   }
 
+  async function handleBarcodeChange({ update, newRow, addRow }) {
+    if (!newRow?.barcode) return update({ barcode: null })
+
+    const barcodeInfo = await getBarcodeData(newRow.barcode)
+
+    if (!barcodeInfo) {
+      return update({ ...initialValues.items[0], id: newRow.id })
+    }
+
+    await barcodeSkuSelection(update, addRow, {
+      ...newRow,
+      taxId: barcodeInfo?.taxId ?? newRow?.taxId,
+      muId: barcodeInfo?.muId ?? newRow?.muId,
+      itemId: barcodeInfo?.itemId ?? newRow?.itemId,
+      sku: barcodeInfo?.sku ?? newRow?.sku,
+      itemName: barcodeInfo?.itemName ?? newRow?.itemName
+    })
+  }
+
   const getVendorInvoice = async (vendorId, vendorDocRef) => {
     if (!vendorId || !vendorDocRef) return false
 
@@ -457,7 +477,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     {
       component: 'resourcecombobox',
       name: 'promotionTypeName',
-      label: labels.promotionType,
+      label: labels.type,
       props: {
         datasetId: DataSets.PROMOTION_TYPE,
         valueField: 'key',
@@ -472,38 +492,41 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       },
     },
     {
+      component: 'button',
+      name: 'barcodeLookup',
+      label: ' ',
+      props: {
+        imgSrc: '/images/buttonsIcons/popup-black.png'
+      },
+      onClick: (e, row, update, updateRow, addRow) => {
+        stack({
+          Component: BarcodesLookup,
+          props: {
+            labels,
+            maxAccess,
+            onSelect: selected => {
+              if (!selected?.barcode) return
+
+              handleBarcodeChange({
+                newRow: { ...row, barcode: selected.barcode },
+                addRow,
+                update: changes => updateRow({ id: row.id, changes })
+              })
+            }
+          },
+          width: 900,
+          height: 600,
+          title: labels.barcodes
+        })
+      }
+    },
+    {
       component: 'textfield',
       label: labels.barcode,
       name: 'barcode',
       updateOn: 'blur',
       jumpToNextLine,
-      async onChange({ row: { update, newRow, oldRow, addRow } }) {
-        if (!newRow?.barcode) return update({ barcode: null })
-        const barcodeInfo = await getBarcodeData(newRow?.barcode)
-
-        const resetRow = () => {
-          update({
-            ...initialValues.items[0],
-            id: newRow.id
-          })
-        }
-        if (!barcodeInfo) {
-          resetRow()
-        } else {
-          await barcodeSkuSelection(
-            update,
-            addRow,
-            {
-              ...newRow,
-              taxId: barcodeInfo?.taxId ?? newRow?.taxId, 
-              muId: barcodeInfo?.muId ?? newRow?.muId,
-              itemId: barcodeInfo?.itemId ?? newRow?.itemId,
-              sku: barcodeInfo?.sku ?? newRow?.sku,
-              itemName: barcodeInfo?.itemName ?? newRow?.itemName
-            }
-          )
-        }
-      }
+      onChange: ({ row: { update, newRow, addRow } }) => handleBarcodeChange({ update, newRow, addRow })
     },
     {
       component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
@@ -1400,6 +1423,8 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     const updatedRowValues = {
       id: newRow?.id,
       barcode: newRow?.barcode,
+      promotionType: newRow?.promotionType ?? initialPromotionType?.key,
+      promotionTypeName: newRow?.promotionTypeName ?? initialPromotionType?.value,
       decimals: measurementSchedule?.decimals,
       sku: itemInfo?.sku || '',
       itemName: itemInfo?.name || '',
