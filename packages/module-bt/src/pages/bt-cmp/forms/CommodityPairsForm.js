@@ -72,6 +72,23 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
+                endpointId={InventoryRepository.Metals.qry}
+                name='metalId'
+                label={labels.metal}
+                valueField='recordId'
+                displayField={'reference'}
+                values={formik.values}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('metalId', newValue?.recordId || null)
+                }}
+                error={formik.touched.metalId && Boolean(formik.errors.metalId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
@@ -89,23 +106,6 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.Metals.qry}
-                name='metalId'
-                label={labels.metal}
-                valueField='recordId'
-                displayField={'reference'}
-                values={formik.values}
-                required
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('metalId', newValue?.recordId || null)
-                }}
-                error={formik.touched.metalId && Boolean(formik.errors.metalId)}
               />
             </Grid>
             <Grid item xs={12}>

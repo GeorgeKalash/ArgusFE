@@ -44,13 +44,13 @@ const CommodityPairs = () => {
 
   const columns = [
     {
-      field: 'currencyRef',
-      headerName: labels.currency,
+      field: 'metalRef',
+      headerName: labels.metal,
       flex: 1
     },
     {
-      field: 'metalRef',
-      headerName: labels.metal,
+      field: 'currencyRef',
+      headerName: labels.currency,
       flex: 1
     }
   ]

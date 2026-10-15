@@ -46,6 +46,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       szId: null,
       spId: null,
       sgId: null,
+      isTaxable: false,
       isInactive: false,
       isConfidential: false
     },
@@ -198,6 +199,15 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('flName', '')}
                     error={formik.touched.flName && Boolean(formik.errors.flName)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomCheckBox
+                    name='isTaxable'
+                    value={formik.values?.isTaxable}
+                    onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
+                    label={labels.isTaxable}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
