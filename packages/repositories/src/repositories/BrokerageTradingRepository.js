@@ -40,7 +40,9 @@ export const BrokerageTradingRepository = {
     reopen: service + 'reopenEO',
     get: service + 'getEO',
     snapshot: service + 'snapshotEO',
-    pack: service + 'getPackEO'
+    pack: service + 'getPackEO',
+    post: service + 'postEO',
+    unpost: service + 'unpostEO'
   },
   EventOrderInquiry: {
     page: service + 'pageEOI'

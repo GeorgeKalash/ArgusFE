@@ -33,8 +33,9 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
-
+import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export default function FixingForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -44,6 +45,7 @@ export default function FixingForm({ recordId, functionId, window }) {
   const { stack: stackError } = useError()
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
   const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
+  const maxDiscount = systemDefaults?.list?.find(obj => obj.key === 'bt_max_discount')?.value || null
   
   const getResourceId = functionId => {
     switch (functionId) {
@@ -92,6 +94,11 @@ export default function FixingForm({ recordId, functionId, window }) {
     endpointId: getEndpoint(functionId).page
   })
 
+  const getMaxAllowedDiscount = unitPrice => {
+    const price = Number(unitPrice) || 0
+    return maxDiscount ? Math.min(maxDiscount, price) : price
+  }
+
   const { formik } = useForm({
     behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
@@ -116,6 +123,8 @@ export default function FixingForm({ recordId, functionId, window }) {
       taxAmount: null,
       amount: null,
       exRate: 1,
+      isTaxable: false,
+      marketPrice: null,
       rateCalcMethod: 1,
       baseAmount: 0,
       notes: '',
@@ -149,9 +158,15 @@ export default function FixingForm({ recordId, functionId, window }) {
       ),
       currencyId_metalId: yup.string().required(),
       unitPrice: yup.number().required(),
-      discount: yup.number().required(),
       netUnitPrice: yup.number().required(),
-      premium: yup.number().required(),
+      discount: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { unitPrice } = this.parent
+
+          return (Number(value) || 0) <= getMaxAllowedDiscount(unitPrice)
+        }),
       unitPrice_muId: yup.number().required(),
       baseUnitPrice: yup.number().required(),
       baseQty: yup.number().required(),
@@ -226,6 +241,16 @@ export default function FixingForm({ recordId, functionId, window }) {
     return res?.record || {}
   }
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId,
+        recordId: formik.values.recordId
+      }
+    })
+  }
+
   const onClose = async () => {
     const res = await postRequest({
       extension: getEndpoint(functionId).close,
@@ -271,6 +296,17 @@ export default function FixingForm({ recordId, functionId, window }) {
     refetchForm(formik.values.recordId)
   }
 
+  async function getMarketPrice(fromCurrencyId, metalId, date) {
+    if(!(fromCurrencyId && metalId && date)) return null
+    const res = await getRequest({
+      extension: InventoryRepository.Metals.get,
+      parameters: `_recordId=${metalId}`
+    })
+
+    const marketPrice = await getMultiCurrencyFormData(res?.record?.currencyId, fromCurrencyId, date)
+    return marketPrice?.exRate || null
+  }
+
   async function getMultiCurrencyFormData(fromCurrencyId, toCurrencyId, date) {
     if (!(fromCurrencyId && toCurrencyId && date)) return null
 
@@ -305,6 +341,12 @@ export default function FixingForm({ recordId, functionId, window }) {
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || !isClosed
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     },
     {
       key: 'Close',
@@ -362,11 +404,11 @@ export default function FixingForm({ recordId, functionId, window }) {
   useEffect(() => {
     if (!reCalc) return
 
-    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty) || 0
-    const netUnitPrice = roundTo(formik?.values?.unitPrice + formik?.values?.premium - formik?.values?.discount) || 0
-    const baseUnitPrice = roundTo(netUnitPrice / formik?.values?.unitPrice_muQty) || 0
-    const subtotal = roundTo(baseQty * baseUnitPrice) || 0
-    const taxAmount = roundTo((subtotal + roundTo(formik?.values?.miscAmount)) * vatPct / 100)
+    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty, 5) || 0
+    const netUnitPrice = roundTo(formik?.values?.unitPrice * formik?.values?.purity / 1000 + formik?.values?.premium - formik?.values?.discount) || 0
+    const baseUnitPrice = roundTo(netUnitPrice / formik?.values?.unitPrice_muQty, 5) || 0
+    const subtotal = roundTo(baseQty * baseUnitPrice, 5) || 0
+    const taxAmount = formik.values.isTaxable ? roundTo((subtotal + roundTo(formik?.values?.miscAmount)) * vatPct / 100) : 0
     const amount = roundTo(subtotal) + roundTo(formik?.values?.miscAmount) + roundTo(taxAmount)
 
     formik.setValues({
@@ -395,6 +437,8 @@ export default function FixingForm({ recordId, functionId, window }) {
     formik.values.miscAmount,
     formik.values.exRate,
     formik.values.rateCalcMethod,
+    formik.values.isTaxable,
+    formik.values.purity,
     vatPct
   ])
 
@@ -539,10 +583,14 @@ useEffect(() => {
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(newValue?.recordId, formik.values.currencyId, formik.values.date)
+
+                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date)
+
                   setReCalc(true)
                   formik.setValues({
                     ...formik.values,
                     ...(rate || {}),
+                    marketPrice,
                     fi_currencyRef: newValue?.reference || '',
                     fi_currencyId: newValue?.recordId || null
                   })
@@ -577,6 +625,8 @@ useEffect(() => {
 
                   formik.setFieldValue('fi_currencyId', !newValue?.isInactive ? newValue?.currencyId || null : null)
                   formik.setFieldValue('fi_currencyRef', !newValue?.isInactive ? newValue?.currencyRef || '' : '')
+                  formik.setFieldValue('isTaxable', !newValue?.isInactive && !!newValue?.isTaxable)
+                  setReCalc(true)
                   formik.setFieldValue('accountRef', !newValue?.isInactive ? newValue?.reference || null : null)
                   formik.setFieldValue('accountName', !newValue?.isInactive ? newValue?.name || '' : '')
                   formik.setFieldValue('accountId', newValue?.recordId || null)
@@ -591,15 +641,21 @@ useEffect(() => {
                 required
                 label={labels.date}
                 value={formik.values.date}
-                onChange={async (e, newValue) => {
+                onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(formik.values.fi_currencyId, formik.values.currencyId, newValue)
+
+                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik?.values?.metalId, newValue)
+
                   setReCalc(true)
-                  formik.setValues({ ...formik.values, ...(rate || {}), date: newValue })
+                  formik.setValues({ ...formik.values, ...(rate || {}), marketPrice, date: newValue })
                 }}
                 readOnly={isClosed}
                 maxAccess={maxAccess}
                 onClear={() => {
                   formik.setFieldValue('date', null)
+                  formik.setFieldValue('exRate', 0)
+                  formik.setFieldValue('marketPrice', 0)
+                  setReCalc(true)
                 }}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
@@ -667,18 +723,21 @@ useEffect(() => {
                           formik.values.date
                         )
 
+                        const marketPrice = await getMarketPrice(formik.values.fi_currencyId, newValue?.metalId, formik.values.date)
+
                         setReCalc(true)
                         formik.setValues({
                           ...formik.values,
                           ...(rate || {}),
-                          purity: res?.purity ?? null,
+                          purity: res?.purity * 1000 ?? null,
+                          marketPrice,
                           currencyId: newValue?.currencyId || null,
                           currencyRef: newValue?.currencyRef || '',
                           metalId: newValue?.metalId || null,
                           qty_muId: newValue?.defQtyMUId || null,
-                          qty_muQty: newValue?.defQtyMUQty || null,
+                          qty_muQty: newValue?.defQtyMUQty || 0,
                           unitPrice_muId: newValue?.defUnitPriceMUId || null,
-                          unitPrice_muQty: newValue?.defUnitPriceMUQty || null,
+                          unitPrice_muQty: newValue?.defUnitPriceMUQty || 0,
                           currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null
                         })
                       }}
@@ -696,7 +755,7 @@ useEffect(() => {
                       decimalScale={5}
                       readOnly={isClosed}
                       onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('purity', null)}
+                      onClear={() => formik.setFieldValue('purity', 0)}
                       error={formik.touched.purity && Boolean(formik.errors.purity)}
                     />
                   </Grid>
@@ -712,9 +771,9 @@ useEffect(() => {
                       readOnly={isClosed}
                       onChange={(e) => {
                         setReCalc(true)
-                        formik.setFieldValue('qty', e.target.value || null)
+                        formik.setFieldValue('qty', e.target.value || 0)
                       }}
-                      onClear={() => formik.setFieldValue('qty', null)}
+                      onClear={() => formik.setFieldValue('qty', 0)}
                       error={formik.touched.qty && Boolean(formik.errors.qty)}
                     />
                   </Grid>
@@ -738,7 +797,7 @@ useEffect(() => {
                       onChange={(_, newValue) => {
                         setReCalc(true)
                         formik.setFieldValue('qty_muId', newValue?.recordId || null)
-                        formik.setFieldValue('qty_muQty', newValue?.qty || null)
+                        formik.setFieldValue('qty_muQty', newValue?.qty || 0)
                         formik.setFieldValue('qty', 0)
                       }}
                       error={formik.touched.qty_muId && Boolean(formik.errors.qty_muId)}
@@ -750,6 +809,7 @@ useEffect(() => {
                       label={labels.baseQty}
                       value={formik.values.baseQty}
                       maxAccess={maxAccess}
+                      decimalScale={5}
                       readOnly
                       required
                       error={formik.touched.baseQty && Boolean(formik.errors.baseQty)}
@@ -767,7 +827,7 @@ useEffect(() => {
                       readOnly={isClosed}
                       onChange={(e) => {
                         setReCalc(true)
-                        formik.setFieldValue('unitPrice', e.target.value || null)
+                        formik.setFieldValue('unitPrice', e.target.value || 0)
                       }}
                       onClear={() => {
                         setReCalc(true)
@@ -781,14 +841,13 @@ useEffect(() => {
                       name='premium'
                       label={labels.premium}
                       value={formik.values.premium}
-                      required
                       maxAccess={maxAccess}
                       maxLength={12}
                       decimalScale={2}
                       readOnly={isClosed}
                       onChange={(e) => {
                         setReCalc(true)
-                        formik.setFieldValue('premium', e.target.value || null)
+                        formik.setFieldValue('premium', e.target.value || 0)
                       }}
                       onClear={() => {
                         setReCalc(true)
@@ -802,14 +861,14 @@ useEffect(() => {
                       name='discount'
                       label={labels.discount}
                       value={formik.values.discount}
-                      required
                       maxAccess={maxAccess}
                       maxLength={12}
                       decimalScale={2}
                       readOnly={isClosed}
+                      allowNegative={false}
                       onChange={(e) => {
                         setReCalc(true)
-                        formik.setFieldValue('discount', e.target.value || null)
+                        formik.setFieldValue('discount', e.target.value || 0)
                       }}
                       onClear={() => {
                         setReCalc(true)
@@ -849,7 +908,7 @@ useEffect(() => {
                       onChange={(_, newValue) => {
                         setReCalc(true)
                         formik.setFieldValue('unitPrice_muId', newValue?.recordId || null)
-                        formik.setFieldValue('unitPrice_muQty', newValue?.qty || null)
+                        formik.setFieldValue('unitPrice_muQty', newValue?.qty || 0)
                         formik.setFieldValue('unitPrice', 0)
                       }}
                       error={formik.touched.unitPrice_muId && Boolean(formik.errors.unitPrice_muId)}
@@ -861,6 +920,7 @@ useEffect(() => {
                       label={labels.baseUnitPrice}
                       value={formik.values.baseUnitPrice}
                       maxAccess={maxAccess}
+                      decimalScale={5}
                       readOnly
                       required
                       error={formik.touched.baseUnitPrice && Boolean(formik.errors.baseUnitPrice)}
@@ -987,22 +1047,37 @@ useEffect(() => {
                     />
                   </Grid>
                   <Grid item xs={12}>
-                    <CustomNumberField
-                      name='exRate'
-                      label={labels.exRate}
-                      value={formik.values.exRate}
-                      required
-                      maxAccess={maxAccess}
-                      readOnly={isClosed || (!!formik.values.fi_currencyId && formik.values.fi_currencyId === formik.values.currencyId)}
-                      maxLength={17}
-                      decimalScale={5}
-                      onChange={(e) => {
-                        setReCalc(true)
-                        formik.setFieldValue('exRate', e.target.value || null)
-                      }}
-                      onClear={() => formik.setFieldValue('exRate', null)}
-                      error={formik.touched.exRate && Boolean(formik.errors.exRate)}
-                    />
+                    <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='marketPrice'
+                        label={labels.marketPrice}
+                        value={formik.values.marketPrice}
+                        readOnly
+                        maxLength={17}
+                        decimalScale={5}
+                        maxAccess={maxAccess}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='exRate'
+                        label={labels.exRate}
+                        value={formik.values.exRate}
+                        required
+                        maxAccess={maxAccess}
+                        readOnly={isClosed || (!!formik.values.fi_currencyId && formik.values.fi_currencyId === formik.values.currencyId)}
+                        maxLength={17}
+                        decimalScale={5}
+                        onChange={(e) => {
+                          setReCalc(true)
+                          formik.setFieldValue('exRate', e.target.value || 0)
+                        }}
+                        onClear={() => formik.setFieldValue('exRate', 0)}
+                        error={formik.touched.exRate && Boolean(formik.errors.exRate)}
+                      />
+                    </Grid>
+                    </Grid>
                   </Grid>
                   <Grid item xs={12}>
                     <CustomNumberField

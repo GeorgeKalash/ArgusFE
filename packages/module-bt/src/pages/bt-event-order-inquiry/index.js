@@ -143,7 +143,7 @@ const EventOrderInquiry = () => {
       field: 'triggeredAt',
       headerName: labels.triggeredAt,
       flex: 1,
-      type: 'date'
+      type: 'dateTime'
     },
     {
       field: 'triggeredAtPrice',
