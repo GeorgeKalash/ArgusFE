@@ -1305,8 +1305,8 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       header: {
         ...formik.values.header,
         vendorId: object?.recordId,
-        vendorName: object?.name,
-        vendorRef: object?.reference,
+        vendorName: object?.name || '',
+        vendorRef: object?.reference || '',
         isVattable: object?.isTaxable || false,
         tdAmount: object?.tradeDiscount,
         tdPct: object?.tradeDiscount,
@@ -2285,9 +2285,12 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
 
                   fillVendorData(newValue)
                 }}
-                secondFieldName={'header.vendorName'}
-                onSecondValueChange={(name, value) => {
-                  formik.setFieldValue('header.vendorName', value)
+                secondField={{
+                  name: 'header.vendorName',
+                  editable: !isPosted,
+                  onChange: (name, value) => {
+                    formik.setFieldValue('header.vendorName', value)
+                  }
                 }}
                 errorCheck={'header.vendorId'}
                 maxAccess={maxAccess}
