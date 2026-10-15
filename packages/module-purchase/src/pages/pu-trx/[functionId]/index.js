@@ -17,8 +17,8 @@ import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/Purc
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import toast from 'react-hot-toast'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 const PuTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)

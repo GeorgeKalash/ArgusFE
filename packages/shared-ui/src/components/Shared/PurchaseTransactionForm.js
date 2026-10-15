@@ -70,9 +70,9 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ChangeVendor from '@argus/shared-ui/src/components/Shared/ChangeVendor'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
-import BarcodesLookup from '../../../../../apps/main/src/pages/pu-trx/[functionId]/BarcodesTable'
-
+import BarcodesTable from '@argus/module-purchase/src/pages/pu-trx/[functionId]/Forms/BarcodesTable'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export default function PurchaseTransactionForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -500,7 +500,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       },
       onClick: (e, row, update, updateRow, addRow) => {
         stack({
-          Component: BarcodesLookup,
+          Component: BarcodesTable,
           props: {
             labels,
             maxAccess,

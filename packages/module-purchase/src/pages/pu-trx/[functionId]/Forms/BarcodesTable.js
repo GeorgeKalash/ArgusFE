@@ -11,7 +11,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
-export default function BarcodesLookup({ labels, maxAccess, onSelect, window }) {
+export default function BarcodesTable({ labels, maxAccess, onSelect, window }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
