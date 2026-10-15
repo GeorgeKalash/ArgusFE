@@ -404,10 +404,10 @@ export default function FixingForm({ recordId, functionId, window }) {
   useEffect(() => {
     if (!reCalc) return
 
-    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty) || 0
-    const netUnitPrice = roundTo(formik?.values?.unitPrice + formik?.values?.premium - formik?.values?.discount) || 0
-    const baseUnitPrice = roundTo(netUnitPrice / formik?.values?.unitPrice_muQty) || 0
-    const subtotal = roundTo(baseQty * baseUnitPrice) || 0
+    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty, 5) || 0
+    const netUnitPrice = roundTo(formik?.values?.unitPrice * formik?.values?.purity / 1000 + formik?.values?.premium - formik?.values?.discount) || 0
+    const baseUnitPrice = roundTo(netUnitPrice / formik?.values?.unitPrice_muQty, 5) || 0
+    const subtotal = roundTo(baseQty * baseUnitPrice, 5) || 0
     const taxAmount = formik.values.isTaxable ? roundTo((subtotal + roundTo(formik?.values?.miscAmount)) * vatPct / 100) : 0
     const amount = roundTo(subtotal) + roundTo(formik?.values?.miscAmount) + roundTo(taxAmount)
 
@@ -438,6 +438,7 @@ export default function FixingForm({ recordId, functionId, window }) {
     formik.values.exRate,
     formik.values.rateCalcMethod,
     formik.values.isTaxable,
+    formik.values.purity,
     vatPct
   ])
 
@@ -728,7 +729,7 @@ useEffect(() => {
                         formik.setValues({
                           ...formik.values,
                           ...(rate || {}),
-                          purity: res?.purity ?? null,
+                          purity: res?.purity * 1000 ?? null,
                           marketPrice,
                           currencyId: newValue?.currencyId || null,
                           currencyRef: newValue?.currencyRef || '',
@@ -808,6 +809,7 @@ useEffect(() => {
                       label={labels.baseQty}
                       value={formik.values.baseQty}
                       maxAccess={maxAccess}
+                      decimalScale={5}
                       readOnly
                       required
                       error={formik.touched.baseQty && Boolean(formik.errors.baseQty)}
@@ -918,6 +920,7 @@ useEffect(() => {
                       label={labels.baseUnitPrice}
                       value={formik.values.baseUnitPrice}
                       maxAccess={maxAccess}
+                      decimalScale={5}
                       readOnly
                       required
                       error={formik.touched.baseUnitPrice && Boolean(formik.errors.baseUnitPrice)}
