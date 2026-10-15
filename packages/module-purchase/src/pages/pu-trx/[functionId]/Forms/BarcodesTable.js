@@ -59,7 +59,18 @@ export default function BarcodesTable({ labels, maxAccess, onSelect, window }) {
     { 
       field: 'defaultQty', 
       headerName: labels.defaultQty, 
-      flex: 1 
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'scaleDescription', 
+      headerName: labels.scaleDescription, 
+      flex: 1
+    },
+    {
+      field: 'posDescription', 
+      headerName: labels.posDescription, 
+      flex: 1
     }
   ]
 

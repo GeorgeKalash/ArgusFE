@@ -507,11 +507,26 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
             onSelect: selected => {
               if (!selected?.barcode) return
 
-              handleBarcodeChange({
-                newRow: { ...row, barcode: selected.barcode },
+              if (selected.isInactive) {
+                stackError({ message: labels.inactiveItem })
+
+                return
+              }
+
+              barcodeSkuSelection(
+                changes => updateRow({ id: row.id, changes }),
                 addRow,
-                update: changes => updateRow({ id: row.id, changes })
-              })
+                {
+                  ...row,
+                  barcode: selected.barcode,
+                  itemId: selected.itemId,
+                  sku: selected.sku,
+                  itemName: selected.itemName,
+                  msId: selected.msId,
+                  muId: selected.muId ?? row.muId,
+                  taxId: selected.taxId ?? row.taxId
+                }
+              )
             }
           },
           width: 900,

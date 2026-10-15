@@ -51,12 +51,33 @@ const BarcodeForm = ({ store, labels }) => {
     })
 
     setGridData(response)
+
+    return response
+  }
+
+  async function fetchWithSearch({ options = {}, qry }) {
+    if (!qry?.trim()) {
+      return await onSuccess()
+    }
+
+    const { _startAt = 0, _size = 50 } = options
+
+    const response = await getRequest({
+      extension: InventoryRepository.Barcodes.snapshot,
+      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}`
+    })
+
+    setGridData(response)
+
+    return response
   }
 
   const {
     labels: _labels,
     search,
-    access
+    clear,
+    access,
+    refetch
   } = useResourceQuery({
     datasetId: ResourceIds.Barcodes,
     search: {
@@ -64,6 +85,23 @@ const BarcodeForm = ({ store, labels }) => {
       searchFn: fetchWithSearch
     }
   })
+
+  const onSearch = value => {
+    const text = typeof value === 'string' ? value : ''
+
+    if (!text.trim()) {
+      onSuccess()
+
+      return
+    }
+
+    search(value)
+  }
+
+  const onClear = () => {
+    clear?.()
+    onSuccess()
+  }
 
   const add = () => {
     openForm()
@@ -93,18 +131,6 @@ const BarcodeForm = ({ store, labels }) => {
     setGridData({ list: barcodes || [] })
   }, [barcodes])
 
-  
-  async function fetchWithSearch({ options = {}, qry }) {
-    const { _startAt = 0, _size = 50 } = options
-
-    const response = await getRequest({
-      extension: InventoryRepository.Barcodes.snapshot,
-      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}`
-    })
-
-    return response
-  }
-
   const del = async obj => {
     await postRequest({
       extension: InventoryRepository.Barcodes.del,
@@ -119,23 +145,25 @@ const BarcodeForm = ({ store, labels }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar 
-          onAdd={add} 
-          maxAccess={access} 
-          onSearch={search}
-          inputSearch={true} 
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={onSearch}
+          onSearchClear={onClear}
+          inputSearch={true}
         />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={gridData}
-          rowId={'barcode'}
+          rowId={'recordId'}
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
           pagination={false}
           maxAccess={access}
+          refetch={refetch}
         />
       </Grow>
     </VertLayout>
