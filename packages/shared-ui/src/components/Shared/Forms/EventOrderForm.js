@@ -335,8 +335,8 @@ export default function EventOrderForm({ recordId, window }) {
   useEffect(() => {
     if (!reCalc) return
 
-    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty) || 0
-    const baseTargetPrice = roundTo(formik?.values?.targetPrice / formik?.values?.targetPrice_muQty) || 0
+    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty, 5) || 0
+    const baseTargetPrice = roundTo(formik?.values?.targetPrice * formik?.values?.purity / 1000 / formik?.values?.targetPrice_muQty, 5) || 0
     const amount = roundTo(baseQty * baseTargetPrice) || 0
 
     formik.setValues({
@@ -352,6 +352,7 @@ export default function EventOrderForm({ recordId, window }) {
     formik.values.qty_muQty,
     formik.values.targetPrice,
     formik.values.targetPrice_muQty,
+    formik.values.purity,
     vatPct
   ])
 
@@ -709,7 +710,7 @@ useEffect(() => {
                         formik.setValues({
                           ...formik.values,
                           marketPrice,
-                          purity: res?.purity ?? null,
+                          purity: res?.purity * 1000 ?? null,
                           currencyId: newValue?.currencyId || null,
                           currencyRef: newValue?.currencyRef || '',
                           metalId: newValue?.metalId || null,
@@ -789,6 +790,7 @@ useEffect(() => {
                       label={labels.baseQty}
                       value={formik.values.baseQty}
                       maxAccess={maxAccess}
+                      decimalScale={5}
                       readOnly
                       required
                       error={formik.touched.baseQty && Boolean(formik.errors.baseQty)}
@@ -843,6 +845,7 @@ useEffect(() => {
                       label={labels.baseTargetPrice}
                       value={formik.values.baseTargetPrice}
                       maxAccess={maxAccess}
+                      decimalScale={5}
                       readOnly
                       required
                       error={formik.touched.baseTargetPrice && Boolean(formik.errors.baseTargetPrice)}
