@@ -14,6 +14,7 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { LeaveManagementRepository } from '@argus/repositories/src/repositories/LeaveManagementRepository'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 
 export default function LeaveSchedules({ labels, maxAccess, row, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -44,7 +45,8 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
         .map(scheduleRow => ({
           employeeId: row.recordId,
           ltId: scheduleRow.ltId,
-          lsId: scheduleRow.lsId
+          lsId: scheduleRow.lsId,
+          lastGeneratedEarnedLeave: scheduleRow?.lastGeneratedEarnedLeave ? formatDateToApi(scheduleRow.lastGeneratedEarnedLeave) : null
         }))
 
       const resultObject = {
@@ -130,6 +132,8 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
                 ltName: leaveType.name,
                 lsId: matchingSchedule?.lsId ?? null,
                 lsName: matchingSchedule?.lsName ?? null,
+                lastGeneratedEarnedLeave:  matchingSchedule?.lastGeneratedEarnedLeave 
+                  ? formatDateFromApi(matchingSchedule.lastGeneratedEarnedLeave) : null
             }
         })
 

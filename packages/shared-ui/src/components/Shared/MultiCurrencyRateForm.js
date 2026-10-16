@@ -119,6 +119,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 value={formik?.values?.currencyName}
                 label={labels.currency}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -127,6 +128,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 value={formik?.values?.rateTypeName}
                 label={labels.rateType}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -135,6 +137,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 value={formik?.values?.exchangeName}
                 label={labels.exchangeTable}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -143,6 +146,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 value={formik?.values?.rateCalcMethodName}
                 label={labels.rateCalcMethod}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -186,7 +190,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField name='amount' value={formik?.values?.amount} label={labels.amount} readOnly />
+              <CustomNumberField name='amount' value={formik?.values?.amount} label={labels.amount} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={6}>
               <CustomNumberField

@@ -40,13 +40,11 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
         toPlantId: obj.toPlantId,
         toAccountId: obj.toAccountId
       }
-      try {
-        await postRequest({
-          extension: CashCountRepository.Generate.generate,
-          record: JSON.stringify(data)
-        })
-        toast.success(platformLabels.Generated)
-      } catch (error) {}
+      await postRequest({
+        extension: CashCountRepository.Generate.generate,
+        record: JSON.stringify(data)
+      })
+      toast.success(platformLabels.Generated)
     }
   })
 

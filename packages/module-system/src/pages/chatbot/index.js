@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext, useMemo } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -24,8 +24,6 @@ import { parseChatStream } from "@argus/shared-providers/src/providers/chatServi
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import DeleteDialog from "@argus/shared-ui/src/components/Shared/DeleteDialog";
 import { ResourceIds } from "@argus/shared-domain/src/resources/ResourceIds";
 import { useResourceQuery } from "@argus/shared-hooks/src/hooks/resource";
 import { RequestsContext } from "@argus/shared-providers/src/providers/RequestsContext";

@@ -63,7 +63,7 @@ export default function JobInfoForm({ recordId, window }) {
       status: 1,
       wip: 1
     },
-    validateOnChange: true,
+    maxAccess,
     validationSchema: yup.object({
       employeeId: yup.number().required(),
       date: yup.date().max(new Date(), 'Date cannot be in the future').required(),
@@ -233,6 +233,10 @@ export default function JobInfoForm({ recordId, window }) {
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('departmentId', newValue?.recordId || null)
+                  formik.setFieldValue('reportToId', newValue?.supervisorId || null)
+                  formik.setFieldValue('reportToRef', newValue?.managerRef || '')
+                  formik.setFieldValue('reportToName', newValue?.managerName || '')
+
                 }}
                 error={formik.touched.departmentId && Boolean(formik.errors.departmentId)}
               />
@@ -308,7 +312,7 @@ export default function JobInfoForm({ recordId, window }) {
                 name='reportToId'
                 displayFieldWidth={2}
                 label={labels.reportsTo}
-                form={formik}
+                formObject={formik.values}
                 readOnly={isClosed}
                 valueShow='reportToRef'
                 secondValueShow='reportToName'
@@ -317,8 +321,9 @@ export default function JobInfoForm({ recordId, window }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'fullName', value: 'Name' }
                 ]}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('reportToName', newValue?.fullName || '')
+                  formik.setFieldValue('reportToRef', newValue?.reference || '')
                   formik.setFieldValue('reportToId', newValue?.recordId || null)
                 }}
                 errorCheck={'reportToId'}

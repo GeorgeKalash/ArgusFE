@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Grid, InputAdornment, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -11,7 +11,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
@@ -33,6 +33,10 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
+import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 
@@ -45,11 +49,11 @@ export default function EventOrderForm({ recordId, window }) {
   const functionId = SystemFunction.EventOrder
   const { stack: stackError } = useError()
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
+  const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
   const [store, setStore] = useState({
     documentTypes: [],
     plants: [],
     currencies: [],
-    salesPeople: [],
     commodityPairs: [],
     measurementUnits: [],
     salesOrderSources: []
@@ -110,7 +114,8 @@ export default function EventOrderForm({ recordId, window }) {
       time: null,
       isTriggered: false,
       triggeredAt: null,
-      triggeredAtPrice: null
+      triggeredAtPrice: null,
+      marketPrice: null
     },
     maxAccess,
     validationSchema: yup.object({
@@ -161,6 +166,38 @@ export default function EventOrderForm({ recordId, window }) {
 
   const editMode = !!formik.values?.recordId
   const isClosed = formik.values.wip == 2
+  const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.EventOrder,
+    enabled: !!recordId && !(isPosted || isClosed)
+  })
+
+  async function getMarketPrice(fromCurrencyId, metalId, date) {
+    if(!(fromCurrencyId && metalId && date)) return null
+    const res = await getRequest({
+      extension: InventoryRepository.Metals.get,
+      parameters: `_recordId=${metalId}`
+    })
+
+    const marketPrice = await getMultiCurrencyFormData(res?.record?.currencyId, fromCurrencyId, date)
+    return marketPrice?.exRate || null
+  }
+
+  async function getMultiCurrencyFormData(fromCurrencyId, toCurrencyId, date) {
+    if (!(fromCurrencyId && toCurrencyId && date)) return null
+
+    const res = await getRequest({
+      extension: MultiCurrencyRepository.McrInfo.get,
+      parameters: `_fromCurrencyId=${fromCurrencyId}&_toCurrencyId=${toCurrencyId}&_date=${formatDateForGetApI(date)}&_rateTypeId=${rateTypeId}`
+    })
+
+    return {
+      exRate: res.record?.exRate,
+    }
+  }
 
   async function refetchForm(recordId) {
     if (!msId) return
@@ -197,7 +234,6 @@ export default function EventOrderForm({ recordId, window }) {
       documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
       plants: res?.record?.plants || [],
       currencies: res?.record?.currencies?.filter(item => item.currencyType === 1) || [],
-      salesPeople: res?.record?.salesPeople || [],
       commodityPairs: (res?.record?.commodityPairs || []).map(item => ({
         ...item,
         recordId: `${item.currencyId}${item.metalId}`
@@ -223,6 +259,32 @@ export default function EventOrderForm({ recordId, window }) {
     })
 
     return res?.record || {}
+  }
+
+  const onPost = async () => {
+    await postRequest({
+      extension: BrokerageTradingRepository.EventOrder.post,
+      record: JSON.stringify({
+        ...formik.values,
+        triggeredAt: formik.values?.triggeredAt ? formatDateToApi(formik.values.triggeredAt) : null
+      })
+    })
+
+    toast.success(platformLabels.Posted)
+    await releaseLock()
+    invalidate()
+
+    await refetchForm(formik.values.recordId)
+  }
+
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.EventOrder,
+        recordId: formik.values.recordId
+      }
+    })
   }
 
   const onClose = async () => {
@@ -269,6 +331,23 @@ export default function EventOrderForm({ recordId, window }) {
       disabled: !isClosed
     },
     {
+      key: 'Locked',
+      condition: isPosted,
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode || !isClosed
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
+    {
       key: 'AccountSummary',
       condition: true,
       onClick: () => {
@@ -288,8 +367,8 @@ export default function EventOrderForm({ recordId, window }) {
   useEffect(() => {
     if (!reCalc) return
 
-    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty) || 0
-    const baseTargetPrice = roundTo(formik?.values?.targetPrice / formik?.values?.targetPrice_muQty) || 0
+    const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty, 5) || 0
+    const baseTargetPrice = roundTo(formik?.values?.targetPrice * formik?.values?.purity / 1000 / formik?.values?.targetPrice_muQty, 5) || 0
     const amount = roundTo(baseQty * baseTargetPrice) || 0
 
     formik.setValues({
@@ -305,6 +384,7 @@ export default function EventOrderForm({ recordId, window }) {
     formik.values.qty_muQty,
     formik.values.targetPrice,
     formik.values.targetPrice_muQty,
+    formik.values.purity,
     vatPct
   ])
 
@@ -385,6 +465,10 @@ useEffect(() => {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
+                  formik.setFieldValue('spId', null)
+                  formik.setFieldValue('spRef', '')
+                  formik.setFieldValue('spName', '')
+                  
                   formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 required
@@ -424,7 +508,13 @@ useEffect(() => {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  formik.setFieldValue('fi_currencyId', newValue?.recordId || null)
+                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date)
+
+                  formik.setValues({
+                    ...formik.values,
+                    marketPrice: marketPrice,
+                    fi_currencyId: newValue?.recordId || null
+                  })
                 }}
                 error={formik.touched.fi_currencyId && Boolean(formik.errors.fi_currencyId)}
               />
@@ -439,13 +529,25 @@ useEffect(() => {
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'groupName', value: 'Group Name' }
+                ]}
                 required
                 displayFieldWidth={2}
                 readOnly={isClosed}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('accountRef', newValue?.reference || '')
-                  formik.setFieldValue('accountName', newValue?.name || '')
+                  if (newValue?.isInactive) {
+                    stackError({
+                      message: platformLabels.inactiveAccount
+                    })
+                  }
 
+                  formik.setFieldValue('fi_currencyId', !newValue?.isInactive ? newValue?.currencyId || null : null)
+                  formik.setFieldValue('fi_currencyRef', !newValue?.isInactive ? newValue?.currencyRef || '' : '')
+                  formik.setFieldValue('accountRef', !newValue?.isInactive ? newValue?.reference || '' : null)
+                  formik.setFieldValue('accountName', !newValue?.isInactive ? newValue?.name || '' : '')
                   formik.setFieldValue('accountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
@@ -454,24 +556,32 @@ useEffect(() => {
             </Grid>
             
             <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={SaleRepository.SalesPerson.qry}
-                store={store?.salesPeople}
+              <ResourceLookup
+                endpointId={formik.values.plantId && SaleRepository.SalesPerson.snapshot2}
+                parameters={{
+                  _plantId: formik?.values?.plantId
+                }}
                 name='spId'
                 label={labels.spName}
+                form={formik}
+                displayFieldWidth={2}
+                valueField='spRef'
+                displayField='name'
+                readOnly={isClosed || !formik.values.plantId}
                 columnsInDropDown={[
                   { key: 'spRef', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                valueField='recordId'
-                displayField='name'
-                values={formik.values}
+                valueShow='spRef'
+                required
+                secondValueShow='spName'
                 onChange={(_, newValue) => {
+                  formik.setFieldValue('spRef', newValue?.spRef || '')
+                  formik.setFieldValue('spName', newValue?.name || '')
+                  
                   formik.setFieldValue('spId', newValue?.recordId || null)
                 }}
-                required
-                readOnly={isClosed}
-                error={formik.touched.spId && Boolean(formik.errors.spId)}
+                errorCheck={'spId'}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -482,11 +592,15 @@ useEffect(() => {
                 label={labels.date}
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
-                  formik.setFieldValue('date', newValue)
+                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue)
+                  formik.setValues({ ...formik.values, marketPrice, date: newValue })
                 }}
                 readOnly={isClosed}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', null)}
+                onClear={() => {
+                  formik.setFieldValue('date', null)
+                  formik.setFieldValue('marketPrice', 0)
+                }}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
@@ -610,12 +724,19 @@ useEffect(() => {
                       readOnly={isClosed}
                       onChange={async (_, newValue) => {
                         const res = await getMetalPurity(newValue?.metalId)
+                        const marketPrice = await getMarketPrice(
+                          formik.values.fi_currencyId,
+                          newValue?.metalId,
+                          formik.values.date
+                        )
 
                         setReCalc(true)
                         formik.setValues({
                           ...formik.values,
-                          purity: res?.purity ?? null,
+                          marketPrice,
+                          purity: res?.purity * 1000 ?? null,
                           currencyId: newValue?.currencyId || null,
+                          currencyRef: newValue?.currencyRef || '',
                           metalId: newValue?.metalId || null,
                           qty_muId: newValue?.eo_defQtyMUId || null,
                           qty_muQty: newValue?.eo_defQtyMUQty || null,
@@ -693,6 +814,7 @@ useEffect(() => {
                       label={labels.baseQty}
                       value={formik.values.baseQty}
                       maxAccess={maxAccess}
+                      decimalScale={5}
                       readOnly
                       required
                       error={formik.touched.baseQty && Boolean(formik.errors.baseQty)}
@@ -747,6 +869,7 @@ useEffect(() => {
                       label={labels.baseTargetPrice}
                       value={formik.values.baseTargetPrice}
                       maxAccess={maxAccess}
+                      decimalScale={5}
                       readOnly
                       required
                       error={formik.touched.baseTargetPrice && Boolean(formik.errors.baseTargetPrice)}
@@ -811,13 +934,38 @@ useEffect(() => {
               </Grid>
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
-                name='amount'
-                label={labels.totalAmount}
-                value={formik.values.amount}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='amount'
+                    label={labels.totalAmount}
+                    value={formik.values.amount}
+                    readOnly
+                    maxAccess={maxAccess}
+                    InputProps={{
+                      readOnly: true,
+                      endAdornment: (
+                        <InputAdornment position='end' sx={{ maxHeight: '2em', mr: 0.5 }}>
+                          <Typography component='span' sx={{ color: 'red', fontSize: 'small', lineHeight: 1 }}>
+                            {formik.values.currencyRef}
+                          </Typography>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='marketPrice'
+                    label={labels.marketPrice}
+                    value={formik.values.marketPrice}
+                    readOnly
+                    maxLength={17}
+                    decimalScale={5}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Fixed>

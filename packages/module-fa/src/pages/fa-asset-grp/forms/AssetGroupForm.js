@@ -157,6 +157,7 @@ export default function AssetGroupForm({ labels, maxAccess, recordId }) {
                 secondDisplayField
                 secondValue={formik.values.nraDescription}
                 onChange={handleNumberRangeChange}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

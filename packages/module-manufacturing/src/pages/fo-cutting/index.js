@@ -15,10 +15,12 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 import FOCuttingWindow from './Windows/CuttingWindow'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const FoCuttings = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -104,10 +106,18 @@ const FoCuttings = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.FoCuttings,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: FOCuttingWindow,
       props: {

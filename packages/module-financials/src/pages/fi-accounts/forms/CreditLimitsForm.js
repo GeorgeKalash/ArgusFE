@@ -128,7 +128,7 @@ const CreditLimitsForm = ({ labels, editMode, store, maxAccess }) => {
             columns={column}
             allowDelete={false}
             allowAddNewLine={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

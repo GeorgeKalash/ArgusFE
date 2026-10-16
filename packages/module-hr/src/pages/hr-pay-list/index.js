@@ -15,10 +15,12 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const PayList = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -109,7 +111,7 @@ const PayList = () => {
 
     const response = await getRequest({
       extension: PayrollRepository.Payroll.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -134,10 +136,18 @@ const PayList = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.PayrollHeader,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: PayrollListForm,
       props: {

@@ -1,7 +1,7 @@
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -43,17 +43,11 @@ const PhysicalCountSerial = () => {
       totalVariancePcs: null,
       totalVarianceWeight: null,
       date: '',
-      reference: '',
-      search: ''
+      reference: ''
     },
     maxAccess,
     validateOnChange: true
   })
-
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('search', value)
-  }
 
   async function fetchGridData() {
     if (!formik.values.stockCountId || !formik.values.siteId) return
@@ -182,19 +176,6 @@ const PhysicalCountSerial = () => {
     })
   }
 
-  const filtered = useMemo(
-    () => ({
-      ...data,
-      list: data?.list?.filter(
-        item =>
-          (item.sku && item.sku.toString().toLowerCase().includes(formik.values.search.toLowerCase())) ||
-          (item.srlNo && item.srlNo.toLowerCase().includes(formik.values.search.toLowerCase())) ||
-          (item.weight && item.weight.toString().toLowerCase().includes(formik.values.search.toLowerCase()))
-      )
-    }),
-    [formik.values.search, data]
-  )
-
   return (
     <Form
       isSaved={false}
@@ -242,6 +223,7 @@ const PhysicalCountSerial = () => {
                 value={formik.values.date}
                 readOnly={true}
                 error={false}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={2}>
@@ -251,6 +233,7 @@ const PhysicalCountSerial = () => {
                 value={formik.values.reference}
                 readOnly={true}
                 error={false}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}></Grid>
@@ -278,35 +261,22 @@ const PhysicalCountSerial = () => {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={10}></Grid>
             <Grid item xs={2}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={_labels.search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
+              <CustomButton
+                image='clear.png'
+                tooltipText={platformLabels.Clear}
+                onClick={openClear}
+                style={{
+                  backgroundColor: '#f44336',
                 }}
-                onChange={handleSearchChange}
-                readOnly={data?.list?.length === 0 || data?.length === 0}
               />
-            </Grid>
-            <Grid item xs={2}>
-            <CustomButton
-              image='clear.png'
-              tooltipText={platformLabels.Clear}
-              onClick={openClear}
-              style={{
-                backgroundColor: '#f44336',
-              }}
-            />
             </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <Table
             columns={columns}
-            gridData={filtered ?? { list: [] }}
+            gridData={data ?? { list: [] }}
             rowId={['recordId']}
             pagination={false}
             maxAccess={maxAccess}
@@ -325,6 +295,7 @@ const PhysicalCountSerial = () => {
                     value={formik.values.totalCountedPcs}
                     readOnly={true}
                     hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -334,6 +305,7 @@ const PhysicalCountSerial = () => {
                     value={formik.values.totalSystemPcs}
                     readOnly={true}
                     hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -343,6 +315,7 @@ const PhysicalCountSerial = () => {
                     value={formik.values.totalVariancePcs}
                     readOnly={true}
                     hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -352,6 +325,7 @@ const PhysicalCountSerial = () => {
                     value={formik.values.totalWeight}
                     readOnly={true}
                     hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -361,6 +335,7 @@ const PhysicalCountSerial = () => {
                     value={formik.values.totalVarianceWeight}
                     readOnly={true}
                     hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>

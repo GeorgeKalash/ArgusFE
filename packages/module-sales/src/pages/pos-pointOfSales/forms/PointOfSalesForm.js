@@ -181,6 +181,7 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
                   formik.setFieldValue('plantId', newValue?.recordId || '')
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

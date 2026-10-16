@@ -1,4 +1,4 @@
-import { useState, useContext, useMemo, useEffect } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
@@ -17,7 +17,6 @@ import { DeliveryRepository } from '@argus/repositories/src/repositories/Deliver
 import OutboundTranspForm from '../outbound-transportation/forms/OutboundTranspForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
@@ -42,7 +41,6 @@ const GenerateOutboundTransportation = () => {
 
   const { formik } = useForm({
     initialValues: {
-      search: '',
       vehicleId: null,
       driverId: null,
       szId: null,
@@ -383,24 +381,6 @@ const GenerateOutboundTransportation = () => {
     formik.resetForm()
   }
 
-  const handleSearchChange = event => {
-    const { value } = event.target
-    if (formik.values.search !== value) {
-      formik.setFieldValue('search', value)
-    }
-  }
-
-  const filteredSalesZones = useMemo(() => {
-    return {
-      ...formik?.values?.salesZones,
-      list: formik?.values?.salesZones?.list.filter(item =>
-        item.name.toString().toLowerCase().includes(formik?.values?.search?.toLowerCase())
-      )
-    }
-  }, [formik?.values?.salesZones, formik.values.search])
-
-  const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
-
   return (
     <Form onSave={formik.handleSubmit} isSaved={false} maxAccess={access}>
       <VertLayout>
@@ -450,7 +430,7 @@ const GenerateOutboundTransportation = () => {
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('vehicleId', newValue?.recordId || null)
                   formik.setFieldValue('capacity', newValue?.capacityVolume || null)
                 }}
@@ -460,23 +440,10 @@ const GenerateOutboundTransportation = () => {
               />
             </Grid>
             <Grid item xs={2}>
-              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly />
+              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly maxAccess={access} />
             </Grid>
             <Grid item xs={5}></Grid>
-            <Grid item xs={3}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                size='small'
-                onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('search', e)}
-                search={true}
-              />
-            </Grid>
+            <Grid item xs={3}></Grid>
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={DeliveryRepository.Driver.qry}
@@ -485,7 +452,7 @@ const GenerateOutboundTransportation = () => {
                 valueField='recordId'
                 displayField={'name'}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('driverId', newValue?.recordId || null)
                 }}
                 error={formik.touched.driverId && Boolean(formik.errors.driverId)}
@@ -497,6 +464,7 @@ const GenerateOutboundTransportation = () => {
                 name='capacity'
                 label={labels.capacity}
                 value={formik.values.capacity}
+                maxAccess={access}
                 readOnly
               />
             </Grid>
@@ -511,7 +479,7 @@ const GenerateOutboundTransportation = () => {
             <Grid item xs={3} sx={{ display: 'flex', flex: 1 }}>
               <Table
                 columns={columnsZones}
-                gridData={filteredData}
+                gridData={formik?.values?.salesZones}
                 rowId={['recordId']}
                 pagination={false}
                 maxAccess={access}
@@ -548,6 +516,7 @@ const GenerateOutboundTransportation = () => {
                       <CustomNumberField
                         name='amount'
                         label={labels.amount}
+                        maxAccess={access}
                         value={formik.values.totalAmount}
                         readOnly
                       />
@@ -556,6 +525,7 @@ const GenerateOutboundTransportation = () => {
                       <CustomNumberField
                         name='volume'
                         label={labels.volume}
+                        maxAccess={access}
                         value={formik.values.totalVolume}
                         readOnly
                       />
@@ -591,10 +561,10 @@ const GenerateOutboundTransportation = () => {
             </Grid>
             <Grid item xs={7}></Grid>
             <Grid item xs={1.5}>
-              <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly />
+              <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly maxAccess={access} />
             </Grid>
             <Grid item xs={1.5}>
-              <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly />
+              <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly maxAccess={access} />
             </Grid>
           </Grid>
         </Fixed>

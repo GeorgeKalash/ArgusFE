@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import axios from 'axios'
 import jwt from 'jwt-decode'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
@@ -240,23 +240,22 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         data: bodyFormData
       })
         .then(response => {
-          if (!disableLoading) decrementRequests()
-
-          if (body?.noHandleError) return resolve(response.data)
           resolve(response.data)
         })
         .catch(error => {
-          if (!disableLoading) decrementRequests()
-
           if (body?.noHandleError) {
-            return resolve(error.response.data)
+            return resolve(error?.response?.data ?? {})
           }
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
+          error.isHandledApiError = true
 
           if (throwError) reject(error)
+        })
+        .finally(() => {
+          if (!disableLoading) decrementRequests()
         })
     })
   }

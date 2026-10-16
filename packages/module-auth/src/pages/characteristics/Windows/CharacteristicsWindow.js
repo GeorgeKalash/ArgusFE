@@ -7,7 +7,6 @@ import ValueFormList from '../forms/ValueFormList'
 
 const CharacteristicsWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
-  const [editMode, setEditMode] = useState(recordId)
 
   const [store, setStore] = useState({
     recordId: recordId || null,
@@ -22,17 +21,14 @@ const CharacteristicsWindow = ({ height, recordId, labels, maxAccess }) => {
       <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
         <CharacteristicsForm
           labels={labels}
-          setEditMode={setEditMode}
           setStore={setStore}
           store={store}
-          editMode={editMode}
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <ValueFormList
           labels={labels}
-          setEditMode={setEditMode}
           setStore={setStore}
           maxAccess={maxAccess}
           store={store}

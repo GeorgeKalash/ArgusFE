@@ -15,17 +15,19 @@ import DeliveriesOrdersForm from './Forms/DeliveryOrdersForm'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const DeliveryOrders = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: DeliveryRepository.DeliveriesOrders.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
+      extension: DeliveryRepository.DeliveriesOrders.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -50,7 +52,7 @@ const DeliveryOrders = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DeliveryRepository.DeliveriesOrders.qry,
+    endpointId: DeliveryRepository.DeliveriesOrders.page,
     datasetId: ResourceIds.DeliveriesOrders,
     filter: {
       filterFn: fetchWithFilter
@@ -137,10 +139,18 @@ const DeliveryOrders = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3 || obj?.status == -1)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.DeliveriesOrders,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: DeliveriesOrdersForm,
       props: {

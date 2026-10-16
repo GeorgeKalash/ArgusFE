@@ -15,9 +15,11 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import ProductionRequestForm from './Forms/ProductionRequestForm'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const ProductionRequest = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
@@ -77,8 +79,13 @@ const ProductionRequest = () => {
       type: 'date'
     },
     {
-      field: 'plantName',
-      headerName: labels.plant,
+      field: 'plantGroupName',
+      headerName: labels.plantGroup,
+      flex: 1
+    },
+    {
+      field: 'typeName',
+      headerName: labels.type,
       flex: 1
     },
     {
@@ -115,7 +122,15 @@ const ProductionRequest = () => {
     await proxyAction()
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.ProductionRequest,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: ProductionRequestForm,
       props: {
@@ -130,7 +145,7 @@ const ProductionRequest = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
   return (

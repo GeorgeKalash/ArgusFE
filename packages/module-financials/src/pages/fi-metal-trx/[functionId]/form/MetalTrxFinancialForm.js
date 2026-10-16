@@ -29,6 +29,7 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, getGLResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -172,8 +173,26 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     return payload
   }
 
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.MetalReceiptVoucher:
+        return ResourceIds.MetalReceiptVoucher
+      case SystemFunction.MetalPaymentVoucher:
+        return ResourceIds.MetalPaymentVoucher
+      default:
+        return
+    }
+  }
+
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: getResourceId(parseInt(formik.values.functionId)),
+    enabled: !!recordId && !isPosted
+  })
   const isVerified = formik.values.isVerified
   const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + ((item[key]) || 0), 0)
   const totalQty = calculateTotal('qty')
@@ -195,6 +214,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
   }
@@ -227,17 +247,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
     formik.setFieldValue('siteId', res?.record?.siteId || null)
     formik.setFieldValue('plantId', res?.record?.plantId || null)
-  }
-
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.MetalReceiptVoucher:
-        return ResourceIds.MetalReceiptVoucher
-      case SystemFunction.MetalPaymentVoucher:
-        return ResourceIds.MetalPaymentVoucher
-      default:
-        return
-    }
   }
 
   function getFilteredMetal(metalId) {
@@ -756,7 +765,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                   isInactive: val => val !== true
                 }}
                 readOnly={isPosted}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId)
                   formik.setFieldValue('accountRef', newValue?.reference)
                   formik.setFieldValue('accountName', newValue?.name)
@@ -771,6 +780,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 value={formik.values.accountGroupName}
                 readOnly
                 error={formik.touched.accountGroupName && Boolean(formik.errors.accountGroupName)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
@@ -862,16 +872,16 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             </Grid>
             <Grid item xs={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly />
+                  <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly maxAccess={maxAccess} />
                 </Grid>
             </Grid>
             <Grid item xs={2}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={2} readOnly />
+                  <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={2} readOnly maxAccess={maxAccess} />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.totalLabor} value={totalLabor} decimalScale={2} readOnly />
+                  <CustomNumberField label={labels.totalLabor} value={totalLabor} decimalScale={2} readOnly maxAccess={maxAccess} />
                 </Grid>
                 {metal?.reference && (
                   <Grid item xs={12}>
@@ -880,6 +890,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                       value={totalMetal}
                       decimalScale={2}
                       readOnly
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 )}

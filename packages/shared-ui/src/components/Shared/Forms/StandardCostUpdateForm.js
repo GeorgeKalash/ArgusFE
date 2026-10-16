@@ -21,10 +21,13 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
-export default function StandardCostUpdateForm({ labels, access, recordId, window }) {
+export default function StandardCostUpdateForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const functionId = SystemFunction.StandardCostUpdate
@@ -37,6 +40,13 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
     productionLines: []
   })
 
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.StandardCostUpdate,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.StandardCostUpdate, window })
+  
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
     access,
@@ -113,6 +123,13 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
   const isPosted = formik.values.header.status === 3
   const isClosed = formik.values.header.wip == 2
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.StandardCostUpdate,
+    enabled: !!recordId && !isClosed
+  })
+
   const onPost = async () => {
     await postRequest({
       extension: ManufacturingRepository.StandardCostUpdate.post,
@@ -120,6 +137,7 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
   }
@@ -508,3 +526,6 @@ export default function StandardCostUpdateForm({ labels, access, recordId, windo
     </FormShell>
   )
 }
+
+StandardCostUpdateForm.width = 1000
+StandardCostUpdateForm.height = 700

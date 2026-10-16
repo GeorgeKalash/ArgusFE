@@ -327,7 +327,7 @@ export default function ItemTab({ labels, maxAccess, store }) {
         </Grow>
         <Grid container p={4} justifyContent='flex-end'>
           <Grid item xs={2}>
-            <CustomNumberField name='totalCost' label={labels.totalCost} value={totalCost} readOnly />
+            <CustomNumberField name='totalCost' label={labels.totalCost} value={totalCost} readOnly maxAccess={maxAccess} />
           </Grid>
         </Grid>
       </VertLayout>

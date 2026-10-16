@@ -12,16 +12,18 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ThreadProgress } from '@argus/shared-ui/src/components/Shared/ThreadProgress'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
 export default function RebuildACForm({ _labels, maxAccess }) {
   const { platformLabels } = useContext(ControlContext)
-  const { postRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const { formik } = useForm({
     initialValues: {
@@ -36,7 +38,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
     validationSchema: yup.object({
       startDate: yup
         .date()
-        .nullable()
+        .required()
         .test('start-before-end', 'Start date must be before end date', function (startDate) {
           const { endDate } = this.parent
           if (!startDate || !endDate) return true
@@ -55,6 +57,8 @@ export default function RebuildACForm({ _labels, maxAccess }) {
       year: yup.number().required()
     }),
     onSubmit: async data => {
+      if (await isPeriodClosed(data.startDate)) return
+
       const { itemId, ...rest } = data
 
       const dataFormatted = {
@@ -80,6 +84,29 @@ export default function RebuildACForm({ _labels, maxAccess }) {
       toast.success(platformLabels.rebuild)
     }
   })
+
+  async function isPeriodClosed(startDate) {
+    if (!startDate) return
+    
+    const res = await getRequest({
+      extension: SystemRepository.Period.qry,
+      parameters: `_fiscalYear=${startDate.getFullYear()}`
+    })
+
+    const period = res.list?.find(
+      ({ startDate: from, endDate: to }) => startDate >= formatDateFromApi(from) && startDate <= formatDateFromApi(to)
+    )
+
+    const closed = period?.status === 2
+
+    if (closed) {
+      stackError({
+        message: _labels.periodClosed
+      })
+    }
+
+    return closed
+  }
 
   const actions = [
     {
@@ -147,6 +174,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
                 value={formik.values?.startDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
+                required
                 onClear={() => formik.setFieldValue('startDate', '')}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
               />

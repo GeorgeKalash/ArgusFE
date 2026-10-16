@@ -31,7 +31,7 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ShipmentsForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -196,6 +196,13 @@ export default function ShipmentsForm({ recordId, window }) {
   const isPosted = formik.values.header?.status === 3
   const editMode = !!formik.values.header?.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.Shipments,
+    enabled: !!recordId && !isPosted
+  })
+
   async function refetchForm(recordId) {
     muStoreByRowRef.current = {}
     const res = await getShipment(recordId)
@@ -267,6 +274,7 @@ export default function ShipmentsForm({ recordId, window }) {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
 
     await refetchForm(formik.values.recordId)
@@ -424,6 +432,15 @@ export default function ShipmentsForm({ recordId, window }) {
     })
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   function getFilteredMU(msId) {
     if (!msId) return []
 
@@ -438,7 +455,6 @@ export default function ShipmentsForm({ recordId, window }) {
       props: {
         displayField: 'reference',
         valueField: 'reference',
-        readOnly: isPosted,
         mapping: [
           { from: 'poId', to: 'poId' },
           { from: 'reference', to: 'poRef' }
@@ -542,11 +558,13 @@ export default function ShipmentsForm({ recordId, window }) {
         //lot store
 
         const filteredMU = getFilteredMU(newRow?.msId)
+        const measurementSchedule = await getMeasurementObject(newRow?.msId)
         update({
-          muRef: filteredMU?.[0]?.reference || null,
-          muId: filteredMU?.[0]?.recordId || null,
-          muQty: filteredMU?.[0]?.qty || 0,
-          baseQty: filteredMU?.[0]?.qty || newRow?.qty
+          decimals: measurementSchedule?.decimals,
+          muRef: filteredMU?.current?.[0]?.reference || null,
+          muId: filteredMU?.current?.[0]?.recordId || null,
+          muQty: filteredMU?.current?.[0]?.qty || 0,
+          baseQty: filteredMU?.current?.[0]?.qty || newRow?.qty
         })
       }
     },
@@ -603,7 +621,11 @@ export default function ShipmentsForm({ recordId, window }) {
       label: labels.qty,
       name: 'shippedNowQty',
       props: {
-        readOnly: isPosted
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
       },
       updateOn: 'blur',
       async onChange({ row: { update, oldRow, newRow } }) {
@@ -636,7 +658,6 @@ export default function ShipmentsForm({ recordId, window }) {
         endpointId: InventoryRepository.Site.qry,
         displayField: 'name',
         valueField: 'recordId',
-        readOnly: isPosted,
         mapping: [
           { from: 'recordId', to: 'siteId' },
           { from: 'reference', to: 'siteRef' },

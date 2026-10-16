@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -16,7 +16,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 
 export default function GroupsForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -54,24 +53,21 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
           recordId: response.recordId
         })
       } else toast.success(platformLabels.Edited)
-      setEditMode(true)
       invalidate()
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: BusinessPartnerRepository.Groups.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: BusinessPartnerRepository.Groups.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {
-        setErrorMessage(error)
+        formik.setValues(res.record)
       }
     })()
   }, [])
@@ -115,9 +111,10 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
                 displayField='description'
                 name='nraRef'
                 label={labels.numberRange}
+                maxAccess={maxAccess}
                 secondDisplayField={true}
                 secondValue={formik.values.nraDescription}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   if (newValue) {
                     formik.setFieldValue('nraId', newValue?.recordId)
                     formik.setFieldValue('nraRef', newValue?.reference)

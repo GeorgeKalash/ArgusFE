@@ -118,10 +118,11 @@ export default function LocationForm({ labels, maxAccess, recordId }) {
                 ]}
                 values={formik.values}
                 required
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || '')
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                maxAccess={maxAccess}
               />
             </Grid>
 
@@ -139,7 +140,7 @@ export default function LocationForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik && formik.setFieldValue('costCenterId', newValue?.recordId)
                 }}
                 error={formik.touched.costCenterId && Boolean(formik.errors.costCenterId)}

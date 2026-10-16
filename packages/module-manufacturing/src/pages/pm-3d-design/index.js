@@ -15,10 +15,12 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import ThreeDDesignForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const ThreeDDesign = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -157,6 +159,14 @@ const ThreeDDesign = () => {
   }
 
   async function openForm(obj) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.ThreeDDesign,
+      recordId: obj?.recordId,
+      disabled: obj?.wip == 2
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: ThreeDDesignForm,
       props: {

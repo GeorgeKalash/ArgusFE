@@ -18,13 +18,13 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
-const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
+const CharacteristicsForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.qry
+    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.page
   })
 
   const formik = useFormik({
@@ -52,6 +52,8 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   const postCharacteristics = async obj => {
     const recordId = obj?.recordId || ''
     const date = obj?.validFrom && formatDateToApi(obj?.validFrom)
@@ -61,7 +63,6 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
       record: JSON.stringify(data)
     }).then(res => {
       if (!recordId) {
-        setEditMode(true)
         setStore(prevStore => ({
           ...prevStore,
           recordId: res.recordId
@@ -82,15 +83,12 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
   }, [recordId])
 
   const getCharacteristicsById = recordId => {
-    const defaultParams = `_recordId=${recordId}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.get,
-      parameters: parameters
+      parameters: `_recordId=${recordId}`
     }).then(res => {
       res.record.validFrom = formatDateFromApi(res.record.validFrom)
       formik.setValues(res.record)
-      setEditMode(true)
     })
   }
 
@@ -121,8 +119,9 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
                 valueField='key'
                 displayField='value'
                 values={formik.values}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('dataType', '')}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('dataType', newValue?.key || '')
                 }}
                 error={formik.touched.dataType && Boolean(formik.errors.dataType)}

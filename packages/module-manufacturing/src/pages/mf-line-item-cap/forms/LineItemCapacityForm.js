@@ -189,7 +189,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <CustomTextField name='class' label={labels.prodClass} readOnly value={formik.values.class} />
+              <CustomTextField name='class' label={labels.prodClass} readOnly value={formik.values.class} maxAccess={maxAccess}/>
             </Grid>
           </Grid>
         </Fixed>

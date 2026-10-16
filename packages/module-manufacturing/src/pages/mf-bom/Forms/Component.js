@@ -83,7 +83,7 @@ const ComponentBOM = ({ store, labels }) => {
   })
 
   const totalQty = data?.list?.reduce((qtySum, row) => {
-    const qtyValue = parseFloat(row.baseQty) || 0
+    const qtyValue = parseFloat(row.qty) || 0
 
     return qtySum + qtyValue
   }, 0)
@@ -190,7 +190,7 @@ const ComponentBOM = ({ store, labels }) => {
         <Fixed>
           <Grid container sx={{ p: 2 }}>
             <Grid item xs={3}>
-              <CustomNumberField name='totalQty' label={labels.totalQty} value={totalQty} readOnly />
+              <CustomNumberField name='totalQty' label={labels.totalQty} value={totalQty} readOnly maxAccess={access}/>
             </Grid>
           </Grid>
         </Fixed>

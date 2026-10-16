@@ -214,6 +214,15 @@ export default function PuQtnForm({ recordId, window }) {
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -275,7 +284,7 @@ export default function PuQtnForm({ recordId, window }) {
 
         const filteredMU = getFilteredMU(newRow?.itemId, itemInfo?.msId)
         delete muStoreByRowRef.current[newRow.id]
-
+        const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
         const filteredItems = filteredMU.filter(item => item.recordId === newRow?.muId)
 
         update({
@@ -287,6 +296,7 @@ export default function PuQtnForm({ recordId, window }) {
           priceType: itemInfo?.priceType || 1,
           mdAmount: 0,
           qty: 0,
+          decimals: measurementSchedule?.decimals,
           msId: itemInfo?.msId,
           muRef: filteredMU?.[0]?.reference,
           muId: filteredMU?.[0]?.recordId,

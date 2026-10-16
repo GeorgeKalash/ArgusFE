@@ -25,6 +25,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function PayrollListForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -94,6 +95,13 @@ export default function PayrollListForm({ recordId, window }) {
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip == 2
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.PayrollHeader,
+    enabled: !!recordId && !isClosed
+  })
   const isPosted = formik.values.status === 3
 
   const refetchForm = async recordId => {
@@ -155,6 +163,7 @@ export default function PayrollListForm({ recordId, window }) {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     refetchForm(recordId)
     invalidate()
   }

@@ -27,6 +27,7 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function JTCheckoutForm({ recordId, window, refetch }) {
   const { platformLabels } = useContext(ControlContext)
@@ -106,20 +107,12 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
     }),
     onSubmit: async obj => {
       const round = (n, decimals = 3) => Number(n.toFixed(decimals))
+      if (round(Number(totalQty)) != round(Number(obj.transfer.qty))) {
+        stackError({
+          message: labels.QtyNotMatching
+        })
 
-      const hasTotalQty = totalQty !== null && totalQty !== undefined
-      const hasJobQty = obj?.transfer?.jobQty !== null && obj?.transfer?.jobQty !== undefined
-
-      if (hasTotalQty && hasJobQty) {
-        const delta = Math.abs(round(Number(totalQty)) - round(Number(obj.transfer.jobQty)))
-
-        if (delta > 0.01) {
-          stackError({
-            message: labels.QtyNotMatching
-          })
-
-          return
-        }
+        return
       }
 
       const transferPack = {
@@ -178,6 +171,13 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
   const isPosted = formik.values.transfer.status === 3
   const isClosed = formik.values.transfer.wip === 2
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.transfer.reference,
+    resourceId: ResourceIds.JTCheckOut,
+    enabled: !!recordId && !isClosed
+  })
+
   const onPost = async () => {
     await postRequest({
       extension: ManufacturingRepository.JobTransfer.post,
@@ -190,6 +190,7 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
       invalidate()
       
       toast.success(platformLabels.Posted)
+      await releaseLock()
       window.close()
     })
   }
@@ -315,7 +316,19 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed || isPosted || !editMode
-    }
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      valuesPath: {
+        ...formik.values.transfer,
+        date: formik.values.transfer.postedDate,
+        notes: formik.values.transfer.jobDescription
+      },
+      datasetId: ResourceIds.GLJTCheckout,
+      disabled: !editMode
+    },
   ]
 
   return (

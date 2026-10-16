@@ -1,9 +1,6 @@
 const service = 'TA.asmx/'
 
 export const TimeAttendanceRepository = {
-  AttendanceScheduleFilters: {
-    qry: service + 'qrySD'
-  },
   ProcessedShiftPunches: {
     retry: service + 'retryPSP'
   },
@@ -67,7 +64,11 @@ export const TimeAttendanceRepository = {
     qry: service + 'qryLR'
   },
   Calendar: {
-    qry: service + 'qryCA'
+    qry: service + 'qryCA',
+    page: service + 'pageCA',
+    set: service + 'setCA',
+    get: service + 'getCA',
+    del: service + 'delCA',
   },
   DayTypes: {
     page: service + 'pageDT',
@@ -77,6 +78,7 @@ export const TimeAttendanceRepository = {
     del: service + 'delDT'
   },
   AttendanceDay: {
+    page: service + 'pageAD',
     qry: service + 'qryAD'
   },
   Schedule: {
@@ -97,5 +99,12 @@ export const TimeAttendanceRepository = {
   },
   FlatPunch: {
     qry: service + 'qryFP'
+  },
+  CalendarDay: {
+    qry3: service + 'qryCD3',
+    set2: service + 'set2CD'
+  },
+  batchCloseTV: {
+    batch: service + 'batchCloseTV',
   }
 }

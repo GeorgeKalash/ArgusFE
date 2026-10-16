@@ -80,34 +80,32 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
     }
   ]
   async function getData() {
-    try {
-      const res = await getRequest({
-        extension: InventoryRepository.Site.qry,
-        parameters: `_filter=`
-      })
+    const res = await getRequest({
+      extension: InventoryRepository.Site.qry,
+      parameters: `_filter=`
+    })
 
-      const modifiedList = res.list?.map((category, index) => ({
-        ...category,
-        siteId: category.recordId,
-        id: index + 1
-      }))
+    const modifiedList = res.list?.map((category, index) => ({
+      ...category,
+      siteId: category.recordId,
+      id: index + 1
+    }))
 
-      const lockRes = await getRequest({
-        extension: InventoryRepository.CategorySites.qry,
-        parameters: `_categoryId=${recordId}`
-      })
+    const lockRes = await getRequest({
+      extension: InventoryRepository.CategorySites.qry,
+      parameters: `_categoryId=${recordId}`
+    })
 
-      const mergedList = modifiedList.map(site => {
-        const lockInfo = lockRes.list.find(lockItem => lockItem.siteId === site.siteId)
+    const mergedList = modifiedList.map(site => {
+      const lockInfo = lockRes.list.find(lockItem => lockItem.siteId === site.siteId)
 
-        return {
-          ...site,
-          isLocked: lockInfo ? lockInfo.isLocked : false
-        }
-      })
+      return {
+        ...site,
+        isLocked: lockInfo ? lockInfo.isLocked : false
+      }
+    })
 
-      formik.setValues({ sites: mergedList })
-    } catch (error) {}
+    formik.setValues({ sites: mergedList })
   }
   useEffect(() => {
     if (recordId) {
@@ -121,10 +119,10 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={6.01}>
-              <CustomTextField name='reference' label={labels.reference} value={store.ref} readOnly={true} />
+              <CustomTextField name='reference' label={labels.reference} value={store.ref} readOnly={true} maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={6.01}>
-              <CustomTextField name='name' label={labels.name} value={store.name} readOnly={true} />
+              <CustomTextField name='name' label={labels.name} value={store.name} readOnly={true} maxAccess={maxAccess}/>
             </Grid>
           </Grid>
           <DataGrid
@@ -134,7 +132,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
             columns={columns}
             allowAddNewLine={false}
             allowDelete={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </FormShell>

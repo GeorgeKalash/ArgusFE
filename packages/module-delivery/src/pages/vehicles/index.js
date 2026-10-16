@@ -23,7 +23,7 @@ const Vehicles = () => {
 
     const response = await getRequest({
       extension: DeliveryRepository.Vehicle.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -88,14 +88,12 @@ const Vehicles = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: DeliveryRepository.Vehicle.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: DeliveryRepository.Vehicle.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (

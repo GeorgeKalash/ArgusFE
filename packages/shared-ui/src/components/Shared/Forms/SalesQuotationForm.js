@@ -52,8 +52,10 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
+export default function SalesQuotationForm({ recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -65,6 +67,13 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.SalesQuotations,
+    editMode: !!recordId
+  })
+  
+  useSetWindow({ title: labels.salesQuotations, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesQuotation,
@@ -278,6 +287,15 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -338,6 +356,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           rowTaxDetails = details
         }
 
+        const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
         const filteredMU = measurements?.filter(item => item.msId === itemInfo?.msId)
         const rowMUList = getFilteredMU(newRow?.itemId, itemInfo?.msId)
         delete muStoreByRowRef.current[newRow.id]
@@ -357,6 +376,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           msId: itemInfo?.msId,
           muRef: filteredMU?.[0]?.reference,
           muId: filteredMU?.[0]?.recordId,
+          decimals: measurementSchedule?.decimals,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
@@ -420,6 +440,13 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
+            props: {
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
+      },
       onChange({ row: { update, newRow } }) {
         const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.itemId, newRow?.msId)
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -981,7 +1008,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? roundTo(itemPriceRow?.qty, 2) : 0,
+      qty: itemPriceRow?.qty ? roundTo(itemPriceRow?.qty, newRow?.decimals || 2) : 0,
       volume: itemPriceRow?.volume ? roundTo(itemPriceRow.volume, 2) : 0,
       weight: roundTo(itemPriceRow?.weight, 2),
       basePrice: itemPriceRow?.basePrice ? roundTo(itemPriceRow.basePrice, 5) : 0,
@@ -1410,6 +1437,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       formik.setFieldValue('spId', newValue?.recordId)
                     }}
                     error={formik.touched.spId && Boolean(formik.errors.spId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1461,6 +1489,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       formik.setFieldValue('szId', newValue?.recordId)
                     }}
                     error={formik.touched.szId && Boolean(formik.errors.szId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
@@ -1657,7 +1686,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess}/>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
@@ -1777,3 +1806,5 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     </FormShell>
   )
 }
+SalesQuotationForm.width = 1300
+SalesQuotationForm.height = 730

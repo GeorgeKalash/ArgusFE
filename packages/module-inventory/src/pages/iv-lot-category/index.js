@@ -23,7 +23,7 @@ const IvLotCategory = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.LotCategory.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -99,14 +99,12 @@ const IvLotCategory = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: InventoryRepository.LotCategory.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (e) {}
+    await postRequest({
+      extension: InventoryRepository.LotCategory.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {

@@ -31,6 +31,7 @@ import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextAre
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function FOMetalTrxForm({ labels, access, recordId, functionId, getResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -209,6 +210,13 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const editMode = !!formik.values?.header.recordId
   const isPosted = formik.values.header.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: getResourceId(Number(functionId)),
+    enabled: !!recordId && !isPosted
+  })
+
   const scrapQty = formik?.values?.scraps?.reduce((sum, item) => {
     return sum + (item.qty || 0)
   }, 0)
@@ -302,6 +310,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
   }
@@ -937,6 +946,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                       updatePurityRelatedFields(0)
                       formik.setFieldValue('header.purity', '')
                     }}
+                    maxAccess={maxAccess}
                     error={formik.touched.header?.purity && Boolean(formik.errors.header?.purity)}
                   />
                 </Grid>
@@ -956,6 +966,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                     readOnly={isPosted}
                     onClear={() => formik.setFieldValue('header.qty', null)}
                     error={formik.touched.header?.qty && Boolean(formik.errors.header?.qty)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
@@ -1046,6 +1057,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                     value={totalDesiredPurity}
                     decimalScale={3}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 {
@@ -1056,6 +1068,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                       value={totalAlloy}
                       decimalScale={3}
                       readOnly
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 }
@@ -1067,20 +1080,21 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
                       value={expectedAlloy}
                       decimalScale={3}
                       readOnly
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 }
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.qtyIn} value={qtyIn} decimalScale={3} readOnly />
+                  <CustomNumberField label={labels.qtyIn} value={qtyIn} decimalScale={3} readOnly maxAccess={maxAccess}/>
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.qtyOut} value={qtyOut} decimalScale={3} readOnly />
+                  <CustomNumberField label={labels.qtyOut} value={qtyOut} decimalScale={3} readOnly maxAccess={maxAccess}/>
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.qtyDiff} value={qtyDiff} decimalScale={3} readOnly />
+                  <CustomNumberField label={labels.qtyDiff} value={qtyDiff} decimalScale={3} readOnly maxAccess={maxAccess}/>
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.avgPurity} value={avgPurity} decimalScale={3} readOnly />
+                  <CustomNumberField label={labels.avgPurity} value={avgPurity} decimalScale={3} readOnly maxAccess={maxAccess}/>
                 </Grid>
               </Grid>
             </Grid>

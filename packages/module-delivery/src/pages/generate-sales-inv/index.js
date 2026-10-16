@@ -31,7 +31,7 @@ const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
-  const { stack, lockRecord } = useWindow()
+  const { stack } = useWindow()
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateInvoices
@@ -98,8 +98,7 @@ const GeneratePurchaseInvoice = () => {
       props: {
         recordId,
         functionId: SystemFunction.SalesInvoice,
-        getResourceId: () => ResourceIds.SalesInvoice,
-        lockRecord
+        getResourceId: () => ResourceIds.SalesInvoice
       },
     })
   }
@@ -267,7 +266,7 @@ const GeneratePurchaseInvoice = () => {
                   { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'Foreign Language' }
                 ]}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('clientName', newValue?.name)
                   formik.setFieldValue('clientRef', newValue?.reference)
                   formik.setFieldValue('applyVAT', newValue?.isSubjectToVAT || false)
@@ -319,8 +318,9 @@ const GeneratePurchaseInvoice = () => {
                   { key: 'spRef', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                maxAccess={maxAccess}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('spId', newValue?.recordId || 0)
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
@@ -397,6 +397,7 @@ const GeneratePurchaseInvoice = () => {
                 label={labels.amount}
                 value={formik?.values?.amount}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

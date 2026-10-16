@@ -938,8 +938,7 @@ export const apiMappings = {
   },
   [ResourceIds.AttendanceSchedule]: {
     type: COMBOBOX,
-    endpoint: TimeAttendanceRepository.AttendanceScheduleFilters.qry,
-    parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId&_scId=0`,
+    endpoint: TimeAttendanceRepository.Schedule.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -1297,6 +1296,22 @@ export const apiMappings = {
   [ResourceIds.DamageCategory]: {
     type: COMBOBOX,
     endpoint: ManufacturingRepository.DamageCategory.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Calendar]: {
+    type: COMBOBOX,
+    endpoint: TimeAttendanceRepository.Calendar.qry,
+    valueField: 'recordId',
+    displayField: 'name'
+  },
+  [ResourceIds.Developer]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Developer.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [

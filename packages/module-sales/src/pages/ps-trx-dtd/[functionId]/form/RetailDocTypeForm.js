@@ -20,7 +20,7 @@ export default function RetailDocTypeForm({ labels, maxAccess, recordId, functio
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: PointofSaleRepository.DocumentTypeDefault.qry
+    endpointId: PointofSaleRepository.DocumentTypeDefault.page
   })
 
   const { formik } = useForm({

@@ -22,6 +22,7 @@ import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDateP
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function AssetsForm({ recordId, maxAccess: access, labels, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -98,6 +99,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }
@@ -179,6 +181,13 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
     }
   ]
   const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.Depreciation,
+    enabled: !!recordId && !isPosted
+  })
 
   const actions = [
     {

@@ -39,12 +39,14 @@ export const ResourceIds = {
   RightToWork: 70114,
   Salaries: 71206,
   EmployeeRightToWork: 71210,
+  BackgroundCheck: 71202,
   Probation: 71215,
   CasePleads: 76210,
   EmploymentReview: 71601,
   EmployeesBirthday: 71604,
   TermEndDate: 71602,
   WorkAnniversary: 71603,
+  Holidays: 72601,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
@@ -669,6 +671,9 @@ export const ResourceIds = {
   FixingSalesDTD: 38602,
   FixingPurchaseDTD: 38603,
   BTDocumentTypeDefault: 38102,
+  Budget: 42145,
+  Calendar: 72106,
+  PM_Budget: 48105,
 
   // GL
   GLSalesInvoice: 51604,
@@ -717,6 +722,9 @@ export const ResourceIds = {
   GLWorkOrder: 45600,
   GLPayrollList: 75600,
   GLItemDisposal: 42610,
+  GLFixingSales: 38604,
+  GLFixingPurchases: 38605,
+  GLJTCheckout: 31631,
 
   BtDefaults: 38601,
   CommodityPair: 38101,

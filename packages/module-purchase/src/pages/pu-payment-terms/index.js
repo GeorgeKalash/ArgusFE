@@ -21,14 +21,12 @@ const PaymentTerm = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: PurchaseRepository.PaymentTerms.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
-      })
+    const response = await getRequest({
+      extension: PurchaseRepository.PaymentTerms.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -40,7 +38,7 @@ const PaymentTerm = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PurchaseRepository.PaymentTerms.qry,
+    endpointId: PurchaseRepository.PaymentTerms.page,
     datasetId: ResourceIds.PUPaymentTerms
   })
 
@@ -82,14 +80,12 @@ const PaymentTerm = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: PurchaseRepository.PaymentTerms.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: PurchaseRepository.PaymentTerms.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {

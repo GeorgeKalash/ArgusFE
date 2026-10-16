@@ -244,11 +244,11 @@ const GetDate = ({ field, formik, rpbParams }) => {
   }, [])
 
   return (
-    <Grid item xs={12} key={formik.values?.parameters?.[field.id]?.value ? true : false}>
+    <Grid item xs={12} key={field.id}>
       <CustomDatePicker
         name={`parameters[${field.id}]`}
         label={field.caption}
-        value={formik.values?.parameters?.[field.id]?.value}
+        value={formik.values?.parameters?.[field.id]?.value ?? null}
         required={field.mandatory}
         onChange={(_, newValue) => {
           newValue
@@ -260,10 +260,10 @@ const GetDate = ({ field, formik, rpbParams }) => {
                 controlType: field?.controlType,
                 display: formatDateDefault(newValue)
               })
-            : formik.setFieldValue(`parameters[${field.id}]`, undefined)
+            : formik.setFieldValue(`parameters[${field.id}]`, null)
         }}
         error={formik.touched?.parameters && Boolean(formik.errors?.parameters?.[field?.id])}
-        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, undefined)}
+        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, null)}
       />
     </Grid>
   )

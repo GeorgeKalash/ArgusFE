@@ -38,6 +38,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -204,6 +205,13 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.ReceiptVoucher,
+    enabled: !!recordId && !(isPosted || isCancelled)
+  })
   const isVerified = formik.values.isVerified
 
   const getDefaultFields = async cashAccountId => {
@@ -335,6 +343,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
 
     if (res) {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       invalidate()
       await getData(formik.values.recordId)
       window.close()
@@ -559,6 +568,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 label={labels.accountGroup}
                 value={formik.values.accountGroupName}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>

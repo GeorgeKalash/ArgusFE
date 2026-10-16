@@ -25,6 +25,7 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function SketchForm({ recordId, invalidate, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -121,6 +122,13 @@ export default function SketchForm({ recordId, invalidate, window }) {
   const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.Sketch,
+    enabled: !!recordId && !(isClosed || isPosted)
+  })
+
   async function getData(recordId) {
     const res = await getRequest({
       extension: ProductModelingRepository.Sketch.get,
@@ -169,6 +177,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
 
     await getData(formik.values.recordId)
     toast.success(platformLabels.Posted)
+    await releaseLock()
     refresh()
   }
 
@@ -496,7 +505,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField name='statusName' label={labels.status} readOnly value={formik.values.statusName} />
+                  <CustomTextField name='statusName' label={labels.status} readOnly value={formik.values.statusName} maxAccess={maxAccess}/>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea

@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -16,7 +16,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function StatesForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -49,11 +48,12 @@ export default function StatesForm({ labels, maxAccess, recordId }) {
           recordId: response.recordId
         })
       } else toast.success(platformLabels.Edited)
-      setEditMode(true)
 
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

@@ -25,11 +25,13 @@ import toast from 'react-hot-toast'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GeneratePUInvoices
@@ -91,6 +93,14 @@ const GeneratePurchaseInvoice = () => {
   })
 
   async function openForm(recordId) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.PurchaseInvoice,
+      recordId,
+      disabled: true
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: PurchaseTransactionForm,
       props: {
@@ -377,7 +387,7 @@ const GeneratePurchaseInvoice = () => {
               />
             </Grid>
             <Grid item xs={3} p={2}>
-              <CustomNumberField name='amount' label='' value={formik?.values?.amount} readOnly />
+              <CustomNumberField name='amount' label='' value={formik?.values?.amount} readOnly maxAccess={access}/>
             </Grid>
           </Grid>
         </Fixed>

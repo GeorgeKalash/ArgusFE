@@ -15,9 +15,11 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const BalanceAdjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
@@ -61,12 +63,10 @@ const BalanceAdjustment = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
-    var parameters = defaultParams
 
     const response = await getRequest({
       extension: LeaveManagementRepository.BalanceAdjustment.page,
-      parameters: parameters
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -137,10 +137,18 @@ const BalanceAdjustment = () => {
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj.recordId, obj?.status == 3)
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.BalanceAdjustment,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: BalanceAdjustmentForm,
       props: {

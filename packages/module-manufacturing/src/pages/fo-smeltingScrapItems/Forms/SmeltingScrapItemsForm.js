@@ -140,7 +140,7 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
     >
       <VertLayout>
         <Grid item xs={12}>
-          <CustomTextField name='metalRef' label={labels.metal} value={formik.values.metalRef} readOnly />
+          <CustomTextField name='metalRef' label={labels.metal} value={formik.values.metalRef} readOnly maxAccess={maxAccess} />
         </Grid>
         <Grow>
           <DataGrid

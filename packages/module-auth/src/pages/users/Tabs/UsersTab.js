@@ -1,5 +1,5 @@
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
@@ -115,7 +115,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
               userName: copy.username,
               password: copy.password,
               passwordExpiryDays: copy.passwordExpiryDays,
-              userId: copy.recordId
+              userId: copy.recordId,
+              email: copy.email
             })
           },
           {
@@ -281,6 +282,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     label={labels.email}
                     value={formik.values.email}
                     type='email'
+                    maxAccess={maxAccess}
                     required
                     placeholder='johndoe@email.com'
                     readOnly={editMode}

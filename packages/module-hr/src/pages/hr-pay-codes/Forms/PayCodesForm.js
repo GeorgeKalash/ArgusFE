@@ -20,7 +20,7 @@ export default function PayCodesForm({ labels, recordId, maxAccess, window }) {
   const editMode = !!recordId
 
   const invalidate = useInvalidate({
-    endpointId: PayrollRepository.Paycode.qry
+    endpointId: PayrollRepository.Paycode.page
   })
 
   const { formik } = useForm({

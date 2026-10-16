@@ -130,6 +130,7 @@ const UserTextForm = () => {
                 decimalScale={0}
                 allowNegative={false}
                 error={errored || (formik.touched.ivtUDTCount && Boolean(formik.errors.ivtUDTCount))}
+                maxAccess={maxAccess}
               />
             </Grid>
 
@@ -150,6 +151,7 @@ const UserTextForm = () => {
                       inputProps={{
                         readOnly: errored || formik.values.ivtUDTCount <= index || formik.values.ivtUDTCount === 'null'
                       }}
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 ))}
@@ -172,6 +174,7 @@ const UserTextForm = () => {
                         readOnly:
                           errored || formik.values.ivtUDTCount <= index + 10 || formik.values.ivtUDTCount === 'null'
                       }}
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 ))}

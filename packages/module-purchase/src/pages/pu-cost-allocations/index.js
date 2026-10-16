@@ -15,10 +15,12 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { CostAllocationRepository } from '@argus/repositories/src/repositories/CostAllocationRepository'
 import PuCostAllocationWindow from '@argus/shared-ui/src/components/Shared/Forms/PuCostAllocationWindow'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const PuCostAllocations = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
@@ -108,6 +110,14 @@ const PuCostAllocations = () => {
   }
 
   async function openForm(obj) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.PuCostAllocation,
+      recordId: obj?.recordId,
+      disabled: obj?.wip == 2
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: PuCostAllocationWindow,
       props: {

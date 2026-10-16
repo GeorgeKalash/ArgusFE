@@ -57,7 +57,7 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack, lockRecord } = useWindow()
+  const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
@@ -183,6 +183,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         overheadId: '',
         vatAmount: 0,
         mdAmount: 0,
+        onHand: 0,
         upo: 0,
         extendedPrice: 0,
         mdAmountPct: null,
@@ -325,6 +326,26 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   }
 
+  async function getOnHand (rowValues) {
+    if (!rowValues?.itemId && !rowValues.siteId) return 0
+
+    const res = await getRequest({
+      extension: InventoryRepository.Availability.get,
+      parameters: `_itemId=${rowValues.itemId}&_seqNo=0&_siteId=${rowValues.siteId}`
+    })
+    
+    return res?.record?.onhand || 0
+  }
+
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -370,6 +391,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+        const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update, defaultMu?.recordId || 0)
         let rowTax = null
@@ -414,11 +436,13 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           muRef: defaultMu?.reference || '',
           muId: defaultMu?.recordId || null,
           muQty: defaultMu?.qty || 0,
+          decimals: measurementSchedule?.decimals,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
           taxDetails: rowTaxDetails || null,
           mdType: 1,
+          onHand: await getOnHand({ itemId: newRow?.itemId, siteId: formik?.values?.siteId }),
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId)
         })
@@ -451,6 +475,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow.siteId) {
+          update({ onHand: 0 })
+
+          return
+        }
+        const currentOnHand = await getOnHand(newRow)
+        update({ onHand: currentOnHand })
       }
     },
     {
@@ -505,11 +538,24 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     },
     {
       component: 'numberfield',
+      label: labels.onHand,
+      name: 'onHand',
+      props: {
+        decimalScale: 2,
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 2
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         const muList = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.msId)
@@ -759,8 +805,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       props: {
         recordId: res.recordId,
         functionId: SystemFunction.SalesInvoice,
-        getResourceId: () => ResourceIds.SalesInvoice,
-        lockRecord
+        getResourceId: () => ResourceIds.SalesInvoice
       }
     })
   }
@@ -1795,7 +1840,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess}/>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField

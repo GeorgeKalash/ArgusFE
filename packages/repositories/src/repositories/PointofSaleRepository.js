@@ -25,12 +25,14 @@ export const PointofSaleRepository = {
     set2: service + 'set2CA'
   },
   DocumentTypeDefault: {
+    page: service + 'pageDTD',
     qry: service + 'qryDTD',
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD'
   },
   RetailInvoice: {
+    page: service + 'pageIVC',
     qry: service + 'qryIVC',
     del: service + 'delIVC',
     get: service + 'getIVC',

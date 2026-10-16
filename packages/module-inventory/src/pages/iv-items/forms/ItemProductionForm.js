@@ -100,9 +100,6 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
 
       formik.setValues(obj)
       toast.success(platformLabels.Edited)
-
-      invalidate()
-      
     }
   })
 

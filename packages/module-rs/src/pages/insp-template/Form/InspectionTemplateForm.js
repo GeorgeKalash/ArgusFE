@@ -15,7 +15,6 @@ import { RepairAndServiceRepository } from '@argus/repositories/src/repositories
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 export default function InspectionTemplateForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
