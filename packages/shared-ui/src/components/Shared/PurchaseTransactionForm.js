@@ -497,11 +497,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       label: ' ',
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png',
-        onCondition: row => {
-          return {
-            disabled: isPosted
-          }
-        }
       },
       onClick: (e, row, update, updateRow, addRow) => {
         stack({
@@ -2396,7 +2391,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
             value={formik?.values?.items}
             error={formik.errors.items}
             name='items'
-            columns={columns}
+            columns={columns.filter(col => !(col.name === 'barcodeLookup' && isPosted))}
             maxAccess={maxAccess}
             allowDelete={!isPosted}
             disabled={isPosted || !formik.values.header.vendorId || !formik.values.header.vendorId}

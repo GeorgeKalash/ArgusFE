@@ -44,27 +44,23 @@ const BarcodeForm = ({ store, labels }) => {
     }
   ]
 
-  async function onSuccess() {
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
     const response = await getRequest({
       extension: InventoryRepository.Barcode.qry,
-      parameters: `_itemId=${recordId}&_pageSize=50&_startAt=0`
+      parameters: `_itemId=${recordId}&_pageSize=${_pageSize}&_startAt=${_startAt}`
     })
 
     setGridData(response)
 
-    return response
+    return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({ options = {}, qry }) {
-    if (!qry?.trim()) {
-      return await onSuccess()
-    }
-
-    const { _startAt = 0, _size = 50 } = options
-
+  async function fetchWithSearch({ qry }) {
     const response = await getRequest({
       extension: InventoryRepository.Barcodes.snapshot2,
-      parameters: `_filter=${qry}&_itemId=${recordId}&_startAt=${_startAt}&_size=${_size}`
+      parameters: `_filter=${qry}&_itemId=${recordId}`
     })
 
     setGridData(response)
@@ -77,31 +73,17 @@ const BarcodeForm = ({ store, labels }) => {
     search,
     clear,
     access,
-    refetch
+    refetch,
+    paginationParameters
   } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: InventoryRepository.Barcode.qry,
     datasetId: ResourceIds.Barcodes,
     search: {
       endpointId: InventoryRepository.Barcodes.snapshot,
       searchFn: fetchWithSearch
     }
   })
-
-  const onSearch = value => {
-    const text = typeof value === 'string' ? value : ''
-
-    if (!text.trim()) {
-      onSuccess()
-
-      return
-    }
-
-    search(value)
-  }
-
-  const onClear = () => {
-    clear?.()
-    onSuccess()
-  }
 
   const add = () => {
     openForm()
@@ -148,20 +130,22 @@ const BarcodeForm = ({ store, labels }) => {
         <GridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={onSearch}
-          onSearchClear={onClear}
+          onSearch={search}
+          onSearchClear={clear}
           inputSearch={true}
         />
       </Fixed>
       <Grow>
         <Table
+          name='barcodeTable'
           columns={columns}
           gridData={gridData}
           rowId={'recordId'}
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          pagination={false}
+          paginationType='api'
+          paginationParameters={paginationParameters}
           maxAccess={access}
           refetch={refetch}
         />
