@@ -188,7 +188,8 @@ export const InventoryRepository = {
     del: service + 'delBCD',
     page: service + 'pageBCD',
     qry: service + 'qryBCD',
-    get2: service + 'getBCD2'
+    get2: service + 'getBCD2',
+    snapshot2: service + 'snapshotBCD2'
   },
   MetalColor: {
     get: service + 'getMTC',

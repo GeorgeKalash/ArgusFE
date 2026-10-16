@@ -252,7 +252,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
           })
           error.isHandledApiError = true
 
-          reject(error)
+          if (throwError) reject(error)
         })
         .finally(() => {
           if (!disableLoading) decrementRequests()
