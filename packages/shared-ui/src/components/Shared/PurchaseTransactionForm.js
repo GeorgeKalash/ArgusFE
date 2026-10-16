@@ -497,6 +497,11 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       label: ' ',
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: row => {
+          return {
+            disabled: !formik.values.header.vendorId
+          }
+        }
       },
       onClick: (e, row, update, updateRow, addRow) => {
         stack({
