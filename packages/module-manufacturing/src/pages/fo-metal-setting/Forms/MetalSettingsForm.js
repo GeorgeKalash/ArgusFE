@@ -121,11 +121,8 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Items.pack}
+                endpointId={InventoryRepository.MetalColor.qry}
                 values={formik.values}
-                reducer={response => {
-                  return response?.record?.metalColors
-                }}
                 name='metalColorId'
                 label={labels.metalColor}
                 readOnly={editMode}
@@ -134,7 +131,7 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
                 displayFieldWidth={1}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('metalColorId', newValue?.recordId)
                 }}
                 error={formik.touched.metalColorId && formik.errors.metalColorId}

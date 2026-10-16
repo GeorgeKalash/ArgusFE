@@ -25,6 +25,8 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function PurityAdjForm({ labels, access, recordId, window }) {
@@ -33,8 +35,15 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [allMetals, setAllMetals] = useState([])
   const [recalc, setRecalc] = useState(false)
-  const filteredItems = useRef()
+  const skuStoreByRowRef = useRef({})
   const functionId = SystemFunction.PurityAdjustment
+  const [store, setStore] = useState({
+    documentTypes: [],
+    plants: [],
+    sites: [],
+    workCenters: [],
+    metals: []
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
@@ -197,12 +206,10 @@ const calculateTotal = key =>
     invalidate()
   }
 
-  async function fillSKUStore(metalId) {
-    filteredItems.current = metalId
-      ? allMetals.filter(metal => {
-          return metal.metalId === metalId
-        })
-      : []
+  function getFilteredSku(metalId) {
+    if (!metalId) return 
+    
+    return allMetals.filter(metal => { return metal.metalId === metalId })
   }
 
   async function getAllMetals() {
@@ -225,6 +232,7 @@ const calculateTotal = key =>
   }
 
   async function refetchForm(recordId) {
+    skuStoreByRowRef.current = {}
     const { record } = await getRequest({
       extension: FoundryRepository.PurityAdjustment.get2,
       parameters: `_recordId=${recordId}`
@@ -278,8 +286,6 @@ const calculateTotal = key =>
       label: labels.metal,
       name: 'metalId',
       props: {
-        endpointId: FoundryRepository.PurityAdjustment.combos,
-        reducer: response => response?.record?.metals,
         valueField: 'recordId',
         displayField: 'reference',
         displayFieldWidth: 1.5,
@@ -290,11 +296,22 @@ const calculateTotal = key =>
         ]
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: !!row.itemId }
+        return {
+          ...props,
+          readOnly: !!row.itemId,
+          store: store.metals,
+          onRefreshed: list => {
+           setStore(prev => ({
+              ...prev,
+              metals: list
+            }))
+          },
+          endpointId: InventoryRepository.Metals.qry
+          }
       },
       onChange: async ({ row: { update, newRow } }) => {
         setRecalc(true)
-        fillSKUStore(newRow?.metalId)
+        delete skuStoreByRowRef.current[newRow.id]
         update({
           purity: roundTo(newRow?.purity * 1000 || 0),
           deltaPurity: roundTo((newRow?.stdPurity || 0) - (newRow?.purity || 0) * 1000)
@@ -306,10 +323,8 @@ const calculateTotal = key =>
       label: labels.sku,
       name: 'sku',
       props: {
-        store: filteredItems?.current,
         valueField: 'itemId',
         displayField: 'sku',
-        refresh: false,
         mapping: [
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
@@ -341,7 +356,17 @@ const calculateTotal = key =>
         })
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredItems?.current }
+        return {
+          ...props,
+          store: skuStoreByRowRef.current[row.id] ?? getFilteredSku(row?.metalId),
+          onRefreshed: list => {
+            skuStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.metalId && {
+              endpointId: InventoryRepository.Scrap.qry,
+              parameters: `_metalId=${row.metalId}`
+            })
+          }
       },
       flex: 1.5
     },
@@ -496,6 +521,21 @@ const calculateTotal = key =>
     return res?.record || {}
   }
 
+  const fillCombos = async () => {
+    const res = await getRequest({
+      extension: FoundryRepository.PurityAdjustment.combos,
+      parameters: ``
+    })
+
+    setStore({
+      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus == 1) || [],
+      plants: res?.record?.plants || [],
+      sites: res?.record?.sites || [],
+      workCenters: res?.record?.workCenters || [],
+      metals: res?.record?.metals || []
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
@@ -519,6 +559,7 @@ const calculateTotal = key =>
   useEffect(() => {
     ;(async function () {
       await getAllMetals()
+      await fillCombos()
       if (recordId) refetchForm(recordId)
     })()
   }, [])
@@ -541,8 +582,9 @@ const calculateTotal = key =>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={FoundryRepository.PurityAdjustment.combos}
-                    reducer={response => response?.record?.documentTypes}
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}
+                    store={store?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
@@ -590,8 +632,8 @@ const calculateTotal = key =>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={FoundryRepository.PurityAdjustment.combos}
-                    reducer={response => response?.record?.plants}
+                    endpointId={SystemRepository.Plant.qry}
+                    store={store?.plants}
                     name='header.plantId'
                     readOnly={editMode}
                     required
@@ -612,8 +654,8 @@ const calculateTotal = key =>
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={FoundryRepository.PurityAdjustment.combos}
-                    reducer={response => response?.record?.sites}
+                    endpointId={InventoryRepository.Site.qry}
+                    store={store?.sites}
                     name='header.siteId'
                     label={labels.site}
                     columnsInDropDown={[
@@ -632,8 +674,8 @@ const calculateTotal = key =>
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={FoundryRepository.PurityAdjustment.combos}
-                    reducer={response => response?.record?.workCenters}
+                    endpointId={ManufacturingRepository.WorkCenter.qry}
+                    store={store?.workCenters}
                     name='header.workCenterId'
                     label={labels.workCenter}
                     valueField='recordId'
@@ -669,9 +711,6 @@ const calculateTotal = key =>
             maxAccess={maxAccess}
             disabled={isPosted}
             allowDelete={!isPosted}
-            onSelectionChange={(row, _, field) => {
-              if (field == 'sku') fillSKUStore(row?.metalId)
-            }}
           />
         </Grow>
         <Fixed>

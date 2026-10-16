@@ -566,6 +566,9 @@ const PhysicalCountItemDe = () => {
               <ResourceComboBox
                 name='siteId'
                 store={siteStore}
+                endpointId={formik.values?.stockCountId ? SCRepository.Sites.qry : null}
+                parameters={`_stockCountId=${formik.values?.stockCountId}`}  
+                filter={item => item.isChecked}             
                 label={labels.site}
                 valueField='siteId'
                 displayField={['siteRef', 'siteName']}
@@ -597,6 +600,10 @@ const PhysicalCountItemDe = () => {
               <ResourceComboBox
                 name='controllerId'
                 store={controllerStore}
+                endpointId={ formik.values?.stockCountId && formik.values?.siteId ?
+                    SCRepository.StockCountControllerTab.qry
+                  : null}
+                parameters={`_stockCountId=${formik.values?.stockCountId || null}&_siteId=${formik.values?.siteId || null}`} 
                 label={labels.controller}
                 valueField='controllerId'
                 displayField='controllerName'

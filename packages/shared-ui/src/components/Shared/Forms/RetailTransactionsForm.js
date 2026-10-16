@@ -56,6 +56,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 
 export default function RetailTransactionsForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -67,9 +68,13 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
   const [reCal, setReCal] = useState(false)
   const [addressModified, setAddressModified] = useState(false)
   const [posUser, setPosUser] = useState(null)
-  const filteredCreditCard = useRef([])
+  const ccStoreByRowRef = useRef({})
+  const cashAccStoreByRowRef = useRef({})
+  const [store, setStore] = useState({
+    documentTypes: [],
+    salesPeople: []
+  })
   const level2CacheRef = useRef(null)
-
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
@@ -544,6 +549,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
   ]
 
   async function fillForm(retailTrxPack) {
+    ccStoreByRowRef.current = {}
     const retailTrxHeader = retailTrxPack?.header || {}
     const retailTrxItems = retailTrxPack?.items || []
     const retailTrxCash = retailTrxPack?.cash || []
@@ -1051,7 +1057,6 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
       label: labels.cashbox,
       name: 'cashAccountId',
       props: {
-        store: level2CacheRef?.current?.posCashAccounts,
         displayField: 'cashAccountRef',
         valueField: 'cashAccountId',
         mapping: [
@@ -1066,9 +1071,10 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
         displayFieldWidth: 3
       },
       async onChange({ row: { update, newRow } }) {
+        delete ccStoreByRowRef.current[newRow.id]
+        delete cashAccStoreByRowRef.current[newRow.id]
+    
         if (cashAmount == 0) update({ amount: roundTo(Number(amount) || 0) })
-        getFilteredCC(newRow?.cashAccountId)
-
         if (newRow?.type == 1) {
           update({ bankFees: roundTo(calculateBankFees(newRow?.ccId, newRow?.amount)) || 0 })
         } else {
@@ -1076,7 +1082,14 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
         }
       },
       propsReducer({ row, props }) {
-        return { ...props, store: level2CacheRef?.current?.posCashAccounts }
+        return { 
+          ...props,
+          store: cashAccStoreByRowRef.current[row.id] ?? level2CacheRef?.current?.posCashAccounts ?? [],
+          ...(posUser?.posId && {
+              endpointId: PointofSaleRepository.CashAccount.qry,
+              parameters: `_posId=${parseInt(posUser?.posId)}`
+            })
+          }
       }
     },
     {
@@ -1089,7 +1102,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
       label: labels.creditCard,
       name: 'ccRef',
       props: {
-        store: filteredCreditCard?.current,
+        endpointId: CashBankRepository.CreditCard.qry,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -1104,7 +1117,19 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
         }
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredCreditCard.current, readOnly: row.type == 2 }
+        const currentBankId = level2CacheRef?.current?.cashAccounts?.find(
+          account => parseInt(account.recordId) === row?.cashAccountId
+        )?.bankId
+
+        return {
+          ...props,
+          store: ccStoreByRowRef.current[row.id] ?? getFilteredCC(row.cashAccountId),
+          onRefreshed: list => {
+            ccStoreByRowRef.current[row.id] = list
+          },
+          filter: card => card.bankId == currentBankId,
+          readOnly: row.type == 2
+        }
       }
     },
     {
@@ -1287,18 +1312,26 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
       parameters: `_posId=${parseInt(currentPosUser?.posId)}&_functionId=${functionId}`
     })
 
+    setStore({
+      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
+      salesPeople: res?.record?.salesPeople?.filter(item => editMode || !item.isInactive) || [],
+    })
+
     level2CacheRef.current = res?.record || null
   }
 
-  async function getFilteredCC(cashAccountId) {
-    if (!cashAccountId) return
+  function getFilteredCC(cashAccountId) {
+    if (!cashAccountId) return []
 
-    const currentBankId = level2CacheRef?.current?.cashAccounts?.find(
-      account => parseInt(account.recordId) === cashAccountId
+    const currentBankId = level2CacheRef.current?.cashAccounts?.find(
+      account => parseInt(account.recordId) === parseInt(cashAccountId)
     )?.bankId
 
-    const arrayCC = level2CacheRef?.current?.creditCards?.filter(card => card.bankId == currentBankId) || []
-    filteredCreditCard.current = arrayCC
+    return (
+      level2CacheRef.current?.creditCards?.filter(
+        c => c.bankId == currentBankId
+      ) || []
+    )
   }
 
   async function sKULookupInfo(dtId) {
@@ -1432,13 +1465,9 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={posUser?.posId && PointofSaleRepository.RetailInvoice.level}
-                    reducer={response => {
-                      return editMode
-                        ? response?.record?.documentTypes
-                        : response?.record?.documentTypes?.filter(item => item.activeStatus == 1)
-                    }}
-                    parameters={`_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`}
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}                                           
+                    store={store?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     readOnly={isPosted || formik?.values?.items?.some(item => item.sku)}
@@ -1486,13 +1515,9 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={posUser?.posId && PointofSaleRepository.RetailInvoice.level}
-                    reducer={response => {
-                      return editMode
-                        ? response?.record?.salesPeople
-                        : response?.record?.salesPeople?.filter(item => item.isInactive !== true)
-                    }}
-                    parameters={`_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`}
+                    endpointId={PointofSaleRepository.SalesPerson.qry}
+                    parameters={`_posId=${parseInt(posUser?.posId)}`}   
+                    store={store?.salesPeople}
                     name='header.spId'
                     readOnly={isPosted}
                     label={labels.salesPerson}
@@ -1852,9 +1877,6 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
                 value={formik?.values?.cash}
                 error={formik.errors.cash}
                 name='cash'
-                onSelectionChange={(row, update, field) => {
-                  if (field == 'ccRef') getFilteredCC(row?.cashAccountId)
-                }}
                 columns={cashColumns}
                 maxAccess={maxAccess}
                 disabled={isPosted}

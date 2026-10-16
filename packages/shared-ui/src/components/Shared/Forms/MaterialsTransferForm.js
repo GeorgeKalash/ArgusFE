@@ -43,7 +43,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
   const { userDefaults, systemChecks } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
 
   const [measurements, setMeasurements] = useState([])
   const serials = useRef([])
@@ -345,13 +345,12 @@ export default function MaterialsTransferForm({ recordId, window }) {
     return res?.record
   }
 
-  async function getFilteredMU(itemId) {
-    if (!itemId) return
+  function getFilteredMU(itemId) {
+    if (!itemId) return []
 
     const currentItemId = formik.values.transfers?.find(transfer => parseInt(transfer.itemId) === itemId)?.msId
 
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
-    filteredMeasurements.current = arrayMU
+    return measurements?.filter(item => item.msId === currentItemId) || []
   }
 
   const onCondition = row => {
@@ -386,7 +385,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
       const unitCost = (await getUnitCost(itemIdValue)) ?? 0
       const totalCost = calcTotalCost(newRow)
       const itemInfo = await getItem(itemIdValue)
-      getFilteredMU(itemIdValue)
       const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
       const measurementSchedule = await getMeasurementObject(newRow?.msId)
 
@@ -461,6 +459,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
         return { ...props, imgSrc: onCondition(row) }
       },
       async onChange({ row: { update, newRow, oldRow, addRow } }) {
+        delete muStoreByRowRef.current[newRow.id]
+
         const resetRow = () => {
          update({
             ...initialValues.transfers[0],
@@ -543,7 +543,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
       label: labels.muId,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         readOnly: isClosed,
@@ -554,7 +553,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.itemId)
+        const filteredItems = store.filter(item => item.recordId === newRow?.muId)
         const qtyInBase = newRow?.qty * filteredItems?.muQty ?? 0
 
         update({
@@ -563,7 +563,17 @@ export default function MaterialsTransferForm({ recordId, window }) {
         })
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.itemId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
@@ -670,6 +680,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
   }
 
   async function fillDetails(recordId, refetchSerials){
+    muStoreByRowRef.current = {}
     const detailsResp = await getDataGrid(recordId, refetchSerials)
     const allSerials = serials.current?.list || []
 
@@ -1320,9 +1331,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
               }))
 
               formik.setFieldValue('transfers', data)
-            }}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             initialValues={initialValues?.transfers[0]}
             enableFilters

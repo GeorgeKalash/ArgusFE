@@ -41,7 +41,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
   const { stack: stackError } = useError()
 
   const [measurements, setMeasurements] = useState([])
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.MaterialReplenishment,
@@ -192,13 +192,12 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
     }
   })
 
-  async function getFilteredMU(itemId) {
-    if (!itemId) return
+  function getFilteredMU(itemId) {
+    if (!itemId) return []
 
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
+    const currentMsId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
 
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
-    filteredMeasurements.current = arrayMU
+    return measurements?.filter(item => item.msId === currentMsId) || []
   }
   const isClosed = formik.values.wip === 2
   const isCancelled = formik.values.status == -1
@@ -267,6 +266,8 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
         ]
       },
       async onChange({ row: { update, newRow } }) {
+        delete muStoreByRowRef.current[newRow.id]
+
         if (!newRow?.itemId) {
           update({
             details: false
@@ -287,7 +288,6 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
         }
         if (newRow?.itemId) {
           const itemInfo = await getItem(newRow.itemId)
-          getFilteredMU(newRow?.itemId)
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
           const onHandSite = (await setOnHandSite(newRow?.itemId)) ?? 0
           update({
@@ -312,7 +312,6 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
       label: labels.muId,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         readOnly: isClosed || isCancelled,
@@ -322,7 +321,8 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.itemId)
+        const filteredItems = store.filter(item => item.recordId === newRow?.muId)
         const qtyInBase = newRow?.qty * filteredItems?.muQty ?? 0
 
         update({
@@ -331,7 +331,17 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
         })
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.itemId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
@@ -483,6 +493,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
   ]
 
   async function getDataGrid(recordId) {
+    muStoreByRowRef.current = {}
     const dataGrid = await getRequest({
       extension: IVReplenishementRepository.OrderItem.qry,
       parameters: `_requestId=${recordId}&_functionId=${SystemFunction.MaterialRequest}&_params=&_startAt=0`
@@ -695,9 +706,6 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
               })
 
               formik?.setFieldValue('items', data)
-            }}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             name='items'
             maxAccess={maxAccess}

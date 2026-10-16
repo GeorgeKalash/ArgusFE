@@ -5,6 +5,32 @@ import { CommonContext } from '@argus/shared-providers/src/providers/CommonConte
 import { useCacheDataContext } from '@argus/shared-providers/src/providers/CacheDataContext'
 import { useCacheStoreContext } from '@argus/shared-providers/src/providers/CacheStoreContext'
 
+  const refreshListeners = new Map()
+
+  function subscribeRefresh(key, callback) {
+    if (!refreshListeners.has(key)) {
+      refreshListeners.set(key, new Set())
+    }
+
+    const listeners = refreshListeners.get(key)
+    listeners.add(callback)
+
+    return () => {
+      listeners.delete(callback)
+
+      if (!listeners.size) {
+        refreshListeners.delete(key)
+      }
+    }
+  }
+
+  function publishRefresh(key, list) {
+    const listeners = refreshListeners.get(key)
+    if (!listeners) return
+
+    listeners.forEach(callback => callback(list))
+  }
+
 export default function ResourceComboBox({
   endpointId,
   datasetId,
@@ -21,6 +47,8 @@ export default function ResourceComboBox({
   allowClear,
   setData,
   triggerOnDefault = false,
+  onRefreshed,
+  refreshKey,
   ...rest
 }) {
   const { store: data } = rest
@@ -34,12 +62,14 @@ export default function ResourceComboBox({
 
   const [apiResponse, setApiResponse] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [refreshedList, setRefreshedList] = useState(null)
   const finalItemsListRef = useRef([])
 
   const didTriggerDefaultRef = useRef(false)
 
   const key = endpointId || datasetId
   const noCache = Boolean(dynamicParams)
+  const hasStore = Object.prototype.hasOwnProperty.call(rest, 'store')
 
   function fetch({ datasetId, endpointId, parameters, refresh }) {
     if (endpointId) {
@@ -61,41 +91,57 @@ export default function ResourceComboBox({
   }
 
   useEffect(() => {
+    if (!refreshKey || !hasStore) return
+
+    return subscribeRefresh(refreshKey, list => setRefreshedList(list))
+  }, [refreshKey, hasStore])
+
+  useEffect(() => {
     const fetchDataAsync = async () => {
       await fetchData(false)
     }
 
-    !noCache && fetchDataAsync()
-  }, [parameters])
+    if (!hasStore && !noCache && (datasetId || endpointId)) fetchDataAsync()
+  }, [parameters, hasStore, datasetId, endpointId, noCache])
 
-  const fetchData = async (refresh = true) => {
+  const fetchData = async (isRefresh = false) => {
     if (rest?.readOnly && dataGrid) return
+    if (!parameters || (!datasetId && !endpointId)) return
+    if (!isRefresh && (hasStore || cacheStore?.[key])) return
 
-    if (parameters && !data && (datasetId || endpointId)) {
-      setIsLoading(true)
+    setIsLoading(true)
 
-      const data =
-        cacheStore?.[key] && !refresh
-          ? cacheStore?.[key]
-          : cacheAvailable
-          ? await fetchWithCache({
-              queryKey: [datasetId || endpointId, parameters],
-              queryFn: () => fetch({ datasetId, endpointId, parameters, refresh })
-            })
-          : await fetch({ datasetId, endpointId, parameters, refresh })
+    const response = cacheAvailable
+      ? await fetchWithCache({
+          queryKey: [datasetId || endpointId, parameters],
+          queryFn: () => fetch({ datasetId, endpointId, parameters, refresh: isRefresh })
+        })
+      : await fetch({ datasetId, endpointId, parameters, refresh: isRefresh
+        })
 
-      setApiResponse(!!datasetId ? { list: data } : data)
+    const result = datasetId ? { list: response } : response
 
-      if (!cacheStore?.[key]) {
-        endpointId ? updateCacheStore(endpointId, data.list) : updateCacheStore(datasetId, data)
-      }
-      if (typeof setData == 'function') setData(!!datasetId ? { list: data } : data)
-      setIsLoading(false)
+    if (hasStore) {
+      const list = reducer(result)?.filter?.(filter) || []
+      if (refreshKey) publishRefresh(refreshKey, list)
+      else setRefreshedList(list)
+      if (typeof onRefreshed === 'function') onRefreshed(list)
+    } else {
+      setApiResponse(result)
+      if (endpointId) updateCacheStore(endpointId, response?.list)
+      else if (datasetId) updateCacheStore(datasetId, response)
     }
-  }
-  let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
-  finalItemsList = cacheStore?.[key] && !noCache ? cacheStore?.[key] : finalItemsList
 
+    if (typeof setData === 'function') setData(result)
+    setIsLoading(false)
+  }
+
+  let finalItemsList
+  if (hasStore) finalItemsList = refreshedList ?? data ?? []
+  else if (apiResponse) finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
+  else finalItemsList = []
+
+  if (cacheStore?.[key] && !noCache && !hasStore) finalItemsList = cacheStore[key]
   finalItemsListRef.current = rest?.options || finalItemsList || []
   const fieldPath = rest?.name?.split('.')
   const [parent, child] = fieldPath
@@ -104,20 +150,20 @@ export default function ResourceComboBox({
   const _value =
     (typeof values[name] === 'object'
       ? values[name]
-      : datasetId
-      ? finalItemsList?.find(item => item[valueField] === values[name]?.toString())
-      : finalItemsList?.find(item => item[valueField] === (values[name] || values))) ||
+      : finalItemsList?.find(
+          item => item[valueField]?.toString() === (values[name] ?? values)?.toString()
+        )) ||
     value ||
     ''
 
   const onBlur = (e, HighlightedOption, options, allowSelect) => {
-    if (allowSelect) {
-      finalItemsListRef.current = options || finalItemsListRef.current
-      if (HighlightedOption) {
-        rest.onChange('', HighlightedOption)
-      } else if (finalItemsListRef.current?.[0]) {
-        selectFirstOption()
-      }
+    if (!allowSelect) return
+
+    finalItemsListRef.current = options || finalItemsListRef.current
+    if (HighlightedOption) {
+      rest.onChange('', HighlightedOption)
+    } else if (!_value && finalItemsListRef.current?.[0]) {
+      selectFirstOption()
     }
   }
 
@@ -157,7 +203,7 @@ export default function ResourceComboBox({
         store: finalItemsList,
         valueField,
         value: _value,
-        onOpen: () => noCache && fetchData(),
+        onOpen: () => noCache && fetchData(true),
         onBlur,
         isLoading
       }}

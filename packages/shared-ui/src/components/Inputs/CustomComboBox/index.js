@@ -318,7 +318,7 @@ const CustomComboBox = ({
                         refresh &&
                         !readOnly && (
                           <IconButton
-                            onClick={fetchData}
+                            onClick={() => fetchData(true)}
                             aria-label='refresh data'
                             tabIndex={-1}
                             className={inputs.iconButton}

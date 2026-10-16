@@ -17,8 +17,7 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const editMode = !!recordId
   const [operations, setOperations] = useState([])
-
-  const filteredOperations = useRef([])
+  const operationStoreByRowRef = useRef({})
 
   const conditions = {
     seqNo: row => row.seqNo,
@@ -57,9 +56,10 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
     }
   })
 
-  async function getFilteredOperations(workCenterId) {
-    const array = operations?.filter(item => item?.workCenterId == workCenterId) || []
-    filteredOperations.current = array
+  function getFilteredOperations(workCenterId) {
+    if (!workCenterId) return []
+
+    return operations?.filter(item => item?.workCenterId == workCenterId) || []
   }
 
   const getOperations = async () => {
@@ -103,7 +103,7 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        getFilteredOperations(newRow?.workCenterId)
+        delete operationStoreByRowRef.current[newRow.id]
       }
     },
     {
@@ -111,7 +111,6 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
       label: labels.operation,
       name: 'operationId',
       props: {
-        store: filteredOperations?.current,
         displayField: 'name',
         valueField: 'recordId',
         mapping: [
@@ -125,7 +124,17 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
         ]
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredOperations?.current }
+        return {
+          ...props,
+          store: operationStoreByRowRef.current[row.id] ?? getFilteredOperations(row?.workCenterId),
+          onRefreshed: list => {
+            operationStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.workCenterId && {
+              endpointId: ManufacturingRepository.Operation.qry,
+              parameters: `_workCenterId=${row.workCenterId}`
+            })
+          }
       }
     }
   ]
@@ -165,9 +174,6 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
               name='routingSequence'
               maxAccess={maxAccess}
               onChange={value => formik.setFieldValue('data', value)}
-              onSelectionChange={(row, update, field) => {
-                if (field == 'operationId') getFilteredOperations(row?.workCenterId)
-              }}
               value={formik.values?.data}
               error={formik.errors?.data}
               columns={columns}
