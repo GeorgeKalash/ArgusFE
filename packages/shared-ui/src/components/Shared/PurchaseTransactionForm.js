@@ -234,8 +234,8 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   const invalidate = useInvalidate({
     endpointId:
       parseFloat(functionId) === SystemFunction.PurchaseInvoice
-        ? PurchaseRepository.PurchaseInvoiceHeader.qry
-        : PurchaseRepository.PurchaseReturnHeader.qry
+        ? PurchaseRepository.PurchaseInvoiceHeader.page
+        : PurchaseRepository.PurchaseReturnHeader.page
   })
 
   const getGLResource = functionId => {

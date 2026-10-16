@@ -37,7 +37,8 @@ export const FixedAssetsRepository = {
     snapshot: service + 'snapshotDEP',
     preview: service + 'previewDEP',
     post: service + 'postDEP',
-    unpost: service + 'unpostDEP'
+    unpost: service + 'unpostDEP',
+    page: service + 'pageDEP'
   },
   AssetsTableData: {
     qry: service + 'qryDEA'

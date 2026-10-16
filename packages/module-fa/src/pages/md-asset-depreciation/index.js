@@ -26,7 +26,7 @@ const AssetsDescription = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: FixedAssetsRepository.AssetsDescription.qry,
+      extension: FixedAssetsRepository.AssetsDescription.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}`
     })
 
