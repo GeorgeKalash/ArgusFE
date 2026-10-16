@@ -39,7 +39,7 @@ const BPMasterData = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BusinessPartnerRepository.MasterData.snapshot,
+    endpointId: BusinessPartnerRepository.MasterData.page,
     datasetId: ResourceIds.BPMasterData,
     filter: {
       filterFn: fetchWithFilter
