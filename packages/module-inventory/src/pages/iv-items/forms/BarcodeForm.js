@@ -63,8 +63,8 @@ const BarcodeForm = ({ store, labels }) => {
     const { _startAt = 0, _size = 50 } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.Barcodes.snapshot,
-      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}`
+      extension: InventoryRepository.Barcodes.snapshot2,
+      parameters: `_filter=${qry}&_itemId=${recordId}&_startAt=${_startAt}&_size=${_size}`
     })
 
     setGridData(response)

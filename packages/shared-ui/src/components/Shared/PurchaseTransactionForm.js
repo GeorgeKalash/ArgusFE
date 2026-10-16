@@ -496,7 +496,12 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       name: 'barcodeLookup',
       label: ' ',
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png'
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: row => {
+          return {
+            disabled: isPosted
+          }
+        }
       },
       onClick: (e, row, update, updateRow, addRow) => {
         stack({
