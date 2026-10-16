@@ -21,8 +21,8 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export default function AssetsForm({ recordId, maxAccess: access, labels, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -34,7 +34,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
   })
 
   const invalidate = useInvalidate({
-    endpointId: FixedAssetsRepository.AssetsDescription.snapshot
+    endpointId: FixedAssetsRepository.AssetsDescription.page
   })
 
   const formatDate = date => {

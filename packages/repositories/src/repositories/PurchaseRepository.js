@@ -72,7 +72,8 @@ export const PurchaseRepository = {
     preview: service + 'previewIVC',
     sync: service + 'syncIVC',
     verify: service + 'verifyIVC',
-    assert: service + 'assertIVC'
+    assert: service + 'assertIVC',
+    page: service + 'pageIVC'
   },
   Invoice: {
     snapshot: service + 'snapshotINV'
@@ -83,7 +84,8 @@ export const PurchaseRepository = {
     unpost: service + 'unpostIVR',
     del: service + 'delIVR',
     qry: service + 'qryIVR',
-    snapshot: service + 'snapshotIVR'
+    snapshot: service + 'snapshotIVR',
+    page: service + 'pageIVR'
   },
   VendorPrice: {
     get: service + 'getPRI2'
