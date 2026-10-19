@@ -230,6 +230,7 @@ export default function AddressFilterForm({
             checkboxFlex={1}
             rowSelection='single'
             showCheckboxColumn={true}
+            refetch={refetch}
             viewCheckButtons={true}
           />
         </Grow>
