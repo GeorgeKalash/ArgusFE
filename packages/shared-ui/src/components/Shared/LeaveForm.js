@@ -7,7 +7,7 @@ import CustomTextField from '../Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -30,8 +30,8 @@ import { SelfServiceRepository } from '@argus/repositories/src/repositories/Self
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export const LeaveForm = ({ recordId, resourceId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -41,6 +41,7 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
   const { stack: stackError } = useError()
   const autoClose = systemChecks?.find(item => item.checkId === SystemChecks.AUTO_CLOSE_LEAVE_REQUEST_ONSAVE)?.value || false
   const editMode = !!recordId
+  const previewDatesRef = useRef({ startDate: null, endDate: null })
 
   const getEndpoint = {
     [ResourceIds.SSLeaveRequest]: {set: SelfServiceRepository.SSLeaveRequest.set2, page: SelfServiceRepository.SSLeaveRequest.page},
@@ -134,6 +135,27 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
     }
   })
 
+  const checkDatesChanged = (startDate, endDate) => {
+    if (formik.values.items.length === 0) return
+
+    const last = previewDatesRef.current
+
+    const changed =
+      !dayjs(startDate).isSame(dayjs(last.startDate), 'day') || !dayjs(endDate).isSame(dayjs(last.endDate), 'day')
+
+    if (!changed) return
+
+    formik.setFieldValue('items', [])
+    formik.setFieldValue('hours', null)
+    formik.setFieldValue('leaveDays', null)
+
+    stackError({
+      message: labels.datesChangedPreviewAgain
+    })
+  }
+
+  const onDateBlur = () => checkDatesChanged(formik.values.startDate, formik.values.endDate)
+
     const getLeaveBalance = async (recordId, employeeId, ltId, asOfDate) => {
     if (!employeeId || !ltId) return 0
 
@@ -222,6 +244,8 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
           id: index
         })) || []
     }
+
+    previewDatesRef.current = { startDate: data.startDate, endDate: data.endDate }
 
     formik.resetForm({ values: data })
 
@@ -335,6 +359,8 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
     })
 
     if (res?.list) {
+      previewDatesRef.current = { startDate, endDate }
+
       formik.setFieldValue(
         'items',
         res.list.map((day, index) => ({
@@ -515,7 +541,9 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
                 label={labels.startDate}
                 value={formik.values?.startDate}
                 max={formik.values.endDate}
-                onChange={formik.setFieldValue}
+                onChange={(e, newValue) => formik.setFieldValue('startDate', newValue)}
+                onAccept={newValue => checkDatesChanged(newValue, formik.values.endDate)}
+                onBlur={onDateBlur}
                 onClear={() => formik.setFieldValue('startDate', null)}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
                 maxAccess={maxAccess}
@@ -526,7 +554,9 @@ export const LeaveForm = ({ recordId, resourceId, window }) => {
                 label={labels.endDate}
                 value={formik.values?.endDate}
                 min={formik.values.startDate}
-                onChange={formik.setFieldValue}
+                onChange={(e, newValue) => formik.setFieldValue('endDate', newValue)}
+                onAccept={newValue => checkDatesChanged(formik.values.startDate, newValue)}
+                onBlur={onDateBlur}
                 onClear={() => formik.setFieldValue('endDate', null)}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
                 maxAccess={maxAccess}
