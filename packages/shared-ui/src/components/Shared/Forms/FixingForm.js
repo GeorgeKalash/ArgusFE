@@ -36,7 +36,6 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 
 export default function FixingForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

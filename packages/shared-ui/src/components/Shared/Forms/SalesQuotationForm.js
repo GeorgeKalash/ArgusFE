@@ -440,7 +440,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
-            props: {
+      props: {
         onCondition: row => {
           return {
             decimalScale: row?.decimals

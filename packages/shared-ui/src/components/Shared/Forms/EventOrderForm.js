@@ -38,7 +38,6 @@ import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 
 export default function EventOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

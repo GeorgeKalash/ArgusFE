@@ -285,6 +285,7 @@ export default function PuQtnForm({ recordId, window }) {
         const filteredMU = getFilteredMU(newRow?.itemId, itemInfo?.msId)
         delete muStoreByRowRef.current[newRow.id]
         const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
+
         const filteredItems = filteredMU.filter(item => item.recordId === newRow?.muId)
 
         update({
@@ -356,6 +357,13 @@ export default function PuQtnForm({ recordId, window }) {
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
+      props: {
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
+      },
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.itemId, newRow?.msId)
@@ -739,7 +747,7 @@ export default function PuQtnForm({ recordId, window }) {
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
+      qty: itemPriceRow?.qty ||  0,
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(4) : 0,
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
@@ -1283,7 +1291,7 @@ export default function PuQtnForm({ recordId, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess}/>
                 </Grid>
               </Grid>
             </Grid>
