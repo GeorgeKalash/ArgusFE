@@ -151,6 +151,7 @@ const ResourcePerformance = () => {
                 formik.setFieldValue('resourceId', '')
               }}
               error={formik.touched.moduleId && Boolean(formik.errors.moduleId)}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={2}>
@@ -167,6 +168,7 @@ const ResourcePerformance = () => {
                 formik.setFieldValue('resourceId', newValue?.key || null)
               }}
               error={formik.touched.resourceId && Boolean(formik.errors.resourceId)}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={2}>

@@ -1,6 +1,6 @@
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -438,6 +438,7 @@ const PhysicalCountSerialDe = () => {
                 readOnly
                 required
                 error={formik.touched.scDate && Boolean(formik.errors.scDate)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={3}>
@@ -448,6 +449,7 @@ const PhysicalCountSerialDe = () => {
                 readOnly
                 required
                 error={formik.touched.scRef && Boolean(formik.errors.scRef)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={3}></Grid>
@@ -535,6 +537,7 @@ const PhysicalCountSerialDe = () => {
                 readOnly
                 hidden={!formik.values.controllerId}
                 numberField
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={2}>
@@ -545,6 +548,7 @@ const PhysicalCountSerialDe = () => {
                 readOnly
                 hidden={!formik.values.controllerId}
                 numberField
+                maxAccess={access}
               />
             </Grid>
           </Grid>

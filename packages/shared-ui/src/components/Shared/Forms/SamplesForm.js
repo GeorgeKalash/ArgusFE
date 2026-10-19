@@ -30,6 +30,7 @@ import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function SamplesForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -160,6 +161,13 @@ export default function SamplesForm({ recordId, window }) {
   const isPosted = formik.values.header.status === 3
   const isClosed = formik.values.header.wip === 2
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.Samples,
+    enabled: !!recordId && !isClosed
+  })
+
   async function onPost() {
     await postRequest({
       extension: ProductModelingRepository.Samples.post,
@@ -169,6 +177,7 @@ export default function SamplesForm({ recordId, window }) {
       })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }

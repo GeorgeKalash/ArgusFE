@@ -26,15 +26,13 @@ const ReleaseCodeForm = ({ labels, maxAccess, storeRecordId, invalidate, window 
       codeId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        await postRequest({
-          extension: AccessControlRepository.UserReleaseCode.set,
-          record: JSON.stringify(obj)
-        })
-        toast.success(platformLabels.Updated)
-        window.close()
-        invalidate()
-      } catch (error) {}
+      await postRequest({
+        extension: AccessControlRepository.UserReleaseCode.set,
+        record: JSON.stringify(obj)
+      })
+      toast.success(platformLabels.Updated)
+      window.close()
+      invalidate()
     }
   })
 

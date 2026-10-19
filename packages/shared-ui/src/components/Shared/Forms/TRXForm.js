@@ -22,6 +22,7 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function TRXForm({ labels, access, setStore, store }) {
   const { platformLabels } = useContext(ControlContext)
   const { userDefaults } = useContext(DefaultsContext)
@@ -85,6 +86,13 @@ export default function TRXForm({ labels, access, setStore, store }) {
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.PuCostAllocation,
+    enabled: !!recordId && !isClosed
+  })
   const isPosted = formik.values.status === 3
 
   useEffect(() => {
@@ -136,6 +144,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
     }).then(async () => {
       await fetchData(data.recordId)
       toast.success(platformLabels.Posted)
+      await releaseLock()
       invalidate()
     })
   }

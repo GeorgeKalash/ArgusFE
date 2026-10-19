@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -16,8 +16,8 @@ const SalesInquiries = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: SaleRepository.SalesInquiries.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=itemId`
+      extension: SaleRepository.SalesInquiries.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     const transformedData = response.list.map(sale => ({
@@ -41,7 +41,7 @@ const SalesInquiries = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesInquiries.qry,
+    endpointId: SaleRepository.SalesInquiries.page,
     datasetId: ResourceIds.SalesInquiries,
     filter: {
       filterFn: fetchWithFilter

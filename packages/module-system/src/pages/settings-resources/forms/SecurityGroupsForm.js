@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { useContext, useMemo, useState  } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -25,7 +25,6 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [filterType, setFilterType] = useState()
-  const [searchText, setSearchText] = useState('')
 
   const {
     query: { data }
@@ -186,15 +185,8 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
         : true
     )
 
-    if (searchText) {
-      const value = searchText.toLowerCase()
-      list = list.filter(
-        item => item.name?.toLowerCase().includes(value) || item.description?.toLowerCase().includes(value)
-      )
-    }
-
     return { ...data, list }
-  }, [data, filterType, searchText])
+  }, [data, filterType])
 
   return (
     <Form onSave={onSubmit} maxAccess={maxAccess}>
@@ -233,20 +225,6 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
                   setFilterType(newValue?.key ?? SECURITY_GROUP_FILTER.ALL)
                 }}
                 onClear={() => setFilterType(SECURITY_GROUP_FILTER.ALL)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='search'
-                value={searchText}
-                label={platformLabels.Search}
-                onClear={() => setSearchText('')}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    e.stopPropagation()
-                  }
-                }}
-                onChange={e => setSearchText(e.target.value)}
               />
             </Grid>
           </Grid>

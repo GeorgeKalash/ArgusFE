@@ -1,9 +1,3 @@
-// ** To use core palette, uncomment the below import
-import { PaletteMode } from '@mui/material'
-
-// ** To use core palette, uncomment the below import
-import corePalette from '@argus/shared-core/src/@core/theme/palette'
-
 // ** To use mode (light/dark/semi-dark), skin(default/bordered), direction(ltr/rtl), etc. for conditional styles, uncomment below line
 import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
 

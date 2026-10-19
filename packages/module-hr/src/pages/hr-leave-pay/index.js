@@ -11,12 +11,16 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import LeavePaymentForm from './Forms/LeavePaymentForm'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const LeavePayment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -57,7 +61,12 @@ const LeavePayment = () => {
 
   const columns = [
     {
-      field: 'paymentRef',
+      field: 'dtName',
+      headerName: labels.documentType,
+      flex: 1
+    },
+    {
+      field: 'reference',
       headerName: labels.reference,
       flex: 1
     },
@@ -93,12 +102,25 @@ const LeavePayment = () => {
       headerName: labels.hours,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
+      flex: 1
     }
   ]
 
-  const add = () => openForm()
+   const { proxyAction } = useDocumentTypeProxy({
+      functionId: SystemFunction.LeavePayment,
+      action: openForm
+    })
 
-  const edit = obj => openForm(obj?.recordId)
+  const add = () => proxyAction()
+
+  const edit = obj => openForm(obj?.recordId, obj?.status == 3)
 
   const del = async obj => {
     await postRequest({
@@ -109,7 +131,15 @@ const LeavePayment = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.LeavePayment,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: LeavePaymentForm,
       props: {

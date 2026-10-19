@@ -27,6 +27,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function CastingForm({ store, setStore, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -79,7 +80,10 @@ export default function CastingForm({ store, setStore, access, labels }) {
       metalColorId: null,
       stdLossRate: 0,
       factor: 0,
-      scrapWgt: 0
+      scrapWgt: 0,
+      inputWgtPurity: null,
+      outputWgtPurity: null,
+      wipWeight: null
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -125,6 +129,13 @@ export default function CastingForm({ store, setStore, access, labels }) {
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.FoCastings,
+    enabled: !!recordId && !(isCancelled || isPosted)
+  })
+
   const netInputWgt = roundTo(
     recal
       ? (Number(formik?.values?.inputWgt) || 0) + (Number(formik?.values?.rmWgt) || 0)
@@ -141,12 +152,15 @@ export default function CastingForm({ store, setStore, access, labels }) {
     ? lossPct - (Number(formik?.values?.stdLossRate) || 0)
     : formik?.values?.lossVariationPct
 
+  const wipWeight = recal ? formik?.values?.inputWgtPurity 
+    ? Number(formik?.values?.outputWgt || 0) * Number(formik?.values?.outputWgtPurity || 0) / Number(formik?.values?.inputWgtPurity) : 0 : formik?.values?.wipWeight
+
+  const lossCastingCalc = recal ? (netInputWgt || 0) - (wipWeight || 0) - Number(formik?.values?.lossDisassembly || 0) : Number(formik?.values?.lossCasting) || 0
+
   useEffect(() => {
     if (!recal || !lastEdited) return
 
     const netInput = Number(formik?.values?.inputWgt || 0) + Number(formik?.values?.rmWgt || 0)
-
-    const output = Number(formik?.values?.outputWgt || 0)
     const disassembly = Number(formik?.values?.lossDisassembly || 0)
     let casting = Number(formik?.values?.lossCasting || 0)
 
@@ -154,10 +168,9 @@ export default function CastingForm({ store, setStore, access, labels }) {
 
     switch (lastEdited) {
       case 'outputWgt': {
-        totalLoss = netInput - output
-        casting = totalLoss - disassembly
+        totalLoss = netInput - wipWeight
 
-        formik.setFieldValue('lossCasting', casting)
+        formik.setFieldValue('lossCasting', lossCastingCalc)
         formik.setFieldValue('loss', totalLoss)
         break
       }
@@ -255,6 +268,19 @@ export default function CastingForm({ store, setStore, access, labels }) {
     return res?.record
   }
 
+  async function getMetalInfo(metalId) {
+    if (!metalId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Metals.get,
+      parameters: `_recordId=${metalId}`
+    })
+
+    return res?.record
+  }
+
+  
+
   async function onPost() {
     await postRequest({
       extension: FoundryRepository.Casting.post,
@@ -264,6 +290,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
       })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     refetchForm(formik.values.recordId)
   }
@@ -325,7 +352,9 @@ export default function CastingForm({ store, setStore, access, labels }) {
         loss: loss || 0,
         lossPct: lossPct || 0,
         lossVariationPct: lossVariationPct || 0,
-        netInputWgt: netInputWgt || 0
+        netInputWgt: netInputWgt || 0,
+        wipWeight,
+        lossCasting: lossCastingCalc
       }
     })
     setStore(prevStore => ({
@@ -335,7 +364,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
         loss: Number(loss)
       }
     }))
-  }, [loss, lossPct, lossVariationPct, store?.castingInfo?.scrapWgt])
+  }, [loss, lossPct, lossVariationPct, store?.castingInfo?.scrapWgt, wipWeight, lossCastingCalc])
 
   useEffect(() => {
     refetchForm(recordId)
@@ -375,7 +404,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       displayField={['reference', 'name']}
                       values={formik.values}
                       maxAccess={maxAccess}
-                      onChange={async (event, newValue) => {
+                      onChange={async (_, newValue) => {
                         await changeDT(newValue)
                         formik.setFieldValue('dtId', newValue?.recordId || null)
                       }}
@@ -424,10 +453,11 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         { key: 'prodLineName', value: 'Production Line' }
                       ]}
                       form={formik}
-                      onChange={async (event, newValue) => {
+                      onChange={async (_, newValue) => {
                         setRecal(true)
                         const factorStdLoss = await getfactorStdLoss(newValue?.metalId, newValue?.metalColorId)
                         const waxInfo = await getWaxInfo(newValue?.recordId)
+                        const metalInfo = await getMetalInfo(newValue?.metalId)
                         formik.setFieldValue('grossWgt', waxInfo?.grossWgt || 0)
                         formik.setFieldValue('rmWgt', waxInfo?.rmWgt || 0)
                         formik.setFieldValue('mouldWgt', waxInfo?.mouldWgt || 0)
@@ -437,6 +467,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         formik.setFieldValue('stdLossRate', factorStdLoss?.stdLossRate || 0)
                         formik.setFieldValue('mouldId', newValue?.mouldId || null)
                         formik.setFieldValue('metalId', newValue?.metalId || null)
+                        formik.setFieldValue('inputWgtPurity', metalInfo?.purity ? metalInfo.purity * 1000 : null)
+                        formik.setFieldValue('outputWgtPurity', metalInfo?.purity ? metalInfo.purity * 1000 : null)
                         formik.setFieldValue('metalColorId', newValue?.metalColorId || null)
                         formik.setFieldValue('lineId', newValue?.lineId || null)
                         formik.setFieldValue('waxRef', newValue?.reference || null)
@@ -459,7 +491,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       displayField={'reference'}
                       values={formik.values}
                       maxAccess={maxAccess}
-                      onChange={(event, newValue) => {
+                      onChange={(_, newValue) => {
                         formik.setFieldValue('mouldId', newValue?.recordId || null)
                       }}
                       error={formik.touched?.mouldId && Boolean(formik.errors?.mouldId)}
@@ -474,7 +506,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       displayField={'reference'}
                       readOnly
                       values={formik.values}
-                      onChange={(event, newValue) => {
+                      onChange={(_, newValue) => {
                         formik.setFieldValue('metalId', newValue?.recordId || null)
                       }}
                       required
@@ -493,7 +525,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       displayField={'reference'}
                       values={formik.values}
                       maxAccess={maxAccess}
-                      onChange={async (event, newValue) => {
+                      onChange={async (_, newValue) => {
                         formik.setFieldValue('metalColorId', newValue?.recordId || null)
                       }}
                       error={formik.touched?.metalColorId && Boolean(formik.errors?.metalColorId)}
@@ -509,6 +541,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       onChange={e => {
                         formik.setFieldValue('factor', e.target.value)
                       }}
+                      maxAccess={maxAccess}
                       onClear={() => formik.setFieldValue('factor', 0)}
                       error={formik.touched.factor && Boolean(formik.errors.factor)}
                     />
@@ -520,6 +553,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.stdLossRate}
                       required
                       readOnly
+                      maxAccess={maxAccess}
                       onChange={e => {
                         formik.setFieldValue('stdLossRate', e.target.value)
                       }}
@@ -538,12 +572,13 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
+                      maxAccess={maxAccess}
                       displayField={['reference', 'name']}
                       readOnly={isPosted || isCancelled}
                       valueField='recordId'
                       required
                       values={formik.values}
-                      onChange={(event, newValue) => {
+                      onChange={(_, newValue) => {
                         formik.setFieldValue('laborId', newValue?.recordId || null)
                       }}
                       error={formik.touched.laborId && Boolean(formik.errors.laborId)}
@@ -564,17 +599,31 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         { key: 'name', value: 'Name' }
                       ]}
                       maxAccess={maxAccess}
-                      onChange={(event, newValue) => {
+                      onChange={(_, newValue) => {
                         formik.setFieldValue('lineId', newValue?.recordId || null)
                       }}
                       error={formik.touched.lineId && formik.errors.lineId}
                     />
                   </Grid>
+                  <Grid item>
+                    <CustomNumberField
+                      name='wipWeight'
+                      label={labels.wipWeight}
+                      value={wipWeight}
+                      maxLength={12}
+                      decimalScale={3}
+                      readOnly
+                      maxAccess={maxAccess}
+                      onChange={e => formik.setFieldValue('wipWeight', e.target.value)}
+                      onClear={() => formik.setFieldValue('wipWeight', 0)}
+                      error={formik.touched.wipWeight && Boolean(formik.errors.wipWeight)}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
               <Grid item xs={6}>
-                <Grid container direction='column' spacing={2}>
-                  <Grid item>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='grossWgt'
                       label={labels.grossWgt}
@@ -582,13 +631,14 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       readOnly
                       maxLength={11}
+                      maxAccess={maxAccess}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('grossWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('grossWgt', 0)}
                       error={formik.touched.grossWgt && Boolean(formik.errors.grossWgt)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='rmWgt'
                       label={labels.rmWgt}
@@ -596,13 +646,14 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       readOnly
                       maxLength={11}
+                      maxAccess={maxAccess}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('rmWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('rmWgt', 0)}
                       error={formik.touched.rmWgt && Boolean(formik.errors.rmWgt)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='mouldWgt'
                       label={labels.mouldWgt}
@@ -610,13 +661,14 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       readOnly
                       maxLength={11}
+                      maxAccess={maxAccess}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('mouldWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('mouldWgt', 0)}
                       error={formik.touched.mouldWgt && Boolean(formik.errors.mouldWgt)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='netWgt'
                       label={labels.netWgt}
@@ -624,19 +676,21 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       readOnly
                       maxLength={11}
+                      maxAccess={maxAccess}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('netWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('netWgt', 0)}
                       error={formik.touched.netWgt && Boolean(formik.errors.netWgt)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='suggestedWgt'
                       label={labels.suggestedWgt}
                       value={formik.values.suggestedWgt}
                       required
                       readOnly
+                      maxAccess={maxAccess}
                       maxLength={11}
                       decimalScale={3}
                       onChange={e => formik.setFieldValue('suggestedWgt', e.target.value)}
@@ -644,7 +698,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       error={formik.touched.suggestedWgt && Boolean(formik.errors.suggestedWgt)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={6}>
                     <CustomNumberField
                       name='inputWgt'
                       label={labels.inputWgt}
@@ -652,6 +706,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       decimalScale={3}
                       readOnly={isPosted || isCancelled}
+                      maxAccess={maxAccess}
                       onChange={e => {
                         let value = Number(e.target.value) > 32767 ? 0 : Number(e.target.value)
                         formik.setFieldValue('inputWgt', value)
@@ -669,13 +724,31 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       error={formik.touched.inputWgt && Boolean(formik.errors.inputWgt)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={6}>
+                    <CustomNumberField
+                      name='inputWgtPurity'
+                      label={labels.inputWgtPurity}
+                      value={formik.values.inputWgtPurity}
+                      readOnly={isPosted || isCancelled}
+                      maxLength={10}
+                      decimalScale={5}
+                      maxAccess={maxAccess}
+                      onChange={e => {
+                        setRecal(true)
+                        formik.setFieldValue('inputWgtPurity', e.target.value)
+                      }}
+                      onClear={() => formik.setFieldValue('inputWgtPurity', 0)}
+                      error={formik.touched.inputWgtPurity && Boolean(formik.errors.inputWgtPurity)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='netInputWgt'
                       label={labels.netInputWgt}
                       value={formik.values.netInputWgt}
                       required
                       readOnly
+                      maxAccess={maxAccess}
                       decimalScale={3}
                       onChange={e => {
                         formik.setFieldValue('netInputWgt', e.target.value)
@@ -684,13 +757,14 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       error={formik.touched.netInputWgt && Boolean(formik.errors.netInputWgt)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={6}>
                     <CustomNumberField
                       name='outputWgt'
                       label={labels.outputWgt}
                       value={formik.values.outputWgt}
                       required
                       decimalScale={3}
+                      maxAccess={maxAccess}
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
                         setRecal(true)
@@ -709,7 +783,24 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       error={formik.touched.outputWgt && Boolean(formik.errors.outputWgt)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={6}>
+                    <CustomNumberField
+                      name='outputWgtPurity'
+                      label={labels.outputWgtPurity}
+                      value={formik.values.outputWgtPurity}
+                      readOnly={isPosted || isCancelled}
+                      maxLength={10}
+                      decimalScale={5}
+                      maxAccess={maxAccess}
+                      onChange={e => {
+                        setRecal(true)
+                        formik.setFieldValue('outputWgtPurity', e.target.value)
+                      }}
+                      onClear={() => formik.setFieldValue('outputWgtPurity', 0)}
+                      error={formik.touched.outputWgtPurity && Boolean(formik.errors.outputWgtPurity)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='lossCasting'
                       label={labels.lossCasting}
@@ -728,7 +819,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       error={formik.touched.lossCasting && Boolean(formik.errors.lossCasting)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='lossDisassembly'
                       label={labels.lossDisassembly}
@@ -747,7 +838,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       error={formik.touched.lossDisassembly && Boolean(formik.errors.lossDisassembly)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='loss'
                       label={labels.loss}
@@ -756,12 +847,13 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       maxLength={11}
                       decimalScale={3}
                       readOnly
+                      maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('loss', e.target.value)}
                       onClear={() => formik.setFieldValue('loss', 0)}
                       error={formik.touched.loss && Boolean(formik.errors.loss)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='lossPct'
                       label={labels.lossPct}
@@ -770,6 +862,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       maxLength={3}
                       readOnly
                       decimalScale={3}
+                      maxAccess={maxAccess}
                       onChange={e => {
                         formik.setFieldValue('lossPct', e.target.value)
                       }}
@@ -777,7 +870,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       error={formik.touched.lossPct && Boolean(formik.errors.lossPct)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='lossVariationPct'
                       label={labels.lossVariation}
@@ -785,19 +878,21 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       maxLength={5}
                       readOnly
+                      maxAccess={maxAccess}
                       decimalScale={3}
                       onChange={e => formik.setFieldValue('lossVariationPct', e.target.value)}
                       onClear={() => formik.setFieldValue('lossVariationPct', 0)}
                       error={formik.touched.lossVariationPct && Boolean(formik.errors.lossVariationPct)}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='scrapWgt'
                       label={labels.scrapWgt}
                       value={formik.values.scrapWgt}
                       readOnly
                       decimalScale={3}
+                      maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('scrapWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('scrapWgt', 0)}
                       error={formik.touched.scrapWgt && Boolean(formik.errors.scrapWgt)}

@@ -78,7 +78,7 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
       <Fixed>
         <Grid container p={4}>
           <Grid item xs={2}>
-            <CustomNumberField name='totalQty' label={labels.totQty} value={totQty} readOnly />
+            <CustomNumberField name='totalQty' label={labels.totQty} value={totQty} readOnly maxAccess={maxAccess}/>
           </Grid>
         </Grid>
       </Fixed>

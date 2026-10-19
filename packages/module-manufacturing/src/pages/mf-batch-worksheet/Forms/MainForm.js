@@ -24,6 +24,7 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function MainForm({ labels, access, store, setStore, window }) {
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
@@ -120,6 +121,13 @@ export default function MainForm({ labels, access, store, setStore, window }) {
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.header.wip == 2
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.BatchWorksheet,
+    enabled: !!recordId && !isClosed
+  })
   const isPosted = formik?.values?.header?.status === 3
 
   async function refetchForm(recordId) {
@@ -312,6 +320,7 @@ export default function MainForm({ labels, access, store, setStore, window }) {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }

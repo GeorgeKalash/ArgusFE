@@ -37,6 +37,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -226,19 +227,25 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   const isPosted = formik.values.status === 3
   const isCancelled = formik.values.status === -1
   const editMode = !!formik.values.recordId
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.PaymentVoucherExpenses,
+    enabled: !!recordId && !(isPosted || isCancelled)
+  })
   const isVerified = formik.values.isVerified
 
   const onPost = async () => {
-    try {
-      const res = await postRequest({
-        extension: FinancialRepository.PaymentVouchers.post,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.post,
+      record: JSON.stringify(formik.values)
+    })
 
-      toast.success(platformLabels.Posted)
-      invalidate()
-      refetchForm(res.recordId)
-    } catch (exception) {}
+    toast.success(platformLabels.Posted)
+    await releaseLock()
+    invalidate()
+    refetchForm(res.recordId)
   }
   async function onChangeDT(dtId) {
     if (dtId) {
@@ -314,16 +321,14 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   }
 
   const onCancel = async () => {
-    try {
-      const res = await postRequest({
-        extension: FinancialRepository.PaymentVouchers.cancel,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.cancel,
+      record: JSON.stringify(formik.values)
+    })
 
-      toast.success(platformLabels.Cancelled)
-      invalidate()
-      refetchForm(res.recordId)
-    } catch (e) {}
+    toast.success(platformLabels.Cancelled)
+    invalidate()
+    refetchForm(res.recordId)
   }
 
   const onVerify = async () => {
@@ -969,7 +974,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
           columns={columns}
           allowDelete={!isPosted && !isCancelled}
           allowAddNewLine={!isPosted && !isCancelled}
-        />
+          maxAccess={maxAccess}/>
       </VertLayout>
     </FormShell>
   )

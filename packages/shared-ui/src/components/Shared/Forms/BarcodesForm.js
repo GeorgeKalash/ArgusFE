@@ -24,7 +24,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Barcodes.qry
+    endpointId: InventoryRepository.Barcodes.page
   })
 
   const { maxAccess, changeDT } = useBarcodeFieldBehaviours({

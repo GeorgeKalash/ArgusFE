@@ -152,7 +152,7 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
             columns={column}
             allowDelete={false}
             allowAddNewLine={false}
-          />
+            maxAccess={access}/>
         </Grow>
       </VertLayout>
     </Form>

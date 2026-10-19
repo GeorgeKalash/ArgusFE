@@ -1,4 +1,3 @@
-import { useFormik } from 'formik'
 import { useContext, useEffect, useRef } from 'react'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -167,6 +166,7 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
             required
             readOnly
             error={formik.touched.nodeRef && Boolean(formik.errors.nodeRef)}
+            maxAccess={maxAccess}
           />
           <DataGrid
             name='ledgerTable'

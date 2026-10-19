@@ -15,7 +15,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-export default function MaterialsForm({ store, labels, maxAccess }) {
+export default function ModellingMaterialsForm({ store, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId, isClosed } = store

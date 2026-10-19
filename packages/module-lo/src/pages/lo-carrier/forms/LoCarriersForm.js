@@ -127,6 +127,7 @@ export default function LoCarriersForms({ labels, maxAccess, recordId }) {
                   }
                 }}
                 error={formik.touched.type && Boolean(formik.errors.type)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

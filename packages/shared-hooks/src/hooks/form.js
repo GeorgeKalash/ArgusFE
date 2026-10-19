@@ -58,6 +58,7 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
         submitSucceededRef.current = true
       } catch (error) {
         submitSucceededRef.current = false
+        if (error?.isHandledApiError) return
         throw error
       }
     },
@@ -182,7 +183,8 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
     
     return value
   }
-
+  
+  //const dirty = false
   const dirty = JSON.stringify(normalized(formik.values)) !== JSON.stringify(normalized(formik.initialValues))
   
   return {

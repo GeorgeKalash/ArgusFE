@@ -23,7 +23,7 @@ const ProductionShifts = () => {
 
     const response = await getRequest({
       extension: ManufacturingRepository.ProductionShifts.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }

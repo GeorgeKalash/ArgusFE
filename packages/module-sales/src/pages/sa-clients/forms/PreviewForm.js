@@ -67,6 +67,7 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
                   value={data?.yearOpenAmount}
                   label={labels.yearOpenAmount}
                   readOnly
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -75,6 +76,7 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
                   value={data?.invoicedAmount}
                   label={labels.invoicedAmount}
                   readOnly
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -83,6 +85,7 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
                   value={data?.saleReturnAmount}
                   label={labels.saleReturnAmount}
                   readOnly
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -91,10 +94,12 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
                   value={data?.receivedAmount}
                   label={labels.receivedAmount}
                   readOnly
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField name='balance' value={data?.balance} label={labels.balance} readOnly />
+                <CustomNumberField name='balance' value={data?.balance} label={labels.balance} readOnly                 maxAccess={maxAccess}
+                />
               </Grid>
             </Grid>
           </Grid>
@@ -125,6 +130,7 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
                   value={data?.debitNoteAmount}
                   label={labels.debitNoteAmount}
                   readOnly
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -133,6 +139,7 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
                   value={data?.creditNoteAmount}
                   label={labels.creditNoteAmount}
                   readOnly
+                  maxAccess={maxAccess}
                 />
               </Grid>
             </Grid>
@@ -147,6 +154,7 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
                   value={data.address}
                   rows={6}
                   readOnly
+                  maxAccess={maxAccess}
                 />
               </Grid>
             </Grid>

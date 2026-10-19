@@ -92,10 +92,10 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <CustomTextField name='reference' label={labels.reference} value={formValues?.reference} readOnly />
+            <CustomTextField name='reference' label={labels.reference} value={formValues?.reference} readOnly maxAccess={access}/>
           </Grid>
           <Grid item xs={12}>
-            <CustomDatePicker name='date' label={labels.date} value={formValues?.date} readOnly />
+            <CustomDatePicker name='date' label={labels.date} value={formValues?.date} readOnly maxAccess={access}/>
           </Grid>
           <Grid item xs={12}>
             <CustomTextArea
@@ -105,6 +105,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
               rows={3}
               maxLength='100'
               readOnly
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
@@ -116,10 +117,11 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
               valueField='recordId'
               displayField={['reference', 'name']}
               values={formValues}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={9}>
-            <CustomCheckBox name='isVattable' value={formValues?.isVattable} label={labels.vat} disabled={true} />
+            <CustomCheckBox name='isVattable' value={formValues?.isVattable} label={labels.vat} disabled={true} maxAccess={access}/>
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
@@ -130,6 +132,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
               displayField={['reference', 'name']}
               readOnly
               values={formValues}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
@@ -145,6 +148,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
               displayFieldWidth={4}
               valueShow='clientRef'
               secondValueShow='clientName'
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>

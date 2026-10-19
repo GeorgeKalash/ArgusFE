@@ -107,5 +107,11 @@ export const ProductModelingRepository = {
     set: service + 'setDEV',
     del: service + 'delDEV',
     snapshot: service + 'snapshotDEV'
+  },
+  Budget: {
+    page: service + 'pageBUD',
+    get2: service + 'get2BUD',
+    set2: service + 'set2BUD ',
+    del: service + 'delBUD'
   }
 }

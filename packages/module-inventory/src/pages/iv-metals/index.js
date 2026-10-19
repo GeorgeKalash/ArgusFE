@@ -24,7 +24,7 @@ const TaxCodes = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.Metals.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -70,14 +70,12 @@ const TaxCodes = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: InventoryRepository.Metals.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (e) {}
+    await postRequest({
+      extension: InventoryRepository.Metals.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {

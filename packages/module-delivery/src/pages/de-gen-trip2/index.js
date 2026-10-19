@@ -15,7 +15,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { DeliveryRepository } from '@argus/repositories/src/repositories/DeliveryRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import UnallocatedOrdersForm from './Forms/UnallocatedOrders'
@@ -43,7 +42,6 @@ const GenerateOutboundTransportation2 = () => {
 
   const { formik } = useForm({
     initialValues: {
-      search: '',
       departureDate: null,
       itemCategoryId: null,
       szId: null,
@@ -200,7 +198,7 @@ const GenerateOutboundTransportation2 = () => {
       type: 'number'
     },
     {
-      field: 'filteredCategoryVolme',
+      field: 'filteredCategoryVolume',
       headerName: labels.categVol,
       type: 'number',
       flex: 1
@@ -452,23 +450,7 @@ const GenerateOutboundTransportation2 = () => {
     formik.resetForm()
   }
 
-  const handleSearchChange = event => {
-    const { value } = event.target
-    if (formik.values.search !== value) {
-      formik.setFieldValue('search', value)
-    }
-  }
-
-  const filteredSalesZones = useMemo(() => {
-    return {
-      ...formik?.values?.salesZones,
-      list: formik?.values?.salesZones?.list.filter(item =>
-        item?.name?.toString().toLowerCase().includes(formik?.values?.search?.toLowerCase())
-      )
-    }
-  }, [formik?.values?.salesZones, formik.values.search])
-
-  const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
+  const filteredData = formik?.values?.salesZones
 
   const handleImport = async () => {
     setSelectedSaleZones(prevState => {
@@ -478,7 +460,7 @@ const GenerateOutboundTransportation2 = () => {
         .filter(item => item.checked)
         .map(item => ({
           ...item,
-          filteredCategoryVolme: item.filteredCategoryVolme.toFixed(2),
+          filteredCategoryVolume: item.filteredCategoryVolume.toFixed(2),
           orders: item.orders?.map(order => ({ ...order, checked: true }))
         }))
 
@@ -529,7 +511,7 @@ const GenerateOutboundTransportation2 = () => {
 
   const getSelectedZonesTotals = () => {
     const totalFilteredCategoryVolume = (selectedSaleZones?.list || [])?.reduce((sum, zone) => {
-      return sum + (parseFloat(zone.filteredCategoryVolme) || 0)
+      return sum + (parseFloat(zone.filteredCategoryVolume) || 0)
     }, 0)
     const totalPct = ordersVolume ? ((totalFilteredCategoryVolume * 100) / ordersVolume).toFixed(2) : 0
 
@@ -543,7 +525,7 @@ const GenerateOutboundTransportation2 = () => {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} p={2}>
-            <Grid item xs={1.33}>
+            <Grid item xs={2.66}>
               <ResourceComboBox
                 endpointId={DeliveryRepository.GenerateTrip.root}
                 parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
@@ -565,21 +547,6 @@ const GenerateOutboundTransportation2 = () => {
                 }}
                 error={formik.touched.szId && Boolean(formik.errors.szId)}
                 maxAccess={access}
-              />
-            </Grid>
-
-            <Grid item xs={1.33}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                size='small'
-                onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('search', e)}
-                search={true}
               />
             </Grid>
 
@@ -620,6 +587,7 @@ const GenerateOutboundTransportation2 = () => {
                 onBlur={async e => {
                   handleTruckNoChange(e.target.value)
                 }}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={1.33}>
@@ -641,6 +609,7 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.trucksVolume}
                 value={totalTrucksVolume}
                 readOnly
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={1.33}>
@@ -649,10 +618,11 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.ordersVolume}
                 value={ordersVolume}
                 readOnly
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={1.33}>
-              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly />
+              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly maxAccess={access} />
             </Grid>
             <Grid item xs={1.33}>
               <CustomNumberField
@@ -660,6 +630,7 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.zonesVolume}
                 value={formik.values.zonesVolume}
                 readOnly
+                maxAccess={access}
               />
             </Grid>
           </Grid>
@@ -740,7 +711,7 @@ const GenerateOutboundTransportation2 = () => {
                     columns={columnsTrucks}
                     allowAddNewLine={false}
                     allowDelete={false}
-                  />
+                    maxAccess={access}/>
                 </Grid>
                 <Grid item xs={9} sx={{ display: 'flex' }}>
                   <Table
@@ -783,6 +754,7 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.totalCategVolume}
                 value={totalFilteredCategoryVolume.toFixed(2)}
                 readOnly
+                maxAccess={access}
               />
             </Grid>
 
@@ -792,6 +764,7 @@ const GenerateOutboundTransportation2 = () => {
                 label={labels.totalCategVolPct}
                 value={totalPct}
                 readOnly
+                maxAccess={access}
               />
             </Grid>
 
@@ -828,8 +801,6 @@ const GenerateOutboundTransportation2 = () => {
                 color='#231f20'
                 tooltipText={platformLabels.Generate}
                 image={'generate.png'}
-
-                //disabled={balance + 0.1 * totalTrucksVolume < 0}
               />
             </Grid>
           </Grid>

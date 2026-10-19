@@ -17,12 +17,14 @@ import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/Purc
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import toast from 'react-hot-toast'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const PuTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   const { stack: stackError } = useError()
 
   const { functionId } = Router()
@@ -59,8 +61,8 @@ const PuTrx = () => {
     queryFn: fetchGridData,
     endpointId:
       parseFloat(functionId) === SystemFunction.PurchaseInvoice
-        ? PurchaseRepository.PurchaseInvoiceHeader.qry
-        : PurchaseRepository.PurchaseReturnHeader.qry,
+        ? PurchaseRepository.PurchaseInvoiceHeader.page
+        : PurchaseRepository.PurchaseReturnHeader.page,
     datasetId: ResourceIds.PurchaseInvoice,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
@@ -153,8 +155,8 @@ const PuTrx = () => {
     const response = await getRequest({
       extension:
         parseFloat(functionId) === SystemFunction.PurchaseInvoice
-          ? PurchaseRepository.PurchaseInvoiceHeader.qry
-          : PurchaseRepository.PurchaseReturnHeader.qry,
+          ? PurchaseRepository.PurchaseInvoiceHeader.page
+          : PurchaseRepository.PurchaseReturnHeader.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&&_params=${params}`
     })
 
@@ -194,10 +196,18 @@ const PuTrx = () => {
   })
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: getResourceId(parseInt(functionId)),
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: PurchaseTransactionForm,
       props: {

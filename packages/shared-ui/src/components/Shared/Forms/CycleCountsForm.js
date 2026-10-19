@@ -25,6 +25,7 @@ import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function CycleCountsForm({ labels, maxAccess: access, setStore, store, plantId }) {
   const { recordId } = store
@@ -35,7 +36,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   const editMode = !!store.recordId
 
   const invalidate = useInvalidate({
-    endpointId: SCRepository.StockCount.qry
+    endpointId: SCRepository.StockCount.page
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -137,6 +138,14 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
 
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.StockCounts,
+    enabled: !!recordId && !isClosed
+  })
+
   const onClose = async () => {
     const res = await postRequest({
       extension: SCRepository.StockCount.close,
@@ -167,6 +176,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
 
     toast.success(platformLabels.Posted)
     invalidate()
+    await releaseLock()
     refetchForm(res.recordId)
   }
 
@@ -299,6 +309,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                   formik.setFieldValue('plantId', newValue ? newValue?.recordId : null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

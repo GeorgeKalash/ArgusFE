@@ -4,11 +4,13 @@ import ErrorWindow from '@argus/shared-ui/src/components/Shared/ErrorWindow'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const MenuContext = createContext()
 
 const MenuProvider = ({ children }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [menu, setMenu] = useState([])
   const [gear, setGear] = useState([])
@@ -16,6 +18,8 @@ const MenuProvider = ({ children }) => {
   const [reloadOpenedPage, setReloadOpenedPage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [tabSwitch, setTabSwitch] = useState(false)
+  const [startupPages, setStartupPages] = useState([])
+  const [menuLoaded, setMenuLoaded] = useState(false)
 
   const [openTabs, setOpenTabs] = useState([])
 
@@ -32,6 +36,17 @@ const MenuProvider = ({ children }) => {
       const builtGear = buildGear(res?.record?.commandLines)
       setGear(builtGear)
       setMenu(builtMenu)
+
+      const startupCommands = res?.record?.commandLines?.filter(cl => cl.isStartup && cl.nextAPI) || []
+      setStartupPages(
+        startupCommands.map(cmd => ({
+          id: cmd.id,
+          path: `/${cmd.nextAPI}`,
+          name: cmd.name
+        }))
+      )
+
+      setMenuLoaded(true)
     })
   }
 
@@ -92,7 +107,7 @@ const MenuProvider = ({ children }) => {
     return Gear
   }
 
-  const handleBookmark = (item, isBookmarked, callBack = undefined) => {
+  const handleBookmark = (item, isBookmarked, callBack = undefined, isStartup) => {
     const userData = window.localStorage.getItem('userData')
       ? window.localStorage.getItem('userData')
       : window.sessionStorage.getItem('userData')
@@ -100,7 +115,8 @@ const MenuProvider = ({ children }) => {
     const record = {
       userId: JSON.parse(userData).userId,
       commandId: item.id,
-      displayOrder: 1
+      displayOrder: 1,
+      isStartup
     }
 
     if (isBookmarked) {
@@ -112,7 +128,7 @@ const MenuProvider = ({ children }) => {
         if (typeof callBack === 'function') {
           callBack()
         }
-        toast.success('Removed from favorites')
+        toast.success(isStartup ? platformLabels.StartupPageRemoved : platformLabels.RemovedFromFavorites)
       })
     } else {
       postRequest({
@@ -123,7 +139,7 @@ const MenuProvider = ({ children }) => {
         if (typeof callBack === 'function') {
           callBack()
         }
-        toast.success('Added to favorites')
+        toast.success(isStartup ? platformLabels.StartupPageSet : platformLabels.AddedToFavorites)
       })
     }
   }
@@ -145,7 +161,9 @@ const MenuProvider = ({ children }) => {
     currentTabIndex,
     setCurrentTabIndex,
     tabSwitch,
-    setTabSwitch
+    setTabSwitch,
+    startupPages,
+    menuLoaded,
   }
 
   return (

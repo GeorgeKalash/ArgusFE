@@ -34,6 +34,7 @@ import { AccessControlRepository } from '@argus/repositories/src/repositories/Ac
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function DraftTransfer({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -205,6 +206,13 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
   const editMode = !!formik.values.recordId
   const isPosted = formik.values?.header?.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.DraftTransfer,
+    enabled: !!recordId && !isPosted
+  })
+
   const autoDelete = async row => {
     if (!row?.draftTransferId) return true
 
@@ -322,16 +330,15 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
             ? await autoSave(formik?.values?.header, lineObj.changes)
             : await saveHeader(lineObj.changes)
 
-          if (!successSave) 
+          if (!successSave) {
             update({
-              ...initialValues?.items,
+              ...initialValues?.items?.[0],
               id: newRow?.id,
               srlNo: ''
             })
-          else {
-            await addRow(lineObj)
-            
+          } else {
             if (formik.values?.recordId) {
+              await addRow(lineObj)
               await refetchForm(formik.values.recordId)
             }
           }      
@@ -399,6 +406,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
 
@@ -597,7 +605,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
     if (!formik.values.items?.length) return
     const totals = calculateTotalWeightFromSerials(formik.values.items)
 
-    formik.setFieldValue('header.totalWeight', totals.totalWeight || 0)
+    formik.setFieldValue('header.totalWeight', roundTo(totals.totalWeight) || 0)
 
   }, [formik.values.items])
 

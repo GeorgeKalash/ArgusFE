@@ -4,7 +4,7 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -23,7 +23,7 @@ const MultiCurrencyMapping = () => {
 
     const response = await getRequest({
       extension: MultiCurrencyRepository.McExchangeMap.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -69,14 +69,12 @@ const MultiCurrencyMapping = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: MultiCurrencyRepository.McExchangeMap.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: MultiCurrencyRepository.McExchangeMap.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(record) {

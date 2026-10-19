@@ -194,6 +194,21 @@ const formatDayId = dayId => {
   return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+// from yyyymmdd to a string formatted per defaultSettings.dateFormat
+const formatDayIdToDefault = dayId => {
+  if (!dayId || dayId.length !== 8) return dayId
+
+  const year = dayId.slice(0, 4)
+  const month = dayId.slice(4, 6)
+  const day = dayId.slice(6, 8)
+  const date = new Date(Number(year), Number(month) - 1, Number(day))
+
+  const defaultSettings = JSON.parse(window.localStorage.getItem('default') || '{}')
+  const dateFormat = defaultSettings.dateFormat || 'dd/MM/yyyy'
+
+  return format(date, dateFormat)
+}
+
 const formatTimeToApi = time => {
   return new Date(time).toLocaleTimeString([], {
     hour: '2-digit',
@@ -224,6 +239,28 @@ const formatDateToSlashDate = dateStr => {
   return `${value.substring(0, 4)}/${value.substring(4, 6)}/${value.substring(6, 8)}`
 }
 
+// Format date of this structure YYYY-MM-DD HH:MM:SS
+const formatDateTimeFromApi = dateString => {
+  if (!dateString) return null
+  const parsed = dayjs(dateString)
+
+  return parsed.isValid() ? parsed.toDate() : null
+}
+
+const dayKey = (d, utc = false) =>
+  utc
+    ? d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate()
+    : d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
+
+const findPeriod = (periods, date) => {
+  const key = dayKey(new Date(date))
+  return periods.find(p => {
+    const start = dayKey(formatDateFromApi(p.startDate), true)
+    const end = dayKey(formatDateFromApi(p.endDate), true)
+    return key >= start && key <= end
+  })
+}
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -240,5 +277,8 @@ export {
   formatDateToISO,
   formatDateTimeForGetAPI,
   formatDayId,
-  formatTimeToApi
+  formatTimeToApi,
+  formatDateTimeFromApi,
+  formatDayIdToDefault,
+  findPeriod
 }

@@ -22,14 +22,12 @@ const CaDocumentTypeDefault = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: CashBankRepository.DocumentTypeDefault.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=${SystemFunction.CashTransfer}`
-      })
+    const response = await getRequest({
+      extension: CashBankRepository.DocumentTypeDefault.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=${SystemFunction.CashTransfer}`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const {

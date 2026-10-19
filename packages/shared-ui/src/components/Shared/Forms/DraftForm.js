@@ -37,15 +37,13 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
-const DraftForm = ({ labels, access, recordId, lockRecord, invalidate }) => {
+const DraftForm = ({ labels, access, recordId, invalidate }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -257,6 +255,13 @@ const DraftForm = ({ labels, access, recordId, lockRecord, invalidate }) => {
   const editMode = !!formik.values.header?.recordId
   const isClosed = formik.values.header?.wip === 2
 
+  const { releaseLock } = useRecordLock({
+    recordId,
+    reference: formik.values.header.reference,
+    resourceId: ResourceIds.DraftSerialsInvoices,
+    enabled: !!recordId && !isClosed
+  })
+
   const autoDelete = async row => {
     if (!row?.draftId || !row?.itemId) return true
 
@@ -287,14 +292,16 @@ const DraftForm = ({ labels, access, recordId, lockRecord, invalidate }) => {
       await postRequest({
         extension: SaleRepository.DraftInvoiceSerial.append,
         record: JSON.stringify(LastSerPack),
-        noHandleError: true
+        throwError: true
       })
-      
-      toast.success(platformLabels.Saved)
-      invalidate()
-      refetchForm(draftId)
+      .then(() => {
+        toast.success(platformLabels.Saved)
+        invalidate()
+        refetchForm(draftId)
 
-      return true
+        return true
+      })
+      .catch(() => false)
     }
   }
 
@@ -631,9 +638,10 @@ const DraftForm = ({ labels, access, recordId, lockRecord, invalidate }) => {
         ...restValues.header,
         date: formatDateToApi(formik.values.header?.date)
       })
-    }).then(() => {
+    }).then(async () => {
       toast.success(platformLabels.Closed)
       invalidate()
+      await releaseLock()
       refetchForm(formik?.values?.header?.recordId)
     })
   }
@@ -649,30 +657,7 @@ const DraftForm = ({ labels, access, recordId, lockRecord, invalidate }) => {
       })
     }).then(() => {
       toast.success(platformLabels.Reopened)
-      lockRecord({
-        recordId: formik?.values?.header?.recordId,
-        reference: formik.values.header.reference,
-        resourceId: ResourceIds.DraftSerialsInvoices,
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: ResourceIds.DraftSerialsInvoices,
-            recordId: formik?.values?.header?.recordId,
-            reference: formik.values.header.reference
-          })
-          refetchForm(formik?.values?.header?.recordId)
-        },
-        isAlreadyLocked: name => {
-          window.close()
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              title: platformLabels.Dialog
-            },
-            title: platformLabels.Dialog
-          })
-        }
-      })
+      refetchForm(formik?.values?.header?.recordId)
       invalidate()
     })
   }
@@ -788,20 +773,6 @@ const DraftForm = ({ labels, access, recordId, lockRecord, invalidate }) => {
         ...summaryGridData,
         items: modifiedList,
         taxDetails: pack.taxDetails
-      }
-    })
-
-    !formik.values.recordId &&
-    lockRecord({
-      recordId: pack.header.recordId,
-      reference: pack.header.reference,
-      resourceId: ResourceIds.DraftSerialsInvoices,
-      onSuccess: () => {
-        addLockedScreen({
-          resourceId: ResourceIds.DraftSerialsInvoices,
-          recordId: pack.header.recordId,
-          reference: pack.header.reference
-        })
       }
     })
 
@@ -1112,6 +1083,7 @@ const DraftForm = ({ labels, access, recordId, lockRecord, invalidate }) => {
                   formik.setFieldValue('header.spId', newValue?.recordId || null)
                 }}
                 error={formik.touched.header?.spId && Boolean(formik.errors.header?.spId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={4}>

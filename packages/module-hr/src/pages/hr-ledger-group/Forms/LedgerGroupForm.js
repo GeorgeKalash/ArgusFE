@@ -19,7 +19,7 @@ export default function LedgerGroupForm({ labels, recordId, maxAccess, window })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: PayrollRepository.LedgerGroup.qry
+    endpointId: PayrollRepository.LedgerGroup.page
   })
 
   const { formik } = useForm({

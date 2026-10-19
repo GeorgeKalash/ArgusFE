@@ -107,7 +107,7 @@ const DraftSerialsInvoice = () => {
         maxAccess: access,
         functionId
       },
-      width: 500,
+      width: 700,
       height: 380,
       title: getCorrectLabel(parseInt(functionId))
     })

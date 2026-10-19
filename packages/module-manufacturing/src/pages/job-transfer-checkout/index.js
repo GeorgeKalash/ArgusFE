@@ -14,11 +14,13 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import JTCheckoutForm from '@argus/shared-ui/src/components/Shared/Forms/JTCheckoutForm'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const JTCheckout = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -127,7 +129,15 @@ const JTCheckout = () => {
     action: openForm
   })
 
-  function openForm(obj) {
+  async function openForm(obj) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.JTCheckOut,
+      recordId: obj?.recordId,
+      disabled: obj?.wip == 2
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: JTCheckoutForm,
       props: {

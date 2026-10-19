@@ -13,12 +13,14 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
-import ModellingWindow from './Windows/ModellingWindow'
+import ModellingWindow from '@argus/shared-ui/src/components/Shared/Forms/ModellingWindow'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const ModelMaker = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -124,7 +126,7 @@ const ModelMaker = () => {
 
     const response = await getRequest({
       extension: ProductModelingRepository.ModelMaker.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -149,20 +151,23 @@ const ModelMaker = () => {
   }
 
   const editMDL = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.ModelMaker,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: ModellingWindow,
       props: {
-        labels,
-        access,
         recordId
-      },
-      width: 900,
-      height: 680,
-      title: labels.modelMaker
+      }
     })
   }
 

@@ -27,6 +27,7 @@ import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomD
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ThreeDPrintForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -116,6 +117,13 @@ export default function ThreeDPrintForm({ recordId, window }) {
   const isReleased = formik.values.status == 4
   const editMode = !!formik.values.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.Printing,
+    enabled: !!recordId && !isPosted
+  })
+
   async function getData(recordId) {
     const res = await getRequest({
       extension: ProductModelingRepository.Printing.get,
@@ -160,6 +168,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
 
     getData(formik.values.recordId)
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
   }
 

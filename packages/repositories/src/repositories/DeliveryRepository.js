@@ -52,6 +52,7 @@ export const DeliveryRepository = {
     page: service + 'pageET'
   },
   DeliveriesOrders: {
+    page: service + 'pageORD',
     qry: service + 'qryORD',
     get: service + 'getORD',
     snapshot: service + 'snapshotORD',

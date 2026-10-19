@@ -23,7 +23,7 @@ const PosUsers = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: PointofSaleRepository.PosUsers.qry,
+      extension: PointofSaleRepository.PosUsers.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_posId=0&_params=`
     })
 
@@ -39,7 +39,7 @@ const PosUsers = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PointofSaleRepository.PosUsers.qry,
+    endpointId: PointofSaleRepository.PosUsers.page,
     datasetId: ResourceIds.POSUsers
   })
 

@@ -25,6 +25,7 @@ import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextAre
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ModellingForm({ labels, access, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -93,6 +94,13 @@ export default function ModellingForm({ labels, access, setStore, store }) {
   })
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip == 2
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.ModelMaker,
+    enabled: !!recordId && !isClosed
+  })
   const isPosted = formik.values.status == 3
 
   async function refetchForm(recordId) {
@@ -155,6 +163,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     refetchForm(res.recordId)
   }
@@ -379,7 +388,8 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('laborId', newValue?.recordId || null)
                 }}
                 error={formik.touched.laborId && Boolean(formik.errors.laborId)}
@@ -408,7 +418,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                   { key: 'reference', value: 'Ref' },
                   { key: 'date', value: 'Date', type: 'date' }
                 ]}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   if (newValue?.recordId) {
                     const res = await getProduct(newValue?.recordId)
                     const res2 = await getDesign(newValue?.threeDDId)

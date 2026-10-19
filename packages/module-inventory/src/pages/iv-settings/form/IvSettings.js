@@ -92,6 +92,7 @@ const IvSettings = ({ _labels, access }) => {
                   formik.setFieldValue('itemSearchStyle', newValue?.key || '')
                 }}
                 error={formik.touched.itemSearchStyle && Boolean(formik.errors.itemSearchStyle)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -106,6 +107,7 @@ const IvSettings = ({ _labels, access }) => {
                   formik.setFieldValue('itemSearchFields', newValue?.key || '')
                 }}
                 error={formik.touched.itemSearchFields && Boolean(formik.errors.itemSearchFields)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -116,6 +118,7 @@ const IvSettings = ({ _labels, access }) => {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('iv_minSerialSize', '')}
                 error={formik.touched.iv_minSerialSize && Boolean(formik.errors.iv_minSerialSize)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -127,6 +130,7 @@ const IvSettings = ({ _labels, access }) => {
                 required
                 onClear={() => formik.setFieldValue('minItemSearchTextSize', '')}
                 error={formik.touched.minItemSearchTextSize && Boolean(formik.errors.minItemSearchTextSize)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -149,6 +153,7 @@ const IvSettings = ({ _labels, access }) => {
                   formik.setFieldValue('nraRef', newValue?.reference || '')
                   formik.setFieldValue('nraDescription', newValue?.description || '')
                 }}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>

@@ -13,12 +13,14 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import StandardCostUpdateForm from './Forms/StandardCostUpdateForm'
+import StandardCostUpdateForm from '@argus/shared-ui/src/components/Shared/Forms/StandardCostUpdateForm'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const StandardCostUpdate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -138,20 +140,23 @@ const StandardCostUpdate = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.StandardCostUpdate,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: StandardCostUpdateForm,
       props: {
-        labels,
-        recordId,
-        access
-      },
-      width: 1000,
-      height: 700,
-      title: labels.StandardCostUpdate
+        recordId
+      }
     })
   }
 

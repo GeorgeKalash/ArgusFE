@@ -45,6 +45,7 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
       version: '',
       date: new Date(),
       qty: null,
+      designId: null,
       description: null
     },
     maxAccess,
@@ -130,6 +131,28 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
     }
   ]
 
+  const getDesign = async itemId => {
+    if (!itemId) return null
+
+    const res = await getRequest({
+      extension: InventoryRepository.ItemProduction.get,
+      parameters: `_recordId=${itemId}`
+    })
+
+    return res?.record || null
+  }
+
+  const getWeight = async itemId => {
+    if (!itemId) return null
+
+    const res = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return res?.record?.weight || null
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.BillOfMaterials}
@@ -198,10 +221,22 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
                   { key: 'sku', value: 'SKU' },
                   { key: 'name', value: 'Name' }
                 ]}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId || null)
+                onChange={async (_, newValue) => {
+                  const itemId = newValue?.recordId || null
+
+                  formik.setFieldValue('itemId', itemId)
                   formik.setFieldValue('itemName', newValue?.name || null)
                   formik.setFieldValue('sku', newValue?.sku || null)
+
+                  const design = await getDesign(itemId)
+                  if (newValue?.priceType == 1) {
+                    const weight = await getWeight(newValue?.recordId)
+                    formik.setFieldValue('qty', weight)
+                  }
+
+                  formik.setFieldValue('designId', design?.designId || null)
+                  formik.setFieldValue('designRef', design?.designRef || '')
+                  formik.setFieldValue('designName', design?.designName || '')
                 }}
                 maxAccess={maxAccess}
                 errorCheck={'itemId'}
@@ -273,6 +308,18 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
                 decimalScale={3}
                 maxLength={12}
               />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='designRef'
+                label={labels.design}
+                value={formik?.values?.designRef}
+                maxAccess={maxAccess}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField name='designName' value={formik?.values?.designName} maxAccess={maxAccess} readOnly />
             </Grid>
           </Grid>
         </Grow>

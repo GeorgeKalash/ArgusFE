@@ -272,7 +272,7 @@ const DocumentAging = () => {
           <Grid item xs={6}>
             <ResourceComboBox
               endpointId={FinancialRepository.AgingProfile.qry}
-              parameters={`_startAt=0&_pageSize=1000&filter=`}
+              parameters={`_startAt=0&_pageSize=1000`}
               name='profileId'
               label={labels.profile}
               values={formik.values}

@@ -37,6 +37,7 @@ import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLi
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function FiPaymentVouchersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -113,6 +114,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       date: yup.string().required(),
       paymentMethod: yup.string().required(),
       cashAccountId: yup.string().required(),
+      accountId: yup.string().required(),
       checkNo: yup
         .string().nullable()
         .test(
@@ -219,6 +221,13 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   const isPosted = formik.values.status === 3
   const isCancelled = formik.values.status === -1
   const editMode = !!formik.values.recordId
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.PaymentVouchers,
+    enabled: !!recordId && !(isPosted || isCancelled)
+  })
   const isVerified = formik.values.isVerified
 
   const onPost = async () => {
@@ -229,6 +238,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
 
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       invalidate()
       refetchForm(res.recordId)
     }
@@ -604,12 +614,13 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 ]}
                 firstFieldWidth={4}
                 displayFieldWidth={4}
+                required
                 filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
                 onChange={async (_, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('accountGroupName', newValue?.groupName || '')
+                  formik.setFieldValue('accountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
@@ -621,6 +632,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 label={labels.accountGroup}
                 value={formik.values.accountGroupName}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>

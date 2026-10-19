@@ -18,7 +18,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import { formatDateFromApi, formatDateFromISO, formatDateToApi, formatDateToISO } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
@@ -35,6 +35,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ImportTransfer from '@argus/shared-ui/src/components/Shared/Forms/ImportTransfer'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -167,8 +168,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
       delete copy.transfers
       delete copy.serials
       copy.date = !!copy.date ? formatDateToApi(copy.date) : null
-      copy.closedDate = !!copy.closedDate ? formatDateToISO(copy.closedDate) : null
-      copy.receivedDate = !!copy.receivedDate ? formatDateToISO(copy.receivedDate) : null
+      copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
+      copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
 
       const serialsValues = []
 
@@ -244,6 +245,13 @@ export default function MaterialsTransferForm({ recordId, window }) {
   const isPosted = formik.values.status === 3
   const isClosed = formik.values.wip === 2
   const editMode = !!formik.values.recordId
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.MaterialsTransfer,
+    enabled: !!recordId && !(isPosted || isClosed)
+  })
 
   const getWeightAndMetalId = async itemId => {
     const res = await getRequest({
@@ -359,6 +367,15 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const fillSkuData = async (newRow, update, addRow) => {
     const itemIdValue = formik.values.disableSKULookup ? newRow?.recordId : newRow?.itemId
     const itemNameValue = formik.values.disableSKULookup ? newRow?.name : newRow?.itemName
@@ -369,6 +386,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       const totalCost = calcTotalCost(newRow)
       const itemInfo = await getItem(itemIdValue)
       const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+      const measurementSchedule = await getMeasurementObject(newRow?.msId)
 
       const data = {
         qty: jumpToNextLine ? 1 : 0,
@@ -380,6 +398,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         totalCost,
         msId: itemInfo?.msId,
         caName: itemInfo?.categoryName,
+        decimals: measurementSchedule?.decimals,
         muRef: filteredMeasurements?.[0]?.reference,
         muId: filteredMeasurements?.[0]?.recordId,
         muQty: filteredMeasurements?.[0]?.qty,
@@ -570,7 +589,11 @@ export default function MaterialsTransferForm({ recordId, window }) {
       label: labels.qty,
       name: 'qty',
       props: {
-        readOnly: isClosed
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
@@ -633,8 +656,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
     })
 
     res.record.date = formatDateFromApi(res?.record?.date)
-    res.record.closedDate = formatDateFromISO(res?.record?.closedDate)
-    res.record.receivedDate = formatDateFromISO(res?.record?.receivedDate)
+    res.record.closedDate = formatDateFromApi(res?.record?.closedDate)
+    res.record.receivedDate = formatDateFromApi(res?.record?.receivedDate)
 
     return res
   }
@@ -764,6 +787,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     await refetchForm(formik.values.recordId)
   }

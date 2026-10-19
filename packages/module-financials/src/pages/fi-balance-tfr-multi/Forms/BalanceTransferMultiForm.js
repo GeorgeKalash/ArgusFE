@@ -30,6 +30,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function BalanceTransferMultiForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -135,6 +136,13 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.header.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.BalanceTransferMultiAccounts,
+    enabled: !!recordId && !isPosted
+  })
+
   async function onPost() {
     await postRequest({
       extension: FinancialRepository.BalanceTransferMultiAccounts.post,
@@ -145,6 +153,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }
@@ -437,7 +446,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.plantId', newValue?.recordId || null)
                 }}
                 error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
@@ -474,6 +483,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                   formik.setFieldValue('header.spId', newValue?.recordId || null)
                 }}
                 error={formik?.touched?.header?.spId && Boolean(formik?.errors?.header?.spId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -546,6 +556,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 value={formik?.values?.header?.fromGroup}
                 label={labels.fromGroup}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>

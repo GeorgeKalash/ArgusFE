@@ -18,7 +18,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateTimeFromApi, formatDayIdToDefault } from '@argus/shared-domain/src/lib/date-helper'
 
 const AttSettings = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -37,7 +37,7 @@ const AttSettings = () => {
         return (
           obj.key === 'caId' ||
           obj.key === 'fdowCombo' ||
-          obj.key === 'lastGenFSDateTime' ||
+          obj.key === 'lastGenFSDayId' ||
           obj.key === 'lastReceivedPunch' ||
           obj.key === 'lastProcessedPunch' ||
           obj.key === 'lastGenTATV' ||
@@ -48,18 +48,19 @@ const AttSettings = () => {
           obj.key === 'punchSource' ||
           obj.key === 'weeklyTAHours' ||
           obj.key === 'prevDayTVTime' ||
+          obj.key === 'maxTAFSGenerateTime' ||
           obj.key === 'disableCrossBranchTA'
         )
       })
       filteredList?.forEach(obj => {
-        if (obj.key === 'disableCrossBranchTA') {
+        if (obj.key === 'disableCrossBranchTA' || obj.key === 'lastGenFSDayId' || obj.key === 'lastGenTATV') {
           myObject[obj.key] = obj.value || null
         } else if (
           obj.key === 'lastReceivedPunch' ||
           obj.key === 'lastProcessedPunch'
         ) {
           myObject[obj.key] = obj.value
-            ? formatDateFromApi(obj.value)
+            ? formatDateTimeFromApi(obj.value)
             : null
         } else {
           myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
@@ -75,7 +76,7 @@ const AttSettings = () => {
     initialValues: {
       caId: null,
       fdowCombo: null,
-      lastGenFSDateTime: null,
+      lastGenFSDayId: null,
       lastReceivedPunch: null,
       lastProcessedPunch: null,
       lastGenTATV: null,
@@ -86,22 +87,22 @@ const AttSettings = () => {
       punchSource: null,
       weeklyTAHours: null,
       prevDayTVTime: null,
-      disableCrossBranchTA: null
+      disableCrossBranchTA: null,
+      maxTAFSGenerateTime: null
     },
     validationSchema: yup.object().shape({
       prevDayTVTime: yup.number().min(7).max(15).nullable(),
-      minPunchInterval: yup.number().min(5).max(15).nullable()
+      minPunchInterval: yup.number().min(5).max(15).nullable(),
+      maxTAFSGenerateTime: yup.number().min(0).max(16).nullable()
     }),
     onSubmit: async obj => {
-      const data = Object.entries(obj).map(([key, value]) => ({
-        key,
-        value:
-          key === 'lastReceivedPunch' || key === 'lastProcessedPunch'
-            ? value
-              ? formatDateToApi(value)
-              : null
-            : value
-      }))
+      const readOnlyFields = ['lastGenFSDayId', 'lastReceivedPunch', 'lastProcessedPunch', 'lastGenTATV']
+
+      const data = Object.entries(obj)
+        .filter(([key]) => !readOnlyFields.includes(key)).map(([key, value]) => ({
+          key,
+          value
+        }))
 
       await postRequest({
         extension: SystemRepository.Defaults.set,
@@ -149,10 +150,10 @@ const AttSettings = () => {
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
-              name='lastGenFSDateTime'
+              name='lastGenFSDayId'
               readOnly
               label={labels.lastGenFSDateTime}
-              value={formik.values?.lastGenFSDateTime}
+              value={formatDayIdToDefault(formik.values?.lastGenFSDayId)}
               maxAccess={access}
             />
           </Grid>
@@ -178,7 +179,7 @@ const AttSettings = () => {
             <CustomTextField
               name='lastGenTATV'
               label={labels.lastGenTATV}
-              value={formik.values.lastGenTATV}
+              value={formatDayIdToDefault(formik.values.lastGenTATV)}
               maxAccess={access}
               readOnly
               onChange={formik.handleChange}
@@ -288,6 +289,19 @@ const AttSettings = () => {
               onChange={event => formik.setFieldValue('disableCrossBranchTA', event.target.checked)}
               label={labels.disableCrossBranchTA}
               maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='maxTAFSGenerateTime'
+              label={labels.maxTAFSGenerateTime}
+              value={formik.values.maxTAFSGenerateTime}
+              maxAccess={access}
+              decimalScale={0}
+              maxLength={2}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('maxTAFSGenerateTime', null)}
+              error={formik.touched.maxTAFSGenerateTime && Boolean(formik.errors.maxTAFSGenerateTime)}
             />
           </Grid>
         </Grid>

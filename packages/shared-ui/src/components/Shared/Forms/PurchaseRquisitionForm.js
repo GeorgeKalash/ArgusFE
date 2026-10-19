@@ -226,7 +226,10 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
-      type: 'number'
+      type: {
+        field: 'number',
+        decimal: 5
+      }
     },
     {
       field: 'deliveryDate',
@@ -592,10 +595,10 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
         <Fixed>
           <Grid container justifyContent='flex-end' spacing={2}>
             <Grid item>
-              <CustomNumberField name='totalQty' label={labels.totalQty} value={formik.values.totalQty} readOnly />
+              <CustomNumberField name='totalQty' label={labels.totalQty} value={formik.values.totalQty} readOnly maxAccess={maxAccess}/>
             </Grid>
             <Grid item>
-              <CustomNumberField name='totalCost' label={labels.totalCost} value={formik.values.totalCost} readOnly />
+              <CustomNumberField name='totalCost' label={labels.totalCost} value={formik.values.totalCost} readOnly maxAccess={maxAccess}/>
             </Grid>
           </Grid>
         </Fixed>

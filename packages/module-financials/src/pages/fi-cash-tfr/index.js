@@ -15,16 +15,18 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CashTransfersForm from './Forms/CashTransfersForm'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const FiCashTransfers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: CashBankRepository.CashTransfers.qry,
+      extension: CashBankRepository.CashTransfers.page,
       parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=reference desc&_pageSize=${_pageSize}&_params=${
         params || ''
       }`
@@ -54,7 +56,7 @@ const FiCashTransfers = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CashBankRepository.CashTransfers.qry,
+    endpointId: CashBankRepository.CashTransfers.page,
     datasetId: ResourceIds.CashTransfers,
     filter: {
       filterFn: fetchWithFilter
@@ -120,10 +122,18 @@ const FiCashTransfers = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.CashTransfers,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: CashTransfersForm,
       props: {
