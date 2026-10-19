@@ -1,4 +1,4 @@
-import { useContext, useRef } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -11,7 +11,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
-export default function BarcodesTable({ labels, maxAccess, onSelect, window }) {
+export default function BarcodesTable({ labels, maxAccess, onSelect, window, initialSearch = '', onSearchChange }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -76,6 +76,7 @@ export default function BarcodesTable({ labels, maxAccess, onSelect, window }) {
 
   async function onSearch(qry) {
     selectedRef.current = null
+    onSearchChange?.(qry || '')
 
     if (!qry) return formik.setFieldValue('rows', [])
 
@@ -90,6 +91,7 @@ export default function BarcodesTable({ labels, maxAccess, onSelect, window }) {
 
   const onClear = () => {
     selectedRef.current = null
+    onSearchChange?.('')
     formik.setFieldValue('rows', [])
   }
 
@@ -97,13 +99,19 @@ export default function BarcodesTable({ labels, maxAccess, onSelect, window }) {
     selectedRef.current = isChecked ? row : null
   }
 
+  useEffect(() => {
+    if (initialSearch) onSearch(initialSearch)
+  }, [])
+
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} fullSize>
       <VertLayout>
         <Fixed>
           <GridToolbar
             inputSearch
+            initialSearch={initialSearch}
             onSearch={onSearch}
+            onSearchChange={term => onSearchChange?.(term || '')}
             onSearchClear={onClear}
             labels={labels}
             maxAccess={maxAccess}
