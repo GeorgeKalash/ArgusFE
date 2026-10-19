@@ -62,9 +62,6 @@ export const FoundryRepository = {
     qry: service + 'qryCDA',
     set2: service + 'set2CDA'
   },
-  MetalScrap: {
-    qry: service + 'qryMSC'
-  },
   CastingJob: {
     qry: service + 'qryCAJ',
     set2: service + 'set2CAJ'
@@ -125,5 +122,14 @@ export const FoundryRepository = {
     del: service + 'delCUT',
     post: service + 'postCUT',
     unpost: service + 'unpostCUT'
+  },
+  ScrapAdjustment: {
+    page: service + 'pageSAJ',
+    snapshot: service + 'snapshotSAJ',
+    get2: service + 'get2SAJ',
+    set2: service + 'set2SAJ',
+    del: service + 'delSAJ',
+    post: service + 'postSAJ',
+    unpost: service + 'unpostSAJ'
   }
 }

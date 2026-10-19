@@ -674,6 +674,7 @@ export const ResourceIds = {
   Budget: 42145,
   Calendar: 72106,
   PM_Budget: 48105,
+  ScrapAdjustment: 47319,
 
   // GL
   GLSalesInvoice: 51604,
