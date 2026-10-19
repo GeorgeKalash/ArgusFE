@@ -34,13 +34,14 @@ const GridToolbar = ({
   actions = [],
   previewReport,
   disableActionsPadding,
+  initialSearch = '',
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess?.record?.accessFlags
   const addBtnVisible = onAdd && maxAccess && maxAccess[accessMap[TrxType.ADD]]
 
   const { getRequest } = useContext(RequestsContext)
-  const [searchValue, setSearchValue] = useState('')
+  const [searchValue, setSearchValue] = useState(initialSearch)
   const { platformLabels } = useContext(ControlContext)
   const [reportStore, setReportStore] = useState([])
 

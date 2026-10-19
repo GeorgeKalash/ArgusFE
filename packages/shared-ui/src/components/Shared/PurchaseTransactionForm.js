@@ -88,6 +88,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   const [reCal, setReCal] = useState(false)
   const { stack: stackError } = useError()
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
+  const lastBarcodeSearch = useRef('')
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
@@ -509,6 +510,10 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
           props: {
             labels,
             maxAccess,
+            initialSearch: lastBarcodeSearch.current,
+            onSearchChange: term => {
+              lastBarcodeSearch.current = term || ''
+            },
             onSelect: selected => {
               if (!selected?.barcode) return
 
