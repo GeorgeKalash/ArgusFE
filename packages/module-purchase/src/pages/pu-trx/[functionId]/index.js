@@ -61,8 +61,8 @@ const PuTrx = () => {
     queryFn: fetchGridData,
     endpointId:
       parseFloat(functionId) === SystemFunction.PurchaseInvoice
-        ? PurchaseRepository.PurchaseInvoiceHeader.qry
-        : PurchaseRepository.PurchaseReturnHeader.qry,
+        ? PurchaseRepository.PurchaseInvoiceHeader.page
+        : PurchaseRepository.PurchaseReturnHeader.page,
     datasetId: ResourceIds.PurchaseInvoice,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
@@ -155,8 +155,8 @@ const PuTrx = () => {
     const response = await getRequest({
       extension:
         parseFloat(functionId) === SystemFunction.PurchaseInvoice
-          ? PurchaseRepository.PurchaseInvoiceHeader.qry
-          : PurchaseRepository.PurchaseReturnHeader.qry,
+          ? PurchaseRepository.PurchaseInvoiceHeader.page
+          : PurchaseRepository.PurchaseReturnHeader.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&&_params=${params}`
     })
 

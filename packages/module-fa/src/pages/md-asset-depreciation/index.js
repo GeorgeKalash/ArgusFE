@@ -14,8 +14,8 @@ import { FixedAssetsRepository } from '@argus/repositories/src/repositories/Fixe
 import AssetsForm from './form/AssetsForm'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 const AssetsDescription = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -26,7 +26,7 @@ const AssetsDescription = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: FixedAssetsRepository.AssetsDescription.qry,
+      extension: FixedAssetsRepository.AssetsDescription.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}`
     })
 
@@ -37,13 +37,13 @@ const AssetsDescription = () => {
     query: { data },
     filterBy,
     refetch,
-    labels: _labels,
+    labels,
     access,
     paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FixedAssetsRepository.AssetsDescription.snapshot,
+    endpointId: FixedAssetsRepository.AssetsDescription.page,
     datasetId: ResourceIds.Depreciation,
     filter: {
       filterFn: fetchWithFilter
@@ -64,28 +64,28 @@ const AssetsDescription = () => {
   const columns = [
     {
       field: 'dtName',
-      headerName: _labels.dtName,
+      headerName: labels.dtName,
       flex: 1
     },
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'date',
-      headerName: _labels.date,
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
       field: 'plantName',
-      headerName: _labels.plantName,
+      headerName: labels.plantName,
       flex: 1
     },
     {
       field: 'statusName',
-      headerName: _labels.status,
+      headerName: labels.status,
       type: 'badge',
       family: 'document',
       valueField: 'status',
@@ -93,7 +93,7 @@ const AssetsDescription = () => {
     },
     {
       field: 'wipName',
-      headerName: _labels.wip,
+      headerName: labels.wip,
       type: 'badge',
       family: 'wip',
       valueField: 'wip',
@@ -101,7 +101,7 @@ const AssetsDescription = () => {
     },
     {
       field: 'notes',
-      headerName: _labels.notes,
+      headerName: labels.notes,
       flex: 1
     }
   ]
@@ -118,13 +118,13 @@ const AssetsDescription = () => {
     stack({
       Component: AssetsForm,
       props: {
-        labels: _labels,
+        labels,
         recordId,
         maxAccess: access
       },
       width: 1200,
       height: 660,
-      title: _labels.assetD
+      title: labels.assetD
     })
   }
 
