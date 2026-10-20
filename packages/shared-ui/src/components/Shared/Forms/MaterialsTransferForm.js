@@ -8,6 +8,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -44,6 +45,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const filteredMeasurements = useRef([])
+  const [reCal, setReCal] = useState(false)
 
   const [measurements, setMeasurements] = useState([])
   const serials = useRef([])
@@ -314,20 +316,24 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
   }, [formik.values?.dtId])
 
-  const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
-    (acc, row) => {
-      const qtyValue = row?.qty || 0
-      const totalCostValue = row?.totalCost || 0
-      const weightValue = row?.weight || 0
-
-      return {
-        totalQty: acc?.totalQty + qtyValue,
-        totalCost: roundTo(Math.round((acc?.totalCost + totalCostValue) * 100) / 100),
-        totalWeight: acc?.totalWeight + weightValue
-      }
-    },
+  const computed = (formik.values.transfers || []).reduce(
+    (acc, row) => ({
+      totalQty: acc.totalQty + (Number(row?.qty) || 0),
+      totalCost: acc.totalCost + (Number(row?.totalCost) || 0),
+      totalWeight: acc.totalWeight + (Number(row?.qty) || 0) * (Number(row?.weight) || 0)
+    }),
     { totalQty: 0, totalCost: 0, totalWeight: 0 }
   )
+
+  const totalQty = reCal ? computed.totalQty : formik.values.qty || 0
+  const totalCost = reCal ? computed.totalCost : formik.values.totalCost || 0
+  const totalWeight = reCal ? computed.totalWeight : formik.values.weight || 0
+
+  useEffect(() => {
+    formik.setFieldValue('qty', roundTo(totalQty, 5))
+    formik.setFieldValue('totalCost', roundTo(totalCost))
+    formik.setFieldValue('weight', roundTo(totalWeight))
+  }, [totalQty, totalCost, totalWeight])
 
   const getMeasurementUnits = async () => {
     return await getRequest({
@@ -389,6 +395,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
       getFilteredMU(itemIdValue)
       const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
       const measurementSchedule = await getMeasurementObject(newRow?.msId)
+
+      setReCal(true)
 
       const data = {
         qty: jumpToNextLine ? 1 : 0,
@@ -589,7 +597,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         if (newRow) {
           const totalCost = calcTotalCost(newRow)
           const qtyInBase = newRow?.muQty ? newRow.qty * newRow.muQty : newRow?.qty
-
+          setReCal(true)
           update({
             totalCost,
             qtyInBase
@@ -1313,13 +1321,14 @@ export default function MaterialsTransferForm({ recordId, window }) {
             </Grid>
           </Grid>
           <DataGrid
-            onChange={value => {
+            onChange={(value, action) => {
               const data = value?.map(transfer => ({
                 ...transfer,
                 qtyInBase: transfer.muQty ? transfer.qty * transfer.muQty : transfer.qty
               }))
 
               formik.setFieldValue('transfers', data)
+              if (action === 'delete') setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId)
@@ -1342,28 +1351,29 @@ export default function MaterialsTransferForm({ recordId, window }) {
           <Grid container direction='row' wrap='nowrap' sx={{ justifyContent: 'space-between' }}>
             <Grid container xs={3} direction='column' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-start' }}>
               <Grid item xs={3}>
-                <CustomTextField
+                <CustomNumberField
                   name='totalQty'
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(roundTo(totalQty))}
+                  value={totalQty}
                   label={labels.totalQty}
+                  decimalScale={5}
                   readOnly
                 />
               </Grid>
               <Grid item xs={3} sx={{ mt: 2 }}>
-                <CustomTextField
+                <CustomNumberField
                   name='totalCost'
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(roundTo(totalCost))}
+                  value={totalCost}
                   label={labels.totalCost}
                   readOnly
                 />
               </Grid>
               <Grid item xs={3} sx={{ mt: 2 }}>
-                <CustomTextField
+                <CustomNumberField
                   name='totalWeight'
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(roundTo(totalWeight))}
+                  value={totalWeight}
                   label={labels.totalWeight}
                   readOnly
                 />
