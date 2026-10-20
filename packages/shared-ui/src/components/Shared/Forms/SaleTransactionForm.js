@@ -71,6 +71,7 @@ import FIReceiptVoucherForm from './FIReceiptVoucherForm'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 export default function SaleTransactionForm({
   recordId,
@@ -92,15 +93,7 @@ export default function SaleTransactionForm({
   const [reCal, setReCal] = useState(false)
   const muStoreByRowRef = useRef({})
   const [taxDetails, setTaxDetails] = useState([])
-  const [store, setStore] = useState({
-    documentTypes: [],
-    plants: [],
-    currencies: [],
-    salesPeople: [],
-    sites: [],
-    saleZones: [],
-    taxSchedules: []
-  })
+  const { combosStore } = useComboStore(SaleRepository.SaleTransaction.pack, {parameters: `_functionId=${functionId}`})
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.SalesInvoice,
@@ -1908,23 +1901,6 @@ export default function SaleTransactionForm({
     }
   }
 
-  async function fillCombos() {
-    const res = await getRequest({
-      extension: SaleRepository.SaleTransaction.pack,
-      parameters: `_functionId=${functionId}`
-    })
-
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      plants: res?.record?.plants || [],
-      currencies: res?.record?.currencies?.filter(item => item.currencyType === 1) || [],
-      salesPeople: res?.record?.salesPeople?.filter(item => !item.isInactive) || [],
-      sites: res?.record?.sites || [],
-      saleZones: res?.record?.saleZones || [],
-      taxSchedules: res?.record?.taxSchedules || [],
-    })
-  }
-
   useEffect(() => {
     formik.setFieldValue('header.qty', roundTo(totalQty))
     formik.setFieldValue('header.weight', roundTo(totalWeight))
@@ -1958,7 +1934,6 @@ export default function SaleTransactionForm({
 
   useEffect(() => {
     ;(async function () {
-      await fillCombos()
       const res = await getPackData()
       setTaxDetails(res?.taxDetails || [])
       setMeasurements(res?.measurementUnits)
@@ -2068,7 +2043,7 @@ export default function SaleTransactionForm({
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}                          
-                store={store?.documentTypes}
+                store={combosStore?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 readOnly={editMode || formik.values.items?.some(item => item.sku)}
@@ -2099,7 +2074,7 @@ export default function SaleTransactionForm({
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SaleRepository.SalesPerson.qry}
-                store={store?.salesPeople}
+                store={combosStore?.salesPeople}
                 name='header.spId'
                 readOnly={isPosted}
                 label={labels.salesPerson}
@@ -2122,7 +2097,7 @@ export default function SaleTransactionForm({
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
-                store={store?.plants}
+                store={combosStore?.plants}
                 name='header.plantId'
                 label={labels.plant}
                 columnsInDropDown={[
@@ -2144,7 +2119,7 @@ export default function SaleTransactionForm({
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
-                store={store?.currencies}
+                store={combosStore?.currencies}
                 name='header.currencyId'
                 label={labels.currency}
                 filter={item => item.currencyType == 1}
@@ -2213,7 +2188,7 @@ export default function SaleTransactionForm({
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
                 triggerOnDefault={formik.values.header.siteId && !formik.values.header.siteRef}
-                store={store?.sites}
+                store={combosStore?.sites}
                 name='header.siteId'
                 label={labels.site}
                 columnsInDropDown={[
@@ -2254,7 +2229,7 @@ export default function SaleTransactionForm({
               <ResourceComboBox
                 endpointId={SaleRepository.SalesZone.qry}
                 parameters={`_startAt=0&_pageSize=1000&_sortField=recordId&_filter=`}
-                store={store?.saleZones}
+                store={combosStore?.saleZones}
                 name='header.szId'
                 label={labels.saleZone}
                 readOnly={isPosted}
@@ -2344,7 +2319,7 @@ export default function SaleTransactionForm({
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={FinancialRepository.TaxSchedules.qry}
-                store={store?.taxSchedules}
+                store={combosStore?.taxSchedules}
                 name='header.taxId'
                 label={labels.tax}
                 valueField='recordId'

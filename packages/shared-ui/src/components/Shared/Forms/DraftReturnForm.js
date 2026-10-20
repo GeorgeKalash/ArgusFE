@@ -38,6 +38,7 @@ import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 export default function DraftReturnForm({ labels, access, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -47,15 +48,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const [reCal, setReCal] = useState(false)
   const taxDetailsCacheRef = useRef(null)
-  const [store, setStore] = useState({
-    documentTypes: [],
-    sites: [],
-    currencies: [],
-    plants: [],
-    salesPeople: [],
-    taxes: [],
-    returnReasons: []
-  })
+  const { combosStore } = useComboStore(SaleRepository.DraftReturn.pack)
   
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftInvoiceReturn,
@@ -862,7 +855,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     formik.setFieldValue('header.amount', amount)
   }, [weight, subTotal, vatAmount, amount])
 
-  async function fillCombos() {
+  async function fillTaxDetails() {
     if (taxDetailsCacheRef.current) return
 
     const res = await getRequest({
@@ -871,15 +864,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     })
 
     taxDetailsCacheRef.current = res?.record?.taxDetails || []
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      sites: res?.record?.sites || [],
-      currencies: res?.record?.currencies?.filter(item => item.currencyType === 1) || [],
-      plants: res?.record?.plants || [],
-      salesPeople: res?.record?.salesPeople || [],
-      taxes: res?.record?.taxes || [],
-      returnReasons: res?.record?.returnReasons || []
-    })
   }
 
   useEffect(() => {
@@ -888,8 +872,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         stackError({
           message: labels.noSelectedplId
         })
-
-      await fillCombos()
+      await fillTaxDetails()
       if (formik?.values?.recordId) await refetchForm(formik?.values?.recordId)
     })()
   }, [])
@@ -1019,7 +1002,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_dgId=${SystemFunction.DraftInvoiceReturn}&_startAt=0&_pageSize=1000`}     
-                store={store?.documentTypes}
+                store={combosStore?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 label={labels.documentType}
@@ -1043,7 +1026,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
-                store={store?.sites}
+                store={combosStore?.sites}
                 name='header.siteId'
                 readOnly={isClosed}
                 label={labels.site}
@@ -1072,7 +1055,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
-                store={store?.currencies}
+                store={combosStore?.currencies}
                 filter={item => item.currencyType === 1}
                 name='header.currencyId'
                 label={labels.currency}
@@ -1111,7 +1094,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
-                    store={store?.plants}
+                    store={combosStore?.plants}
                     name='header.plantId'
                     label={labels.plant}
                     readOnly
@@ -1171,7 +1154,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesPerson.qry}
-                    store={store?.salesPeople}
+                    store={combosStore?.salesPeople}
                     name='header.spId'
                     required
                     label={labels.salesPerson}
@@ -1193,7 +1176,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={FinancialRepository.TaxSchedules.qry}
-                    store={store?.taxes}
+                    store={combosStore?.taxes}
                     name='header.taxId'
                     label={labels.tax}
                     valueField='recordId'
@@ -1295,7 +1278,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 <Grid item xs={5.8}>
                   <ResourceComboBox
                     endpointId={SaleRepository.ReturnReasons.qry}
-                    store={store?.returnReasons}
+                    store={combosStore?.returnReasons}
                     name='header.returnReasonId'
                     label={labels.reason}
                     valueField='recordId'

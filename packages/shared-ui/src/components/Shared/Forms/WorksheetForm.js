@@ -27,8 +27,9 @@ import DamageForm from '@argus/shared-ui/src/components/Shared/Forms/DamageForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
+
 export default function WorksheetForm({ labels, maxAccess: access, setStore, store, joInvalidate }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -37,12 +38,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
   const functionId = SystemFunction.Worksheet
   const resourceId = ResourceIds.Worksheet
   const editMode = !!recordId
-  const [comboStore, setComboStore] = useState({
-    documentTypes: [],
-    workCenters: [],
-    sites: [],
-    shifts: []
-  })
+  const { combosStore } = useComboStore(ManufacturingRepository.Worksheet.pack)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
@@ -157,25 +153,8 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
     })
   }
 
-  async function fillCombos() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.Worksheet.pack,
-      parameters: ``
-    })
-    
-    setComboStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      workCenters: res?.record?.workCenters || [],
-      sites: res?.record?.sites || [],
-      shifts: res?.record?.shifts || []
-    })
-  }
-
   useEffect(() => {
-    ;(async function () {
-      await fillCombos()
-      recordId && (await getData(recordId))
-    })()
+    if(recordId) getData(recordId)
   }, [])
 
   const isPosted = formik.values.status === 3
@@ -314,7 +293,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}  
-                    store={comboStore?.documentTypes}
+                    store={combosStore?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
@@ -408,7 +387,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={ManufacturingRepository.WorkCenter.qry}
-                        store={comboStore?.workCenters}
+                        store={combosStore?.workCenters}
                         name='workCenterId'
                         label={labels.workCenter}
                         readOnly
@@ -553,7 +532,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={InventoryRepository.Site.qry}
-                        store={comboStore?.sites}
+                        store={combosStore?.sites}
                         name='siteId'
                         label={labels.site}
                         required
@@ -667,7 +646,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.ProductionShifts.qry}
-                    store={comboStore?.shifts}
+                    store={combosStore?.shifts}
                     name='shiftId'
                     label={labels.shift}
                     maxAccess={maxAccess}

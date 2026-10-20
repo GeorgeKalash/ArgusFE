@@ -31,6 +31,7 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 export default function InboundTranspForm({ labels, maxAccess: access, recordId }) {
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -39,12 +40,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     const { stack } = useWindow()
     const { stack: stackError } = useError()
     const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value) || null
-    const [store, setStore] = useState({
-      documentTypes: [],
-      plants: [],
-      drivers: [],
-      vehicles: []
-    })
+    const { combosStore } = useComboStore(DeliveryRepository.InboundTransp.pack)
 
     const { documentType, maxAccess, changeDT } = useDocumentType({
         functionId: SystemFunction.InboundTransportation,
@@ -389,25 +385,8 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     }))
    }
 
-   const fillCombos = async () => {
-    const res = await getRequest({
-      extension: DeliveryRepository.InboundTransp.pack,
-      parameters: ``
-    })
-
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus == 1) || [],
-      plants: res?.record?.plants || [],
-      drivers: res?.record?.drivers || [],
-      vehicles: res?.record?.vehicles || []
-    })
-   }
-
     useEffect(() => {
-      ;(async function () {
-        await fillCombos()
-        if (recordId) refetchForm(recordId)
-      })()
+      if (recordId) refetchForm(recordId)
     }, [])
 
     return (
@@ -431,7 +410,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                             <ResourceComboBox
                                 endpointId={SystemRepository.DocumentType.qry}
                                 parameters={`_dgId=${SystemFunction.InboundTransportation}&_startAt=0&_pageSize=1000`}
-                                store={store?.documentTypes}
+                                store={combosStore?.documentTypes}
                                 filter={!editMode ? item => item.activeStatus == 1 : undefined}
                                 name='dtId'
                                 label={labels.docType}
@@ -481,7 +460,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                         <Grid item xs={4}>
                             <ResourceComboBox
                                 endpointId={SystemRepository.Plant.qry}
-                                store={store?.plants}
+                                store={combosStore?.plants}
                                 name='plantId'
                                 label={labels.plant}
                                 valueField='recordId'
@@ -529,7 +508,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                         <Grid item xs={4}>
                             <ResourceComboBox
                                 endpointId={DeliveryRepository.Driver.qry}
-                                store={store?.drivers}
+                                store={combosStore?.drivers}
                                 name='driverId'
                                 label={labels.driver}
                                 valueField='recordId'
@@ -572,7 +551,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                         <Grid item xs={4}>
                             <ResourceComboBox
                                 endpointId={DeliveryRepository.Vehicle.qry}
-                                store={store?.vehicles}
+                                store={combosStore?.vehicles}
                                 name='vehicleId'
                                 label={labels.vehicle}
                                 valueField='recordId'

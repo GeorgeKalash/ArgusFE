@@ -37,23 +37,15 @@ import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLi
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
+
 export default function FIReceiptVoucherForm({ header, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
-  const [store, setStore] = useState({
-    documentTypes: [],
-    plants: [],
-    salesPeople: [],
-    paymentMethods: [],
-    cashAccounts: [],
-    currencies: [],
-    collectors: [],
-    descriptionTemplates: []
-  })
+  const { combosStore } = useComboStore(FinancialRepository.ReceiptVouchers.pack)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.ReceiptVoucher,
@@ -249,28 +241,8 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
     return res?.record?.balance
   }
 
-  async function fillCombos() {
-    const res = await getRequest({
-      extension: FinancialRepository.ReceiptVouchers.pack,
-      parameters: ``
-    })
-    
-    const targetType = formik.values.paymentMethod == 2 ? 1 : 2
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      plants: res?.record?.plants || [],
-      salesPeople: res?.record?.salesPeople || [],
-      paymentMethods: res?.record?.paymentMethods || [],
-      cashAccounts: res?.record?.cashAccounts?.filter(item => Number(item.type) == targetType) || [],
-      currencies: res?.record?.currencies?.filter(item => item.currencyType === 1) || [],
-      collectors: res?.record?.collectors || [],
-      descriptionTemplates: res?.record?.descriptionTemplates || []
-    })
-  }
-
   useEffect(() => {
     ;(async function () {
-      await fillCombos()
       if (recordId) {
         await getData(recordId)
       } else {
@@ -463,7 +435,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_dgId=${SystemFunction.ReceiptVoucher}&_startAt=0&_pageSize=1000`}  
-                store={store?.documentTypes}
+                store={combosStore?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
@@ -512,7 +484,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
-                store={store?.plants}
+                store={combosStore?.plants}
                 name='plantId'
                 readOnly={isCancelled || isPosted}
                 label={labels.plant}
@@ -574,7 +546,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SaleRepository.SalesPerson.qry}
-                store={store?.salesPeople}
+                store={combosStore?.salesPeople}
                 name='spId'
                 readOnly={!formik.values.accountId || isCancelled || isPosted}
                 label={labels.salePerson}
@@ -596,7 +568,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.PAYMENT_METHOD}
-                store={store?.paymentMethods}
+                store={combosStore?.paymentMethods}
                 name='paymentMethod'
                 readOnly={isCancelled || isPosted}
                 label={labels.receiptMethod}
@@ -634,7 +606,8 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
               <ResourceComboBox
                 endpointId={CashBankRepository.CashAccount.qry}
                 parameters={formik.values.paymentMethod == 2 ? `_type=1` : `_type=2` }
-                store={store?.cashAccounts}
+                store={combosStore?.cashAccounts}
+                filter={item => item.type == (formik.values.paymentMethod == 2 ? 1 : 2)}         
                 name='cashAccountId'
                 readOnly={isCancelled || isPosted}
                 required
@@ -682,7 +655,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
                 <Grid item xs={7}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
-                    store={store?.currencies}
+                    store={combosStore?.currencies}
                     name='currencyId'
                     readOnly={isCancelled || isPosted}
                     required
@@ -773,7 +746,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={LogisticsRepository.LoCollector.qry}
-                store={store?.collectors}
+                store={combosStore?.collectors}
                 name='collectorId'
                 readOnly={isCancelled || isPosted}
                 label={labels.collector}
@@ -795,7 +768,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
               <ResourceComboBox
                 neverPopulate={true}
                 endpointId={FinancialRepository.DescriptionTemplate.qry}
-                store={store?.descriptionTemplates}
+                store={combosStore?.descriptionTemplates}
                 name='templateId'
                 label={labels.descriptionTemplate}
                 readOnly={isCancelled || isPosted}

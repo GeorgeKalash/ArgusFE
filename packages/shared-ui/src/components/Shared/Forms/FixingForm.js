@@ -36,6 +36,7 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 export default function FixingForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -47,13 +48,15 @@ export default function FixingForm({ recordId, functionId, window }) {
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
   const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
   const maxDiscount = systemDefaults?.list?.find(obj => obj.key === 'bt_max_discount')?.value || null
-  const [store, setStore] = useState({
-    documentTypes: [],
-    plants: [],
-    currencies: [],
-    commodityPairs: [],
-    measurementUnits: [],
-    salesOrderSources: []
+  const { combosStore } = useComboStore(BrokerageTradingRepository.Fixing.pack, {
+    parameters: `_dgId=${functionId}&_msId=${msId}`,
+    transform: record => ({
+      ...record,
+      commodityPairs: (record?.commodityPairs || []).map(item => ({
+        ...item,
+        recordId: `${item.currencyId}${item.metalId}`
+      }))
+    })
   })
   
   const getResourceId = functionId => {
@@ -235,30 +238,8 @@ export default function FixingForm({ recordId, functionId, window }) {
     })
   }
 
-  async function fillCombos() {
-    const res = await getRequest({
-      extension: BrokerageTradingRepository.Fixing.pack,
-      parameters: `_dgId=${functionId}&_msId=${msId}`
-    })
-
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      plants: res?.record?.plants || [],
-      currencies: res?.record?.currencies?.filter(item => item.currencyType === 1) || [],
-      commodityPairs: (res?.record?.commodityPairs || []).map(item => ({
-        ...item,
-        recordId: `${item.currencyId}${item.metalId}`
-      })),
-      measurementUnits: res?.record?.measurementUnits || [],
-      salesOrderSources: res?.record?.salesOrderSources || [],
-    })
-  }
-
   useEffect(() => {
-    ;(async function () {
-      await fillCombos()
-      if (recordId) refetchForm(recordId)
-    })()
+    if (recordId) refetchForm(recordId)
   }, [])
 
   async function getMetalPurity(metalId) {
@@ -536,7 +517,7 @@ useEffect(() => {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}  
-                store={store?.documentTypes}
+                store={combosStore?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.docType}
@@ -556,7 +537,7 @@ useEffect(() => {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
-                store={store?.plants}
+                store={combosStore?.plants}
                 name='plantId'
                 label={labels.plant}
                 valueField='recordId'
@@ -596,7 +577,7 @@ useEffect(() => {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
-                store={store?.currencies}
+                store={combosStore?.currencies}
                 name='fi_currencyId'
                 filter={item => item.currencyType === 1}
                 label={labels.currency}
@@ -729,7 +710,7 @@ useEffect(() => {
                       label={labels.cmp}
                       valueField='recordId'
                       displayField={['metalRef', 'currencyRef']}
-                      store={store?.commodityPairs}
+                      store={combosStore?.commodityPairs}
                       columnsInDropDown={[
                         { key: 'metalRef', value: 'Metal Reference' },
                         { key: 'currencyRef', value: 'Currency Reference' }
@@ -804,7 +785,7 @@ useEffect(() => {
                     <ResourceComboBox
                       endpointId={msId && InventoryRepository.MeasurementUnit.qry}
                       parameters={msId && `_msId=${msId}`}
-                      store={store?.measurementUnits}
+                      store={combosStore?.measurementUnits}
                       name='qty_muId'
                       label={labels.mu}
                       valueField='recordId'
@@ -915,7 +896,7 @@ useEffect(() => {
                     <ResourceComboBox
                       endpointId={msId && InventoryRepository.MeasurementUnit.qry}
                       parameters={msId && `_msId=${msId}`}
-                      store={store?.measurementUnits}
+                      store={combosStore?.measurementUnits}
                       name='unitPrice_muId'
                       label={labels.mu}
                       valueField='recordId'
@@ -958,7 +939,7 @@ useEffect(() => {
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={SaleRepository.SalesOrderSource.qry}
-                      store={store?.salesOrderSources}
+                      store={combosStore?.salesOrderSources}
                       name='sourceId'
                       label={labels.source}
                       valueField='recordId'

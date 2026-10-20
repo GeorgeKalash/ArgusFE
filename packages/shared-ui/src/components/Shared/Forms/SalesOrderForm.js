@@ -54,6 +54,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -68,16 +69,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const [reCal, setReCal] = useState(false)
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
   const taxDetailsCacheRef = useRef({})
-  const [store, setStore] = useState({
-    documentTypes: [],
-    salesPeople: [],
-    currencies: [],
-    plants: [],
-    taxSchedules: [],
-    sites: [],
-    saleZones: [],
-    sources: []
-  })
+  const { combosStore } = useComboStore(SaleRepository.SalesOrder.pack)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.SalesOrder,
@@ -1283,21 +1275,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     })
   }
 
-  const fillCombos = async () => {
+  const fillTaxAndMeasurements = async () => {
     const res = await getRequest({
       extension: SaleRepository.SalesOrder.pack,
       parameters: ``
-    })
-
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      salesPeople: res?.record?.salesPeople?.filter(item => editMode || !item.isInactive) || [],
-      currencies: res?.record?.currencies || [],
-      plants: res?.record?.plants || [],
-      taxSchedules: res?.record?.taxSchedules || [],
-      sites: res?.record?.sites || [],
-      saleZones: res?.record?.saleZones || [],
-      sources: res?.record?.sources || []
     })
 
     const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
@@ -1396,7 +1377,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   useEffect(() => {
     ;(async function () {
-      const muList = await fillCombos()
+      const muList = await fillTaxAndMeasurements()
       setMeasurements(muList)
       const defaultValues = await getDefaultData()
       if (recordId) {
@@ -1458,7 +1439,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${SystemFunction.SalesOrder}&_startAt=0&_pageSize=1000`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
-                    store={store?.documentTypes}
+                    store={combosStore?.documentTypes}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -1481,7 +1462,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesPerson.qry}
                     filter={!editMode ? item => !item.isInactive : undefined}
-                    store={store?.salesPeople}
+                    store={combosStore?.salesPeople}
                     name='spId'
                     label={labels.salesPerson}
                     columnsInDropDown={[
@@ -1503,7 +1484,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
-                    store={store?.currencies}
+                    store={combosStore?.currencies}
                     name='currencyId'
                     label={labels.currency}
                     valueField='recordId'
@@ -1553,7 +1534,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
-                    store={store?.plants}
+                    store={combosStore?.plants}
                     name='plantId'
                     label={labels.plant}
                     readOnly={isClosed}
@@ -1660,7 +1641,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={FinancialRepository.TaxSchedules.qry}
-                store={store?.taxSchedules}
+                store={combosStore?.taxSchedules}
                 name='taxId'
                 label={labels.tax}
                 valueField='recordId'
@@ -1681,7 +1662,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
-                store={store?.sites}
+                store={combosStore?.sites}
                 name='siteId'
                 readOnly={isClosed}
                 label={labels.site}
@@ -1706,7 +1687,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
               <ResourceComboBox
                 endpointId={SaleRepository.SalesZone.qry}
                 parameters={`_startAt=0&_pageSize=1000&_sortField=recordId&_filter=`}
-                store={store?.saleZones}
+                store={combosStore?.saleZones}
                 name='szId'
                 label={labels.saleZone}
                 valueField='recordId'
@@ -1800,7 +1781,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                   <Grid item xs={6}>
                     <ResourceComboBox
                       endpointId={SaleRepository.SalesOrderSource.qry}
-                      store={store?.sources}
+                      store={combosStore?.sources}
                       name='sourceId'
                       label={labels.source}
                       valueField='recordId'

@@ -27,8 +27,9 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
+
 export default function PurityAdjForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -37,13 +38,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   const [recalc, setRecalc] = useState(false)
   const skuStoreByRowRef = useRef({})
   const functionId = SystemFunction.PurityAdjustment
-  const [store, setStore] = useState({
-    documentTypes: [],
-    plants: [],
-    sites: [],
-    workCenters: [],
-    metals: []
-  })
+  const { combosStore, setCombosStore } = useComboStore(FoundryRepository.PurityAdjustment.combos)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
@@ -299,9 +294,9 @@ const calculateTotal = key =>
         return {
           ...props,
           readOnly: !!row.itemId,
-          store: store.metals,
+          store: combosStore.metals,
           onRefreshed: list => {
-           setStore(prev => ({
+           setCombosStore(prev => ({
               ...prev,
               metals: list
             }))
@@ -521,21 +516,6 @@ const calculateTotal = key =>
     return res?.record || {}
   }
 
-  const fillCombos = async () => {
-    const res = await getRequest({
-      extension: FoundryRepository.PurityAdjustment.combos,
-      parameters: ``
-    })
-
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus == 1) || [],
-      plants: res?.record?.plants || [],
-      sites: res?.record?.sites || [],
-      workCenters: res?.record?.workCenters || [],
-      metals: res?.record?.metals || []
-    })
-  }
-
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
@@ -559,7 +539,6 @@ const calculateTotal = key =>
   useEffect(() => {
     ;(async function () {
       await getAllMetals()
-      await fillCombos()
       if (recordId) refetchForm(recordId)
     })()
   }, [])
@@ -584,7 +563,7 @@ const calculateTotal = key =>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}
-                    store={store?.documentTypes}
+                    store={combosStore?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
@@ -633,7 +612,7 @@ const calculateTotal = key =>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
-                    store={store?.plants}
+                    store={combosStore?.plants}
                     name='header.plantId'
                     readOnly={editMode}
                     required
@@ -655,7 +634,7 @@ const calculateTotal = key =>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
-                    store={store?.sites}
+                    store={combosStore?.sites}
                     name='header.siteId'
                     label={labels.site}
                     columnsInDropDown={[
@@ -675,7 +654,7 @@ const calculateTotal = key =>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.WorkCenter.qry}
-                    store={store?.workCenters}
+                    store={combosStore?.workCenters}
                     name='header.workCenterId'
                     label={labels.workCenter}
                     valueField='recordId'

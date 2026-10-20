@@ -31,6 +31,7 @@ import FormGrid from '@argus/shared-ui/src/components/form'
 import Samples from '@argus/shared-ui/src/components/Shared/JobOrderPages/Samples'
 import SerialsLots from '@argus/shared-ui/src/components/Shared/JobOrderPages/SerialsLots'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 export default function JobOrderForm({
   labels,
@@ -50,17 +51,7 @@ export default function JobOrderForm({
   const recordId = store?.recordId
   const [imageSource, setImageSource] = useState(null)
   const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
-  const [comboStore, setComboStore] = useState({
-    documentTypes: [],
-    plants: [],
-    itemSizes: [],
-    productionLines: [],
-    productionClasses: [],
-    productionStandards: [],
-    jobCategories: [],
-    categories: [],
-    salesPeople: []
-  })
+  const { combosStore } = useComboStore(ManufacturingRepository.MFJobOrder.pack)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -609,25 +600,6 @@ export default function JobOrderForm({
     }
   }
 
-  const fillCombos = async () => {
-    const res = await getRequest({
-      extension: ManufacturingRepository.MFJobOrder.pack,
-      parameters: ``
-    })
-
-    setComboStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      plants: res?.record?.plants || [],
-      itemSizes: res?.record?.itemSizes || [], 
-      productionLines: res?.record?.productionLines || [],
-      productionClasses: res?.record?.productionClasses || [],
-      productionStandards: res?.record?.productionStandards || [],
-      jobCategories: res?.record?.jobCategories || [],
-      categories: res?.record?.categories || [],
-      salesPeople: res?.record?.salesPeople || []
-    })
-  }
-
   useEffect(() => {
     ;(async function () {
       if (!editMode)
@@ -651,7 +623,6 @@ export default function JobOrderForm({
 
   useEffect(() => {
     ;(async function () {
-      await fillCombos()
       const res = await getRequest({
         extension: SystemRepository.Defaults.get,
         parameters: `_filter=&_key=mf_jo_pic_source`
@@ -682,7 +653,7 @@ export default function JobOrderForm({
                 <ResourceComboBox
                   endpointId={SystemRepository.DocumentType.qry}
                   parameters={`_dgId=${SystemFunction.JobOrder}&_startAt=0&_pageSize=1000`} 
-                  store={comboStore?.documentTypes}
+                  store={combosStore?.documentTypes || []}
                   filter={!editMode ? item => item.activeStatus === 1 : undefined}
                   name='dtId'
                   label={labels.documentType}
@@ -767,7 +738,7 @@ export default function JobOrderForm({
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={SystemRepository.Plant.qry}
-                        store={comboStore?.plants}
+                        store={combosStore?.plants}
                         name='plantId'
                         label={platformLabels.plant}
                         valueField='recordId'
@@ -819,7 +790,7 @@ export default function JobOrderForm({
                     <Grid item>
                       <ResourceComboBox
                         endpointId={InventoryRepository.ItemSizes.qry}
-                        store={comboStore?.itemSizes}
+                        store={combosStore?.itemSizes}
                         name='sizeId'
                         label={labels.size}
                         readOnly={isCancelled || isReleased || isPosted}
@@ -955,7 +926,7 @@ export default function JobOrderForm({
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={ManufacturingRepository.ProductionLine.qry}
-                        store={comboStore?.productionLines}
+                        store={combosStore?.productionLines}
                         name='lineId'
                         label={labels.line}
                         values={formik.values}
@@ -1048,7 +1019,7 @@ export default function JobOrderForm({
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={ManufacturingRepository.ProductionClass.qry}
-                        store={comboStore?.productionClasses}
+                        store={combosStore?.productionClasses}
                         values={formik.values}
                         name='classId'
                         label={labels.productionClass}
@@ -1065,7 +1036,7 @@ export default function JobOrderForm({
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={ManufacturingRepository.ProductionStandard.qry}
-                        store={comboStore?.productionStandards}
+                        store={combosStore?.productionStandards}
                         values={formik.values}
                         name='standardId'
                         label={labels.productionStandard}
@@ -1111,7 +1082,7 @@ export default function JobOrderForm({
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={ManufacturingRepository.JobCategory.qry}
-                      store={comboStore?.jobCategories}
+                      store={combosStore?.jobCategories}
                       name='categoryId'
                       label={labels.category}
                       columnsInDropDown={[
@@ -1132,7 +1103,7 @@ export default function JobOrderForm({
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={InventoryRepository.Category.qry}
-                      store={comboStore?.categories}
+                      store={combosStore?.categories}
                       name='itemCategoryId'
                       label={labels.itemCategory}
                       readOnly
@@ -1185,7 +1156,7 @@ export default function JobOrderForm({
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={SaleRepository.SalesPerson.qry}
-                      store={comboStore?.salesPeople}
+                      store={combosStore?.salesPeople}
                       name='spId'
                       label={labels.orderedBy}
                       columnsInDropDown={[

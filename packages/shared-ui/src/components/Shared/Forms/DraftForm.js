@@ -41,6 +41,7 @@ import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 
 const DraftForm = ({ labels, access, recordId, invalidate }) => {
@@ -51,14 +52,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const [reCal, setReCal] = useState(false)
   const taxDetailsCacheRef = useRef(null)
-  const [store, setStore] = useState({
-    documentTypes: [],
-    sites: [],
-    currencies: [],
-    plants: [],
-    salesPeople: [],
-    taxSchedules: []
-  })
+  const { combosStore } = useComboStore(SaleRepository.DraftInvoice.pack)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -188,7 +182,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   })
 
-  async function fillCombos() {
+  async function fillTaxDetails() {
     if (taxDetailsCacheRef.current) return
 
     const res = await getRequest({
@@ -197,16 +191,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     })
 
     taxDetailsCacheRef.current = res?.record?.taxDetails || []
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      sites: res?.record?.sites || [],
-      currencies: res?.record?.currencies?.filter(item => item.currencyType === 1) || [],
-      plants: res?.record?.plants || [],
-      salesPeople: res?.record?.salesPeople || [],
-      taxSchedules: res?.record?.taxSchedules || []
-    })
   }
-
 
   async function refetchForm(recordId) {
     const pack = await getDraftInvoicePack(recordId)
@@ -881,7 +866,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
   useEffect(() => {
     ;(async function () {
-      await fillCombos()
+      await fillTaxDetails()
       if (recordId) await refetchForm(recordId)
     })()
   }, [])
@@ -924,7 +909,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_dgId=${SystemFunction.DraftSerialsIn}&_startAt=0&_pageSize=1000`}                                                                                 
-                store={store?.documentTypes}
+                store={combosStore?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 label={labels.documentType}
@@ -948,7 +933,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
-                store={store?.sites}
+                store={combosStore?.sites}
                 name='header.siteId'
                 readOnly={isClosed || formik?.values?.items?.some(serial => serial.srlNo)}
                 label={labels.site}
@@ -977,7 +962,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
-                store={store?.currencies}
+                store={combosStore?.currencies}
                 filter={item => item.currencyType === 1}
                 name='header.currencyId'
                 label={labels.currency}
@@ -1012,7 +997,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
-                store={store?.plants}
+                store={combosStore?.plants}
                 name='header.plantId'
                 label={labels.plant}
                 readOnly
@@ -1068,7 +1053,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SaleRepository.SalesPerson.qry}
-                store={store?.salesPeople}
+                store={combosStore?.salesPeople}
                 name='header.spId'
                 required
                 label={labels.salesPerson}
@@ -1090,7 +1075,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={FinancialRepository.TaxSchedules.qry}
-                store={store?.taxSchedules}
+                store={combosStore?.taxSchedules}
                 name='header.taxId'
                 label={labels.tax}
                 valueField='recordId'

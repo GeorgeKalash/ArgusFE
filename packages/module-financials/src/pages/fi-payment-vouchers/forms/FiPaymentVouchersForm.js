@@ -36,24 +36,15 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
+
 export default function FiPaymentVouchersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
-  const [store, setStore] = useState({
-    documentTypes: [],
-    plants: [],
-    groupTypes: [],
-    cashAccounts: [],
-    currencies: [],
-    paymentMethods: [],
-    descriptionTemplates: [],
-    checkBooks: [],
-    paymentReasons: []
-  })
+  const { combosStore } = useComboStore(FinancialRepository.PaymentVouchers.pack)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.PaymentVouchers,
@@ -289,25 +280,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     })
   }
 
-  const fillCombos = async () => {
-    const res = await getRequest({
-      extension: FinancialRepository.PaymentVouchers.pack,
-      parameters: ``
-    })
-
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      plants: res?.record?.plants || [],
-      groupTypes: res?.record?.groupTypes?.filter(item => item.key == 1 || item.key == 4) || [], 
-      cashAccounts: res?.record?.cashAccounts || [],
-      currencies: res?.record?.currencies?.filter(item => item.currencyType === 1) || [],
-      paymentMethods: res?.record?.paymentMethods || [],
-      descriptionTemplates: res?.record?.descriptionTemplates || [],
-      checkBooks: res?.record?.checkBooks || [],
-      paymentReasons: res?.record?.paymentReasons || []
-    })
-  }
-
   useEffect(() => {
     ;(async function () {
       if (!recordId && cashAccountId && !documentType?.dtId) {
@@ -318,10 +290,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   }, [cashAccountId])
 
   useEffect(() => {
-    ;(async function () {
-      await fillCombos()
-      if (recordId) refetchForm(recordId)
-    })()
+    if (recordId) refetchForm(recordId)
   }, [])
 
   const onWorkFlowClick = async () => {
@@ -485,7 +454,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_dgId=${SystemFunction.PaymentVoucher}&_startAt=0&_pageSize=1000`}                                           
-                store={store?.documentTypes}
+                store={combosStore?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
@@ -533,7 +502,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
-                store={store?.plants}
+                store={combosStore?.plants}
                 name='plantId'
                 label={labels.plant}
                 valueField='recordId'
@@ -554,7 +523,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.FI_PV_GROUP_TYPE}
-                store={store?.groupTypes}
+                store={combosStore?.groupTypes}
                 name='accountType'
                 filter={item => item.key == 1 || item.key == 4}
                 label={labels.accountType}
@@ -639,7 +608,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
               <ResourceComboBox
                 endpointId={CashBankRepository.CashAccount.qry}
                 parameters={`_type=2`}
-                store={store?.cashAccounts}
+                store={combosStore?.cashAccounts}
                 name='cashAccountId'
                 readOnly={isCancelled || isPosted}
                 required
@@ -666,7 +635,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 <Grid item xs={7}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
-                    store={store?.currencies}
+                    store={combosStore?.currencies}
                     name='currencyId'
                     label={labels.currency}
                     filter={item => item.currencyType === 1}
@@ -742,7 +711,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.PAYMENT_METHOD}
-                store={store?.paymentMethods}
+                store={combosStore?.paymentMethods}
                 name='paymentMethod'
                 label={labels.paymentMethod}
                 valueField='key'
@@ -791,7 +760,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
               <ResourceComboBox
                 neverPopulate={true}
                 endpointId={FinancialRepository.DescriptionTemplate.qry}
-                store={store?.descriptionTemplates}
+                store={combosStore?.descriptionTemplates}
                 name='templateId'
                 label={labels.descriptionTemplate}
                 readOnly={isPosted || isCancelled}
@@ -810,7 +779,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={CashBankRepository.CACheckbook.qry}
-                store={store?.checkBooks}
+                store={combosStore?.checkBooks}
                 name='checkBookId'
                 label={labels.checkbook}
                 valueField='recordId'
@@ -842,7 +811,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={FinancialRepository.PaymentReasons.qry}
-                store={store?.paymentReasons}
+                store={combosStore?.paymentReasons}
                 name='paymentReasonId'
                 readOnly={isPosted || isCancelled}
                 label={labels.paymentReasons}

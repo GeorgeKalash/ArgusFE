@@ -26,19 +26,14 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 export default function StandardCostUpdateForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const functionId = SystemFunction.StandardCostUpdate
   const [reCal, setReCal] = useState(false)
-  const [store, setStore] = useState({
-    documentTypes: [],
-    itemGroups: [],
-    categories: [],
-    collections: [],
-    productionLines: []
-  })
+  const { combosStore } = useComboStore(ManufacturingRepository.StandardCostUpdate.pack)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.StandardCostUpdate,
@@ -288,24 +283,8 @@ export default function StandardCostUpdateForm({ recordId, window }) {
     },
   ]
 
-  const fillCombos = async () => {
-    const res = await getRequest({
-      extension: ManufacturingRepository.StandardCostUpdate.pack,
-      parameters: ``
-    })
-
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      itemGroups: res?.record?.itemGroups || [],
-      categories: res?.record?.categories || [], 
-      collections: res?.record?.collections || [],
-      productionLines: res?.record?.productionLines || []
-    })
-  }
-
   useEffect(() => {
     ;(async function () {
-      await fillCombos()
       if (recordId) {
         refetchForm(recordId)
       } else {
@@ -335,7 +314,7 @@ export default function StandardCostUpdateForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}        
-                    store={store?.documentTypes}
+                    store={combosStore?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
@@ -389,7 +368,7 @@ export default function StandardCostUpdateForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={InventoryRepository.Group.qry}
                     parameters={`_startAt=0&_pageSize=1000`}        
-                    store={store?.itemGroups}
+                    store={combosStore?.itemGroups}
                     values={formik.values.header}
                     name='header.itemGroupId'
                     label={labels.itemGroup}
@@ -411,7 +390,7 @@ export default function StandardCostUpdateForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={InventoryRepository.Category.qry}
                     parameters='_pagesize=1000&_startAt=0&_name='
-                    store={store?.categories}
+                    store={combosStore?.categories}
                     values={formik.values.header}
                     name='header.itemCategoryId'
                     label={labels.category}
@@ -431,7 +410,7 @@ export default function StandardCostUpdateForm({ recordId, window }) {
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Collections.qry}
-                    store={store?.collections}
+                    store={combosStore?.collections}
                     name='header.collectionId'
                     label={labels.collection}
                     valueField='recordId'
@@ -453,7 +432,7 @@ export default function StandardCostUpdateForm({ recordId, window }) {
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.ProductionLine.qry}
-                    store={store?.productionLines}
+                    store={combosStore?.productionLines}
                     values={formik.values.header}
                     name='header.productionLineId'
                     label={labels.productionLine}

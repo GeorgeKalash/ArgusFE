@@ -122,10 +122,10 @@ export default function ResourceComboBox({
     const result = datasetId ? { list: response } : response
 
     if (hasStore) {
-      const list = reducer(result)?.filter?.(filter) || []
+      const list = reducer(result) || []
       if (refreshKey) publishRefresh(refreshKey, list)
       else setRefreshedList(list)
-      if (typeof onRefreshed === 'function') onRefreshed(list)
+      if (typeof onRefreshed === 'function') onRefreshed(list.filter(filter))
     } else {
       setApiResponse(result)
       if (endpointId) updateCacheStore(endpointId, response?.list)
@@ -137,7 +137,7 @@ export default function ResourceComboBox({
   }
 
   let finalItemsList
-  if (hasStore) finalItemsList = refreshedList ?? data ?? []
+  if (hasStore) finalItemsList = (refreshedList ?? data ?? []).filter(filter)
   else if (apiResponse) finalItemsList = reducer(apiResponse)?.filter?.(filter) || []
   else finalItemsList = []
 
