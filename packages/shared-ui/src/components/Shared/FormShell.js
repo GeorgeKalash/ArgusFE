@@ -54,17 +54,12 @@ export default function FormShell({
   const { clear, open, setRecord } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
   const { loading } = useContext(RequestsContext)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
 
-  const guarded = async fn => {
-    if (isSubmitting || loading) return
-    setIsSubmitting(true)
-    try {
-      await fn()
-    } finally {
-      setIsSubmitting(false)
-    }
+  const guarded = fn => {
+    if (loading) return
+
+    Promise.resolve(fn()).catch(() => {})
   }
 
   const { stack: stackError } = useError()
@@ -387,7 +382,6 @@ export default function FormShell({
     <Form
       form={form}
       previewBtnClicked={previewBtnClicked}
-      submitting={isSubmitting}
       onSave={() => guarded(() => form.submitForm())}
       onSaveClear={() => {
         handleSaveAndClear()

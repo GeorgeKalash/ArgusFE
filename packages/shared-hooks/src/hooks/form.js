@@ -58,7 +58,6 @@ export function useForm({ behavior, conditionSchema = [], maxAccess, validate = 
         submitSucceededRef.current = true
       } catch (error) {
         submitSucceededRef.current = false
-        if (error?.isHandledApiError) return
         throw error
       }
     },
