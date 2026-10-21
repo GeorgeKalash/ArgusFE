@@ -15,6 +15,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function CommodityPairsForm({ labels, maxAccess, record, recordId }) {
   const { postRequest } = useContext(RequestsContext)
@@ -35,7 +36,8 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
       defQtyMUId: null,
       defUnitPriceMUId: null,
       eo_defQtyMUId: null,
-      eo_defTargetPriceMUId: null
+      eo_defTargetPriceMUId: null,
+      disablePurityEditing: false
     },
     maxAccess,
     validationSchema: yup.object({
@@ -188,6 +190,15 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
                 error={formik.touched.eo_defTargetPriceMUId && Boolean(formik.errors.eo_defTargetPriceMUId)}
               />
             </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='disablePurityEditing'
+                value={formik.values.disablePurityEditing}
+                onChange={event => formik.setFieldValue('disablePurityEditing', event.target.checked)}
+                label={labels.disablePurityEditing}
+                maxAccess={maxAccess}
+              />
+            </Grid> 
           </Grid>
         </Grow>
       </VertLayout>
