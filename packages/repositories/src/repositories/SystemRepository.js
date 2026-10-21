@@ -307,5 +307,8 @@ export const SystemRepository = {
   },
   Nationality: {
     get: service + 'getNA'
+  },
+  ActivityCancellationReason: {
+    get: service + 'getACR'
   }
 }
