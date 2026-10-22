@@ -10,12 +10,18 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-const CancelReasonForm = ({ action, functionId, recordId, isCancelled = false, maxAccess, window }) => {
+const CancelReasonForm = ({ action, functionId, recordId, isCancelled = false, window }) => {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest } = useContext(RequestsContext)
 
   useSetWindow({ title: platformLabels.CancelReason, window })
+
+  const { access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.CancelReason
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -62,7 +68,7 @@ const CancelReasonForm = ({ action, functionId, recordId, isCancelled = false, m
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={2}>
+          <Grid container>
             <Grid item xs={12}>
               <CustomTextArea
                 name='cancelReason'

@@ -175,9 +175,7 @@ export default function EventOrderForm({ recordId, window }) {
     const rate = await getMultiCurrencyFormData(res?.record?.currencyId, fromCurrencyId, date)
     if (!rate?.exRate) return null
 
-    const qty = muQty ?? formik.values.targetPrice_muQty ?? 1
-
-    return roundTo(rate.exRate * qty, 5)
+    return roundTo(rate.exRate * muQty, 5)
   }
 
   async function getMultiCurrencyFormData(fromCurrencyId, toCurrencyId, date) {
@@ -516,7 +514,7 @@ useEffect(() => {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date)
+                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date, formik.values.targetPrice_muQty)
 
                   formik.setValues({
                     ...formik.values,
@@ -600,7 +598,7 @@ useEffect(() => {
                 label={labels.date}
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
-                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue)
+                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue, formik.values.targetPrice_muQty)
                   formik.setValues({ ...formik.values, marketPrice, date: newValue })
                 }}
                 readOnly={isClosed || isCancelled}

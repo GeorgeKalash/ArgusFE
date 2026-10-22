@@ -340,8 +340,7 @@ export default function FormShell({
                 action: action.action,
                 functionId,
                 recordId: form.values?.recordId,
-                isCancelled: action.isCancelled,
-                maxAccess
+                isCancelled: action.isCancelled
               },
               expandable: false
             })
