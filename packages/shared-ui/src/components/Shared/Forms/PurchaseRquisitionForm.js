@@ -226,7 +226,10 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
-      type: 'number'
+      type: {
+        field: 'number',
+        decimal: 5
+      }
     },
     {
       field: 'deliveryDate',
@@ -312,9 +315,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
 
       return {
         ...item,
-        totalCost: roundTo(item?.unitCost * item?.qty || 0),
-        unitCost: roundTo(item?.unitCost || 0),
-        qty: roundTo(item?.qty || 0)
+        totalCost: item?.unitCost * item?.qty,
       }
     })
 
