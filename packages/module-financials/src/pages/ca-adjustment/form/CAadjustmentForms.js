@@ -431,7 +431,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                     readOnly={isPosted}
                     required
                     maxAccess={maxAccess}
-                    thousandSeparator={false}
                     onChange={async e => {
                       formik.setFieldValue('amount', e.target.value)
 
