@@ -42,7 +42,8 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
     maxAccess,
     validationSchema: yup.object({
       currencyId: yup.number().required(),
-      metalId: yup.number().required()
+      metalId: yup.number().required(),
+      eo_defTargetPriceMUId: yup.number().required()
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -183,6 +184,7 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
+                required
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('eo_defTargetPriceMUId', newValue?.recordId || null)
