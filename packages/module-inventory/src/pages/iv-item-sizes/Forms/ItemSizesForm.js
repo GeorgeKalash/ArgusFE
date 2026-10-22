@@ -28,7 +28,6 @@ export default function ItemSizesForm({ labels, maxAccess, recordId }) {
       name: ''
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required()
