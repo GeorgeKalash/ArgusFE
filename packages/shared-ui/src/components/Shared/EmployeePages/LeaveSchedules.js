@@ -46,7 +46,7 @@ export default function LeaveSchedules({ labels, maxAccess, row, window }) {
           employeeId: row.recordId,
           ltId: scheduleRow.ltId,
           lsId: scheduleRow.lsId,
-          lastGeneratedEarnedLeave: scheduleRow?.lastGeneratedEarnedLeave ? formatDateToApi(scheduleRow.lastGeneratedEarnedLeave) : null
+          lastGeneratedEarnedLeave: scheduleRow?.lastGeneratedEarnedLeave ? formatDateToApi(scheduleRow.lastGeneratedEarnedLeave) : row.hireDate
         }))
 
       const resultObject = {
