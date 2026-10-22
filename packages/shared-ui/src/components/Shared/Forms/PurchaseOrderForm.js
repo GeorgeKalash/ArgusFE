@@ -1660,6 +1660,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                   label={labels.totQty}
                   value={totalQty}
                   readOnly
+                  decimalScale={5}
                 />
               </Stack>
             </Grid>

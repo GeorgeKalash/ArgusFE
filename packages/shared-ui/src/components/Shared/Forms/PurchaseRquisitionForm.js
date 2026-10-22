@@ -315,9 +315,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
 
       return {
         ...item,
-        totalCost: roundTo(item?.unitCost * item?.qty || 0),
-        unitCost: roundTo(item?.unitCost || 0),
-        qty: roundTo(item?.qty || 0)
+        totalCost: item?.unitCost * item?.qty,
       }
     })
 
