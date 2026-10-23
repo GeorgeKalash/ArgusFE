@@ -136,6 +136,11 @@ export default function BTFixing() {
       flex: 1
     },
     {
+      field: 'qty_muRef',
+      headerName: labels.qtyMuRef,
+      flex: 1
+    },
+    {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
