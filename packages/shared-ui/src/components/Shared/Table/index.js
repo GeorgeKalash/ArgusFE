@@ -1448,6 +1448,19 @@ const Table = ({
     }
   }
 
+  useEffect(() => {
+    const el = gridRef.current
+    if (!el || !props?.tabByRow) return
+
+    const block = e => {
+      if (e.target.classList.contains('ag-tab-guard') && !el.querySelector('.ag-cell')) e.stopImmediatePropagation()
+    }
+
+    el.addEventListener('focus', block, true)
+
+    return () => el.removeEventListener('focus', block, true)
+  }, [props?.tabByRow])
+
 
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
 
@@ -1472,7 +1485,7 @@ const Table = ({
             >
           {hoveredTable && !pagination && (
             <Box className={'hoverReset'}>
-              <IconButton size='small' onClick={onReset}>
+              <IconButton size='small' onClick={onReset} tabIndex={props?.tabByRow ? -1 : undefined}>
                 <CachedIcon fontSize='small' />
               </IconButton>
             </Box>
@@ -1495,6 +1508,7 @@ const Table = ({
                   return next
                 })
               }}
+              tabIndex={props?.tabByRow ? -1 : undefined}
             >
               <FilterAltIcon fontSize='small' />
             </IconButton>
@@ -1510,6 +1524,15 @@ const Table = ({
             domLayout={domLayout}
             {...(hasRowId && {
               getRowId: params => params?.data?.id
+            })}
+            {...(props?.tabByRow && {
+              suppressHeaderFocus: true,
+              tabToNextCell: ({ previousCellPosition: p, backwards, api }) => {
+                const i = p.rowIndex + (backwards ? -1 : 1)
+
+                return i < 0 || i >= api.getDisplayedRowCount() ? p : { rowIndex: i, column: p.column }
+              },
+              onCellKeyDown: e => e.event.key === 'Enter' && e.event.target.closest('.ag-cell')?.querySelector('input')?.click()
             })}
             pagination={false}
             paginationPageSize={pageSize}
