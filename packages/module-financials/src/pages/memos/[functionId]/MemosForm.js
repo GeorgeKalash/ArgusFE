@@ -616,7 +616,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     value={formik.values.amount}
                     required
                     maxAccess={maxAccess}
-                    thousandSeparator={false}
                     readOnly
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
                     maxLength={10}

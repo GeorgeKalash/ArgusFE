@@ -1686,7 +1686,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess}/>
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess} decimalScale={5}/>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField

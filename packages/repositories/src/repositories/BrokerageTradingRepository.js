@@ -45,7 +45,7 @@ export const BrokerageTradingRepository = {
     unpost: service + 'unpostEO'
   },
   EventOrderInquiry: {
-    page: service + 'pageEOI'
+    page2: service + 'pageEOI2'
   },
   DocumentTypeDefault: {
     get: service + 'getDTD',  

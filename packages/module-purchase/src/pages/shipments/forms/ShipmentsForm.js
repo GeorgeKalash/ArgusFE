@@ -902,6 +902,7 @@ export default function ShipmentsForm({ recordId, window }) {
                 maxAccess={maxAccess}
                 value={totalQty}
                 readOnly
+                decimalScale={5}
               />
             </Grid>
             <Grid item xs={3}>

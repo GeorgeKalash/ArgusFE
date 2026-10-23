@@ -399,7 +399,7 @@ export default function PayrollListForm({ recordId, window }) {
                     const end = new Date(date.getFullYear(), date.getMonth() + 1, 0)
 
                     const diffMs = end.getTime() - start.getTime()
-                    const diffDays = diffMs / (1000 * 60 * 60 * 24) + 1
+                    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24) + 1)
 
                     formik.setFieldValue('calendarDays', diffDays)
                     formik.setFieldValue('startDate', start)
