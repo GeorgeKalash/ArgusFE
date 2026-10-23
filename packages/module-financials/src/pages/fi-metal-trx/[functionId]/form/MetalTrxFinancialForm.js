@@ -37,7 +37,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [metal, setMetal] = useState({})
   const [allMetals, setAllMetals] = useState([])
-  const filteredItems = useRef()
+  const itemsStoreByRow = useRef({})
   const { stack } = useWindow()
 
   const MetalRepositories = {
@@ -250,11 +250,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   }
 
   function getFilteredMetal(metalId) {
-    filteredItems.current = metalId
-      ? allMetals.filter(metal => {
-          return metal.metalId === metalId
-        })
-      : []
+    if (!metalId) return []
+
+    return allMetals.filter(metal => {return metal.metalId === metalId}) 
   }
   async function getAllMetals() {
     const res = await getRequest({
@@ -330,7 +328,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         return { ...props, readOnly: !!row.itemId }
       },
       onChange: async ({ row: { update, newRow } }) => {
-        getFilteredMetal(newRow?.metalId)
+        itemsStoreByRow.current = {}
         if (newRow.purity)
           update({ purity: newRow.purity * 1000, stdPurity: newRow.stdPurity * 1000 })
       }
@@ -340,7 +338,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       label: labels.sku,
       name: 'sku',
       props: {
-        store: filteredItems?.current,
+        endpointId: InventoryRepository.Scrap.qry,
         valueField: 'itemId',
         displayField: 'sku',
         columnsInDropDown: [
@@ -356,7 +354,14 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         displayFieldWidth: 4
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredItems?.current }
+        return { 
+          ...props, 
+          store: itemsStoreByRow.current[row.id] ?? getFilteredMetal(row?.metalId),
+          onRefreshed: list => {
+            itemsStoreByRow.current[row.id] = list
+          },
+          parameters: `_metalId=${row?.metalId}`,
+         }
       },
       onChange: async ({ row: { update, newRow } }) => {
         let purityValue = newRow.purity || newRow.stdPurity
@@ -791,9 +796,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             maxAccess={maxAccess}
             disabled={isPosted}
             allowDelete={!isPosted}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'sku') getFilteredMetal(row?.metalId)
-            }}
           />
         </Grow>
         <Fixed>

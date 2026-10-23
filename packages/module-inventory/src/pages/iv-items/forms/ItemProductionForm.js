@@ -17,6 +17,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
+import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 
 export default function ItemProductionForm({ labels, editMode, maxAccess, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -260,7 +261,6 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
   const totalQty = formik.values.items.reduce((qty, row) => qty + (parseFloat(row.designQty) || 0), 0)
   const totalPcs = formik.values.items.reduce((pcs, row) => pcs + (Number(row.designPcs) || 0), 0)
 
-
   return (
     <FormShell
       resourceId={ResourceIds.Items}
@@ -276,6 +276,8 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             <Grid item xs={6}>
               <ResourceComboBox
                 store={store?.productionLines}
+                endpointId={ManufacturingRepository.ProductionLine.qry}
+                parameters='_startAt=0&_pageSize=1000'
                 name='header.lineId'
                 label={labels.productionLine}
                 columnsInDropDown={[
@@ -296,6 +298,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             <Grid item xs={6}>
               <ResourceComboBox
                 store={store?.productionClasses}
+                endpointId={ManufacturingRepository.ProductionClass.qry}
                 values={formik.values.header}
                 name='header.classId'
                 label={labels.productionClass}
@@ -311,6 +314,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             <Grid item xs={6}>
               <ResourceComboBox
                 store={store?.productionStandards}
+                endpointId={ManufacturingRepository.ProductionStandard.qry}
                 values={formik.values.header}
                 name='header.standardId'
                 label={labels.productionStandard}
@@ -326,6 +330,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             <Grid item xs={6}>
               <ResourceComboBox
                 store={store?.serialProfiles}
+                endpointId={InventoryRepository.SerialsProfile.qry}
                 values={formik.values.header}
                 name='header.spfId'
                 label={labels.sprofile}
@@ -373,6 +378,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             <Grid item xs={6}>
               <ResourceComboBox
                 store={store?.costGroups}
+                endpointId={ManufacturingRepository.CostGroup.qry}
                 name='header.cgId'
                 label={labels.cg}
                 columnsInDropDown={[
@@ -393,6 +399,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             <Grid item xs={6}>
               <ResourceComboBox
                 store={store?.labelTemplates}
+                endpointId={SCRepository.LabelTemplate.qry}
                 name='header.ltId'
                 label={labels.template}
                 valueField='recordId'
@@ -408,6 +415,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             <Grid item xs={6}>
               <ResourceComboBox
                 store={store?.rawMaterialCategories}
+                endpointId={ManufacturingRepository.RawMaterialCategory.qry}
                 name='header.rmcId'
                 label={labels.rmc}
                 valueField='recordId'
@@ -452,6 +460,8 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             <Grid item xs={6}>
               <ResourceComboBox
                 store={store?.packB?.billOfMaterials ?? []}
+                endpointId={ManufacturingRepository.BillOfMaterials.qry2}
+                parameters={`_itemId=${recordId}`}
                 name='header.bomId'
                 label={labels.bom}
                 columnsInDropDown={[

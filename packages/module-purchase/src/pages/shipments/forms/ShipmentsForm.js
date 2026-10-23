@@ -31,16 +31,17 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export default function ShipmentsForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const unpostedOrders = useRef([])
-  const skuStore = useRef([])
-  const filteredMeasurements = useRef([])
+  const poStoreByRowRef = useRef({})
+  const skuStoreByRowRef = useRef({})
+  const muStoreByRowRef = useRef({})
   const [measurements, setMeasurements] = useState([])
   const { stack: stackError } = useError()
 
@@ -204,6 +205,7 @@ export default function ShipmentsForm({ recordId, window }) {
   })
 
   async function refetchForm(recordId) {
+    muStoreByRowRef.current = {}
     const res = await getShipment(recordId)
 
     res.record.date = formatDateFromApi(res.record.date)
@@ -379,6 +381,9 @@ export default function ShipmentsForm({ recordId, window }) {
   ]
 
   async function fillGridRefCombo(vendorId) {
+    poStoreByRowRef.current = {}
+    skuStoreByRowRef.current = {}
+
     if (vendorId) {
       await getRequest({
         extension: PurchaseRepository.UnpostedOrderPack.get,
@@ -391,12 +396,10 @@ export default function ShipmentsForm({ recordId, window }) {
     }
   }
 
-  const filterByPoId = poId => {
-    if (!unpostedOrders?.current?.items?.length) return []
+  const mapSkuItems = (items, poId) => {
+    if (!poId || !items?.length) return []
 
-    const array = unpostedOrders?.current?.items
-
-    const filteredData = array
+    return items
       .filter(item => item.poId === poId)
       .map(({ poId, poSeqNo, itemId, sku, itemName, qty, trackBy, lotCategoryId, msId, isInactive }) => ({
         poId,
@@ -410,8 +413,10 @@ export default function ShipmentsForm({ recordId, window }) {
         msId,
         isInactive
       }))
+  }
 
-    skuStore.current = filteredData
+  function getSkuStore(poId) {
+    return mapSkuItems(unpostedOrders?.current?.items, poId)
   }
 
   useEffect(() => {
@@ -437,11 +442,10 @@ export default function ShipmentsForm({ recordId, window }) {
     return res?.record
   }
 
-  async function getFilteredMU(itemId, msId) {
-    if (!itemId) return
+  function getFilteredMU(msId) {
+    if (!msId) return []
 
-    const arrayMU = measurements?.filter(item => item.msId === msId) || []
-    filteredMeasurements.current = arrayMU
+    return measurements?.filter(item => item.msId === msId) || []
   }
 
   const columns = [
@@ -450,7 +454,6 @@ export default function ShipmentsForm({ recordId, window }) {
       label: labels.reference,
       name: 'poRef',
       props: {
-        store: unpostedOrders?.current?.orders,
         displayField: 'reference',
         valueField: 'reference',
         mapping: [
@@ -461,10 +464,24 @@ export default function ShipmentsForm({ recordId, window }) {
         displayFieldWidth: 1
       },
       async onChange({ row: { newRow } }) {
-        filterByPoId(newRow?.poId)
+        delete skuStoreByRowRef.current[newRow.id]
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: !!row.poId }
+        const vendorId = formik.values?.header?.vendorId
+
+        return {
+          ...props,
+          readOnly: !!row.poId,
+          store: poStoreByRowRef.current[row.id] ?? unpostedOrders?.current?.orders ?? [],
+          onRefreshed: list => {
+            poStoreByRowRef.current[row.id] = list
+          },
+          ...(vendorId && {
+            endpointId: PurchaseRepository.UnpostedOrderPack.get,
+            parameters: `_vendorId=${vendorId}`,
+            reducer: res => res?.record?.orders || []
+          })
+        }
       }
     },
     {
@@ -473,10 +490,23 @@ export default function ShipmentsForm({ recordId, window }) {
       name: 'sku',
       flex: 1,
       propsReducer({ row, props }) {
-        return { ...props, readOnly: !!row.shipmentId && !!row.poId && !!row.sku }
+        const vendorId = formik.values?.header?.vendorId
+
+        return {
+          ...props,
+          readOnly: !!row.shipmentId && !!row.poId && !!row.sku,
+          store: skuStoreByRowRef.current[row.id] ?? getSkuStore(row?.poId),
+          onRefreshed: list => {
+            skuStoreByRowRef.current[row.id] = list
+          },
+          ...(vendorId && row?.poId && {
+            endpointId: PurchaseRepository.UnpostedOrderPack.get,
+            parameters: `_vendorId=${vendorId}`,
+            reducer: res => mapSkuItems(res?.record?.items, row.poId)
+          })
+        }
       },
       props: {
-        store: skuStore?.current,
         displayField: 'sku',
         valueField: 'sku',
         mapping: [
@@ -498,8 +528,9 @@ export default function ShipmentsForm({ recordId, window }) {
         displayFieldWidth: 2
       },
       async onChange({ row: { update, newRow } }) {
+        delete muStoreByRowRef.current[newRow.id]
+
         if (!newRow.itemId) {
-          filteredMeasurements.current = []
           update({
             muRef: null,
             muId: null,
@@ -527,14 +558,14 @@ export default function ShipmentsForm({ recordId, window }) {
 
         //lot store
 
-        getFilteredMU(newRow?.itemId, newRow?.msId)
+        const filteredMU = getFilteredMU(newRow?.msId)
         const measurementSchedule = await getMeasurementObject(newRow?.msId)
         update({
           decimals: measurementSchedule?.decimals,
-          muRef: filteredMeasurements?.current?.[0]?.reference || null,
-          muId: filteredMeasurements?.current?.[0]?.recordId || null,
-          muQty: filteredMeasurements?.current?.[0]?.qty || 0,
-          baseQty: filteredMeasurements?.current?.[0]?.qty || newRow?.qty
+          muRef: filteredMU?.current?.[0]?.reference || null,
+          muId: filteredMU?.current?.[0]?.recordId || null,
+          muQty: filteredMU?.current?.[0]?.qty || 0,
+          baseQty: filteredMU?.current?.[0]?.qty || newRow?.qty
         })
       }
     },
@@ -551,7 +582,7 @@ export default function ShipmentsForm({ recordId, window }) {
       label: labels.MU,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
+        readOnly: isPosted,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -573,14 +604,17 @@ export default function ShipmentsForm({ recordId, window }) {
         }
       },
       propsReducer({ row, props }) {
-        let store = []
-        if (row?.itemId) {
-          getFilteredMU(row?.itemId, row?.msId)
-
-          store = filteredMeasurements?.current
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.msId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
         }
-
-        return { ...props, store }
       }
     },
     {
@@ -783,6 +817,7 @@ export default function ShipmentsForm({ recordId, window }) {
                       fillGridRefCombo(newValue?.recordId)
                       if (!newValue?.recordId) {
                         formik.setFieldValue('items', initialValues?.items)
+                        muStoreByRowRef.current = {}
                       }
                       formik.setFieldValue('header.vendorId', newValue?.recordId || null)
                     }}

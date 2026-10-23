@@ -22,6 +22,10 @@ export default function ResourceComboBoxEdit({
         .reduce((acc, obj) => ({ ...acc, ...obj }), {})
     : value
 
+  const { filter: columnFilter, ...restProps } = props || {}
+  
+  const refreshKey = `${props?.endpointId || props?.datasetId || ''}:${field}:${id}`
+
   return (
     <ResourceComboBox
       name={field}
@@ -31,6 +35,8 @@ export default function ResourceComboBoxEdit({
       label={''}
       hasBorder={false}
       dynamicParams={dynamicParams}
+      refreshKey={refreshKey}
+      filter={columnFilter ? item => columnFilter(item, data) : undefined}
       onChange={(e, value) => {
         if (props?.mapping) {
           let changes = props.mapping
@@ -58,7 +64,7 @@ export default function ResourceComboBoxEdit({
           }
         }
       }}
-      {...props}
+      {...restProps}
     />
   )
 }

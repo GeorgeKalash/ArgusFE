@@ -57,7 +57,7 @@ export default function PuQtnForm({ recordId, window }) {
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
 
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value)
@@ -200,12 +200,12 @@ export default function PuQtnForm({ recordId, window }) {
   const editMode = !!formik.values.recordId
   const isRaw = formik.values.status == 1
 
-  async function getFilteredMU(itemId, msId = null) {
-    if (!itemId) return
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-    const updatedMsId = !currentItemId ? msId || currentItemId : currentItemId
-    const arrayMU = measurements?.filter(item => item.msId == updatedMsId) || []
-    filteredMeasurements.current = arrayMU
+  function getFilteredMU(itemId, msId = null) {
+    if (!itemId) return []
+    const currentMsId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
+    const updatedMsId = !currentMsId ? msId || currentMsId : currentMsId
+
+    return measurements?.filter(item => item.msId == updatedMsId) || []
   }
 
   const iconKey = ({ value, data }) => {
@@ -282,11 +282,11 @@ export default function PuQtnForm({ recordId, window }) {
           rowTaxDetails = details
         }
 
-        const filteredMU = measurements?.filter(item => item.msId === itemInfo?.msId)
-        getFilteredMU(newRow?.itemId, itemInfo?.msId)
+        const filteredMU = getFilteredMU(newRow?.itemId, itemInfo?.msId)
+        delete muStoreByRowRef.current[newRow.id]
         const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
-        const filteredItems = filteredMeasurements?.current?.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMU.filter(item => item.recordId === newRow?.muId)
 
         update({
           volume: parseFloat(itemPhysProp?.volume) || 0,
@@ -322,7 +322,6 @@ export default function PuQtnForm({ recordId, window }) {
       label: labels.mu,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -332,13 +331,25 @@ export default function PuQtnForm({ recordId, window }) {
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId == newRow?.muId)
+        const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.itemId, newRow?.msId)
+        const selected = store.find(item => item.recordId == newRow?.muId)
+
         update({
-          baseQty: newRow?.qty * filteredItems?.[0]?.qty
+          baseQty: newRow?.qty * selected?.qty
         })
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.itemId, row?.msId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
@@ -355,11 +366,12 @@ export default function PuQtnForm({ recordId, window }) {
       },
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        getFilteredMU(newRow?.itemId, newRow?.msId)
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.itemId, newRow?.msId)
+        const selected = store.find(item => item.recordId === newRow?.muId)
+
         update({
           ...data,
-          baseQty: filteredItems?.[0]?.qty * newRow?.qty
+          baseQty: selected?.qty * newRow?.qty
         })
       }
     },
@@ -735,7 +747,7 @@ export default function PuQtnForm({ recordId, window }) {
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? itemPriceRow?.qty : 0,
+      qty: itemPriceRow?.qty ||  0,
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(4) : 0,
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
@@ -828,6 +840,7 @@ export default function PuQtnForm({ recordId, window }) {
     recalcNewVat(tdPct)
   }
   async function refetchForm(recordId) {
+    muStoreByRowRef.current = {}
     const qtnHeader = await getPurchaseQuotation(recordId)
     const qtnItems = await getPurchaseQuotationItems(recordId)
     await fillForm(qtnHeader, qtnItems)
@@ -1055,6 +1068,7 @@ export default function PuQtnForm({ recordId, window }) {
                       onChange={(event, newValue) => {
                         formik.setFieldValue('items', formik.initialValues.items)
                         formik.setFieldValue('currencyId', newValue?.recordId || null)
+                        muStoreByRowRef.current = {}
                       }}
                       error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                     />
@@ -1237,9 +1251,6 @@ export default function PuQtnForm({ recordId, window }) {
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
-            }}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             initialValues={formik?.initialValues?.items?.[0]}
             value={formik.values.items}

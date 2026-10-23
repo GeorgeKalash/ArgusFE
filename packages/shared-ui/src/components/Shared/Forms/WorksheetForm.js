@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -26,8 +26,10 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import DamageForm from '@argus/shared-ui/src/components/Shared/Forms/DamageForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
-
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
+
 export default function WorksheetForm({ labels, maxAccess: access, setStore, store, joInvalidate }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -36,6 +38,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
   const functionId = SystemFunction.Worksheet
   const resourceId = ResourceIds.Worksheet
   const editMode = !!recordId
+  const { combosStore } = useComboStore(ManufacturingRepository.Worksheet.pack)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
@@ -151,9 +154,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
   }
 
   useEffect(() => {
-    ;(async function () {
-      recordId && (await getData(recordId))
-    })()
+    if(recordId) getData(recordId)
   }, [])
 
   const isPosted = formik.values.status === 3
@@ -290,8 +291,9 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.Worksheet.pack}
-                    reducer={response => response?.record?.documentTypes}
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}  
+                    store={combosStore?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
@@ -384,8 +386,8 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.Worksheet.pack}
-                        reducer={response => response?.record?.workCenters}
+                        endpointId={ManufacturingRepository.WorkCenter.qry}
+                        store={combosStore?.workCenters}
                         name='workCenterId'
                         label={labels.workCenter}
                         readOnly
@@ -529,8 +531,8 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.Worksheet.pack}
-                        reducer={response => response?.record?.sites}
+                        endpointId={InventoryRepository.Site.qry}
+                        store={combosStore?.sites}
                         name='siteId'
                         label={labels.site}
                         required
@@ -643,8 +645,8 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.Worksheet.pack}
-                    reducer={response => response?.record?.shifts}
+                    endpointId={ManufacturingRepository.ProductionShifts.qry}
+                    store={combosStore?.shifts}
                     name='shiftId'
                     label={labels.shift}
                     maxAccess={maxAccess}
@@ -652,7 +654,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
                     valueField='recordId'
                     displayField={'name'}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('shiftId', newValue?.recordId || null)
                     }}
                     error={formik.touched.shiftId && Boolean(formik.errors.shiftId)}

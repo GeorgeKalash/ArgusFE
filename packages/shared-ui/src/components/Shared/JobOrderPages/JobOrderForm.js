@@ -31,6 +31,7 @@ import FormGrid from '@argus/shared-ui/src/components/form'
 import Samples from '@argus/shared-ui/src/components/Shared/JobOrderPages/Samples'
 import SerialsLots from '@argus/shared-ui/src/components/Shared/JobOrderPages/SerialsLots'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 export default function JobOrderForm({
   labels,
@@ -50,6 +51,7 @@ export default function JobOrderForm({
   const recordId = store?.recordId
   const [imageSource, setImageSource] = useState(null)
   const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
+  const { combosStore } = useComboStore(ManufacturingRepository.MFJobOrder.pack)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -649,8 +651,9 @@ export default function JobOrderForm({
             <Grid container spacing={2} xs={8}>
               <Grid item xs={12}>
                 <ResourceComboBox
-                  endpointId={ManufacturingRepository.MFJobOrder.pack}
-                  reducer={response => response?.record?.documentTypes}
+                  endpointId={SystemRepository.DocumentType.qry}
+                  parameters={`_dgId=${SystemFunction.JobOrder}&_startAt=0&_pageSize=1000`} 
+                  store={combosStore?.documentTypes || []}
                   filter={!editMode ? item => item.activeStatus === 1 : undefined}
                   name='dtId'
                   label={labels.documentType}
@@ -734,8 +737,8 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.MFJobOrder.pack}
-                        reducer={response => response?.record?.plants}
+                        endpointId={SystemRepository.Plant.qry}
+                        store={combosStore?.plants}
                         name='plantId'
                         label={platformLabels.plant}
                         valueField='recordId'
@@ -786,8 +789,8 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.MFJobOrder.pack}
-                        reducer={response => response?.record?.itemSizes}
+                        endpointId={InventoryRepository.ItemSizes.qry}
+                        store={combosStore?.itemSizes}
                         name='sizeId'
                         label={labels.size}
                         readOnly={isCancelled || isReleased || isPosted}
@@ -922,8 +925,8 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.MFJobOrder.pack}
-                        reducer={response => response?.record?.productionLines}
+                        endpointId={ManufacturingRepository.ProductionLine.qry}
+                        store={combosStore?.productionLines}
                         name='lineId'
                         label={labels.line}
                         values={formik.values}
@@ -1015,8 +1018,8 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.MFJobOrder.pack}
-                        reducer={response => response?.record?.productionClasses}
+                        endpointId={ManufacturingRepository.ProductionClass.qry}
+                        store={combosStore?.productionClasses}
                         values={formik.values}
                         name='classId'
                         label={labels.productionClass}
@@ -1032,8 +1035,8 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.MFJobOrder.pack}
-                        reducer={response => response?.record?.productionStandards}
+                        endpointId={ManufacturingRepository.ProductionStandard.qry}
+                        store={combosStore?.productionStandards}
                         values={formik.values}
                         name='standardId'
                         label={labels.productionStandard}
@@ -1078,8 +1081,8 @@ export default function JobOrderForm({
                   </Grid>
                   <Grid item xs={12}>
                     <ResourceComboBox
-                      endpointId={ManufacturingRepository.MFJobOrder.pack}
-                      reducer={response => response?.record?.jobCategories}
+                      endpointId={ManufacturingRepository.JobCategory.qry}
+                      store={combosStore?.jobCategories}
                       name='categoryId'
                       label={labels.category}
                       columnsInDropDown={[
@@ -1099,8 +1102,8 @@ export default function JobOrderForm({
                   </Grid>
                   <Grid item xs={12}>
                     <ResourceComboBox
-                      endpointId={ManufacturingRepository.MFJobOrder.pack}
-                      reducer={response => response?.record?.categories}
+                      endpointId={InventoryRepository.Category.qry}
+                      store={combosStore?.categories}
                       name='itemCategoryId'
                       label={labels.itemCategory}
                       readOnly
@@ -1152,8 +1155,8 @@ export default function JobOrderForm({
                   </FormGrid>
                   <Grid item xs={12}>
                     <ResourceComboBox
-                      endpointId={ManufacturingRepository.MFJobOrder.pack}
-                      reducer={response => response?.record?.salesPeople}
+                      endpointId={SaleRepository.SalesPerson.qry}
+                      store={combosStore?.salesPeople}
                       name='spId'
                       label={labels.orderedBy}
                       columnsInDropDown={[
