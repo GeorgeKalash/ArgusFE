@@ -37,6 +37,7 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
+import FixingForm from '@argus/shared-ui/src/components/Shared/Forms/FixingForm'
 
 export default function EventOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -48,7 +49,8 @@ export default function EventOrderForm({ recordId, window }) {
   const { stack: stackError } = useError()
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
   const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
-  
+  const maxDiscount = systemDefaults?.list?.find(obj => obj.key === 'bt_max_discount')?.value || null
+
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.EventOrder,
     editMode: !!recordId
@@ -67,6 +69,11 @@ export default function EventOrderForm({ recordId, window }) {
   const invalidate = useInvalidate({
     endpointId: BrokerageTradingRepository.EventOrder.page
   })
+
+  const getMaxAllowedDiscount = price => {
+    const basePrice = Number(price) || 0
+    return maxDiscount ? Math.min(maxDiscount, basePrice) : basePrice
+  }
 
   const { formik } = useForm({
     behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
@@ -101,11 +108,14 @@ export default function EventOrderForm({ recordId, window }) {
       currencyId_metalId: '',
       sourceId: null,
       sourceNo: '',
-      time: null,
       isTriggered: false,
       triggeredAt: null,
       triggeredAtPrice: null,
-      marketPrice: null
+      marketPrice: null,
+      premium: 0,
+      discount: 0,
+      netUnitPrice: 0,
+      disablePurityEditing: false
     },
     maxAccess,
     validationSchema: yup.object({
@@ -129,7 +139,15 @@ export default function EventOrderForm({ recordId, window }) {
       baseQty: yup.number().required(),
       targetPrice_muId: yup.number().required(),
       baseTargetPrice: yup.number().required(),
-      time: yup.date().required(),
+      netUnitPrice: yup.number().required(),
+      discount: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { marketPrice } = this.parent
+
+          return (Number(value) || 0) <= getMaxAllowedDiscount(marketPrice)
+        }),
       sourceNo: yup.string().nullable().test( function (value) {
         const { sourceId } = this.parent
         return !(sourceId && !value)
@@ -141,7 +159,6 @@ export default function EventOrderForm({ recordId, window }) {
         ...obj,
         date: formatDateToApi(obj?.date),
         expiryDate: obj?.expiryDate ? formatDateToApi(obj?.expiryDate) : null,
-        time: formatDateToApi(obj.time),
         triggeredAt: obj?.triggeredAt ? formatDateToApi(obj.triggeredAt) : null
       }
       const response = await postRequest({
@@ -157,23 +174,26 @@ export default function EventOrderForm({ recordId, window }) {
   const editMode = !!formik.values?.recordId
   const isClosed = formik.values.wip == 2
   const isPosted = formik.values.status === 3
+  const isCancelled = formik.values.status == -1
 
   const { releaseLock } = useRecordLock({
     recordId: recordId,
     reference: formik?.values?.reference,
     resourceId: ResourceIds.EventOrder,
-    enabled: !!recordId && !(isPosted || isClosed)
+    enabled: !!recordId && !(isPosted || isClosed || isCancelled)
   })
 
-  async function getMarketPrice(fromCurrencyId, metalId, date) {
+  async function getMarketPrice(fromCurrencyId, metalId, date, muQty) {
     if(!(fromCurrencyId && metalId && date)) return null
     const res = await getRequest({
       extension: InventoryRepository.Metals.get,
       parameters: `_recordId=${metalId}`
     })
 
-    const marketPrice = await getMultiCurrencyFormData(res?.record?.currencyId, fromCurrencyId, date)
-    return marketPrice?.exRate || null
+    const rate = await getMultiCurrencyFormData(res?.record?.currencyId, fromCurrencyId, date)
+    if (!rate?.exRate) return null
+
+    return roundTo(rate.exRate * muQty, 5)
   }
 
   async function getMultiCurrencyFormData(fromCurrencyId, toCurrencyId, date) {
@@ -208,7 +228,6 @@ export default function EventOrderForm({ recordId, window }) {
           res?.record?.currencyId && res?.record?.metalId
             ? `${res.record.currencyId}${res.record.metalId}`
             : null,
-        time: formatDateFromApi(res?.record?.time),
         triggeredAt: res?.record?.triggeredAt ? formatDateFromApi(res?.record?.triggeredAt) : null
       }
     })
@@ -230,7 +249,7 @@ export default function EventOrderForm({ recordId, window }) {
   }
 
   const onPost = async () => {
-    await postRequest({
+    const res = await postRequest({
       extension: BrokerageTradingRepository.EventOrder.post,
       record: JSON.stringify({
         ...formik.values,
@@ -243,6 +262,18 @@ export default function EventOrderForm({ recordId, window }) {
     invalidate()
 
     await refetchForm(formik.values.recordId)
+
+    const [fixingRecordId, fixingFunctionId] = String(res?.recordId || '')
+      .split(',')
+      .map(v => parseInt(v.trim()))
+
+    stack({
+      Component: FixingForm,
+      props: {
+        recordId: fixingRecordId,
+        functionId: fixingFunctionId
+      }
+    })
   }
 
   const onWorkFlowClick = async () => {
@@ -277,20 +308,37 @@ export default function EventOrderForm({ recordId, window }) {
     refetchForm(res.recordId)
   }
 
+  const onCancel = async cancelReason => {
+    const res = await postRequest({
+      extension: BrokerageTradingRepository.EventOrder.cancel,
+      record: JSON.stringify({ recordId: formik.values?.recordId, notes: cancelReason })
+    })
 
+    toast.success(platformLabels.Cancelled)
+    invalidate()
+    refetchForm(res.recordId)
+  }
 
   const actions = [
+    {
+      key: 'Cancel',
+      condition: true,
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || (isClosed && !isCancelled)
+    },
     {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: !editMode
+      disabled: !editMode || isCancelled
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed
+      disabled: !isClosed || isCancelled
     },
     {
       key: 'Approval',
@@ -307,7 +355,7 @@ export default function EventOrderForm({ recordId, window }) {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || !isClosed
+      disabled: !editMode || !isClosed || isCancelled
     },
     {
       key: 'WorkFlow',
@@ -328,6 +376,12 @@ export default function EventOrderForm({ recordId, window }) {
         })
       },
       disabled: !formik.values.accountId || !formik.values.date
+    },
+    {
+      key: 'Attachment',
+      condition: true,
+      onClick: 'onClickAttachment',
+      disabled: !editMode
     }
   ]
 
@@ -338,12 +392,22 @@ export default function EventOrderForm({ recordId, window }) {
     const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty, 5) || 0
     const baseTargetPrice = roundTo(formik?.values?.targetPrice * formik?.values?.purity / 1000 / formik?.values?.targetPrice_muQty, 5) || 0
     const amount = roundTo(baseQty * baseTargetPrice) || 0
+    const netUnitPrice =
+      roundTo(
+        ((Number(formik?.values?.marketPrice) || 0) -
+          (Number(formik?.values?.discount) || 0) +
+          (Number(formik?.values?.premium) || 0)) *
+          (Number(formik?.values?.purity) || 0) /
+          1000,
+        5
+      ) || 0
 
     formik.setValues({
       ...formik.values,
       baseQty,
       baseTargetPrice,
-      amount
+      amount,
+      netUnitPrice
     })
 
   }, [
@@ -353,6 +417,9 @@ export default function EventOrderForm({ recordId, window }) {
     formik.values.targetPrice,
     formik.values.targetPrice_muQty,
     formik.values.purity,
+    formik.values.marketPrice,
+    formik.values.premium,
+    formik.values.discount,
     vatPct
   ])
 
@@ -391,7 +458,7 @@ useEffect(() => {
       previewReport={editMode}
       editMode={editMode}
       functionId={functionId}
-      disabledSubmit={isClosed}
+      disabledSubmit={isClosed || isCancelled}
       actions={actions}
     >
       <VertLayout>
@@ -441,7 +508,7 @@ useEffect(() => {
                   formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 required
-                readOnly={isClosed}
+                readOnly={isClosed || isCancelled}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
@@ -478,8 +545,9 @@ useEffect(() => {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date)
+                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date, formik.values.targetPrice_muQty)
 
+                  setReCalc(true)
                   formik.setValues({
                     ...formik.values,
                     marketPrice: marketPrice,
@@ -506,7 +574,7 @@ useEffect(() => {
                 ]}
                 required
                 displayFieldWidth={2}
-                readOnly={isClosed}
+                readOnly={isClosed || isCancelled}
                 onChange={(_, newValue) => {
                   if (newValue?.isInactive) {
                     stackError({
@@ -537,7 +605,7 @@ useEffect(() => {
                 displayFieldWidth={2}
                 valueField='spRef'
                 displayField='name'
-                readOnly={isClosed || !formik.values.plantId}
+                readOnly={isClosed || isCancelled || !formik.values.plantId}
                 columnsInDropDown={[
                   { key: 'spRef', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -562,14 +630,17 @@ useEffect(() => {
                 label={labels.date}
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
-                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue)
+                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue, formik.values.targetPrice_muQty)
+
+                  setReCalc(true)
                   formik.setValues({ ...formik.values, marketPrice, date: newValue })
                 }}
-                readOnly={isClosed}
+                readOnly={isClosed || isCancelled}
                 maxAccess={maxAccess}
                 onClear={() => {
                   formik.setFieldValue('date', null)
                   formik.setFieldValue('marketPrice', 0)
+                  setReCalc(true)
                 }}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
@@ -584,7 +655,7 @@ useEffect(() => {
                 displayField='value'
                 maxAccess={maxAccess}
                 values={formik.values}
-                readOnly={isClosed}
+                readOnly={isClosed || isCancelled}
                 onClear={() => formik.setFieldValue('direction', null)}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('direction', newValue?.key || null)
@@ -602,7 +673,7 @@ useEffect(() => {
                 displayField='value'
                 values={formik.values}
                 maxAccess={maxAccess}
-                readOnly={isClosed}
+                readOnly={isClosed || isCancelled}
                 onClear={() => {
                   formik.setFieldValue('validityType', null)
                   formik.setFieldValue('expiryDate', null)
@@ -626,26 +697,12 @@ useEffect(() => {
                 onChange={(e, newValue) => {
                   formik.setFieldValue('expiryDate', newValue)
                 }}
-                readOnly={isClosed || formik.values.validityType != 2}
+                readOnly={isClosed || isCancelled || formik.values.validityType != 2}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('expiryDate', null)}
                 error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
               />
             </Grid>
-            <Grid item xs={6}>
-              <CustomDateTimePicker
-                name='time'
-                required
-                label={labels.time}
-                value={formik.values.time}
-                onChange={formik.setFieldValue}
-                maxAccess={maxAccess}
-                readOnly={isClosed}
-                onClear={() => formik.setFieldValue('time', null)}
-                error={formik.touched.time && Boolean(formik.errors.time)}
-              />
-            </Grid>
-            
             <Grid item xs={6}>
               <CustomCheckBox
                 name='isTriggered'
@@ -697,19 +754,24 @@ useEffect(() => {
                       values={formik.values}
                       required
                       maxAccess={maxAccess}
-                      readOnly={isClosed}
+                      readOnly={isClosed || isCancelled}
                       onChange={async (_, newValue) => {
                         const res = await getMetalPurity(newValue?.metalId)
+
+                        const pairQty = newValue?.eo_defTargetPriceMUQty || null
+
                         const marketPrice = await getMarketPrice(
                           formik.values.fi_currencyId,
                           newValue?.metalId,
-                          formik.values.date
+                          formik.values.date,
+                          pairQty
                         )
 
                         setReCalc(true)
                         formik.setValues({
                           ...formik.values,
                           marketPrice,
+                          disablePurityEditing: !!newValue?.disablePurityEditing,
                           purity: res?.purity * 1000 ?? null,
                           currencyId: newValue?.currencyId || null,
                           currencyRef: newValue?.currencyRef || '',
@@ -717,7 +779,7 @@ useEffect(() => {
                           qty_muId: newValue?.eo_defQtyMUId || null,
                           qty_muQty: newValue?.eo_defQtyMUQty || null,
                           targetPrice_muId: newValue?.eo_defTargetPriceMUId || null,
-                          targetPrice_muQty: newValue?.eo_defTargetPriceMUQty || null,
+                          targetPrice_muQty: pairQty,
                           currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null
                         })
                         
@@ -734,7 +796,7 @@ useEffect(() => {
                       maxAccess={maxAccess}
                       maxLength={10}
                       decimalScale={5}
-                      readOnly={isClosed}
+                      readOnly={isClosed || isCancelled || formik.values.disablePurityEditing}
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('purity', null)}
                       error={formik.touched.purity && Boolean(formik.errors.purity)}
@@ -749,8 +811,8 @@ useEffect(() => {
                       maxLength={12}
                       decimalScale={2}
                       maxAccess={maxAccess}
-                      readOnly={isClosed}
-                      onChange={(e) => {
+                      readOnly={isClosed || isCancelled}
+                      onChange={e => {
                         setReCalc(true)
                         formik.setFieldValue('qty', e.target.value || null)
                       }}
@@ -774,7 +836,7 @@ useEffect(() => {
                       values={formik.values}
                       required
                       maxAccess={maxAccess}
-                      readOnly={isClosed}
+                      readOnly={isClosed || isCancelled}
                       onChange={(_, newValue) => {
                         setReCalc(true)
                         formik.setFieldValue('qty_muId', newValue?.recordId || null)
@@ -805,10 +867,19 @@ useEffect(() => {
                       maxAccess={maxAccess}
                       maxLength={12}
                       decimalScale={2}
-                      readOnly={isClosed}
-                      onChange={(e) => {
+                      readOnly={isClosed || isCancelled}
+                      onChange={e => {
                         setReCalc(true)
                         formik.setFieldValue('targetPrice', e.target.value || null)
+                      }}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end' sx={{ maxHeight: '2em', mr: 0.5 }}>
+                            <Typography component='span' sx={{ color: 'red', fontSize: 'small', lineHeight: 1 }}>
+                              {formik.values.currencyRef}
+                            </Typography>
+                          </InputAdornment>
+                        )
                       }}
                       onClear={() => formik.setFieldValue('targetPrice', null)}
                       error={formik.touched.targetPrice && Boolean(formik.errors.targetPrice)}
@@ -829,7 +900,7 @@ useEffect(() => {
                       ]}
                       values={formik.values}
                       required
-                      readOnly={isClosed}
+                      readOnly={isClosed || isCancelled}
                       maxAccess={maxAccess}
                       onChange={(_, newValue) => {
                         setReCalc(true)
@@ -866,7 +937,7 @@ useEffect(() => {
                     label={labels.source}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -889,7 +960,7 @@ useEffect(() => {
                     value={formik.values.sourceNo}
                     maxLength={20}
                     onChange={formik.handleChange}
-                    readOnly={!formik.values.sourceId || isClosed}
+                    readOnly={!formik.values.sourceId || isClosed || isCancelled}
                     required={formik.values.sourceId}
                     maxAccess={maxAccess}
                     error={formik.touched.sourceNo && Boolean(formik.errors.sourceNo)}
@@ -902,7 +973,7 @@ useEffect(() => {
                     value={formik.values.notes}
                     rows={4}
                     maxAccess={maxAccess}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     onChange={e => formik.setFieldValue('notes', e.target.value)}
                     onClear={() => formik.setFieldValue('notes', '')}
                     error={formik.touched.notes && Boolean(formik.errors.notes)}
@@ -940,6 +1011,69 @@ useEffect(() => {
                     maxLength={17}
                     decimalScale={5}
                     maxAccess={maxAccess}
+                    InputProps={{
+                      readOnly: true,
+                      endAdornment: (
+                        <InputAdornment position='end' sx={{ maxHeight: '2em', mr: 0.5 }}>
+                          <Typography component='span' sx={{ color: 'red', fontSize: 'small', lineHeight: 1 }}>
+                            {formik.values.currencyRef}
+                          </Typography>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='premium'
+                    label={labels.premium}
+                    value={formik.values.premium}
+                    maxAccess={maxAccess}
+                    maxLength={12}
+                    decimalScale={2}
+                    readOnly={isClosed || isCancelled}
+                    onChange={e => {
+                      setReCalc(true)
+                      formik.setFieldValue('premium', e.target.value || 0)
+                    }}
+                    onClear={() => {
+                      setReCalc(true)
+                      formik.setFieldValue('premium', 0)
+                    }}
+                    error={formik.touched.premium && Boolean(formik.errors.premium)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='discount'
+                    label={labels.discount}
+                    value={formik.values.discount}
+                    maxAccess={maxAccess}
+                    maxLength={12}
+                    decimalScale={2}
+                    readOnly={isClosed || isCancelled}
+                    allowNegative={false}
+                    onChange={e => {
+                      setReCalc(true)
+                      formik.setFieldValue('discount', e.target.value || 0)
+                    }}
+                    onClear={() => {
+                      setReCalc(true)
+                      formik.setFieldValue('discount', 0)
+                    }}
+                    error={formik.touched.discount && Boolean(formik.errors.discount)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='netUnitPrice'
+                    label={labels.netunitPrice}
+                    value={formik.values.netUnitPrice}
+                    maxAccess={maxAccess}
+                    decimalScale={5}
+                    required
+                    readOnly
+                    error={formik.touched.netUnitPrice && Boolean(formik.errors.netUnitPrice)}
                   />
                 </Grid>
               </Grid>

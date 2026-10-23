@@ -111,6 +111,11 @@ export default function BTEventOrder() {
       type: 'number'
     },
     {
+      field: 'qty_muRef',
+      headerName: labels.qty_muRef,
+      flex: 1
+    },
+    {
       field: 'amount',
       headerName: labels.amount,
       flex: 1,
