@@ -57,6 +57,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 export default function RetailTransactionsForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -70,10 +71,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
   const [posUser, setPosUser] = useState(null)
   const ccStoreByRowRef = useRef({})
   const cashAccStoreByRowRef = useRef({})
-  const [store, setStore] = useState({
-    documentTypes: [],
-    salesPeople: []
-  })
+  const { combosStore, fillCombos } = useComboStore(PointofSaleRepository.RetailInvoice.level, { autoLoad: false })
   const level2CacheRef = useRef(null)
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
@@ -1307,17 +1305,11 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
     const currentPosUser = pu || posUser
     if (!currentPosUser?.posId) return
 
-    const res = await getRequest({
-      extension: PointofSaleRepository.RetailInvoice.level,
-      parameters: `_posId=${parseInt(currentPosUser?.posId)}&_functionId=${functionId}`
-    })
-
-    setStore({
-      documentTypes: res?.record?.documentTypes?.filter(item => editMode || item.activeStatus === 1) || [],
-      salesPeople: res?.record?.salesPeople?.filter(item => editMode || !item.isInactive) || [],
-    })
-
-    level2CacheRef.current = res?.record || null
+    const record = await fillCombos(
+      `_posId=${parseInt(currentPosUser?.posId)}&_functionId=${functionId}`
+    )
+    
+    level2CacheRef.current = record || null
   }
 
   function getFilteredCC(cashAccountId) {
@@ -1467,7 +1459,7 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}                                           
-                    store={store?.documentTypes}
+                    store={combosStore?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     readOnly={isPosted || formik?.values?.items?.some(item => item.sku)}
@@ -1517,7 +1509,8 @@ export default function RetailTransactionsForm({ recordId, functionId, window })
                   <ResourceComboBox
                     endpointId={PointofSaleRepository.SalesPerson.qry}
                     parameters={`_posId=${parseInt(posUser?.posId)}`}   
-                    store={store?.salesPeople}
+                    store={combosStore?.salesPeople}
+                    filter={item => editMode || !item.isInactive}
                     name='header.spId'
                     readOnly={isPosted}
                     label={labels.salesPerson}

@@ -5,11 +5,16 @@ export function useComboStore(extension, { parameters = '', transform, autoLoad 
   const { getRequest } = useContext(RequestsContext)
   const [rawStore, setCombosStore] = useState({})
 
-  const fillCombos = useCallback(async () => {
-    const res = await getRequest({ extension, parameters })
+  const fillCombos = useCallback(async (overrideParameters) => {
+    const res = await getRequest({
+      extension,
+      parameters: overrideParameters ?? parameters
+    })
     setCombosStore(prev => ({ ...prev, ...(res?.record || {}) }))
-  }, [extension, parameters])
 
+    return res?.record
+  }, [extension, parameters])
+  
   useEffect(() => {
     if (autoLoad) fillCombos()
   }, [autoLoad])
