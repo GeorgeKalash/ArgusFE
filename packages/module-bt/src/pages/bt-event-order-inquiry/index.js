@@ -31,7 +31,7 @@ const EventOrderInquiry = () => {
     setCurrencyRef(resEd2?.record?.baseCurrencyRef)
 
     const response = await getRequest({
-      extension: BrokerageTradingRepository.EventOrderInquiry.page,
+      extension: BrokerageTradingRepository.EventOrderInquiry.page2,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
@@ -51,7 +51,7 @@ const EventOrderInquiry = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BrokerageTradingRepository.EventOrderInquiry.page,
+    endpointId: BrokerageTradingRepository.EventOrderInquiry.page2,
     datasetId: ResourceIds.EventOrderInquiry,
     filter: {
       filterFn: fetchWithFilter
@@ -187,8 +187,8 @@ const EventOrderInquiry = () => {
           maxAccess={access}
           highlightRow={{
             condition: row => row?.direction === 1 || row?.direction === 2,
-
             color: row => {
+              if (row?.isTriggered) return '#f9f763'
               if (row?.direction === 1) return '#78d580'
               if (row?.direction === 2) return '#f28b82'
               return 'transparent'

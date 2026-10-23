@@ -46,7 +46,7 @@ export const BrokerageTradingRepository = {
     cancel: service + 'cancelEO'
   },
   EventOrderInquiry: {
-    page: service + 'pageEOI'
+    page2: service + 'pageEOI2'
   },
   DocumentTypeDefault: {
     get: service + 'getDTD',  

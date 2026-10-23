@@ -1,0 +1,165 @@
+import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { useContext } from 'react'
+import toast from 'react-hot-toast'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import ScrapAdjustmentForm from './form/ScrapAdjustmentForm'
+
+export default function ScrapAdjustment() {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
+
+    const response = await getRequest({
+      extension: FoundryRepository.ScrapAdjustment.page,
+      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  const {
+    query: { data },
+    refetch,
+    labels,
+    filterBy,
+    paginationParameters,
+    access,
+    invalidate
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: FoundryRepository.ScrapAdjustment.page,
+    datasetId: ResourceIds.ScrapAdjustment,
+    filter: {
+      filterFn: fetchWithSearch
+    }
+  })
+
+  async function fetchWithSearch({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: FoundryRepository.ScrapAdjustment.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
+  const columns = [
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
+      field: 'dtName',
+      headerName: labels.docType,
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'workCenterName',
+      headerName: labels.workCenter,
+      flex: 1
+    },
+    {
+      field: 'siteRef',
+      headerName: labels.site,
+      flex: 1
+    },
+    {
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      type: 'badge',
+      family: 'document',
+      valueField: 'status',
+      flex: 1
+    }
+  ]
+  
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.ScrapAdjustment,
+    action: openForm
+  })
+
+  const add = async () => { await proxyAction() }
+  const edit = obj => { openForm(obj?.recordId, obj?.status == 3) }
+
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.ScrapAdjustment,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
+    stack({
+      Component: ScrapAdjustmentForm,
+      props: { labels, recordId, access },
+      width: 1050,
+      height: 650,
+      title: labels.scrapAdjustment
+    })
+  }
+
+  const del = async obj => {
+    await postRequest({
+      extension: FoundryRepository.ScrapAdjustment.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
+  return (
+    <VertLayout>
+      <Fixed>
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'FOSAJ'} filterBy={filterBy} />
+      </Fixed>
+      <Grow>
+        <Table
+          name='table'
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          deleteConfirmationType={'strict'}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          refetch={refetch}
+          paginationType='api'
+          maxAccess={access}
+        />
+      </Grow>
+    </VertLayout>
+  )
+}
