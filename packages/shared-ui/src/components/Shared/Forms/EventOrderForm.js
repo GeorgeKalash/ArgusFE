@@ -49,7 +49,8 @@ export default function EventOrderForm({ recordId, window }) {
   const { stack: stackError } = useError()
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
   const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
-  
+  const maxDiscount = systemDefaults?.list?.find(obj => obj.key === 'bt_max_discount')?.value || null
+
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.EventOrder,
     editMode: !!recordId
@@ -68,6 +69,11 @@ export default function EventOrderForm({ recordId, window }) {
   const invalidate = useInvalidate({
     endpointId: BrokerageTradingRepository.EventOrder.page
   })
+
+  const getMaxAllowedDiscount = price => {
+    const basePrice = Number(price) || 0
+    return maxDiscount ? Math.min(maxDiscount, basePrice) : basePrice
+  }
 
   const { formik } = useForm({
     behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
@@ -106,6 +112,9 @@ export default function EventOrderForm({ recordId, window }) {
       triggeredAt: null,
       triggeredAtPrice: null,
       marketPrice: null,
+      premium: 0,
+      discount: 0,
+      netUnitPrice: 0,
       disablePurityEditing: false
     },
     maxAccess,
@@ -130,6 +139,15 @@ export default function EventOrderForm({ recordId, window }) {
       baseQty: yup.number().required(),
       targetPrice_muId: yup.number().required(),
       baseTargetPrice: yup.number().required(),
+      netUnitPrice: yup.number().required(),
+      discount: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { marketPrice } = this.parent
+
+          return (Number(value) || 0) <= getMaxAllowedDiscount(marketPrice)
+        }),
       sourceNo: yup.string().nullable().test( function (value) {
         const { sourceId } = this.parent
         return !(sourceId && !value)
@@ -374,12 +392,22 @@ export default function EventOrderForm({ recordId, window }) {
     const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty, 5) || 0
     const baseTargetPrice = roundTo(formik?.values?.targetPrice * formik?.values?.purity / 1000 / formik?.values?.targetPrice_muQty, 5) || 0
     const amount = roundTo(baseQty * baseTargetPrice) || 0
+    const netUnitPrice =
+      roundTo(
+        ((Number(formik?.values?.marketPrice) || 0) -
+          (Number(formik?.values?.discount) || 0) +
+          (Number(formik?.values?.premium) || 0)) *
+          (Number(formik?.values?.purity) || 0) /
+          1000,
+        5
+      ) || 0
 
     formik.setValues({
       ...formik.values,
       baseQty,
       baseTargetPrice,
-      amount
+      amount,
+      netUnitPrice
     })
 
   }, [
@@ -389,6 +417,9 @@ export default function EventOrderForm({ recordId, window }) {
     formik.values.targetPrice,
     formik.values.targetPrice_muQty,
     formik.values.purity,
+    formik.values.marketPrice,
+    formik.values.premium,
+    formik.values.discount,
     vatPct
   ])
 
@@ -516,6 +547,7 @@ useEffect(() => {
                 onChange={async (_, newValue) => {
                   const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date, formik.values.targetPrice_muQty)
 
+                  setReCalc(true)
                   formik.setValues({
                     ...formik.values,
                     marketPrice: marketPrice,
@@ -599,6 +631,8 @@ useEffect(() => {
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
                   const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue, formik.values.targetPrice_muQty)
+
+                  setReCalc(true)
                   formik.setValues({ ...formik.values, marketPrice, date: newValue })
                 }}
                 readOnly={isClosed || isCancelled}
@@ -606,6 +640,7 @@ useEffect(() => {
                 onClear={() => {
                   formik.setFieldValue('date', null)
                   formik.setFieldValue('marketPrice', 0)
+                  setReCalc(true)
                 }}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
@@ -986,6 +1021,59 @@ useEffect(() => {
                         </InputAdornment>
                       )
                     }}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='premium'
+                    label={labels.premium}
+                    value={formik.values.premium}
+                    maxAccess={maxAccess}
+                    maxLength={12}
+                    decimalScale={2}
+                    readOnly={isClosed || isCancelled}
+                    onChange={e => {
+                      setReCalc(true)
+                      formik.setFieldValue('premium', e.target.value || 0)
+                    }}
+                    onClear={() => {
+                      setReCalc(true)
+                      formik.setFieldValue('premium', 0)
+                    }}
+                    error={formik.touched.premium && Boolean(formik.errors.premium)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='discount'
+                    label={labels.discount}
+                    value={formik.values.discount}
+                    maxAccess={maxAccess}
+                    maxLength={12}
+                    decimalScale={2}
+                    readOnly={isClosed || isCancelled}
+                    allowNegative={false}
+                    onChange={e => {
+                      setReCalc(true)
+                      formik.setFieldValue('discount', e.target.value || 0)
+                    }}
+                    onClear={() => {
+                      setReCalc(true)
+                      formik.setFieldValue('discount', 0)
+                    }}
+                    error={formik.touched.discount && Boolean(formik.errors.discount)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='netUnitPrice'
+                    label={labels.netunitPrice}
+                    value={formik.values.netUnitPrice}
+                    maxAccess={maxAccess}
+                    decimalScale={5}
+                    required
+                    readOnly
+                    error={formik.touched.netUnitPrice && Boolean(formik.errors.netUnitPrice)}
                   />
                 </Grid>
               </Grid>
