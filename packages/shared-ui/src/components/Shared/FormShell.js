@@ -23,6 +23,7 @@ import AttachmentList from './AttachmentList'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from './Form'
 import StrictConfirmation from './StrictConfirmation'
+import CancelReasonForm from './CancelationReasonForm'
 import WorkFlow from './WorkFlow'
 
 export default function FormShell({
@@ -330,6 +331,20 @@ export default function FormShell({
                 functionId,
                 isActive: !form.values?.isInActive 
               }
+            })
+          }
+          break
+        case 'onCancelReason':
+          action.onClick = () => {
+            stack({
+              Component: CancelReasonForm,
+              props: {
+                action: action.action,
+                functionId,
+                recordId: form.values?.recordId,
+                isCancelled: action.isCancelled
+              },
+              expandable: false
             })
           }
           break
