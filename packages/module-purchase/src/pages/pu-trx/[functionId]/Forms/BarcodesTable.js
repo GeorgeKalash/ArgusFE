@@ -10,7 +10,6 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 
 export default function BarcodesTable({ labels, maxAccess, onSelect, window, initialSearch = '', onSearchChange }) {
   const { getRequest } = useContext(RequestsContext)
-  const selectedRef = useRef(null)
   const submittedRef = useRef(false)
 
   const { formik } = useForm({
@@ -57,7 +56,6 @@ export default function BarcodesTable({ labels, maxAccess, onSelect, window, ini
   ]
 
   async function onSearch(qry) {
-    selectedRef.current = null
     onSearchChange?.(qry || '')
 
     if (!qry) return formik.setFieldValue('rows', [])
@@ -67,64 +65,60 @@ export default function BarcodesTable({ labels, maxAccess, onSelect, window, ini
       parameters: `_filter=${qry}`
     })
 
-    const rows = (res?.list || []).map(r => ({ ...r, checked: false }))
-    formik.setFieldValue('rows', rows)
+    formik.setFieldValue('rows', res?.list || [])
   }
 
   const onClear = () => {
-    selectedRef.current = null
     onSearchChange?.('')
     formik.setFieldValue('rows', [])
   }
 
-  const handleCheckboxChange = (row, isChecked) => {
-    if (!isChecked) {
-      selectedRef.current = null
-      return
-    }
+  const selectRow = row => {
+  if (!row || submittedRef.current) return
 
-    if (submittedRef.current) return
-    submittedRef.current = true
+  submittedRef.current = true
 
-    selectedRef.current = row
-
-    const { checked, ...selectedRow } = row
-    onSelect?.(selectedRow)
-    window.close()
-  }
+  onSelect?.(row)
+  window.close()
+}
 
   useEffect(() => {
     if (initialSearch) onSearch(initialSearch)
   }, [])
 
   return (
-      <VertLayout>
-        <Fixed>
-          <GridToolbar
-            inputSearch
-            autoFocus
-            initialSearch={initialSearch}
-            onSearch={onSearch}
-            onSearchChange={term => onSearchChange?.(term || '')}
-            onSearchClear={onClear}
-            labels={labels}
-            maxAccess={maxAccess}
-          />
-        </Fixed>
-        <Grow>
-          <Table
-            name='barcodesLookup'
-            tabByRow
-            columns={columns}
-            gridData={{ list: formik.values.rows, count: formik.values.rows.length }}
-            rowId={['recordId']}
-            pagination={false}
-            showCheckboxColumn
-            rowSelection='single'
-            handleCheckboxChange={handleCheckboxChange}
-            maxAccess={maxAccess}
-          />
-        </Grow>
-      </VertLayout>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          inputSearch
+          autoFocus
+          initialSearch={initialSearch}
+          onSearch={onSearch}
+          onSearchChange={term => onSearchChange?.(term || '')}
+          onSearchClear={onClear}
+          labels={labels}
+          maxAccess={maxAccess}
+        />
+      </Fixed>
+      <Grow>
+        <Table
+          name='barcodesLookup'
+          columns={columns}
+          gridData={{
+            list: formik.values.rows,
+            count: formik.values.rows.length
+          }}
+          rowId={['recordId']}
+          pagination={false}
+          onCellKeyDown={e => {
+            if (e.event?.key === 'Enter' && e.data) {
+              e.event.preventDefault()
+              selectRow(e.data)
+            }
+          }}
+          maxAccess={maxAccess}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
