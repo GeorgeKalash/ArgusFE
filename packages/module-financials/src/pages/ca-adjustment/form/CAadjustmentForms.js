@@ -19,7 +19,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
@@ -251,16 +250,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     }
   }
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: formik.values.functionId,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   const actions = [
     {
       key: 'RecordRemarks',
@@ -286,12 +275,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {

@@ -19,7 +19,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -410,16 +409,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       })
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.DraftTransfer,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   async function onImportClick() {
     stack({
       Component: ImportSerials,
@@ -481,12 +470,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode 
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
     },
     {
       key: 'Import',

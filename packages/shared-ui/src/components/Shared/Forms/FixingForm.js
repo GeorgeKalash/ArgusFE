@@ -33,7 +33,6 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function FixingForm({ recordId, functionId, window }) {
@@ -241,15 +240,6 @@ export default function FixingForm({ recordId, functionId, window }) {
     return res?.record || {}
   }
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const onClose = async () => {
     const res = await postRequest({
@@ -343,12 +333,6 @@ export default function FixingForm({ recordId, functionId, window }) {
       disabled: !editMode || !isClosed
     },
     {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-    {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
@@ -391,7 +375,7 @@ export default function FixingForm({ recordId, functionId, window }) {
       condition: true,
       onClick: 'onClickIT',
       disabled: !editMode
-    },
+    }
   ]
 
   const getNetAmount = ({ amount, exRate, rateCalcMethod }) => {

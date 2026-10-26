@@ -22,7 +22,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -1015,16 +1014,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: functionId,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
-
   const onPost = async () => {
     await postRequest({
       extension: getEndpoint[functionId]?.['post'],
@@ -1114,12 +1103,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {

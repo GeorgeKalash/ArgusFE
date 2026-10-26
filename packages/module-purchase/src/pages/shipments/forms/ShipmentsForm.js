@@ -23,7 +23,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
@@ -299,16 +298,6 @@ export default function ShipmentsForm({ recordId, window }) {
     })()
   }, [])
 
-  const onWorkFlow = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.Shipment,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
-
   async function openGenerateInvoiceForm() {
     stack({
       Component: GenerateInvoiceForm,
@@ -336,12 +325,6 @@ export default function ShipmentsForm({ recordId, window }) {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlow,
       disabled: !editMode
     },
     {

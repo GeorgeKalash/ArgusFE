@@ -35,7 +35,6 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 
 export default function EventOrderForm({ recordId, window }) {
@@ -245,16 +244,6 @@ export default function EventOrderForm({ recordId, window }) {
     await refetchForm(formik.values.recordId)
   }
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.EventOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   const onClose = async () => {
     const res = await postRequest({
       extension: BrokerageTradingRepository.EventOrder.close,
@@ -308,12 +297,6 @@ export default function EventOrderForm({ recordId, window }) {
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || !isClosed
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
     },
     {
       key: 'AccountSummary',

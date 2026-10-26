@@ -21,7 +21,6 @@ import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDateP
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
@@ -105,15 +104,6 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     }
   })
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.StockCount,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   async function refetchForm(recordId) {
     const res = await getRequest({
@@ -193,12 +183,6 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
 
   const actions = [
     {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-    {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
@@ -234,6 +218,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   return (
     <FormShell
       resourceId={ResourceIds.StockCounts}
+      functionId={SystemFunction.StockCount}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

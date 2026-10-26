@@ -22,7 +22,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
@@ -552,15 +551,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     }
   ]
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PUDraftSerialReturn,
-        recordId: formik.values?.recordId
-      }
-    })
-  }
 
   async function onImportClick() {
     stack({
@@ -606,12 +596,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
   }
 
   const actions = [
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
     {
       key: 'Import',
       condition: true,

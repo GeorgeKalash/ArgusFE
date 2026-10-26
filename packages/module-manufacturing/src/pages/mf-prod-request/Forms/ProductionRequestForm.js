@@ -28,7 +28,6 @@ import PreviewPR from './PreviewPR'
 import PreviewPR2 from './PreviewPR2'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useError } from '@argus/shared-providers/src/providers/error'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const PROD_REQ_TYPE = {
@@ -289,27 +288,11 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     }
   }
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.ProductionRequest,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   const actions = [
     {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -323,7 +306,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
-    },
+    }
   ]
 
   useEffect(() => {

@@ -26,7 +26,6 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import { DIRTYFIELD_AMOUNT, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
@@ -246,23 +245,8 @@ const CashTransferTab = ({ recordId, dtId, refetch, window }) => {
     })()
   }, [])
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.CashTransfer,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const actions = [
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
     {
       key: 'Close',
       condition: !isClosed,

@@ -21,7 +21,6 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
@@ -289,15 +288,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     if (recordId) refetchForm(recordId)
   }, [])
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PaymentVoucher,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const onCancel = async () => {
     const res = await postRequest({
@@ -397,12 +387,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
