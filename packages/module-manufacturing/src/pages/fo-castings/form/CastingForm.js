@@ -364,6 +364,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
       editMode={editMode}
       disabledSubmit={isCancelled || isPosted}
       disabledSavedClear={isCancelled || isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

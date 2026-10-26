@@ -884,6 +884,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       editMode={editMode}
       disabledSubmit={isClosed && !editMode}
       disabledSavedClear={isClosed && !editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

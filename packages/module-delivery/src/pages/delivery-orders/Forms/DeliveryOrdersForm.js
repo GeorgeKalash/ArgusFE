@@ -491,6 +491,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       functionId={SystemFunction.DeliveryTrip}
       disabledSubmit={isPosted || isCancelled}
       previewReport={editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

@@ -521,6 +521,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
       actions={actions}
       functionId={SystemFunction.MaterialRequest}
       disabledSubmit={isClosed || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

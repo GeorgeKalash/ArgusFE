@@ -426,6 +426,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       actions={actions}
       functionId={SystemFunction.PaymentVoucher}
       disabledSubmit={isPosted || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>

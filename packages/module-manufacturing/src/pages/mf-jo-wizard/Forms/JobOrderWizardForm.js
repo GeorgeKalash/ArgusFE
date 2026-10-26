@@ -358,6 +358,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       previewReport={editMode}
       actions={actions}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

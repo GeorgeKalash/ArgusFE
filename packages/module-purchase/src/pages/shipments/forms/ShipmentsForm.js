@@ -657,6 +657,7 @@ export default function ShipmentsForm({ recordId, window }) {
       functionId={SystemFunction.Shipment}
       disabledSubmit={isPosted}
       previewReport={editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

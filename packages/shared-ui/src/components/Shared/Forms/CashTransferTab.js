@@ -375,6 +375,7 @@ const CashTransferTab = ({ recordId, dtId, refetch, window }) => {
       functionId={SystemFunction.CashTransfer}
       actions={actions}
       disabledSubmit={isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

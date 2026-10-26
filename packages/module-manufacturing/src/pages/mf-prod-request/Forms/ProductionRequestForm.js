@@ -460,6 +460,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       editMode={editMode}
       previewReport={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

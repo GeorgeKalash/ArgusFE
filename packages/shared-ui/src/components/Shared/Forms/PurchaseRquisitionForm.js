@@ -364,6 +364,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
       actions={actions}
       previewReport={editMode}
       disabledSubmit={isClosed || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

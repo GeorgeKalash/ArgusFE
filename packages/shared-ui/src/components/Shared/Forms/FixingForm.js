@@ -487,6 +487,7 @@ useEffect(() => {
       functionId={functionId}
       disabledSubmit={isClosed}
       actions={actions}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

@@ -1582,6 +1582,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

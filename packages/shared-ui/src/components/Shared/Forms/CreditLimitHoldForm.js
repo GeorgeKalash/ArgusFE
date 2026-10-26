@@ -266,6 +266,7 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
       editMode={editMode}
       previewReport={editMode}
       disabledSubmit={isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

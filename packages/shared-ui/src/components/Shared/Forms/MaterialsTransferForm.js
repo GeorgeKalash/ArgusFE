@@ -24,7 +24,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
@@ -1095,6 +1095,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       actions={actions}
       functionId={SystemFunction.MaterialTransfer}
       disabledSubmit={isPosted || isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>

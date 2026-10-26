@@ -609,6 +609,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       editMode={editMode}
       isParentWindow={false}
       disabledSubmit={isPosted}
+    isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

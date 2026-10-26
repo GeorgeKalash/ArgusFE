@@ -1398,6 +1398,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       editMode={editMode}
       disabledSubmit={isClosed && !editMode}
       disabledSavedClear={isClosed && !editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

@@ -529,6 +529,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
       actions={actions}
       functionId={SystemFunction.PaymentOrder}
       disabledSubmit={isCancelled || isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

@@ -295,6 +295,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       functionId={functionId}
       previewReport={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>

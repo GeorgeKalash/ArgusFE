@@ -2068,6 +2068,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

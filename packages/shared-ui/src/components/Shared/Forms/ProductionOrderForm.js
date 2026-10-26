@@ -568,6 +568,7 @@ export default function ProductionOrderForm({ recordId, window }) {
       editMode={editMode}
       previewReport={editMode}
       disabledSubmit={isPosted || isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

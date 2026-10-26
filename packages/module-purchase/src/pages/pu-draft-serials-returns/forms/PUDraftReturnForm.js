@@ -924,6 +924,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted && !editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

@@ -961,6 +961,7 @@ export default function PuQtnForm({ recordId, window }) {
       actions={actions}
       editMode={editMode}
       disabledSubmit={!isRaw}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

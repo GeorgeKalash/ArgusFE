@@ -443,6 +443,7 @@ useEffect(() => {
       functionId={functionId}
       disabledSubmit={isClosed || isCancelled}
       actions={actions}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

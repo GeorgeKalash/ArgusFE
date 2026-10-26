@@ -626,6 +626,7 @@ export default function JobOrderForm({
       previewReport={editMode}
       actions={actions}
       editMode={editMode}
+      isWorkFlow={true}
       disabledSubmit={isCancelled || isPosted}
       disabledSavedClear={isCancelled || isPosted}
     >

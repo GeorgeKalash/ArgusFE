@@ -225,6 +225,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       actions={actions}
       disabledSubmit={isPosted || isClosed}
       disableSubmitAndClear={isPosted || isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>

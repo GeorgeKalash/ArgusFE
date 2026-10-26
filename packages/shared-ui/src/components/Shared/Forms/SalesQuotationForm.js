@@ -1262,6 +1262,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       actions={actions}
       editMode={editMode}
       disabledSubmit={isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

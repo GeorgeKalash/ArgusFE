@@ -266,6 +266,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
       actions={actions}
       previewReport={true}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

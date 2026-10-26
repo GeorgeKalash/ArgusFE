@@ -381,6 +381,7 @@ export default function MatPlaningForm({ recordId, window }) {
       editMode={editMode}
       previewReport={editMode}
       disabledSubmit={isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
