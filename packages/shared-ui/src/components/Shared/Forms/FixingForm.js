@@ -308,7 +308,7 @@ export default function FixingForm({ recordId, functionId, window }) {
     refetchForm(formik.values.recordId)
   }
 
-  async function getMarketPrice(fromCurrencyId, metalId, date) {
+  async function getMarketPrice(fromCurrencyId, metalId, date, eo_defTargetPriceMUQty) {
     if(!(fromCurrencyId && metalId && date)) return null
     const res = await getRequest({
       extension: InventoryRepository.Metals.get,
@@ -316,7 +316,7 @@ export default function FixingForm({ recordId, functionId, window }) {
     })
 
     const marketPrice = await getMultiCurrencyFormData(res?.record?.currencyId, fromCurrencyId, date)
-    return marketPrice?.exRate || null
+    return (marketPrice?.exRate * eo_defTargetPriceMUQty) || null
   }
 
   async function getMultiCurrencyFormData(fromCurrencyId, toCurrencyId, date) {
@@ -397,7 +397,13 @@ export default function FixingForm({ recordId, functionId, window }) {
         })
       },
       disabled: !formik.values.accountId || !formik.values.date
-    }
+    },
+    {
+      key: 'FI Trx',
+      condition: true,
+      onClick: 'onClickIT',
+      disabled: !editMode
+    },
   ]
 
   const getNetAmount = ({ amount, exRate, rateCalcMethod }) => {
@@ -417,7 +423,7 @@ export default function FixingForm({ recordId, functionId, window }) {
     if (!reCalc) return
 
     const baseQty = roundTo(formik?.values?.qty * formik?.values?.qty_muQty, 5) || 0
-    const netUnitPrice = roundTo(formik?.values?.unitPrice * formik?.values?.purity / 1000 + formik?.values?.premium - formik?.values?.discount) || 0
+    const netUnitPrice = roundTo((formik?.values?.unitPrice - formik?.values?.discount + formik?.values?.premium) * formik?.values?.purity / 1000) || 0
     const baseUnitPrice = roundTo(netUnitPrice / formik?.values?.unitPrice_muQty, 5) || 0
     const subtotal = roundTo(baseQty * baseUnitPrice, 5) || 0
     const taxAmount = formik.values.isTaxable ? roundTo((subtotal + roundTo(formik?.values?.miscAmount)) * vatPct / 100) : 0
@@ -594,7 +600,7 @@ useEffect(() => {
                 onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(newValue?.recordId, formik.values.currencyId, formik.values.date)
 
-                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date)
+                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date, formik.values?.eo_defTargetPriceMUQty)
 
                   setReCalc(true)
                   formik.setValues({
@@ -654,7 +660,7 @@ useEffect(() => {
                 onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(formik.values.fi_currencyId, formik.values.currencyId, newValue)
 
-                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik?.values?.metalId, newValue)
+                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik?.values?.metalId, newValue, formik.values?.eo_defTargetPriceMUQty)
 
                   setReCalc(true)
                   formik.setValues({ ...formik.values, ...(rate || {}), marketPrice, date: newValue })
@@ -727,7 +733,7 @@ useEffect(() => {
                           formik.values.date
                         )
 
-                        const marketPrice = await getMarketPrice(formik.values.fi_currencyId, newValue?.metalId, formik.values.date)
+                        const marketPrice = await getMarketPrice(formik.values.fi_currencyId, newValue?.metalId, formik.values.date, newValue?.eo_defTargetPriceMUQty)
 
                         setReCalc(true)
                         formik.setValues({
@@ -742,7 +748,9 @@ useEffect(() => {
                           qty_muQty: newValue?.defQtyMUQty || 0,
                           unitPrice_muId: newValue?.defUnitPriceMUId || null,
                           unitPrice_muQty: newValue?.defUnitPriceMUQty || 0,
-                          currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null
+                          currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null,
+                          eo_defTargetPriceMUQty: newValue?.eo_defTargetPriceMUQty,
+                          disablePurityEditing: newValue?.disablePurityEditing || false
                         })
                       }}
                       error={formik.touched.currencyId_metalId && Boolean(formik.errors.currencyId_metalId)}
@@ -757,7 +765,7 @@ useEffect(() => {
                       maxAccess={maxAccess}
                       maxLength={10}
                       decimalScale={5}
-                      readOnly={isClosed}
+                      readOnly={formik.values?.disablePurityEditing || isClosed}
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('purity', 0)}
                       error={formik.touched.purity && Boolean(formik.errors.purity)}
