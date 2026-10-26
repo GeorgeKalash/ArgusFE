@@ -524,7 +524,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
               }
 
               barcodeSkuSelection(
-                changes => updateRow({ id: row.id, changes }),
+                changes => updateRow({ id: row.id, changes, focusField: jumpToNextLine ? undefined : 'qty'}),
                 addRow,
                 {
                   ...row,
