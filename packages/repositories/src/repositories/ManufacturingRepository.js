@@ -547,5 +547,9 @@ export const ManufacturingRepository = {
     page: service + 'pagePSG',
     qry: service + 'qryPSG',
     snapshot: service + 'snapshotPSG'
+  },
+  WorkCenterWorkForce: {
+    set2: service + 'set2WCWF',
+    qry: service + 'qryWCWF',
   }
 }

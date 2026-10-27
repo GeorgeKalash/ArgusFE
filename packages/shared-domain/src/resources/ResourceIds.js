@@ -152,6 +152,7 @@ export const ResourceIds = {
   LaborGroups: 42114,
   ProductionLines: 42107,
   WorkCenters: 42101,
+  WorkCenterWorkForce: 42146,
   Operations: 42102,
   Machines: 42106,
   GateKeeper: 42322,
