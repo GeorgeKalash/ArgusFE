@@ -30,6 +30,7 @@ import FormGrid from '@argus/shared-ui/src/components/form'
 import Samples from '@argus/shared-ui/src/components/Shared/JobOrderPages/Samples'
 import SerialsLots from '@argus/shared-ui/src/components/Shared/JobOrderPages/SerialsLots'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function JobOrderForm({
   labels,
@@ -47,7 +48,8 @@ export default function JobOrderForm({
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const recordId = store?.recordId
-  const [imageSource, setImageSource] = useState(null)
+  const { systemDefaults } = useContext(DefaultsContext)
+  const imageSource = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mf_jo_pic_source')?.value) || 3
   const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -606,15 +608,7 @@ export default function JobOrderForm({
   }, [refetchJob])
 
   useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=mf_jo_pic_source`
-      })
-      setImageSource(res?.record?.value || 3)
-
-      if (recordId) await refetchForm(recordId)
-    })()
+    if (recordId) refetchForm(recordId)
   }, [])
 
   return (

@@ -58,6 +58,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
   const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const vatPct = parseInt(systemDefaults?.list?.find(obj => obj.key === 'vatPct')?.value) || 0
 
   const initialValues = {
     recordId: null,
@@ -77,6 +78,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     releaseStatus: null,
     cashAccountId: parseInt(cashAccountId),
     plantId: parseInt(plantId),
+    vatPct,
     expenses: [
       {
         id: 1,
@@ -181,7 +183,6 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const editMode = !!formik.values.recordId
 
   async function getPaymentOrder(recordId) {
-    const vatPct = await getDefaultVAT()
     const res = await getRequest({
       extension: FinancialRepository.PaymentOrders.get,
       parameters: `_recordId=${recordId}`
@@ -237,7 +238,6 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
 
   useEffect(() => {
     ;(async function () {
-      await getDefaultVAT()
       if (recordId) {
         await getPaymentOrder(recordId)
       } else {
@@ -358,17 +358,6 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     return vatAmount + vatAmountValue
   }, 0)
 
-  async function getDefaultVAT() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=vatPct`
-    })
-
-    formik.setFieldValue('vatPct', parseInt(res.record.value) ?? 0)
-
-    return parseInt(res.record.value) ?? 0
-  }
-
   const columns = [
     {
       component: 'resourcelookup',
@@ -408,8 +397,6 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow.isVAT) {
-          const vatPct = await getDefaultVAT()
-
           if (!newRow.amount) {
             return
           }

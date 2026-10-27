@@ -35,7 +35,6 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -44,6 +43,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   const { stack } = useWindow()
   const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const vatPct = parseInt(systemDefaults?.list?.find(obj => obj.key === 'vatPct')?.value)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.PaymentVoucherExpenses,
@@ -83,6 +83,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     plantId: parseInt(plantId),
     contactId: null,
     isVerified: false,
+    vatPct,
     expenses: [
       {
         id: 1,
@@ -182,7 +183,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
 
 
   async function refetchForm (recordId) {
-    const vatPct = await getDefaultVAT()
     const response = await getRequest({
       extension: FinancialRepository.PaymentVouchers.get2,
       parameters: `_recordId=${recordId}`
@@ -283,10 +283,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   }, [formik.values?.dtId])
 
   useEffect(() => {
-    ;(async function () {
-        if (recordId) await refetchForm(recordId)
-        await getDefaultVAT()
-    })()
+    if (recordId) refetchForm(recordId)
   }, [])
   
   useEffect(() => {
@@ -297,17 +294,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       }
     })()
   }, [cashAccountId])
-
-  async function getDefaultVAT() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=vatPct`
-    })
-
-    const vatPctValue = parseInt(res.record.value)
-    formik.setFieldValue('vatPct', vatPctValue)
-    return vatPctValue
-  }
 
   const onCancel = async () => {
     const res = await postRequest({
@@ -347,7 +333,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   }
 
   const onReset = async () => {
-    getDefaultVAT()
     const payload = getPayload(formik.values)
     await postRequest({
       extension: FinancialRepository.ResetGL_PV.reset,

@@ -4,7 +4,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
@@ -17,6 +17,7 @@ import Form from './Form'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function AddressFilterForm({
   labels,
@@ -28,13 +29,15 @@ export default function AddressFilterForm({
   checkedAddressId,
   window
 }) {
+  const { systemDefaults } = useContext(DefaultsContext)
+  const countryId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'countryId')?.value)
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   useSetWindow({ title: platformLabels.AddressFilter, window })
 
   const { formik } = useForm({
-    initialValues: { search: '', cityId: null, countryId: null },
+    initialValues: { search: '', cityId: null, countryId},
     validateOnChange: true,
     onSubmit: async () => {
       const checkedADD = data?.list?.find(obj => obj.checked)
@@ -132,19 +135,6 @@ export default function AddressFilterForm({
     datasetId: ResourceIds.Address
   })
 
-  async function getDefaultCountry() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=countryId`
-    })
-    formik.setFieldValue('countryId', parseInt(res?.record?.value))
-  }
-
-  useEffect(() => {
-    ;(async function () {
-      await getDefaultCountry()
-    })()
-  }, [])
 
   return (
     <Form onSave={formik.handleSubmit}>

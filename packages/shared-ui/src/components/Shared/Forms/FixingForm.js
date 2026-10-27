@@ -747,8 +747,14 @@ useEffect(() => {
                       maxLength={10}
                       decimalScale={5}
                       readOnly={formik.values?.disablePurityEditing || isClosed}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('purity', 0)}
+                      onChange={e => {
+                        setReCalc(true)
+                        formik.setFieldValue('purity', e.target.value || 0)
+                      }}
+                      onClear={() => {
+                        setReCalc(true)
+                        formik.setFieldValue('purity', 0)
+                      }}
                       error={formik.touched.purity && Boolean(formik.errors.purity)}
                     />
                   </Grid>
