@@ -27,7 +27,6 @@ import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalc
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import ExpensesCostCenters from '@argus/shared-ui/src/components/Shared/ExpensesCostCenters'
-import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
@@ -259,10 +258,10 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     })
   }
 
-  const onCancel = async () => {
+  const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentOrders.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ ...formik.values, notes: cancelReason })
     })
 
     toast.success(platformLabels.Cancelled)
@@ -310,27 +309,14 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     }))
   }
 
-  function onCancelConf() {
-    stack({
-      Component: ConfirmationDialog,
-      props: {
-        DialogText: platformLabels.CancelConf,
-        okButtonAction: onCancel,
-        fullScreen: false,
-        close: true
-      },
-      width: 400,
-      height: 150,
-      title: platformLabels.Confirmation
-    })
-  }
-
   const actions = [
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancelConf,
-      disabled: !editMode || isCancelled || isClosed
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || (isClosed && !isCancelled)
     },
     {
       key: 'RecordRemarks',

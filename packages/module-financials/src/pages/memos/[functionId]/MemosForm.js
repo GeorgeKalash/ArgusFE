@@ -202,10 +202,10 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }
   }
 
-  const onCancel = async () => {
+  const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.FiMemo.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ ...formik.values, notes: cancelReason })
     })
 
     if (res?.recordId) {
@@ -310,8 +310,10 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isCancelled || isPosted
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || (isPosted && !isCancelled)
     },
     {
       key: 'AccountSummary',

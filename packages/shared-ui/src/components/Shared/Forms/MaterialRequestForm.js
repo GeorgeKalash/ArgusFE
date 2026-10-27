@@ -419,8 +419,9 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
     })
   }
 
-  const onCancel = async recId => {
-    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) || null }
+  const onCancel = async cancelReason => {
+    const recId = formik.values?.recordId
+    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) || null, notes: cancelReason }
     delete header.items
 
     await postRequest({
@@ -477,9 +478,11 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
     {
       key: 'Cancel',
       condition: true,
-      onClick: () => onCancel(formik.values.recordId),
-      disabled: !editMode || isCancelled || isClosed
-    }
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || (isClosed && !isCancelled)
+    },
   ]
 
   async function getDataGrid(recordId) {

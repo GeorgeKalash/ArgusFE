@@ -216,8 +216,10 @@ export default function CastingForm({ store, setStore, access, labels }) {
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isCancelled || isPosted
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isPosted
     },
     {
       key: 'WorkFlow',
@@ -295,12 +297,13 @@ export default function CastingForm({ store, setStore, access, labels }) {
     refetchForm(formik.values.recordId)
   }
 
-  async function onCancel() {
+  async function onCancel(cancelReason) {
     await postRequest({
       extension: FoundryRepository.Casting.cancel,
       record: JSON.stringify({
         ...formik.values,
-        date: formatDateToApi(formik.values.date)
+        date: formatDateToApi(formik.values.date),
+        notes: cancelReason
       })
     })
     toast.success(platformLabels.Cancelled)
