@@ -2,37 +2,18 @@ import { useContext, useEffect, useRef } from 'react'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import Form from '@argus/shared-ui/src/components/Shared/Form'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { useError } from '@argus/shared-providers/src/providers/error'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 export default function BarcodesTable({ labels, maxAccess, onSelect, window, initialSearch = '', onSearchChange }) {
   const { getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
-
-  const selectedRef = useRef(null)
+  const submittedRef = useRef(false)
 
   const { formik } = useForm({
     initialValues: { rows: [] },
-    onSubmit: async () => {
-      const selected = selectedRef.current
-
-      if (!selected) {
-        stackError({ message: platformLabels.checkItemsBeforeAppend })
-
-        return
-      }
-
-      const { checked, ...row } = selected
-      onSelect?.(row)
-      window.close()
-    }
   })
 
   const columns = [
@@ -75,7 +56,6 @@ export default function BarcodesTable({ labels, maxAccess, onSelect, window, ini
   ]
 
   async function onSearch(qry) {
-    selectedRef.current = null
     onSearchChange?.(qry || '')
 
     if (!qry) return formik.setFieldValue('rows', [])
@@ -85,52 +65,60 @@ export default function BarcodesTable({ labels, maxAccess, onSelect, window, ini
       parameters: `_filter=${qry}`
     })
 
-    const rows = (res?.list || []).map(r => ({ ...r, checked: false }))
-    formik.setFieldValue('rows', rows)
+    formik.setFieldValue('rows', res?.list || [])
   }
 
   const onClear = () => {
-    selectedRef.current = null
     onSearchChange?.('')
     formik.setFieldValue('rows', [])
   }
 
-  const handleCheckboxChange = (row, isChecked) => {
-    selectedRef.current = isChecked ? row : null
-  }
+  const selectRow = row => {
+  if (!row || submittedRef.current) return
+
+  submittedRef.current = true
+
+  onSelect?.(row)
+  window.close()
+}
 
   useEffect(() => {
     if (initialSearch) onSearch(initialSearch)
   }, [])
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} fullSize>
-      <VertLayout>
-        <Fixed>
-          <GridToolbar
-            inputSearch
-            initialSearch={initialSearch}
-            onSearch={onSearch}
-            onSearchChange={term => onSearchChange?.(term || '')}
-            onSearchClear={onClear}
-            labels={labels}
-            maxAccess={maxAccess}
-          />
-        </Fixed>
-        <Grow>
-          <Table
-            name='barcodesLookup'
-            columns={columns}
-            gridData={{ list: formik.values.rows, count: formik.values.rows.length }}
-            rowId={['recordId']}
-            pagination={false}
-            showCheckboxColumn
-            rowSelection='single'
-            handleCheckboxChange={handleCheckboxChange}
-            maxAccess={maxAccess}
-          />
-        </Grow>
-      </VertLayout>
-    </Form>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          inputSearch
+          autoFocus
+          initialSearch={initialSearch}
+          onSearch={onSearch}
+          onSearchChange={term => onSearchChange?.(term || '')}
+          onSearchClear={onClear}
+          labels={labels}
+          maxAccess={maxAccess}
+        />
+      </Fixed>
+      <Grow>
+        <Table
+          name='barcodesLookup'
+          columns={columns}
+          gridData={{
+            list: formik.values.rows,
+            count: formik.values.rows.length
+          }}
+          rowId={['recordId']}
+          pagination={false}
+          onCellKeyDown={e => {
+            if (e.event?.key === 'Enter' && e.data) {
+              e.event.preventDefault()
+              selectRow(e.data)
+            }
+          }}
+          maxAccess={maxAccess}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
