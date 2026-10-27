@@ -152,7 +152,10 @@ export default function EntitlementForm({
                   displayField='name'
                   values={formik.values}
                   filter={item => item.type == 1}
-                  onChange={(_, newValue) => formik.setFieldValue('edId', newValue?.recordId || null)}
+                  onChange={(_, newValue) => {
+                    formik.setFieldValue('edCalcType', newValue?.edCalcType || null)
+                    formik.setFieldValue('edId', newValue?.recordId || null)
+                  }}
                   required
                   maxAccess={maxAccess}
                   error={formik.touched.edId && Boolean(formik.errors.edId)}
