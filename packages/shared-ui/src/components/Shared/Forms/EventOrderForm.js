@@ -326,7 +326,7 @@ export default function EventOrderForm({ recordId, window }) {
       onClick: 'onCancelReason',
       action: onCancel,
       isCancelled,
-      disabled: !editMode || (isClosed && !isCancelled)
+      disabled: !editMode
     },
     {
       key: 'Close',
