@@ -524,7 +524,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
               }
 
               barcodeSkuSelection(
-                changes => updateRow({ id: row.id, changes }),
+                changes => updateRow({ id: row.id, changes, focusField: jumpToNextLine ? undefined : 'qty'}),
                 addRow,
                 {
                   ...row,
@@ -1443,6 +1443,10 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       : itemInfo.taxName ?? ''
 
     const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+
+    const selectedMU =
+      (newRow?.muId && filteredMeasurements?.find(mu => mu.recordId === newRow.muId)) ||
+      filteredMeasurements?.[0]    
     const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
     const updatedRowValues = {
@@ -1466,9 +1470,9 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       priceType: itemInfo?.priceType || 1,
       qty: jumpToNextLine ? 1 : 0,
       msId: itemInfo?.msId,
-      muRef: filteredMeasurements?.[0]?.reference,
-      muId: filteredMeasurements?.[0]?.recordId,
-      muQty: filteredMeasurements?.[0]?.qty,
+      muRef: selectedMU?.reference,
+      muId: selectedMU?.recordId,
+      muQty: selectedMU?.qty,
       mdAmount: formik.values.header.maxDiscount ? formik.values.header.maxDiscount : 0,
       mdType: MDTYPE_PCT,
       extendedPrice: 0,

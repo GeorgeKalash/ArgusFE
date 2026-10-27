@@ -1525,6 +1525,7 @@ const Table = ({
             onColumnMoved={onColumnMoved}
             onColumnResized={onColumnResized}
             onColumnPinned={onColumnPinned}
+            onCellKeyDown={props?.onCellKeyDown}
             onSortChanged={onSortChanged}
             enableRtl={languageId === 2}
             suppressContextMenu={false}

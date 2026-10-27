@@ -669,11 +669,12 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
-    const updateRow = ({ changes }) => {
+    const updateRow = ({ changes, focusField }) => {
       const oldRow = params.data
       setData(changes, params)
       commit(changes)
       process(params, oldRow, setData)
+      focusFieldLater(params, focusField)
     }
 
     const isRightAligned =
@@ -728,7 +729,7 @@ export function DataGrid({
       }
     }
 
-    const updateRow = ({ changes, commitOnBlur }) => {
+    const updateRow = ({ changes, commitOnBlur, focusField }) => {
       const oldRow = params.data
       setCurrentValue(changes || '')
       setData(changes, params)
@@ -742,6 +743,8 @@ export function DataGrid({
         commit(changes)
         process(params, oldRow, setData)
       }
+
+      focusFieldLater(params, focusField)
     }
 
     const comp = column.colDef.component
@@ -1072,6 +1075,16 @@ export function DataGrid({
       rowNode.updateData(newData)
     }
   }
+
+  const focusFieldLater = (params, field) => {
+    if (!field) return
+
+    setTimeout(() => {
+      params.api.setFocusedCell(params.node.rowIndex, field)
+      params.api.startEditingCell({ rowIndex: params.node.rowIndex, colKey: field })
+    }, 50)
+  }
+
 
   const onCellEditingStopped = params => {
     const cellId = `${params.node.id}-${params.column.colId}`
