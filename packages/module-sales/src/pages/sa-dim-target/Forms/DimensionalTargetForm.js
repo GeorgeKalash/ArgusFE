@@ -7,7 +7,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
@@ -16,38 +16,34 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 
-export default function BudgetForm ({ labels, record, recordId, maxAccess, window }) {
+export default function DimensionalTargetForm ({ labels, recordId, maxAccess, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const {fiscalYear, periodId, seqNo} = record || {}
   
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.Budget.page
+    endpointId: SaleRepository.DimensionalTarget.page
   })
   
   const { formik } = useForm({
     initialValues: {
-      recordId,
+      recordId: null,
       fiscalYear: null,
       periodId: null,
-      seqNo: 0,
+      plantId: null,
       metalId: null,
       itemGroupId: null,
       collectionId: null,
-      qtyPct: 0
+      qty: 0
     },
     maxAccess,
     validationSchema: yup.object({
       fiscalYear: yup.number().required(),
       periodId: yup.number().required(),
-      metalId: yup.number().required(),
-      itemGroupId: yup.number().required(),
-      collectionId: yup.number().required(),
-      qtyPct: yup.number().required().max(100),
+      qty: yup.number().required(),
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: ManufacturingRepository.Budget.set,
+        extension: SaleRepository.DimensionalTarget.set,
         record: JSON.stringify(obj)
       })
       toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
@@ -58,26 +54,22 @@ export default function BudgetForm ({ labels, record, recordId, maxAccess, windo
 
   async function refetchForm () {
     const res = await getRequest({
-      extension: ManufacturingRepository.Budget.get,
-      parameters: `_fiscalYear=${fiscalYear}&_periodId=${periodId}&_seqNo=${seqNo}`
+      extension: SaleRepository.DimensionalTarget.get,
+      parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({
-      ...res?.record || {},
-      recordId
-     }
-    )
+    formik.setValues({...res?.record})
   }
 
   useEffect(() => {
-    if (record && fiscalYear && periodId && seqNo && recordId) refetchForm()
+    if (recordId) refetchForm()
   }, [])
 
   const editMode = !!formik.values.recordId
   
   return (
     <FormShell
-      resourceId={ResourceIds.Budget}
+      resourceId={ResourceIds.DimensionalTarget}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -94,7 +86,6 @@ export default function BudgetForm ({ labels, record, recordId, maxAccess, windo
                 displayField='fiscalYear'
                 values={formik.values}
                 required
-                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => formik.setFieldValue('fiscalYear', newValue?.fiscalYear)}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
@@ -109,7 +100,6 @@ export default function BudgetForm ({ labels, record, recordId, maxAccess, windo
                 displayField='name'
                 values={formik.values}
                 required
-                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => formik.setFieldValue('periodId', newValue?.periodId || null)}
                 error={formik.touched.periodId && Boolean(formik.errors.periodId)}
@@ -123,9 +113,25 @@ export default function BudgetForm ({ labels, record, recordId, maxAccess, windo
                 valueField='recordId'
                 displayField='reference'
                 values={formik.values}
-                required
                 onChange={(_, newValue) => formik.setFieldValue('metalId', newValue?.recordId || null) }
                 error={formik.touched.metalId && Boolean(formik.errors.metalId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='plantId'
+                label={labels.plant}
+                valueField='recordId'
+                displayField={['reference','name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('plantId', newValue?.recordId || null) }
+                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -143,7 +149,6 @@ export default function BudgetForm ({ labels, record, recordId, maxAccess, windo
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                required
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => formik.setFieldValue('itemGroupId', newValue?.recordId || null)}
                 error={formik.touched.itemGroupId && formik.errors.itemGroupId}
@@ -162,22 +167,22 @@ export default function BudgetForm ({ labels, record, recordId, maxAccess, windo
                 ]}
                 maxAccess={maxAccess}
                 values={formik.values}
-                required
                 onChange={(_, newValue) => formik.setFieldValue('collectionId', newValue?.recordId || null) }
                 error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField
-                name='qtyPct'
-                label={labels.qtyPct}
-                value={formik.values.qtyPct}
+                name='qty'
+                label={labels.amount}
+                value={formik.values.qty}
                 maxAccess={maxAccess}
                 allowNegative={false}
+                maxLength={14}
                 required
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('qtyPct', 0)}
-                error={formik.touched.qtyPct && Boolean(formik.errors.qtyPct)}
+                onClear={() => formik.setFieldValue('qty', 0)}
+                error={formik.touched.qty && Boolean(formik.errors.qty)}
               />
             </Grid>
           </Grid>

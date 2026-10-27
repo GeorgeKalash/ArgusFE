@@ -327,5 +327,11 @@ export const SaleRepository = {
   SalesBasket: {
     get2: service + 'get2BSK',
     set2: service + 'set2BSK'
+  },
+  DimensionalTarget: {
+    set: service + 'setDTGT',
+    del: service + 'delDTGT',
+    page: service + 'pageDTGT',
+    get: service + 'getDTGT'
   }
 }

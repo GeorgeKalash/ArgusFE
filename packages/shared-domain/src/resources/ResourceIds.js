@@ -671,7 +671,7 @@ export const ResourceIds = {
   FixingSalesDTD: 38602,
   FixingPurchaseDTD: 38603,
   BTDocumentTypeDefault: 38102,
-  Budget: 42145,
+  DimensionalTarget: 51211,
   Calendar: 72106,
   PM_Budget: 48105,
   CancelReason: 20603,
