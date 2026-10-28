@@ -53,6 +53,7 @@ const Table = ({
   collabsable = true,
   domLayout = 'normal',
   highlightRow,
+  showFilterButton = true,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -1478,27 +1479,29 @@ const Table = ({
             </Box>
           )}
 
-          <Box
-            ref={hoverFilterRef}
-            className='hoverFilter'
-            onPointerDown={handleDragStart}
-            style={{ right: 6, top: 6 }}
-          >
-            <IconButton
-              size='small'
-              onClick={() => {
-                setShowFilters(prev => {
-                  const next = !prev
-                  if (!next) {
-                    gridApiRef.current?.api?.setFilterModel(null)
-                  }
-                  return next
-                })
-              }}
+          {showFilterButton && (
+            <Box
+              ref={hoverFilterRef}
+              className='hoverFilter'
+              onPointerDown={handleDragStart}
+              style={{ right: 6, top: 6 }}
             >
-              <FilterAltIcon fontSize='small' />
-            </IconButton>
-          </Box>
+              <IconButton
+                size='small'
+                onClick={() => {
+                  setShowFilters(prev => {
+                    const next = !prev
+                    if (!next) {
+                      gridApiRef.current?.api?.setFilterModel(null)
+                    }
+                    return next
+                  })
+                }}
+              >
+                <FilterAltIcon fontSize='small' />
+              </IconButton>
+            </Box>
+          )}
 
           <AgGridReact
             key="grid"
