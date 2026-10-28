@@ -178,7 +178,7 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
                 value={formik.values.qty}
                 maxAccess={maxAccess}
                 allowNegative={false}
-                maxLength={14}
+                maxLength={12}
                 required
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('qty', 0)}
