@@ -585,13 +585,10 @@ useEffect(() => {
                 onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(newValue?.recordId, formik.values.currencyId, formik.values.date)
 
-                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date, formik.values?.eo_defTargetPriceMUQty)
-
                   setReCalc(true)
                   formik.setValues({
                     ...formik.values,
                     ...(rate || {}),
-                    marketPrice,
                     fi_currencyRef: newValue?.reference || '',
                     fi_currencyId: newValue?.recordId || null
                   })
@@ -645,7 +642,7 @@ useEffect(() => {
                 onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(formik.values.fi_currencyId, formik.values.currencyId, newValue)
 
-                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik?.values?.metalId, newValue, formik.values?.eo_defTargetPriceMUQty)
+                  const marketPrice = await getMarketPrice(formik.values.currencyId, formik?.values?.metalId, newValue, formik.values?.eo_defTargetPriceMUQty)
 
                   setReCalc(true)
                   formik.setValues({ ...formik.values, ...(rate || {}), marketPrice, date: newValue })
@@ -724,7 +721,7 @@ useEffect(() => {
                           formik.values.date
                         )
 
-                        const marketPrice = await getMarketPrice(formik.values.fi_currencyId, newValue?.metalId, formik.values.date, newValue?.eo_defTargetPriceMUQty)
+                        const marketPrice = await getMarketPrice(newValue?.currencyId, newValue?.metalId, formik.values.date, newValue?.eo_defTargetPriceMUQty)
 
                         setReCalc(true)
                         formik.setValues({
