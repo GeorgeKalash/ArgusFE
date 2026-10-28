@@ -25,7 +25,6 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import DamageForm from '@argus/shared-ui/src/components/Shared/Forms/DamageForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function WorksheetForm({ labels, maxAccess: access, setStore, store, joInvalidate }) {
@@ -165,15 +164,6 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
     enabled: !!recordId && !isPosted
   })
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const onPost = async () => {
     const data = {
@@ -204,12 +194,6 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
   }
 
   const actions = [
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode || isPosted
-    },
     {
       key: 'Unlocked',
       condition: !isPosted,
@@ -282,6 +266,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
       actions={actions}
       previewReport={true}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

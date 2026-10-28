@@ -18,7 +18,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -183,12 +182,6 @@ export default function JobOrderForm({
       disabled: !editMode || isCancelled || isPosted
     },
     {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-    {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
@@ -309,15 +302,8 @@ export default function JobOrderForm({
 
     invalidate()
   }
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.JobOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
+
+  
   function openSerials() {
     stack({
       Component: SerialsLots,
@@ -634,6 +620,7 @@ export default function JobOrderForm({
       previewReport={editMode}
       actions={actions}
       editMode={editMode}
+      isWorkFlow={true}
       disabledSubmit={isCancelled || isPosted}
       disabledSavedClear={isCancelled || isPosted}
     >
