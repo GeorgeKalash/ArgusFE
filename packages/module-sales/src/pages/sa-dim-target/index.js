@@ -19,10 +19,11 @@ export default function DimensionalTarget () {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
+
     const response = await getRequest({
       extension: SaleRepository.DimensionalTarget.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
     return { ...response, _startAt }
   }
@@ -38,8 +39,18 @@ export default function DimensionalTarget () {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SaleRepository.DimensionalTarget.page,
-    datasetId: ResourceIds.DimensionalTarget
+    datasetId: ResourceIds.DimensionalTarget,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
+
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({
+      _startAt: pagination?._startAt || 0,
+      params: filters?.params
+    })
+  }
 
   const columns = [
     { field: 'fiscalYear', headerName: labels.fiscalYear, flex: 1 },
@@ -70,7 +81,6 @@ export default function DimensionalTarget () {
         labels,
         recordId: obj?.recordId,
         maxAccess,
-        invalidate
       },
       width: 550,
       height: 450,
@@ -81,7 +91,7 @@ export default function DimensionalTarget () {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={maxAccess} reportName={'SADTGT'} filterBy={filterBy} inputSearch={false}/>
+        <RPBGridToolbar onAdd={add} maxAccess={maxAccess} reportName={'SADTGT'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

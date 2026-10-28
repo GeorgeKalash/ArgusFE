@@ -58,7 +58,7 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
       parameters: `_recordId=${recordId}`
     })
 
-    formik.setValues({...res?.record})
+    formik.setValues(res?.record || {})
   }
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('fiscalYear', newValue?.fiscalYear)}
+                onChange={(_, newValue) => formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
             </Grid>
