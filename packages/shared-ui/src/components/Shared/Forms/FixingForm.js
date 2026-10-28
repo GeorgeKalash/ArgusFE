@@ -137,6 +137,7 @@ export default function FixingForm({ recordId, functionId, window }) {
       reference: '',
       releaseStatus: 1,
       currencyId_metalId: '',
+      baseCurrency: '',
       status: 1
     },
     maxAccess,
@@ -205,22 +206,20 @@ export default function FixingForm({ recordId, functionId, window }) {
       extension: getEndpoint(functionId).get,
       parameters: `_recordId=${recordId}`
     })
+    const baseCurrency = await getBaseCurrency()
 
     setReCalc(false)
 
     formik.resetForm({
       values: {
         ...res?.record,
+        baseCurrency,
         date: formatDateFromApi(res?.record?.date),
         currencyId_metalId:
           res?.record?.currencyId && res?.record?.metalId
             ? `${res.record.currencyId}${res.record.metalId}`
             : null,
-        netAmount: getNetAmount({
-          amount: res.record?.amount,
-          exRate: res.record?.exRate,
-          rateCalcMethod: res.record?.rateCalcMethod
-        })
+        netAmount: res?.record?.baseAmount
       }
     })
   }
@@ -239,6 +238,23 @@ export default function FixingForm({ recordId, functionId, window }) {
 
     return res?.record || {}
   }
+
+  async function getBaseCurrency() {
+    if (!msId || !functionId) return ''
+
+    const res = await getRequest({
+      extension: BrokerageTradingRepository.Fixing.pack,
+      parameters: `_dgId=${functionId}&_msId=${msId}`
+    })
+
+    return res?.record?.baseCurrencyRef || ''
+  }
+
+  useEffect(() => {
+    if (recordId) return
+
+    getBaseCurrency().then(baseCurrency => formik.setFieldValue('baseCurrency', baseCurrency))
+  }, [msId])
 
 
   const onClose = async () => {
@@ -469,10 +485,10 @@ useEffect(() => {
     </InputAdornment>
   )
 
-  const fiCurrencyAdornment = (
+  const baseCurrencyAdornment = (
     <InputAdornment position='end' sx={{ maxHeight: '2em', mr: 0.5 }}>
       <Typography component='span' sx={{ color: 'red', fontSize: 'small', lineHeight: 1 }}>
-        {formik.values.fi_currencyRef}
+        {formik.values.baseCurrency}
       </Typography>
     </InputAdornment>
   )
@@ -832,6 +848,10 @@ useEffect(() => {
                         setReCalc(true)
                         formik.setFieldValue('unitPrice', 0)
                       }}
+                      InputProps={{
+                        readOnly: isClosed,
+                        endAdornment: currencyAdornment
+                      }}
                       error={formik.touched.unitPrice && Boolean(formik.errors.unitPrice)}
                     />
                   </Grid>
@@ -851,6 +871,10 @@ useEffect(() => {
                       onClear={() => {
                         setReCalc(true)
                         formik.setFieldValue('premium', 0)
+                      }}
+                      InputProps={{
+                        readOnly: isClosed,
+                        endAdornment: currencyAdornment
                       }}
                       error={formik.touched.premium && Boolean(formik.errors.premium)}
                     />
@@ -873,6 +897,10 @@ useEffect(() => {
                         setReCalc(true)
                         formik.setFieldValue('discount', 0)
                       }}
+                      InputProps={{
+                        readOnly: isClosed,
+                        endAdornment: currencyAdornment
+                      }}
                       error={formik.touched.discount && Boolean(formik.errors.discount)}
                     />
                   </Grid>
@@ -884,6 +912,10 @@ useEffect(() => {
                       maxAccess={maxAccess}
                       required
                       readOnly
+                      InputProps={{
+                        readOnly: true,
+                        endAdornment: currencyAdornment
+                      }}
                       error={formik.touched.netUnitPrice && Boolean(formik.errors.netUnitPrice)}
                     />
                   </Grid>
@@ -1056,6 +1088,10 @@ useEffect(() => {
                         maxLength={17}
                         decimalScale={5}
                         maxAccess={maxAccess}
+                        InputProps={{
+                          readOnly: true,
+                          endAdornment: currencyAdornment
+                        }}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -1087,7 +1123,7 @@ useEffect(() => {
                       readOnly
                       InputProps={{
                         readOnly: true,
-                        endAdornment: fiCurrencyAdornment
+                        endAdornment: baseCurrencyAdornment
                       }}
                     />
                   </Grid>
