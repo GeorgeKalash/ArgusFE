@@ -24,11 +24,13 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from './Form'
 import StrictConfirmation from './StrictConfirmation'
 import CancelReasonForm from './CancelationReasonForm'
+import WorkFlow from './WorkFlow'
 
 export default function FormShell({
   form,
   isSaved = true,
   isInfo = true,
+  isWorkFlow = false,
   isCleared = true,
   isSavedClear = true,
   children,
@@ -411,9 +413,19 @@ export default function FormShell({
           }
         })
       }
+      onWorkFlow={() => 
+        stack({
+          Component: WorkFlow,
+          props: {
+            functionId,
+            recordId: form.values.recordId
+          }
+        })
+      }
       isSaved={isSaved}
       isSavedClear={isSavedClearVisible}
       isInfo={isInfo}
+      isWorkFlow={isWorkFlow}
       isCleared={isCleared}
       actions={actions}
       editMode={editMode}

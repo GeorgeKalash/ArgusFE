@@ -2,6 +2,16 @@ import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLev
 
 export const getButtons = platformLabels => [
   {
+    key: 'WorkFlow',
+    label: platformLabels.WorkFlow,
+    condition: 'isWorkFlow',
+    onClick: 'onWorkFlow',
+    color: '#231f20',
+    disabled: '!editMode',
+    image: 'workflow.png',
+    main: true
+  },
+  {
     key: 'Clear',
     label: platformLabels.Clear,
     condition: 'isCleared',
@@ -122,13 +132,6 @@ export const getButtons = platformLabels => [
     label: platformLabels.AccountSummary,
     color: '#90278e',
     image: 'accountBalanceWhite.png',
-    main: false
-  },
-  {
-    key: 'WorkFlow',
-    label: platformLabels.WorkFlow,
-    color: '#231f20',
-    image: 'workflow.png',
     main: false
   },
   {

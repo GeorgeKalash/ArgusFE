@@ -12,7 +12,6 @@ import { useWindow } from "@argus/shared-providers/src/providers/windows"
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { formatDateFromApi, formatDateToApi } from "@argus/shared-domain/src/lib/date-helper"
-import WorkFlow from "@argus/shared-ui/src/components/Shared/WorkFlow"
 import FormShell from "@argus/shared-ui/src/components/Shared/FormShell"
 import { VertLayout } from "@argus/shared-ui/src/components/Layouts/VertLayout"
 import { Fixed } from "@argus/shared-ui/src/components/Layouts/Fixed"
@@ -166,16 +165,6 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
     })()
   }, [])
 
-  async function onWorkFlow() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.CreditLimitHold,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
-
   async function onReopen() {
     await postRequest({
       extension: FinancialRepository.CreditLimitHold.reopen,
@@ -214,12 +203,6 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlow,
       disabled: !editMode
     },
     {
@@ -283,6 +266,7 @@ const CreditLimitHoldForm = ({ recordId, window }) => {
       editMode={editMode}
       previewReport={editMode}
       disabledSubmit={isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
