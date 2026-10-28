@@ -14,6 +14,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { Grid } from '@mui/material'
 
 const GenerateMaterialPlaning = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -305,20 +306,22 @@ const GenerateMaterialPlaning = () => {
             filterBy={filterBy}
             hasSearch={false}
             rightSection={
-              <ResourceComboBox
-                endpointId={IVReplenishementRepository.MatPlanning.qry}
-                parameters='_params='
-                filter={item => item.status === 1}
-                label={labels.matReqPlan}
-                name='mrpId'
-                values={formik.values}
-                valueField='recordId'
-                displayField='reference'
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('mrpId', newValue?.recordId || null)
-                }}
-                maxAccess={access}
-              />
+              <Grid item xs={3}>
+                <ResourceComboBox
+                  endpointId={IVReplenishementRepository.MatPlanning.qry}
+                  parameters='_params='
+                  filter={item => item.status === 1}
+                  label={labels.matReqPlan}
+                  name='mrpId'
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField='reference'
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('mrpId', newValue?.recordId || null)
+                  }}
+                  maxAccess={access}
+                />
+              </Grid>
             }
           />
         </Fixed>
