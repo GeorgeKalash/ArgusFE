@@ -505,7 +505,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       editMode={editMode}
       actions={actions}
       previewBtnClicked={previewBtnClicked}
-      functionId={SystemFunction.DeliveryTrip}
+      functionId={SystemFunction.DeliveryOrder}
       disabledSubmit={isPosted || isCancelled}
       previewReport={editMode}
     >

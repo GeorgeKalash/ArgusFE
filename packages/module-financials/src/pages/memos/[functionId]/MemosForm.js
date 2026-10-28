@@ -313,7 +313,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       onClick: 'onCancelReason',
       action: onCancel,
       isCancelled,
-      disabled: !editMode || (isPosted && !isCancelled)
+      disabled: !editMode || isPosted
     },
     {
       key: 'AccountSummary',

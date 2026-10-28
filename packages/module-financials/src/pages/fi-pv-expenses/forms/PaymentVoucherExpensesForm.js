@@ -371,7 +371,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       onClick: 'onCancelReason',
       action: onCancel,
       isCancelled,
-      disabled: !editMode || (isPosted && !isCancelled)
+      disabled: !editMode || isPosted
     },
     {
       key: 'FI Trx',

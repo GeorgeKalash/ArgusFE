@@ -481,7 +481,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
       onClick: 'onCancelReason',
       action: onCancel,
       isCancelled,
-      disabled: !editMode || (isClosed && !isCancelled)
+      disabled: !editMode || isClosed
     },
   ]
 

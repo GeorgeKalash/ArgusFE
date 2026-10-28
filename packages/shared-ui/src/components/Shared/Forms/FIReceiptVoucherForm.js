@@ -353,7 +353,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
       onClick: 'onCancelReason',
       action: onCancel,
       isCancelled,
-      disabled: !editMode || isPosted || isCancelled
+      disabled: !editMode || isPosted
     },
     {
       key: 'FI Trx',

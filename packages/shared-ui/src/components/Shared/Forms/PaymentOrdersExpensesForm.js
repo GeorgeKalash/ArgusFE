@@ -316,7 +316,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
       onClick: 'onCancelReason',
       action: onCancel,
       isCancelled,
-      disabled: !editMode || (isClosed && !isCancelled)
+      disabled: !editMode || isClosed
     },
     {
       key: 'RecordRemarks',

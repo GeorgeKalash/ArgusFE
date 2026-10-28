@@ -232,7 +232,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
       onClick: 'onCancelReason',
       action: onCancel,
       isCancelled,
-      disabled: !editMode
+      disabled: !editMode || isClosed
     },
     {
       key: 'RecordRemarks',

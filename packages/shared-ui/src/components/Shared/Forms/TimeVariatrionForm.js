@@ -109,7 +109,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
       onClick: 'onCancelReason',
       action: onCancel,
       isCancelled,
-      disabled: !editMode || (isClosed && !isCancelled)
+      disabled: !editMode || isClosed
     },
     {
       key: 'Attachment',
