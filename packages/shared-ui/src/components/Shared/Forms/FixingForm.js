@@ -45,7 +45,8 @@ export default function FixingForm({ recordId, functionId, window }) {
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
   const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
   const maxDiscount = systemDefaults?.list?.find(obj => obj.key === 'bt_max_discount')?.value || null
-  
+  const [baseCurrencyRef, setBaseCurrencyRef] = useState('')
+
   const getResourceId = functionId => {
     switch (functionId) {
       case SystemFunction.FixingSales:
@@ -216,11 +217,7 @@ export default function FixingForm({ recordId, functionId, window }) {
           res?.record?.currencyId && res?.record?.metalId
             ? `${res.record.currencyId}${res.record.metalId}`
             : null,
-        netAmount: getNetAmount({
-          amount: res.record?.amount,
-          exRate: res.record?.exRate,
-          rateCalcMethod: res.record?.rateCalcMethod
-        })
+        netAmount: res?.record?.baseAmount
       }
     })
   }
@@ -239,6 +236,19 @@ export default function FixingForm({ recordId, functionId, window }) {
 
     return res?.record || {}
   }
+
+  useEffect(() => {
+    if (!msId || !functionId) return
+
+    ;(async () => {
+      const res = await getRequest({
+        extension: BrokerageTradingRepository.Fixing.pack,
+        parameters: `_dgId=${functionId}&_msId=${msId}`
+      })
+
+      setBaseCurrencyRef(res?.record?.baseCurrencyRef || '')
+    })()
+  }, [msId, functionId])
 
 
   const onClose = async () => {
@@ -469,10 +479,10 @@ useEffect(() => {
     </InputAdornment>
   )
 
-  const fiCurrencyAdornment = (
+  const baseCurrencyAdornment = (
     <InputAdornment position='end' sx={{ maxHeight: '2em', mr: 0.5 }}>
       <Typography component='span' sx={{ color: 'red', fontSize: 'small', lineHeight: 1 }}>
-        {formik.values.fi_currencyRef}
+        {baseCurrencyRef}
       </Typography>
     </InputAdornment>
   )
@@ -575,13 +585,10 @@ useEffect(() => {
                 onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(newValue?.recordId, formik.values.currencyId, formik.values.date)
 
-                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date, formik.values?.eo_defTargetPriceMUQty)
-
                   setReCalc(true)
                   formik.setValues({
                     ...formik.values,
                     ...(rate || {}),
-                    marketPrice,
                     fi_currencyRef: newValue?.reference || '',
                     fi_currencyId: newValue?.recordId || null
                   })
@@ -635,7 +642,7 @@ useEffect(() => {
                 onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(formik.values.fi_currencyId, formik.values.currencyId, newValue)
 
-                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik?.values?.metalId, newValue, formik.values?.eo_defTargetPriceMUQty)
+                  const marketPrice = await getMarketPrice(formik.values.currencyId, formik?.values?.metalId, newValue, formik.values?.eo_defTargetPriceMUQty)
 
                   setReCalc(true)
                   formik.setValues({ ...formik.values, ...(rate || {}), marketPrice, date: newValue })
@@ -714,7 +721,7 @@ useEffect(() => {
                           formik.values.date
                         )
 
-                        const marketPrice = await getMarketPrice(formik.values.fi_currencyId, newValue?.metalId, formik.values.date, newValue?.eo_defTargetPriceMUQty)
+                        const marketPrice = await getMarketPrice(newValue?.currencyId, newValue?.metalId, formik.values.date, newValue?.eo_defTargetPriceMUQty)
 
                         setReCalc(true)
                         formik.setValues({
@@ -832,6 +839,10 @@ useEffect(() => {
                         setReCalc(true)
                         formik.setFieldValue('unitPrice', 0)
                       }}
+                      InputProps={{
+                        readOnly: isClosed,
+                        endAdornment: currencyAdornment
+                      }}
                       error={formik.touched.unitPrice && Boolean(formik.errors.unitPrice)}
                     />
                   </Grid>
@@ -851,6 +862,10 @@ useEffect(() => {
                       onClear={() => {
                         setReCalc(true)
                         formik.setFieldValue('premium', 0)
+                      }}
+                      InputProps={{
+                        readOnly: isClosed,
+                        endAdornment: currencyAdornment
                       }}
                       error={formik.touched.premium && Boolean(formik.errors.premium)}
                     />
@@ -873,6 +888,10 @@ useEffect(() => {
                         setReCalc(true)
                         formik.setFieldValue('discount', 0)
                       }}
+                      InputProps={{
+                        readOnly: isClosed,
+                        endAdornment: currencyAdornment
+                      }}
                       error={formik.touched.discount && Boolean(formik.errors.discount)}
                     />
                   </Grid>
@@ -884,6 +903,10 @@ useEffect(() => {
                       maxAccess={maxAccess}
                       required
                       readOnly
+                      InputProps={{
+                        readOnly: true,
+                        endAdornment: currencyAdornment
+                      }}
                       error={formik.touched.netUnitPrice && Boolean(formik.errors.netUnitPrice)}
                     />
                   </Grid>
@@ -1056,6 +1079,10 @@ useEffect(() => {
                         maxLength={17}
                         decimalScale={5}
                         maxAccess={maxAccess}
+                        InputProps={{
+                          readOnly: true,
+                          endAdornment: currencyAdornment
+                        }}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -1087,7 +1114,7 @@ useEffect(() => {
                       readOnly
                       InputProps={{
                         readOnly: true,
-                        endAdornment: fiCurrencyAdornment
+                        endAdornment: baseCurrencyAdornment
                       }}
                     />
                   </Grid>

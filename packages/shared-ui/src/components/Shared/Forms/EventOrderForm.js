@@ -529,12 +529,9 @@ useEffect(() => {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date, formik.values.targetPrice_muQty)
-
                   setReCalc(true)
                   formik.setValues({
                     ...formik.values,
-                    marketPrice: marketPrice,
                     fi_currencyId: newValue?.recordId || null
                   })
                 }}
@@ -614,7 +611,7 @@ useEffect(() => {
                 label={labels.date}
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
-                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue, formik.values.targetPrice_muQty)
+                  const marketPrice = await getMarketPrice(formik.values.currencyId, formik.values.metalId, newValue, formik.values.targetPrice_muQty)
 
                   setReCalc(true)
                   formik.setValues({ ...formik.values, marketPrice, date: newValue })
@@ -745,7 +742,7 @@ useEffect(() => {
                         const pairQty = newValue?.eo_defTargetPriceMUQty || null
 
                         const marketPrice = await getMarketPrice(
-                          formik.values.fi_currencyId,
+                          newValue?.currencyId,
                           newValue?.metalId,
                           formik.values.date,
                           pairQty
