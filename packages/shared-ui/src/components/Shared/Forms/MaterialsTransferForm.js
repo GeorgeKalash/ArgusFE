@@ -20,12 +20,11 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
@@ -745,15 +744,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
     await refetchForm(formik.values.recordId)
   }
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.MaterialTransfer,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const onPost = async () => {
     const copy = { ...formik.values }
@@ -947,12 +937,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
       disabled: !isClosed || !editMode || isPosted
     },
     {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-    {
       key: 'Verify',
       condition: !formik.values.isVerified,
       onClick: onVerify,
@@ -982,7 +966,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       onClick: onReturn,
       disabled: !isPosted
     }
-  ]
+   ]
 
   async function getNotificationData(recordId) {
     return await getRequest({
@@ -1111,6 +1095,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       actions={actions}
       functionId={SystemFunction.MaterialTransfer}
       disabledSubmit={isPosted || isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>

@@ -19,7 +19,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { getVatCalc, calcVatAmountPerTaxDetail } from '@argus/shared-utils/src/utils/VatCalculator'
@@ -646,16 +645,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       invalidate()
     })
   }
-
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.DraftSerialsIn,
-        recordId: formik.values.header?.recordId
-      }
-    })
-  }
+  
 
   async function onImportClick() {
     stack({
@@ -691,12 +681,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed || formik.values.header?.status == 3 || !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
     },
     {
       key: 'Import',
@@ -900,6 +884,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       editMode={editMode}
       disabledSubmit={isClosed && !editMode}
       disabledSavedClear={isClosed && !editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

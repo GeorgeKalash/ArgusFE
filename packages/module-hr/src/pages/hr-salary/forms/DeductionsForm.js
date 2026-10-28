@@ -144,7 +144,10 @@ export default function DeductionsForm({
                   displayField='name'
                   values={formik.values}
                   filter={item => item.type == 2}
-                  onChange={(event, newValue) => formik.setFieldValue('edId', newValue?.recordId || null)}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('edCalcType', newValue?.edCalcType || null)
+                    formik.setFieldValue('edId', newValue?.recordId || null)
+                  }}
                   maxAccess={maxAccess}
                   required
                   error={formik.touched.edId && Boolean(formik.errors.edId)}

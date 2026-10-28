@@ -23,7 +23,6 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
@@ -176,16 +175,6 @@ export default function PaymentOrdersForm({ recordId, window }) {
     })()
   }, [])
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PaymentOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentOrders.cancel,
@@ -241,12 +230,6 @@ export default function PaymentOrdersForm({ recordId, window }) {
       disabled: !editMode
     },
     {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-    {
       key: 'Attachment',
       condition: true,
       onClick: 'onClickAttachment',
@@ -282,6 +265,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
       actions={actions}
       functionId={SystemFunction.PaymentOrder}
       disabledSubmit={isClosed || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>

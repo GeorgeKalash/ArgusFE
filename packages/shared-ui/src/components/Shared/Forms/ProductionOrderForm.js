@@ -27,7 +27,6 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import ImportForm from '@argus/shared-ui/src/components/Shared/ImportForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
@@ -505,27 +504,11 @@ export default function ProductionOrderForm({ recordId, window }) {
     invalidate()
   }
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.ProductionOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   const actions = [
     {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -585,6 +568,7 @@ export default function ProductionOrderForm({ recordId, window }) {
       editMode={editMode}
       previewReport={editMode}
       disabledSubmit={isPosted || isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

@@ -26,7 +26,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import AddressFilterForm from '@argus/shared-ui/src/components/Shared/AddressFilterForm'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
@@ -296,15 +295,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     })()
   }, [])
 
-  const onWorkFlow = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.DeliveryOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
+
 
   async function openGenerateInvoiceForm() {
     const resClient = await getRequest({
@@ -354,12 +345,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       action: onCancel,
       isCancelled,
       disabled: !editMode || (!isPosted && !isCancelled)
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlow,
-      disabled: !editMode
     },
     {
       key: 'generateIV',
@@ -508,6 +493,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       functionId={SystemFunction.DeliveryOrder}
       disabledSubmit={isPosted || isCancelled}
       previewReport={editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
