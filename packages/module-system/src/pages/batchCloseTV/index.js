@@ -1,12 +1,9 @@
-import React, { useContext } from 'react'
 import { ImmediateWindow } from '@argus/shared-providers/src/providers/windows'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import BatchCloseTVForm from './Forms/BatchCloseForm'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const BatchCloseTV = () => {
-  const { platformLabels } = useContext(ControlContext)
-
-  return <ImmediateWindow titleName={platformLabels.BatchCloseTV} Component={BatchCloseTVForm} />
+  return <ImmediateWindow Component={BatchCloseTVForm} labelKey={'BatchCloseTV'} datasetId={ResourceIds.BatchCloseTV} />
 }
 
 export default BatchCloseTV

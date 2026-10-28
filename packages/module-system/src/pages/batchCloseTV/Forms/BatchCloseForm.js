@@ -17,8 +17,9 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 
-export default function BatchCloseTVForm({ access }) {
+export default function BatchCloseTVForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -81,7 +82,7 @@ export default function BatchCloseTVForm({ access }) {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='startDate'
-                label={platformLabels.startDate}
+                label={_labels.startDate}
                 value={formik.values?.startDate}
                 required
                 onChange={formik.setFieldValue}
@@ -93,7 +94,7 @@ export default function BatchCloseTVForm({ access }) {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='endDate'
-                label={platformLabels.endDate}
+                label={_labels.endDate}
                 value={formik.values?.endDate}
                 required
                 onChange={formik.setFieldValue}
@@ -106,7 +107,7 @@ export default function BatchCloseTVForm({ access }) {
               <ResourceComboBox
                 endpointId={companyStructureRepository.Branches.qry}
                 name='branchId'
-                label={platformLabels.branch}
+                label={_labels.branch}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -121,13 +122,68 @@ export default function BatchCloseTVForm({ access }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
+                endpointId={EmployeeRepository.Employee.snapshot}
+                parameters={{ _branchId: 0 }}
+                valueField='reference'
+                displayField='fullName'
+                name='employeeId'
+                label={_labels.employee}
+                form={formik}
+                valueShow='employeeRef'
+                secondValueShow='employeeName'
+                maxAccess={access}
+                displayFieldWidth={2}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('employeeName', newValue.fullName || '')
+                  formik.setFieldValue('employeeRef', newValue?.reference || '')
+                  formik.setFieldValue('employeeId', newValue?.recordId || null)
+                }}
+                errorCheck='employeeId'
+              />
+            </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={companyStructureRepository.Divisions.qry}
+                  name='divisionId'
+                  label={_labels.division}
+                  valueField='recordId'
+                  displayField={'name'}
+                  maxAccess={access}
+                  values={formik.values}
+                  onChange={(_, newValue) => {
+                    formik.setFieldValue('divisionId', newValue?.recordId || null)
+                  }}
+                  error={formik.touched.divisionId && Boolean(formik.errors.divisionId)}
+                />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={companyStructureRepository.Departments.qry}
+                parameters={`_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`}
+                name='departmentId'
+                label={_labels.department}
+                values={formik.values}
+                columnsInDropDown={[
+                  { key: 'departmentRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                displayField={['departmentRef', 'name']}
+                maxAccess={access}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('departmentId', newValue?.recordId || null)
+                }}
+                error={formik.touched.departmentId && Boolean(formik.errors.departmentId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
                 endpointId={SystemRepository.Batch.snapshot}
                 parameters={{
                   _sortBy: 'recordId desc',
                   _functionId: SystemFunction.SalesInvoice
                 }}
                 name='batchId'
-                label={platformLabels.batch}
+                label={_labels.batch}
                 valueField='reference'
                 displayField='name'
                 valueShow='batchRef'
