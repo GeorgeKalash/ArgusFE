@@ -45,7 +45,6 @@ export default function FixingForm({ recordId, functionId, window }) {
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
   const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
   const maxDiscount = systemDefaults?.list?.find(obj => obj.key === 'bt_max_discount')?.value || null
-  const [baseCurrencyRef, setBaseCurrencyRef] = useState('')
 
   const getResourceId = functionId => {
     switch (functionId) {
@@ -216,8 +215,7 @@ export default function FixingForm({ recordId, functionId, window }) {
         currencyId_metalId:
           res?.record?.currencyId && res?.record?.metalId
             ? `${res.record.currencyId}${res.record.metalId}`
-            : null,
-        netAmount: res?.record?.baseAmount
+            : null
       }
     })
   }
@@ -236,19 +234,6 @@ export default function FixingForm({ recordId, functionId, window }) {
 
     return res?.record || {}
   }
-
-  useEffect(() => {
-    if (!msId || !functionId) return
-
-    ;(async () => {
-      const res = await getRequest({
-        extension: BrokerageTradingRepository.Fixing.pack,
-        parameters: `_dgId=${functionId}&_msId=${msId}`
-      })
-
-      setBaseCurrencyRef(res?.record?.baseCurrencyRef || '')
-    })()
-  }, [msId, functionId])
 
 
   const onClose = async () => {
@@ -479,10 +464,10 @@ useEffect(() => {
     </InputAdornment>
   )
 
-  const baseCurrencyAdornment = (
+  const fiCurrencyAdornment = (
     <InputAdornment position='end' sx={{ maxHeight: '2em', mr: 0.5 }}>
       <Typography component='span' sx={{ color: 'red', fontSize: 'small', lineHeight: 1 }}>
-        {baseCurrencyRef}
+        {formik.values.fi_currencyRef}
       </Typography>
     </InputAdornment>
   )
@@ -1114,7 +1099,7 @@ useEffect(() => {
                       readOnly
                       InputProps={{
                         readOnly: true,
-                        endAdornment: baseCurrencyAdornment
+                        endAdornment: fiCurrencyAdornment
                       }}
                     />
                   </Grid>
