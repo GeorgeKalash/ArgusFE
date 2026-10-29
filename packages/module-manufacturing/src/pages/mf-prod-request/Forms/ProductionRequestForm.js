@@ -30,9 +30,8 @@ import PreviewPR2 from './PreviewPR2'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
-import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
+
 const PROD_REQ_TYPE = {
   TopSales: 1,
   NewItems: 2,
