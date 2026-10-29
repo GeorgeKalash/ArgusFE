@@ -17,8 +17,9 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 
-export default function BatchCloseTVForm({ access }) {
+export default function BatchCloseTVForm({ _labels: labels, access }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -33,6 +34,9 @@ export default function BatchCloseTVForm({ access }) {
     initialValues: {
       startDate: newStartDate,
       endDate: today,
+      departmentId: 0,
+      divisionId: 0,
+      employeeId: 0,
       status: 1
     },
     maxAccess: access,
@@ -81,7 +85,7 @@ export default function BatchCloseTVForm({ access }) {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='startDate'
-                label={platformLabels.startDate}
+                label={labels.startDate}
                 value={formik.values?.startDate}
                 required
                 onChange={formik.setFieldValue}
@@ -93,7 +97,7 @@ export default function BatchCloseTVForm({ access }) {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='endDate'
-                label={platformLabels.endDate}
+                label={labels.endDate}
                 value={formik.values?.endDate}
                 required
                 onChange={formik.setFieldValue}
@@ -106,7 +110,7 @@ export default function BatchCloseTVForm({ access }) {
               <ResourceComboBox
                 endpointId={companyStructureRepository.Branches.qry}
                 name='branchId'
-                label={platformLabels.branch}
+                label={labels.branch}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -115,8 +119,73 @@ export default function BatchCloseTVForm({ access }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={access}
-                onChange={(_, newValue) => formik.setFieldValue('branchId', newValue?.recordId || null)}
+                onChange={(_, newValue) => {
+                   formik.setFieldValue('employeeName', '')
+                   formik.setFieldValue('employeeRef', '')
+                   formik.setFieldValue('employeeId', 0)
+                   formik.setFieldValue('branchId', newValue?.recordId || 0)
+                  }
+                }
                 error={formik.touched.branchId && Boolean(formik.errors.branchId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={EmployeeRepository.Employee.snapshot}
+                parameters={{ _branchId: formik?.values?.branchId || 0 }}
+                valueField='reference'
+                displayField='fullName'
+                name='employeeId'
+                label={labels.employee}
+                form={formik}
+                valueShow='employeeRef'
+                secondValueShow='employeeName'
+                maxAccess={access}
+                displayFieldWidth={2}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('employeeName', newValue?.fullName || '')
+                  formik.setFieldValue('employeeRef', newValue?.reference || '')
+                  formik.setFieldValue('employeeId', newValue?.recordId || 0)
+                }}
+                errorCheck='employeeId'
+              />
+            </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={companyStructureRepository.Divisions.qry}
+                  name='divisionId'
+                  label={labels.division}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  maxAccess={access}
+                  values={formik.values}
+                  onChange={(_, newValue) => {
+                    formik.setFieldValue('divisionId', newValue?.recordId || 0)
+                  }}
+                  error={formik.touched.divisionId && Boolean(formik.errors.divisionId)}
+                />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={companyStructureRepository.Departments.qry}
+                parameters={`_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`}
+                name='departmentId'
+                label={labels.department}
+                values={formik.values}
+                columnsInDropDown={[
+                  { key: 'departmentRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                displayField={['departmentRef', 'name']}
+                maxAccess={access}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('departmentId', newValue?.recordId || 0)
+                }}
+                error={formik.touched.departmentId && Boolean(formik.errors.departmentId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -127,7 +196,7 @@ export default function BatchCloseTVForm({ access }) {
                   _functionId: SystemFunction.SalesInvoice
                 }}
                 name='batchId'
-                label={platformLabels.batch}
+                label={labels.batch}
                 valueField='reference'
                 displayField='name'
                 valueShow='batchRef'
