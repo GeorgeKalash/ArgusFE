@@ -75,6 +75,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       ivtItem: true,
       salesItem: true,
       purchaseItem: true,
+      mfrItem: true,
       kitItem: false,
       taxId: '',
       lotCategoryId: null,
@@ -579,7 +580,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={12}>
                   <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.Items} seqNo={0} recordId={recordId} />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={3}>
                   <CustomCheckBox
                     name='ivtItem'
                     value={formik.values?.ivtItem}
@@ -589,7 +590,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     disabled={formik.values.kitItem || editMode}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={3}>
                   <CustomCheckBox
                     name='salesItem'
                     value={formik.values?.salesItem}
@@ -599,12 +600,22 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   />
                 </Grid>
 
-                <Grid item xs={4}>
+                <Grid item xs={3}>
                   <CustomCheckBox
                     name='purchaseItem'
                     value={formik.values?.purchaseItem}
                     onChange={event => formik.setFieldValue('purchaseItem', event.target.checked)}
                     label={labels.purchase}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+
+                <Grid item xs={3}>
+                  <CustomCheckBox
+                    name='mfrItem'
+                    value={formik.values?.mfrItem}
+                    onChange={event => formik.setFieldValue('mfrItem', event.target.checked)}
+                    label={labels.production}
                     maxAccess={maxAccess}
                   />
                 </Grid>
