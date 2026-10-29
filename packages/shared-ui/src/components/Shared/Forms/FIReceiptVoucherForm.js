@@ -275,12 +275,12 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
     }
   }
 
-  const onCancel = async () => {
+  const onCancel = async (cancelReason) => {
     const obj = formik.values
 
     const res = await postRequest({
       extension: FinancialRepository.ReceiptVouchers.cancel,
-      record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
+      record: JSON.stringify({ recordId: formik.values.recordId, notes: cancelReason })
     })
 
     if (res?.recordId) {
@@ -347,12 +347,13 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
       onReset,
       disabled: !editMode
     },
-
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isPosted || isCancelled
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isPosted
     },
     {
       key: 'FI Trx',

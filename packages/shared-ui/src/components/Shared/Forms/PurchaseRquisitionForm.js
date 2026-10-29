@@ -135,10 +135,10 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
     refetchForm(res?.recordId)
   }
 
-  async function onCancel() {
+  async function onCancel(cancelReason) {
     const res = await postRequest({
       extension: PurchaseRepository.PurchaseRequisition.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ recordId: formik.values.recordId, notes: cancelReason })
     })
 
     toast.success(platformLabels.Cancelled)
@@ -180,8 +180,10 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isCancelled
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode
     }
   ]
 

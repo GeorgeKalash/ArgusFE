@@ -30,8 +30,8 @@ import AddressFilterForm from '@argus/shared-ui/src/components/Shared/AddressFil
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId, refresh = true, ...props }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -275,10 +275,10 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     await refetchForm(formik.values.recordId)
   }
 
-  const onCancel = async () => {
+  const onCancel = async cancelReason => {
     await postRequest({
       extension: DeliveryRepository.DeliveriesOrders.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
     if (recordId) toast.success(platformLabels.Cancelled)
@@ -341,8 +341,10 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || !isPosted || isCancelled
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || (!isPosted && !isCancelled)
     },
     {
       key: 'generateIV',

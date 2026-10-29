@@ -176,10 +176,10 @@ export default function JobOrderForm({
     {
       key: 'Cancel',
       condition: true,
-      onClick: () => {
-        confirmation(platformLabels.CancelConf, platformLabels.Confirmation, onCancel)
-      },
-      disabled: !editMode || isCancelled || isPosted
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isPosted
     },
     {
       key: 'GL',
@@ -264,13 +264,12 @@ export default function JobOrderForm({
     await refetchForm(res.recordId)
     setRefetchRouting(true)
   }
-  async function onCancel() {
+  async function onCancel(cancelReason) {
     const res = await postRequest({
       extension: ManufacturingRepository.MFJobOrder.cancel,
       record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values.date),
-        deliveryDate: formik.values.deliveryDate ? formatDateToApi(formik.values.deliveryDate) : null
+        recordId: formik?.values?.recordId,
+        notes: cancelReason
       })
     })
     toast.success(platformLabels.Cancelled)
