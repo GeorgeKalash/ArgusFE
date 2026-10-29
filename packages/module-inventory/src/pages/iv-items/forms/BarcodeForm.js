@@ -77,6 +77,7 @@ const BarcodeForm = ({ store, labels }) => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
+    enabled: !!recordId,
     endpointId: InventoryRepository.Barcode.qry,
     datasetId: ResourceIds.Barcodes,
     search: {
