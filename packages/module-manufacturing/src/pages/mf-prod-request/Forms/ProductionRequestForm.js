@@ -65,7 +65,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       dtId: null,
       reference: '',
       date: new Date(),
-      plantGroupId: null,
+      plantId: null,
       fiscalYear: null,
       periodId: null,
       periodName: null,
@@ -98,7 +98,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required(),
-        plantGroupId: yup.number().required(),
+        plantId: yup.number().required(),
         fiscalYear: yup.number().required(),
         periodName: yup.string().required(),
         type: yup.number().required(),
@@ -163,12 +163,12 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       formik.values.header.type
     )
 
-  const { type, plantGroupId, metalId } = formik.values.header;
+  const { type, plantId, metalId } = formik.values.header;
 
   const isPreviewDisabled =
     !canPreview ||
     disablePreview ||
-    (type === PROD_REQ_TYPE.TopSales && (!plantGroupId || !metalId));
+    (type === PROD_REQ_TYPE.TopSales && (!plantId || !metalId));
 
   async function refetchForm(requestId) {
     const { record } = await getRequest({
@@ -310,7 +310,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       stack({
         Component: PreviewPR,
         props: {
-          plantGroupId: formik.values.header.plantGroupId,
+          plantId: formik.values.header.plantId,
           metalId: formik.values.header.metalId,
           requestId: formik.values.recordId || 0,
           parentFormik: formik,
@@ -624,9 +624,9 @@ export default function ProductionRequestForm({ recordId, labels, access, window
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.PlantGroup.qry}
-                    name='header.plantGroupId'
-                    label={labels.plantGroup}
+                    endpointId={SystemRepository.Plant.qry}
+                    name='header.plantId'
+                    label={labels.plant}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
@@ -638,9 +638,9 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                     required
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('header.plantGroupId', newValue?.recordId || null)
+                      formik.setFieldValue('header.plantId', newValue?.recordId || null)
                     }}
-                    error={formik?.touched?.header?.plantGroupId && Boolean(formik?.errors?.header?.plantGroupId)}
+                    error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
