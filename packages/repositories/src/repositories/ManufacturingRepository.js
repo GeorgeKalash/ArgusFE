@@ -132,6 +132,7 @@ export const ManufacturingRepository = {
     del: service + 'delDES',
     snapshot: service + 'snapshotDES',
     snapshot2: service + 'snapshotDES2',
+    snapshot3: service + 'snapshotDES3',
     page: service + 'pageDES'
   },
   MFJobOrder: {
