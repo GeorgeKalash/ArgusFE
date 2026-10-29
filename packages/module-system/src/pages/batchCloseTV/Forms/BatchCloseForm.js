@@ -19,7 +19,7 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 
-export default function BatchCloseTVForm({ _labels, access }) {
+export default function BatchCloseTVForm({ _labels: labels, access }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -34,6 +34,9 @@ export default function BatchCloseTVForm({ _labels, access }) {
     initialValues: {
       startDate: newStartDate,
       endDate: today,
+      departmentId: 0,
+      divisionId: 0,
+      employeeId: 0,
       status: 1
     },
     maxAccess: access,
@@ -82,7 +85,7 @@ export default function BatchCloseTVForm({ _labels, access }) {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='startDate'
-                label={_labels.startDate}
+                label={labels.startDate}
                 value={formik.values?.startDate}
                 required
                 onChange={formik.setFieldValue}
@@ -94,7 +97,7 @@ export default function BatchCloseTVForm({ _labels, access }) {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='endDate'
-                label={_labels.endDate}
+                label={labels.endDate}
                 value={formik.values?.endDate}
                 required
                 onChange={formik.setFieldValue}
@@ -107,7 +110,7 @@ export default function BatchCloseTVForm({ _labels, access }) {
               <ResourceComboBox
                 endpointId={companyStructureRepository.Branches.qry}
                 name='branchId'
-                label={_labels.branch}
+                label={labels.branch}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -116,27 +119,33 @@ export default function BatchCloseTVForm({ _labels, access }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={access}
-                onChange={(_, newValue) => formik.setFieldValue('branchId', newValue?.recordId || null)}
+                onChange={(_, newValue) => {
+                   formik.setFieldValue('employeeName', '')
+                   formik.setFieldValue('employeeRef', '')
+                   formik.setFieldValue('employeeId', 0)
+                   formik.setFieldValue('branchId', newValue?.recordId || 0)
+                  }
+                }
                 error={formik.touched.branchId && Boolean(formik.errors.branchId)}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={EmployeeRepository.Employee.snapshot}
-                parameters={{ _branchId: 0 }}
+                parameters={{ _branchId: formik?.values?.branchId || 0 }}
                 valueField='reference'
                 displayField='fullName'
                 name='employeeId'
-                label={_labels.employee}
+                label={labels.employee}
                 form={formik}
                 valueShow='employeeRef'
                 secondValueShow='employeeName'
                 maxAccess={access}
                 displayFieldWidth={2}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('employeeName', newValue.fullName || '')
+                  formik.setFieldValue('employeeName', newValue?.fullName || '')
                   formik.setFieldValue('employeeRef', newValue?.reference || '')
-                  formik.setFieldValue('employeeId', newValue?.recordId || null)
+                  formik.setFieldValue('employeeId', newValue?.recordId || 0)
                 }}
                 errorCheck='employeeId'
               />
@@ -145,13 +154,17 @@ export default function BatchCloseTVForm({ _labels, access }) {
                 <ResourceComboBox
                   endpointId={companyStructureRepository.Divisions.qry}
                   name='divisionId'
-                  label={_labels.division}
+                  label={labels.division}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
                   valueField='recordId'
-                  displayField={'name'}
+                  displayField={['reference', 'name']}
                   maxAccess={access}
                   values={formik.values}
                   onChange={(_, newValue) => {
-                    formik.setFieldValue('divisionId', newValue?.recordId || null)
+                    formik.setFieldValue('divisionId', newValue?.recordId || 0)
                   }}
                   error={formik.touched.divisionId && Boolean(formik.errors.divisionId)}
                 />
@@ -161,7 +174,7 @@ export default function BatchCloseTVForm({ _labels, access }) {
                 endpointId={companyStructureRepository.Departments.qry}
                 parameters={`_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`}
                 name='departmentId'
-                label={_labels.department}
+                label={labels.department}
                 values={formik.values}
                 columnsInDropDown={[
                   { key: 'departmentRef', value: 'Reference' },
@@ -170,7 +183,7 @@ export default function BatchCloseTVForm({ _labels, access }) {
                 displayField={['departmentRef', 'name']}
                 maxAccess={access}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('departmentId', newValue?.recordId || null)
+                  formik.setFieldValue('departmentId', newValue?.recordId || 0)
                 }}
                 error={formik.touched.departmentId && Boolean(formik.errors.departmentId)}
               />
@@ -183,7 +196,7 @@ export default function BatchCloseTVForm({ _labels, access }) {
                   _functionId: SystemFunction.SalesInvoice
                 }}
                 name='batchId'
-                label={_labels.batch}
+                label={labels.batch}
                 valueField='reference'
                 displayField='name'
                 valueShow='batchRef'
