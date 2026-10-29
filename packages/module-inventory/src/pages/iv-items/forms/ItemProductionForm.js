@@ -41,6 +41,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
         spfId: null,
         ltId: null,
         classId: null,
+        familyId: null,
         designName: '',
         designRef: '',
         designId: null,
@@ -339,8 +340,30 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
               />
             </Grid>
             <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.DesignFamily.qry}
+                values={formik.values.header}
+                name='header.familyId'
+                label={labels.designFamily}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.familyId', newValue?.recordId || null)
+
+                  formik.setFieldValue('header.designId', null)
+                  formik.setFieldValue('header.designRef', '')
+                  formik.setFieldValue('header.designName', '')
+                }}
+                error={formik.touched?.header?.familyId && Boolean(formik.errors?.header?.familyId)}
+              />
+            </Grid>
+            <Grid item xs={6}>
               <ResourceLookup
-                endpointId={ManufacturingRepository.Design.snapshot}
+                endpointId={ManufacturingRepository.Design.snapshot3}
+                parameters={{
+                  _familyId: formik.values.header.familyId || 0
+                }}
                 valueField='reference'
                 displayField='name'
                 name='header.designId'
@@ -352,6 +375,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 secondValue={formik.values.header.designName}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
+                  formik.setFieldValue('header.familyId', newValue?.familyId || null)
                   formik.setFieldValue('header.designRef', newValue?.reference || '')
                   formik.setFieldValue('header.designName', newValue?.name || '')
                   formik.setFieldValue('header.designId', newValue?.recordId || null)
