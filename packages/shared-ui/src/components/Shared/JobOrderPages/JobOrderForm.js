@@ -736,7 +736,7 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item>
                       <ResourceLookup
-                        endpointId={InventoryRepository.Item.snapshot5}
+                        endpointId={InventoryRepository.Item.snapshot7}
                         name='itemId'
                         readOnly={isCancelled || isPosted}
                         label={labels.item}
