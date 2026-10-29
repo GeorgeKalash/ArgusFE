@@ -143,9 +143,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
     const res = await postRequest({
       extension: TimeAttendanceRepository.TimeVariation.cancel,
       record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values?.date),
-        clockDuration: 0,
+        recordId: formik.values.recordId,
         notes: cancelReason
       })
     })

@@ -420,12 +420,10 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
 
   const onCancel = async cancelReason => {
     const recId = formik.values?.recordId
-    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) || null, notes: cancelReason }
-    delete header.items
 
     await postRequest({
       extension: IVReplenishementRepository.MaterialReplenishment.cancel,
-      record: JSON.stringify(header)
+      record: JSON.stringify({ recordId: recId, notes: cancelReason })
     })
 
     toast.success(platformLabels.Cancelled)

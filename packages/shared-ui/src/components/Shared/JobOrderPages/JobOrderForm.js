@@ -268,9 +268,7 @@ export default function JobOrderForm({
     const res = await postRequest({
       extension: ManufacturingRepository.MFJobOrder.cancel,
       record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values.date),
-        deliveryDate: formik.values.deliveryDate ? formatDateToApi(formik.values.deliveryDate) : null,
+        recordId: formik?.values?.recordId,
         notes: cancelReason
       })
     })

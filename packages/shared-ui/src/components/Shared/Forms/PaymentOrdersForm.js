@@ -178,7 +178,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
   const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentOrders.cancel,
-      record: JSON.stringify({ ...formik.values, notes: cancelReason })
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
     if (res?.recordId) {
@@ -221,7 +221,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
       onClick: 'onCancelReason',
       action: onCancel,
       isCancelled,
-      disabled: !editMode || isClosed
+      disabled: !editMode
     },
     {
       key: 'RecordRemarks',

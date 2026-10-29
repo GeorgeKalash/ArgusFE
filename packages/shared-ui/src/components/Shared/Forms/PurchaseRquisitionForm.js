@@ -138,7 +138,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
   async function onCancel(cancelReason) {
     const res = await postRequest({
       extension: PurchaseRepository.PurchaseRequisition.cancel,
-      record: JSON.stringify({ ...formik.values, notes: cancelReason })
+      record: JSON.stringify({ recordId: formik.values.recordId, notes: cancelReason })
     })
 
     toast.success(platformLabels.Cancelled)

@@ -280,7 +280,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
 
     const res = await postRequest({
       extension: FinancialRepository.ReceiptVouchers.cancel,
-      record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date), notes: cancelReason })
+      record: JSON.stringify({ recordId: formik.values.recordId, notes: cancelReason })
     })
 
     if (res?.recordId) {

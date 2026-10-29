@@ -278,7 +278,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   const onCancel = async cancelReason => {
     await postRequest({
       extension: DeliveryRepository.DeliveriesOrders.cancel,
-      record: JSON.stringify({ ...formik.values, notes: cancelReason })
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
     if (recordId) toast.success(platformLabels.Cancelled)

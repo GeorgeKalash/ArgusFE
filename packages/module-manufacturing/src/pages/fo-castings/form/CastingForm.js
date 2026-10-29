@@ -284,8 +284,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
     await postRequest({
       extension: FoundryRepository.Casting.cancel,
       record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values.date),
+        recordId: formik.values.recordId,
         notes: cancelReason
       })
     })

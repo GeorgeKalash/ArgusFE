@@ -249,7 +249,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentOrders.cancel,
-      record: JSON.stringify({ ...formik.values, notes: cancelReason })
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
     toast.success(platformLabels.Cancelled)

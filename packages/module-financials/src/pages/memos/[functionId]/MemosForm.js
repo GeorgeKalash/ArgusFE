@@ -205,7 +205,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.FiMemo.cancel,
-      record: JSON.stringify({ ...formik.values, notes: cancelReason })
+      record: JSON.stringify({ recordId: formik.values.recordId, notes: cancelReason })
     })
 
     if (res?.recordId) {
