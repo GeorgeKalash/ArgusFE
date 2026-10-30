@@ -52,6 +52,8 @@ import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/Pr
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -61,11 +63,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
   const taxDetailsCacheRef = useRef({})
+  const { combosStore } = useComboStore(SaleRepository.SalesOrder.pack)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.SalesOrder,
@@ -270,11 +273,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const isClosed = formik.values.wip === 2
   const isReleased = formik.values.status == 4
 
-  async function getFilteredMU(itemId, msId) {
-    if (!itemId) return
+  function getFilteredMU(msId) {
+    if (!msId) return []
 
-    const arrayMU = measurements?.filter(item => item.msId === msId) || []
-    filteredMeasurements.current = arrayMU
+    return measurements?.filter(item => item.msId === msId) || []
   }
 
   const iconKey = ({ value, data }) => {
@@ -360,6 +362,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         displayFieldWidth: 5
       },
       async onChange({ row: { update, newRow } }) {
+        delete muStoreByRowRef.current[newRow.id]
+
         if (!newRow.itemId) {
           return
         }
@@ -375,7 +379,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
           return
         }
-        getFilteredMU(newRow?.itemId, newRow?.msId)
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
@@ -479,7 +482,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       label: labels.measurementUnit,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -493,7 +495,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           update({ baseQty: 0 })
         }
 
-        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        const muList = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.msId)
+        const filteredItems = muList.find(item => item.recordId === newRow?.muId)
         const muQty = newRow?.muQty ?? filteredItems?.qty
         const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, '', newRow?.muId)
 
@@ -510,8 +513,18 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         )
         update(data)
       },
-      propsReducer({ props }) {
-        return { ...props, store: filteredMeasurements?.current }
+      propsReducer({ row, props }) {
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.msId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
@@ -536,8 +549,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         }
       },
       async onChange({ row: { update, newRow } }) {
-        getFilteredMU(newRow?.itemId, newRow?.msId)
-        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        const muList = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.msId)
+        const filteredItems = muList.find(item => item.recordId === newRow?.muId)
         const muQty = newRow?.muQty ?? filteredItems?.qty
 
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -852,6 +865,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   async function refetchForm(soId) {
     if (!soId) return
 
+    muStoreByRowRef.current = {}
     const { header, items } = await getSalesOrder(soId)
     const client = await getClient(header?.clientId)
     const shipAdd = await getAddress(header?.shipToAddressId)
@@ -1245,10 +1259,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     })
   }
 
-  const getPackData = async () => {
+  const fillTaxAndMeasurements = async () => {
     const res = await getRequest({
       extension: SaleRepository.SalesOrder.pack,
-      parameters: ''
+      parameters: ``
     })
 
     const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
@@ -1347,7 +1361,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   useEffect(() => {
     ;(async function () {
-      const muList = await getPackData()
+      const muList = await fillTaxAndMeasurements()
       setMeasurements(muList)
       const defaultValues = await getDefaultData()
       if (recordId) {
@@ -1407,9 +1421,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
               <Grid container spacing={2}>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesOrder.pack}
-                    reducer={response => response?.record?.documentTypes}
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_dgId=${SystemFunction.SalesOrder}&_startAt=0&_pageSize=1000`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
+                    store={combosStore?.documentTypes}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -1421,7 +1436,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       changeDT(newValue)
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                     }}
@@ -1430,9 +1445,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesOrder.pack}
-                    reducer={response => response?.record?.salesPeople}
+                    endpointId={SaleRepository.SalesPerson.qry}
                     filter={!editMode ? item => !item.isInactive : undefined}
+                    store={combosStore?.salesPeople}
                     name='spId'
                     label={labels.salesPerson}
                     columnsInDropDown={[
@@ -1445,7 +1460,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     values={formik.values}
                     displayFieldWidth={1.5}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('spId', newValue ? newValue.recordId : null)
                     }}
                     error={formik.touched.spId && Boolean(formik.errors.spId)}
@@ -1453,8 +1468,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesOrder.pack}
-                    reducer={response => response?.record?.currencies}
+                    endpointId={SystemRepository.Currency.qry}
+                    store={combosStore?.currencies}
                     name='currencyId'
                     label={labels.currency}
                     valueField='recordId'
@@ -1467,7 +1482,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     readOnly={isClosed}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
+                      muStoreByRowRef.current = {}
                       formik.setFieldValue('currencyId', newValue?.recordId || null)
                       formik.setFieldValue('items', [{ id: 1 }])
                     }}
@@ -1502,8 +1518,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesOrder.pack}
-                    reducer={response => response?.record?.plants}
+                    endpointId={SystemRepository.Plant.qry}
+                    store={combosStore?.plants}
                     name='plantId'
                     label={labels.plant}
                     readOnly={isClosed}
@@ -1515,7 +1531,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('plantId', newValue ? newValue.recordId : null)
                     }}
                     displayFieldWidth={2}
@@ -1582,7 +1598,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                   { key: 'name', value: 'Name' },
                   { key: 'szName', value: 'Sales Zone' }
                 ]}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('clientId', newValue?.recordId)
                   formik.setFieldValue('clientName', newValue?.name)
                   formik.setFieldValue('clientRef', newValue?.reference)
@@ -1609,8 +1625,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SalesOrder.pack}
-                reducer={response => response?.record?.taxSchedules}
+                endpointId={FinancialRepository.TaxSchedules.qry}
+                store={combosStore?.taxSchedules}
                 name='taxId'
                 label={labels.tax}
                 valueField='recordId'
@@ -1621,7 +1637,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 ]}
                 readOnly
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('taxId', newValue ? newValue.recordId : '')
                 }}
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
@@ -1630,8 +1646,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SalesOrder.pack}
-                reducer={response => response?.record?.sites}
+                endpointId={InventoryRepository.Site.qry}
+                store={combosStore?.sites}
                 name='siteId'
                 readOnly={isClosed}
                 label={labels.site}
@@ -1644,7 +1660,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 displayFieldWidth={2}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('siteId', newValue ? newValue.recordId : null)
                   formik.setFieldValue('siteRef', newValue ? newValue.reference : null)
                   formik.setFieldValue('siteName', newValue ? newValue.name : null)
@@ -1654,8 +1670,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SalesOrder.pack}
-                reducer={response => response?.record?.saleZones}
+                endpointId={SaleRepository.SalesZone.qry}
+                parameters={`_startAt=0&_pageSize=1000&_sortField=recordId&_filter=`}
+                store={combosStore?.saleZones}
                 name='szId'
                 label={labels.saleZone}
                 valueField='recordId'
@@ -1664,7 +1681,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 values={formik.values}
                 displayFieldWidth={1.5}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('szId', newValue ? newValue.recordId : null)
                 }}
                 error={formik.touched.szId && Boolean(formik.errors.szId)}
@@ -1693,9 +1710,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
-            }}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik.values.items}
             error={formik.errors.items}
@@ -1751,8 +1765,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 <Grid item container spacing={2}>
                   <Grid item xs={6}>
                     <ResourceComboBox
-                      endpointId={SaleRepository.SalesOrder.pack}
-                      reducer={response => response?.record?.sources}
+                      endpointId={SaleRepository.SalesOrderSource.qry}
+                      store={combosStore?.sources}
                       name='sourceId'
                       label={labels.source}
                       valueField='recordId'
