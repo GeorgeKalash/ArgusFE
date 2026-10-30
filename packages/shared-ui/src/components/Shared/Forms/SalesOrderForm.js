@@ -22,7 +22,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -802,15 +801,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     })
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.SalesOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   async function generateProdOrder() {
     const res = await postRequest({
@@ -857,12 +847,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       condition: true,
       onClick: onCancel,
       disabled: !((formik.values.deliveryStatus == 2 || formik.values.deliveryStatus == 1) && formik.values.status == 4)
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
     },
     {
       key: 'Invoice',
@@ -1428,6 +1412,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       editMode={editMode}
       disabledSubmit={isClosed && !editMode}
       disabledSavedClear={isClosed && !editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

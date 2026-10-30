@@ -22,7 +22,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -521,7 +520,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
               }
 
               barcodeSkuSelection(
-                changes => updateRow({ id: row.id, changes }),
+                changes => updateRow({ id: row.id, changes, focusField: jumpToNextLine ? undefined : 'qty'}),
                 addRow,
                 {
                   ...row,
@@ -1022,16 +1021,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: functionId,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
-
   const onPost = async () => {
     await postRequest({
       extension: getEndpoint[functionId]?.['post'],
@@ -1121,12 +1110,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -1451,6 +1434,9 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       : itemInfo.taxName ?? ''
 
     const filteredMUs = getFilteredMU(itemInfo?.msId)
+    const selectedMU =
+      (newRow?.muId && filteredMUs?.find(mu => mu.recordId === newRow.muId)) ||
+      filteredMUs?.[0]
     const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
     const updatedRowValues = {
@@ -1474,9 +1460,9 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       priceType: itemInfo?.priceType || 1,
       qty: jumpToNextLine ? 1 : 0,
       msId: itemInfo?.msId,
-      muRef: filteredMUs?.[0]?.reference,
-      muId: filteredMUs?.[0]?.recordId,
-      muQty: filteredMUs?.[0]?.qty,
+      muRef: selectedMU?.[0]?.reference,
+      muId: selectedMU?.[0]?.recordId,
+      muQty: selectedMU?.[0]?.qty,
       mdAmount: formik.values.header.maxDiscount ? formik.values.header.maxDiscount : 0,
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
@@ -2094,6 +2080,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

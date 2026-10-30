@@ -33,7 +33,6 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
@@ -228,12 +227,7 @@ export default function FixingForm({ recordId, functionId, window }) {
         currencyId_metalId:
           res?.record?.currencyId && res?.record?.metalId
             ? `${res.record.currencyId}${res.record.metalId}`
-            : null,
-        netAmount: getNetAmount({
-          amount: res.record?.amount,
-          exRate: res.record?.exRate,
-          rateCalcMethod: res.record?.rateCalcMethod
-        })
+            : null
       }
     })
   }
@@ -253,15 +247,6 @@ export default function FixingForm({ recordId, functionId, window }) {
     return res?.record || {}
   }
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const onClose = async () => {
     const res = await postRequest({
@@ -355,12 +340,6 @@ export default function FixingForm({ recordId, functionId, window }) {
       disabled: !editMode || !isClosed
     },
     {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-    {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
@@ -403,7 +382,7 @@ export default function FixingForm({ recordId, functionId, window }) {
       condition: true,
       onClick: 'onClickIT',
       disabled: !editMode
-    },
+    }
   ]
 
   const getNetAmount = ({ amount, exRate, rateCalcMethod }) => {
@@ -515,6 +494,7 @@ useEffect(() => {
       functionId={functionId}
       disabledSubmit={isClosed}
       actions={actions}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -600,13 +580,10 @@ useEffect(() => {
                 onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(newValue?.recordId, formik.values.currencyId, formik.values.date)
 
-                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date, formik.values?.eo_defTargetPriceMUQty)
-
                   setReCalc(true)
                   formik.setValues({
                     ...formik.values,
                     ...(rate || {}),
-                    marketPrice,
                     fi_currencyRef: newValue?.reference || '',
                     fi_currencyId: newValue?.recordId || null
                   })
@@ -660,7 +637,7 @@ useEffect(() => {
                 onChange={async (_, newValue) => {
                   const rate = await getMultiCurrencyFormData(formik.values.fi_currencyId, formik.values.currencyId, newValue)
 
-                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik?.values?.metalId, newValue, formik.values?.eo_defTargetPriceMUQty)
+                  const marketPrice = await getMarketPrice(formik.values.currencyId, formik?.values?.metalId, newValue, formik.values?.eo_defTargetPriceMUQty)
 
                   setReCalc(true)
                   formik.setValues({ ...formik.values, ...(rate || {}), marketPrice, date: newValue })
@@ -733,7 +710,7 @@ useEffect(() => {
                           formik.values.date
                         )
 
-                        const marketPrice = await getMarketPrice(formik.values.fi_currencyId, newValue?.metalId, formik.values.date, newValue?.eo_defTargetPriceMUQty)
+                        const marketPrice = await getMarketPrice(newValue?.currencyId, newValue?.metalId, formik.values.date, newValue?.eo_defTargetPriceMUQty)
 
                         setReCalc(true)
                         formik.setValues({
@@ -851,6 +828,10 @@ useEffect(() => {
                         setReCalc(true)
                         formik.setFieldValue('unitPrice', 0)
                       }}
+                      InputProps={{
+                        readOnly: isClosed,
+                        endAdornment: currencyAdornment
+                      }}
                       error={formik.touched.unitPrice && Boolean(formik.errors.unitPrice)}
                     />
                   </Grid>
@@ -870,6 +851,10 @@ useEffect(() => {
                       onClear={() => {
                         setReCalc(true)
                         formik.setFieldValue('premium', 0)
+                      }}
+                      InputProps={{
+                        readOnly: isClosed,
+                        endAdornment: currencyAdornment
                       }}
                       error={formik.touched.premium && Boolean(formik.errors.premium)}
                     />
@@ -892,6 +877,10 @@ useEffect(() => {
                         setReCalc(true)
                         formik.setFieldValue('discount', 0)
                       }}
+                      InputProps={{
+                        readOnly: isClosed,
+                        endAdornment: currencyAdornment
+                      }}
                       error={formik.touched.discount && Boolean(formik.errors.discount)}
                     />
                   </Grid>
@@ -903,6 +892,10 @@ useEffect(() => {
                       maxAccess={maxAccess}
                       required
                       readOnly
+                      InputProps={{
+                        readOnly: true,
+                        endAdornment: currencyAdornment
+                      }}
                       error={formik.touched.netUnitPrice && Boolean(formik.errors.netUnitPrice)}
                     />
                   </Grid>
@@ -1074,6 +1067,10 @@ useEffect(() => {
                         maxLength={17}
                         decimalScale={5}
                         maxAccess={maxAccess}
+                        InputProps={{
+                          readOnly: true,
+                          endAdornment: currencyAdornment
+                        }}
                       />
                     </Grid>
                     <Grid item xs={6}>

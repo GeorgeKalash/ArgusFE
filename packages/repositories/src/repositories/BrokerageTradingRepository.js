@@ -43,7 +43,8 @@ export const BrokerageTradingRepository = {
     pack: service + 'getPackEO',
     post: service + 'postEO',
     unpost: service + 'unpostEO',
-    cancel: service + 'cancelEO'
+    cancel: service + 'cancelEO',
+    service: service + 'serviceEO',
   },
   EventOrderInquiry: {
     page2: service + 'pageEOI2'

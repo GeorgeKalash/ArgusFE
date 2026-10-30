@@ -19,7 +19,6 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { useError } from '@argus/shared-providers/src/providers/error'
@@ -449,16 +448,6 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
     })
   }
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.MaterialRequest,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   const actions = [
     {
       key: 'Approval',
@@ -477,12 +466,6 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
       condition: isClosed,
       onClick: () => onReopen(formik.values.recordId),
       disabled: !editMode || isCancelled
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
     },
     {
       key: 'Cancel',
@@ -549,6 +532,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
       actions={actions}
       functionId={SystemFunction.MaterialRequest}
       disabledSubmit={isClosed || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

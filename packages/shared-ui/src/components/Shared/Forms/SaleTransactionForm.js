@@ -20,7 +20,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import SalesTrxForm from '@argus/shared-ui/src/components/Shared/SalesTrxForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -1071,15 +1070,6 @@ export default function SaleTransactionForm({
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: functionId,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
 
   const onPost = async () => {
     await postRequest({
@@ -1161,12 +1151,6 @@ export default function SaleTransactionForm({
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -2035,6 +2019,7 @@ export default function SaleTransactionForm({
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

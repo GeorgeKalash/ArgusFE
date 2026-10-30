@@ -23,7 +23,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -674,16 +673,6 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     window.close()
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.SalesQuotation,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   const onClose = async () => {
     const res = await postRequest({
       extension: SaleRepository.SalesQuotations.close,
@@ -711,12 +700,6 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -754,7 +737,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed || !editMode || !isReleased
-    },
+    }
   ]
 
   async function fillForm(sqHeader, sqItems, clientDiscount) {
@@ -1291,6 +1274,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       actions={actions}
       editMode={editMode}
       disabledSubmit={isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

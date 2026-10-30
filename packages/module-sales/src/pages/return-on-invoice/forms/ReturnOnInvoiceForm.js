@@ -23,7 +23,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -952,15 +951,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.SalesReturn,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const handleMetalClick = async () => {
     const metalItemsList = rowsUpdate?.current
@@ -1065,12 +1055,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         notes: formik?.values?.header.description
       },
       datasetId: ResourceIds.GLReturnOnInvoice,
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -1609,6 +1593,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

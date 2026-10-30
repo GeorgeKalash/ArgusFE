@@ -23,7 +23,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -583,16 +582,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  const onWorkFlowClick = () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
-
   const confirmation = () => {
     stack({
       Component: ConfirmationDialog,
@@ -712,13 +701,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
       onClick: 'onRecordRemarks',
       disabled: !editMode
     },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-
     {
       key: 'Terminate',
       condition: true,
@@ -1325,6 +1307,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       actions={actions}
       editMode={editMode}
       disabledSubmit={isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
