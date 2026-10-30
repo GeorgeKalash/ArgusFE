@@ -196,6 +196,7 @@ export const EmployeeRepository = {
   EmployeeDimensionGroup: {
     page: service + 'pageDIG',
     get2: service + 'get2DIG',
+    qry: service + 'qryDIG',
     set2: service + 'set2DIG',
     del: service + 'delDIG' 
   }
