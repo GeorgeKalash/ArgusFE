@@ -179,6 +179,25 @@ export const EmployeeRepository = {
     get: service + 'getBC',
     set: service + 'setBC',
     del: service + 'delBC'  
+  },
+  EmployeeDimensions: {
+    page: service + 'pageDIM',
+    qry: service + 'qryDIM',
+    get: service + 'getDIM',
+    set: service + 'setDIM',
+    del: service + 'delDIM' 
+  },
+  EmployeeDimensionValue: {
+    qry: service + 'qryDI',
+    get: service + 'getDI',
+    set: service + 'setDI',
+    del: service + 'delDI' 
+  },
+  EmployeeDimensionGroup: {
+    page: service + 'pageDIG',
+    get2: service + 'get2DIG',
+    set2: service + 'set2DIG',
+    del: service + 'delDIG' 
   }
 }
 

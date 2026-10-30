@@ -47,6 +47,9 @@ export const ResourceIds = {
   TermEndDate: 71602,
   WorkAnniversary: 71603,
   Holidays: 72601,
+  HRDimensions: 71115,
+  HRDimensionValue: 71116,
+  HRDimensionGroup: 71117,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
