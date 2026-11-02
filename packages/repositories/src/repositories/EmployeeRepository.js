@@ -69,8 +69,7 @@ export const EmployeeRepository = {
     get: service + 'getUP',
     set: service + 'setUP',
     del: service + 'delUP',
-    page: service + 'pageUP',
-    qry: service + 'qryUP'
+    page: service + 'pageUP'
   },
   ResignationRequest: {
     get: service + 'getRR',
@@ -157,10 +156,6 @@ export const EmployeeRepository = {
     get: service + 'getCE',
     set: service + 'setCE'
   },
-  UserDefined: {
-    qry: service + 'qryUV',
-    set2: service + 'set2UV'
-  },
   Leaves: {
     set: service + 'setLS',
     del: service + 'delLS',
@@ -195,10 +190,15 @@ export const EmployeeRepository = {
   },
   EmployeeDimensionGroup: {
     page: service + 'pageDIG',
+    qry: service + 'qryDIG',
     get2: service + 'get2DIG',
     qry: service + 'qryDIG',
     set2: service + 'set2DIG',
     del: service + 'delDIG' 
+  },
+  Dimensions: {
+    packEM: service + 'packEM',
+    set2: service + 'set2ID'
   }
 }
 

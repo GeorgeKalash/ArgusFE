@@ -13,10 +13,10 @@ import JobTab from '@argus/shared-ui/src/components/Shared/EmployeePages/JobTab'
 import LeavesTab from '@argus/shared-ui/src/components/Shared/EmployeePages/LeavesTab'
 import HiringTab from '@argus/shared-ui/src/components/Shared/EmployeePages/HiringTab'
 import SkillsTab from '@argus/shared-ui/src/components/Shared/EmployeePages/SkillsTab'
-import UserDefinedTab from '@argus/shared-ui/src/components/Shared/EmployeePages/UserDefinedTab'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import LegalsTab from './EmployeePages/LegalsTab'
+import DimensionsTab from './EmployeePages/DimensionsTab'
 
 export default function EmployeeListWindow ({ recordId, employeeStatus, onSuccess, window}) {
   const [activeTab, setActiveTab] = useState(0)
@@ -37,7 +37,7 @@ export default function EmployeeListWindow ({ recordId, employeeStatus, onSucces
     { label: labels.Files, disabled: !store.recordId },
     { label: labels.Skills, disabled: !store.recordId },
     { label: labels.Legals, disabled: !store.recordId },
-    { label: labels.UserDefined, disabled: !store.recordId }
+    { label: labels.dimensions, disabled: !store.recordId }
   ]
 
   const getData = async recordId => {
@@ -139,7 +139,7 @@ export default function EmployeeListWindow ({ recordId, employeeStatus, onSucces
         </CustomTabPanel>
 
         <CustomTabPanel index={7} value={activeTab} maxAccess={maxAccess}>
-          <UserDefinedTab store={store} maxAccess={maxAccess} isActive={store.isActive} />
+          <DimensionsTab labels={labels} maxAccess={maxAccess} store={store} isActive={store.isActive}/>
         </CustomTabPanel>
       </Grid>
     </Grid>
