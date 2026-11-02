@@ -113,5 +113,11 @@ export const ProductModelingRepository = {
     get2: service + 'get2BUD',
     set2: service + 'set2BUD ',
     del: service + 'delBUD'
-  }
+  },
+  DeveloperGroup: {
+    page: service + 'pageDVG',
+    get: service + 'getDVG',
+    set: service + 'setDVG',
+    del: service + 'delDVG'
+  },
 }
