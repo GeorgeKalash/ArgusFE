@@ -1871,7 +1871,7 @@ export default function SaleTransactionForm({
 
   useEffect(() => {
     formik.setFieldValue('header.qty', roundTo(totalQty))
-    formik.setFieldValue('header.weight', roundTo(totalWeight))
+    formik.setFieldValue('header.weight', roundTo(totalWeight, 3))
     formik.setFieldValue('header.volume', roundTo(totalVolume, 3))
     formik.setFieldValue('header.amount', roundTo(amount))
 
@@ -2437,6 +2437,7 @@ export default function SaleTransactionForm({
                     maxAccess={maxAccess}
                     label={labels.totWeight}
                     value={totalWeight}
+                    decimalScale={3}
                     readOnly
                   />
                 </Grid>
