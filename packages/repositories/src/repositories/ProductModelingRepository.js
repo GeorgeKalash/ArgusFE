@@ -113,5 +113,8 @@ export const ProductModelingRepository = {
     get2: service + 'get2BUD',
     set2: service + 'set2BUD ',
     del: service + 'delBUD'
+  },
+  DeveloperGroup: {
+    qry: service + 'qryDVG',
   }
 }
