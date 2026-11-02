@@ -16,7 +16,6 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import * as yup from 'yup'
 import { Grid } from '@mui/material'
-import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 export default function HrDimensionValue () {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -111,7 +110,7 @@ export default function HrDimensionValue () {
           middleSection={
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Dimensions.qry}
+                endpointId={EmployeeRepository.EmployeeDimensions.qry}
                 name='dimValue'
                 label={labels.dimension}
                 valueField='id'

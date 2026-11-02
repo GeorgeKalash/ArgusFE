@@ -13,7 +13,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 
 export default function HRDimensionGroupForm({ labels, maxAccess, recordId }) {
