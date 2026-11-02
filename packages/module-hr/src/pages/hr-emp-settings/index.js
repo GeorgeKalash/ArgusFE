@@ -35,7 +35,8 @@ const EmpSettings = () => {
         'retirementAge',
         'employeeRefSize',
         'lvEdId',
-        'ep_nraId'
+        'ep_nraId',
+        'employeeDmgId'
       ]
 
       const myObject = {}
@@ -73,6 +74,7 @@ const EmpSettings = () => {
       ep_nraId: null,
       ep_nraRef: '',
       ep_nraDes: '',
+      employeeDmgId: null,
       firstNameFormat: ''
     },
     validationSchema: yup.object().shape({
@@ -205,7 +207,26 @@ const EmpSettings = () => {
               error={formik.touched.lvEdId && Boolean(formik.errors.lvEdId)}
             />
           </Grid>
-
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={EmployeeRepository.EmployeeDimensionGroup.qry}
+              parameters='_startAt=0&_pageSize=1000'
+              name='employeeDmgId'
+              label={labels.dimensionGroup}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              values={formik.values}
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('employeeDmgId', newValue?.recordId || null)
+              }}
+              error={formik.touched.employeeDmgId && Boolean(formik.errors.employeeDmgId)}
+            />
+          </Grid>
           <Grid item xs={12}>
             <ResourceLookup
               endpointId={SystemRepository.NumberRange.snapshot}

@@ -681,6 +681,7 @@ export const ResourceIds = {
   CancelReason: 20603,
   ScrapAdjustment: 47319,
   ProdRequestDTD: 42612,
+  BatchCloseTV: 72216,
 
   // GL
   GLSalesInvoice: 51604,

@@ -27,7 +27,7 @@ export default function ProdRequestDtdForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
-      dtId: '',
+      dtId: null,
       plantId: null,
       metalId: null
     },
@@ -58,10 +58,7 @@ export default function ProdRequestDtdForm({ labels, maxAccess, recordId }) {
           parameters: `_dtId=${recordId}`
         })
 
-        formik.setValues({
-          ...res.record,
-          recordId: recordId
-        })
+        formik.setValues({ ...res.record, recordId })
       }
     })()
   }, [])
@@ -88,7 +85,7 @@ export default function ProdRequestDtdForm({ labels, maxAccess, recordId }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 valueField='recordId'
-                displayField={'name'}
+                displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
                 readOnly={editMode}
