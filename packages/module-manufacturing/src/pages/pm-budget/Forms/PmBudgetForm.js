@@ -17,6 +17,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 
 export default function PmBudgetForm ({ labels, recordId, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -57,7 +58,10 @@ export default function PmBudgetForm ({ labels, recordId, maxAccess }) {
         yup.object().shape({
           metalRef: yup.string().required(),
           collectionRef: yup.string().required(),
+          collectionName: yup.string().required(),
           itemGroupRef: yup.string().required(),
+          itemGroupName: yup.string().required(),
+          itemCategoryName: yup.string().required(),
           designCount: yup.number().max(32767).required().notOneOf([0])
         })
       )
@@ -121,14 +125,15 @@ export default function PmBudgetForm ({ labels, recordId, maxAccess }) {
     },
     {
       component: 'resourcecombobox',
-      label: labels.collection,
+      label: labels.collectionRef,
       name: 'collectionRef',
       props: {
         endpointId: InventoryRepository.Collections.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 1.5,
+        displayFieldWidth: 4,
         mapping: [
+          { from: 'name', to: 'collectionName' },
           { from: 'reference', to: 'collectionRef' },
           { from: 'recordId', to: 'collectionId' }
         ],
@@ -136,19 +141,30 @@ export default function PmBudgetForm ({ labels, recordId, maxAccess }) {
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        update({ collectionName: newRow?.collectionName || '' })
       }
     },
     {
+      component: 'textfield',
+      label: labels.collectionName,
+      name: 'collectionName',
+      props: { readOnly: true },
+      flex: 2
+    },
+    {
       component: 'resourcecombobox',
-      label: labels.itemGroup,
+      label: labels.itemGrpRef,
       name: 'itemGroupRef',
       props: {
         endpointId: InventoryRepository.Group.qry,
         parameters: '_startAt=0&_pageSize=1000',     
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 1.5,
+        displayFieldWidth: 4,
         mapping: [
+          { from: 'name', to: 'itemGroupName' },
           { from: 'reference', to: 'itemGroupRef' },
           { from: 'recordId', to: 'itemGroupId' }
         ],
@@ -156,6 +172,38 @@ export default function PmBudgetForm ({ labels, recordId, maxAccess }) {
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        update({ itemGroupName: newRow?.itemGroupName || '' })
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.itemGrpName,
+      name: 'itemGroupName',
+      props: { readOnly: true },
+      flex: 2
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.category,
+      name: 'itemCategoryName',
+      flex: 2,
+      props: {
+        endpointId: InventoryRepository.Category.qry,
+        parameters: `_pagesize=100&_startAt=0&_name=`,
+        displayField: 'name',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'itemCategoryId' },
+          { from: 'name', to: 'itemCategoryName' },
+          { from: 'caRef', to: 'itemCategoryRef' }
+        ],
+        columnsInDropDown: [
+          { key: 'caRef', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 2
       }
     },
     {
@@ -176,67 +224,89 @@ export default function PmBudgetForm ({ labels, recordId, maxAccess }) {
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={SystemRepository.FiscalYears.qry}
-                name='header.fiscalYear'
-                label={labels.fiscalYear}
-                valueField='fiscalYear'
-                displayField='fiscalYear'
-                values={formik.values.header}
-                required
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('header.fiscalYear', newValue?.fiscalYear)}
-                error={formik.touched.header?.fiscalYear && Boolean(formik.errors.header?.fiscalYear)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceComboBox
-               endpointId={ProductModelingRepository.Developer.qry}
-               values={formik.values.header}
-               name='header.developerId'
-               label={labels.developer}
-               valueField='recordId'
-               displayField={['reference', 'name']}
-               columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-               readOnly={editMode}
-               required
-               maxAccess={maxAccess}
-               onChange={(_, newValue) => formik.setFieldValue('header.developerId', newValue?.recordId || null)}
-               error={formik.touched.header?.developerId && formik.errors.header?.developerId}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={SystemRepository.FiscalPeriod.qry}
-                name='header.periodId'
-                label={labels.period}
-                valueField='periodId'
-                displayField='name'
-                values={formik.values.header}
-                required
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('header.periodId', newValue?.periodId || null)}
-                error={formik.touched.header?.periodId && Boolean(formik.errors.header?.periodId)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='header.designCount'
-                label={labels.designCount}
-                value={totalDesignCount}
-                maxAccess={maxAccess}
-                readOnly
-                error={formik.touched.header?.designCount && Boolean(formik.errors.header?.designCount)}
-              />
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.FiscalYears.qry}
+                  name='header.fiscalYear'
+                  label={labels.fiscalYear}
+                  valueField='fiscalYear'
+                  displayField='fiscalYear'
+                  values={formik.values.header}
+                  required
+                  readOnly={editMode}
+                  maxAccess={maxAccess}
+                  onChange={(_, newValue) => formik.setFieldValue('header.fiscalYear', newValue?.fiscalYear)}
+                  error={formik.touched.header?.fiscalYear && Boolean(formik.errors.header?.fiscalYear)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={ProductModelingRepository.Developer.qry}
+                  values={formik.values.header}
+                  name='header.developerId'
+                  label={labels.developer}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly={editMode}
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(_, newValue) => formik.setFieldValue('header.developerId', newValue?.recordId || null)}
+                  error={formik.touched.header?.developerId && Boolean(formik.errors.header?.developerId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.FiscalPeriod.qry}
+                  name='header.periodId'
+                  label={labels.period}
+                  valueField='periodId'
+                  displayField='name'
+                  values={formik.values.header}
+                  required
+                  readOnly={editMode}
+                  maxAccess={maxAccess}
+                  onChange={(_, newValue) => formik.setFieldValue('header.periodId', newValue?.periodId || null)}
+                  error={formik.touched.header?.periodId && Boolean(formik.errors.header?.periodId)}
+                />
+              </Grid>
             </Grid>
           </Grid>
+
+          <Grid item xs={6}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='header.designCount'
+                  label={labels.designCount}
+                  value={totalDesignCount}
+                  maxAccess={maxAccess}
+                  readOnly
+                  error={formik.touched.header?.designCount && Boolean(formik.errors.header?.designCount)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextArea
+                  name='header.notes'
+                  label={labels.notes}
+                  value={formik?.values?.header?.notes}
+                  rows={2.9}
+                  maxLength='255'
+                  maxAccess={maxAccess}
+                  onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                  onClear={() => formik.setFieldValue('header.notes', '')}
+                  error={formik?.touched?.header?.notes && Boolean(formik?.errors?.header?.notes)}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
         </Fixed>
          <Grow>
           <DataGrid
