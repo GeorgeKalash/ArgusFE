@@ -682,6 +682,7 @@ export const ResourceIds = {
   ScrapAdjustment: 47319,
   BatchCloseTV: 72216,
   DeveloperGroup: 48108,
+  IVBrands: 41125,
 
   // GL
   GLSalesInvoice: 51604,
