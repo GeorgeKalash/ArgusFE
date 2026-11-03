@@ -116,5 +116,9 @@ export const ProductModelingRepository = {
   },
   DeveloperGroup: {
     qry: service + 'qryDVG',
-  }
+    page: service + 'pageDVG',
+    get: service + 'getDVG',
+    set: service + 'setDVG',
+    del: service + 'delDVG'
+  },
 }
