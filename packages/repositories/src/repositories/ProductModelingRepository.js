@@ -115,6 +115,7 @@ export const ProductModelingRepository = {
     del: service + 'delBUD'
   },
   DeveloperGroup: {
+    qry: service + 'qryDVG',
     page: service + 'pageDVG',
     get: service + 'getDVG',
     set: service + 'setDVG',
