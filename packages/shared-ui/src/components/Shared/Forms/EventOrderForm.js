@@ -51,7 +51,7 @@ export default function EventOrderForm({ recordId, window }) {
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
   const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
   const maxDiscount = systemDefaults?.list?.find(obj => obj.key === 'bt_max_discount')?.value || null
-  const { combosStore } = useComboStore(BrokerageTradingRepository.EventOrder.pack)
+  const { combosStore } = useComboStore(BrokerageTradingRepository.EventOrder.pack, { parameters: `_msId=${msId}`,})
   
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.EventOrder,

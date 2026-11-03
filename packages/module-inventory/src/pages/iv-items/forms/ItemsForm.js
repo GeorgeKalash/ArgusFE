@@ -722,7 +722,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     <ResourceComboBox
                       store={store?.lotCategories}
                       endpointId={InventoryRepository.LotCategory.qry}
-                      Category
                       values={formik.values}
                       name='lotCategoryId'
                       label={labels.lotCategory}

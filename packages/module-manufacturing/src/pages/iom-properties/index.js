@@ -67,18 +67,21 @@ const IomProperties = () => {
   }, [systemDefaults])
 
   useEffect(() => {
+    if (!propertyStore.length) return
+
     const keys = ['mfimd1', 'mfimd2']
 
     const myObject =
       systemDefaults?.list?.reduce((acc, obj) => {
         if (keys.includes(obj.key)) {
-          acc[obj.key] = obj.value ? parseInt(obj.value) : null
+          const id = obj.value ? parseInt(obj.value) : null
+          acc[obj.key] = propertyStore.some(p => p.recordId === id) ? id : null
         }
 
         return acc
       }, {}) || {}
 
-    formik.setValues(myObject)
+    formik.setValues({ mfimd1: null, mfimd2: null, ...myObject })
   }, [propertyStore])
 
   return (
