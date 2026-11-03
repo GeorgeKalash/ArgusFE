@@ -415,5 +415,11 @@ export const InventoryRepository = {
     get: service + 'getOW',
     del: service + 'delOW',
     page: service + 'pageOW'
+  },
+  Brands: {
+    set: service + 'setBRND',
+    get: service + 'getBRND',
+    del: service + 'delBRND',
+    page: service + 'pageBRND'
   }
 }

@@ -683,6 +683,7 @@ export const ResourceIds = {
   ProdRequestDTD: 42612,
   BatchCloseTV: 72216,
   DeveloperGroup: 48108,
+  IVBrands: 41125,
 
   // GL
   GLSalesInvoice: 51604,
