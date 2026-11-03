@@ -420,6 +420,7 @@ export const InventoryRepository = {
     set: service + 'setBRND',
     get: service + 'getBRND',
     del: service + 'delBRND',
-    page: service + 'pageBRND'
+    page: service + 'pageBRND',
+    qry: service + 'qryBRND'
   }
 }
