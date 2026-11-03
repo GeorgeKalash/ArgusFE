@@ -179,6 +179,7 @@ export default function FIReceiptVoucherForm({ header, recordId, window }) {
         props: {
           DatasetIdAccess: ResourceIds.MCRFIReceiptVoucher,
           data,
+          readOnly: isCancelled || isPosted,
           onOk: childFormikValues => {
             formik.setValues(prevValues => ({
               ...prevValues,

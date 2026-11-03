@@ -183,6 +183,10 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     }
   }
 
+  const isPosted = formik.values.status === 3
+  const isCancelled = formik.values.status === -1
+  const editMode = !!formik.values.recordId
+
   const { openStack } = useStackValueLink({ linkOpen: { resourceId: ResourceIds.MCRFIPaymentVoucher } })
   
   async function openMCRForm(data) {
@@ -193,6 +197,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
         props: {
           DatasetIdAccess: ResourceIds.MCRFIPaymentVoucher,
           data,
+          readOnly: isCancelled || isPosted,
           onOk: childFormikValues => {
             formik.setValues({
               ...formik.values,
@@ -203,10 +208,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       })
     }
   }
-
-  const isPosted = formik.values.status === 3
-  const isCancelled = formik.values.status === -1
-  const editMode = !!formik.values.recordId
 
   const { releaseLock } = useRecordLock({
     recordId: recordId,

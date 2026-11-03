@@ -615,6 +615,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
         Component: MultiCurrencyRateForm,
         props: {
           DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
+          readOnly: isCancelled || isPosted,
           data: {
             ...data,
             amount: amountSum

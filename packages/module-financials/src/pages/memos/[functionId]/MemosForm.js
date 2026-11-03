@@ -363,6 +363,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         props: {
           DatasetIdAccess: getResourceMCR(functionId),
           data,
+          readOnly: isCancelled || isPosted,
           onOk: childFormikValues => {
             formik.setValues(prevValues => ({
               ...prevValues,
