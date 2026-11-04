@@ -82,8 +82,8 @@ export default function DimensionalTarget () {
         recordId: obj?.recordId,
         maxAccess,
       },
-      width: 550,
-      height: 450,
+      width: 750,
+      height: 550,
       title: labels.dimensionalTarget
     })
   }
