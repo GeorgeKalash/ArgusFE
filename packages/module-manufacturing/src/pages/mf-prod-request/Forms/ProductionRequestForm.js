@@ -18,6 +18,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
@@ -31,6 +32,8 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import LineNotes from '@argus/shared-ui/src/components/Shared/LineNote'
+import ItemWindow from '@argus/shared-ui/src/components/Shared/ItemWindow'
 
 const PROD_REQ_TYPE = {
   TopSales: 1,
@@ -41,9 +44,14 @@ const PROD_REQ_TYPE = {
 export default function ProductionRequestForm({ recordId, labels, access, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const [disablePreview, setDisablePreview] = useState(false)
+  const [periodOptions, setPeriodOptions] = useState([])
+
+  const minDay = parseInt(systemDefaults?.list?.find(({ key }) => key === 'pp_min_pr_dom')?.value) || null
+  const maxDay = parseInt(systemDefaults?.list?.find(({ key }) => key === 'pp_max_pr_dom')?.value) || null
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ProductionRequest,
@@ -69,23 +77,31 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       periodName: null,
       type: null,
       metalId: null,
+      summaryId: null,
       pcs: 0,
       qty: 0,
       typeName: '',
       notes: '',
       status: 1
     },
-    items: [{
-      id: 1,
-      requestId: recordId || null,
-      seqNo: 1,
-      itemId: null,
-      sku: '',
-      itemName: '',
-      qty: 0,
-      pcs: null,
-      itemWeight: null
-    }],
+    items: [
+      {
+        id: 1,
+        requestId: recordId || null,
+        seqNo: 1,
+        itemId: null,
+        sku: '',
+        itemName: '',
+        collectionName: '',
+        itemGroupName: '',
+        categoryName: '',
+        onHand: null,
+        qty: 0,
+        pcs: null,
+        itemWeight: null,
+        note: ''
+      }
+    ],
     sizes: []
   }
     
@@ -110,7 +126,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       )
     }),
     onSubmit: async obj => {
-      const items = obj.items.map(({ sizes, ...item }, index) => ({
+      const items = obj.items.map(({ sizes, note, ...item }, index) => ({
         ...item,
         requestId: recordId,
         seqNo: index + 1
@@ -129,12 +145,28 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           }))
       )
 
+      const notes = obj.items.flatMap((item, index) => {
+        const text = (item.note || '').trim()
+
+        if (!text) return []
+
+        return [
+          {
+            functionId: SystemFunction.ProductionRequest,
+            recordId: obj.recordId || recordId || 0,
+            seqNo: index + 1,
+            notes: text
+          }
+        ]
+      })
+
       const res = await postRequest({
         extension: ManufacturingRepository.ProductionRequest.set2,
         record: JSON.stringify({
           header: { ...obj.header, date: formatDateToApi(obj.header.date) },
           items,
-          sizes
+          sizes,
+          notes
         })
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -161,12 +193,45 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       formik.values.header.type
     )
 
-  const { type, plantId, metalId } = formik.values.header;
+  const { type, plantId, metalId } = formik.values.header
+  const isSpecialOrder = type === PROD_REQ_TYPE.SpecialOrder
 
   const isPreviewDisabled =
     !canPreview ||
     disablePreview ||
     (type === PROD_REQ_TYPE.TopSales && (!plantId || !metalId));
+
+  const openNote = row => {
+    stack({
+      Component: LineNotes,
+      props: {
+        row,
+        readOnly: isPosted,
+        onSave: (row, note) => formik.setFieldValue('items', formik.values.items.map(r => (r.id === row.id ? { ...r, note } : r))),
+        maxAccess
+      },
+      width: 500,
+      height: 360,
+      title: row.sku
+    })
+  }
+
+
+  const loadPeriods = async years => {
+    const results = await Promise.all(
+      years.map(year =>
+        getRequest({
+          extension: SystemRepository.Period.qry,
+          parameters: `_fiscalYear=${year}`
+        }).catch(() => ({ list: [] }))
+      )
+    )
+
+    const map = new Map()
+    results.forEach(res => (res?.list || []).forEach(p => map.set(`${p.fiscalYear}-${p.periodId}`, p)))
+
+    return Array.from(map.values())
+  }
 
   async function refetchForm(requestId) {
     const { record } = await getRequest({
@@ -176,6 +241,13 @@ export default function ProductionRequestForm({ recordId, labels, access, window
 
     const sizesBySeq = (record?.sizes || []).reduce((acc, s) => {
       ;(acc[s.seqNo] ||= []).push(s)
+
+      return acc
+    }, {})
+
+    const notesBySeq = (record?.notes || []).reduce((acc, n) => {
+      acc[n.seqNo] = n.notes
+
       return acc
     }, {})
       
@@ -186,15 +258,17 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           ...record.header,
           date: formatDateFromApi(record.header?.date)
         },
-        items: record?.items?.length > 0 ?
-          record?.items?.map((item, index) => {
-            return {
-              ...item,
-              id: index + 1,
-              sizes: (sizesBySeq[item.seqNo] || []).map((s, i) => ({ ...s, id: i + 1 }))
-            }
-          })
-          : initialValues.items
+        items:
+          record?.items?.length > 0
+            ? record?.items?.map((item, index) => {
+                return {
+                  ...item,
+                  id: index + 1,
+                  note: notesBySeq[item.seqNo] || '',
+                  sizes: (sizesBySeq[item.seqNo] || []).map((s, i) => ({ ...s, id: i + 1 }))
+                }
+              })
+            : initialValues.items
       }
     })
 
@@ -220,7 +294,12 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     const totalPcs = (items || []).reduce((sum, row) => sum + (Number(row.pcs) || 0), 0)
 
     formik.setFieldValue('header.qty', totalQty)
-    formik.setFieldValue('header.pcs', totalPcs)
+    formik.setFieldValue('header.pcs', parseInt(totalPcs))
+  }
+
+  const clearPeriod = () => {
+    formik.setFieldValue('header.periodId', null)
+    formik.setFieldValue('header.periodName', null)
   }
 
   const onChangeType = (_, { key, value } = {}) => {
@@ -243,34 +322,123 @@ export default function ProductionRequestForm({ recordId, labels, access, window
   }
 
   useEffect(() => {
-    if (recordId) return
+    if (editMode) return
 
-    const date = formik.values.header.date
+    const dtId = formik.values.header.dtId
+
+    if (!dtId) return
+
+    if (formik.values.items?.some(item => item.itemId)) return
+
+    let cancelled = false
+
+    ;(async () => {
+      try {
+        const res = await getRequest({
+          extension: ManufacturingRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${dtId}`
+        })
+
+        if (cancelled) return
+
+        formik.setFieldValue('header.plantId', res?.record?.plantId ?? null)
+        formik.setFieldValue('header.metalId', res?.record?.metalId ?? null)
+      } catch (e) {
+        if (cancelled) return
+        formik.setFieldValue('header.plantId', null)
+        formik.setFieldValue('header.metalId', null)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [formik.values.header.dtId])
+
+  useEffect(() => {
+    if (editMode) return
+
+    const { date, type } = formik.values.header
 
     if (!date) {
-      formik.setFieldValue('header.fiscalYear', null)
-      formik.setFieldValue('header.periodId', null)
+      clearPeriod()
+
       return
     }
 
     let cancelled = false
 
     ;(async () => {
-      const year = new Date(date).getFullYear()
+      const selected = new Date(date)
+      const year = selected.getFullYear()
+      const isPlanned = [PROD_REQ_TYPE.TopSales, PROD_REQ_TYPE.NewItems].includes(type)
+      const isSpecial = type === PROD_REQ_TYPE.SpecialOrder
+
+      if (isPlanned) {
+        const day = selected.getDate()
+
+        if ((minDay != null && day < minDay) || (maxDay != null && day > maxDay)) {
+          stackError({ message: platformLabels.dayRange })
+          formik.setFieldValue('header.typeName', '')
+          formik.setFieldValue('header.type', null)
+          clearPeriod()
+
+          return
+        }
+      }
 
       try {
-        const res = await getRequest({
-          extension: SystemRepository.Period.qry,
-          parameters: `_fiscalYear=${year}`
-        })
+        const now = new Date()
+        const years = isSpecial ? [now.getFullYear()] : [year]
 
+        const list = await loadPeriods(years)
         if (cancelled) return
 
-        const period = findPeriod(res?.list || [], date)
+        if (isPlanned) {
+          const nextMonth = new Date(year, selected.getMonth() + 1, 1)
+          const period = findPeriod(list, nextMonth)
 
-        formik.setFieldValue('header.fiscalYear', period?.fiscalYear ?? year)
-        formik.setFieldValue('header.periodId', period?.periodId ?? null)
-        formik.setFieldValue('header.periodName', period?.periodName ?? null)
+          if (!period || Number(period.fiscalYear) !== year) {
+            stackError({ message: platformLabels.NoNextPeriod })
+            clearPeriod()
+
+            return
+          }
+
+          formik.setFieldValue('header.periodId', period.periodId)
+          formik.setFieldValue('header.periodName', period.periodName)
+        } else if (isSpecial) {
+          const minStart = new Date(now.getFullYear(), now.getMonth(), 1)
+
+          const options = list.filter(p => {
+            const end = p.endDate ? new Date(formatDateFromApi(p.endDate)) : null
+
+            return Number(p.fiscalYear) === now.getFullYear() && (!end || end >= minStart)
+          })
+
+          setPeriodOptions(options)
+
+          const stillValid = options.some(
+            p =>
+              p.periodId === formik.values.header.periodId &&
+              (!formik.values.header.fiscalYear || p.fiscalYear === formik.values.header.fiscalYear)
+          )
+
+          if (!stillValid) {
+            const target = selected < minStart ? minStart : selected
+            const period = findPeriod(options, target) || options[0]
+
+            formik.setFieldValue('header.fiscalYear', period?.fiscalYear ?? null)
+            formik.setFieldValue('header.periodId', period?.periodId ?? null)
+            formik.setFieldValue('header.periodName', period?.periodName ?? null)
+          }
+        } else {
+          const period = findPeriod(list, selected)
+
+          formik.setFieldValue('header.fiscalYear', period?.fiscalYear ?? year)
+          formik.setFieldValue('header.periodId', period?.periodId ?? null)
+          formik.setFieldValue('header.periodName', period?.periodName ?? null)
+        }
       } catch (e) {
         if (cancelled) return
         formik.setFieldValue('header.fiscalYear', year)
@@ -282,20 +450,24 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     return () => {
       cancelled = true
     }
-  }, [formik.values.header.date])
+  }, [formik.values.header.date, formik.values.header.type, systemDefaults])
 
   const mergePreviewedItems = async newItems => {
-    const sizesByItem = new Map(
-      (formik.values.items || [])
-        .filter(item => item.itemId)
-        .map(item => [item.itemId, item.sizes || []])
-    )
+    const existingItems = (formik.values.items || []).filter(item => item.itemId)
+
+    const sizesByItem = new Map(existingItems.map(item => [item.itemId, item.sizes || []]))
+    const notesByItem = new Map(existingItems.map(item => [item.itemId, item.note || '']))
 
     const merged = newItems.map((item, index) => ({
       ...item,
       id: index + 1,
       seqNo: index + 1,
-      sizes: sizesByItem.get(item.itemId) || []
+      collectionName: item.collectionName ?? '',
+      itemGroupName: item.groupName ?? '',
+      categoryName: item.categoryName ?? '',
+      onHand: formik.values.header.type === PROD_REQ_TYPE.TopSales ? item.onHand ?? null : null,
+      sizes: sizesByItem.get(item.itemId) || [],
+      note: notesByItem.get(item.itemId) || ''
     }))
 
     await formik.setFieldValue('items', merged)
@@ -333,6 +505,17 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     }
   }
 
+  const onUnpost = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.ProductionRequest.unpost,
+      record: JSON.stringify({ recordId: formik.values.recordId })
+    })
+
+    toast.success(platformLabels.Unposted)
+    invalidate()
+    await refetchForm(formik.values.recordId)
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -343,8 +526,9 @@ export default function ProductionRequestForm({ recordId, labels, access, window
     {
       key: 'Locked',
       condition: isPosted,
+      onSuccess: onUnpost,
       onClick: 'onUnpostConfirmation',
-      disabled: true
+      disabled: !editMode || !!formik.values.header.summaryId
     },
     {
       key: 'Unlocked',
@@ -366,15 +550,39 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       label: labels.sku,
       name: 'sku',
       flex: 1,
+      link: {
+        enabled: true,
+        popup: row => {
+          stack({
+            Component: ItemWindow,
+            props: {
+              obj: {
+                recordId: row.itemId,
+                ...row
+              },
+            },
+            nextToTitle: row?.sku
+          })
+        }
+      },
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
+        endpointId: InventoryRepository.Items.snapshot,
+        parameters: {
+          _startAt: 0,
+          _size: 50
+        },
         valueField: 'sku',
         displayField: 'sku',
         readOnly: canPreview,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'collectionName', to: 'collectionName' },
+          { from: 'groupName', to: 'itemGroupName' },
+          { from: 'categoryName', to: 'categoryName' },
+          { from: 'dmgId', to: 'dmgId' },
+          { from: 'msId', to: 'msId' }
         ],
         displayFieldWidth: 4,
         columnsInDropDown: [
@@ -413,12 +621,49 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       }
     },
     {
+      component: 'textfield',
+      label: labels.collection,
+      name: 'collectionName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.itemGroupName,
+      name: 'itemGroupName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.category,
+      name: 'categoryName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
       component: 'numberfield',
       label: labels.weight,
       name: 'itemWeight',
       flex: 1,
       props: {
         readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.onhand,
+      name: 'onHand',
+      flex: 1,
+      props: {
+        readOnly: true,
+        decimalScale: 2
       }
     },
     {
@@ -488,6 +733,20 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           }
         })
       }
+    },
+    {
+      component: 'button',
+      name: 'noteAction',
+      label: labels.notes,
+      flex: 0.5,
+      props: {
+        imgSrc:'/images/buttonsIcons/notes.png', 
+        color: '#90278e',
+        onCondition: row => ({
+          disabled: !row?.itemId
+        })
+      },
+      onClick: (e, row) => openNote(row)
     }
   ]
 
@@ -571,9 +830,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                     onChange={formik.setFieldValue}
                     onClear={() => {
                       formik.setFieldValue('header.date', null)
-                      formik.setFieldValue('header.fiscalYear', null)
-                      formik.setFieldValue('header.periodId', null)
-                      formik.setFieldValue('header.periodName', null)
+                      clearPeriod()
                     }}
                     error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
                     maxAccess={maxAccess}
@@ -591,15 +848,35 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField
-                    name='header.periodName'
-                    label={labels.period}
-                    value={formik?.values?.header?.periodName}
-                    readOnly
-                    required
-                    maxAccess={maxAccess}
-                    error={formik?.touched?.header?.periodName && Boolean(formik?.errors?.header?.periodName)}
-                  />
+                  {isSpecialOrder && !editMode ? (
+                    <ResourceComboBox
+                      store={periodOptions}
+                      name='header.periodId'
+                      label={labels.period}
+                      valueField='periodId'
+                      displayField='periodName'
+                      values={formik?.values?.header}
+                      required
+                      readOnly={isPosted}
+                      maxAccess={maxAccess}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('header.periodId', newValue?.periodId || null)
+                        formik.setFieldValue('header.periodName', newValue?.periodName || null)
+                        formik.setFieldValue('header.fiscalYear', newValue?.fiscalYear || null)
+                      }}
+                      error={formik?.touched?.header?.periodName && Boolean(formik?.errors?.header?.periodName)}
+                    />
+                  ) : (
+                    <CustomTextField
+                      name='header.periodName'
+                      label={labels.period}
+                      value={formik?.values?.header?.periodName}
+                      readOnly
+                      required
+                      maxAccess={maxAccess}
+                      error={formik?.touched?.header?.periodName && Boolean(formik?.errors?.header?.periodName)}
+                    />
+                  )}
                 </Grid>
               </Grid>
             </Grid>
@@ -706,6 +983,10 @@ export default function ProductionRequestForm({ recordId, labels, access, window
             maxAccess={maxAccess}
             enableFilters
             name='items'
+            highlightRow={{
+              condition: row => !!row?.note?.trim(),
+              color: () => '#f9f763'
+            }}
             allowDelete={!isPosted && !canPreview}
             allowAddNewLine={!isPosted && !canPreview}
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'items').length > 0}

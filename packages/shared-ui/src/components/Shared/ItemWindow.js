@@ -1,25 +1,30 @@
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useContext, useEffect, useState } from 'react'
-import ItemsForm from '../forms/ItemsForm.js'
-import PhysicalForm from '../forms/PhysicalForm.js'
-import VendorList from '../forms/VendorList.js'
-import SalesList from '../forms/SaleList.js'
-import PropertiesForm from '../forms/PropertiesForm.js'
-import BarcodeForm from '../forms/BarcodeForm.js'
-import ItemProductionForm from '../forms/ItemProductionForm.js'
-import KitForm from '../forms/KitForm.js'
-import RetailForm from '../forms/RetailForm.js'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext.js'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository.js'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams.js'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds.js'
+import ItemsForm from './ItemPages/ItemsForm'
+import BarcodeForm from './ItemPages/BarcodeForm'
+import SalesList from './ItemPages/SaleList'
+import PropertiesForm from './ItemPages/PropertiesForm'
+import PhysicalForm from './ItemPages/PhysicalForm'
+import VendorList from './ItemPages/VendorList'
+import ItemProductionForm from './ItemPages/ItemProductionForm'
+import KitForm from './ItemPages/KitForm'
+import RetailForm from './ItemPages/RetailForm'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-const ItemWindow = ({ obj, labels, maxAccess, window }) => {
+const ItemWindow = ({ obj, window }) => {
   const { recordId, msId, dmgId } = obj || {}
 
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
   const { getRequest } = useContext(RequestsContext)
+  const { labels, access: maxAccess } = useResourceParams({ datasetId: ResourceIds.Items, editMode: !!recordId})
+  useSetWindow({ title: labels.items, window })
   
 
   const [store, setStore] = useState({
@@ -133,5 +138,7 @@ const ItemWindow = ({ obj, labels, maxAccess, window }) => {
     </>
   )
 }
+ItemWindow.width = 1200
+ItemWindow.height = 670
 
 export default ItemWindow

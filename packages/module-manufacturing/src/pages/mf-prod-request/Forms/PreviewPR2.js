@@ -13,11 +13,14 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import ItemWindow from '@argus/shared-ui/src/components/Shared/ItemWindow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
 const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
+  const { stack } = useWindow()
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.PreviewPR
@@ -51,11 +54,12 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
         return
       }
 
-      const mappedRows = selectedRows.map(row => ({
-        ...row, 
+      const mappedRows = selectedRows.map(({ onHand, ...row }) => ({
+        ...row,
         itemId: row.recordId,
         sku: row.sku,
         itemName: row.name,
+        itemGroupName: row.groupName
       }))
 
       onSelect(mappedRows)
@@ -82,6 +86,20 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
       label: labels.sku,
       name: 'sku',
       flex: 1,
+      link: {
+        enabled: true,
+        popup: row =>
+          stack({
+            Component: ItemWindow,
+            props: {
+              obj: {
+                recordId: row.itemId,
+                ...row
+              },
+            },
+            nextToTitle: row?.sku
+          })
+      },
       props: {
         readOnly: true
       }
@@ -106,8 +124,8 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
     },
     {
       component: 'textfield',
-      label: labels.itemGroupRef,
-      name: 'groupRef',
+      label: labels.itemGroupName,
+      name: 'groupName',
       flex: 1,
       props: {
         readOnly: true
@@ -115,8 +133,26 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
     },
     {
       component: 'textfield',
-      label: labels.itemGroupName,
-      name: 'groupName',
+      label: labels.collection,
+      name: 'collectionName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.category,
+      name: 'categoryName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.onhand,
+      name: 'onHand',
       flex: 1,
       props: {
         readOnly: true
@@ -221,7 +257,8 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
             enableFilters={true}
             allowDelete={false}
             allowAddNewLine={false}
-            maxAccess={maxAccess}/>
+            maxAccess={maxAccess}
+          />
         </Grow>
       </VertLayout>
     </Form>

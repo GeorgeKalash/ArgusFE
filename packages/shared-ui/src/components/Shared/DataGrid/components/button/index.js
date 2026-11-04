@@ -5,6 +5,7 @@ function DataGridButton({ data, column: { props, field, ...column }, update, upd
   const checkCondition = props?.onCondition && props?.onCondition(data)
   const imgSrc = !props?.imgSrc ? checkCondition?.imgSrc : props?.imgSrc
   const hiddenButton = checkCondition?.hidden || false
+  const bgColor = props?.color
 
   return (
     !hiddenButton && (
@@ -14,8 +15,16 @@ function DataGridButton({ data, column: { props, field, ...column }, update, upd
         onClick={e => {
           column?.onClick(e, data, update, updateRow)
         }}
-        variant={!!imgSrc ? '' : 'contained'}
+        variant={bgColor || !imgSrc ? 'contained' : ''}
         disabled={checkCondition?.disabled}
+        sx={
+          bgColor
+            ? {
+                '&&': { backgroundColor: bgColor },
+                '&&:hover': { backgroundColor: bgColor, opacity: 0.7 }
+              }
+            : undefined
+        }
       >
         <img
           src={imgSrc || '/images/buttonsIcons/popup.png'}

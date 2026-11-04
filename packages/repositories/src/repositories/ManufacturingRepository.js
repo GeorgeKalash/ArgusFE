@@ -522,6 +522,7 @@ export const ManufacturingRepository = {
     del: service + 'delPR',
     snapshot: service + 'snapshotPR',
     post: service + 'postPR',
+    unpost: service + 'unpostPR',
     preview: service + 'previewPR',
     preview2: service + 'previewPR2',
   },

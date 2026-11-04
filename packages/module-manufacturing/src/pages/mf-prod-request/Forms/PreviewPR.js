@@ -12,11 +12,14 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import ItemWindow from '@argus/shared-ui/src/components/Shared/ItemWindow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
 const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
+  const { stack } = useWindow()
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.PreviewPR
@@ -79,6 +82,20 @@ const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window
       label: labels.sku,
       name: 'sku',
       flex: 1,
+      link: {
+        enabled: true,
+        popup: row =>
+          stack({
+            Component: ItemWindow,
+            props: {
+              obj: {
+                recordId: row.itemId,
+                ...row
+              },
+            },
+            nextToTitle: row?.sku
+          })
+      },
       props: { 
         readOnly: true
       }
@@ -112,15 +129,6 @@ const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window
     },
     {
       component: 'textfield',
-      label: labels.itemGroupRef,
-      name: 'itemGroupRef',
-      flex: 1,
-      props: { 
-        readOnly: true 
-      }
-    },
-    {
-      component: 'textfield',
       label: labels.itemGroupName,
       name: 'itemGroupName',
       flex: 1,
@@ -130,8 +138,26 @@ const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window
     },
     {
       component: 'textfield',
-      label: labels.weight,
-      name: 'itemWeight',
+      label: labels.collection,
+      name: 'collectionName',
+      flex: 1,
+      props: { 
+        readOnly: true 
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.category,
+      name: 'categoryName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.onhand,
+      name: 'onHand',
       flex: 1,
       props: {
         readOnly: true 
