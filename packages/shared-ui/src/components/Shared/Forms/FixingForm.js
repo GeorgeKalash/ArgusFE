@@ -37,6 +37,11 @@ import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
+const mapCommodityPairs = list => (list || []).map(item => ({
+  ...item,
+  recordId: `${item.currencyId}-${item.metalId}`
+}))
+
 export default function FixingForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -51,10 +56,7 @@ export default function FixingForm({ recordId, functionId, window }) {
     parameters: `_dgId=${functionId}&_msId=${msId}`,
     transform: record => ({
       ...record,
-      commodityPairs: (record?.commodityPairs || []).map(item => ({
-        ...item,
-        recordId: `${item.currencyId}${item.metalId}`
-      }))
+      commodityPairs: mapCommodityPairs(record?.commodityPairs)
     })
   })
   
@@ -226,7 +228,7 @@ export default function FixingForm({ recordId, functionId, window }) {
         date: formatDateFromApi(res?.record?.date),
         currencyId_metalId:
           res?.record?.currencyId && res?.record?.metalId
-            ? `${res.record.currencyId}${res.record.metalId}`
+            ? `${res.record.currencyId}-${res.record.metalId}`
             : null
       }
     })
@@ -694,6 +696,7 @@ useEffect(() => {
                       valueField='recordId'
                       displayField={['metalRef', 'currencyRef']}
                       store={combosStore?.commodityPairs}
+                      reducer={res => mapCommodityPairs(res?.list)}
                       columnsInDropDown={[
                         { key: 'metalRef', value: 'Metal Reference' },
                         { key: 'currencyRef', value: 'Currency Reference' }
@@ -725,7 +728,7 @@ useEffect(() => {
                           qty_muQty: newValue?.defQtyMUQty || 0,
                           unitPrice_muId: newValue?.defUnitPriceMUId || null,
                           unitPrice_muQty: newValue?.defUnitPriceMUQty || 0,
-                          currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null,
+                          currencyId_metalId: newValue ? `${newValue.currencyId}-${newValue.metalId}` : null,
                           eo_defTargetPriceMUQty: newValue?.eo_defTargetPriceMUQty,
                           disablePurityEditing: newValue?.disablePurityEditing || false
                         })

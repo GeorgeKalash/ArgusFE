@@ -40,6 +40,11 @@ import FixingForm from '@argus/shared-ui/src/components/Shared/Forms/FixingForm'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
+const mapCommodityPairs = list => (list || []).map(item => ({
+  ...item,
+  recordId: `${item.currencyId}-${item.metalId}`
+}))
+
 export default function EventOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -51,7 +56,13 @@ export default function EventOrderForm({ recordId, window }) {
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
   const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
   const maxDiscount = systemDefaults?.list?.find(obj => obj.key === 'bt_max_discount')?.value || null
-  const { combosStore } = useComboStore(BrokerageTradingRepository.EventOrder.pack, { parameters: `_msId=${msId}`,})
+  const { combosStore } = useComboStore(BrokerageTradingRepository.EventOrder.pack, {
+     parameters: `_msId=${msId}`,
+     transform: record => ({
+      ...record,
+      commodityPairs: mapCommodityPairs(record?.commodityPairs)
+     })
+    })
   
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.EventOrder,
@@ -228,7 +239,7 @@ export default function EventOrderForm({ recordId, window }) {
         expiryDate: res?.record?.expiryDate ? formatDateFromApi(res?.record?.expiryDate) : null,
         currencyId_metalId:
           res?.record?.currencyId && res?.record?.metalId
-            ? `${res.record.currencyId}${res.record.metalId}`
+            ? `${res.record.currencyId}-${res.record.metalId}`
             : null,
         triggeredAt: res?.record?.triggeredAt ? formatDateFromApi(res?.record?.triggeredAt) : null
       }
@@ -725,6 +736,7 @@ useEffect(() => {
                       valueField='recordId'
                       displayField={['metalRef', 'currencyRef']}
                       store={combosStore?.commodityPairs}
+                      reducer={res => mapCommodityPairs(res?.list)}
                       columnsInDropDown={[
                         { key: 'metalRef', value: 'Metal Reference' },
                         { key: 'currencyRef', value: 'Currency Reference' }
@@ -758,7 +770,7 @@ useEffect(() => {
                           qty_muQty: newValue?.eo_defQtyMUQty || null,
                           targetPrice_muId: newValue?.eo_defTargetPriceMUId || null,
                           targetPrice_muQty: pairQty,
-                          currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null
+                          currencyId_metalId: newValue ? `${newValue.currencyId}-${newValue.metalId}` : null
                         })
                         
                       }}
