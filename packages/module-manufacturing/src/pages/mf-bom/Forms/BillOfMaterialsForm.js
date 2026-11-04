@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -27,6 +27,8 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const loadedItemId = useRef(null)
+  const itemInfo = useRef({})
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.BillOfMaterials.page
@@ -54,13 +56,15 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
       name: yup.string().required(),
       reference: yup.string().required(),
       type: yup.string().required(),
-      itemId: yup.number().required(),
       activeStatus: yup.string().required(),
       version: yup.string().required(),
       date: yup.date().required(),
       qty: yup.number().required()
     }),
-    onSubmit: async obj => {
+   onSubmit: async obj => {
+      const oldItemId = loadedItemId.current
+      const newItemId = obj.itemId || null
+
       const response = await postRequest({
         extension: ManufacturingRepository.BillOfMaterials.set,
         record: JSON.stringify({
@@ -68,6 +72,9 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
           date: formatDateToApi(obj.date)
         })
       })
+
+      if (!oldItemId && newItemId) await updateItemProduction(oldItemId, newItemId)
+      loadedItemId.current = newItemId
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       formik.setFieldValue('recordId', response.recordId)
       setStore(prevStore => ({
@@ -79,6 +86,18 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
     }
   })
 
+  async function updateItemProduction() {
+    if (!formik.values?.itemId) return
+
+    await postRequest({
+      extension: InventoryRepository.ItemProduction.set,
+      record: JSON.stringify({
+        ...itemInfo?.current || {},
+        bomId: formik.values.recordId
+      })
+    })
+  }
+
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [])
@@ -88,6 +107,8 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
       extension: ManufacturingRepository.BillOfMaterials.get,
       parameters: `_recordId=${recordId}`
     })
+
+    loadedItemId.current = res.record?.itemId || null
     formik.setValues({
       ...res.record,
       date: formatDateFromApi(res.record.date)
@@ -139,6 +160,7 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
       parameters: `_recordId=${itemId}`
     })
 
+    itemInfo.current = {...res?.record || {}, itemId}
     return res?.record || null
   }
 
@@ -164,163 +186,164 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik.values.reference}
-                required
-                maxLength='15'
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='name'
-                label={labels.name}
-                value={formik.values.name}
-                required
-                maxAccess={maxAccess}
-                maxLength='30'
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('name', '')}
-                error={formik.touched.name && Boolean(formik.errors.name)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.BOM_TYPE}
-                name='type'
-                label={labels.type}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('type', newValue?.key || null)
-                }}
-                error={formik.touched.type && Boolean(formik.errors.type)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={InventoryRepository.Item.snapshot}
-                name='itemId'
-                label={labels?.sku}
-                valueField='recordId'
-                displayField='sku'
-                valueShow='sku'
-                secondValueShow='itemName'
-                form={formik}
-                columnsInDropDown={[
-                  { key: 'sku', value: 'SKU' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                onChange={async (_, newValue) => {
-                  const itemId = newValue?.recordId || null
+          <Grid container>
+            <Grid container spacing={2} xs={6}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='reference'
+                  label={labels.reference}
+                  value={formik.values.reference}
+                  required
+                  maxLength='15'
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('reference', '')}
+                  error={formik.touched.reference && Boolean(formik.errors.reference)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='name'
+                  label={labels.name}
+                  value={formik.values.name}
+                  required
+                  maxAccess={maxAccess}
+                  maxLength='30'
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('name', '')}
+                  error={formik.touched.name && Boolean(formik.errors.name)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  datasetId={DataSets.BOM_TYPE}
+                  name='type'
+                  label={labels.type}
+                  valueField='key'
+                  displayField='value'
+                  values={formik.values}
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('type', newValue?.key || null)
+                  }}
+                  error={formik.touched.type && Boolean(formik.errors.type)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={InventoryRepository.Item.snapshot}
+                  name='itemId'
+                  label={labels?.sku}
+                  valueField='recordId'
+                  displayField='sku'
+                  valueShow='sku'
+                  secondValueShow='itemName'
+                  form={formik}
+                  columnsInDropDown={[
+                    { key: 'sku', value: 'SKU' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  onChange={async (_, newValue) => {
+                    const itemId = newValue?.recordId || null
 
-                  formik.setFieldValue('itemId', itemId)
-                  formik.setFieldValue('itemName', newValue?.name || null)
-                  formik.setFieldValue('sku', newValue?.sku || null)
+                    formik.setFieldValue('itemId', itemId)
+                    formik.setFieldValue('itemName', newValue?.name || null)
+                    formik.setFieldValue('sku', newValue?.sku || null)
 
-                  const design = await getDesign(itemId)
-                  if (newValue?.priceType == 1) {
-                    const weight = await getWeight(newValue?.recordId)
-                    formik.setFieldValue('qty', weight)
-                  }
+                    const design = await getDesign(itemId)
+                    if (newValue?.priceType == 1) {
+                      const weight = await getWeight(newValue?.recordId)
+                      formik.setFieldValue('qty', weight)
+                    }
 
-                  formik.setFieldValue('designId', design?.designId || null)
-                  formik.setFieldValue('designRef', design?.designRef || '')
-                  formik.setFieldValue('designName', design?.designName || '')
-                }}
-                maxAccess={maxAccess}
-                errorCheck={'itemId'}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.ACTIVE_STATUS}
-                name='activeStatus'
-                label={labels.status}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('activeStatus', newValue?.key || null)
-                }}
-                error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='version'
-                label={labels.version}
-                value={formik.values.version}
-                maxAccess={maxAccess}
-                required
-                maxLength='10'
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('version', '')}
-                error={formik.touched.version && Boolean(formik.errors.version)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name='date'
-                required
-                label={labels.date}
-                value={formik?.values?.date}
-                onChange={formik.setFieldValue}
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', null)}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='description'
-                label={labels.description}
-                value={formik.values.description}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('description', '')}
-                error={formik.touched.description && Boolean(formik.errors.description)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='qty'
-                required
-                label={labels.qty}
-                value={formik?.values?.qty}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('qty', 0)}
-                error={formik.touched.qty && Boolean(formik.errors.qty)}
-                decimalScale={3}
-                maxLength={12}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='designRef'
-                label={labels.design}
-                value={formik?.values?.designRef}
-                maxAccess={maxAccess}
-                readOnly
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField name='designName' value={formik?.values?.designName} maxAccess={maxAccess} readOnly />
-            </Grid>
+                    formik.setFieldValue('designId', design?.designId || null)
+                    formik.setFieldValue('designRef', design?.designRef || '')
+                    formik.setFieldValue('designName', design?.designName || '')
+                  }}
+                  maxAccess={maxAccess}
+                  errorCheck={'itemId'}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  datasetId={DataSets.ACTIVE_STATUS}
+                  name='activeStatus'
+                  label={labels.status}
+                  valueField='key'
+                  displayField='value'
+                  values={formik.values}
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('activeStatus', newValue?.key || null)
+                  }}
+                  error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='version'
+                  label={labels.version}
+                  value={formik.values.version}
+                  maxAccess={maxAccess}
+                  required
+                  maxLength='10'
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('version', '')}
+                  error={formik.touched.version && Boolean(formik.errors.version)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomDatePicker
+                  name='date'
+                  required
+                  label={labels.date}
+                  value={formik?.values?.date}
+                  onChange={formik.setFieldValue}
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('date', null)}
+                  error={formik.touched.date && Boolean(formik.errors.date)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='description'
+                  label={labels.description}
+                  value={formik.values.description}
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('description', '')}
+                  error={formik.touched.description && Boolean(formik.errors.description)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='qty'
+                  required
+                  label={labels.qty}
+                  value={formik?.values?.qty}
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('qty', 0)}
+                  error={formik.touched.qty && Boolean(formik.errors.qty)}
+                  decimalScale={3}
+                  maxLength={12}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <CustomTextField
+                  name='designRef'
+                  label={labels.design}
+                  value={formik?.values?.designRef}
+                  maxAccess={maxAccess}
+                  readOnly
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <CustomTextField name='designName' value={formik?.values?.designName} maxAccess={maxAccess} readOnly />
+              </Grid>
+            </Grid> 
           </Grid>
         </Grow>
       </VertLayout>
