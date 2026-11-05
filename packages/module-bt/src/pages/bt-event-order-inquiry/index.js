@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -21,6 +21,8 @@ const EventOrderInquiry = () => {
   const [rate, setRate] = useState(null)
   const [currencyRef, setCurrencyRef] = useState(null)
   const { platformLabels } = useContext(ControlContext)
+  const dataRef = useRef(null)
+  const checkingRef = useRef(false)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -60,6 +62,37 @@ const EventOrderInquiry = () => {
       filterFn: fetchWithFilter
     }
   })
+
+
+  dataRef.current = data
+
+  const isHit = (row, price) => {
+    if (row?.isTriggered) return false
+    if (row?.direction === 1) return price < row?.targetPrice
+    if (row?.direction === 2) return price > row?.targetPrice
+
+    return false
+  }
+
+  const handlePrices = async body => {
+    if (checkingRef.current) return
+
+    const price = body?.price
+    if (price == null) return
+
+    const rows = dataRef.current?.list || []
+    const hasHit = rows.some(row => isHit(row, price))
+    if (!hasHit) return
+
+    checkingRef.current = true
+    await postRequest({
+      extension: MultiCurrencyRepository.ExchangeRates.current,
+      record: JSON.stringify(body)
+    })
+
+    await serviceEO()
+    await refetch()
+  }
 
 
   useEffect(() => {
@@ -180,7 +213,14 @@ const EventOrderInquiry = () => {
   return (
     <VertLayout>
       <Fixed>
-        {currencyRef && rate && (<GoldPriceTicker currency={currencyRef} rate={rate} style={{ marginLeft: 16, marginBottom: 16 }} />)}
+        {currencyRef && rate && (
+          <GoldPriceTicker
+            currency={currencyRef}
+            rate={rate}
+            onPrices={handlePrices}
+            style={{ marginLeft: 16, marginBottom: 16 }}
+          />
+        )}
         <RPBGridToolbar 
           hasSearch={false} 
           labels={labels} 
