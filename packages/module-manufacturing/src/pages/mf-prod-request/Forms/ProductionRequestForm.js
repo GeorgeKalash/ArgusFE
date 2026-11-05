@@ -250,6 +250,14 @@ export default function ProductionRequestForm({ recordId, labels, access, window
 
       return acc
     }, {})
+
+    const fiscalYear = record?.header?.fiscalYear
+
+    if (fiscalYear) {
+      const list = await loadPeriods([fiscalYear])
+
+      setPeriodOptions(list)
+    }
       
     formik.resetForm({
       values: {
@@ -366,10 +374,13 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       return
     }
 
+    const selected = new Date(date)
+
+    if (isNaN(selected.getTime()) || selected.getFullYear() < 2000) return
+
     let cancelled = false
 
-    ;(async () => {
-      const selected = new Date(date)
+    const timer = setTimeout(async () => {
       const year = selected.getFullYear()
       const isPlanned = [PROD_REQ_TYPE.TopSales, PROD_REQ_TYPE.NewItems].includes(type)
       const isSpecial = type === PROD_REQ_TYPE.SpecialOrder
@@ -388,13 +399,13 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       }
 
       try {
-        const now = new Date()
-        const years = isSpecial ? [now.getFullYear()] : [year]
+        const years = [year]
 
         const list = await loadPeriods(years)
         if (cancelled) return
 
         if (isPlanned) {
+          setPeriodOptions(list)
           const nextMonth = new Date(year, selected.getMonth() + 1, 1)
           const period = findPeriod(list, nextMonth)
 
@@ -405,15 +416,16 @@ export default function ProductionRequestForm({ recordId, labels, access, window
             return
           }
 
+          formik.setFieldValue('header.fiscalYear', period.fiscalYear)
           formik.setFieldValue('header.periodId', period.periodId)
           formik.setFieldValue('header.periodName', period.periodName)
         } else if (isSpecial) {
-          const minStart = new Date(now.getFullYear(), now.getMonth(), 1)
+          const minStart = new Date(year, selected.getMonth(), 1)
 
           const options = list.filter(p => {
             const end = p.endDate ? new Date(formatDateFromApi(p.endDate)) : null
 
-            return Number(p.fiscalYear) === now.getFullYear() && (!end || end >= minStart)
+            return Number(p.fiscalYear) === year && (!end || end >= minStart)
           })
 
           setPeriodOptions(options)
@@ -425,14 +437,14 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           )
 
           if (!stillValid) {
-            const target = selected < minStart ? minStart : selected
-            const period = findPeriod(options, target) || options[0]
+            const period = findPeriod(options, selected) || options[0]
 
             formik.setFieldValue('header.fiscalYear', period?.fiscalYear ?? null)
             formik.setFieldValue('header.periodId', period?.periodId ?? null)
             formik.setFieldValue('header.periodName', period?.periodName ?? null)
           }
         } else {
+          setPeriodOptions(list)
           const period = findPeriod(list, selected)
 
           formik.setFieldValue('header.fiscalYear', period?.fiscalYear ?? year)
@@ -445,10 +457,11 @@ export default function ProductionRequestForm({ recordId, labels, access, window
         formik.setFieldValue('header.periodId', null)
         formik.setFieldValue('header.periodName', null)
       }
-    })()
+    }, 800)
 
     return () => {
       cancelled = true
+      clearTimeout(timer)
     }
   }, [formik.values.header.date, formik.values.header.type, systemDefaults])
 
@@ -825,7 +838,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                     name='header.date'
                     label={labels.date}
                     value={formik?.values?.header?.date}
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     required
                     onChange={formik.setFieldValue}
                     onClear={() => {
@@ -848,35 +861,23 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  {isSpecialOrder && !editMode ? (
-                    <ResourceComboBox
-                      store={periodOptions}
-                      name='header.periodId'
-                      label={labels.period}
-                      valueField='periodId'
-                      displayField='periodName'
-                      values={formik?.values?.header}
-                      required
-                      readOnly={isPosted}
-                      maxAccess={maxAccess}
-                      onChange={(_, newValue) => {
-                        formik.setFieldValue('header.periodId', newValue?.periodId || null)
-                        formik.setFieldValue('header.periodName', newValue?.periodName || null)
-                        formik.setFieldValue('header.fiscalYear', newValue?.fiscalYear || null)
-                      }}
-                      error={formik?.touched?.header?.periodName && Boolean(formik?.errors?.header?.periodName)}
-                    />
-                  ) : (
-                    <CustomTextField
-                      name='header.periodName'
-                      label={labels.period}
-                      value={formik?.values?.header?.periodName}
-                      readOnly
-                      required
-                      maxAccess={maxAccess}
-                      error={formik?.touched?.header?.periodName && Boolean(formik?.errors?.header?.periodName)}
-                    />
-                  )}
+                  <ResourceComboBox
+                    store={periodOptions}
+                    name='header.periodId'
+                    label={labels.period}
+                    valueField='periodId'
+                    displayField='periodName'
+                    values={formik?.values?.header}
+                    required
+                    readOnly={!(isSpecialOrder && !editMode) || isPosted}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('header.periodId', newValue?.periodId || null)
+                      formik.setFieldValue('header.periodName', newValue?.periodName || null)
+                      formik.setFieldValue('header.fiscalYear', newValue?.fiscalYear || null)
+                    }}
+                    error={formik?.touched?.header?.periodName && Boolean(formik?.errors?.header?.periodName)}
+                  />
                 </Grid>
               </Grid>
             </Grid>
@@ -909,11 +910,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
                     name='header.metalId'
                     label={labels.metal}
                     valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
+                    displayField={'reference'}
                     values={formik?.values?.header}
                     readOnly={isPosted || formik.values.items?.some(row => row.itemId)}
                     required

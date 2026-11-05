@@ -18,7 +18,7 @@ function DataGridButton({ data, column: { props, field, ...column }, update, upd
         variant={bgColor || !imgSrc ? 'contained' : ''}
         disabled={checkCondition?.disabled}
         sx={
-          bgColor
+          bgColor && !checkCondition?.disabled
             ? {
                 '&&': { backgroundColor: bgColor },
                 '&&:hover': { backgroundColor: bgColor, opacity: 0.7 }

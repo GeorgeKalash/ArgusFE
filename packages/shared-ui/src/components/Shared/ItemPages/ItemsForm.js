@@ -26,7 +26,7 @@ import PrintConfirmationDialog from './PrintConfirmationDialog'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
 
-export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window }) {
+export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window, onSaved }) {
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
@@ -142,6 +142,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
       await refetchForm(response.recordId, !obj.recordId)
       invalidate()
+      onSaved?.()
     }
   })
 
