@@ -69,8 +69,16 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
   const columns = [
     {
       component: 'numberfield',
-      label: labels?.period,
+      label: labels?.periodId,
       name: 'periodId',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels?.period,
+      name: 'periodName',
       props: {
         readOnly: true
       }
