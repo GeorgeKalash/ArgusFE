@@ -16,14 +16,14 @@ import KitForm from './ItemPages/KitForm'
 import RetailForm from './ItemPages/RetailForm'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-const ItemWindow = ({ obj, window }) => {
+const ItemWindow = ({ obj, window, onSuccess }) => {
   const { recordId, msId, dmgId } = obj || {}
 
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
   const { getRequest } = useContext(RequestsContext)
-  const { labels, access: maxAccess } = useResourceParams({ datasetId: ResourceIds.Items, editMode: !!recordId})
+  const { labels, access: maxAccess } = useResourceParams({ datasetId: ResourceIds.Items, editMode: !!recordId })
   useSetWindow({ title: labels.items, window })
   
 
@@ -109,6 +109,7 @@ const ItemWindow = ({ obj, window }) => {
           maxAccess={maxAccess}
           setFormikInitial={setFormikInitial}
           window={window}
+          onSuccess={onSuccess}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>

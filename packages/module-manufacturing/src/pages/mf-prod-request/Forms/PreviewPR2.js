@@ -1,5 +1,5 @@
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
@@ -21,6 +21,7 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
+  const rowsRef = useRef([])
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.PreviewPR
@@ -54,7 +55,7 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
         return
       }
 
-      const mappedRows = selectedRows.map(({ onHand, ...row }) => ({
+      const mappedRows = selectedRows.map((row) => ({
         ...row,
         itemId: row.recordId,
         sku: row.sku,
@@ -66,6 +67,48 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
       window.close()
     }
   })
+
+  rowsRef.current = formik.values.rows
+
+  async function loadRows({ refresh = false } = {}) {
+    const res = await getRequest({
+      extension: ManufacturingRepository.ProductionRequest.preview2,
+      parameters: `_requestId=${requestId}`
+    })
+
+    if (!res?.list?.length) return
+
+    const selectedItemsMap = new Map((parentFormik.values.items || []).map(item => [item.itemId, item]))
+    const currentRowsMap = new Map((rowsRef.current || []).map(row => [row.recordId, row]))
+
+    const rows = res.list.map((item, index) => {
+      const createdDate = item?.createdDate ? formatDateFromApi(item?.createdDate) : null
+      const existing = refresh ? currentRowsMap.get(item.recordId) : null
+
+      if (existing) {
+        return {
+          ...item,
+          id: existing.id,
+          checked: existing.checked,
+          pcs: existing.pcs,
+          qty: existing.qty,
+          createdDate
+        }
+      }
+
+      const selectedItem = selectedItemsMap.get(item.recordId)
+
+      return {
+        id: index + 1,
+        ...item,
+        checked: !!selectedItem,
+        qty: selectedItem ? selectedItem.qty : item.qty,
+        createdDate
+      }
+    })
+
+    formik.setValues({ rows })
+  }
 
   const columns = [
     {
@@ -96,6 +139,7 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
                 recordId: row.itemId,
                 ...row
               },
+              onSuccess: () => loadRows({ refresh: true })
             },
             nextToTitle: row?.sku
           })
@@ -144,15 +188,6 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
       component: 'textfield',
       label: labels.category,
       name: 'categoryName',
-      flex: 1,
-      props: {
-        readOnly: true
-      }
-    },
-    {
-      component: 'numberfield',
-      label: labels.onhand,
-      name: 'onHand',
       flex: 1,
       props: {
         readOnly: true
@@ -215,34 +250,7 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
   ]
 
   useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: ManufacturingRepository.ProductionRequest.preview2,
-        parameters: `_requestId=${requestId}`
-      })
-
-      if (res?.list?.length > 0) {
-        const selectedItems = parentFormik.values.items || []
-
-        const selectedItemsMap = new Map(
-          selectedItems.map(item => [item.itemId, item])
-        )
-
-        const rows = res.list.map((item, index) => {
-          const selectedItem = selectedItemsMap.get(item.recordId)
-
-          return {
-            id: index + 1,
-            ...item,
-            checked: !!selectedItem,
-            qty: selectedItem ? selectedItem.qty : item.qty,
-            createdDate: item?.createdDate ? formatDateFromApi(item?.createdDate) : null
-          }
-        })
-
-        formik.setValues({ rows })
-      }
-    })()
+    loadRows()
   }, [])
 
   return (

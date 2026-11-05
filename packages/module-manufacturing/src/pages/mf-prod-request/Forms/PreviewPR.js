@@ -1,5 +1,5 @@
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
@@ -20,6 +20,7 @@ const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
+  const rowsRef = useRef([])
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.PreviewPR
@@ -63,6 +64,45 @@ const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window
     }
   })
 
+  rowsRef.current = formik.values.rows
+
+  async function loadRows({ refresh = false } = {}) {
+    const res = await getRequest({
+      extension: ManufacturingRepository.ProductionRequest.preview,
+      parameters: `_requestId=${requestId}&_plantId=${plantId}&_metalId=${metalId}`
+    })
+
+    if (!res?.list?.length) return
+
+    const selectedItemsMap = new Map((parentFormik.values.items || []).map(item => [item.itemId, item]))
+    const currentRowsMap = new Map((rowsRef.current || []).map(row => [row.itemId, row]))
+
+    const rows = res.list.map((item, index) => {
+      const existing = refresh ? currentRowsMap.get(item.itemId) : null
+
+      if (existing) {
+        return {
+          ...item,
+          id: existing.id,
+          checked: existing.checked,
+          pcs: existing.pcs,
+          qty: existing.qty
+        }
+      }
+
+      const selectedItem = selectedItemsMap.get(item.itemId)
+
+      return {
+        id: index + 1,
+        ...item,
+        checked: !!selectedItem,
+        qty: selectedItem ? selectedItem.qty : item.qty
+      }
+    })
+
+    formik.setValues({ rows })
+  }
+
   const columns = [
     {
       component: 'checkbox',
@@ -92,6 +132,7 @@ const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window
                 recordId: row.itemId,
                 ...row
               },
+              onSuccess: () => loadRows({ refresh: true })
             },
             nextToTitle: row?.sku
           })
@@ -130,7 +171,7 @@ const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window
     {
       component: 'textfield',
       label: labels.itemGroupName,
-      name: 'itemGroupName',
+      name: 'groupName',
       flex: 1,
       props: { 
         readOnly: true 
@@ -220,33 +261,7 @@ const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window
   ]
 
   useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: ManufacturingRepository.ProductionRequest.preview,
-        parameters: `_requestId=${requestId}&_plantId=${plantId}&_metalId=${metalId}`
-      })
-
-      if (res?.list?.length > 0) {
-        const selectedItems = parentFormik.values.items || []
-
-        const selectedItemsMap = new Map(
-          selectedItems.map(item => [item.itemId, item])
-        )
-
-        const rows = res.list.map((item, index) => {
-          const selectedItem = selectedItemsMap.get(item.itemId)
-
-          return {
-            id: index + 1,
-            ...item,
-            checked: !!selectedItem,
-            qty: selectedItem ? selectedItem.qty : item.qty
-          }
-        })
-
-        formik.setValues({ rows })
-      }
-    })()
+    loadRows()
   }, [])
 
   return (
