@@ -88,7 +88,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
         .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
 
       await postRequest({
-        extension: InventoryRepository.ItemProduction.set,
+        extension: InventoryRepository.ItemProduction.setPack,
         record: JSON.stringify({
           header: {
             itemId: recordId,
