@@ -20,7 +20,7 @@ const BillOfMaterialsWindow = ({ recordId, labels, maxAccess }) => {
         <BillOfMaterialsForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
-        <ComponentBOM labels={labels} store={store} maxAccess={maxAccess}/>
+        <ComponentBOM labels={labels} store={store} />
       </CustomTabPanel>
     </>
   )
