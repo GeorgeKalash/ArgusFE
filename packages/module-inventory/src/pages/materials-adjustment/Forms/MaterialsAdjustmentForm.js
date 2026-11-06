@@ -29,8 +29,9 @@ import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/number
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+
 export default function MaterialsAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -67,6 +68,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     clientName: '',
     isVerified: false,
     clientRef: '',
+    productionLineId: null,
     rows: [
       {
         id: 1,
@@ -898,11 +900,29 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionLine.qry}
+                    parameters='_startAt=0&_pageSize=1000'
+                    values={formik.values}
+                    name='productionLineId'
+                    label={labels.productionLine}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('productionLineId', newValue?.recordId || null)}
+                    error={formik.touched.productionLineId && formik.errors.productionLineId}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <CustomTextArea
                     name='description'
                     label={labels.description}
                     value={formik?.values?.description}
-                    rows={2.5}
+                    rows={2}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
