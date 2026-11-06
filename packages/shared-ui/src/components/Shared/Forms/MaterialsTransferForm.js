@@ -1280,6 +1280,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
                   maxLength='200'
                   maxAccess={maxAccess}
                   onChange={formik.handleChange}
+                  rows={3}
                   onClear={() => formik.setFieldValue('notes', '')}
                   error={formik.touched.notes && Boolean(formik.errors.notes)}
                 />
@@ -1314,7 +1315,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
                   label={labels.productionLine}
                   valueField='recordId'
                   displayField={['reference', 'name']}
-                  displayFieldWidth={1}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
