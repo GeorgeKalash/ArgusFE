@@ -36,6 +36,7 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ImportTransfer from '@argus/shared-ui/src/components/Shared/Forms/ImportTransfer'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -78,6 +79,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     notes: '',
     status: 1,
     plantId,
+    productionLineId: null,
     printStatus: null,
     qty: null,
     pcs: null,
@@ -1301,6 +1303,25 @@ export default function MaterialsTransferForm({ recordId, window }) {
                     formik.setFieldValue('plantId', newValue?.recordId || null)
                   }}
                   error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                />
+              </Grid>
+              <Grid item xs={12} marginLeft={2}>
+                <ResourceComboBox
+                  endpointId={ManufacturingRepository.ProductionLine.qry}
+                  parameters='_startAt=0&_pageSize=1000'
+                  values={formik.values}
+                  name='productionLineId'
+                  label={labels.productionLine}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  displayFieldWidth={1}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  maxAccess={maxAccess}
+                  onChange={(_, newValue) => formik.setFieldValue('productionLineId', newValue?.recordId || null)}
+                  error={formik.touched.productionLineId && formik.errors.productionLineId}
                 />
               </Grid>
             </Grid>
