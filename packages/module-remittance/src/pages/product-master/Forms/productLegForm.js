@@ -214,7 +214,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
                   label={labels.plant}
                   valueField='recordId'
                   values={store}
-                  readOnly={true}
+                  readOnly
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
@@ -225,9 +225,11 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
               <Grid item xs={3}>
                 <ResourceComboBox
                   store={countries}
+                  endpointId={RemittanceSettingsRepository.ProductCountries.qry}
+                  parameters={`_productId=${pId}`}
                   name='countryId'
                   label={labels.country}
-                  readOnly={true}
+                  readOnly
                   valueField='countryId'
                   displayField={['countryRef', 'countryName']}
                   columnsInDropDown={[
@@ -249,13 +251,15 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  readOnly={true}
+                  readOnly
                 />
               </Grid>
               <Grid item xs={3}>
                 {}
                 <ResourceComboBox
                   store={store?.dispersals}
+                  endpointId={RemittanceSettingsRepository.ProductDispersal.qry}
+                  parameters={`_productId=${pId}`}
                   name='dispersalId'
                   label={labels.dispersal}
                   valueField='recordId'
@@ -265,7 +269,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  readOnly={true}
+                  readOnly
                 />
               </Grid>
             </Grid>

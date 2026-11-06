@@ -39,7 +39,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   const { stack: stackError } = useError()
   const [allMetals, setAllMetals] = useState([])
   const [recalc, setRecalc] = useState(false)
-  const filteredItems = useRef()
+  const skuStoreByRowRef = useRef({})
   const alloyMetalItems = useRef({})
   const isMetalSmelting = Number(functionId) === SystemFunction.MetalSmelting
 
@@ -326,14 +326,10 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
     invalidate()
   }
 
-  async function fillSKUStore(metalId, flag) {
-    if (flag == 'metal')
-      filteredItems.current = metalId
-        ? allMetals.filter(metal => {
-            return metal.metalId === metalId
-          })
-        : []
-    else filteredItems.current = alloyMetalItems.current || []
+  function getSkuStore(row) {
+    if (row?.type == 2) return alloyMetalItems.current || []
+
+    return row?.metalId ? (allMetals || []).filter(metal => metal.metalId === row.metalId) : []
   }
 
   async function getAllMetals() {
@@ -356,6 +352,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
   }
 
   async function refetchForm(recordId) {
+    skuStoreByRowRef.current = {}
     const { record } = await getRequest({
       extension: endpoint?.get2,
       parameters: `_recordId=${recordId}`
@@ -421,7 +418,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
         ]
       },
       onChange: async ({ row: { update, newRow } }) => {
-        if (newRow?.type == 2) fillSKUStore()
+        delete skuStoreByRowRef.current[newRow.id]
         update({ itemId: null, sku: '', itemName: '', metalId: '', metalRef: '', purity: newRow?.type == 1 ? 0 : '' })
       }
     },
@@ -444,7 +441,7 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
         return { ...props, readOnly: !!row.itemId || row.type == 2 }
       },
       onChange: async ({ row: { update, newRow } }) => {
-        fillSKUStore(newRow?.metalId, 'metal')
+        delete skuStoreByRowRef.current[newRow.id]
         if (newRow?.purity) update({ purity: newRow.purity * 1000 })
       }
     },
@@ -453,7 +450,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
       label: labels.sku,
       name: 'sku',
       props: {
-        store: filteredItems?.current,
         valueField: 'itemId',
         displayField: 'sku',
         mapping: [
@@ -468,7 +464,23 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
         displayFieldWidth: 3.5
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredItems?.current }
+        return {
+          ...props,
+          store: skuStoreByRowRef.current[row.id] ?? getSkuStore(row),
+          onRefreshed: list => {
+            skuStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.type == 2
+            ? {
+                endpointId: FoundryRepository.AlloyMetals.qry,
+                parameters: `_filter=`,
+                reducer: res => (res?.list || []).map(item => ({ ...item, itemName: item.name }))
+              }
+            : row?.metalId && {
+                endpointId: InventoryRepository.Scrap.qry,
+                parameters: `_metalId=${row.metalId}`
+              })
+        }
       },
       onChange: async ({ row: { update, newRow } }) => {
         if (!newRow?.itemId) return
@@ -973,10 +985,6 @@ export default function FOMetalTrxForm({ labels, access, recordId, functionId, g
             maxAccess={maxAccess}
             disabled={isPosted}
             allowDelete={!isPosted}
-            onSelectionChange={(row, _, field) => {
-              const flag = row.type != 2 ? 'metal' : ''
-              if (field == 'sku') fillSKUStore(row?.metalId, flag)
-            }}
           />
         </Grow>
         <Fixed>
