@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -29,7 +30,8 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
       reference: '',
       name: '',
       divisionId: null,
-      branchId: null
+      branchId: null,
+      direction: null
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -127,6 +129,22 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
                 }}
                 required
                 error={formik.touched.branchId && Boolean(formik.errors.branchId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.BIOMETRIC_DIRECTION}
+                name='direction'
+                label={labels.direction}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('direction', null)}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('direction', newValue?.key || null)
+                }}
+                error={formik.touched.direction && Boolean(formik.errors.direction)}
               />
             </Grid>
           </Grid>
