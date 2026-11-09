@@ -15,7 +15,6 @@ import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
-
 const ComponentBOM = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,7 +27,12 @@ const ComponentBOM = ({ store, labels, maxAccess }) => {
     sku: row => row?.sku,
     itemName: row => row?.itemName,
     qty: row => row?.qty,
-    pcs: row => row?.pcs != null && row?.pcs <= 2147483647
+    pcs: row => {
+      return {
+        valid: row?.pcs <= 2147483647,
+        optional: true
+      }
+    }
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'components')
 
