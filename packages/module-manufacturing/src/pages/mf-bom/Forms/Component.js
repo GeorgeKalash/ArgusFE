@@ -95,7 +95,11 @@ const ComponentBOM = ({ store, labels, maxAccess }) => {
       label: labels.sku,
       name: 'sku',
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
+        endpointId: InventoryRepository.Items.snapshot,
+        parameters: {
+          _startAt: 0,
+          _size: 50
+        },
         valueField: 'sku',
         displayField: 'sku',
         mapping: [
@@ -103,7 +107,8 @@ const ComponentBOM = ({ store, labels, maxAccess }) => {
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
           { from: 'msId', to: 'msId' },
-          { from: 'categoryName', to: 'categoryName' }
+          { from: 'categoryName', to: 'categoryName' },
+          { from: 'groupName', to: 'groupName' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -182,8 +187,8 @@ const ComponentBOM = ({ store, labels, maxAccess }) => {
     },
     {
       component: 'textfield',
-      label: labels.itemGroupName,
-      name: 'itemGroupName',
+      label: labels.itemGroup,
+      name: 'groupName',
       props: { readOnly: true },
       flex: 2
     },
