@@ -33,12 +33,15 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
       metalId: null,
       itemGroupId: null,
       collectionId: null,
+      itemCategoryId: null,
+      brandId: null,
       qty: 0
     },
     maxAccess,
     validationSchema: yup.object({
       fiscalYear: yup.number().required(),
       periodId: yup.number().required(),
+      itemCategoryId: yup.number().required(),
       qty: yup.number().required(),
     }),
     onSubmit: async obj => {
@@ -169,6 +172,42 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
                 values={formik.values}
                 onChange={(_, newValue) => formik.setFieldValue('collectionId', newValue?.recordId || null) }
                 error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Category.qry}
+                parameters='_name=&_pageSize=1000&_startAt=0'
+                name='itemCategoryId'
+                label={labels.itemCategory}
+                valueField='recordId'
+                displayField={['caRef', 'name']}
+                columnsInDropDown={[
+                  { key: 'caRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                required
+                maxAccess={maxAccess}
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('itemCategoryId', newValue?.recordId || null) }
+                error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Brands.qry}
+                name='brandId'
+                label={labels.brand}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                maxAccess={maxAccess}
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('brandId', newValue?.recordId || null) }
+                error={formik.touched.brandId && Boolean(formik.errors.brandId)}
               />
             </Grid>
             <Grid item xs={12}>
