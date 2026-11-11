@@ -255,7 +255,7 @@ const EventOrderInquiry = () => {
       </Fixed>
       <Grow>
         <Table
-          name='table'
+          name='InquiryTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
