@@ -189,41 +189,37 @@ export default function SamplesForm({ recordId, window }) {
       label: labels.sku,
       name: 'sku',
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
+        endpointId: InventoryRepository.Items.snapshot,
+        parameters: { _startAt: 0, _size: 50},
         valueField: 'sku',
         displayField: 'sku',
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
-          { from: 'categoryId', to: 'categoryId' }
+          { from: 'categoryName', to: 'itemCategoryName' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 4
       },
       async onChange({ row: { update, newRow } }) {
-        const { itemId, categoryId } = newRow
+        const { itemId } = newRow
         if (!itemId){
-          update({
-            rawCategoryName: '',
-            itemCategoryName: ''
-          })
+          update({ rawCategoryName: ''})
 
           return
         }
 
-        const fetchRecord = (extension, id) => getRequest({ extension, parameters: `_recordId=${id}` })
-        const [item, category] = await Promise.all([
-          fetchRecord(InventoryRepository.ItemProduction.get, itemId),
-          categoryId ? fetchRecord(InventoryRepository.Category.get, categoryId) : null
-        ])
+        const res = await getRequest({
+          extension: InventoryRepository.ItemProduction.get,
+          parameters: `_recordId=${itemId}`
+        }) 
 
         update({
-          rawCategoryName: item?.record?.rmcName || '',
-          itemCategoryName: category?.record?.name || ''
+          rawCategoryName: res?.record?.rmcName || '',
         })
       }
     },
@@ -490,6 +486,7 @@ export default function SamplesForm({ recordId, window }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => formik.setFieldValue('header.itemGroupId', newValue?.recordId || null)}
                     error={formik.touched.header?.itemGroupId && formik.errors.header?.itemGroupId}
@@ -700,8 +697,7 @@ export default function SamplesForm({ recordId, window }) {
                     readOnly={isClosed}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('header.fileReference', newValue?.fileReference || '')
-                      formik.setFieldValue('header.sketchId', newValue?.sketchId || null)
-                      formik.setFieldValue('header.sketchRef', newValue?.sketchRef || '')
+                      formik.setFieldValue('header.sketchSourceName', newValue?.sketchSourceName || '')
                       formik.setFieldValue('header.threeDDRef', newValue?.reference || '')
                       formik.setFieldValue('header.threeDDId', newValue?.recordId || null)
                     }}
@@ -720,12 +716,12 @@ export default function SamplesForm({ recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='header.sketchRef'
-                    label={labels.sketch}
-                    value={formik?.values?.header?.sketchRef}
+                    name='header.sketchSourceName'
+                    label={labels.sketchSource}
+                    value={formik?.values?.header?.sketchSourceName}
                     maxAccess={maxAccess}
                     readOnly
-                    error={formik.touched.header?.sketchRef && Boolean(formik.errors.header?.sketchRef)}
+                    error={formik.touched.header?.sketchSourceName && Boolean(formik.errors.header?.sketchSourceName)}
                   />
                 </Grid>
 
