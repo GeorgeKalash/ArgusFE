@@ -148,8 +148,9 @@ export const InventoryRepository = {
   },
   ItemProduction: {
     get: service + 'getMFR',
+    set: service + 'setMFR',
     getPack: service + 'getPackMFR',
-    set: service + 'setPackMFR',
+    setPack: service + 'setPackMFR',
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
