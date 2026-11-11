@@ -2405,6 +2405,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                 value={formik.values.header.description}
                 rows={3}
                 editMode={editMode}
+                readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.description', e.target.value)}
                 onClear={() => formik.setFieldValue('header.description', '')}
