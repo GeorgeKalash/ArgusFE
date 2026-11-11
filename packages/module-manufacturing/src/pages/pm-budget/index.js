@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -12,6 +11,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import PmBudgetForm from './Forms/PmBudgetForm'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 export default function PMBudget () {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -19,16 +19,21 @@ export default function PMBudget () {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
     const response = await getRequest({
       extension: ProductModelingRepository.Budget.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
     return { ...response, _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   const {
     query: { data },
+    filterBy,
     labels,
     paginationParameters,
     refetch,
@@ -37,12 +42,16 @@ export default function PMBudget () {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ProductModelingRepository.Budget.page,
-    datasetId: ResourceIds.PM_Budget
+    datasetId: ResourceIds.PM_Budget,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
     { field: 'fiscalYear', headerName: labels.fiscalYear, flex: 1 },
-    { field: 'developerRef', headerName: labels.developer, flex: 1 },
+    { field: 'developerRef', headerName: labels.developerRef, flex: 1 },
+    { field: 'developerName', headerName: labels.developerName, flex: 1 },
     { field: 'periodName', headerName: labels.period, flex: 1 },
     { field: 'designCount', headerName: labels.designCount, flex: 1, type: 'number' }
   ]
@@ -67,8 +76,8 @@ export default function PMBudget () {
         recordId,
         maxAccess
       },
-      width: 800,
-      height: 550,
+      width: 1000,
+      height: 560,
       title: labels.budget
     })
   }
@@ -76,7 +85,7 @@ export default function PMBudget () {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} inputSearch={false} />
+        <RPBGridToolbar onAdd={add} maxAccess={maxAccess} reportName={'PMBUD'} inputSearch={false} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

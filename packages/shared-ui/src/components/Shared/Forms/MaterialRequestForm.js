@@ -418,13 +418,12 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
     })
   }
 
-  const onCancel = async recId => {
-    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) || null }
-    delete header.items
+  const onCancel = async cancelReason => {
+    const recId = formik.values?.recordId
 
     await postRequest({
       extension: IVReplenishementRepository.MaterialReplenishment.cancel,
-      record: JSON.stringify(header)
+      record: JSON.stringify({ recordId: recId, notes: cancelReason })
     })
 
     toast.success(platformLabels.Cancelled)
@@ -460,9 +459,11 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
     {
       key: 'Cancel',
       condition: true,
-      onClick: () => onCancel(formik.values.recordId),
-      disabled: !editMode || isCancelled || isClosed
-    }
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isClosed
+    },
   ]
 
   async function getDataGrid(recordId) {
