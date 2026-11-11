@@ -214,6 +214,7 @@ export default function PuQtnForm({ recordId, window }) {
   }
 
   async function getMeasurementObject(msId) {
+    if (!msId) return
     const res = await getRequest({
       extension: InventoryRepository.Measurement.get,
       parameters: `_recordId=${msId}`

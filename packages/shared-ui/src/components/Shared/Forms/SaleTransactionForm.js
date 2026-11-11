@@ -1229,6 +1229,7 @@ export default function SaleTransactionForm({
   ]
 
   async function getMeasurementObject(msId) {
+    if (!msId) return
     const res = await getRequest({
       extension: InventoryRepository.Measurement.get,
       parameters: `_recordId=${msId}`

@@ -1752,6 +1752,8 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   }
 
   async function getMeasurementObject(msId) {
+    if (!msId) return
+    
     const res = await getRequest({
       extension: InventoryRepository.Measurement.get,
       parameters: `_recordId=${msId}`
