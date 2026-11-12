@@ -69,8 +69,8 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ChangeVendor from '@argus/shared-ui/src/components/Shared/ChangeVendor'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
-import BarcodesTable from '@argus/module-purchase/src/pages/pu-trx/[functionId]/Forms/BarcodesTable'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import BarcodesTable from '@argus/shared-ui/src/components/Shared/BarcodesTable'
 
 export default function PurchaseTransactionForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -537,10 +537,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                 }
               )
             }
-          },
-          width: 900,
-          height: 600,
-          title: labels.barcodes
+          }
         })
       }
     },
