@@ -19,7 +19,6 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { useError } from '@argus/shared-providers/src/providers/error'
@@ -419,13 +418,12 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
     })
   }
 
-  const onCancel = async recId => {
-    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) || null }
-    delete header.items
+  const onCancel = async cancelReason => {
+    const recId = formik.values?.recordId
 
     await postRequest({
       extension: IVReplenishementRepository.MaterialReplenishment.cancel,
-      record: JSON.stringify(header)
+      record: JSON.stringify({ recordId: recId, notes: cancelReason })
     })
 
     toast.success(platformLabels.Cancelled)
@@ -436,16 +434,6 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
     formik.setValues({
       ...res.record,
       items: res3
-    })
-  }
-
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.MaterialRequest,
-        recordId: formik.values.recordId
-      }
     })
   }
 
@@ -469,17 +457,13 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
       disabled: !editMode || isCancelled
     },
     {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-    {
       key: 'Cancel',
       condition: true,
-      onClick: () => onCancel(formik.values.recordId),
-      disabled: !editMode || isCancelled || isClosed
-    }
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isClosed
+    },
   ]
 
   async function getDataGrid(recordId) {
@@ -538,6 +522,7 @@ export default function MaterialRequestForm({ recordId, window: titleWindow }) {
       actions={actions}
       functionId={SystemFunction.MaterialRequest}
       disabledSubmit={isClosed || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

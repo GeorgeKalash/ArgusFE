@@ -47,6 +47,9 @@ export const ResourceIds = {
   TermEndDate: 71602,
   WorkAnniversary: 71603,
   Holidays: 72601,
+  HRDimensions: 71115,
+  HRDimensionValue: 71116,
+  HRDimensionGroup: 71117,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
@@ -669,14 +672,19 @@ export const ResourceIds = {
   PreviewPR: 42353,
   PPDefaults: 42611,
   BatchWaxTransfer: 42354,
+  PRItemSize: 42355,
   FixingSalesDTD: 38602,
   FixingPurchaseDTD: 38603,
   BTDocumentTypeDefault: 38102,
-  Budget: 42145,
+  DimensionalTarget: 51211,
   Calendar: 72106,
   PM_Budget: 48105,
   CancelReason: 20603,
   ScrapAdjustment: 47319,
+  ProdRequestDTD: 42612,
+  BatchCloseTV: 72216,
+  DeveloperGroup: 48108,
+  IVBrands: 41125,
 
   // GL
   GLSalesInvoice: 51604,

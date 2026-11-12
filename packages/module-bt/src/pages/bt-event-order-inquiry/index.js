@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -12,12 +13,14 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import EventOrderForm from '@argus/shared-ui/src/components/Shared/Forms/EventOrderForm'
 import GoldPriceTicker from '@argus/shared-ui/src/components/Shared/GoldPriceTicker'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const EventOrderInquiry = () => {
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const [rate, setRate] = useState(null)
   const [currencyRef, setCurrencyRef] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -66,6 +69,13 @@ const EventOrderInquiry = () => {
 
     return () => clearInterval(interval)
   }, [refetch])
+
+  const serviceEO = async () => {
+    await postRequest({
+      extension: BrokerageTradingRepository.EventOrder.service,
+      record: JSON.stringify({})
+    })
+  }
 
   const columns = [
     {
@@ -171,7 +181,20 @@ const EventOrderInquiry = () => {
     <VertLayout>
       <Fixed>
         {currencyRef && rate && (<GoldPriceTicker currency={currencyRef} rate={rate} style={{ marginLeft: 16, marginBottom: 16 }} />)}
-        <RPBGridToolbar hasSearch={false} labels={labels} maxAccess={access} reportName={'BTEOI'} filterBy={filterBy} />
+        <RPBGridToolbar 
+          hasSearch={false} 
+          labels={labels} 
+          maxAccess={access}
+          reportName={'BTEOI'} 
+          filterBy={filterBy} 
+          rightSection={
+              <CustomButton
+                image='import.png'
+                tooltipText={platformLabels.Import}
+                onClick={() => serviceEO()}
+              />
+          }
+        />
       </Fixed>
       <Grow>
         <Table

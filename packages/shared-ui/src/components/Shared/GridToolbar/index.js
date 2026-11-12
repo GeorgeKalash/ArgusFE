@@ -400,9 +400,9 @@ const GridToolbar = ({
           )}
 
           {rightSection && (
-            <Grid item xs={3}>
+            <>
               {rightSection}
-            </Grid>
+            </>
           )}
         </Grid>
 

@@ -22,7 +22,6 @@ import { useContext, useEffect, useState } from 'react'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import toast from 'react-hot-toast'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
@@ -216,28 +215,14 @@ export default function CastingForm({ store, setStore, access, labels }) {
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isCancelled || isPosted
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isPosted
     }
   ]
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.Casting,
-        recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
-    })
-  }
+
+  
   async function getfactorStdLoss(metalId, metalColorId) {
     if (!metalId && !metalColorId) return
 
@@ -295,12 +280,12 @@ export default function CastingForm({ store, setStore, access, labels }) {
     refetchForm(formik.values.recordId)
   }
 
-  async function onCancel() {
+  async function onCancel(cancelReason) {
     await postRequest({
       extension: FoundryRepository.Casting.cancel,
       record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values.date)
+        recordId: formik.values.recordId,
+        notes: cancelReason
       })
     })
     toast.success(platformLabels.Cancelled)
@@ -381,6 +366,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
       editMode={editMode}
       disabledSubmit={isCancelled || isPosted}
       disabledSavedClear={isCancelled || isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

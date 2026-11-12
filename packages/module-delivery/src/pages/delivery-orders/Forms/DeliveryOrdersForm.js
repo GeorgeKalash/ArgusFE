@@ -26,13 +26,12 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import AddressFilterForm from '@argus/shared-ui/src/components/Shared/AddressFilterForm'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+
 export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId, refresh = true, ...props }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -276,10 +275,10 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     await refetchForm(formik.values.recordId)
   }
 
-  const onCancel = async () => {
+  const onCancel = async cancelReason => {
     await postRequest({
       extension: DeliveryRepository.DeliveriesOrders.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
     if (recordId) toast.success(platformLabels.Cancelled)
@@ -296,15 +295,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     })()
   }, [])
 
-  const onWorkFlow = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.DeliveryOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
+
 
   async function openGenerateInvoiceForm() {
     const resClient = await getRequest({
@@ -350,20 +341,16 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || !isPosted || isCancelled
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlow,
-      disabled: !editMode
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || (!isPosted && !isCancelled)
     },
     {
       key: 'generateIV',
       condition: true,
       onClick: openGenerateInvoiceForm,
-      disabled: (!isPosted && !isCancelled) || !!formik.values.invoiceId
+      disabled: !isPosted || isCancelled || !!formik.values.invoiceId
     }
   ]
 
@@ -503,9 +490,10 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       editMode={editMode}
       actions={actions}
       previewBtnClicked={previewBtnClicked}
-      functionId={SystemFunction.DeliveryTrip}
+      functionId={SystemFunction.DeliveryOrder}
       disabledSubmit={isPosted || isCancelled}
       previewReport={editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

@@ -21,7 +21,6 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ExpensesCostCenters from '@argus/shared-ui/src/components/Shared/ExpensesCostCenters'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
@@ -296,20 +295,10 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     })()
   }, [cashAccountId])
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PaymentVoucher,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
-  const onCancel = async () => {
+  const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentVouchers.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
     toast.success(platformLabels.Cancelled)
@@ -368,8 +357,10 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isPosted || isCancelled
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isPosted
     },
     {
       key: 'FI Trx',
@@ -389,12 +380,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -630,6 +615,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
         Component: MultiCurrencyRateForm,
         props: {
           DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
+          readOnly: isCancelled || isPosted,
           data: {
             ...data,
             amount: amountSum
@@ -655,6 +641,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       actions={actions}
       functionId={SystemFunction.PaymentVoucher}
       disabledSubmit={isPosted || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

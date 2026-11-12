@@ -22,7 +22,6 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
@@ -127,16 +126,6 @@ export default function MatPlaningForm({ recordId, window }) {
     })
   }
 
-  async function onWorkFlow() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.MRP,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   async function onReopen() {
     await postRequest({
       extension: IVReplenishementRepository.MatPlanning.reopen,
@@ -186,12 +175,6 @@ export default function MatPlaningForm({ recordId, window }) {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlow,
       disabled: !editMode
     },
     {
@@ -398,6 +381,7 @@ export default function MatPlaningForm({ recordId, window }) {
       editMode={editMode}
       previewReport={editMode}
       disabledSubmit={isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

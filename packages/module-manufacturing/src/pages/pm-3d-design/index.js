@@ -96,6 +96,11 @@ const ThreeDDesign = () => {
       flex: 1
     },
     {
+      field: 'developerName',
+      headerName: labels.developer,
+      flex: 1
+    },
+    {
       field: 'itemGroupName',
       headerName: labels.itemGroup,
       flex: 1

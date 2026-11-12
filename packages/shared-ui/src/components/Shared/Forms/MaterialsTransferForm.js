@@ -20,12 +20,11 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { getFormattedNumber, roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
@@ -37,6 +36,7 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ImportTransfer from '@argus/shared-ui/src/components/Shared/Forms/ImportTransfer'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -79,6 +79,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
     notes: '',
     status: 1,
     plantId,
+    productionLineId: null,
     printStatus: null,
     qty: null,
     pcs: null,
@@ -745,15 +746,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
     await refetchForm(formik.values.recordId)
   }
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.MaterialTransfer,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const onPost = async () => {
     const copy = { ...formik.values }
@@ -947,12 +939,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
       disabled: !isClosed || !editMode || isPosted
     },
     {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-    {
       key: 'Verify',
       condition: !formik.values.isVerified,
       onClick: onVerify,
@@ -982,7 +968,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       onClick: onReturn,
       disabled: !isPosted
     }
-  ]
+   ]
 
   async function getNotificationData(recordId) {
     return await getRequest({
@@ -1111,6 +1097,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       actions={actions}
       functionId={SystemFunction.MaterialTransfer}
       disabledSubmit={isPosted || isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>
@@ -1293,6 +1280,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
                   maxLength='200'
                   maxAccess={maxAccess}
                   onChange={formik.handleChange}
+                  rows={3}
                   onClear={() => formik.setFieldValue('notes', '')}
                   error={formik.touched.notes && Boolean(formik.errors.notes)}
                 />
@@ -1316,6 +1304,24 @@ export default function MaterialsTransferForm({ recordId, window }) {
                     formik.setFieldValue('plantId', newValue?.recordId || null)
                   }}
                   error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                />
+              </Grid>
+              <Grid item xs={12} marginLeft={2}>
+                <ResourceComboBox
+                  endpointId={ManufacturingRepository.ProductionLine.qry}
+                  parameters='_startAt=0&_pageSize=1000'
+                  values={formik.values}
+                  name='productionLineId'
+                  label={labels.productionLine}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  maxAccess={maxAccess}
+                  onChange={(_, newValue) => formik.setFieldValue('productionLineId', newValue?.recordId || null)}
+                  error={formik.touched.productionLineId && formik.errors.productionLineId}
                 />
               </Grid>
             </Grid>

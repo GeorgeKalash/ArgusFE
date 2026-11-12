@@ -14,9 +14,11 @@ const WindowToolbar = ({
   onSaveClear,
   onClear,
   onInfo,
+  onWorkFlow,
   isSaved,
   isSavedClear,
   isInfo,
+  isWorkFlow,
   isCleared,
   onORD,
   disabledSubmit,
@@ -119,6 +121,7 @@ const WindowToolbar = ({
     isSaved,
     isSavedClear,
     isInfo,
+    isWorkFlow,
     isCleared,
     disabledSubmit,
     disabledSavedClear,
@@ -132,7 +135,8 @@ const WindowToolbar = ({
     onORD,
     onSaveClear,
     onClear,
-    onInfo
+    onInfo,
+    onWorkFlow
   }
 
   const handleProtectedClick = (button, handleClick) => {

@@ -23,10 +23,8 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
-import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
@@ -177,20 +175,10 @@ export default function PaymentOrdersForm({ recordId, window }) {
     })()
   }, [])
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PaymentOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
-  const onCancel = async () => {
+  const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentOrders.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
     if (res?.recordId) {
@@ -198,23 +186,6 @@ export default function PaymentOrdersForm({ recordId, window }) {
       invalidate()
       getPaymentOrder(res.recordId)
     }
-  }
-
-  function confirmation(dialogText, titleText, event) {
-    stack({
-      Component: ConfirmationDialog,
-      props: {
-        DialogText: dialogText,
-        okButtonAction: async () => {
-          await event()
-        },
-        fullScreen: false,
-        close: true
-      },
-      width: 400,
-      height: 150,
-      title: titleText
-    })
   }
 
   const onClose = async () => {
@@ -247,21 +218,15 @@ export default function PaymentOrdersForm({ recordId, window }) {
     {
       key: 'Cancel',
       condition: true,
-      onClick: () => {
-        confirmation(platformLabels.CancelConf, platformLabels.Confirmation, onCancel)
-      },
-      disabled: !editMode || isCancelled
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode
     },
     {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -300,6 +265,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
       actions={actions}
       functionId={SystemFunction.PaymentOrder}
       disabledSubmit={isClosed || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>

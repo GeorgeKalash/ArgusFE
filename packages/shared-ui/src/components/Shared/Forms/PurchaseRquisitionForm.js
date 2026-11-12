@@ -20,7 +20,6 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -113,15 +112,6 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
   const isClosed = formik.values.wip == 2
   const isCancelled = formik.values.status == -1
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PurchaseRequisition,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   async function onClose() {
     const res = await postRequest({
@@ -145,10 +135,10 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
     refetchForm(res?.recordId)
   }
 
-  async function onCancel() {
+  async function onCancel(cancelReason) {
     const res = await postRequest({
       extension: PurchaseRepository.PurchaseRequisition.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ recordId: formik.values.recordId, notes: cancelReason })
     })
 
     toast.success(platformLabels.Cancelled)
@@ -161,12 +151,6 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
       key: 'Attachment',
       condition: true,
       onClick: 'onClickAttachment',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -196,8 +180,10 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isCancelled
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode
     }
   ]
 
@@ -380,6 +366,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
       actions={actions}
       previewReport={editMode}
       disabledSubmit={isClosed || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

@@ -34,7 +34,8 @@ export default function EntDeductionForm({ labels, recordId, maxAccess, window }
       type: null,
       reference: '',
       paycodeRef: '',
-      expressionId: null
+      expressionId: null,
+      edCalcType: null
     },
     maxAccess,
     validateOnChange: true,
@@ -151,6 +152,21 @@ export default function EntDeductionForm({ labels, recordId, maxAccess, window }
                   formik.setFieldValue('paycodeRef', newValue?.payCode || '')
                 }}
                 error={formik.touched.paycodeRef && Boolean(formik.errors.paycodeRef)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.ED_CALC_TYPE}
+                name='edCalcType'
+                label={labels.edCalcType}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('edCalcType', newValue?.key || null)
+                }}
+                error={formik.touched.edCalcType && Boolean(formik.errors.edCalcType)}
               />
             </Grid>
             <Grid item xs={12}>

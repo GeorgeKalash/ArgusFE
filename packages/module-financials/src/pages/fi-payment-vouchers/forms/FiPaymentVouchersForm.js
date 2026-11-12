@@ -21,7 +21,6 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
@@ -184,6 +183,10 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     }
   }
 
+  const isPosted = formik.values.status === 3
+  const isCancelled = formik.values.status === -1
+  const editMode = !!formik.values.recordId
+
   const { openStack } = useStackValueLink({ linkOpen: { resourceId: ResourceIds.MCRFIPaymentVoucher } })
   
   async function openMCRForm(data) {
@@ -194,6 +197,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
         props: {
           DatasetIdAccess: ResourceIds.MCRFIPaymentVoucher,
           data,
+          readOnly: isCancelled || isPosted,
           onOk: childFormikValues => {
             formik.setValues({
               ...formik.values,
@@ -204,10 +208,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       })
     }
   }
-
-  const isPosted = formik.values.status === 3
-  const isCancelled = formik.values.status === -1
-  const editMode = !!formik.values.recordId
 
   const { releaseLock } = useRecordLock({
     recordId: recordId,
@@ -289,20 +289,11 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     if (recordId) refetchForm(recordId)
   }, [])
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PaymentVoucher,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
-  const onCancel = async () => {
+  const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentVouchers.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
     if (res?.recordId) {
@@ -370,8 +361,10 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isPosted || isCancelled
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isPosted
     },
     {
       key: 'FI Trx',
@@ -397,12 +390,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -442,6 +429,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       actions={actions}
       functionId={SystemFunction.PaymentVoucher}
       disabledSubmit={isPosted || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>

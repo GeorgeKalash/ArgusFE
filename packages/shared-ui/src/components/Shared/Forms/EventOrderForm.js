@@ -35,7 +35,6 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import FixingForm from '@argus/shared-ui/src/components/Shared/Forms/FixingForm'
 
@@ -276,16 +275,6 @@ export default function EventOrderForm({ recordId, window }) {
     })
   }
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.EventOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   const onClose = async () => {
     const res = await postRequest({
       extension: BrokerageTradingRepository.EventOrder.close,
@@ -356,12 +345,6 @@ export default function EventOrderForm({ recordId, window }) {
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || !isClosed || isCancelled
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
     },
     {
       key: 'AccountSummary',
@@ -460,6 +443,7 @@ useEffect(() => {
       functionId={functionId}
       disabledSubmit={isClosed || isCancelled}
       actions={actions}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -545,12 +529,9 @@ useEffect(() => {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  const marketPrice = await getMarketPrice(newValue?.recordId, formik?.values?.metalId, formik.values.date, formik.values.targetPrice_muQty)
-
                   setReCalc(true)
                   formik.setValues({
                     ...formik.values,
-                    marketPrice: marketPrice,
                     fi_currencyId: newValue?.recordId || null
                   })
                 }}
@@ -630,7 +611,7 @@ useEffect(() => {
                 label={labels.date}
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
-                  const marketPrice = await getMarketPrice(formik.values.fi_currencyId, formik.values.metalId, newValue, formik.values.targetPrice_muQty)
+                  const marketPrice = await getMarketPrice(formik.values.currencyId, formik.values.metalId, newValue, formik.values.targetPrice_muQty)
 
                   setReCalc(true)
                   formik.setValues({ ...formik.values, marketPrice, date: newValue })
@@ -761,7 +742,7 @@ useEffect(() => {
                         const pairQty = newValue?.eo_defTargetPriceMUQty || null
 
                         const marketPrice = await getMarketPrice(
-                          formik.values.fi_currencyId,
+                          newValue?.currencyId,
                           newValue?.metalId,
                           formik.values.date,
                           pairQty

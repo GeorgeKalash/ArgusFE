@@ -10,8 +10,8 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotIT',
     snapshot3: service + 'snapshotIT3',
     snapshot4: service + 'snapshotIT4',
-    snapshot5: service + 'snapshotIT5',
     snapshot6: service + 'snapshotIT6',
+    snapshot7: service + 'snapshotIT7',
     get: service + 'getIT',
     quickView: service + 'quickViewIT',
     clone: service + 'cloneIT'
@@ -148,8 +148,9 @@ export const InventoryRepository = {
   },
   ItemProduction: {
     get: service + 'getMFR',
+    set: service + 'setMFR',
     getPack: service + 'getPackMFR',
-    set: service + 'setPackMFR',
+    setPack: service + 'setPackMFR',
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
@@ -415,5 +416,12 @@ export const InventoryRepository = {
     get: service + 'getOW',
     del: service + 'delOW',
     page: service + 'pageOW'
+  },
+  Brands: {
+    set: service + 'setBRND',
+    get: service + 'getBRND',
+    del: service + 'delBRND',
+    page: service + 'pageBRND',
+    qry: service + 'qryBRND'
   }
 }

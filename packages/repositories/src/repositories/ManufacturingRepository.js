@@ -132,6 +132,7 @@ export const ManufacturingRepository = {
     del: service + 'delDES',
     snapshot: service + 'snapshotDES',
     snapshot2: service + 'snapshotDES2',
+    snapshot3: service + 'snapshotDES3',
     page: service + 'pageDES'
   },
   MFJobOrder: {
@@ -521,6 +522,7 @@ export const ManufacturingRepository = {
     del: service + 'delPR',
     snapshot: service + 'snapshotPR',
     post: service + 'postPR',
+    unpost: service + 'unpostPR',
     preview: service + 'previewPR',
     preview2: service + 'previewPR2',
   },

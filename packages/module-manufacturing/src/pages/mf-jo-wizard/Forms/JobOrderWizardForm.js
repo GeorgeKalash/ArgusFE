@@ -25,7 +25,6 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
@@ -317,15 +316,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     return returned + returnedValue
   }, 0)
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.JobOrderWizard,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const actions = [
     {
@@ -339,13 +329,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       disabled: true
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
+    }
   ]
 
   const totalConsumed = formik.values?.rows?.reduce((consumed, row) => {
@@ -374,6 +358,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       previewReport={editMode}
       actions={actions}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
