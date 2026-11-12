@@ -684,6 +684,7 @@ export const ResourceIds = {
   BatchCloseTV: 72216,
   DeveloperGroup: 48108,
   IVBrands: 41125,
+  BarcodesTable: 41608,
 
   // GL
   GLSalesInvoice: 51604,
