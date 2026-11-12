@@ -36,7 +36,6 @@ function useMetalPrices(karatCurrency, onPrices) {
   const prevPrices = useRef({})
   const onPricesRef = useRef(onPrices)
 
-  // keep the latest callback without restarting the interval
   onPricesRef.current = onPrices
 
   useEffect(() => {
@@ -87,7 +86,7 @@ function useMetalPrices(karatCurrency, onPrices) {
 }
 
 function trend(current, previous) {
-  if (previous == null) return 'up' // default to green on first load
+  if (previous == null) return 'up' 
   if (current > previous) return 'up'
   if (current < previous) return 'down'
 
@@ -171,7 +170,7 @@ function PriceCell(props) {
 }
 
 export default function GoldPriceTicker(props) {
-  const karatCurrency = props.currency // isoCode, resolved by the parent
+  const karatCurrency = props.currency 
   const state = useMetalPrices(karatCurrency, props.onPrices)
   const prices = state.prices
   const error = state.error
