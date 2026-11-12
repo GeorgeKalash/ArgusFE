@@ -113,7 +113,7 @@ const BillOfMaterials = () => {
         recordId,
         maxAccess: access
       },
-      width: 900,
+      width: 1330,
       height: 620,
       title: labels.BillOfMaterials
     })
