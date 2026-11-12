@@ -198,8 +198,8 @@ export default function GoldPriceTicker(props) {
     { key: 'gold24k', label: 'Gold 24K', value: current.gold24k, currency: karatCurrency },
     { key: 'gold21k', label: 'Gold 21K', value: current.gold21k, currency: karatCurrency },
     { key: 'gold18k', label: 'Gold 18K', value: current.gold18k, currency: karatCurrency },
-    { key: 'goldOzUsd', label: 'Gold', value: current.goldOzUsd, currency: 'USD' },
-    { key: 'silverOzUsd', label: 'Silver', value: current.silverOzUsd, currency: 'USD' }
+    { key: 'goldOzUsd', label: 'Gold', value: current.goldOzUsd, currency: karatCurrency },
+    { key: 'silverOzUsd', label: 'Silver', value: current.silverOzUsd, currency: karatCurrency }
   ]
 
   return h(
