@@ -41,7 +41,6 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
     validationSchema: yup.object({
       fiscalYear: yup.number().required(),
       periodId: yup.number().required(),
-      itemCategoryId: yup.number().required(),
       qty: yup.number().required(),
     }),
     onSubmit: async obj => {
@@ -110,19 +109,6 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Metals.qry}
-                name='metalId'
-                label={labels.metal}
-                valueField='recordId'
-                displayField='reference'
-                values={formik.values}
-                onChange={(_, newValue) => formik.setFieldValue('metalId', newValue?.recordId || null) }
-                error={formik.touched.metalId && Boolean(formik.errors.metalId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
@@ -138,6 +124,20 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
                 maxAccess={maxAccess}
               />
             </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Metals.qry}
+                name='metalId'
+                label={labels.metal}
+                valueField='recordId'
+                displayField='reference'
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('metalId', newValue?.recordId || null) }
+                error={formik.touched.metalId && Boolean(formik.errors.metalId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Group.qry}
@@ -186,7 +186,6 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
                   { key: 'caRef', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                required
                 maxAccess={maxAccess}
                 values={formik.values}
                 onChange={(_, newValue) => formik.setFieldValue('itemCategoryId', newValue?.recordId || null) }
