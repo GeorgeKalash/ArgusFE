@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, createElement as h } from 'react'
 const API_BASE = 'https://api.gold-api.com/price'
 const GRAMS_PER_OZ = 31.1034768
 
-const REFRESH_MS = 10000
+const REFRESH_MS = 5000
 
 async function fetchGoldBody() {
   const res = await fetch(`${API_BASE}/XAU`)
