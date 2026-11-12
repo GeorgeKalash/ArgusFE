@@ -17,6 +17,7 @@ export const BrokerageTradingRepository = {
     post: service + 'postFIS',
     unpost: service + 'unpostFIS',
     reopen: service + 'reopenFIS',
+    cancel: service + 'cancelFIS'
   },
   FixingPurchases: {
     page: service + 'pageFIP',
@@ -28,6 +29,7 @@ export const BrokerageTradingRepository = {
     post: service + 'postFIP',
     reopen: service + 'reopenFIP',
     unpost: service + 'unpostFIP',
+    cancel: service + 'cancelFIP'
   },
   Fixing: {
     pack: service + 'getPackFIX',
