@@ -839,6 +839,7 @@ export default function ShipmentsForm({ recordId, window }) {
             maxAccess={maxAccess}
             name='shippedItems'
             allowDelete={!isPosted}
+            disabled={isPosted}
             allowAddNewLine={!isPosted}
           />
         </Grow>
