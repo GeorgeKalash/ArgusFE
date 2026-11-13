@@ -686,6 +686,8 @@ export const ResourceIds = {
   DeveloperGroup: 48108,
   IVBrands: 41125,
   BarcodesTable: 41608,
+  FixingSalesCancellation: 38306,
+  FixingPurchaseCancellation: 38307,
 
   // GL
   GLSalesInvoice: 51604,
@@ -737,6 +739,8 @@ export const ResourceIds = {
   GLFixingSales: 38604,
   GLFixingPurchases: 38605,
   GLJTCheckout: 31631,
+  GLFixingSalesCancellation: 38606,
+  GLFixingPurchasesCancellation: 38607,
 
   BtDefaults: 38601,
   CommodityPair: 38101,
