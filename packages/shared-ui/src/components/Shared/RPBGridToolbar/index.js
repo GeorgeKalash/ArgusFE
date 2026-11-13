@@ -186,8 +186,8 @@ const RPBGridToolbar = ({
 
         @media (max-width: 768px) {
           .leftSectionGridItem {
-            width: 100%;
-            margin-top: 8px;
+            width: fit-content;
+            max-width: 100%;
           }
 
           .bottomSectionContainer {
