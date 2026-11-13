@@ -409,7 +409,6 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                displayFieldWidth={2}
                 values={formik.values.header}
                 valueField='recordId'
                 displayField='name'
