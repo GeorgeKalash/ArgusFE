@@ -7,10 +7,17 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-export default function BarcodesTable({ labels, maxAccess, onSelect, window, initialSearch = '', onSearchChange }) {
+export default function BarcodesTable({ onSelect, window, initialSearch = '', onSearchChange }) {
   const { getRequest } = useContext(RequestsContext)
   const submittedRef = useRef(false)
+  const { labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.BarcodesTable
+  })
+  useSetWindow({ title: labels.barcodes, window })
 
   const { formik } = useForm({
     initialValues: { rows: [] },
@@ -122,3 +129,6 @@ export default function BarcodesTable({ labels, maxAccess, onSelect, window, ini
     </VertLayout>
   )
 }
+
+BarcodesTable.width = 900
+BarcodesTable.height = 600

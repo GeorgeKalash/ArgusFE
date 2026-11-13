@@ -135,7 +135,7 @@ const GlobalAuthorization = () => {
           labels={labels}
           inputSearch={true}
           leftSection={
-            <Grid item xs={2.5}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 datasetId={DataSets.MODULE}
                 label={labels.module}

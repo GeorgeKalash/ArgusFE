@@ -81,6 +81,7 @@ export default function SamplesForm({ recordId, window }) {
         jobId: null,
         itemId: null,
         developerId: null,
+        itemGroupId: null,
         threeDDId: null,
         productionLineId: null,
         designFamilyId: null,
@@ -187,44 +188,92 @@ export default function SamplesForm({ recordId, window }) {
       component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
-      width: 100,
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
+        endpointId: InventoryRepository.Items.snapshot,
+        parameters: { _startAt: 0, _size: 50},
         valueField: 'sku',
         displayField: 'sku',
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'categoryName', to: 'itemCategoryName' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 4
+      },
+      async onChange({ row: { update, newRow } }) {
+        const { itemId } = newRow
+        if (!itemId){
+          update({ rawCategoryName: ''})
+
+          return
+        }
+
+        const res = await getRequest({
+          extension: InventoryRepository.ItemProduction.get,
+          parameters: `_recordId=${itemId}`
+        }) 
+
+        update({
+          rawCategoryName: res?.record?.rmcName || '',
+        })
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.itemName,
+      name: 'itemName',
+      flex: 2, 
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.category,
+      name: 'itemCategoryName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.rawCategory,
+      name: 'rawCategoryName',
+      props: {
+        readOnly: true
       }
     },
     {
       component: 'numberfield',
       name: 'pcs',
       label: labels.pcs,
-      width: 100,
     },
     {
       component: 'numberfield',
       name: 'weight',
       label: labels.weight,
-      width: 100,
       props: {
         maxLength: 10,
         decimalScale: 3
       }
     },
     {
+      component: 'textfield',
+      label: labels.size,
+      name: 'size',
+      props: {
+        maxLength: 10
+      }
+    },
+    {
       component: 'numberfield',
       name: 'stonePct',
       label: labels.stonePct,
-      width: 100,
       props: {
         maxLength: 5,
         decimalScale: 2
@@ -424,6 +473,25 @@ export default function SamplesForm({ recordId, window }) {
                     error={formik.touched.header?.developerId && formik.errors.header?.developerId}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Group.qry}
+                    parameters='_startAt=0&_pageSize=1000'
+                    values={formik.values.header}
+                    name='header.itemGroupId'
+                    label={labels.itemGrp}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isClosed}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('header.itemGroupId', newValue?.recordId || null)}
+                    error={formik.touched.header?.itemGroupId && formik.errors.header?.itemGroupId}
+                  />
+                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={3}>
@@ -522,6 +590,27 @@ export default function SamplesForm({ recordId, window }) {
                     error={formik?.touched?.header?.designFamilyId && Boolean(formik?.errors?.header?.designFamilyId)}
                     maxAccess={maxAccess}
                   />
+                </Grid> 
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Collections.qry}
+                    name='header.collectionId'
+                    label={labels.collection}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    required
+                    maxAccess={maxAccess}
+                    readOnly={isClosed}
+                    values={formik.values.header}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.collectionId', newValue?.recordId || null)
+                    }}
+                    error={formik?.touched?.header?.collectionId && Boolean(formik?.errors?.header?.collectionId)}
+                  />
                 </Grid>
               </Grid>
             </Grid>
@@ -589,6 +678,10 @@ export default function SamplesForm({ recordId, window }) {
                     displayField='reference'
                     secondDisplayField={false}
                     name='header.threeDDId'
+                    linkOpen={{
+                      props: { recordId: formik.values.header?.threeDDId },
+                      resourceId: ResourceIds.ThreeDDesign
+                    }}
                     label={labels.threeDD}
                     formObject={formik.values.header}
                     form={formik}
@@ -602,33 +695,33 @@ export default function SamplesForm({ recordId, window }) {
                     valueShow='threeDDRef'
                     maxAccess={maxAccess}
                     readOnly={isClosed}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('header.fileReference', newValue?.fileReference || '')
+                      formik.setFieldValue('header.sketchSourceName', newValue?.sketchSourceName || '')
                       formik.setFieldValue('header.threeDDRef', newValue?.reference || '')
                       formik.setFieldValue('header.threeDDId', newValue?.recordId || null)
                     }}
                     errorCheck={'header.threeDDId'}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={InventoryRepository.Collections.qry}
-                    name='header.collectionId'
-                    label={labels.collection}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    required
+                  <CustomTextField
+                    name='header.fileReference'
+                    label={labels.fileRef}
+                    value={formik?.values?.header?.fileReference}
                     maxAccess={maxAccess}
-                    readOnly={isClosed}
-                    values={formik.values.header}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.collectionId', newValue?.recordId || null)
-                    }}
-                    error={formik?.touched?.header?.collectionId && Boolean(formik?.errors?.header?.collectionId)}
+                    readOnly
+                    error={formik.touched.header?.fileReference && Boolean(formik.errors.header?.fileReference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='header.sketchSourceName'
+                    label={labels.sketchSource}
+                    value={formik?.values?.header?.sketchSourceName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    error={formik.touched.header?.sketchSourceName && Boolean(formik.errors.header?.sketchSourceName)}
                   />
                 </Grid>
 
@@ -648,6 +741,7 @@ export default function SamplesForm({ recordId, window }) {
                     maxAccess={maxAccess}
                   />
                 </Grid>
+
               </Grid>
             </Grid>
             <Grid item xs={3}>
@@ -658,7 +752,7 @@ export default function SamplesForm({ recordId, window }) {
                 disabled={isClosed}
                 recordId={recordId}
                 width={250}
-                height={200}
+                height={235}
               />
             </Grid>
           </Grid>

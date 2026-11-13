@@ -996,7 +996,7 @@ useEffect(() => {
 
               <Grid item xs={6}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid item xs={6}>
                     <CustomNumberField
                       name='subtotal'
                       label={labels.subtotal}
@@ -1010,7 +1010,7 @@ useEffect(() => {
                       }}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={6}>
                     <CustomNumberField
                       name='miscAmount'
                       label={labels.miscAmount}
@@ -1062,7 +1062,7 @@ useEffect(() => {
                         value={formik.values.marketPrice}
                         readOnly
                         maxLength={17}
-                        decimalScale={5}
+                        decimalScale={2}
                         maxAccess={maxAccess}
                         InputProps={{
                           readOnly: true,

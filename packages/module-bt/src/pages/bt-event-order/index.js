@@ -1,4 +1,7 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import GoldPriceTicker from '@argus/shared-ui/src/components/Shared/GoldPriceTicker'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -21,6 +24,24 @@ export default function BTEventOrder() {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const { checkLock } = useRecordLock()
+  const { systemDefaults } = useContext(DefaultsContext)
+  const [currencyRef, setCurrencyRef] = useState(null)
+
+  const bt_reporting_currencyId =
+    systemDefaults?.list?.find(obj => obj.key === 'bt_reporting_currencyId')?.value || null
+
+  useEffect(() => {
+    if (!bt_reporting_currencyId) return
+
+    ;(async () => {
+      const res = await getRequest({
+        extension: SystemRepository.Currency.get,
+        parameters: `_recordId=${bt_reporting_currencyId}`
+      })
+
+      setCurrencyRef(res?.record?.isoCode || null)
+    })()
+  }, [bt_reporting_currencyId])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -102,6 +123,11 @@ export default function BTEventOrder() {
     {
       field: 'accountName',
       headerName: labels.accountName,
+      flex: 1
+    },
+    {
+      field: 'directionName',
+      headerName: labels.directionName,
       flex: 1
     },
     {
@@ -210,6 +236,9 @@ export default function BTEventOrder() {
   return (
     <VertLayout>
       <Fixed>
+        {currencyRef && (
+          <GoldPriceTicker currency={currencyRef} style={{ marginLeft: 16, marginBottom: 16 }} />
+        )}
         <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'BTEO'} filterBy={filterBy} />
       </Fixed>
       <Grow>
