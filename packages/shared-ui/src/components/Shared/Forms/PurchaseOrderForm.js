@@ -351,7 +351,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
         if (newRow) {
           const store = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.msId)
           const filteredItems = store.filter(item => item.recordId === newRow?.muId)
-          const qtyInBase = filteredItems?.muQty ? newRow?.qty * filteredItems?.muQty : newRow?.qty
+          const qtyInBase = filteredItems[0]?.muQty ? newRow?.qty * filteredItems[0]?.muQty : newRow?.qty
 
           update({
             qtyInBase,

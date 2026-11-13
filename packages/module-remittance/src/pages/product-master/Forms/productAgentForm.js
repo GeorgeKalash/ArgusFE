@@ -114,8 +114,6 @@ const ProductAgentForm = ({
             name='dispersalId'
             label={labels.dispersal}
             store={dispersals}
-            endpointId={RemittanceSettingsRepository.ProductDispersal.qry}
-            parameters={`_productId=${pId}`}
             valueField='recordId'
             displayField={['reference', 'name']}
             columnsInDropDown={[

@@ -338,7 +338,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       label: labels.sku,
       name: 'sku',
       props: {
-        endpointId: InventoryRepository.Scrap.qry,
         valueField: 'itemId',
         displayField: 'sku',
         columnsInDropDown: [
@@ -360,7 +359,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           onRefreshed: list => {
             itemsStoreByRow.current[row.id] = list
           },
-          parameters: `_metalId=${row?.metalId}`,
+          ...(row?.metalId && {
+            endpointId: InventoryRepository.Scrap.qry,
+            parameters: `_metalId=${row.metalId}`
+          })
          }
       },
       onChange: async ({ row: { update, newRow } }) => {

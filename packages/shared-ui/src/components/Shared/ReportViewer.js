@@ -9,7 +9,7 @@ import { generateReport } from '@argus/shared-utils/src/utils/ReportUtils'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
-import CustomComboBox from '../Inputs/CustomComboBox'
+import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

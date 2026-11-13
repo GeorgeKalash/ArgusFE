@@ -949,7 +949,7 @@ useEffect(() => {
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={SaleRepository.SalesOrderSource.qry}
-                      store={combosStore?.salesOrderSources}
+                      store={combosStore?.sources}
                       name='sourceId'
                       label={labels.source}
                       valueField='recordId'

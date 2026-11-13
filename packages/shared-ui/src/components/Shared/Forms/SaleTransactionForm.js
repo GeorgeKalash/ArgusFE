@@ -808,7 +808,7 @@ export default function SaleTransactionForm({
         const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
         const muList = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.msId)
         const filteredItems = muList.filter(item => item.recordId === newRow?.muId)
-        const qtyInBase = newRow?.qty * filteredItems?.muQty
+        const qtyInBase = newRow?.qty * filteredItems[0]?.muQty
 
         const unitPrice =
           ItemConvertPrice?.priceType === 3
