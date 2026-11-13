@@ -246,6 +246,8 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             <Grid item xs={4}>
               <ResourceComboBox
                 store={store?._measurementUnits}
+                endpointId={InventoryRepository.MeasurementUnit.qry}
+                parameters={`_msId=${store._msId || 0}`}
                 name='defSaleMUId'
                 label={labels.measure}
                 columnsInDropDown={[
@@ -264,6 +266,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             <Grid item xs={4}>
               <ResourceComboBox
                 store={store.priceGroups}
+                endpointId={SaleRepository.PriceGroups.qry}
                 name='pgId'
                 label={labels.priceGroups}
                 valueField='recordId'
@@ -279,6 +282,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             <Grid item xs={4}>
               <ResourceComboBox
                 store={store.returnPolicies}
+                endpointId={SaleRepository.ReturnPolicy.qry}
                 name='returnPolicyId'
                 label={labels.returnPolicy}
                 valueField='recordId'

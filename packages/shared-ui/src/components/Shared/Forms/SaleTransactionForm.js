@@ -70,6 +70,8 @@ import FIReceiptVoucherForm from './FIReceiptVoucherForm'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import BarcodesTable from '@argus/shared-ui/src/components/Shared/BarcodesTable'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 export default function SaleTransactionForm({
   recordId,
@@ -89,9 +91,10 @@ export default function SaleTransactionForm({
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
-  const filteredMeasurements = useRef([])
+  const muStoreByRowRef = useRef({})
   const lastBarcodeSearch = useRef('')
   const [taxDetails, setTaxDetails] = useState([])
+  const { combosStore } = useComboStore(SaleRepository.SaleTransaction.pack, {parameters: `_functionId=${functionId}`})
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.SalesInvoice,
@@ -680,6 +683,23 @@ export default function SaleTransactionForm({
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         await handleBarcode(update, newRow)
+        delete muStoreByRowRef.current[newRow.id]
+        
+        if (!newRow?.barcode) return
+
+        const ItemConvertPrice = await getItemConvertPrice2(newRow)
+        if (ItemConvertPrice) {
+          const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
+          const itemInfo = await getItem(ItemConvertPrice?.itemId)
+          getFilteredMU(itemInfo?.itemId, itemInfo?.msId)
+
+          const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+          await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true, defaultMu)
+        } else {
+          update({
+            barcode: null
+          })
+        }
       }
     },
     {
@@ -706,10 +726,11 @@ export default function SaleTransactionForm({
         displayFieldWidth: 5
       },
       async onChange({ row: { update, newRow } }) {
+        delete muStoreByRowRef.current[newRow.id]
+
         if (!newRow.itemId) return
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        getFilteredMU(newRow?.itemId, newRow?.msId)
 
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
 
@@ -771,7 +792,6 @@ export default function SaleTransactionForm({
       label: labels.measurementUnit,
       name: 'muRef',
       props: {
-        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -786,7 +806,8 @@ export default function SaleTransactionForm({
         }
 
         const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const muList = muStoreByRowRef.current[newRow.id] ?? getFilteredMU(newRow?.msId)
+        const filteredItems = muList.filter(item => item.recordId === newRow?.muId)
         const qtyInBase = newRow?.qty * filteredItems?.muQty
 
         const unitPrice =
@@ -821,7 +842,17 @@ export default function SaleTransactionForm({
         update(data)
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        return {
+          ...props,
+          store: muStoreByRowRef.current[row.id] ?? getFilteredMU(row?.msId),
+          onRefreshed: list => {
+            muStoreByRowRef.current[row.id] = list
+          },
+          ...(row?.msId && {
+            endpointId: InventoryRepository.MeasurementUnit.qry,
+            parameters: `_msId=${row.msId}`
+          })
+        }
       }
     },
     {
@@ -1288,6 +1319,7 @@ export default function SaleTransactionForm({
   }
 
   async function fillForm(saTrxPack, dtInfo) {
+    muStoreByRowRef.current = {}
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
     const saTrxTaxes = saTrxPack?.taxes || []
@@ -1677,11 +1709,10 @@ export default function SaleTransactionForm({
     return itemPriceRow?.totalWeightPerG ? roundTo(itemPriceRow.totalWeightPerG) : 0
   }
 
-  async function getFilteredMU(itemId, msId) {
-    if (!itemId) return
+  function getFilteredMU(msId) {
+    if (!msId) return []
 
-    const arrayMU = measurements?.filter(item => item.msId === msId) || []
-    filteredMeasurements.current = arrayMU
+    return measurements?.filter(item => item.msId === msId) || []
   }
 
   const parsedItemsArray = formik.values.items
@@ -2060,9 +2091,9 @@ export default function SaleTransactionForm({
           <Grid container spacing={2}>
             <Grid item xs={3}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.documentTypes}
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}                          
+                store={combosStore?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='header.dtId'
                 readOnly={editMode || formik.values.items?.some(item => item.sku)}
@@ -2092,9 +2123,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={3}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.salesPeople}
+                endpointId={SaleRepository.SalesPerson.qry}
+                store={combosStore?.salesPeople}
                 name='header.spId'
                 readOnly={isPosted}
                 label={labels.salesPerson}
@@ -2116,9 +2146,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={3}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.plants}
+                endpointId={SystemRepository.Plant.qry}
+                store={combosStore?.plants}
                 name='header.plantId'
                 label={labels.plant}
                 columnsInDropDown={[
@@ -2139,9 +2168,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.currencies}
+                endpointId={SystemRepository.Currency.qry}
+                store={combosStore?.currencies}
                 name='header.currencyId'
                 label={labels.currency}
                 filter={item => item.currencyType == 1}
@@ -2208,10 +2236,9 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
+                endpointId={InventoryRepository.Site.qry}
                 triggerOnDefault={formik.values.header.siteId && !formik.values.header.siteRef}
-                reducer={response => response?.record?.sites}
+                store={combosStore?.sites}
                 name='header.siteId'
                 label={labels.site}
                 columnsInDropDown={[
@@ -2250,9 +2277,9 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.saleZones}
+                endpointId={SaleRepository.SalesZone.qry}
+                parameters={`_startAt=0&_pageSize=1000&_sortField=recordId&_filter=`}
+                store={combosStore?.saleZones}
                 name='header.szId'
                 label={labels.saleZone}
                 readOnly={isPosted}
@@ -2341,9 +2368,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SaleTransaction.pack}
-                parameters={`_functionId=${functionId}`}
-                reducer={response => response?.record?.taxSchedules}
+                endpointId={FinancialRepository.TaxSchedules.qry}
+                store={combosStore?.taxSchedules}
                 name='header.taxId'
                 label={labels.tax}
                 valueField='recordId'
@@ -2405,9 +2431,6 @@ export default function SaleTransactionForm({
             value={formik.values.items}
             error={formik.errors.items}
             initialValues={initialValues?.items[0]}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
-            }}
             name='items'
             showCounterColumn={true}
             columns={columns.filter(col => !(col.name === 'barcodeLookup' && isPosted))}

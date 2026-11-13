@@ -14,7 +14,7 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const IomProperties = () => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const [propertyStore, setPropertyStore] = useState([])
@@ -41,7 +41,7 @@ const IomProperties = () => {
     }
   })
 
-  useEffect(() => {
+  async function fillProperties() {
     if (!systemDefaults?.list) return
 
     const items = systemDefaults.list
@@ -60,21 +60,28 @@ const IomProperties = () => {
       })
 
     setPropertyStore(items || [])
+  }
+
+  useEffect(() => {
+   fillProperties()
   }, [systemDefaults])
 
   useEffect(() => {
+    if (!propertyStore.length) return
+
     const keys = ['mfimd1', 'mfimd2']
 
     const myObject =
       systemDefaults?.list?.reduce((acc, obj) => {
         if (keys.includes(obj.key)) {
-          acc[obj.key] = obj.value ? parseInt(obj.value) : null
+          const id = obj.value ? parseInt(obj.value) : null
+          acc[obj.key] = propertyStore.some(p => p.recordId === id) ? id : null
         }
 
         return acc
       }, {}) || {}
 
-    formik.setValues(myObject)
+    formik.setValues({ mfimd1: null, mfimd2: null, ...myObject })
   }, [propertyStore])
 
   return (
@@ -87,6 +94,7 @@ const IomProperties = () => {
                 <Grid item xs={12}>
                   <CustomComboBox
                     store={propertyStore}
+                    fetchData={fillProperties}
                     name='mfimd1'
                     label={labels.property1}
                     valueField='recordId'
@@ -101,6 +109,7 @@ const IomProperties = () => {
                 <Grid item xs={12}>
                   <CustomComboBox
                     store={propertyStore}
+                    fetchData={fillProperties}
                     name='mfimd2'
                     label={labels.property2}
                     valueField='recordId'

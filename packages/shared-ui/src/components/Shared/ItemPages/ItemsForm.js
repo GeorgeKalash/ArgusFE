@@ -25,6 +25,8 @@ import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 import PrintConfirmationDialog from './PrintConfirmationDialog'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window, onSuccess }) {
   const { platformLabels } = useContext(ControlContext)
@@ -346,6 +348,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   <ResourceComboBox
                     dataGrid
                     store={store?.categories}
+                    endpointId={InventoryRepository.Category.qry}
+                    parameters='_pagesize=50&_startAt=0&_name='
                     values={formik.values}
                     name='categoryId'
                     label={labels.category}
@@ -386,6 +390,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       key: parseInt(item.key),
                       value: item.value
                     }))}
+                    datasetId={DataSets.PRICE_TYPE}
                     values={formik.values}
                     defaultIndex={onKitItem && 0}
                     name='priceType'
@@ -424,13 +429,14 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         })
                       )
                     }
+                    datasetId={DataSets.PROCUREMENT_METHOD}
                     name='procurementMethod'
                     label={labels.procurement}
                     valueField='key'
                     displayField='value'
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('procurementMethod', newValue?.key || '')
                       formik.setFieldValue('procurementName', newValue?.value || '')
                     }}
@@ -473,6 +479,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   <ResourceComboBox
                     dataGrid
                     store={store?.itemGroups}
+                    endpointId={InventoryRepository.Group.qry}
+                    parameters='_startAt=0&_pageSize=1000'
                     values={formik.values}
                     name='groupId'
                     label={labels.itemGroup}
@@ -495,6 +503,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={12}>
                   <ResourceComboBox
                     store={store?.collections}
+                    endpointId={InventoryRepository.Collections.qry}
                     name='collectionId'
                     label={labels.collection}
                     valueField='recordId'
@@ -514,6 +523,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={6}>
                   <ResourceComboBox
                     store={store?.measurementSchedules}
+                    endpointId={InventoryRepository.Measurement.qry}
+                    parameters='_name='
                     values={formik.values}
                     name='msId'
                     label={labels.measure}
@@ -540,6 +551,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         value: valuations.value
                       })))
                     }
+                    datasetId={DataSets.VALUATION_METHOD}
                     values={formik.values}
                     name='valuationMethod'
                     label={labels.valation}
@@ -638,6 +650,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         value: PL?.value || ''
                       })))
                     }
+                    datasetId={DataSets.PRODUCTION_LEVEL}
                     name='productionLevel'
                     label={labels.productionLevel}
                     valueField='key'
@@ -664,6 +677,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={12}>
                   <ResourceComboBox
                     store={store?.taxSchedules}
+                    endpointId={FinancialRepository.TaxSchedules.qry}
                     values={formik.values}
                     name='taxId'
                     label={labels.vatSchedule}
@@ -685,6 +699,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         value: trackByList.value
                       })))
                     }
+                    datasetId={DataSets.IV_TRACK_BY}
                     values={formik.values}
                     name='trackBy'
                     label={labels.trackBy}
@@ -707,6 +722,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   <Grid item xs={12}>
                     <ResourceComboBox
                       store={store?.lotCategories}
+                      endpointId={InventoryRepository.LotCategory.qry}
                       values={formik.values}
                       name='lotCategoryId'
                       label={labels.lotCategory}
@@ -733,6 +749,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   <Grid item xs={12}>
                     <ResourceComboBox
                       store={store?.serialProfiles}
+                      endpointId={InventoryRepository.SerialsProfile.qry}
                       required
                       values={formik.values}
                       readOnly={editMode}

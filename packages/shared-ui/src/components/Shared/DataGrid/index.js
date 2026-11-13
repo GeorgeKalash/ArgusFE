@@ -19,6 +19,8 @@ import ImageViewer from '@argus/shared-ui/src/components/Shared/ImageViewer'
 const POPUP_PORTAL_SELECTOR =
   '.MuiPopover-root, .MuiAutocomplete-popper, .MuiMenu-list, .MuiPickersPopper-root'
 
+const isEmptyValue = v => v === null || v === undefined || v === ''
+
 export function DataGrid({
   name,
   columns,
@@ -735,6 +737,14 @@ export function DataGrid({
   const CustomCellEditor = params => {
     const { column, data, maxAccess } = params
     const [currentValue, setCurrentValue] = useState(params?.node?.data)
+    const editorBoxRef = useRef(null)
+
+    useEffect(() => {
+      if (column?.colDef?.component !== 'resourcecombobox') return
+      if (isEmptyValue(params?.node?.data?.[column?.colDef?.field])) return
+
+      editorBoxRef.current?.closest('.ag-cell')?.classList.remove('cell-error')
+    }, [currentValue])
 
     const Component =
       typeof column?.colDef?.component === 'string'
@@ -787,7 +797,7 @@ export function DataGrid({
     const centered = comp === 'checkbox' || comp === 'button' || comp === 'icon' || comp === 'image'
 
     return (
-      <Box className={`cellEditorBox ${centered ? 'cellEditorBoxCentered' : ''} `}>
+      <Box ref={editorBoxRef} className={`cellEditorBox ${centered ? 'cellEditorBoxCentered' : ''} `}>
         <Box className={`cellEditorInner ${centered ? 'cellEditorInnerCentered' : ''}`}>
           <Component
             id={params.node.data.id}
@@ -806,7 +816,14 @@ export function DataGrid({
   }
 
   const cellClassRules = {
-    'cell-error': params => !!error?.[params.node.rowIndex]?.[params.colDef.field]
+    'cell-error': params => {
+      const hasError = !!error?.[params.node.rowIndex]?.[params.colDef.field]
+      if (!hasError) return false
+
+      if (params.colDef.component === 'resourcecombobox') return isEmptyValue(params.data?.[params.colDef.field])
+
+      return true
+    }
   }
 
   const ActionCellRenderer = params => {
