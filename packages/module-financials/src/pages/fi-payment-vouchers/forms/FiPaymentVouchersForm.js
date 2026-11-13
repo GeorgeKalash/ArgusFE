@@ -187,6 +187,10 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     }
   }
 
+  const isPosted = formik.values.status === 3
+  const isCancelled = formik.values.status === -1
+  const editMode = !!formik.values.recordId
+
   const { openStack } = useStackValueLink({ linkOpen: { resourceId: ResourceIds.MCRFIPaymentVoucher } })
   
   async function openMCRForm(data) {
@@ -197,6 +201,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
         props: {
           DatasetIdAccess: ResourceIds.MCRFIPaymentVoucher,
           data,
+          readOnly: isCancelled || isPosted,
           onOk: childFormikValues => {
             formik.setValues({
               ...formik.values,
@@ -207,10 +212,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       })
     }
   }
-
-  const isPosted = formik.values.status === 3
-  const isCancelled = formik.values.status === -1
-  const editMode = !!formik.values.recordId
 
   const { releaseLock } = useRecordLock({
     recordId: recordId,
@@ -293,10 +294,10 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   }, [])
 
 
-  const onCancel = async () => {
+  const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentVouchers.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
     if (res?.recordId) {
@@ -364,8 +365,10 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isPosted || isCancelled
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isPosted
     },
     {
       key: 'FI Trx',

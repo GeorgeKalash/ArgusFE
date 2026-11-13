@@ -69,6 +69,7 @@ import CommissionDetailsForm from '@argus/module-sales/src/pages/sa-trx/[functio
 import FIReceiptVoucherForm from './FIReceiptVoucherForm'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import BarcodesTable from '@argus/shared-ui/src/components/Shared/BarcodesTable'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
@@ -91,6 +92,7 @@ export default function SaleTransactionForm({
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
   const muStoreByRowRef = useRef({})
+  const lastBarcodeSearch = useRef('')
   const [taxDetails, setTaxDetails] = useState([])
   const { combosStore } = useComboStore(SaleRepository.SaleTransaction.pack, {parameters: `_functionId=${functionId}`})
 
@@ -450,6 +452,26 @@ export default function SaleTransactionForm({
     })
   }
 
+  async function handleBarcode(update, newRow) {
+    if (!newRow?.barcode) return
+
+    const ItemConvertPrice = await getItemConvertPrice2(newRow)
+
+    if (!ItemConvertPrice) {
+      update({ barcode: null })
+
+      return
+    }
+
+    const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
+    const itemInfo = await getItem(ItemConvertPrice?.itemId)
+    getFilteredMU(itemInfo?.itemId, itemInfo?.msId)
+
+    const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+
+    await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true, defaultMu)
+  }
+
   async function barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, setItemInfo, defaultMu) {
     let result = {}
     const weight = itemPhysProp?.weight || 0
@@ -457,7 +479,7 @@ export default function SaleTransactionForm({
     const isMetal = itemPhysProp?.isMetal ?? false
     const metalId = itemPhysProp?.metalId ?? null
     const baseLaborPrice = ItemConvertPrice?.baseLaborPrice ?? 0
-    const measurementSchedule = await getMeasurementObject(newRow?.msId)
+    const measurementSchedule = await getMeasurementObject(itemInfo?.msId ?? newRow?.msId)
     const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
     const metalPrice = formik?.values?.header?.KGmetalPrice ?? 0
     const basePrice = (metalPrice * metalPurity) / 1000
@@ -472,10 +494,10 @@ export default function SaleTransactionForm({
     const effectiveTaxId = !formik.values.header.isVattable
       ? null
       : formik.values.header.taxId
-      ? itemInfo.taxId
+      ? itemInfo?.taxId
         ? formik.values.header.taxId
         : null
-      : itemInfo.taxId ?? null
+      : itemInfo?.taxId ?? null
 
 
     if (parseFloat(unitPrice) < parseFloat(minPrice)) {
@@ -486,16 +508,17 @@ export default function SaleTransactionForm({
       result = {
         ...result,
         sku: ItemConvertPrice?.sku,
-        barcode: ItemConvertPrice?.barcode,
+        barcode: ItemConvertPrice?.barcode || newRow?.barcode || '',
         itemName: ItemConvertPrice?.itemName,
-        itemId: ItemConvertPrice?.itemId
+        itemId: ItemConvertPrice?.itemId,
+        trackBy: itemInfo?.trackBy
       }
     }
     let categoryName
-    if (itemInfo.categoryId) {
+    if (itemInfo?.categoryId) {
       const category = await getRequest({
         extension: InventoryRepository.Category.get,
-        parameters: `_recordId=${itemInfo.categoryId}`
+        parameters: `_recordId=${itemInfo?.categoryId}`
       })
       categoryName = category?.record?.name
     }
@@ -522,12 +545,12 @@ export default function SaleTransactionForm({
       upo: ItemConvertPrice?.upo || 0,
       priceType: ItemConvertPrice?.priceType || 1,
       msId: itemInfo?.msId,
-      categoryId: itemInfo.categoryId,
+      categoryId: itemInfo?.categoryId,
       categoryName,
       muRef: defaultMu?.reference || '',
       muId: defaultMu?.recordId || null,
+      muQty: defaultMu?.qty,
       mdAmount: formik.values.header.maxDiscount ? formik.values.header.maxDiscount : 0,
-      mdValue: 0,
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
       mdValue: 0,
@@ -614,19 +637,61 @@ export default function SaleTransactionForm({
 
   const columns = [
     {
+      component: 'button',
+      name: 'barcodeLookup',
+      label: ' ',
+      props: {
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: row => {
+          return {
+            disabled: !formik.values.header.clientId
+          }
+        }
+      },
+      onClick: (e, row, update, updateRow) => {
+        stack({
+          Component: BarcodesTable,
+          props: {
+            labels,
+            maxAccess,
+            initialSearch: lastBarcodeSearch.current,
+            onSearchChange: term => {
+              lastBarcodeSearch.current = term || ''
+            },
+            onSelect: selected => {
+              if (!selected?.barcode) return
+
+              if (selected.isInactive) {
+                stackError({ message: labels.inactiveItem })
+
+                return
+              }
+
+              handleBarcode(changes => updateRow({ id: row.id, changes, focusField: 'qty' }), {
+                ...row,
+                barcode: selected.barcode
+              })
+            }
+          }
+        })
+      }
+    },
+    {
       component: 'textfield',
       label: labels.barcode,
       name: 'barcode',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        await handleBarcode(update, newRow)
         delete muStoreByRowRef.current[newRow.id]
-
+        
         if (!newRow?.barcode) return
 
         const ItemConvertPrice = await getItemConvertPrice2(newRow)
         if (ItemConvertPrice) {
           const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
           const itemInfo = await getItem(ItemConvertPrice?.itemId)
+          getFilteredMU(itemInfo?.itemId, itemInfo?.msId)
 
           const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
           await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true, defaultMu)
@@ -1475,7 +1540,7 @@ export default function SaleTransactionForm({
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${
         formik.values.header.currencyId
-      }&_plId=${formik.values.header.plId}&_muId=${muId || 0}`
+      }&_plId=${formik.values.header.plId || 0}&_muId=${muId || 0}`
     })
 
     return res?.record
@@ -1484,7 +1549,7 @@ export default function SaleTransactionForm({
   async function getItemConvertPrice2(row) {
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get2,
-      parameters: `_barcode=${row?.barcode}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}&_exRate=${formik.values.header.exRate}&_rateCalcMethod=${formik.values.header.rateCalcMethod}`
+      parameters: `_barcode=${row?.barcode}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId || 0}&_exRate=${formik.values.header.exRate}&_rateCalcMethod=${formik.values.header.rateCalcMethod}`
     })
 
     return res?.record
@@ -2368,7 +2433,7 @@ export default function SaleTransactionForm({
             initialValues={initialValues?.items[0]}
             name='items'
             showCounterColumn={true}
-            columns={columns}
+            columns={columns.filter(col => !(col.name === 'barcodeLookup' && isPosted))}
             maxAccess={maxAccess}
             allowDelete={!isPosted}
             allowAddNewLine={!isPosted}

@@ -106,8 +106,10 @@ export default function TimeVariatrionForm({ recordId, window }) {
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isClosed || isCancelled
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isClosed
     },
     {
       key: 'Attachment',
@@ -137,10 +139,13 @@ export default function TimeVariatrionForm({ recordId, window }) {
     refetchForm(res.recordId)
   }
 
-  async function onCancel() {
+  async function onCancel(cancelReason) {
     const res = await postRequest({
       extension: TimeAttendanceRepository.TimeVariation.cancel,
-      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values?.date), clockDuration: 0 })
+      record: JSON.stringify({
+        recordId: formik.values.recordId,
+        notes: cancelReason
+      })
     })
     toast.success(platformLabels.Cancelled)
     invalidate()

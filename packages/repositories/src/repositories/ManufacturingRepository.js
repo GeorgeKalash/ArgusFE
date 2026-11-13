@@ -522,6 +522,7 @@ export const ManufacturingRepository = {
     del: service + 'delPR',
     snapshot: service + 'snapshotPR',
     post: service + 'postPR',
+    unpost: service + 'unpostPR',
     preview: service + 'previewPR',
     preview2: service + 'previewPR2',
   },
@@ -548,5 +549,9 @@ export const ManufacturingRepository = {
     page: service + 'pagePSG',
     qry: service + 'qryPSG',
     snapshot: service + 'snapshotPSG'
+  },
+  WorkCenterWorkForce: {
+    set2: service + 'set2WCWF',
+    qry: service + 'qryWCWF',
   }
 }

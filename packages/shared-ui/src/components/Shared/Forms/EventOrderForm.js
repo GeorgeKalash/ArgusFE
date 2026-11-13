@@ -206,7 +206,7 @@ export default function EventOrderForm({ recordId, window }) {
     const rate = await getMultiCurrencyFormData(res?.record?.currencyId, fromCurrencyId, date)
     if (!rate?.exRate) return null
 
-    return roundTo(rate.exRate * muQty, 5)
+    return roundTo(rate.exRate * muQty, 2)
   }
 
   async function getMultiCurrencyFormData(fromCurrencyId, toCurrencyId, date) {
@@ -698,7 +698,7 @@ useEffect(() => {
                 error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomCheckBox
                 name='isTriggered'
                 value={formik.values.isTriggered}
@@ -707,7 +707,7 @@ useEffect(() => {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomDateTimePicker
                 name='triggeredAt'
                 label={labels.triggeredAt}
@@ -716,7 +716,7 @@ useEffect(() => {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomNumberField
                 name='triggeredAtPrice'
                 label={labels.triggeredAtPrice}
@@ -972,7 +972,7 @@ useEffect(() => {
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='amount'
                     label={labels.totalAmount}
@@ -991,7 +991,7 @@ useEffect(() => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='marketPrice'
                     label={labels.marketPrice}
@@ -1061,8 +1061,17 @@ useEffect(() => {
                     maxAccess={maxAccess}
                     decimalScale={5}
                     required
-                    readOnly
                     error={formik.touched.netUnitPrice && Boolean(formik.errors.netUnitPrice)}
+                    InputProps={{
+                      readOnly: true,
+                      endAdornment: (
+                        <InputAdornment position='end' sx={{ maxHeight: '2em', mr: 0.5 }}>
+                          <Typography component='span' sx={{ color: 'red', fontSize: 'small', lineHeight: 1 }}>
+                            {formik.values.currencyRef}
+                          </Typography>
+                        </InputAdornment>
+                      )
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -1074,5 +1083,5 @@ useEffect(() => {
   )
 }
 
-EventOrderForm.width = 1000
-EventOrderForm.height = 700
+EventOrderForm.width = 1100
+EventOrderForm.height = 800

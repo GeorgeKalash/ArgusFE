@@ -329,7 +329,12 @@ const GridToolbar = ({
       <DialogActions className={styles.dialogActions}>
         <Grid container spacing={2} className={styles.gridContainer}>
           <Grid item xs={previewReport ? 6 : 9}>
-            <Grid container spacing={2}>
+            <Grid
+              container
+              spacing={1}
+              wrap="nowrap"
+              alignItems="center"
+            >
               {onAdd && addBtnVisible && (
                 <Grid item className={styles.buttonWrapper}>
                   <CustomButton

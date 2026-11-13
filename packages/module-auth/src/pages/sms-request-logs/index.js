@@ -67,9 +67,9 @@ const SmsRequestLog = () => {
           }}
           labels={labels}
           leftSection={
-            <Grid item xs={7}>
+            <Grid item xs={9}>
               <Grid container spacing={2}>
-                <Grid item xs={5}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={SystemRepository.KeyValueStore}
                     parameters={`_dataset=${datasetId}&_language=${languageId}`}
@@ -86,7 +86,7 @@ const SmsRequestLog = () => {
                     sx={{ pr: 2 }}
                   />
                 </Grid>
-                <Grid item xs={7}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={SystemRepository.ModuleClassRES.qry}
                     parameters={`_moduleId=${values.moduleId}&_filter=`}

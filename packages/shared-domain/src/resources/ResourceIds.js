@@ -155,6 +155,7 @@ export const ResourceIds = {
   LaborGroups: 42114,
   ProductionLines: 42107,
   WorkCenters: 42101,
+  WorkCenterWorkForce: 42146,
   Operations: 42102,
   Machines: 42106,
   GateKeeper: 42322,
@@ -684,6 +685,7 @@ export const ResourceIds = {
   BatchCloseTV: 72216,
   DeveloperGroup: 48108,
   IVBrands: 41125,
+  BarcodesTable: 41608,
 
   // GL
   GLSalesInvoice: 51604,

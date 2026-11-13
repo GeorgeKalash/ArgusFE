@@ -58,5 +58,7 @@ export const commonResourceIds = [
   ResourceIds.IssueOfMaterials,
   ResourceIds.CreditLimitHold,
   ResourceIds.InventoryTransaction,
-  ResourceIds.PRItemSize
+  ResourceIds.PRItemSize,
+  ResourceIds.BarcodesTable,
+  ResourceIds.Items
 ]

@@ -55,8 +55,8 @@ export default function DimensionalTarget () {
   const columns = [
     { field: 'fiscalYear', headerName: labels.fiscalYear, flex: 1 },
     { field: 'periodName', headerName: labels.period, flex: 1 },
-    { field: 'metalRef', headerName: labels.metal, flex: 1 },
     { field: 'plantRef', headerName: labels.plant, flex: 1 },
+    { field: 'metalRef', headerName: labels.metal, flex: 1 },
     { field: 'itemGroupRef', headerName: labels.itemGroup, flex: 1 },
     { field: 'collectionRef', headerName: labels.collection, flex: 1 },
     { field: 'qty', headerName: labels.amount, flex: 1, type: 'number' }
@@ -82,8 +82,8 @@ export default function DimensionalTarget () {
         recordId: obj?.recordId,
         maxAccess,
       },
-      width: 550,
-      height: 450,
+      width: 750,
+      height: 550,
       title: labels.dimensionalTarget
     })
   }

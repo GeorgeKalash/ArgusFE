@@ -28,7 +28,7 @@ import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehavior
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
-export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window }) {
+export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window, onSuccess }) {
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults } = useContext(DefaultsContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
@@ -144,6 +144,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
       await refetchForm(response.recordId, !obj.recordId)
       invalidate()
+      onSuccess?.()
     }
   })
 

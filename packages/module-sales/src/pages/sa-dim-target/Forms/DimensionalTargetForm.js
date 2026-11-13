@@ -33,6 +33,8 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
       metalId: null,
       itemGroupId: null,
       collectionId: null,
+      itemCategoryId: null,
+      brandId: null,
       qty: 0
     },
     maxAccess,
@@ -107,19 +109,6 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Metals.qry}
-                name='metalId'
-                label={labels.metal}
-                valueField='recordId'
-                displayField='reference'
-                values={formik.values}
-                onChange={(_, newValue) => formik.setFieldValue('metalId', newValue?.recordId || null) }
-                error={formik.touched.metalId && Boolean(formik.errors.metalId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
@@ -135,6 +124,20 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
                 maxAccess={maxAccess}
               />
             </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Metals.qry}
+                name='metalId'
+                label={labels.metal}
+                valueField='recordId'
+                displayField='reference'
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('metalId', newValue?.recordId || null) }
+                error={formik.touched.metalId && Boolean(formik.errors.metalId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Group.qry}
@@ -169,6 +172,41 @@ export default function DimensionalTargetForm ({ labels, recordId, maxAccess, wi
                 values={formik.values}
                 onChange={(_, newValue) => formik.setFieldValue('collectionId', newValue?.recordId || null) }
                 error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Category.qry}
+                parameters='_name=&_pageSize=1000&_startAt=0'
+                name='itemCategoryId'
+                label={labels.itemCategory}
+                valueField='recordId'
+                displayField={['caRef', 'name']}
+                columnsInDropDown={[
+                  { key: 'caRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                maxAccess={maxAccess}
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('itemCategoryId', newValue?.recordId || null) }
+                error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Brands.qry}
+                name='brandId'
+                label={labels.brand}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                maxAccess={maxAccess}
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('brandId', newValue?.recordId || null) }
+                error={formik.touched.brandId && Boolean(formik.errors.brandId)}
               />
             </Grid>
             <Grid item xs={12}>
