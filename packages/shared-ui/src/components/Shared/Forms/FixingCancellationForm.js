@@ -21,7 +21,8 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { ResourceLookup } from '../ResourceLookup'
+import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
+import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 
 export default function FixingCancellationForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -52,11 +53,11 @@ export default function FixingCancellationForm({ recordId, functionId, window })
   const getEndpoint = (functionId) => BrokerageTradingRepositories[Number(functionId)] ?? null
   const snapshotInfo = {
     [SystemFunction.FixingSalesCancellation]: {
-      snapshot: BrokerageTradingRepository.FixingSales.snapshot,
+      snapshot: BrokerageTradingRepository.FixingSales.snapshot2,
       functionId: SystemFunction.FixingSales
     },
     [SystemFunction.FixingPurchaseCancellation]: {
-      snapshot: BrokerageTradingRepository.FixingPurchases.snapshot,
+      snapshot: BrokerageTradingRepository.FixingPurchases.snapshot2,
       functionId: SystemFunction.FixingPurchases
     }
   }
@@ -86,7 +87,7 @@ export default function FixingCancellationForm({ recordId, functionId, window })
     maxAccess,
     validationSchema: yup.object({
       date: yup.date().required(),
-      fixId: yup.string().required()
+      fixId: yup.number().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -103,7 +104,7 @@ export default function FixingCancellationForm({ recordId, functionId, window })
   const isPosted = formik.values.status == 3
 
   const { releaseLock } = useRecordLock({
-    recordId: recordId,
+    recordId,
     reference: formik?.values?.reference,
     resourceId: getResourceId(parseInt(functionId)),
     enabled: !!recordId && !isPosted
@@ -178,8 +179,12 @@ export default function FixingCancellationForm({ recordId, functionId, window })
                 name='dtId'
                 label={labels.docType}
                 readOnly={editMode}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 values={formik.values}
                 onChange={(_, newValue) => {
                   changeDT(newValue)
@@ -231,11 +236,47 @@ export default function FixingCancellationForm({ recordId, functionId, window })
                 required
                 secondDisplayField={false}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('fixReference', newValue?.fixingRef || '')
+                  formik.setFieldValue('accountName', newValue?.accountName || '')
+                  formik.setFieldValue('accountRef', newValue?.accountRef || '')
+                  formik.setFieldValue('fixReference', newValue?.reference || '')
                   formik.setFieldValue('fixId', newValue?.recordId || null)
                 }}
                 errorCheck={'fixId'}
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='accountRef'
+                label={labels.accountRef}
+                value={formik.values.accountRef}
+                readOnly
+                maxAccess={maxAccess}
+                error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
+              />
+            </Grid>
+            <Grid item xs={8}>
+              <CustomTextField
+                name='accountName'
+                label={labels.accountName}
+                value={formik.values.accountName}
+                readOnly
+                maxAccess={maxAccess}
+                error={formik.touched.accountName && Boolean(formik.errors.accountName)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextArea
+                name='notes'
+                label={labels.notes}
+                value={formik.values.notes}
+                readOnly={isPosted}
+                maxAccess={maxAccess}
+                rows={3}
+                maxLength='255'
+                onChange={e => formik.setFieldValue('notes', e.target.value)}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
               />
             </Grid>
           </Grid>
@@ -246,4 +287,4 @@ export default function FixingCancellationForm({ recordId, functionId, window })
 }
 
 FixingCancellationForm.width = 500
-FixingCancellationForm.height = 400
+FixingCancellationForm.height = 450

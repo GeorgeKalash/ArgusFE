@@ -14,6 +14,7 @@ export const BrokerageTradingRepository = {
     close: service + 'closeFIS',
     get: service + 'getFIS',
     snapshot: service + 'snapshotFIS',
+    snapshot2: service + 'snapshot2FIS',
     post: service + 'postFIS',
     unpost: service + 'unpostFIS',
     reopen: service + 'reopenFIS'
@@ -25,6 +26,7 @@ export const BrokerageTradingRepository = {
     close: service + 'closeFIP',
     get: service + 'getFIP',
     snapshot: service + 'snapshotFIP',
+    snapshot2: service + 'snapshot2FIP',
     post: service + 'postFIP',
     reopen: service + 'reopenFIP',
     unpost: service + 'unpostFIP'

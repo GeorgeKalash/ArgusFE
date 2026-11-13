@@ -119,6 +119,11 @@ export default function BTFixingCancellation() {
       family: 'document',
       valueField: 'status',
       flex: 1
+    },
+    {
+      field: 'notes',
+      headerName: labels.notes,
+      flex: 1
     }
   ]
 
