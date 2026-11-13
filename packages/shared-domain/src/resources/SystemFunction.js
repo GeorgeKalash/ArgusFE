@@ -143,6 +143,8 @@ export const SystemFunction = {
   CreditLimitHold: Module.Financials * 100 + 14,
   Cutting: Module.Foundry * 100 + 8,
   ScrapAdjustment: Module.Foundry * 100 + 9,
+  FixingSalesCancellation: Module.BrokerageTrading * 100 + 4,
+  FixingPurchaseCancellation: Module.BrokerageTrading * 100 + 5,
 }
 
 export const getSystemFunctionModule = functionId => {
