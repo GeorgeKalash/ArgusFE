@@ -77,19 +77,20 @@ const WorkCenterWorkForceForm = ({ recordId, labels, maxAccess }) => {
     {
       component: 'numberfield',
       label: labels.qty,
-      name: 'qty'
+      name: 'qty',
+      props: { maxLength: 12, decimalScale: 2 }
     },
     {
       component: 'numberfield',
       label: labels.headCount,
       name: 'headCount',
-      props: { decimalScale: 0 }
+      props: { maxLength: 4, decimalScale: 0 }
     },
     {
       component: 'numberfield',
       label: labels.machinesCount,
       name: 'machinesCount',
-      props: { decimalScale: 0 }
+      props: { maxLength: 4, decimalScale: 0 }
     }
   ]
 
