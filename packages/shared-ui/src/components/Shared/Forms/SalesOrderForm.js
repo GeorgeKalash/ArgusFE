@@ -1330,8 +1330,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   useEffect(() => {
     formik.setFieldValue('qty', Number(totalQty))
     formik.setFieldValue('amount', Number(amount))
-    formik.setFieldValue('volume', Number(totalVolume))
-    formik.setFieldValue('weight', Number(totalWeight))
+    formik.setFieldValue('volume', roundTo(totalVolume, 3))
+    formik.setFieldValue('weight', roundTo(totalWeight))
     formik.setFieldValue('subtotal', Number(subtotal))
     formik.setFieldValue('vatAmount', Number(vatAmount))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
