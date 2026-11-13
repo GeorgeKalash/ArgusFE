@@ -39,6 +39,17 @@ export default function FixingCancellationForm({ recordId, functionId, window })
     }
   }
 
+  const getGLResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.FixingSalesCancellation:
+        return ResourceIds.GLFixingSalesCancellation
+      case SystemFunction.FixingPurchaseCancellation:
+        return ResourceIds.GLFixingPurchasesCancellation
+      default:
+        return null
+    }
+  }
+
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.FixingSalesCancellation,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
@@ -143,6 +154,19 @@ export default function FixingCancellationForm({ recordId, functionId, window })
   }
 
   const actions = [
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      datasetId: getGLResourceId(parseInt(functionId)),
+      disabled: !editMode
+    },
+    {
+      key: 'FI Trx',
+      condition: true,
+      onClick: 'onClickIT',
+      disabled: !editMode
+    },
     {
       key: 'Locked',
       condition: isPosted,
