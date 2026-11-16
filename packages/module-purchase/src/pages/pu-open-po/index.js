@@ -363,22 +363,19 @@ const OpenPurchaseOrder = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Group.qry}
-                    parameters='_startAt=0&_pageSize=1000'
-                    name='groupId'
-                    label={labels.group}
+                    endpointId={InventoryRepository.Category.qry}
+                    parameters='_pagesize=30&_startAt=0&_name='
+                    name='categoryId'
+                    label={labels.category}
                     valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values}
-                    onChange={(_, newValue) => {
-                      formik.setFieldValue('groupId', newValue?.recordId || 0)
-                    }}
-                    error={formik.touched.groupId && Boolean(formik.errors.groupId)}
+                    displayField={'name'}
+                    displayFieldWidth={1}
+                    values={formik?.values}
                     maxAccess={access}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('categoryId', newValue?.recordId || 0)
+                    }}
+                    error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
                   />
                 </Grid>
               </Grid>
@@ -413,19 +410,22 @@ const OpenPurchaseOrder = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Category.qry}
-                    parameters='_pagesize=30&_startAt=0&_name='
-                    name='categoryId'
-                    label={labels.category}
+                    endpointId={InventoryRepository.Site.qry}
+                    name='siteId'
+                    label={labels.site}
                     valueField='recordId'
-                    displayField={'name'}
-                    displayFieldWidth={1}
-                    values={formik?.values}
+                    displayField={['reference', 'name']}
                     maxAccess={access}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    required
+                    values={formik.values}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('categoryId', newValue?.recordId || 0)
+                      formik.setFieldValue('siteId', newValue?.recordId || 0)
                     }}
-                    error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
+                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -477,22 +477,22 @@ const OpenPurchaseOrder = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
-                    name='siteId'
-                    label={labels.site}
+                    endpointId={InventoryRepository.Group.qry}
+                    parameters='_startAt=0&_pageSize=1000'
+                    name='groupId'
+                    label={labels.group}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    maxAccess={access}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    required
                     values={formik.values}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId || 0)
+                      formik.setFieldValue('groupId', newValue?.recordId || 0)
                     }}
-                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                    error={formik.touched.groupId && Boolean(formik.errors.groupId)}
+                    maxAccess={access}
                   />
                 </Grid>
                 <Grid item xs={10}>
