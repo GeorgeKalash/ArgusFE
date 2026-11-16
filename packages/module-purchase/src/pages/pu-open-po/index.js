@@ -338,21 +338,27 @@ const OpenPurchaseOrder = () => {
                     maxAccess={access}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={InventoryRepository.Category.qry}
-                    parameters='_pagesize=30&_startAt=0&_name='
-                    name='categoryId'
-                    label={labels.category}
-                    valueField='recordId'
-                    displayField={'name'}
-                    displayFieldWidth={1}
-                    values={formik?.values}
+                
+                <Grid item xs={6}>
+                  <CustomDatePicker
+                    name='fromDate'
+                    label={labels.fromDate}
+                    value={formik.values?.fromDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('fromDate', null)}
+                    error={formik.touched.fromDate && Boolean(formik.errors.fromDate)}
                     maxAccess={access}
-                    onChange={(_, newValue) => {
-                      formik.setFieldValue('categoryId', newValue?.recordId || 0)
-                    }}
-                    error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomDatePicker
+                    name='toDate'
+                    label={labels.toDate}
+                    value={formik.values?.toDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('toDate', null)}
+                    error={formik.touched.toDate && Boolean(formik.errors.toDate)}
+                    maxAccess={access}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -407,22 +413,19 @@ const OpenPurchaseOrder = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
-                    name='siteId'
-                    label={labels.site}
+                    endpointId={InventoryRepository.Category.qry}
+                    parameters='_pagesize=30&_startAt=0&_name='
+                    name='categoryId'
+                    label={labels.category}
                     valueField='recordId'
-                    displayField={['reference', 'name']}
+                    displayField={'name'}
+                    displayFieldWidth={1}
+                    values={formik?.values}
                     maxAccess={access}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    required
-                    values={formik.values}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId || 0)
+                      formik.setFieldValue('categoryId', newValue?.recordId || 0)
                     }}
-                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                    error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -472,26 +475,24 @@ const OpenPurchaseOrder = () => {
                     maxAccess={access}
                   />
                 </Grid>
-                <Grid item xs={6}>
-                  <CustomDatePicker
-                    name='fromDate'
-                    label={labels.fromDate}
-                    value={formik.values?.fromDate}
-                    onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('fromDate', null)}
-                    error={formik.touched.fromDate && Boolean(formik.errors.fromDate)}
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Site.qry}
+                    name='siteId'
+                    label={labels.site}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
                     maxAccess={access}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <CustomDatePicker
-                    name='toDate'
-                    label={labels.toDate}
-                    value={formik.values?.toDate}
-                    onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('toDate', null)}
-                    error={formik.touched.toDate && Boolean(formik.errors.toDate)}
-                    maxAccess={access}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    required
+                    values={formik.values}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('siteId', newValue?.recordId || 0)
+                    }}
+                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
                 </Grid>
                 <Grid item xs={10}>
