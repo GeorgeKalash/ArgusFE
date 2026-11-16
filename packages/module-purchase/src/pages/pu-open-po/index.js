@@ -16,11 +16,13 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
-import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
+import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import { ReportPuGeneratorRepository } from '@argus/repositories/src/repositories/ReportPuGeneratorRepository'
 import ShipmentsForm from '../shipments/forms/ShipmentsForm'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
@@ -55,6 +57,8 @@ const OpenPurchaseOrder = () => {
       clientName: '',
       itemId: 0,
       poId: 0,
+      fromDate: null,
+      toDate: null,
       items: [],
       marginDefault: defaultVat?.value
     },
@@ -110,16 +114,24 @@ const OpenPurchaseOrder = () => {
     }
   })
 
-  const { groupId, plantId, siteId, categoryId, vendorId, itemId, marginDefault, poId } = formik.values
+  const { groupId, plantId, siteId, categoryId, vendorId, itemId, marginDefault, poId, fromDate, toDate } = formik.values
 
   useEffect(() => {
-    getData()
-  }, [vendorId, categoryId, groupId, poId, itemId])
+    const timer = setTimeout(() => {
+      getData()
+    }, 600)
+
+    return () => clearTimeout(timer)
+  }, [vendorId, categoryId, groupId, poId, itemId, siteId, plantId, fromDate, toDate])
 
   async function getData() {
     const result = await getRequest({
       extension: ReportPuGeneratorRepository.OpenPurchaseOrder.open,
-      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_vendorId=${vendorId}&_itemId=${itemId}&_plantId=${plantId}&_poId=${poId}`
+      parameters:
+        `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_vendorId=${vendorId}` +
+        `&_itemId=${itemId}&_plantId=${plantId}&_poId=${poId}` +
+        `&_startDate=${fromDate ? formatDateForGetApI(fromDate) : ''}` +
+        `&_endDate=${toDate ? formatDateForGetApI(toDate) : ''}`
     })
 
     const res = result?.list?.map((item, index) => ({
@@ -131,6 +143,31 @@ const OpenPurchaseOrder = () => {
 
     formik.setFieldValue('items', res)
   }
+
+ function terminateLine(row) {
+  stack({
+    Component: ConfirmationDialog,
+    props: {
+      DialogText: platformLabels.terminateItemConf,
+      fullScreen: false,
+      close: true,
+      okButtonAction: async () => {
+        await postRequest({
+          extension: PurchaseRepository.OrderItem.terminate,
+          record: JSON.stringify({ poId: row.poId, seqNo: row.poSeqNo })
+        })
+
+        toast.success(platformLabels.TerminatedSuccessfully)
+        getData()
+      }
+    },
+    width: 450,
+    height: 170,
+    title: platformLabels.Confirmation,
+    expandable: false,
+    refresh: false
+  })
+}
 
   const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)
 
@@ -251,6 +288,13 @@ const OpenPurchaseOrder = () => {
 
         update({ receiveNow: value || 0 })
       }
+    },
+    {
+      component: 'button',
+      name: 'terminate',
+      label: labels.terminate,
+      props: { imgSrc: '/images/TableIcons/cancel.png' },
+      onClick: (e, row) => terminateLine(row)
     }
   ]
 
@@ -378,7 +422,7 @@ const OpenPurchaseOrder = () => {
                     onChange={(_, newValue) => {
                       formik.setFieldValue('siteId', newValue?.recordId || 0)
                     }}
-                    error={formik.touched.sitId && Boolean(formik.errors.sitId)}
+                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -425,6 +469,28 @@ const OpenPurchaseOrder = () => {
                       formik.setFieldValue('sku', newValue?.sku || '')
                     }}
                     displayFieldWidth={2}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomDatePicker
+                    name='fromDate'
+                    label={labels.fromDate}
+                    value={formik.values?.fromDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('fromDate', null)}
+                    error={formik.touched.fromDate && Boolean(formik.errors.fromDate)}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomDatePicker
+                    name='toDate'
+                    label={labels.toDate}
+                    value={formik.values?.toDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('toDate', null)}
+                    error={formik.touched.toDate && Boolean(formik.errors.toDate)}
                     maxAccess={access}
                   />
                 </Grid>
