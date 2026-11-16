@@ -250,6 +250,13 @@ export default function FixingCancellationForm({ recordId, functionId, window })
                 parameters= {{
                   _functionId: `${snapshotInfo[Number(functionId)].functionId}`
                 }}
+                linkOpen={{
+                  props: { recordId: formik.values.fixId, functionId: functionId == SystemFunction.FixingPurchaseCancellation 
+                    ? SystemFunction.FixingPurchases 
+                    : SystemFunction.FixingSales },
+                  resourceId: getResourceId(parseInt(functionId)) == ResourceIds.FixingPurchaseCancellation ?
+                    ResourceIds.FixingPurchases : ResourceIds.FixingSales
+                }}
                 name='fixId'
                 label={labels.fixingRef}
                 form={formik}
@@ -259,6 +266,10 @@ export default function FixingCancellationForm({ recordId, functionId, window })
                 readOnly={isPosted}
                 required
                 secondDisplayField={false}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'accountRef', value: 'Account' }
+                ]}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('accountName', newValue?.accountName || '')
                   formik.setFieldValue('accountRef', newValue?.accountRef || '')
