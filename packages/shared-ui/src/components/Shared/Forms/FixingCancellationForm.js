@@ -268,7 +268,8 @@ export default function FixingCancellationForm({ recordId, functionId, window })
                 secondDisplayField={false}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
-                  { key: 'accountRef', value: 'Account' }
+                  { key: 'accountRef', value: 'Account Ref' },
+                  { key: 'accountName', value: 'Account Name' }
                 ]}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('accountName', newValue?.accountName || '')
