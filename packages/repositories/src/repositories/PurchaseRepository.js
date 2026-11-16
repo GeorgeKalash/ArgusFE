@@ -152,7 +152,8 @@ export const PurchaseRepository = {
   },
   OrderItem: {
     qry: service + 'qryORI',
-    set2: service + 'set2ORI'
+    set2: service + 'set2ORI',
+    terminate: service + 'terminateORI'
   },
   PUDraftReturn: {
     set2: service + 'set2DRE',
