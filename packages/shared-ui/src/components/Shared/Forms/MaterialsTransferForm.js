@@ -81,13 +81,15 @@ export default function MaterialsTransferForm({ recordId, window }) {
     plantId,
     productionLineId: null,
     printStatus: null,
-    qty: null,
+    qty: 0,
     pcs: null,
     isVerified: false,
     wip: 1,
     carrierId: null,
     plId: null,
     disableSKULookup: false,
+    totalCost: 0,
+    weight: 0,
     transfers: [
       {
         id: 1,
@@ -317,18 +319,31 @@ export default function MaterialsTransferForm({ recordId, window }) {
     }
   }, [formik.values?.dtId])
 
-  const computed = (formik.values.transfers || []).reduce(
-    (acc, row) => ({
-      totalQty: acc.totalQty + (Number(row?.qty) || 0),
-      totalCost: acc.totalCost + (Number(row?.totalCost) || 0),
-      totalWeight: acc.totalWeight + (Number(row?.qty) || 0) * (Number(row?.weight) || 0)
-    }),
-    { totalQty: 0, totalCost: 0, totalWeight: 0 }
-  )
+  const calcTotals = rows =>
+    (rows || []).reduce(
+      (acc, row) => ({
+        qty: acc.qty + (Number(row?.qty) || 0),
+        totalCost: acc.totalCost + (Number(row?.totalCost) || 0),
+        weight: acc.weight + (Number(row?.qty) || 0) * (Number(row?.weight) || 0)
+      }),
+      { qty: 0, totalCost: 0, weight: 0 }
+    )
 
-  const totalQty = reCal ? computed.totalQty : formik.values.qty || 0
+  const getTotalsValues = rows => {
+    const t = calcTotals(rows)
+
+    return {
+      qty: roundTo(t.qty, 5),
+      totalCost: roundTo(t.totalCost),
+      weight: roundTo(t.weight)
+    }
+  }
+
+  const computed = calcTotals(formik.values.transfers)
+
+  const totalQty = reCal ? computed.qty : formik.values.qty || 0
   const totalCost = reCal ? computed.totalCost : formik.values.totalCost || 0
-  const totalWeight = reCal ? computed.totalWeight : formik.values.weight || 0
+  const totalWeight = reCal ? computed.weight : formik.values.weight || 0
 
   useEffect(() => {
     formik.setFieldValue('qty', roundTo(totalQty, 5))
@@ -671,6 +686,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         ...res.record,
         recordId,
         transfers: updatedTransfers,
+        ...getTotalsValues(updatedTransfers),
         disableSKULookup: formik.values.disableSKULookup,
         notificationGroupId: formik.values.notificationGroupId,
         serials: serials?.current?.list
@@ -711,6 +727,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       values: {
         ...formik.values,
         transfers,
+        ...getTotalsValues(transfers),
         serials: serials?.current?.list
       }
     })
@@ -1037,6 +1054,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
             ...res.record,
             plId,
             transfers: updatedTransfers,
+            ...getTotalsValues(updatedTransfers),
             disableSKULookup: dtId?.record?.disableSKULookup || false,
             notificationGroupId: resNotification?.record?.notificationGroupId,
             serials: serials?.current?.list
