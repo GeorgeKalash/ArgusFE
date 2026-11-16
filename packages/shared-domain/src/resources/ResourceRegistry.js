@@ -54,5 +54,11 @@ export const ResourceRegistry = {
   ),
   [ResourceIds.WorkAnniversary]: createResource(() =>
     import('@argus/shared-ui/src/components/Shared/HrApplets/WorkAnniversary')
+  ),
+  [ResourceIds.FixingSales]: createResource(() =>
+    import('@argus/shared-ui/src/components/Shared/Forms/FixingForm')
+  ),
+  [ResourceIds.FixingPurchases]: createResource(() =>
+    import('@argus/shared-ui/src/components/Shared/Forms/FixingForm')
   )
 }
