@@ -15,10 +15,12 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import PriceListUpdateWindow from './Windows/PriceListUpdateWindow'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 const PriceListUpdate = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   const {
     query: { data },
@@ -76,7 +78,7 @@ const PriceListUpdate = () => {
 
     const response = await getRequest({
       extension: SaleRepository.PriceListUpdate.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -92,10 +94,18 @@ const PriceListUpdate = () => {
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj.recordId, obj?.status == 3)
   }
 
-  async function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.PriceListUpdates,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: PriceListUpdateWindow,
       props: {

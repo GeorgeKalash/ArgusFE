@@ -63,16 +63,16 @@ export default function OperationsTab({ store, labels, access }) {
           <Grid item xs={5}>
             <Grid container spacing={2}>
               <Grid item xs={3}>
-                <CustomNumberField name='totalIssued' value={totalIssued} label={labels.totalIssued} readOnly />
+                <CustomNumberField name='totalIssued' value={totalIssued} label={labels.totalIssued} readOnly maxAccess={access}/>
               </Grid>
               <Grid item xs={3}>
-                <CustomNumberField name='totalLoss' label={labels.totalLoss} value={totalLoss} readOnly />
+                <CustomNumberField name='totalLoss' label={labels.totalLoss} value={totalLoss} readOnly maxAccess={access}/>
               </Grid>
               <Grid item xs={3}>
-                <CustomNumberField name='totalReturned' label={labels.totalReturned} value={totalReturned} readOnly />
+                <CustomNumberField name='totalReturned' label={labels.totalReturned} value={totalReturned} readOnly maxAccess={access}/>
               </Grid>
               <Grid item xs={3}>
-                <CustomNumberField name='totalConsumed' label={labels.totalConsumed} value={otalConsumed} readOnly />
+                <CustomNumberField name='totalConsumed' label={labels.totalConsumed} value={otalConsumed} readOnly maxAccess={access}/>
               </Grid>
               <Grid item xs={0.2}></Grid>
             </Grid>

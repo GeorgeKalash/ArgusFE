@@ -11,22 +11,23 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
-import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import Form from './Form'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, window }) {
+export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, readOnly = false, window }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   useSetWindow({ title: platformLabels.MultiCurrencyRate, window })
 
-  const { labels, access: maxAccess } = useResourceQuery({
+  const { labels, access: maxAccess } = useResourceParams({
     endpointId: MultiCurrencyRepository.Currency.get,
     DatasetIdAccess,
-    datasetId: ResourceIds.MultiCurrencyRate
+    datasetId: ResourceIds.MultiCurrencyRate,
+    editMode: true
   })
 
   const { formik } = useForm({
@@ -119,6 +120,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 value={formik?.values?.currencyName}
                 label={labels.currency}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -127,6 +129,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 value={formik?.values?.rateTypeName}
                 label={labels.rateType}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -135,6 +138,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 value={formik?.values?.exchangeName}
                 label={labels.exchangeTable}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -143,6 +147,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 value={formik?.values?.rateCalcMethodName}
                 label={labels.rateCalcMethod}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -150,7 +155,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
                 name='exRate'
                 value={formik?.values?.exRate}
                 label={labels.rate}
-                readOnly={formik?.values?.amount == 0}
+                readOnly={readOnly || formik?.values?.amount == 0}
                 maxAccess={maxAccess}
                 onClear={() => {
                   formik.setFieldValue('baseAmount', '')
@@ -186,14 +191,14 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField name='amount' value={formik?.values?.amount} label={labels.amount} readOnly />
+              <CustomNumberField name='amount' value={formik?.values?.amount} label={labels.amount} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={6}>
               <CustomNumberField
                 name='baseAmount'
                 value={formik?.values?.baseAmount}
                 label={labels.baseAmount}
-                readOnly={formik?.values?.amount == 0}
+                readOnly={readOnly || formik?.values?.amount == 0}
                 onClear={() => {
                   formik.setFieldValue('baseAmount', '')
                   formik.setFieldValue('exRate', '')

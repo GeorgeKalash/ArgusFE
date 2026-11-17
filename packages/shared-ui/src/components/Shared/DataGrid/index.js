@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton, Link } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
@@ -41,7 +41,8 @@ export function DataGrid({
   isDeleteDisabled,
   maxLines,
   showCounterColumn = false,
-  enableFilters = false
+  enableFilters = false,
+  highlightRow
 }) {
   const gridApiRef = useRef(null)
   const { user } = useContext(AuthContext)
@@ -56,6 +57,41 @@ export function DataGrid({
   const [showFilters, setShowFilters] = useState(false)
   const { width } = useWindowDimensions()
   const hoverFilterRef = useRef(null)
+
+  const highlightRef = useRef(highlightRow)
+  highlightRef.current = highlightRow
+
+  const rowClassRules = useMemo(
+    () => ({
+      'highlighted-row': params => !!highlightRef.current?.condition?.(params.data)
+    }),
+    []
+  )
+
+  const getRowStyle = useMemo(
+    () => params => {
+      const hr = highlightRef.current
+
+      if (!hr || !hr.condition?.(params.data)) return {}
+
+      return {
+        '--highlight-bg': hr.color?.(params.data) || 'transparent'
+      }
+    },
+    []
+  )
+
+  const highlightSignature =
+    highlightRow && Array.isArray(value)
+      ? value
+          .filter(row => highlightRow.condition?.(row))
+          .map(row => `${row.id}:${highlightRow.color?.(row) || ''}`)
+          .join('|')
+      : ''
+
+  useEffect(() => {
+    gridApiRef.current?.redrawRows?.()
+  }, [highlightSignature])
 
   const generalMaxAccess = maxAccess && maxAccess?.record?.accessFlags
   const isAccessDenied = maxAccess?.editMode
@@ -80,6 +116,12 @@ export function DataGrid({
     return (value?.length || 0) < limit
   }
   
+  const isInsidePopup = element => {
+    if (!element) return false
+
+    return !!element.closest(POPUP_PORTAL_SELECTOR)
+  }
+
   const GridCheckbox = ({ checked, disabled, onChange }) => {
     return (
       <Checkbox
@@ -287,6 +329,7 @@ export function DataGrid({
     const onPointerDownCapture = e => {
       const target = e.target
       if (!target) return
+      if (isInsidePopup(target)) return
 
       const pressedButton = target.closest(BUTTON_SELECTOR)
 
@@ -662,11 +705,12 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
-    const updateRow = ({ changes }) => {
+    const updateRow = ({ changes, focusField }) => {
       const oldRow = params.data
       setData(changes, params)
       commit(changes)
       process(params, oldRow, setData)
+      focusFieldLater(params, focusField)
     }
 
     const isRightAligned =
@@ -721,7 +765,7 @@ export function DataGrid({
       }
     }
 
-    const updateRow = ({ changes, commitOnBlur }) => {
+    const updateRow = ({ changes, commitOnBlur, focusField }) => {
       const oldRow = params.data
       setCurrentValue(changes || '')
       setData(changes, params)
@@ -735,6 +779,8 @@ export function DataGrid({
         commit(changes)
         process(params, oldRow, setData)
       }
+
+      focusFieldLater(params, focusField)
     }
 
     const comp = column.colDef.component
@@ -992,6 +1038,7 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
+      if (isInsidePopup(event.target))   return
       const pressedButton = event.target.closest(BUTTON_SELECTOR)
 
       if (
@@ -1064,6 +1111,16 @@ export function DataGrid({
       rowNode.updateData(newData)
     }
   }
+
+  const focusFieldLater = (params, field) => {
+    if (!field) return
+
+    setTimeout(() => {
+      params.api.setFocusedCell(params.node.rowIndex, field)
+      params.api.startEditingCell({ rowIndex: params.node.rowIndex, colKey: field })
+    }, 50)
+  }
+
 
   const onCellEditingStopped = params => {
     const cellId = `${params.node.id}-${params.column.colId}`
@@ -1208,6 +1265,8 @@ export function DataGrid({
               rowData={isEmptyMaxLines ? [] : value}
               columnDefs={finalColumns}
               rowHeight={rowHeight}
+              rowClassRules={rowClassRules}
+              getRowStyle={getRowStyle}
               suppressRowClickSelection={false}
               stopEditingWhenCellsLoseFocus={false}
               rowSelection='single'
@@ -1501,6 +1560,16 @@ export function DataGrid({
         .agContainer :global(.ag-cell-focus),
         .agContainer :global(.ag-cell.ag-cell-inline-editing) {
           border-right: 1px solid #d0d0d0 !important;
+        }
+
+        .agContainer :global(.highlighted-row),
+        .agContainer :global(.highlighted-row.ag-row-hover),
+        .agContainer :global(.highlighted-row .ag-cell) {
+          background-color: var(--highlight-bg) !important;
+        }
+
+        .agContainer :global(.highlighted-row.ag-row-hover) {
+          filter: brightness(95%);
         }
 
         @media (max-width: 1599px) {

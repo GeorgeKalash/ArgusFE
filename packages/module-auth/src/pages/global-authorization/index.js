@@ -23,7 +23,6 @@ const GlobalAuthorization = () => {
   const { stack } = useWindow()
 
   async function fetchWithFilter({ filters }) {
-    // used for both qry and filter since we have same api
     if (filters.moduleId)
       return await getRequest({
         extension: SystemRepository.ModuleClassRES.qry,
@@ -114,13 +113,14 @@ const GlobalAuthorization = () => {
           labels={labels}
           inputSearch={true}
           leftSection={
-            <Grid item xs={3}>
+            <Grid item xs={6}>
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={9}>
                   <ResourceComboBox
                     datasetId={DataSets.MODULE}
                     name='moduleId'
                     values={{ moduleId: filters.moduleId }}
+                    maxAccess={access}
                     valueField='key'
                     displayField='value'
                     onChange={(_, newValue) => {

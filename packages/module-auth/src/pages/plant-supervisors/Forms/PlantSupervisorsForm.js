@@ -152,6 +152,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
             columns={columns}
             allowDelete={true}
             allowAddNewLine={true}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>

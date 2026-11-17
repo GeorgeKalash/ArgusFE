@@ -67,7 +67,7 @@ const SalesQuotations = () => {
       flex: 1
     },
     {
-      field: 'leadName',
+      field: 'bpName',
       headerName: labels.lead,
       flex: 1
     },
@@ -118,7 +118,7 @@ const SalesQuotations = () => {
 
     const response = await getRequest({
       extension: SaleRepository.SalesQuotations.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }

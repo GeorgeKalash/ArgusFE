@@ -15,6 +15,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function CommodityPairsForm({ labels, maxAccess, record, recordId }) {
   const { postRequest } = useContext(RequestsContext)
@@ -35,12 +36,14 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
       defQtyMUId: null,
       defUnitPriceMUId: null,
       eo_defQtyMUId: null,
-      eo_defTargetPriceMUId: null
+      eo_defTargetPriceMUId: null,
+      disablePurityEditing: false
     },
     maxAccess,
     validationSchema: yup.object({
       currencyId: yup.number().required(),
-      metalId: yup.number().required()
+      metalId: yup.number().required(),
+      eo_defTargetPriceMUId: yup.number().required()
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -72,6 +75,23 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
+                endpointId={InventoryRepository.Metals.qry}
+                name='metalId'
+                label={labels.metal}
+                valueField='recordId'
+                displayField={'reference'}
+                values={formik.values}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('metalId', newValue?.recordId || null)
+                }}
+                error={formik.touched.metalId && Boolean(formik.errors.metalId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
@@ -89,23 +109,6 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.Metals.qry}
-                name='metalId'
-                label={labels.metal}
-                valueField='recordId'
-                displayField={'reference'}
-                values={formik.values}
-                required
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('metalId', newValue?.recordId || null)
-                }}
-                error={formik.touched.metalId && Boolean(formik.errors.metalId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -181,6 +184,7 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
+                required
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('eo_defTargetPriceMUId', newValue?.recordId || null)
@@ -188,6 +192,15 @@ export default function CommodityPairsForm({ labels, maxAccess, record, recordId
                 error={formik.touched.eo_defTargetPriceMUId && Boolean(formik.errors.eo_defTargetPriceMUId)}
               />
             </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='disablePurityEditing'
+                value={formik.values.disablePurityEditing}
+                onChange={event => formik.setFieldValue('disablePurityEditing', event.target.checked)}
+                label={labels.disablePurityEditing}
+                maxAccess={maxAccess}
+              />
+            </Grid> 
           </Grid>
         </Grow>
       </VertLayout>

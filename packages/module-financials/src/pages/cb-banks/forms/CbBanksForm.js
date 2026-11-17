@@ -132,6 +132,7 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore }) {
                 label={labels.accNoLength}
                 value={formik.values.accNoLength}
                 onChange={formik.handleChange}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('accNoLength', '')}
                 error={formik.touched.accNoLength && Boolean(formik.errors.accNoLength)}
               />

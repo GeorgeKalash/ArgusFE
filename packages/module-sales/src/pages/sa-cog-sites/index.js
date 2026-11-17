@@ -22,7 +22,7 @@ const ConsignmentSites = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SaleRepository.ConsignmentSites.qry,
+      extension: SaleRepository.ConsignmentSites.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_clientId=0`
     })
 
@@ -38,7 +38,7 @@ const ConsignmentSites = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.ConsignmentSites.qry,
+    endpointId: SaleRepository.ConsignmentSites.page,
     datasetId: ResourceIds.ConsignmentSites
   })
 

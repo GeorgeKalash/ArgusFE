@@ -15,11 +15,14 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import CycleCountsWindow from '@argus/shared-ui/src/components/Shared/Forms/CycleCountsWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const CycleCounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { userDefaults } = useContext(DefaultsContext)
+  const { checkLock } = useRecordLock()
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const { stack } = useWindow()
 
@@ -27,8 +30,8 @@ const CycleCounts = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: SCRepository.StockCount.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
+      extension: SCRepository.StockCount.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -55,7 +58,7 @@ const CycleCounts = () => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SCRepository.StockCount.qry,
+    endpointId: SCRepository.StockCount.page,
     datasetId: ResourceIds.StockCounts,
     filter: {
       filterFn: fetchWithFilter
@@ -108,7 +111,7 @@ const CycleCounts = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
   const del = async obj => {
@@ -129,7 +132,7 @@ const CycleCounts = () => {
     await proxyAction()
   }
 
-  async function openCycleCountsWindow(plantId, recordId) {
+  async function openCycleCountsWindow(recordId) {
     stack({
       Component: CycleCountsWindow,
       props: {
@@ -139,10 +142,18 @@ const CycleCounts = () => {
     })
   }
 
-  async function openForm(recordId) {
-    const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  async function openForm(recordId, disabled) {
 
-    openCycleCountsWindow(plantId, recordId)
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.StockCounts,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+    
+
+    openCycleCountsWindow(recordId)
   }
 
   return (

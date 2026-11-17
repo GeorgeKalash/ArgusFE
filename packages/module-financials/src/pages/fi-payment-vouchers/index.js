@@ -14,18 +14,20 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: FinancialRepository.PaymentVouchers.page3,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     if (response && response?.list) {
@@ -140,20 +142,24 @@ const FiPaymentVouchers = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
-  function openOutWardsWindow(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.PaymentVouchers,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: FiPaymentVouchersForm,
       props: {
         recordId
       },
     })
-  }
-
-  async function openForm(recordId) {
-    openOutWardsWindow(recordId)
   }
 
   const { proxyAction } = useDocumentTypeProxy({

@@ -44,7 +44,7 @@ const GroupInfoTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   })
 
   const invalidate = useInvalidate({
-    endpointId: AccessControlRepository.SecurityGroup.qry
+    endpointId: AccessControlRepository.SecurityGroup.page
   })
 
   useEffect(() => {

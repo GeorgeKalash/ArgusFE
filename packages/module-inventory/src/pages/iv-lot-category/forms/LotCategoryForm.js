@@ -117,7 +117,8 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 label={labels.numberRange}
                 secondDisplayField={true}
                 secondValue={formik.values.nraDescription}
-                onChange={(event, newValue) => {
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('nraId', newValue?.recordId || null)
                   formik.setFieldValue('nraRef', newValue?.reference || '')
                   formik.setFieldValue('nraDescription', newValue?.description || '')

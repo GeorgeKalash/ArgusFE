@@ -77,7 +77,7 @@ export default function SerialsLots({ labels, maxAccess, api, parameters, window
       <Fixed>
         <Grid container spacing={2}>
           <Grid item xs={4} sx={{ p: 2, ml: 2 }}>
-            <CustomNumberField name='totalWeight' label={labels.totWeight} value={totWeight} readOnly />
+            <CustomNumberField name='totalWeight' label={labels.totWeight} value={totWeight} readOnly maxAccess={maxAccess} />
           </Grid>
         </Grid>
       </Fixed>

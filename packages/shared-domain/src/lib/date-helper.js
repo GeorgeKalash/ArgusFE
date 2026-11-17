@@ -247,6 +247,20 @@ const formatDateTimeFromApi = dateString => {
   return parsed.isValid() ? parsed.toDate() : null
 }
 
+const dayKey = (d, utc = false) =>
+  utc
+    ? d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate()
+    : d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
+
+const findPeriod = (periods, date) => {
+  const key = dayKey(new Date(date))
+  return periods.find(p => {
+    const start = dayKey(formatDateFromApi(p.startDate), true)
+    const end = dayKey(formatDateFromApi(p.endDate), true)
+    return key >= start && key <= end
+  })
+}
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -265,5 +279,6 @@ export {
   formatDayId,
   formatTimeToApi,
   formatDateTimeFromApi,
-  formatDayIdToDefault
+  formatDayIdToDefault,
+  findPeriod
 }

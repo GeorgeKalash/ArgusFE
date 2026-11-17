@@ -27,9 +27,11 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsumpForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function IRGenerateConsumption() {
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -97,6 +99,14 @@ export default function IRGenerateConsumption() {
         record: JSON.stringify(payload)
       })
       toast.success(platformLabels.Generated)
+
+      const canOpen = await checkLock({
+        resourceId: ResourceIds.WorkCenterConsumptions,
+        recordId: res.recordId,
+        disabled: true
+      })
+
+      if (!canOpen) return
 
       stack({
         Component: WCConsumpForm,

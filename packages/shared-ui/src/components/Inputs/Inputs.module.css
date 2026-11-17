@@ -4,6 +4,11 @@
   line-height: 1px !important
 }
 
+.inputBase[readonly] {
+  caret-color: transparent !important;
+  cursor: default !important;
+}
+
 .startAdornment:dir(ltr){
   padding-left: 5px;
   padding-right: 0px;

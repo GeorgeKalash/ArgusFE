@@ -22,7 +22,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -56,7 +55,7 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack, lockRecord } = useWindow()
+  const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
@@ -327,6 +326,15 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return res?.record?.onhand || 0
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -371,6 +379,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+        const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update, defaultMu?.recordId || 0)
         let rowTax = null
@@ -415,6 +424,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           muRef: defaultMu?.reference || '',
           muId: defaultMu?.recordId || null,
           muQty: defaultMu?.qty || 0,
+          decimals: measurementSchedule?.decimals,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
@@ -519,7 +529,11 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 2
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         getFilteredMU(newRow?.itemId, newRow?.msId)
@@ -769,21 +783,11 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       props: {
         recordId: res.recordId,
         functionId: SystemFunction.SalesInvoice,
-        getResourceId: () => ResourceIds.SalesInvoice,
-        lockRecord
+        getResourceId: () => ResourceIds.SalesInvoice
       }
     })
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.SalesOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   async function generateProdOrder() {
     const res = await postRequest({
@@ -830,12 +834,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       condition: true,
       onClick: onCancel,
       disabled: !((formik.values.deliveryStatus == 2 || formik.values.deliveryStatus == 1) && formik.values.status == 4)
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
     },
     {
       key: 'Invoice',
@@ -1330,8 +1328,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   useEffect(() => {
     formik.setFieldValue('qty', Number(totalQty))
     formik.setFieldValue('amount', Number(amount))
-    formik.setFieldValue('volume', Number(totalVolume))
-    formik.setFieldValue('weight', Number(totalWeight))
+    formik.setFieldValue('volume', roundTo(totalVolume, 3))
+    formik.setFieldValue('weight', roundTo(totalWeight))
     formik.setFieldValue('subtotal', Number(subtotal))
     formik.setFieldValue('vatAmount', Number(vatAmount))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
@@ -1400,6 +1398,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       editMode={editMode}
       disabledSubmit={isClosed && !editMode}
       disabledSavedClear={isClosed && !editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -1793,7 +1792,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess} decimalScale={5}/>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField

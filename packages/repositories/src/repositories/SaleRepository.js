@@ -25,7 +25,8 @@ export const SaleRepository = {
     set: service + 'setSP',
     del: service + 'delSP',
     page: service + 'pageSP',
-    snapshot: service + 'snapshotSP'
+    snapshot: service + 'snapshotSP',
+    snapshot2: service + 'snapshotSP2'
   },
   SalesZone: {
     qry: service + 'qrySZ',
@@ -36,6 +37,7 @@ export const SaleRepository = {
     snapshot: service + 'snapshotSZ'
   },
   SalesTeam: {
+    page: service + 'pageSPT',
     qry: service + 'qrySPT',
     get: service + 'getSPT',
     set: service + 'setSPT',
@@ -194,6 +196,7 @@ export const SaleRepository = {
     sync: service + 'syncTRX'
   },
   SalesTransaction: {
+    page: service + 'pageTR',
     qry: service + 'qryTR',
     snapshot: service + 'snapshotTRX',
     get: service + 'getTR',
@@ -213,6 +216,7 @@ export const SaleRepository = {
     printed: service + 'flagORD'
   },
   SalesInquiries: {
+    page: service + 'pageII',
     qry: service + 'qryII'
   },
   DraftInvoice: {
@@ -323,5 +327,11 @@ export const SaleRepository = {
   SalesBasket: {
     get2: service + 'get2BSK',
     set2: service + 'set2BSK'
+  },
+  DimensionalTarget: {
+    set: service + 'setDTGT',
+    del: service + 'delDTGT',
+    page: service + 'pageDTGT',
+    get: service + 'getDTGT'
   }
 }

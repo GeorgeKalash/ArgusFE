@@ -37,24 +37,22 @@ export default function MultiCurrencyForm({ labels, maxAccess, record, recordId 
       exId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const currencyId = formik.values.currencyId
-        const rateTypeId = formik.values.rateTypeId
+      const currencyId = formik.values.currencyId
+      const rateTypeId = formik.values.rateTypeId
 
-        await postRequest({
-          extension: MultiCurrencyRepository.McExchangeMap.set,
-          record: JSON.stringify(obj)
-        })
-  
-        if (!currencyId && !rateTypeId) {
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
-        formik.setFieldValue(
-          'recordId',
-          String(obj.currencyId * 1000 + obj.rateTypeId)
-        )
-        invalidate()
-      } catch (error) {}
+      await postRequest({
+        extension: MultiCurrencyRepository.McExchangeMap.set,
+        record: JSON.stringify(obj)
+      })
+
+      if (!currencyId && !rateTypeId) {
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
+      formik.setFieldValue(
+        'recordId',
+        String(obj.currencyId * 1000 + obj.rateTypeId)
+      )
+      invalidate()
     }
   })
 
@@ -62,20 +60,18 @@ export default function MultiCurrencyForm({ labels, maxAccess, record, recordId 
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record.rateTypeId && record.currencyId && recordId) {
-          const res = await getRequest({
-            extension: MultiCurrencyRepository.McExchangeMap.get,
-            parameters: `_currencyId=${record.currencyId}&_rateTypeId=${record.rateTypeId}`
-          })
-          formik.setValues({
-            ...res.record,
+      if (record.rateTypeId && record.currencyId && recordId) {
+        const res = await getRequest({
+          extension: MultiCurrencyRepository.McExchangeMap.get,
+          parameters: `_currencyId=${record.currencyId}&_rateTypeId=${record.rateTypeId}`
+        })
+        formik.setValues({
+          ...res.record,
 
-            recordId:
-              String(res.record.currencyId * 1000 + res.record.rateTypeId)
-          })
-        }
-      } catch (e) {}
+          recordId:
+            String(res.record.currencyId * 1000 + res.record.rateTypeId)
+        })
+      }
     })()
   }, [])
 

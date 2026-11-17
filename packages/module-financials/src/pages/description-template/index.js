@@ -1,10 +1,10 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -23,7 +23,7 @@ const DescriptionTemplate = () => {
 
     const response = await getRequest({
       extension: FinancialRepository.DescriptionTemplate.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -34,15 +34,12 @@ const DescriptionTemplate = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.DescriptionTemplate.page,
     datasetId: ResourceIds.Description_Template
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: FinancialRepository.DescriptionTemplate.page
   })
 
   const columns = [

@@ -81,6 +81,7 @@ const LoDefault = ({ _labels, access }) => {
                 label={_labels.mca}
                 value={formik.values.lo_min_car_amount}
                 error={formik.touched.lo_min_car_amount && Boolean(formik.errors.lo_min_car_amount)}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

@@ -18,7 +18,7 @@ export default function SalesTeamForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.SalesTeam.qry
+    endpointId: SaleRepository.SalesTeam.page
   })
 
   const { formik } = useForm({

@@ -123,8 +123,9 @@ export const SystemFunction = {
   BalanceTransferMultiAccount: Module.Financials * 100 + 13,
   BalanceTransferPurchase: Module.Financials * 100 + 10,
   BalanceTransferSales: Module.Financials * 100 + 11,
-  BalanceAdjustment: Module.LeaveReq * 100 + 4,
   EarnedLeaves: Module.LeaveReq * 100 + 3,
+  BalanceAdjustment: Module.LeaveReq * 100 + 4,
+  LeavePayment: Module.LeaveReq * 100 + 5,
   Samples: Module.ProductModeling * 100 + 7,
   MetalSmelting: Module.Foundry * 100 + 5,
   MetalCalibration: Module.Foundry * 100 + 7,
@@ -141,6 +142,9 @@ export const SystemFunction = {
   ProductionRequest: Module.Manufacturing * 100 + 19,
   CreditLimitHold: Module.Financials * 100 + 14,
   Cutting: Module.Foundry * 100 + 8,
+  ScrapAdjustment: Module.Foundry * 100 + 9,
+  FixingSalesCancellation: Module.BrokerageTrading * 100 + 4,
+  FixingPurchaseCancellation: Module.BrokerageTrading * 100 + 5,
 }
 
 export const getSystemFunctionModule = functionId => {

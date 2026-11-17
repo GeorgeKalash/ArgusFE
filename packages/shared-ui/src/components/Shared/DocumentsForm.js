@@ -26,7 +26,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.DocumentsOnHold.qry
+    endpointId: DocumentReleaseRepository.DocumentsOnHold.page
   })
   const { stack } = useWindow()
 

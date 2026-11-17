@@ -27,9 +27,13 @@ export const MultiCurrencyRepository = {
   Currency: {
     get: service + 'getDRI'
   },
+  McrInfo: {
+    get: service + 'getMCRI'
+  },
   ExchangeRates: {
     set2: service + 'set2ED',
     qry2: service + 'qryED2',
-    get2: service + 'getED2'
+    get2: service + 'getED2',
+    current: service + 'currentED2'
   }
 }

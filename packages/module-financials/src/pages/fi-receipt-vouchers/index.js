@@ -15,12 +15,22 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import FIReceiptVoucherForm from '@argus/shared-ui/src/components/Shared/Forms/FIReceiptVoucherForm'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function CurrencyTrading() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.ReceiptVoucher,
+      recordId: recordId || null,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: FIReceiptVoucherForm,
       props: {
@@ -78,7 +88,7 @@ export default function CurrencyTrading() {
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj.recordId, obj?.status == 3 || obj?.status == -1)
   }
 
   const del = async obj => {

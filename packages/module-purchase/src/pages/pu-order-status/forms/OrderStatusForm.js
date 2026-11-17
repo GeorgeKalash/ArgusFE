@@ -18,7 +18,7 @@ export default function PUOrderStatusForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: PurchaseRepository.PUOrderStatus.qry
+    endpointId: PurchaseRepository.PUOrderStatus.page
   })
 
   const { formik } = useForm({

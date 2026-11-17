@@ -8,6 +8,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -25,11 +26,14 @@ export default function DeveloperForm({ labels, maxAccess, recordId }) {
     initialValues: {
       recordId,
       reference: '',
-      name: ''
+      name: '',
+      groupId: null
     },
+    maxAccess,
     validationSchema: yup.object({
       reference: yup.string().required(),
-      name: yup.string().required()
+      name: yup.string().required(),
+      groupId: yup.number().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -86,6 +90,26 @@ export default function DeveloperForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ProductModelingRepository.DeveloperGroup.qry}
+                name='groupId'
+                label={labels.developerGroup}
+                required
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('groupId', newValue?.recordId || null)
+                }}
+                error={formik.touched.groupId && Boolean(formik.errors.groupId)}
               />
             </Grid>
           </Grid>

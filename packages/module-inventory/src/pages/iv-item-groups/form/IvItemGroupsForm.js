@@ -15,6 +15,8 @@ import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 
 export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,7 +34,8 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
       valuationMethod: '',
       procurementMethod: '',
       msId: '',
-      dmgId: null
+      dmgId: null,
+      nraId: null
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -178,6 +181,25 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
                   formik.setFieldValue('dmgId', newValue?.recordId || null)
                 }}
                 error={formik.touched.dmgId && Boolean(formik.errors.dmgId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+               <ResourceLookup
+                endpointId={SystemRepository.NumberRange.snapshot}
+                form={formik}
+                valueField='reference'
+                displayField='description'
+                name='nraRef'
+                label={labels.numberRange}
+                secondDisplayField={true}
+                displayFieldWidth={2}
+                secondValue={formik.values.nraName}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('nraId', newValue?.recordId || null)
+                  formik.setFieldValue('nraRef', newValue?.reference || '')
+                  formik.setFieldValue('nraName', newValue?.description || '')
+                }}
               />
             </Grid>
           </Grid>

@@ -27,7 +27,7 @@ const AttendanceDay = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: TimeAttendanceRepository.AttendanceDay.qry,
+    endpointId: TimeAttendanceRepository.AttendanceDay.page,
     datasetId: ResourceIds.AttendanceDay,
     filter: {
       filterFn: fetchWithFilter
@@ -44,7 +44,7 @@ const AttendanceDay = () => {
     const { _startAt = 0, _pageSize = 30, params } = options
 
     const response = await getRequest({
-      extension: TimeAttendanceRepository.AttendanceDay.qry,
+      extension: TimeAttendanceRepository.AttendanceDay.page,
       parameters: `_filter=&_size=${_pageSize}&_startAt=${_startAt}&_params=${
         params || `6|${todayFormatted}^7|${todayFormatted}`
       }&_sortBy=dayId`

@@ -22,7 +22,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -214,6 +213,15 @@ export default function PuQtnForm({ recordId, window }) {
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -275,6 +283,7 @@ export default function PuQtnForm({ recordId, window }) {
 
         const filteredMU = measurements?.filter(item => item.msId === itemInfo?.msId)
         getFilteredMU(newRow?.itemId, itemInfo?.msId)
+        const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
         const filteredItems = filteredMeasurements?.current?.filter(item => item.recordId === newRow?.muId)
 
@@ -287,6 +296,7 @@ export default function PuQtnForm({ recordId, window }) {
           priceType: itemInfo?.priceType || 1,
           mdAmount: 0,
           qty: 0,
+          decimals: measurementSchedule?.decimals,
           msId: itemInfo?.msId,
           muRef: filteredMU?.[0]?.reference,
           muId: filteredMU?.[0]?.recordId,
@@ -335,6 +345,13 @@ export default function PuQtnForm({ recordId, window }) {
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
+      props: {
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
+      },
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         getFilteredMU(newRow?.itemId, newRow?.msId)
@@ -499,27 +516,12 @@ export default function PuQtnForm({ recordId, window }) {
     window.close()
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PurchaseQuotation,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const actions = [
     {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -717,7 +719,7 @@ export default function PuQtnForm({ recordId, window }) {
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
+      qty: itemPriceRow?.qty ? itemPriceRow?.qty : 0,
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(4) : 0,
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
@@ -959,6 +961,7 @@ export default function PuQtnForm({ recordId, window }) {
       actions={actions}
       editMode={editMode}
       disabledSubmit={!isRaw}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -1262,7 +1265,7 @@ export default function PuQtnForm({ recordId, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess} decimalScale={5}/>
                 </Grid>
               </Grid>
             </Grid>

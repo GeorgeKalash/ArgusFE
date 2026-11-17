@@ -1,5 +1,5 @@
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
@@ -12,22 +12,31 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import ItemWindow from '@argus/shared-ui/src/components/Shared/ItemWindow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
-const PreviewPR = ({ plantId, onSelect, window }) => {
+const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
+  const { stack } = useWindow()
+  const rowsRef = useRef([])
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.PreviewPR
   })
 
-    const conditions = {
+  const conditions = {
     qty: row => ({
       optional: !row?.checked,
       valid: !row?.checked || row.qty != null
+    }),
+    pcs: row => ({
+      optional: !row?.checked,
+      valid: !row?.checked || Number(row.pcs) > 0
     })
   }
+  
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
 
   const { formik } = useForm({
@@ -55,6 +64,45 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
     }
   })
 
+  rowsRef.current = formik.values.rows
+
+  async function loadRows({ refresh = false } = {}) {
+    const res = await getRequest({
+      extension: ManufacturingRepository.ProductionRequest.preview,
+      parameters: `_requestId=${requestId}&_plantId=${plantId}&_metalId=${metalId}`
+    })
+
+    if (!res?.list?.length) return
+
+    const selectedItemsMap = new Map((parentFormik.values.items || []).map(item => [item.itemId, item]))
+    const currentRowsMap = new Map((rowsRef.current || []).map(row => [row.itemId, row]))
+
+    const rows = res.list.map((item, index) => {
+      const existing = refresh ? currentRowsMap.get(item.itemId) : null
+
+      if (existing) {
+        return {
+          ...item,
+          id: existing.id,
+          checked: existing.checked,
+          pcs: existing.pcs,
+          qty: existing.qty
+        }
+      }
+
+      const selectedItem = selectedItemsMap.get(item.itemId)
+
+      return {
+        id: index + 1,
+        ...item,
+        checked: !!selectedItem,
+        qty: selectedItem ? selectedItem.qty : item.qty
+      }
+    })
+
+    formik.setValues({ rows })
+  }
+
   const columns = [
     {
       component: 'checkbox',
@@ -74,6 +122,21 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
       label: labels.sku,
       name: 'sku',
       flex: 1,
+      link: {
+        enabled: true,
+        popup: row =>
+          stack({
+            Component: ItemWindow,
+            props: {
+              obj: {
+                recordId: row.itemId,
+                ...row
+              },
+              onSuccess: () => loadRows({ refresh: true })
+            },
+            nextToTitle: row?.sku
+          })
+      },
       props: { 
         readOnly: true
       }
@@ -88,6 +151,15 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
       }
     },
     {
+      component: 'numberfield',
+      label: labels.weight,
+      name: 'itemWeight',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
       component: 'textfield',
       label: labels.metalRef,
       name: 'metalRef',
@@ -98,17 +170,8 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
     },
     {
       component: 'textfield',
-      label: labels.itemGroupRef,
-      name: 'itemGroupRef',
-      flex: 1,
-      props: { 
-        readOnly: true 
-      }
-    },
-    {
-      component: 'textfield',
       label: labels.itemGroupName,
-      name: 'itemGroupName',
+      name: 'groupName',
       flex: 1,
       props: { 
         readOnly: true 
@@ -116,8 +179,26 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
     },
     {
       component: 'textfield',
-      label: labels.weight,
-      name: 'itemWeight',
+      label: labels.collection,
+      name: 'collectionName',
+      flex: 1,
+      props: { 
+        readOnly: true 
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.category,
+      name: 'categoryName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.onhand,
+      name: 'onHand',
       flex: 1,
       props: {
         readOnly: true 
@@ -143,12 +224,21 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
     },
     {
       component: 'numberfield',
-      label: labels.qty,
-      name: 'qty',
+      label: labels.pcs,
+      name: 'pcs',
       flex: 1,
       props: { 
         decimalScale: 2, 
-        allowNegative: false 
+        allowNegative: false ,
+      },
+      async onChange({ row: { update, newRow } }) {
+        let qty = 0
+
+        qty = newRow.itemWeight ? newRow.pcs * newRow.itemWeight : 0
+        
+        update({
+          qty: qty
+        })
       },
       propsReducer({ row, props }) {
         return {
@@ -156,25 +246,22 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
           readOnly: !row.checked
         }
       }
+    },
+    {
+      component: 'numberfield',
+      label: labels.qty,
+      name: 'qty',
+      flex: 1,
+      props: { 
+        decimalScale: 2, 
+        allowNegative: false,
+        readOnly: true
+      }
     }
   ]
 
   useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: ManufacturingRepository.ProductionRequest.preview,
-        parameters: `_plantId=${plantId}`
-      })
-
-      if (res?.list?.length > 0) {
-        const rows = res.list.map((item, index) => ({
-          id: index + 1,
-          checked: false,
-          ...item
-        }))
-        formik.setValues({ rows })
-      }
-    })()
+    loadRows()
   }, [])
 
   return (
@@ -188,7 +275,8 @@ const PreviewPR = ({ plantId, onSelect, window }) => {
             columns={columns}
             allowDelete={false}
             allowAddNewLine={false}
-          />
+            enableFilters={true}
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

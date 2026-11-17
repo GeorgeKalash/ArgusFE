@@ -1,4 +1,7 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import GoldPriceTicker from '@argus/shared-ui/src/components/Shared/GoldPriceTicker'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -14,11 +17,31 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { BrokerageTradingRepository } from '@argus/repositories/src/repositories/BrokerageTradingRepository'
 import EventOrderForm from '@argus/shared-ui/src/components/Shared/Forms/EventOrderForm'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function BTEventOrder() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
+  const { systemDefaults } = useContext(DefaultsContext)
+  const [currencyRef, setCurrencyRef] = useState(null)
+
+  const bt_reporting_currencyId =
+    systemDefaults?.list?.find(obj => obj.key === 'bt_reporting_currencyId')?.value || null
+
+  useEffect(() => {
+    if (!bt_reporting_currencyId) return
+
+    ;(async () => {
+      const res = await getRequest({
+        extension: SystemRepository.Currency.get,
+        parameters: `_recordId=${bt_reporting_currencyId}`
+      })
+
+      setCurrencyRef(res?.record?.isoCode || null)
+    })()
+  }, [bt_reporting_currencyId])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -103,10 +126,20 @@ export default function BTEventOrder() {
       flex: 1
     },
     {
+      field: 'directionName',
+      headerName: labels.directionName,
+      flex: 1
+    },
+    {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'qty_muRef',
+      headerName: labels.qty_muRef,
+      flex: 1
     },
     {
       field: 'amount',
@@ -118,6 +151,25 @@ export default function BTEventOrder() {
       field: 'commodityPair',
       headerName: labels.cmp,
       flex: 1
+    },
+    ,
+    {
+      field: 'isTriggered',
+      headerName: labels.isTriggered,
+      flex: 1,
+      type: 'checkbox'
+    },
+    {
+      field: 'triggeredAt',
+      headerName: labels.triggeredAt,
+      flex: 1,
+      type: 'dateTime'
+    },
+    {
+      field: 'triggeredAtPrice',
+      headerName: labels.triggeredAtPrice,
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'rsName',
@@ -143,10 +195,18 @@ export default function BTEventOrder() {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.wip == 2)
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.EventOrder,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: EventOrderForm,
       props: {
@@ -176,6 +236,9 @@ export default function BTEventOrder() {
   return (
     <VertLayout>
       <Fixed>
+        {currencyRef && (
+          <GoldPriceTicker currency={currencyRef} style={{ marginLeft: 16, marginBottom: 16 }} />
+        )}
         <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'BTEO'} filterBy={filterBy} />
       </Fixed>
       <Grow>

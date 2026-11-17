@@ -26,6 +26,7 @@ import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDial
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function RubberForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -96,6 +97,13 @@ export default function RubberForm({ labels, access, recordId }) {
   const isReleased = formik.values.status == 4
   const isPosted = formik.values.status == 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.Rubber,
+    enabled: !!recordId && !(isReleased || isPosted)
+  })
+
   async function refetchForm(damageId) {
     await getRequest({
       extension: ProductModelingRepository.Rubber.get,
@@ -122,6 +130,7 @@ export default function RubberForm({ labels, access, recordId }) {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
 
     await refetchForm(formik.values.recordId)
@@ -304,7 +313,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 valueShow='modelRef'
                 secondDisplayField={false}
                 readOnly={isReleased || isPosted}
-                maxAccess={access}
+                maxAccess={maxAccess}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Ref' },
                   { key: 'date', value: 'Date', type: 'date' }
@@ -465,7 +474,7 @@ export default function RubberForm({ labels, access, recordId }) {
                   valueField='recordId'
                   displayField={['reference']}
                   values={formik.values}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik.setFieldValue('metalId', newValue?.recordId || null)
                     formik.setFieldValue('metalPurity', newValue?.purity || null)
                   }}
@@ -491,7 +500,8 @@ export default function RubberForm({ labels, access, recordId }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
                   formik.setFieldValue('laborId', newValue?.recordId || null)
                 }}
                 error={formik.touched.laborId && Boolean(formik.errors.laborId)}

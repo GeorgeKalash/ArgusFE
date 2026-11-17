@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -27,6 +27,8 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const loadedItemId = useRef(null)
+  const itemInfo = useRef({})
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.BillOfMaterials.page
@@ -45,6 +47,7 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
       version: '',
       date: new Date(),
       qty: null,
+      designId: null,
       description: null
     },
     maxAccess,
@@ -53,13 +56,15 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
       name: yup.string().required(),
       reference: yup.string().required(),
       type: yup.string().required(),
-      itemId: yup.number().required(),
       activeStatus: yup.string().required(),
       version: yup.string().required(),
       date: yup.date().required(),
       qty: yup.number().required()
     }),
-    onSubmit: async obj => {
+   onSubmit: async obj => {
+      const oldItemId = loadedItemId.current
+      const newItemId = obj.itemId || null
+
       const response = await postRequest({
         extension: ManufacturingRepository.BillOfMaterials.set,
         record: JSON.stringify({
@@ -67,6 +72,9 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
           date: formatDateToApi(obj.date)
         })
       })
+
+      if (!oldItemId && newItemId) await updateItemProduction(oldItemId, newItemId)
+      loadedItemId.current = newItemId
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       formik.setFieldValue('recordId', response.recordId)
       setStore(prevStore => ({
@@ -78,6 +86,18 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
     }
   })
 
+  async function updateItemProduction() {
+    if (!formik.values?.itemId) return
+
+    await postRequest({
+      extension: InventoryRepository.ItemProduction.set,
+      record: JSON.stringify({
+        ...itemInfo?.current || {},
+        bomId: formik.values.recordId
+      })
+    })
+  }
+
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [])
@@ -87,6 +107,8 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
       extension: ManufacturingRepository.BillOfMaterials.get,
       parameters: `_recordId=${recordId}`
     })
+
+    loadedItemId.current = res.record?.itemId || null
     formik.setValues({
       ...res.record,
       date: formatDateFromApi(res.record.date)
@@ -130,6 +152,29 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
     }
   ]
 
+  const getDesign = async itemId => {
+    if (!itemId) return null
+
+    const res = await getRequest({
+      extension: InventoryRepository.ItemProduction.get,
+      parameters: `_recordId=${itemId}`
+    })
+
+    itemInfo.current = {...res?.record || {}, itemId}
+    return res?.record || null
+  }
+
+  const getWeight = async itemId => {
+    if (!itemId) return null
+
+    const res = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return res?.record?.weight || null
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.BillOfMaterials}
@@ -141,7 +186,7 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} xs={6}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
@@ -198,14 +243,25 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
                   { key: 'sku', value: 'SKU' },
                   { key: 'name', value: 'Name' }
                 ]}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId || null)
+                onChange={async (_, newValue) => {
+                  const itemId = newValue?.recordId || null
+
+                  formik.setFieldValue('itemId', itemId)
                   formik.setFieldValue('itemName', newValue?.name || null)
                   formik.setFieldValue('sku', newValue?.sku || null)
+
+                  const design = await getDesign(itemId)
+                  if (newValue?.priceType == 1) {
+                    const weight = await getWeight(newValue?.recordId)
+                    formik.setFieldValue('qty', weight)
+                  }
+
+                  formik.setFieldValue('designId', design?.designId || null)
+                  formik.setFieldValue('designRef', design?.designRef || '')
+                  formik.setFieldValue('designName', design?.designName || '')
                 }}
                 maxAccess={maxAccess}
                 errorCheck={'itemId'}
-                required
               />
             </Grid>
             <Grid item xs={12}>
@@ -274,7 +330,19 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
                 maxLength={12}
               />
             </Grid>
-          </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='designRef'
+                label={labels.design}
+                value={formik?.values?.designRef}
+                maxAccess={maxAccess}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField name='designName' value={formik?.values?.designName} maxAccess={maxAccess} readOnly />
+            </Grid>
+          </Grid> 
         </Grow>
       </VertLayout>
     </FormShell>

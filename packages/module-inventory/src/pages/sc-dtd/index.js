@@ -20,14 +20,12 @@ const StockCountDocTypeDefaults = () => {
   const { stack } = useWindow()
 
   async function fetchGridData() {
-    try {
-      const response = await getRequest({
-        extension: SCRepository.DocumentTypeDefaults.qry,
-        parameters: `_filter=&_functionId=${SystemFunction.StockCount}`
-      })
+    const response = await getRequest({
+      extension: SCRepository.DocumentTypeDefaults.qry,
+      parameters: `_filter=&_functionId=${SystemFunction.StockCount}`
+    })
 
-      return response
-    } catch (error) {}
+    return response
   }
 
   const {
@@ -55,14 +53,12 @@ const StockCountDocTypeDefaults = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SCRepository.DocumentTypeDefaults.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SCRepository.DocumentTypeDefaults.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(record) {

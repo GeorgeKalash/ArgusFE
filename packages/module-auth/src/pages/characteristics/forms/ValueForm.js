@@ -47,12 +47,9 @@ const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, windo
   }, [recordId])
 
   const getCharacteristicsById = recordId => {
-    console.log(recordId)
-    const defaultParams = `_chId=${recordId}&_seqNo=${seqNo}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.CharacteristicsValues.get,
-      parameters: parameters
+      parameters: `_chId=${recordId}&_seqNo=${seqNo}`
     }).then(res => {
       res.record.validFrom = formatDateFromApi(res.record.validFrom)
       formik.setValues(res.record)

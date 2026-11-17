@@ -1,0 +1,760 @@
+import { Grid } from '@mui/material'
+import { useContext, useEffect, useState, useRef } from 'react'
+import * as yup from 'yup'
+import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
+import toast from 'react-hot-toast'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
+import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
+import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import HistoryList from './HistoryList'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { useError } from '@argus/shared-providers/src/providers/error'
+import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
+import PrintConfirmationDialog from './PrintConfirmationDialog'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { useFieldBehavior } from '@argus/shared-hooks/src/hooks/useFieldBehaviors'
+
+export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window, onSuccess }) {
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
+  const [showLotCategories, setShowLotCategories] = useState(false)
+  const [showSerialProfiles, setShowSerialProfiles] = useState(false)
+  const { recordId } = store
+  const [onKitItem, setOnKitItem] = useState(false)
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const { stack: stackError } = useError()
+
+  const currencyId = systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value
+  const plId = systemDefaults?.list?.find(({ key }) => key === 'plId')?.value
+  const dmgId = parseInt((systemDefaults?.list?.find(({ key }) => key === 'iv_dmgId')?.value)) || null
+
+  const invalidate = useInvalidate({
+    endpointId: InventoryRepository.Items.page
+  })
+  const imageUploadRef = useRef(null)
+
+  const { onFieldChange, maxAccess, fieldBehavior } = useFieldBehavior({
+    access,
+    fieldName: 'sku',
+    editMode: Boolean(recordId),
+    enableClearing: !recordId
+  })
+
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      name: '',
+      sku: '',
+      categoryId: null,
+      flName: '',
+      shortName: '',
+      groupId: null,
+      msId: null,
+      description: '',
+      priceType: null,
+      ptName: '',
+      procurementMethod: null,
+      valuationMethod: null,
+      volume: '',
+      weght: '',
+      trackBy: null,
+      unitPrice: '',
+      ivtItem: true,
+      salesItem: true,
+      purchaseItem: true,
+      mfrItem: true,
+      kitItem: false,
+      taxId: '',
+      lotCategoryId: null,
+      dmgId,
+      spfId: '',
+      categoryName: '',
+      defSaleMUId: '',
+      pgId: '',
+      productionLevel: null,
+      collectionId: null,
+      isInactive: false,
+      isExternal: false,
+      categoryNraId: null,
+      groupNraId: null
+    },
+    behavior: { fieldBehavior },
+    maxAccess,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      categoryId: yup.string().required(),
+      name: yup.string().required(),
+      priceType: yup.number().required(),
+      msId: yup.string().required(),
+      lotCategoryId: yup
+        .string()
+        .nullable()
+        .test(function (value) {
+          const { trackBy } = this.parent
+
+          return trackBy === 2 ? value != null && value.trim() !== '' : true
+        }),
+      spfId: yup
+        .string()
+        .nullable()
+        .test(function (value) {
+          const { trackBy } = this.parent
+
+          return trackBy === 1 ? value != null && value.trim() !== '' : true
+        })
+    }),
+    onSubmit: async obj => {
+      const response = await postRequest({
+        extension: InventoryRepository.Items.set,
+        record: JSON.stringify({ ...obj, attachment: null })
+      })
+
+      if (!obj.recordId) {
+        setOnKitItem(false)
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
+      } else {
+        toast.success(platformLabels.Edited)
+      }
+      setFormikInitial(formik.values)
+
+      if (imageUploadRef.current) {
+        imageUploadRef.current.value = response.recordId
+
+        await imageUploadRef.current.submit()
+      }
+
+      await refetchForm(response.recordId, !obj.recordId)
+      invalidate()
+      onSuccess?.()
+    }
+  })
+
+  const getData = async nraId => {
+    if (!nraId) return
+    if (nraId) {
+      const res = await getRequest({
+        extension: SystemRepository.NumberRange.get,
+        parameters: `_recordId=${nraId}`
+      })
+
+      return res.record.external
+    }
+  }
+
+  const editMode = !!formik.values.recordId
+
+  const refetchForm = async (recordId, showTitle) => {
+    const res = await getRequest({
+      extension: InventoryRepository.Items.get2IT,
+      parameters: `_recordId=${recordId}`
+    }) 
+    const { item, category, itemGroup } = res.record
+
+    if (window.setTitle && showTitle) window.setTitle(item?.sku ? `${labels.items} ${item?.sku}` : labels.items)
+
+    const isExternal = await getData(category?.nraId || itemGroup?.nraId)
+
+    setFormikInitial(item)
+
+    formik.setValues({ ...item, kitItem: !!item?.kitItem, isInactive: item?.isInactive || false, isExternal })
+    setShowLotCategories(item?.trackBy === 2)
+    setShowSerialProfiles(item?.trackBy === 1)
+
+    setStore(prevStore => ({
+      ...prevStore,
+      recordId,
+      ...res.record,
+      nraId: category?.nraId || itemGroup?.nraId,
+      _msId: item?.msId,
+      _kit: item?.kitItem,
+      productionLevel: item?.productionLevel,
+      measurementId: item?.defSaleMUId,
+      priceGroupId: item?.pgId,
+      returnPolicy: item?.returnPolicyId,
+      _name: item?.name,
+      _reference: item?.sku,
+      _dmgId: item?.dmgId || null,
+      itemObject: item
+    }))
+  }
+  useEffect(() => {
+    if (recordId) {
+      refetchForm(recordId)
+    }
+  }, [])
+
+  async function onCopy(obj) {
+    postRequest({
+      extension: InventoryRepository.Item.clone,
+      record: JSON.stringify(obj)
+    }).then( diRes => {
+      toast.success(platformLabels.Saved)
+      refetchForm(diRes.recordId)
+      invalidate()
+    })
+  }
+
+  async function History(obj) {
+    stack({
+      Component: HistoryList,
+      props: {
+        labels,
+        maxAccess,
+        recordId: obj.recordId
+      },
+      width: 700,
+      height: 500,
+      title: labels.history
+    })
+  }
+
+  async function ConfirmationPrint() {
+    const { barcode, error } = await Print()
+    if (!error && barcode)
+    stack({
+      Component: PrintConfirmationDialog,
+      props: {
+        Print,
+        barcode
+      },
+      width: 400,
+      height: 200
+    })
+  }
+
+  async function Print() {
+    const obj = formik.values
+    if (!obj.labelTemplateId) {
+      stackError({ message: platformLabels.defaultTemplateError })
+
+      return { error: true }
+    }
+
+    if (!currencyId) {
+      stackError({ message: platformLabels.DefaultSalesCurrency })
+
+      return { error: true }
+    }
+
+    const templateRes = await getRequest({
+      extension: SCRepository.LabelTemplate.get,
+      parameters: `_recordId=${obj.labelTemplateId}`
+    })
+
+    if (!templateRes || !templateRes.record.format) {
+      stackError({ message: platformLabels.DefaultTemplateFormat })
+
+      return { error: true }
+    }
+
+    if (!plId) {
+      stackError({ message: platformLabels.DefaultSalesPrice })
+
+      return { error: true }
+    }
+
+    const res = await getRequest({
+      extension: InventoryRepository.LabelString.md,
+      parameters: `_templateId=${obj.labelTemplateId}&_currencyId=${currencyId}&_printFormat=${templateRes.record.format}&_plId=${plId}&_items=${recordId},1`
+    })
+
+    return { barcode: res.record.data}
+  }
+
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      masterSource: MasterSource.Item,
+      disabled: !editMode
+    },
+    {
+      key: 'Copy',
+      condition: true,
+      onClick: () => onCopy(formik?.values),
+      disabled: !editMode || !(store?.nraId && !formik.values.isExternal)
+    },
+    {
+      key: 'History',
+      condition: true,
+      onClick: () => History(formik?.values),
+      disabled: !editMode
+    }
+  ]
+  useEffect(() => {
+    if (formik.values.kitItem) {
+      setOnKitItem(true)
+
+      formik.setFieldValue('ivtItem', false)
+      formik.setFieldValue('trackBy', '')
+      formik.setFieldValue('valuationMethod', '')
+    } else {
+      setOnKitItem(false)
+      formik.setFieldValue('priceType', '')
+    }
+  }, [formik.values.kitItem])
+
+  useEffect(() => {
+    const effectiveNraId = formik.values.categoryNraId || formik.values.groupNraId || null
+
+    onFieldChange(effectiveNraId)
+    
+    if (editMode) return
+
+    if (!effectiveNraId) {
+      formik.setFieldValue('isExternal', false)
+      return
+    }
+
+    getData(effectiveNraId).then(isExternal => {
+      formik.setFieldValue('isExternal', !!isExternal)
+    })
+  }, [formik.values.categoryNraId, formik.values.groupNraId])
+
+  return (
+    <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions} onPrint={ConfirmationPrint}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              <Grid container spacing={2}>
+                <Grid item xs={8}>
+                  <ResourceComboBox
+                    dataGrid
+                    store={store?.categories}
+                    values={formik.values}
+                    name='categoryId'
+                    label={labels.category}
+                    valueField='recordId'
+                    displayField={['caRef', 'name']}
+                    displayFieldWidth={1}
+                    columnsInDropDown={[
+                      { key: 'caRef', value: 'Reference' },
+                      { key: 'name', value: 'Name', width: 8 }
+                    ]}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      setShowLotCategories(newValue?.trackBy === '2' || newValue?.trackBy === 2)
+                      setShowSerialProfiles(newValue?.trackBy === '1' || newValue?.trackBy === 1)
+                      formik.setValues(prev => ({
+                        ...prev,
+                        categoryId: newValue?.recordId || null,
+                        priceType: !prev.kitItem ? (newValue?.priceType || '') : prev.priceType,
+                        trackBy: newValue?.trackBy || null,
+                        procurementMethod: newValue?.procurementMethod || '',
+                        msId: newValue?.msId || null,
+                        valuationMethod: newValue?.valuationMethod || '',
+                        taxId: newValue?.taxId || null,
+                        lotCategoryId: newValue?.lotCategoryId || null,
+                        spfId: newValue?.spfId || null,
+                        productionLevel: newValue?.productionLevel || null,
+                        categoryNraId: newValue?.nraId || null
+                      }))
+                    }}
+                    error={formik.touched.categoryId && formik.errors.categoryId}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <ResourceComboBox
+                    dataGrid
+                    store={store?.priceTypes?.map(item => ({
+                      key: parseInt(item.key),
+                      value: item.value
+                    }))}
+                    values={formik.values}
+                    defaultIndex={onKitItem && 0}
+                    name='priceType'
+                    label={labels.priceType}
+                    readOnly={formik.values.kitItem}
+                    valueField='key'
+                    displayField='value'
+                    displayFieldWidth={1}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('priceType', newValue?.key || null)
+                    }}
+                    error={formik.touched.priceType && formik.errors.priceType}
+                  />
+                </Grid>
+                <Grid item xs={8}>
+                  <CustomTextField
+                    name='sku'
+                    label={labels.reference}
+                    value={formik.values.sku}
+                    maxAccess={maxAccess}
+                    readOnly={editMode}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('sku', '')}
+                    error={formik.touched.sku && formik.errors.sku}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <ResourceComboBox
+                    dataGrid
+                    store={store?.procurementMethods?.map(
+                        procurementMethods => ({
+                          key: parseInt(procurementMethods.key),
+                          value: procurementMethods.value
+                        })
+                      )
+                    }
+                    name='procurementMethod'
+                    label={labels.procurement}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('procurementMethod', newValue?.key || '')
+                      formik.setFieldValue('procurementName', newValue?.value || '')
+                    }}
+                    error={formik.touched.procurementMethod && formik.errors.procurementMethod}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='name'
+                    label={labels.name}
+                    value={formik.values.name}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('name', '')}
+                    error={formik.touched.name && formik.errors.name}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='flName'
+                    label={labels.flName}
+                    value={formik.values.flName}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('flName', '')}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='shortName'
+                    label={labels.shortName}
+                    value={formik.values.shortName}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('shortName', '')}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    dataGrid
+                    store={store?.itemGroups}
+                    values={formik.values}
+                    name='groupId'
+                    label={labels.itemGroup}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    displayFieldWidth={1}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    onChange={async (_, newValue) => {
+                      formik.setFieldValue('groupId', newValue?.recordId || null)
+                      formik.setFieldValue('groupNraId', newValue?.nraId || null)
+                      if (!editMode) formik.setFieldValue('dmgId', newValue?.dmgId || dmgId || null)
+                    }}
+                    error={formik.touched.groupId && formik.errors.groupId}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    store={store?.collections}
+                    name='collectionId'
+                    label={labels.collection}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    values={formik.values}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('collectionId', newValue?.recordId)
+                    }}
+                    error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    store={store?.measurementSchedules}
+                    values={formik.values}
+                    name='msId'
+                    label={labels.measure}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    displayFieldWidth={1}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={editMode}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('msId', newValue?.recordId || '')
+                    }}
+                    error={formik.touched.msId && formik.errors.msId}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    store={store?.valuations?.map(valuations => (({
+                        key: parseInt(valuations.key),
+                        value: valuations.value
+                      })))
+                    }
+                    values={formik.values}
+                    name='valuationMethod'
+                    label={labels.valation}
+                    readOnly={formik.values.kitItem}
+                    valueField='key'
+                    displayField='value'
+                    displayFieldWidth={1}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('valuationMethod', newValue?.key || '')
+                    }}
+                    error={formik.touched.valuationMethod && formik.errors.valuationMethod}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='description'
+                    label={labels.description}
+                    value={formik.values.description}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('description', '')}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomCheckBox
+                    name='isInactive'
+                    value={formik.values?.isInactive}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+                    label={labels.isInactive}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.Items} seqNo={0} recordId={recordId} />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomCheckBox
+                    name='ivtItem'
+                    value={formik.values?.ivtItem}
+                    onChange={event => formik.setFieldValue('ivtItem', event.target.checked)}
+                    label={labels.inventory}
+                    maxAccess={maxAccess}
+                    disabled={formik.values.kitItem || editMode}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomCheckBox
+                    name='salesItem'
+                    value={formik.values?.salesItem}
+                    onChange={event => formik.setFieldValue('salesItem', event.target.checked)}
+                    label={labels.sales}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+
+                <Grid item xs={3}>
+                  <CustomCheckBox
+                    name='purchaseItem'
+                    value={formik.values?.purchaseItem}
+                    onChange={event => formik.setFieldValue('purchaseItem', event.target.checked)}
+                    label={labels.purchase}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+
+                <Grid item xs={3}>
+                  <CustomCheckBox
+                    name='mfrItem'
+                    value={formik.values?.mfrItem}
+                    onChange={event => formik.setFieldValue('mfrItem', event.target.checked)}
+                    label={labels.production}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+
+                <Grid item xs={4}>
+                  <CustomCheckBox
+                    name='kitItem'
+                    value={formik.values?.kitItem}
+                    onChange={event => formik.setFieldValue('kitItem', event.target.checked)}
+                    label={labels.kitItem}
+                    disabled={editMode}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    store={store?.productionLevels?.map(PL => (({
+                        key: parseInt(PL?.key) || null,
+                        value: PL?.value || ''
+                      })))
+                    }
+                    name='productionLevel'
+                    label={labels.productionLevel}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('productionLevel', newValue?.key || '')
+                    }}
+                    maxAccess={maxAccess}
+                    error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='unitPrice'
+                    label={labels.unitPrice}
+                    value={formik.values.unitPrice}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('unitPrice', '')}
+                    error={formik.touched.unitPrice && formik.errors.unitPrice}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    store={store?.taxSchedules}
+                    values={formik.values}
+                    name='taxId'
+                    label={labels.vatSchedule}
+                    valueField='recordId'
+                    displayField='name'
+                    displayFieldWidth={1}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('taxId', newValue?.recordId || '')
+                    }}
+                    error={formik.touched.taxId && formik.errors.taxId}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    store={store?.trackByList?.map(trackByList => (({
+                        key: parseInt(trackByList.key),
+                        value: trackByList.value
+                      })))
+                    }
+                    values={formik.values}
+                    name='trackBy'
+                    label={labels.trackBy}
+                    valueField='key'
+                    displayField='value'
+                    displayFieldWidth={1}
+                    readOnly={editMode || formik.values.kitItem}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      const trackByValue = newValue?.key || ''
+                      formik.setFieldValue('trackBy', trackByValue)
+                      setShowLotCategories(trackByValue === '2' || trackByValue === 2)
+                      setShowSerialProfiles(trackByValue === '1' || trackByValue === 1)
+                    }}
+                    error={formik.touched.trackBy && formik.errors.trackBy}
+                  />
+                </Grid>
+
+                {showLotCategories && !formik.values.kitItem && (
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      store={store?.lotCategories}
+                      values={formik.values}
+                      name='lotCategoryId'
+                      label={labels.lotCategory}
+                      valueField='recordId'
+                      displayField='name'
+                      readOnly={editMode}
+                      displayFieldWidth={1}
+                      required
+                      maxAccess={maxAccess}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('lotCategoryId', newValue?.recordId || '')
+                        formik.setFieldValue('lotCategoryName', newValue?.name || '')
+                      }}
+                      error={
+                        formik.touched.lotCategoryId &&
+                        Boolean(formik.errors.lotCategoryId) &&
+                        !formik.values.lotCategoryName
+                      }
+                    />
+                  </Grid>
+                )}
+
+                {showSerialProfiles && !formik.values.kitItem && (
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      store={store?.serialProfiles}
+                      required
+                      values={formik.values}
+                      readOnly={editMode}
+                      name='spfId'
+                      label={labels.sprofile}
+                      valueField='recordId'
+                      displayField='name'
+                      displayFieldWidth={1}
+                      maxAccess={maxAccess}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue('spfId', newValue?.recordId || null)
+                        formik.setFieldValue('spfName', newValue?.name || '')
+                      }}
+                      error={formik.touched.spfId && Boolean(formik.errors.spfId) && !formik.values.spfName}
+                    />
+                  </Grid>
+                )}
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
+  )
+}

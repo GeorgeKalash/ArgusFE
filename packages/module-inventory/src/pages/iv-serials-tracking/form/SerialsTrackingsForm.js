@@ -108,7 +108,7 @@ export default function SerialsTrackingsForm({ _labels: labels, access }) {
         columns={columns}
         allowDelete={false}
         allowAddNewLine={false}
-      />
+        maxAccess={access}/>
     </Form>
   )
 }

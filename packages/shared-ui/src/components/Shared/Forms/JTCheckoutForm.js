@@ -27,6 +27,7 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function JTCheckoutForm({ recordId, window, refetch }) {
   const { platformLabels } = useContext(ControlContext)
@@ -170,6 +171,13 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
   const isPosted = formik.values.transfer.status === 3
   const isClosed = formik.values.transfer.wip === 2
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.transfer.reference,
+    resourceId: ResourceIds.JTCheckOut,
+    enabled: !!recordId && !isClosed
+  })
+
   const onPost = async () => {
     await postRequest({
       extension: ManufacturingRepository.JobTransfer.post,
@@ -182,6 +190,7 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
       invalidate()
       
       toast.success(platformLabels.Posted)
+      await releaseLock()
       window.close()
     })
   }
@@ -307,6 +316,24 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed || isPosted || !editMode
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      valuesPath: {
+        ...formik.values.transfer,
+        date: formik.values.transfer.postedDate,
+        notes: formik.values.transfer.jobDescription
+      },
+      datasetId: ResourceIds.GLJTCheckout,
+      disabled: !editMode
+    },
+    {
+      key: 'IV',
+      condition: true,
+      onClick: 'onInventoryTransaction',
+      disabled: !editMode || !isClosed || !isPosted
     }
   ]
 
@@ -326,7 +353,7 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
           <Grid container spacing={2}>
             <Grid item xs={8}>
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid item xs={7}>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       <ResourceComboBox
@@ -397,59 +424,33 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
                         errorCheck={'transfer.jobId'}
                       />
                     </Grid>
-                  </Grid>
-                </Grid>
-                <Grid item xs={6}>
-                  <Grid container spacing={2}>
                     <Grid item xs={12}>
-                      <CustomDatePicker
-                        name='transfer.date'
-                        required
-                        readOnly={isClosed || isPosted}
-                        label={labels.date}
-                        value={formik.values.transfer?.date}
-                        onChange={formik.setFieldValue}
+                      <CustomTextArea
+                        name='transfer.jobDescription'
+                        label={labels.jobDesc}
+                        value={formik.values.transfer.jobDescription}
+                        rows={2}
+                        readOnly
                         maxAccess
-                        onClear={() => formik.setFieldValue('date', null)}
-                        error={formik.touched.transfer?.date && Boolean(formik.errors.transfer?.date)}
+                        onChange={e => formik.setFieldValue('transfer.jobDescription', e.target.value)}
+                        onClear={() => formik.setFieldValue('transfer.jobDescription', '')}
+                        error={formik.touched.transfer?.jobDescription && Boolean(formik.errors.transfer?.jobDescription)}
                       />
                     </Grid>
-
-                    <Grid item xs={12}>
-                      <CustomTextField
-                        name='transfer.reference'
-                        label={labels.reference}
-                        value={formik.values.transfer.reference}
-                        readOnly={editMode}
-                        maxLength='15'
-                        maxAccess={!editMode && maxAccess}
-                        onChange={formik.handleChange}
-                        onClear={() => formik.setFieldValue('transfer.reference', '')}
-                        error={formik.touched.transfer?.reference && Boolean(formik.errors.transfer?.reference)}
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextArea
-                    name='transfer.jobDescription'
-                    label={labels.jobDesc}
-                    value={formik.values.transfer.jobDescription}
-                    rows={2}
-                    readOnly
-                    maxAccess
-                    onChange={e => formik.setFieldValue('transfer.jobDescription', e.target.value)}
-                    onClear={() => formik.setFieldValue('transfer.jobDescription', '')}
-                    error={formik.touched.transfer?.jobDescription && Boolean(formik.errors.transfer?.jobDescription)}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
+                    <Grid item xs={5}>
                       <CustomTextField
                         name='transfer.sku'
                         label={labels.itemRef}
                         value={formik.values.transfer.sku}
+                        readOnly
+                        maxAccess
+                      />
+                    </Grid>
+                    <Grid item xs={7}>
+                      <CustomTextField
+                        name='transfer.itemName'
+                        label={labels.itemName}
+                        value={formik.values.transfer.itemName}
                         readOnly
                         maxAccess
                       />
@@ -585,15 +586,33 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
                     </Grid>
                   </Grid>
                 </Grid>
-                <Grid item xs={6}>
-                  <Grid container spacing={2}>
+                <Grid item xs={5}>
+                  <Grid container spacing={2.8}>
+                    <Grid item xs={12}>
+                      <CustomDatePicker
+                        name='transfer.date'
+                        required
+                        readOnly={isClosed || isPosted}
+                        label={labels.date}
+                        value={formik.values.transfer?.date}
+                        onChange={formik.setFieldValue}
+                        maxAccess
+                        onClear={() => formik.setFieldValue('date', null)}
+                        error={formik.touched.transfer?.date && Boolean(formik.errors.transfer?.date)}
+                      />
+                    </Grid>
+
                     <Grid item xs={12}>
                       <CustomTextField
-                        name='transfer.itemName'
-                        label={labels.itemName}
-                        value={formik.values.transfer.itemName}
-                        readOnly
-                        maxAccess
+                        name='transfer.reference'
+                        label={labels.reference}
+                        value={formik.values.transfer.reference}
+                        readOnly={editMode}
+                        maxLength='15'
+                        maxAccess={!editMode && maxAccess}
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('transfer.reference', '')}
+                        error={formik.touched.transfer?.reference && Boolean(formik.errors.transfer?.reference)}
                       />
                     </Grid>
 
@@ -630,13 +649,30 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
                         error={formik.touched.transfer?.pcs && Boolean(formik.errors.transfer?.pcs)}
                       />
                     </Grid>
-
                     <Grid item xs={12}>
                       <CustomTextField
                         name='transfer.toSVName'
                         label={labels.superVisor}
                         value={formik.values.transfer.toSVName}
                         readOnly
+                        maxAccess
+                      />
+                    </Grid>
+                     <Grid item xs={12}>
+                      <CustomNumberField
+                        name='transfer.fromSeqNo'
+                        value={formik.values?.transfer?.fromSeqNo}
+                        readOnly
+                        label={labels.fromSeqNo}
+                        maxAccess
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomNumberField
+                        name='transfer.toSeqNo'
+                        value={formik.values?.transfer?.toSeqNo}
+                        readOnly
+                        label={labels.toSeqNo}
                         maxAccess
                       />
                     </Grid>
@@ -691,8 +727,8 @@ export default function JTCheckoutForm({ recordId, window, refetch }) {
                   />
                 </Grid>
               </Grid>
+            </Grid> 
             </Grid>
-          </Grid>
         </Fixed>
         <Grow>
           <Table

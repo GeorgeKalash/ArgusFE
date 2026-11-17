@@ -14,10 +14,12 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import ProductionRequestForm from './Forms/ProductionRequestForm'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const ProductionRequest = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { checkLock } = useRecordLock()
   const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
@@ -77,9 +79,36 @@ const ProductionRequest = () => {
       type: 'date'
     },
     {
+      field: 'periodName',
+      headerName: labels.period,
+      flex: 1
+    },
+    {
       field: 'plantName',
       headerName: labels.plant,
       flex: 1
+    },
+    {
+      field: 'metalRef',
+      headerName: labels.metal,
+      flex: 1
+    },
+    {
+      field: 'typeName',
+      headerName: labels.type,
+      flex: 1
+    },
+    {
+      field: 'pcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'statusName',
@@ -115,7 +144,15 @@ const ProductionRequest = () => {
     await proxyAction()
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.ProductionRequest,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
+
     stack({
       Component: ProductionRequestForm,
       props: {
@@ -123,14 +160,14 @@ const ProductionRequest = () => {
         labels,
         access
       },
-      width: 900,
+      width: 1000,
       height: 600,
       title: labels.productionRequest
     })
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.status == 3)
   }
 
   return (

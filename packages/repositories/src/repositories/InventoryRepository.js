@@ -10,8 +10,8 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotIT',
     snapshot3: service + 'snapshotIT3',
     snapshot4: service + 'snapshotIT4',
-    snapshot5: service + 'snapshotIT5',
     snapshot6: service + 'snapshotIT6',
+    snapshot7: service + 'snapshotIT7',
     get: service + 'getIT',
     quickView: service + 'quickViewIT',
     clone: service + 'cloneIT'
@@ -139,6 +139,7 @@ export const InventoryRepository = {
     set2: service + 'set2MTS'
   },
   InventoryOpeningQtys: {
+    page: service + 'pageOQ',
     qry: service + 'qryOQ',
     snapshot: service + 'snapshotOQ',
     get: service + 'getOQ',
@@ -147,8 +148,9 @@ export const InventoryRepository = {
   },
   ItemProduction: {
     get: service + 'getMFR',
+    set: service + 'setMFR',
     getPack: service + 'getPackMFR',
-    set: service + 'setPackMFR',
+    setPack: service + 'setPackMFR',
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
@@ -185,12 +187,15 @@ export const InventoryRepository = {
     get: service + 'getBCD',
     set: service + 'setBCD',
     del: service + 'delBCD',
+    page: service + 'pageBCD',
     qry: service + 'qryBCD',
-    get2: service + 'getBCD2'
+    get2: service + 'getBCD2',
+    snapshot2: service + 'snapshotBCD2'
   },
   MetalColor: {
     get: service + 'getMTC',
     set: service + 'setMTC',
+    page: service + 'pageMTC',
     qry: service + 'qryMTC',
     del: service + 'delMTC'
   },
@@ -228,6 +233,7 @@ export const InventoryRepository = {
     get: service + 'getOC',
     set: service + 'setOC',
     del: service + 'delOC',
+    page: service + 'pageOC',
     qry: service + 'qryOC'
   },
   Transaction: {
@@ -239,15 +245,13 @@ export const InventoryRepository = {
   GenerateFiscalYear: {
     gen: service + 'genFIS'
   },
-  IVMDParts: {
-    qry: service + 'qryIT'
-  },
   ItemParts: {
     qry: service + 'qryITP',
     set2: service + 'set2ITP'
   },
   CurrentCost: {
     get: service + 'getCOS',
+    page: service + 'pageCOS',
     qry: service + 'qryCOS',
     snapshot: service + 'snapshotCOS'
   },
@@ -256,6 +260,7 @@ export const InventoryRepository = {
     qry: service + 'qryAVA'
   },
   Parts: {
+    page: service + 'pagePRT',
     qry: service + 'qryPRT',
     del: service + 'delPRT',
     get: service + 'getPRT',
@@ -269,6 +274,7 @@ export const InventoryRepository = {
     set: service + 'setDTD'
   },
   Serial: {
+    page: service + 'pageSRL',
     qry: service + 'qrySRL',
     get2: service + 'get2SRL',
     set: service + 'setSRL',
@@ -410,5 +416,12 @@ export const InventoryRepository = {
     get: service + 'getOW',
     del: service + 'delOW',
     page: service + 'pageOW'
+  },
+  Brands: {
+    set: service + 'setBRND',
+    get: service + 'getBRND',
+    del: service + 'delBRND',
+    page: service + 'pageBRND',
+    qry: service + 'qryBRND'
   }
 }

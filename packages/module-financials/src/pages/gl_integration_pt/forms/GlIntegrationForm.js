@@ -1,8 +1,9 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
@@ -12,9 +13,13 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function GlIntegrationForm({ labels, maxAccess, recordId, invalidate }) {
+export default function GlIntegrationForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: GeneralLedgerRepository.IntegrationPostTypes.page
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -29,37 +34,33 @@ export default function GlIntegrationForm({ labels, maxAccess, recordId, invalid
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: GeneralLedgerRepository.IntegrationPostTypes.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: GeneralLedgerRepository.IntegrationPostTypes.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else {
+        toast.success(platformLabels.Edited)
+      }
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: GeneralLedgerRepository.IntegrationPostTypes.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: GeneralLedgerRepository.IntegrationPostTypes.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

@@ -69,7 +69,10 @@ export default function PurchaseQuotations() {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
-      type: 'number'
+      type: {
+        field: 'number',
+        decimal: 5
+      }
     },
     {
       field: 'amount',
@@ -97,7 +100,7 @@ export default function PurchaseQuotations() {
 
     const response = await getRequest({
       extension: PurchaseRepository.PurchaseQuotation.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }

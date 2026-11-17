@@ -110,7 +110,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
                 }
               }
             ]}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

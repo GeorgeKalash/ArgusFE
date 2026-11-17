@@ -19,7 +19,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
@@ -30,6 +29,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
@@ -98,6 +98,13 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   })
   const editMode = !!formik.values.recordId || !!recordId
   const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.IncreaseDecreaseAdj,
+    enabled: !!recordId && !isPosted
+  })
 
 
   const { openStack } = useStackValueLink({ linkOpen: { resourceId: ResourceIds.MCRIncreaseDecreaseAdj } })
@@ -224,6 +231,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       await refetchForm(formik.values.recordId)
       invalidate()
     }
@@ -240,16 +248,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       await refetchForm(formik.values.recordId)
       invalidate()
     }
-  }
-
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: formik.values.functionId,
-        recordId: formik.values.recordId
-      }
-    })
   }
 
   const actions = [
@@ -280,12 +278,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       disabled: !editMode
     },
     {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-    {
       key: 'Cash Transaction',
       condition: true,
       onClick: 'transactionClicked',
@@ -303,6 +295,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       functionId={functionId}
       previewReport={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>
@@ -422,7 +415,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                     readOnly={isPosted}
                     required
                     maxAccess={maxAccess}
-                    thousandSeparator={false}
                     onChange={async e => {
                       formik.setFieldValue('amount', e.target.value)
 

@@ -18,7 +18,7 @@ import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
-import PrintConfirmationDialog from '../iv-items/forms/PrintConfirmationDialog'
+import PrintConfirmationDialog from '@argus/shared-ui/src/components/Shared/ItemPages/PrintConfirmationDialog'
 
 const PrintLabels = () => {
   const { getRequest } = useContext(RequestsContext)

@@ -20,7 +20,7 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: PointofSaleRepository.PosUsers.qry
+    endpointId: PointofSaleRepository.PosUsers.page
   })
 
   const { formik } = useForm({

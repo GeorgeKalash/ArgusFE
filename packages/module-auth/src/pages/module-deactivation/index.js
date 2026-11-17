@@ -88,17 +88,15 @@ const ModuleDeactivation = () => {
         obj.isInactive = true
       }
     })
-    try {
-      const resultObject = {
-        modules: checkedObjects
-      }
+    const resultObject = {
+      modules: checkedObjects
+    }
 
-      await postRequest({
-        extension: AccessControlRepository.ModuleDeactivation.set2,
-        record: JSON.stringify(resultObject)
-      })
-      toast.success(platformLabels.Updated)
-    } catch (e) {}
+    await postRequest({
+      extension: AccessControlRepository.ModuleDeactivation.set2,
+      record: JSON.stringify(resultObject)
+    })
+    toast.success(platformLabels.Updated)
   }
 
   return (

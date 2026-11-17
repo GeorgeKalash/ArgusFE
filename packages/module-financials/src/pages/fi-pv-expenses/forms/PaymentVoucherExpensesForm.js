@@ -21,7 +21,6 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ExpensesCostCenters from '@argus/shared-ui/src/components/Shared/ExpensesCostCenters'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
@@ -36,7 +35,7 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
-
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -44,6 +43,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   const { stack } = useWindow()
   const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const vatPct = parseInt(systemDefaults?.list?.find(obj => obj.key === 'vatPct')?.value)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.PaymentVoucherExpenses,
@@ -83,6 +83,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     plantId: parseInt(plantId),
     contactId: null,
     isVerified: false,
+    vatPct,
     expenses: [
       {
         id: 1,
@@ -182,7 +183,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
 
 
   async function refetchForm (recordId) {
-    const vatPct = await getDefaultVAT()
     const response = await getRequest({
       extension: FinancialRepository.PaymentVouchers.get2,
       parameters: `_recordId=${recordId}`
@@ -226,19 +226,25 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   const isPosted = formik.values.status === 3
   const isCancelled = formik.values.status === -1
   const editMode = !!formik.values.recordId
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.PaymentVoucherExpenses,
+    enabled: !!recordId && !(isPosted || isCancelled)
+  })
   const isVerified = formik.values.isVerified
 
   const onPost = async () => {
-    try {
-      const res = await postRequest({
-        extension: FinancialRepository.PaymentVouchers.post,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.post,
+      record: JSON.stringify(formik.values)
+    })
 
-      toast.success(platformLabels.Posted)
-      invalidate()
-      refetchForm(res.recordId)
-    } catch (exception) {}
+    toast.success(platformLabels.Posted)
+    await releaseLock()
+    invalidate()
+    refetchForm(res.recordId)
   }
   async function onChangeDT(dtId) {
     if (dtId) {
@@ -277,10 +283,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   }, [formik.values?.dtId])
 
   useEffect(() => {
-    ;(async function () {
-        if (recordId) await refetchForm(recordId)
-        await getDefaultVAT()
-    })()
+    if (recordId) refetchForm(recordId)
   }, [])
   
   useEffect(() => {
@@ -292,38 +295,15 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     })()
   }, [cashAccountId])
 
-  async function getDefaultVAT() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=vatPct`
+  const onCancel = async cancelReason => {
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.cancel,
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
-    const vatPctValue = parseInt(res.record.value)
-    formik.setFieldValue('vatPct', vatPctValue)
-    return vatPctValue
-  }
-
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PaymentVoucher,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
-  const onCancel = async () => {
-    try {
-      const res = await postRequest({
-        extension: FinancialRepository.PaymentVouchers.cancel,
-        record: JSON.stringify(formik.values)
-      })
-
-      toast.success(platformLabels.Cancelled)
-      invalidate()
-      refetchForm(res.recordId)
-    } catch (e) {}
+    toast.success(platformLabels.Cancelled)
+    invalidate()
+    refetchForm(res.recordId)
   }
 
   const onVerify = async () => {
@@ -353,7 +333,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   }
 
   const onReset = async () => {
-    getDefaultVAT()
     const payload = getPayload(formik.values)
     await postRequest({
       extension: FinancialRepository.ResetGL_PV.reset,
@@ -378,8 +357,10 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isPosted || isCancelled
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isPosted
     },
     {
       key: 'FI Trx',
@@ -399,12 +380,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -640,6 +615,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
         Component: MultiCurrencyRateForm,
         props: {
           DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
+          readOnly: isCancelled || isPosted,
           data: {
             ...data,
             amount: amountSum
@@ -665,6 +641,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       actions={actions}
       functionId={SystemFunction.PaymentVoucher}
       disabledSubmit={isPosted || isCancelled}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -969,7 +946,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
           columns={columns}
           allowDelete={!isPosted && !isCancelled}
           allowAddNewLine={!isPosted && !isCancelled}
-        />
+          maxAccess={maxAccess}/>
       </VertLayout>
     </FormShell>
   )

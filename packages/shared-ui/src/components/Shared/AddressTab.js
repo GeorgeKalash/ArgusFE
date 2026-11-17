@@ -7,7 +7,6 @@ import FormGrid from '@argus/shared-ui/src/components/form'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import * as yup from 'yup'
-import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import SegmentedInput from '@argus/shared-ui/src/components/Inputs/SegmentedInput'
 
@@ -21,8 +20,8 @@ const AddressTab = ({
   access,
   ...props
 }) => {
-  const { getRequest } = useContext(RequestsContext)
   const { systemDefaults } = useContext(DefaultsContext)
+  const countryId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'countryId')?.value)
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address,
@@ -159,18 +158,7 @@ const AddressTab = ({
   }, [maxAccess, options])
 
   useEffect(() => {
-    async function getCountry() {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=countryId`
-      })
-      const countryId = res.record.value
-      if (!addressValidation.values.countryId) {
-        addressValidation.setFieldValue('countryId', parseInt(countryId))
-      }
-    }
-
-    getCountry()
+    if (!addressValidation.values.countryId) addressValidation.setFieldValue('countryId', countryId)
   }, [])
 
   return (

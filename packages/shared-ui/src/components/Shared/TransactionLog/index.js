@@ -172,8 +172,9 @@ const TransactionLog = props => {
               valueField='key'
               displayField='value'
               value={transactionType}
+              maxAccess={access}
               required
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 if (newValue) {
                   setTransactionType(newValue.key)
                 } else {

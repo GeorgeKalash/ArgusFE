@@ -18,7 +18,7 @@ export default function SegmentForm({ labels, obj, maxAccess, formikSegmentId, f
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.Segments.qry
+    endpointId: GeneralLedgerRepository.Segments.page
   })
 
   const { formik } = useForm({

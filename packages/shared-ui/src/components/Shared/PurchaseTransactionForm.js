@@ -22,7 +22,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -70,6 +69,8 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ChangeVendor from '@argus/shared-ui/src/components/Shared/ChangeVendor'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import BarcodesTable from '@argus/shared-ui/src/components/Shared/BarcodesTable'
 
 export default function PurchaseTransactionForm({ recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -86,6 +87,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   const [reCal, setReCal] = useState(false)
   const { stack: stackError } = useError()
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
+  const lastBarcodeSearch = useRef('')
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
@@ -185,6 +187,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       {
         id: 1,
         orderId: recordId || 0,
+        barcode: null,
         itemId: null,
         sku: '',
         itemName: '',
@@ -231,8 +234,8 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   const invalidate = useInvalidate({
     endpointId:
       parseFloat(functionId) === SystemFunction.PurchaseInvoice
-        ? PurchaseRepository.PurchaseInvoiceHeader.qry
-        : PurchaseRepository.PurchaseReturnHeader.qry
+        ? PurchaseRepository.PurchaseInvoiceHeader.page
+        : PurchaseRepository.PurchaseReturnHeader.page
   })
 
   const getGLResource = functionId => {
@@ -386,6 +389,13 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: getResourceId(parseInt(functionId)),
+    enabled: !!recordId && !isPosted
+  })
+
   const iconKey = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
@@ -413,7 +423,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     filteredMeasurements.current = arrayMU
   }
 
-  async function fillSkuData(update, addRow, newRow) {
+  async function barcodeSkuSelection(update, addRow, newRow) {
     const phycialProperty = await getItemPhysProp(newRow?.itemId)
     const itemInfo = await getItem(newRow?.itemId)
 
@@ -424,12 +434,50 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     await fillItemObject(update, addRow, newRow, phycialProperty, itemInfo, vendorPrice)
   }
 
+  const getBarcodeData = async barcode => {
+    const res = await getRequest({
+      extension: InventoryRepository.Barcodes.get,
+      parameters: `_barcode=${barcode}`
+    })
+
+    return res?.record
+  }
+
+  async function handleBarcodeChange({ update, newRow, addRow }) {
+    if (!newRow?.barcode) return update({ barcode: null })
+
+    const barcodeInfo = await getBarcodeData(newRow.barcode)
+
+    if (!barcodeInfo) {
+      return update({ ...initialValues.items[0], id: newRow.id })
+    }
+
+    await barcodeSkuSelection(update, addRow, {
+      ...newRow,
+      taxId: barcodeInfo?.taxId ?? newRow?.taxId,
+      muId: barcodeInfo?.muId ?? newRow?.muId,
+      itemId: barcodeInfo?.itemId ?? newRow?.itemId,
+      sku: barcodeInfo?.sku ?? newRow?.sku,
+      itemName: barcodeInfo?.itemName ?? newRow?.itemName
+    })
+  }
+
+  const getVendorInvoice = async (vendorId, vendorDocRef) => {
+    if (!vendorId || !vendorDocRef) return false
+
+    const res = await postRequest({
+      extension: PurchaseRepository.PurchaseInvoiceHeader.assert,
+      record: JSON.stringify({vendorId, vendorDocRef})
+    })
+
+    return !(res != null && Object.keys(res).length > 0)
+  }
+
   const columns = [
     {
       component: 'resourcecombobox',
       name: 'promotionTypeName',
-      label: labels.promotionType,
-      hidden: true,
+      label: labels.type,
       props: {
         datasetId: DataSets.PROMOTION_TYPE,
         valueField: 'key',
@@ -438,7 +486,68 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
           { from: 'key', to: 'promotionType' },
           { from: 'value', to: 'promotionTypeName' }
         ]
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row?.itemId }
+      },
+    },
+    {
+      component: 'button',
+      name: 'barcodeLookup',
+      label: ' ',
+      props: {
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: row => {
+          return {
+            disabled: !formik.values.header.vendorId
+          }
+        }
+      },
+      onClick: (e, row, update, updateRow, addRow) => {
+        stack({
+          Component: BarcodesTable,
+          props: {
+            labels,
+            maxAccess,
+            initialSearch: lastBarcodeSearch.current,
+            onSearchChange: term => {
+              lastBarcodeSearch.current = term || ''
+            },
+            onSelect: selected => {
+              if (!selected?.barcode) return
+
+              if (selected.isInactive) {
+                stackError({ message: labels.inactiveItem })
+
+                return
+              }
+
+              barcodeSkuSelection(
+                changes => updateRow({ id: row.id, changes, focusField: jumpToNextLine ? undefined : 'qty'}),
+                addRow,
+                {
+                  ...row,
+                  barcode: selected.barcode,
+                  itemId: selected.itemId,
+                  sku: selected.sku,
+                  itemName: selected.itemName,
+                  msId: selected.msId,
+                  muId: selected.muId ?? row.muId,
+                  taxId: selected.taxId ?? row.taxId
+                }
+              )
+            }
+          }
+        })
       }
+    },
+    {
+      component: 'textfield',
+      label: labels.barcode,
+      name: 'barcode',
+      updateOn: 'blur',
+      jumpToNextLine,
+      onChange: ({ row: { update, newRow, addRow } }) => handleBarcodeChange({ update, newRow, addRow })
     },
     {
       component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
@@ -487,7 +596,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
             return
           }
 
-          return fillSkuData(update, addRow, newRow)
+          return barcodeSkuSelection(update, addRow, newRow)
         }
 
         if (!newRow?.sku) return resetRow(newRow.id)
@@ -513,7 +622,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
           return
         }
 
-        return fillSkuData(update, addRow, {
+        return barcodeSkuSelection(update, addRow, {
           ...newRow,
           itemId: record.recordId
         })
@@ -677,7 +786,10 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
         update(data)
-      }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row?.promotionType == 3 || row?.promotionType == 4 }
+      },
     },
     {
       component: 'button',
@@ -899,16 +1011,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: functionId,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
-
   const onPost = async () => {
     await postRequest({
       extension: getEndpoint[functionId]?.['post'],
@@ -916,6 +1018,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     await refetchForm(formik.values.recordId)
     invalidate()
     window.close()
@@ -997,12 +1100,6 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -1213,8 +1310,8 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       header: {
         ...formik.values.header,
         vendorId: object?.recordId,
-        vendorName: object?.name,
-        vendorRef: object?.reference,
+        vendorName: object?.name || '',
+        vendorRef: object?.reference || '',
         isVattable: object?.isTaxable || false,
         tdAmount: object?.tradeDiscount,
         tdPct: object?.tradeDiscount,
@@ -1326,10 +1423,17 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       : itemInfo.taxName ?? ''
 
     const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+
+    const selectedMU =
+      (newRow?.muId && filteredMeasurements?.find(mu => mu.recordId === newRow.muId)) ||
+      filteredMeasurements?.[0]    
     const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
     const updatedRowValues = {
       id: newRow?.id,
+      barcode: newRow?.barcode,
+      promotionType: newRow?.promotionType ?? initialPromotionType?.key,
+      promotionTypeName: newRow?.promotionTypeName ?? initialPromotionType?.value,
       decimals: measurementSchedule?.decimals,
       sku: itemInfo?.sku || '',
       itemName: itemInfo?.name || '',
@@ -1346,9 +1450,9 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       priceType: itemInfo?.priceType || 1,
       qty: jumpToNextLine ? 1 : 0,
       msId: itemInfo?.msId,
-      muRef: filteredMeasurements?.[0]?.reference,
-      muId: filteredMeasurements?.[0]?.recordId,
-      muQty: filteredMeasurements?.[0]?.qty,
+      muRef: selectedMU?.reference,
+      muId: selectedMU?.recordId,
+      muQty: selectedMU?.qty,
       mdAmount: formik.values.header.maxDiscount ? formik.values.header.maxDiscount : 0,
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
@@ -1940,6 +2044,21 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     )
   }
 
+  const validateVendorInvoice = async (vendorId, vendorDocRef) => {
+    const invoiceExist = await getVendorInvoice(vendorId, vendorDocRef)
+
+    if (invoiceExist) {
+      formik.setFieldValue('header.vendorDocRef', null)
+      formik.setFieldValue('header.vendorRef', '')
+      formik.setFieldValue('header.vendorName', '')
+      formik.setFieldValue('header.vendorId', null)
+
+      return false
+    }
+
+    return true
+  }
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1950,6 +2069,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -2050,6 +2170,16 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                 readOnly={isPosted}
                 maxLength='15'
                 onChange={formik.handleChange}
+                onBlur={async e => {
+                  const vendorDocRef = e?.target?.value ?? ''
+
+                  if(!editMode){
+                    const isValid = await validateVendorInvoice(formik.values?.header?.vendorId, vendorDocRef)
+                    if (!isValid) return
+                  }
+                 
+                  formik.setFieldValue('header.vendorDocRef', vendorDocRef)
+                }}
                 onClear={() => formik.setFieldValue('header.vendorDocRef', '')}
                 error={formik.touched.header?.vendorDocRef && Boolean(formik.errors.header?.vendorDocRef)}
               />
@@ -2157,12 +2287,20 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                   { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'FL Name' }
                 ]}
-                onChange={(event, newValue) => {
+                onChange={async (_, newValue) => {
+                  if (!editMode){
+                    const isValid = await validateVendorInvoice(newValue?.recordId, formik.values?.header?.vendorDocRef)
+                    if (!isValid) return
+                  }
+
                   fillVendorData(newValue)
                 }}
-                secondFieldName={'header.vendorName'}
-                onSecondValueChange={(name, value) => {
-                  formik.setFieldValue('header.vendorName', value)
+                secondField={{
+                  name: 'header.vendorName',
+                  editable: !isPosted,
+                  onChange: (name, value) => {
+                    formik.setFieldValue('header.vendorName', value)
+                  }
                 }}
                 errorCheck={'header.vendorId'}
                 maxAccess={maxAccess}
@@ -2227,6 +2365,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                 value={formik.values.header.KGmetalPrice}
                 readOnly
                 hidden={!metalPriceVisibility}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
@@ -2247,7 +2386,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
             value={formik?.values?.items}
             error={formik.errors.items}
             name='items'
-            columns={columns}
+            columns={columns.filter(col => !(col.name === 'barcodeLookup' && isPosted))}
             maxAccess={maxAccess}
             allowDelete={!isPosted}
             disabled={isPosted || !formik.values.header.vendorId || !formik.values.header.vendorId}
@@ -2263,6 +2402,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
                 value={formik.values.header.description}
                 rows={3}
                 editMode={editMode}
+                readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.description', e.target.value)}
                 onClear={() => formik.setFieldValue('header.description', '')}

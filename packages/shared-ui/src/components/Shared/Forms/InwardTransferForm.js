@@ -178,27 +178,23 @@ const InwardTransferForm = ({ recordId, plantId, userId, dtId, window }) => {
   const isClosed = formik.values.wip === 2
 
   async function getInwards(recordId) {
-    try {
-      return await getRequest({
-        extension: RemittanceOutwardsRepository.InwardsTransfer.get,
-        parameters: `_recordId=${recordId}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.InwardsTransfer.get,
+      parameters: `_recordId=${recordId}`
+    })
   }
 
   const onPost = async () => {
-    try {
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.InwardsTransfer.post,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.InwardsTransfer.post,
+      record: JSON.stringify(formik.values)
+    })
 
-      toast.success(platformLabels.Posted)
-      invalidate()
-      const res2 = await getInwards(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
-    } catch (exception) {}
+    toast.success(platformLabels.Posted)
+    invalidate()
+    const res2 = await getInwards(res.recordId)
+    res2.record.date = formatDateFromApi(res2.record.date)
+    formik.setValues(res2.record)
   }
 
   async function getDefaultVAT() {

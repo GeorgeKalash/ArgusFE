@@ -23,7 +23,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -370,7 +369,11 @@ export default function PurchaseOrderForm({ recordId, window }) {
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 3
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -569,16 +572,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  const onWorkFlowClick = () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
-
   const confirmation = () => {
     stack({
       Component: ConfirmationDialog,
@@ -699,13 +692,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
       disabled: !editMode
     },
     {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-
-    {
       key: 'Terminate',
       condition: true,
       onClick: confirmation,
@@ -807,6 +793,15 @@ export default function PurchaseOrderForm({ recordId, window }) {
       extension: InventoryRepository.MeasurementUnit.qry,
       parameters: `_msId=0`
     })
+  }
+
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
   }
 
   async function fillVendorData(object) {
@@ -911,6 +906,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
     }
 
     const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+    const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
     return {
       sku: itemInfo?.sku || '',
@@ -928,6 +924,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       priceType: itemInfo?.priceType || 1,
       qty: 0,
       msId: itemInfo?.msId,
+      decimals: measurementSchedule?.decimals,
       muRef: filteredMeasurements?.[0]?.reference,
       muId: filteredMeasurements?.[0]?.recordId,
       muQty: filteredMeasurements?.[0]?.qty,
@@ -1299,6 +1296,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       actions={actions}
       editMode={editMode}
       disabledSubmit={isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -1645,6 +1643,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                   label={labels.totQty}
                   value={totalQty}
                   readOnly
+                  decimalScale={5}
                 />
               </Stack>
             </Grid>

@@ -23,7 +23,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -54,6 +53,7 @@ import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ReturnOnInvoiceForm({ labels, access, recordId, currency }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -272,6 +272,13 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   })
   const editMode = !!formik.values.header.recordId
   const isPosted = formik?.values?.header?.status == 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.ReturnOnInvoice,
+    enabled: !!recordId && !isPosted
+  })
   const rowsUpdate = useRef(formik?.values?.items)
 
   function buildCalculatedTaxDetails(row, taxDetailsList = []) {
@@ -934,15 +941,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.SalesReturn,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   const handleMetalClick = async () => {
     const metalItemsList = rowsUpdate?.current
@@ -965,6 +963,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     refetchForm(formik.values.header.recordId)
     invalidate()
   }
@@ -1046,12 +1045,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         notes: formik?.values?.header.description
       },
       datasetId: ResourceIds.GLReturnOnInvoice,
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -1589,6 +1582,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -1721,6 +1715,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       label={labels.invoice}
                       value={formik?.values?.header?.invoiceRef}
                       readOnly
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 )}
@@ -2055,7 +2050,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField name='header.totalQTY' label={labels.totalQty} value={totalQty} readOnly />
+                  <CustomNumberField name='header.totalQTY' label={labels.totalQty} value={totalQty} readOnly maxAccess={maxAccess}/>
                 </Grid>
               </Grid>
             </Grid>

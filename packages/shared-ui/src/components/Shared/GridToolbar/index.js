@@ -1,6 +1,6 @@
 import { Grid, DialogActions } from '@mui/material'
 import CustomTextField from '../../Inputs/CustomTextField'
-import { useState, useContext } from 'react'
+import { useState, useContext, useRef, useEffect } from 'react'
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { getButtons } from '../Buttons'
@@ -34,15 +34,17 @@ const GridToolbar = ({
   actions = [],
   previewReport,
   disableActionsPadding,
+  initialSearch = '',
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess?.record?.accessFlags
   const addBtnVisible = onAdd && maxAccess && maxAccess[accessMap[TrxType.ADD]]
 
   const { getRequest } = useContext(RequestsContext)
-  const [searchValue, setSearchValue] = useState('')
+  const [searchValue, setSearchValue] = useState(initialSearch)
   const { platformLabels } = useContext(ControlContext)
   const [reportStore, setReportStore] = useState([])
+  const searchWrapperRef = useRef(null)
 
   const clear = () => {
     setSearchValue('')
@@ -108,6 +110,13 @@ const GridToolbar = ({
   ]
     .filter(Boolean)
     .join(' ')
+
+  useEffect(() => {
+    if (!props?.autoFocus) return
+    const t = setTimeout(() => searchWrapperRef.current?.querySelector('input')?.focus(), 100)
+
+    return () => clearTimeout(t)
+  }, [])
 
   return (
     <>
@@ -320,7 +329,12 @@ const GridToolbar = ({
       <DialogActions className={styles.dialogActions}>
         <Grid container spacing={2} className={styles.gridContainer}>
           <Grid item xs={previewReport ? 6 : 9}>
-            <Grid container spacing={2}>
+            <Grid
+              container
+              spacing={1}
+              wrap="nowrap"
+              alignItems="center"
+            >
               {onAdd && addBtnVisible && (
                 <Grid item className={styles.buttonWrapper}>
                   <CustomButton
@@ -336,7 +350,7 @@ const GridToolbar = ({
               {leftSection}
 
               {inputSearch && (
-                <Grid item className={styles.searchFieldWrapper}>
+                <Grid item className={styles.searchFieldWrapper} ref={searchWrapperRef}>
                   <CustomTextField
                     name='search'
                     value={searchValue}
@@ -348,6 +362,7 @@ const GridToolbar = ({
                     }}
                     onSearch={onSearch}
                     search={true}
+                    autoFocus={props?.autoFocus}
                   />
                 </Grid>
               )}
@@ -390,9 +405,9 @@ const GridToolbar = ({
           )}
 
           {rightSection && (
-            <Grid item xs={3}>
+            <>
               {rightSection}
-            </Grid>
+            </>
           )}
         </Grid>
 

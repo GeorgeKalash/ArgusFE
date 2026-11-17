@@ -44,6 +44,7 @@ export default function ItemDetailsForm({
         itemId: null,
         itemName: '',
         siteId,
+        decimals: 0,
         muId: null,
         muQty: null,
         qty: null,
@@ -111,6 +112,15 @@ export default function ItemDetailsForm({
       lastResp?.record?.invoice?.date ? formatDateFromApi(lastResp?.record?.invoice?.date) : null
     )
     formik.setFieldValue('details.lastPurchaseCurrencyId', lastResp?.record?.invoice?.currencyId)
+  }
+
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
   }
 
   async function getCurrentCost(itemId) {
@@ -191,6 +201,8 @@ export default function ItemDetailsForm({
                       await getlastIVI(newValue?.recordId)
                       await getCurrentCost(newValue?.recordId)
                       formik.setFieldValue('details.msId', newValue?.msId || null)
+                      const measurementSchedule = await getMeasurementObject(newValue?.msId)
+                      formik.setFieldValue('details.decimals', measurementSchedule?.decimals)
                       formik.setFieldValue('details.muId', null)
                       formik.setFieldValue(
                         'details.totalCost',
@@ -252,6 +264,7 @@ export default function ItemDetailsForm({
                     name='details.qty'
                     label={labels.qty}
                     value={formik.values.details.qty}
+                    decimalScale={formik.values.details?.decimals}
                     onChange={e => {
                       let qty = e.target.value
                       formik.setFieldValue('details.totalCost', (qty || 0) * (formik.values.details.unitCost || 0))

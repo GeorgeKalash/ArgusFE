@@ -22,7 +22,7 @@ const BPMasterData = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: BusinessPartnerRepository.MasterData.qry,
+      extension: BusinessPartnerRepository.MasterData.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_sortBy=reference desc`
     })
 
@@ -39,7 +39,7 @@ const BPMasterData = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BusinessPartnerRepository.MasterData.snapshot,
+    endpointId: BusinessPartnerRepository.MasterData.page,
     datasetId: ResourceIds.BPMasterData,
     filter: {
       filterFn: fetchWithFilter

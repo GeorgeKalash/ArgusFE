@@ -12,7 +12,6 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import BiometricDevicesForm from './Form/BiometricDevicesForm'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 
 const BiometricDevices = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import TransactionLog from './TransactionLog'
 import { ClientRelationList } from './ClientRelationList'
 import { useGlobalRecord, useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -12,6 +12,7 @@ import FinancialTransaction from './FinancialTransaction'
 import Aging from './Aging'
 import MetalSummary from './MetalSummary'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
 import InventoryTransaction from './InventoryTransaction'
@@ -22,11 +23,14 @@ import AttachmentList from './AttachmentList'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from './Form'
 import StrictConfirmation from './StrictConfirmation'
+import CancelReasonForm from './CancelationReasonForm'
+import WorkFlow from './WorkFlow'
 
 export default function FormShell({
   form,
   isSaved = true,
   isInfo = true,
+  isWorkFlow = false,
   isCleared = true,
   isSavedClear = true,
   children,
@@ -52,7 +56,14 @@ export default function FormShell({
   const { stack } = useWindow()
   const { clear, open, setRecord } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
+  const { loading } = useContext(RequestsContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
+
+  const guarded = fn => {
+    if (loading) return
+
+    Promise.resolve(fn()).catch(() => {})
+  }
 
   const { stack: stackError } = useError()
 
@@ -144,13 +155,13 @@ export default function FormShell({
         case 'onPost':
           action.onClick = () => {
             form.setFieldValue('isOnPostClicked', true)
-            form.handleSubmit()
+            guarded(() => form.submitForm())
           }
           break
         case 'onTFR':
           action.onClick = () => {
             form.setFieldValue('isTFRClicked', true)
-            form.handleSubmit()
+            guarded(() => form.submitForm())
           }
           break
         case 'onClickGL':
@@ -323,6 +334,20 @@ export default function FormShell({
             })
           }
           break
+        case 'onCancelReason':
+          action.onClick = () => {
+            stack({
+              Component: CancelReasonForm,
+              props: {
+                action: action.action,
+                functionId,
+                recordId: form.values?.recordId,
+                isCancelled: action.isCancelled
+              },
+              expandable: false
+            })
+          }
+          break
         default:
           action.onClick = () => console.log(`Action with key ${action.key} has a string onClick handler.`)
           break
@@ -354,11 +379,13 @@ export default function FormShell({
   }
 
   async function handleSaveAndClear() {
-    const errors = await form.validateForm()
-    await form.submitForm()
-    if (Object.keys(errors).length == 0) {
-      await performPostSubmissionTasks()
-    }
+    await guarded(async () => {
+      const errors = await form.validateForm()
+      await form.submitForm()
+      if (Object.keys(errors).length == 0) {
+        await performPostSubmissionTasks()
+      }
+    })
   }
 
   const performPostSubmissionTasks = async () => {
@@ -372,9 +399,7 @@ export default function FormShell({
     <Form
       form={form}
       previewBtnClicked={previewBtnClicked}
-      onSave={() => {
-        form?.handleSubmit()
-      }}
+      onSave={() => guarded(() => form.submitForm())}
       onSaveClear={() => {
         handleSaveAndClear()
       }}
@@ -388,9 +413,19 @@ export default function FormShell({
           }
         })
       }
+      onWorkFlow={() => 
+        stack({
+          Component: WorkFlow,
+          props: {
+            functionId,
+            recordId: form.values.recordId
+          }
+        })
+      }
       isSaved={isSaved}
       isSavedClear={isSavedClearVisible}
       isInfo={isInfo}
+      isWorkFlow={isWorkFlow}
       isCleared={isCleared}
       actions={actions}
       editMode={editMode}

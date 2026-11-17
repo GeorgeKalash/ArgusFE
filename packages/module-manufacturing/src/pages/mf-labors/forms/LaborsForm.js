@@ -19,7 +19,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function LaborsForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [hourRate, setHourRate] = useState(false)
@@ -68,22 +67,21 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
         })
       } else toast.success(platformLabels.Edited)
 
-      setEditMode(true)
       invalidate()
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: ManufacturingRepository.Labor.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: ManufacturingRepository.Labor.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [recordId])
 
@@ -133,7 +131,7 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
                   displayField={['reference', 'name']}
                   values={formik.values}
                   maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik && formik.setFieldValue('workCenterId', newValue?.recordId)
                   }}
                   error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
@@ -153,7 +151,7 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
                   displayField={['reference', 'name']}
                   values={formik.values}
                   maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik && formik.setFieldValue('operationId', newValue?.recordId)
                   }}
                   error={formik.touched.operationId && Boolean(formik.errors.operationId)}
@@ -176,6 +174,7 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
                     formik.setFieldValue('hourRateCurrencyId', '')
                   }}
                   error={formik.touched.hourRate && Boolean(formik.errors.hourRate)}
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item sx={{ pb: '10px' }} xs={12}>
@@ -193,7 +192,7 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
                   displayField={['reference', 'name']}
                   values={formik.values}
                   maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik && formik.setFieldValue('hourRateCurrencyId', newValue?.recordId)
                   }}
                   required={!!formik.values.hourRate}
@@ -226,7 +225,7 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
                   displayField='fullName'
                   values={formik.values}
                   maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik && formik.setFieldValue('userId', newValue?.recordId)
                   }}
                   error={formik.touched.userId && Boolean(formik.errors.userId)}
@@ -246,7 +245,7 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
                   displayField={['reference', 'name']}
                   values={formik.values}
                   maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik && formik.setFieldValue('groupId', newValue?.recordId)
                   }}
                   error={formik.touched.groupId && Boolean(formik.errors.groupId)}
@@ -265,7 +264,7 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
                   label={labels.employee}
                   secondDisplayField={true}
                   secondValue={formik.values.employeeName}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     if (newValue) {
                       formik.setFieldValue('employeeId', newValue?.recordId)
                       formik.setFieldValue('employeeRef', newValue?.reference)
@@ -277,6 +276,7 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
                     }
                   }}
                   error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
+                  maxAccess={maxAccess}
                 />
               </Grid>
             </Grid>

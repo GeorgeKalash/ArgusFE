@@ -23,7 +23,7 @@ const CostCenterGroup = () => {
 
     const response = await getRequest({
       extension: GeneralLedgerRepository.CostCenterGroup.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -64,14 +64,12 @@ const CostCenterGroup = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: GeneralLedgerRepository.CostCenterGroup.del,
-        record: JSON.stringify(obj)
-      })
-      toast.success(platformLabels.Deleted)
-      invalidate()
-    } catch (error) {}
+    await postRequest({
+      extension: GeneralLedgerRepository.CostCenterGroup.del,
+      record: JSON.stringify(obj)
+    })
+    toast.success(platformLabels.Deleted)
+    invalidate()
   }
   function openForm(recordId) {
     stack({

@@ -33,6 +33,7 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -107,6 +108,22 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       invalidate()
     }
   })
+
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.CreditNote:
+        return ResourceIds.CreditNote
+      case SystemFunction.DebitNote:
+        return ResourceIds.DebitNote
+      case SystemFunction.ServiceBill:
+        return ResourceIds.ServiceBillReceived
+      case SystemFunction.ServiceInvoice:
+        return ResourceIds.ServiceInvoice
+      default:
+        return null
+    }
+  }
+
   const editMode = !!formik.values.recordId || !!recordId
 
   function setBaseAmount(amount) {
@@ -166,6 +183,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       await refetchForm(formik.values.recordId)
       invalidate()
     }
@@ -184,10 +202,10 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }
   }
 
-  const onCancel = async () => {
+  const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.FiMemo.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ recordId: formik.values.recordId, notes: cancelReason })
     })
 
     if (res?.recordId) {
@@ -207,6 +225,13 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   const postedOrCanceled = formik.values.status === -1 || formik.values.status === 3
   const isPosted = formik.values.status === 3
   const isCancelled = formik.values.status === -1
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: getResourceId(parseInt(formik.values.functionId)),
+    enabled: !!recordId && !(isCancelled || isPosted)
+  })
 
   async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
     if (currencyId && date && rateType) {
@@ -285,8 +310,10 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isCancelled || isPosted
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isPosted
     },
     {
       key: 'AccountSummary',
@@ -309,21 +336,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       disabled: !editMode || !formik.values.accountId || !formik.values.currencyId
     }
   ]
-
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.CreditNote:
-        return ResourceIds.CreditNote
-      case SystemFunction.DebitNote:
-        return ResourceIds.DebitNote
-      case SystemFunction.ServiceBill:
-        return ResourceIds.ServiceBillReceived
-      case SystemFunction.ServiceInvoice:
-        return ResourceIds.ServiceInvoice
-      default:
-        return null
-    }
-  }
 
   const getResourceMCR = functionId => {
     const fn = Number(functionId)
@@ -351,6 +363,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         props: {
           DatasetIdAccess: getResourceMCR(functionId),
           data,
+          readOnly: isCancelled || isPosted,
           onOk: childFormikValues => {
             formik.setValues(prevValues => ({
               ...prevValues,
@@ -606,7 +619,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     value={formik.values.amount}
                     required
                     maxAccess={maxAccess}
-                    thousandSeparator={false}
                     readOnly
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
                     maxLength={10}

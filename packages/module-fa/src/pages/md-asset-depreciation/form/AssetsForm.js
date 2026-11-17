@@ -21,6 +21,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function AssetsForm({ recordId, maxAccess: access, labels, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,7 +34,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
   })
 
   const invalidate = useInvalidate({
-    endpointId: FixedAssetsRepository.AssetsDescription.snapshot
+    endpointId: FixedAssetsRepository.AssetsDescription.page
   })
 
   const formatDate = date => {
@@ -98,6 +99,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     window.close()
     invalidate()
   }
@@ -179,6 +181,13 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
     }
   ]
   const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.Depreciation,
+    enabled: !!recordId && !isPosted
+  })
 
   const actions = [
     {

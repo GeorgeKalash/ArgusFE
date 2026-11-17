@@ -26,7 +26,6 @@ export default function ExchangeTablesWindow({ labels, maxAccess, recordId, inva
           maxAccess={maxAccess}
           store={store}
           setStore={setStore}
-          invalidate={invalidate}
         />
       </CustomTabPanel>
 

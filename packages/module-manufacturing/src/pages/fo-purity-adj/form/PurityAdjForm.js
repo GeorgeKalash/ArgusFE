@@ -26,6 +26,7 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function PurityAdjForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -146,6 +147,13 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   const editMode = !!formik.values?.header.recordId
   const isPosted = formik.values.header.status === 3
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.PurityAdjustment,
+    enabled: !!recordId && !isPosted
+  })
+
 const calculateTotal = key =>
   roundTo(formik.values.items
     .reduce((sum, item) => {
@@ -173,6 +181,7 @@ const calculateTotal = key =>
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
   }
@@ -689,6 +698,7 @@ const calculateTotal = key =>
                     value={totalMetal}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -697,6 +707,7 @@ const calculateTotal = key =>
                     value={totalRmQty}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -705,6 +716,7 @@ const calculateTotal = key =>
                     value={totalRmNewQty}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -713,6 +725,7 @@ const calculateTotal = key =>
                     value={totalDiffQty}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess} 
                   />
                 </Grid>
               </Grid>
@@ -723,6 +736,7 @@ const calculateTotal = key =>
                     value={avgPurity}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -731,6 +745,7 @@ const calculateTotal = key =>
                     value={avgStdPurity}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -739,6 +754,7 @@ const calculateTotal = key =>
                     value={totalDiffPurity}
                     decimalScale={2}
                     readOnly
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>

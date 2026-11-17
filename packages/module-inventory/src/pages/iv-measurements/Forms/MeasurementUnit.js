@@ -19,14 +19,12 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
   const { stack } = useWindow()
 
   const getMeasurementUnitGridData = async msId => {
-    try {
-      const response = await getRequest({
-        extension: InventoryRepository.MeasurementUnit.qry,
-        parameters: `_msId=${msId}`
-      })
+    const response = await getRequest({
+      extension: InventoryRepository.MeasurementUnit.qry,
+      parameters: `_msId=${msId}`
+    })
 
-      setMeasurementUnitGridData(response) 
-    } catch (error) {}
+    setMeasurementUnitGridData(response)
   }
 
   const columns = [
@@ -79,14 +77,12 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
   }, [recordId])
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: InventoryRepository.MeasurementUnit.del,
-        record: JSON.stringify(obj)
-      })
-      toast.success(platformLabels.Deleted)
-      await getMeasurementUnitGridData(recordId)
-    } catch (exception) {}
+    await postRequest({
+      extension: InventoryRepository.MeasurementUnit.del,
+      record: JSON.stringify(obj)
+    })
+    toast.success(platformLabels.Deleted)
+    await getMeasurementUnitGridData(recordId)
   }
 
   return (

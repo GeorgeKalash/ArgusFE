@@ -76,7 +76,10 @@ const PuTrx = () => {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
-      type: 'number'
+      type: {
+        field: 'number',
+        decimal: 5
+      }
     },
     {
       field: 'amount',

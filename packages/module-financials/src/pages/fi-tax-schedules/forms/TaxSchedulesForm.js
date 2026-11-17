@@ -1,5 +1,5 @@
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -20,7 +20,7 @@ export default function TaxSchedulesForm({ labels, maxAccess, setStore, store, e
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.TaxSchedules.qry
+    endpointId: FinancialRepository.TaxSchedules.page
   })
 
   const { formik } = useForm({

@@ -20,6 +20,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function JournalVoucherForm({ labels, access, recordId, window }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
@@ -77,6 +78,13 @@ export default function JournalVoucherForm({ labels, access, recordId, window })
 
   const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.JournalVoucher,
+    enabled: !!recordId && !isPosted
+  })
   const isVerified = formik.values.isVerified
 
   useEffect(() => {
@@ -109,6 +117,7 @@ export default function JournalVoucherForm({ labels, access, recordId, window })
 
     getData(formik.values.recordId)
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
   }
 

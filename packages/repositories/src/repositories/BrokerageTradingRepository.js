@@ -13,7 +13,11 @@ export const BrokerageTradingRepository = {
     del: service + 'delFIS',
     close: service + 'closeFIS',
     get: service + 'getFIS',
-    snapshot: service + 'snapshotFIS'
+    snapshot: service + 'snapshotFIS',
+    snapshot2: service + 'snapshot2FIS',
+    post: service + 'postFIS',
+    unpost: service + 'unpostFIS',
+    reopen: service + 'reopenFIS'
   },
   FixingPurchases: {
     page: service + 'pageFIP',
@@ -21,7 +25,11 @@ export const BrokerageTradingRepository = {
     del: service + 'delFIP',
     close: service + 'closeFIP',
     get: service + 'getFIP',
-    snapshot: service + 'snapshotFIP'
+    snapshot: service + 'snapshotFIP',
+    snapshot2: service + 'snapshot2FIP',
+    post: service + 'postFIP',
+    reopen: service + 'reopenFIP',
+    unpost: service + 'unpostFIP'
   },
   Fixing: {
     pack: service + 'getPackFIX',
@@ -34,15 +42,35 @@ export const BrokerageTradingRepository = {
     reopen: service + 'reopenEO',
     get: service + 'getEO',
     snapshot: service + 'snapshotEO',
-    pack: service + 'getPackEO'
+    pack: service + 'getPackEO',
+    post: service + 'postEO',
+    unpost: service + 'unpostEO',
+    cancel: service + 'cancelEO',
+    service: service + 'serviceEO',
   },
   EventOrderInquiry: {
-    page: service + 'pageEOI'
+    page2: service + 'pageEOI2'
   },
   DocumentTypeDefault: {
     get: service + 'getDTD',  
     set: service + 'setDTD',
     del: service + 'delDTD',
     page: service + 'pageDTD'
+  },
+  FixingSalesCancellation: {
+    page: service + 'pageFSC',
+    get: service + 'getFSC',
+    set: service + 'setFSC',
+    del: service + 'delFSC',
+    post: service + 'postFSC',
+    snapshot: service + 'snapshotFSC'
+  },
+  FixingPurchaseCancellation: {
+    page: service + 'pageFPC',
+    get: service + 'getFPC',
+    set: service + 'setFPC',
+    del: service + 'delFPC',
+    post: service + 'postFPC',
+    snapshot: service + 'snapshotFPC'
   }
 }

@@ -3,7 +3,7 @@ import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -24,7 +24,7 @@ const PaymentOrderDTD = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.FIDocTypeDefaults.qry,
+      extension: FinancialRepository.FIDocTypeDefaults.page,
 
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${SystemFunction.PaymentOrder}`
     })
@@ -37,15 +37,12 @@ const PaymentOrderDTD = () => {
     labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.FIDocTypeDefaults.qry,
+    endpointId: FinancialRepository.FIDocTypeDefaults.page,
     datasetId: ResourceIds.PaymentOrderDTD
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: FinancialRepository.FIDocTypeDefaults.qry
   })
 
   const columns = [

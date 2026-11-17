@@ -1,5 +1,6 @@
 import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
+import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -16,11 +17,45 @@ const ProdPlanningDefaultsForm = ({ _labels, access }) => {
   const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const { postRequest } = useContext(RequestsContext)
 
-  const arrayAllow = ['pp_lt_sales_benchmark', 'pp_st_sales_benchmark', 'pp_ni_sales_benchmark']
+  const arrayAllow = [
+    'pp_lt_sales_benchmark',
+    'pp_st_sales_benchmark',
+    'pp_ni_sales_benchmark',
+    'pp_min_pr_dom',
+    'pp_max_pr_dom'
+  ]
 
   const { formik } = useForm({
     maxAccess: access,
     initialValues: arrayAllow.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
+    validationSchema: yup.object({
+      pp_min_pr_dom: yup
+        .number()
+        .nullable()
+        .min(1)
+        .max(31)
+        .test('', function (value) {
+          const { pp_max_pr_dom } = this.parent
+          if (value != null && pp_max_pr_dom != null && pp_max_pr_dom !== '') {
+            return value <= Number(pp_max_pr_dom)
+          }
+
+          return true
+        }),
+      pp_max_pr_dom: yup
+        .number()
+        .nullable()
+        .min(1)
+        .max(31)
+        .test('', function (value) {
+          const { pp_min_pr_dom } = this.parent
+          if (value != null && pp_min_pr_dom != null && pp_min_pr_dom !== '') {
+            return value >= Number(pp_min_pr_dom)
+          }
+
+          return true
+        })
+    }),
     onSubmit: async obj => {
       const data = []
       Object.entries(obj).forEach(([key, value]) => {
@@ -80,6 +115,32 @@ const ProdPlanningDefaultsForm = ({ _labels, access }) => {
                 maxAccess={access}
                 onClear={() => formik.setFieldValue('pp_ni_sales_benchmark', '')}
                 error={formik.touched.pp_ni_sales_benchmark && Boolean(formik.errors.pp_ni_sales_benchmark)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='pp_min_pr_dom'
+                label={_labels.pp_min_pr_dom}
+                value={formik.values.pp_min_pr_dom}
+                onChange={formik.handleChange}
+                maxAccess={access}
+                decimalScale={0}
+                allowNegative={false}
+                onClear={() => formik.setFieldValue('pp_min_pr_dom', '')}
+                error={formik.touched.pp_min_pr_dom && Boolean(formik.errors.pp_min_pr_dom)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='pp_max_pr_dom'
+                label={_labels.pp_max_pr_dom}
+                value={formik.values.pp_max_pr_dom}
+                onChange={formik.handleChange}
+                maxAccess={access}
+                decimalScale={0}
+                allowNegative={false}
+                onClear={() => formik.setFieldValue('pp_max_pr_dom', '')}
+                error={formik.touched.pp_max_pr_dom && Boolean(formik.errors.pp_max_pr_dom)}
               />
             </Grid>
           </Grid>

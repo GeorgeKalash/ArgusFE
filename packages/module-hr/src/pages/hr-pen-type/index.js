@@ -24,7 +24,7 @@ const HrPenType = () => {
 
     const response = await getRequest({
       extension: PayrollRepository.PenaltyType.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return {

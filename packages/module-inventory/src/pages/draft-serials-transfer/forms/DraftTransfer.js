@@ -19,7 +19,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -31,6 +30,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialsTransferForm'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function DraftTransfer({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -195,6 +195,13 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values?.header?.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.DraftTransfer,
+    enabled: !!recordId && !isPosted
+  })
 
   const autoDelete = async row => {
     if (!row?.draftTransferId) return true
@@ -389,6 +396,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       })
     })
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     window.close()
 
@@ -399,16 +407,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
           recordId: res?.recordId
         }
       })
-  }
-
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.DraftTransfer,
-        recordId: formik.values.recordId
-      }
-    })
   }
 
   async function onImportClick() {
@@ -472,12 +470,6 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode 
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
     },
     {
       key: 'Import',
@@ -617,6 +609,7 @@ export default function DraftTransfer({ labels, access, recordId, window }) {
       editMode={editMode}
       isParentWindow={false}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

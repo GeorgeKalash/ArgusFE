@@ -1,5 +1,5 @@
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
@@ -13,11 +13,15 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import ItemWindow from '@argus/shared-ui/src/components/Shared/ItemWindow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
-const PreviewPR2 = ({ onSelect, window }) => {
+const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
+  const { stack } = useWindow()
+  const rowsRef = useRef([])
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.PreviewPR
@@ -51,18 +55,60 @@ const PreviewPR2 = ({ onSelect, window }) => {
         return
       }
 
-      const mappedRows = selectedRows.map(row => ({
+      const mappedRows = selectedRows.map((row) => ({
+        ...row,
         itemId: row.recordId,
         sku: row.sku,
         itemName: row.name,
-        itemWeight: row.weight,
-        qty: row.qty
+        itemGroupName: row.groupName
       }))
 
       onSelect(mappedRows)
       window.close()
     }
   })
+
+  rowsRef.current = formik.values.rows
+
+  async function loadRows({ refresh = false } = {}) {
+    const res = await getRequest({
+      extension: ManufacturingRepository.ProductionRequest.preview2,
+      parameters: `_requestId=${requestId}`
+    })
+
+    if (!res?.list?.length) return
+
+    const selectedItemsMap = new Map((parentFormik.values.items || []).map(item => [item.itemId, item]))
+    const currentRowsMap = new Map((rowsRef.current || []).map(row => [row.recordId, row]))
+
+    const rows = res.list.map((item, index) => {
+      const createdDate = item?.createdDate ? formatDateFromApi(item?.createdDate) : null
+      const existing = refresh ? currentRowsMap.get(item.recordId) : null
+
+      if (existing) {
+        return {
+          ...item,
+          id: existing.id,
+          checked: existing.checked,
+          pcs: existing.pcs,
+          qty: existing.qty,
+          createdDate
+        }
+      }
+
+      const selectedItem = selectedItemsMap.get(item.recordId)
+
+      return {
+        id: index + 1,
+        ...item,
+        checked: !!selectedItem,
+        qty: selectedItem ? selectedItem.qty : item.qty,
+        createdDate
+      }
+    })
+
+    formik.setValues({ rows })
+  }
 
   const columns = [
     {
@@ -83,6 +129,21 @@ const PreviewPR2 = ({ onSelect, window }) => {
       label: labels.sku,
       name: 'sku',
       flex: 1,
+      link: {
+        enabled: true,
+        popup: row =>
+          stack({
+            Component: ItemWindow,
+            props: {
+              obj: {
+                recordId: row.itemId,
+                ...row
+              },
+              onSuccess: () => loadRows({ refresh: true })
+            },
+            nextToTitle: row?.sku
+          })
+      },
       props: {
         readOnly: true
       }
@@ -107,15 +168,6 @@ const PreviewPR2 = ({ onSelect, window }) => {
     },
     {
       component: 'textfield',
-      label: labels.itemGroupRef,
-      name: 'groupRef',
-      flex: 1,
-      props: {
-        readOnly: true
-      }
-    },
-    {
-      component: 'textfield',
       label: labels.itemGroupName,
       name: 'groupName',
       flex: 1,
@@ -125,8 +177,26 @@ const PreviewPR2 = ({ onSelect, window }) => {
     },
     {
       component: 'textfield',
+      label: labels.collection,
+      name: 'collectionName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.category,
+      name: 'categoryName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
       label: labels.weight,
-      name: 'weight',
+      name: 'itemWeight',
       flex: 1,
       props: {
         readOnly: true
@@ -143,12 +213,21 @@ const PreviewPR2 = ({ onSelect, window }) => {
     },
     {
       component: 'numberfield',
-      label: labels.qty,
-      name: 'qty',
+      label: labels.pcs,
+      name: 'pcs',
       flex: 1,
-      props: {
-        decimalScale: 2,
-        allowNegative: false
+      props: { 
+        decimalScale: 2, 
+        allowNegative: false ,
+      },
+      async onChange({ row: { update, newRow } }) {
+        let qty = 0
+
+        qty = newRow.itemWeight ? newRow.pcs * newRow.itemWeight : 0
+        
+        update({
+          qty: qty
+        })
       },
       propsReducer({ row, props }) {
         return {
@@ -156,26 +235,22 @@ const PreviewPR2 = ({ onSelect, window }) => {
           readOnly: !row.checked
         }
       }
+    },
+    {
+      component: 'numberfield',
+      label: labels.qty,
+      name: 'qty',
+      flex: 1,
+      props: {
+        decimalScale: 2,
+        allowNegative: false,
+        readOnly: true
+      }
     }
   ]
 
   useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: ManufacturingRepository.ProductionRequest.preview2,
-        parameters: ''
-      })
-
-      if (res?.list?.length > 0) {
-        const rows = res.list.map((item, index) => ({
-          id: index + 1,
-          checked: false,
-          ...item,
-          createdDate: item?.createdDate ? formatDateFromApi(item?.createdDate) : null,
-        }))
-        formik.setValues({ rows })
-      }
-    })()
+    loadRows()
   }, [])
 
   return (
@@ -187,8 +262,10 @@ const PreviewPR2 = ({ onSelect, window }) => {
             value={formik.values.rows}
             error={formik.errors.rows}
             columns={columns}
+            enableFilters={true}
             allowDelete={false}
             allowAddNewLine={false}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>

@@ -21,13 +21,11 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import ExpensesCostCenters from '@argus/shared-ui/src/components/Shared/ExpensesCostCenters'
-import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
@@ -59,6 +57,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
   const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const vatPct = parseInt(systemDefaults?.list?.find(obj => obj.key === 'vatPct')?.value) || 0
 
   const initialValues = {
     recordId: null,
@@ -78,6 +77,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     releaseStatus: null,
     cashAccountId: parseInt(cashAccountId),
     plantId: parseInt(plantId),
+    vatPct,
     expenses: [
       {
         id: 1,
@@ -182,7 +182,6 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const editMode = !!formik.values.recordId
 
   async function getPaymentOrder(recordId) {
-    const vatPct = await getDefaultVAT()
     const res = await getRequest({
       extension: FinancialRepository.PaymentOrders.get,
       parameters: `_recordId=${recordId}`
@@ -238,7 +237,6 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
 
   useEffect(() => {
     ;(async function () {
-      await getDefaultVAT()
       if (recordId) {
         await getPaymentOrder(recordId)
       } else {
@@ -247,22 +245,11 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     })()
   }, [])
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PaymentOrder,
-        recordId: formik.values.recordId
-      },
-      width: 950,
-      title: labels.WorkFlow
-    })
-  }
 
-  const onCancel = async () => {
+  const onCancel = async cancelReason => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentOrders.cancel,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({ recordId: formik?.values?.recordId, notes: cancelReason })
     })
 
     toast.success(platformLabels.Cancelled)
@@ -310,38 +297,19 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
     }))
   }
 
-  function onCancelConf() {
-    stack({
-      Component: ConfirmationDialog,
-      props: {
-        DialogText: platformLabels.CancelConf,
-        okButtonAction: onCancel,
-        fullScreen: false,
-        close: true
-      },
-      width: 400,
-      height: 150,
-      title: platformLabels.Confirmation
-    })
-  }
-
   const actions = [
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancelConf,
-      disabled: !editMode || isCancelled || isClosed
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isClosed
     },
     {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -375,17 +343,6 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
 
     return vatAmount + vatAmountValue
   }, 0)
-
-  async function getDefaultVAT() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=vatPct`
-    })
-
-    formik.setFieldValue('vatPct', parseInt(res.record.value) ?? 0)
-
-    return parseInt(res.record.value) ?? 0
-  }
 
   const columns = [
     {
@@ -426,8 +383,6 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow.isVAT) {
-          const vatPct = await getDefaultVAT()
-
           if (!newRow.amount) {
             return
           }
@@ -547,6 +502,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
       actions={actions}
       functionId={SystemFunction.PaymentOrder}
       disabledSubmit={isCancelled || isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -587,7 +543,8 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                     required
                     readOnly={isClosed || isCancelled}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('currencyId', newValue?.recordId || null)
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
@@ -605,7 +562,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                     required
                     readOnly
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('accountType', newValue?.key || null)
                     }}
                     error={formik.touched.accountType && Boolean(formik.errors.accountType)}
@@ -617,7 +574,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                     label={labels.date}
                     value={formik.values.date}
                     required
-                    onChange={(e, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('date', newValue)
                     }}
                     onClear={() => formik.setFieldValue('date', null)}
@@ -659,7 +616,8 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('plantId', newValue?.recordId || null)
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -797,7 +755,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
           columns={columns}
           allowDelete={!isClosed && !isCancelled}
           allowAddNewLine={!isClosed && !isCancelled}
-        />
+          maxAccess={maxAccess}/>
       </VertLayout>
     </FormShell>
   )

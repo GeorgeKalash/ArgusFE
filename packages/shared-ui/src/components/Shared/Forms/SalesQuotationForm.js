@@ -23,7 +23,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import {
@@ -287,6 +286,15 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -347,6 +355,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
           rowTaxDetails = details
         }
 
+        const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
         const filteredMU = measurements?.filter(item => item.msId === itemInfo?.msId)
         getFilteredMU(newRow?.itemId, itemInfo?.msId)
 
@@ -365,6 +374,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
           msId: itemInfo?.msId,
           muRef: filteredMU?.[0]?.reference,
           muId: filteredMU?.[0]?.recordId,
+          decimals: measurementSchedule?.decimals,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
@@ -418,7 +428,14 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
-      onChange({ row: { update, newRow } }) {
+      props: {
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
+      },
+      async onChange({ row: { update, newRow } }) {
         getFilteredMU(newRow?.itemId, newRow?.msId)
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
@@ -645,16 +662,6 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     window.close()
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.SalesQuotation,
-        recordId: formik.values.recordId
-      }
-    })
-  }
-
   const onClose = async () => {
     const res = await postRequest({
       extension: SaleRepository.SalesQuotations.close,
@@ -682,12 +689,6 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -725,7 +726,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed || !editMode || !isReleased
-    },
+    }
   ]
 
   async function fillForm(sqHeader, sqItems, clientDiscount) {
@@ -979,7 +980,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? roundTo(itemPriceRow?.qty, 2) : 0,
+      qty: itemPriceRow?.qty ? roundTo(itemPriceRow?.qty, newRow?.decimals || 2) : 0,
       volume: itemPriceRow?.volume ? roundTo(itemPriceRow.volume, 2) : 0,
       weight: roundTo(itemPriceRow?.weight, 2),
       basePrice: itemPriceRow?.basePrice ? roundTo(itemPriceRow.basePrice, 5) : 0,
@@ -1261,6 +1262,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
       actions={actions}
       editMode={editMode}
       disabledSubmit={isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -1407,6 +1409,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
                       formik.setFieldValue('spId', newValue?.recordId)
                     }}
                     error={formik.touched.spId && Boolean(formik.errors.spId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1458,6 +1461,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
                       formik.setFieldValue('szId', newValue?.recordId)
                     }}
                     error={formik.touched.szId && Boolean(formik.errors.szId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
@@ -1656,7 +1660,7 @@ export default function SalesQuotationForm({ recordId, currency, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly maxAccess={maxAccess} decimalScale={5}/>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField

@@ -22,8 +22,8 @@ const OpeningCost = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.OpeningCost.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}&_sortBy=year desc`
+      extension: InventoryRepository.OpeningCost.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -43,7 +43,7 @@ const OpeningCost = () => {
     filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.OpeningCost.qry,
+    endpointId: InventoryRepository.OpeningCost.page,
     datasetId: ResourceIds.InventoryOpeningCosts,
     filter: {
       filterFn: fetchWithFilter

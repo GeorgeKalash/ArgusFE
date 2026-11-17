@@ -22,6 +22,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function EarnedLeavesForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -84,6 +85,13 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.EarnedLeave,
+    enabled: !!recordId && !isPosted
+  })
   const preview = formik.values.items.length > 0
 
   const getData = async recordId => {
@@ -121,6 +129,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
     getData(res?.recordId)
   }

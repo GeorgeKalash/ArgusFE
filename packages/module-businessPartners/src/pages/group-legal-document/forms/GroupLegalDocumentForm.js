@@ -1,9 +1,9 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
@@ -53,19 +53,17 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record && record.incId && record.groupId && recordId) {
-          const res = await getRequest({
-            extension: BusinessPartnerRepository.GroupLegalDocument.get,
-            parameters: `_groupId=${record?.groupId}&_incId=${record?.incId}`
-          })
+      if (record && record.incId && record.groupId && recordId) {
+        const res = await getRequest({
+          extension: BusinessPartnerRepository.GroupLegalDocument.get,
+          parameters: `_groupId=${record?.groupId}&_incId=${record?.incId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            recordId: res.record.groupId * 10000 + res.record.incId
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          recordId: res.record.groupId * 10000 + res.record.incId
+        })
+      }
     })()
   }, [])
 

@@ -1,24 +1,19 @@
 import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-import { Grid, Box } from '@mui/material'
-
+import { Grid } from '@mui/material'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
-
 import BarcodesForm from '@argus/shared-ui/src/components/Shared/Forms/BarcodesForm'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
@@ -38,14 +33,12 @@ const IvBarcodes = () => {
     })
   })
 
-  /* ===================== DATA ===================== */
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.Barcodes.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${skuValue || 0}`
+      extension: InventoryRepository.Barcodes.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_itemId=${skuValue || 0}`
     })
 
     return { ...response, _startAt }
@@ -71,15 +64,13 @@ const IvBarcodes = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Barcodes.qry,
+    endpointId: InventoryRepository.Barcodes.page,
     datasetId: ResourceIds.Barcodes,
     search: {
       endpointId: InventoryRepository.Barcodes.snapshot,
       searchFn: fetchWithSearch
     }
   })
-
-  /* ===================== GRID ===================== */
 
   const columns = [
     { field: 'barcode', headerName: _labels.barcode, flex: 1 },
@@ -90,8 +81,6 @@ const IvBarcodes = () => {
     { field: 'scaleDescription', headerName: _labels.scaleDescription, flex: 1 },
     { field: 'posDescription', headerName: _labels.posDescription, flex: 1 }
   ]
-
-  /* ===================== ACTIONS ===================== */
 
   const openForm = obj => {
     stack({

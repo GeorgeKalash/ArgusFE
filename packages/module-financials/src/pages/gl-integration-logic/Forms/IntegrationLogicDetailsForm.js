@@ -154,8 +154,12 @@ export default function IntegrationLogicDetailsForm({ recordId, labels, maxAcces
                 label={labels.tag}
                 values={formik.values}
                 valueField='key'
-                displayField='value'
+                displayField={['key', 'value']}
                 required
+                columnsInDropDown={[
+                  { key: 'key', value: 'ID' },
+                  { key: 'value', value: 'Name' }
+                ]}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('tagId', newValue?.key || null)

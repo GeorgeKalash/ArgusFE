@@ -106,49 +106,45 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: InventoryRepository.Category.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: InventoryRepository.Category.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
 
-          formik.setFieldValue('recordId', response.recordId)
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: response.recordId,
-            ref: formik.values.caRef,
-            name: formik.values.name
-          }))
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        invalidate()
-      } catch (error) {}
+        formik.setFieldValue('recordId', response.recordId)
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: response.recordId,
+          ref: formik.values.caRef,
+          name: formik.values.name
+        }))
+      } else {
+        toast.success(platformLabels.Edited)
+      }
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.Category.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.Category.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          setStore(prevStore => ({
-            ...prevStore,
-            ref: res.record.caRef,
-            name: res.record.name
-          }))
+        setStore(prevStore => ({
+          ...prevStore,
+          ref: res.record.caRef,
+          name: res.record.name
+        }))
 
-          formik.setValues(res.record)
-        }
-      } catch (error) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

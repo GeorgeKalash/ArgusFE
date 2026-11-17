@@ -113,7 +113,7 @@ export default function DisassemblyForm({ store, setStore, window, castingId }) 
     if (!metalInfo?.metalId && !metalInfo?.metalColorId) return
 
     const ScrapMetals = await getRequest({
-      extension: FoundryRepository.MetalScrap.qry,
+      extension: FoundryRepository.Scrap.qry,
       parameters: `_metalId=${metalInfo?.metalId}&_metalColorId=${metalInfo?.metalColorId}`
     })
 

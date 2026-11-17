@@ -25,8 +25,8 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import DamageForm from '@argus/shared-ui/src/components/Shared/Forms/DamageForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function WorksheetForm({ labels, maxAccess: access, setStore, store, joInvalidate }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -157,15 +157,13 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
 
   const isPosted = formik.values.status === 3
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId,
-        recordId: formik.values.recordId
-      }
-    })
-  }
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: resourceId,
+    enabled: !!recordId && !isPosted
+  })
+
 
   const onPost = async () => {
     const data = {
@@ -179,6 +177,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
       await getData()
       joInvalidate ? joInvalidate(true) : invalidate()
       toast.success(platformLabels.Posted)
+      await releaseLock()
     })
   }
 
@@ -195,12 +194,6 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
   }
 
   const actions = [
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode || isPosted
-    },
     {
       key: 'Unlocked',
       condition: !isPosted,
@@ -273,6 +266,7 @@ export default function WorksheetForm({ labels, maxAccess: access, setStore, sto
       actions={actions}
       previewReport={true}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

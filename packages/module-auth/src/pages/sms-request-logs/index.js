@@ -67,25 +67,26 @@ const SmsRequestLog = () => {
           }}
           labels={labels}
           leftSection={
-            <Grid item xs={7}>
+            <Grid item xs={9}>
               <Grid container spacing={2}>
-                <Grid item xs={5}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={SystemRepository.KeyValueStore}
                     parameters={`_dataset=${datasetId}&_language=${languageId}`}
                     label={labels.Module}
                     name='moduleId'
+                    maxAccess={access}
                     values={values}
                     valueField='key'
                     displayField='value'
                     required
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       setValues({ moduleId: newValue?.key || '10', resourceId: '' })
                     }}
                     sx={{ pr: 2 }}
                   />
                 </Grid>
-                <Grid item xs={7}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={SystemRepository.ModuleClassRES.qry}
                     parameters={`_moduleId=${values.moduleId}&_filter=`}
@@ -95,7 +96,8 @@ const SmsRequestLog = () => {
                     required
                     valueField='key'
                     displayField='value'
-                    onChange={(event, newValue) => {
+                    maxAccess={access}
+                    onChange={(_, newValue) => {
                       onChange(newValue?.key || '')
                       setValues({ ...values, resourceId: newValue?.key || '' })
                     }}

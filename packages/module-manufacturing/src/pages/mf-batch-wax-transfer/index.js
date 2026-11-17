@@ -212,6 +212,7 @@ export default function BatchWaxTransfer() {
               value={totalQty}
               label={labels?.totalQty}
               readOnly
+              maxAccess={maxAccess}
             />
           </Grid>
         </Grid>

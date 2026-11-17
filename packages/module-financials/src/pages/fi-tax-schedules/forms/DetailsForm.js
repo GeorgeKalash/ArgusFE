@@ -156,7 +156,7 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
                 decimalScale: 2
               }
             ]}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </FormShell>

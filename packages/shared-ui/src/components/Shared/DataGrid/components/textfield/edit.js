@@ -1,9 +1,4 @@
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import IconButton from '@mui/material/IconButton'
-import PercentIcon from '@mui/icons-material/Percent'
-import PinIcon from '@mui/icons-material/Pin'
-import InputAdornment from '@mui/material/InputAdornment'
-import ClearIcon from '@mui/icons-material/Clear'
 import styles from './textfield.module.css'
 
 export default function TextFieldEdit({ id, column: { props, field, ...column }, value, update, updateRow }) {

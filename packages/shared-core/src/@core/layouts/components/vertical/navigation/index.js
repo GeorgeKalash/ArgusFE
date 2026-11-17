@@ -22,6 +22,7 @@ import { Remove } from '@mui/icons-material'
 import { Tooltip } from '@mui/material'
 import Link from 'next/link'
 import UserDropdown from './UserDropdown'
+import NotificationRing from './NotificationRing'
 import Image from 'next/image'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -428,7 +429,17 @@ const Navigation = props => {
                 />
               </Link>
             )}
-            {!navCollapsed && <UserDropdown settings={settings} />}
+            {!navCollapsed && (
+              <>
+                <NotificationRing
+                  labels={{
+                    whatsNew: platformLabels.whatsNew,
+                    otherModules: platformLabels.otherModules
+                  }}
+                />
+                <UserDropdown settings={settings} />
+              </>
+            )}
           </Box>
         </Box>
         <Box className={styles['menu-search-box']}>

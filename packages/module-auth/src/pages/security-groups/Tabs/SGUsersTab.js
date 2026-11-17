@@ -134,6 +134,7 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
             value={formik.values.groups}
             error={formik.errors.groups}
             columns={columns}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>

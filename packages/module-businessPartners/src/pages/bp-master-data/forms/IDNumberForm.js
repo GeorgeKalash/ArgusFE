@@ -115,7 +115,7 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
             name='rows'
             allowDelete={false}
             allowAddNewLine={false}
-          />
+            maxAccess={maxAccess}/>
         </Grow>
       </VertLayout>
     </Form>

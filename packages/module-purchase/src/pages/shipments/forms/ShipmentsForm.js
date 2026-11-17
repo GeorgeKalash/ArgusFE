@@ -23,7 +23,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
@@ -32,6 +31,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ShipmentsForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -195,6 +195,13 @@ export default function ShipmentsForm({ recordId, window }) {
   const isPosted = formik.values.header?.status === 3
   const editMode = !!formik.values.header?.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.Shipments,
+    enabled: !!recordId && !isPosted
+  })
+
   async function refetchForm(recordId) {
     const res = await getShipment(recordId)
 
@@ -265,6 +272,7 @@ export default function ShipmentsForm({ recordId, window }) {
     })
 
     toast.success(platformLabels.Posted)
+    await releaseLock()
     invalidate()
 
     await refetchForm(formik.values.recordId)
@@ -289,16 +297,6 @@ export default function ShipmentsForm({ recordId, window }) {
       }
     })()
   }, [])
-
-  const onWorkFlow = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.Shipment,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
 
   async function openGenerateInvoiceForm() {
     stack({
@@ -327,12 +325,6 @@ export default function ShipmentsForm({ recordId, window }) {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlow,
       disabled: !editMode
     },
     {
@@ -419,6 +411,15 @@ export default function ShipmentsForm({ recordId, window }) {
     })
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   async function getFilteredMU(itemId, msId) {
     if (!itemId) return
 
@@ -435,7 +436,6 @@ export default function ShipmentsForm({ recordId, window }) {
         store: unpostedOrders?.current?.orders,
         displayField: 'reference',
         valueField: 'reference',
-        readOnly: isPosted,
         mapping: [
           { from: 'poId', to: 'poId' },
           { from: 'reference', to: 'poRef' }
@@ -511,7 +511,9 @@ export default function ShipmentsForm({ recordId, window }) {
         //lot store
 
         getFilteredMU(newRow?.itemId, newRow?.msId)
+        const measurementSchedule = await getMeasurementObject(newRow?.msId)
         update({
+          decimals: measurementSchedule?.decimals,
           muRef: filteredMeasurements?.current?.[0]?.reference || null,
           muId: filteredMeasurements?.current?.[0]?.recordId || null,
           muQty: filteredMeasurements?.current?.[0]?.qty || 0,
@@ -532,7 +534,6 @@ export default function ShipmentsForm({ recordId, window }) {
       label: labels.MU,
       name: 'muRef',
       props: {
-        readOnly: isPosted,
         store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
@@ -570,7 +571,11 @@ export default function ShipmentsForm({ recordId, window }) {
       label: labels.qty,
       name: 'shippedNowQty',
       props: {
-        readOnly: isPosted
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
       },
       updateOn: 'blur',
       async onChange({ row: { update, oldRow, newRow } }) {
@@ -603,7 +608,6 @@ export default function ShipmentsForm({ recordId, window }) {
         endpointId: InventoryRepository.Site.qry,
         displayField: 'name',
         valueField: 'recordId',
-        readOnly: isPosted,
         mapping: [
           { from: 'recordId', to: 'siteId' },
           { from: 'reference', to: 'siteRef' },
@@ -653,6 +657,7 @@ export default function ShipmentsForm({ recordId, window }) {
       functionId={SystemFunction.Shipment}
       disabledSubmit={isPosted}
       previewReport={editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -834,6 +839,7 @@ export default function ShipmentsForm({ recordId, window }) {
             maxAccess={maxAccess}
             name='shippedItems'
             allowDelete={!isPosted}
+            disabled={isPosted}
             allowAddNewLine={!isPosted}
           />
         </Grow>
@@ -846,6 +852,7 @@ export default function ShipmentsForm({ recordId, window }) {
                 maxAccess={maxAccess}
                 value={totalQty}
                 readOnly
+                decimalScale={5}
               />
             </Grid>
             <Grid item xs={3}>

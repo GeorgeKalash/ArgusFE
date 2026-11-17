@@ -20,7 +20,6 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import SalesTrxForm from '@argus/shared-ui/src/components/Shared/SalesTrxForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -50,7 +49,6 @@ import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/Mu
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
@@ -61,7 +59,6 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
@@ -71,16 +68,16 @@ import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 import CommissionDetailsForm from '@argus/module-sales/src/pages/sa-trx/[functionId]/Forms/CommissionDetailsForm'
 import FIReceiptVoucherForm from './FIReceiptVoucherForm'
 import { useStackValueLink } from '@argus/shared-hooks/src/hooks/useStackValueLink'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import BarcodesTable from '@argus/shared-ui/src/components/Shared/BarcodesTable'
 
 export default function SaleTransactionForm({
   recordId,
   functionId,
   window,
-  lockRecord,
   getResourceId
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -93,6 +90,7 @@ export default function SaleTransactionForm({
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
   const filteredMeasurements = useRef([])
+  const lastBarcodeSearch = useRef('')
   const [taxDetails, setTaxDetails] = useState([])
 
   const { labels, access } = useResourceParams({
@@ -139,7 +137,7 @@ export default function SaleTransactionForm({
   })
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.SalesTransaction.qry
+    endpointId: SaleRepository.SalesTransaction.page
   })
 
   const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
@@ -416,6 +414,13 @@ export default function SaleTransactionForm({
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
+  const { releaseLock } = useRecordLock({
+    recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: getResourceId(parseInt(functionId)),
+    enabled: !!recordId && !isPosted
+  })
+
   function buildCalculatedTaxDetails(row, taxDetailsList = []) {
     return (taxDetailsList || []).map(td => {
       const calculatedAmount = calcVatAmountPerTaxDetail(
@@ -444,6 +449,26 @@ export default function SaleTransactionForm({
     })
   }
 
+  async function handleBarcode(update, newRow) {
+    if (!newRow?.barcode) return
+
+    const ItemConvertPrice = await getItemConvertPrice2(newRow)
+
+    if (!ItemConvertPrice) {
+      update({ barcode: null })
+
+      return
+    }
+
+    const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
+    const itemInfo = await getItem(ItemConvertPrice?.itemId)
+    getFilteredMU(itemInfo?.itemId, itemInfo?.msId)
+
+    const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+
+    await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true, defaultMu)
+  }
+
   async function barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, setItemInfo, defaultMu) {
     let result = {}
     const weight = itemPhysProp?.weight || 0
@@ -451,7 +476,7 @@ export default function SaleTransactionForm({
     const isMetal = itemPhysProp?.isMetal ?? false
     const metalId = itemPhysProp?.metalId ?? null
     const baseLaborPrice = ItemConvertPrice?.baseLaborPrice ?? 0
-    const measurementSchedule = await getMeasurementObject(newRow?.msId)
+    const measurementSchedule = await getMeasurementObject(itemInfo?.msId ?? newRow?.msId)
     const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
     const metalPrice = formik?.values?.header?.KGmetalPrice ?? 0
     const basePrice = (metalPrice * metalPurity) / 1000
@@ -466,10 +491,10 @@ export default function SaleTransactionForm({
     const effectiveTaxId = !formik.values.header.isVattable
       ? null
       : formik.values.header.taxId
-      ? itemInfo.taxId
+      ? itemInfo?.taxId
         ? formik.values.header.taxId
         : null
-      : itemInfo.taxId ?? null
+      : itemInfo?.taxId ?? null
 
 
     if (parseFloat(unitPrice) < parseFloat(minPrice)) {
@@ -480,16 +505,17 @@ export default function SaleTransactionForm({
       result = {
         ...result,
         sku: ItemConvertPrice?.sku,
-        barcode: ItemConvertPrice?.barcode,
+        barcode: ItemConvertPrice?.barcode || newRow?.barcode || '',
         itemName: ItemConvertPrice?.itemName,
-        itemId: ItemConvertPrice?.itemId
+        itemId: ItemConvertPrice?.itemId,
+        trackBy: itemInfo?.trackBy
       }
     }
     let categoryName
-    if (itemInfo.categoryId) {
+    if (itemInfo?.categoryId) {
       const category = await getRequest({
         extension: InventoryRepository.Category.get,
-        parameters: `_recordId=${itemInfo.categoryId}`
+        parameters: `_recordId=${itemInfo?.categoryId}`
       })
       categoryName = category?.record?.name
     }
@@ -516,12 +542,12 @@ export default function SaleTransactionForm({
       upo: ItemConvertPrice?.upo || 0,
       priceType: ItemConvertPrice?.priceType || 1,
       msId: itemInfo?.msId,
-      categoryId: itemInfo.categoryId,
+      categoryId: itemInfo?.categoryId,
       categoryName,
       muRef: defaultMu?.reference || '',
       muId: defaultMu?.recordId || null,
+      muQty: defaultMu?.qty,
       mdAmount: formik.values.header.maxDiscount ? formik.values.header.maxDiscount : 0,
-      mdValue: 0,
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
       mdValue: 0,
@@ -608,26 +634,52 @@ export default function SaleTransactionForm({
 
   const columns = [
     {
+      component: 'button',
+      name: 'barcodeLookup',
+      label: ' ',
+      props: {
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: row => {
+          return {
+            disabled: !formik.values.header.clientId
+          }
+        }
+      },
+      onClick: (e, row, update, updateRow) => {
+        stack({
+          Component: BarcodesTable,
+          props: {
+            labels,
+            maxAccess,
+            initialSearch: lastBarcodeSearch.current,
+            onSearchChange: term => {
+              lastBarcodeSearch.current = term || ''
+            },
+            onSelect: selected => {
+              if (!selected?.barcode) return
+
+              if (selected.isInactive) {
+                stackError({ message: labels.inactiveItem })
+
+                return
+              }
+
+              handleBarcode(changes => updateRow({ id: row.id, changes, focusField: 'qty' }), {
+                ...row,
+                barcode: selected.barcode
+              })
+            }
+          }
+        })
+      }
+    },
+    {
       component: 'textfield',
       label: labels.barcode,
       name: 'barcode',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        if (!newRow?.barcode) return
-
-        const ItemConvertPrice = await getItemConvertPrice2(newRow)
-        if (ItemConvertPrice) {
-          const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
-          const itemInfo = await getItem(ItemConvertPrice?.itemId)
-          getFilteredMU(itemInfo?.itemId, itemInfo?.msId)
-
-          const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
-          await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true, defaultMu)
-        } else {
-          update({
-            barcode: null
-          })
-        }
+        await handleBarcode(update, newRow)
       }
     },
     {
@@ -1052,15 +1104,6 @@ export default function SaleTransactionForm({
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: functionId,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
 
   const onPost = async () => {
     await postRequest({
@@ -1070,6 +1113,7 @@ export default function SaleTransactionForm({
 
     toast.success(platformLabels.Posted)
     invalidate()
+    await releaseLock()
     window.close()
   }
 
@@ -1079,30 +1123,7 @@ export default function SaleTransactionForm({
       record: JSON.stringify(formik.values.header)
     }).then(res => {
       toast.success(platformLabels.Posted)
-      lockRecord({
-        recordId: res.recordId,
-        reference: formik.values.header.reference,
-        resourceId: getResourceId(parseInt(functionId)),
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: getResourceId(parseInt(functionId)),
-            recordId,
-            reference: formik.values.header.reference
-          })
-          refetchForm(res.recordId)
-        },
-        isAlreadyLocked: name => {
-          window.close()
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              title: platformLabels.Dialog
-            },
-            title: platformLabels.Dialog
-          })
-        }
-      })
+      refetchForm(res.recordId)
       invalidate()
     })
   }
@@ -1164,12 +1185,6 @@ export default function SaleTransactionForm({
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -1347,20 +1362,6 @@ export default function SaleTransactionForm({
         taxes: saTrxTaxes
       }
     })
-
-    !formik.values.recordId &&
-      lockRecord({
-        recordId: saTrxHeader.recordId,
-        reference: saTrxHeader.reference,
-        resourceId: getResourceId(parseInt(functionId)),
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: getResourceId(parseInt(functionId)),
-            recordId: saTrxHeader.recordId,
-            reference: saTrxHeader.reference
-          })
-        }
-      })
   }
 
   async function getSalesTransactionPack(transactionId) {
@@ -1507,7 +1508,7 @@ export default function SaleTransactionForm({
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${
         formik.values.header.currencyId
-      }&_plId=${formik.values.header.plId}&_muId=${muId || 0}`
+      }&_plId=${formik.values.header.plId || 0}&_muId=${muId || 0}`
     })
 
     return res?.record
@@ -1516,7 +1517,7 @@ export default function SaleTransactionForm({
   async function getItemConvertPrice2(row) {
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get2,
-      parameters: `_barcode=${row?.barcode}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}&_exRate=${formik.values.header.exRate}&_rateCalcMethod=${formik.values.header.rateCalcMethod}`
+      parameters: `_barcode=${row?.barcode}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId || 0}&_exRate=${formik.values.header.exRate}&_rateCalcMethod=${formik.values.header.rateCalcMethod}`
     })
 
     return res?.record
@@ -2052,6 +2053,7 @@ export default function SaleTransactionForm({
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>
@@ -2408,7 +2410,7 @@ export default function SaleTransactionForm({
             }}
             name='items'
             showCounterColumn={true}
-            columns={columns}
+            columns={columns.filter(col => !(col.name === 'barcodeLookup' && isPosted))}
             maxAccess={maxAccess}
             allowDelete={!isPosted}
             allowAddNewLine={!isPosted}

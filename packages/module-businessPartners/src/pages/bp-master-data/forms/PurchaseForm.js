@@ -64,10 +64,10 @@ export default function PurchaseForm({ store, labels, maxAccess }) {
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <CustomTextField name='bpRef' label={labels.bpRef} value={store?.bp?.ref} readOnly />
+              <CustomTextField name='bpRef' label={labels.bpRef} value={store?.bp?.ref} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='bpName' label={labels.bpName} value={store?.bp?.name} readOnly />
+              <CustomTextField name='bpName' label={labels.bpName} value={store?.bp?.name} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox

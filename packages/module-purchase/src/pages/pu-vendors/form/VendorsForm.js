@@ -1,4 +1,4 @@
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -278,6 +278,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 label={labels.tradeDiscount}
                 value={formik.values.tradeDiscount}
                 onChange={e => formik.setFieldValue('tradeDiscount', e.target.value)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

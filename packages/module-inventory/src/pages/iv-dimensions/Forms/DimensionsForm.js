@@ -78,6 +78,7 @@ export default function DimensionsForm({ labels, maxAccess, id }) {
                 readOnly={editMode}
                 onClear={() => formik.setFieldValue('id', null)}
                 error={formik.touched.id && Boolean(formik.errors.id)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

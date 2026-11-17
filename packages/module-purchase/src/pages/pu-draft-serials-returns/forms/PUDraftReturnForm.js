@@ -22,7 +22,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
@@ -40,6 +39,7 @@ import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsC
 import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/PurchaseTransactionForm'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
 
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function PUDraftReturnForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -262,6 +262,13 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.header?.status === 3
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.header?.reference,
+    resourceId: ResourceIds.PUDraftSerialReturns,
+    enabled: !!recordId && !isPosted
+  })
 
   const FilteredListByTaxId = (store, taxId) => {
     if (Array.isArray(store)) {
@@ -544,15 +551,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
     }
   ]
 
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.PUDraftSerialReturn,
-        recordId: formik.values?.recordId
-      }
-    })
-  }
 
   async function onImportClick() {
     stack({
@@ -580,6 +578,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
       })
     }).then(async res => {
       toast.success(platformLabels.Posted)
+      await releaseLock()
       window.close();
       invalidate()
       openPurchaseReturn(res?.recordId)
@@ -597,12 +596,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
   }
 
   const actions = [
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
     {
       key: 'Import',
       condition: true,
@@ -923,7 +916,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
   return (
     <FormShell
       resourceId={ResourceIds.PUDraftSerialReturns}
-      functionId={SystemFunction.DraftInvoiceReturn}
+      functionId={SystemFunction.PUDraftSerialReturn}
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
@@ -931,6 +924,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, window }) 
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted && !editMode}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Fixed>

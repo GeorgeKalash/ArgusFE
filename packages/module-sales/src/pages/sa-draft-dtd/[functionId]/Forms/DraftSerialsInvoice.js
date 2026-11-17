@@ -121,6 +121,7 @@ export default function DraftSerialsInvoiceForm({ labels, maxAccess, recordId, f
                   formik.setFieldValue('spId', newValue?.recordId)
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

@@ -21,10 +21,10 @@ import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDateP
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 export default function CycleCountsForm({ labels, maxAccess: access, setStore, store, plantId }) {
   const { recordId } = store
@@ -35,7 +35,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   const editMode = !!store.recordId
 
   const invalidate = useInvalidate({
-    endpointId: SCRepository.StockCount.qry
+    endpointId: SCRepository.StockCount.page
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -104,15 +104,6 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     }
   })
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.StockCount,
-        recordId: formik.values.recordId
-      }
-    })
-  }
 
   async function refetchForm(recordId) {
     const res = await getRequest({
@@ -136,6 +127,14 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
 
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
+
+
+  const { releaseLock } = useRecordLock({
+    recordId: recordId,
+    reference: formik?.values?.reference,
+    resourceId: ResourceIds.StockCounts,
+    enabled: !!recordId && !isClosed
+  })
 
   const onClose = async () => {
     const res = await postRequest({
@@ -167,6 +166,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
 
     toast.success(platformLabels.Posted)
     invalidate()
+    await releaseLock()
     refetchForm(res.recordId)
   }
 
@@ -182,12 +182,6 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   }
 
   const actions = [
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
     {
       key: 'Close',
       condition: !isClosed,
@@ -224,12 +218,14 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   return (
     <FormShell
       resourceId={ResourceIds.StockCounts}
+      functionId={SystemFunction.StockCount}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
       disabledSubmit={isPosted || isClosed}
       disableSubmitAndClear={isPosted || isClosed}
+      isWorkFlow={true}
     >
       <VertLayout>
         <Grow>
@@ -299,6 +295,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                   formik.setFieldValue('plantId', newValue ? newValue?.recordId : null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

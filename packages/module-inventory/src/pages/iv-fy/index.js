@@ -80,6 +80,7 @@ const IvFy = () => {
                 valueField='fiscalYear'
                 displayField='fiscalYear'
                 values={fiscalYear}
+                maxAccess={access}
                 onChange={(_, newValue) => {
                   setFiscalYear({
                     fiscalYear: newValue.fiscalYear

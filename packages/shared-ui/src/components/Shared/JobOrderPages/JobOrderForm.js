@@ -18,7 +18,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -27,11 +26,11 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import FormGrid from '@argus/shared-ui/src/components/form'
 import Samples from '@argus/shared-ui/src/components/Shared/JobOrderPages/Samples'
 import SerialsLots from '@argus/shared-ui/src/components/Shared/JobOrderPages/SerialsLots'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function JobOrderForm({
   labels,
@@ -40,7 +39,6 @@ export default function JobOrderForm({
   store,
   setRefetchRouting,
   invalidate,
-  lockRecord,
   refetchJob,
   setRefetchJob,
   window
@@ -50,9 +48,9 @@ export default function JobOrderForm({
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const recordId = store?.recordId
-  const [imageSource, setImageSource] = useState(null)
+  const { systemDefaults } = useContext(DefaultsContext)
+  const imageSource = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mf_jo_pic_source')?.value) || 3
   const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
-  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -178,16 +176,10 @@ export default function JobOrderForm({
     {
       key: 'Cancel',
       condition: true,
-      onClick: () => {
-        confirmation(platformLabels.CancelConf, platformLabels.Confirmation, onCancel)
-      },
-      disabled: !editMode || isCancelled || isPosted
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
+      onClick: 'onCancelReason',
+      action: onCancel,
+      isCancelled,
+      disabled: !editMode || isPosted
     },
     {
       key: 'GL',
@@ -272,13 +264,12 @@ export default function JobOrderForm({
     await refetchForm(res.recordId)
     setRefetchRouting(true)
   }
-  async function onCancel() {
+  async function onCancel(cancelReason) {
     const res = await postRequest({
       extension: ManufacturingRepository.MFJobOrder.cancel,
       record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values.date),
-        deliveryDate: formik.values.deliveryDate ? formatDateToApi(formik.values.deliveryDate) : null
+        recordId: formik?.values?.recordId,
+        notes: cancelReason
       })
     })
     toast.success(platformLabels.Cancelled)
@@ -299,47 +290,19 @@ export default function JobOrderForm({
       })
     })
     toast.success(platformLabels.Posted)
-    lockRecord({
-      recordId: res.recordId,
-      reference: formik.values.reference,
-      resourceId: ResourceIds.MFJobOrders,
-      onSuccess: () => {
-        addLockedScreen({
-          resourceId: ResourceIds.MFJobOrders,
-          recordId: res.recordId,
-          reference: formik.values.reference
-        })
-        refetchForm(res.recordId)
-        setStore(prevStore => ({
-          ...prevStore,
-          isPosted: true
-        }))
-      },
-      isAlreadyLocked: name => {
-        window.close()
-        stack({
-          Component: NormalDialog,
-          props: {
-            DialogText: `${platformLabels.RecordLocked} ${name}`,
-            width: 600,
-            height: 200,
-            title: platformLabels.Dialog
-          }
-        })
-      }
-    })
+    
+    refetchForm(res.recordId)
+    setStore(prevStore => ({
+      ...prevStore,
+      isPosted: true
+    }))
+
+    await releaseLock()
 
     invalidate()
   }
-  async function onWorkFlowClick() {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.JobOrder,
-        recordId: formik.values.recordId
-      }
-    })
-  }
+
+  
   function openSerials() {
     stack({
       Component: SerialsLots,
@@ -405,22 +368,15 @@ export default function JobOrderForm({
       ...rest
     }))
 
-    !formik.values.recordId &&
-      lockRecord({
-        recordId: jobOrder?.recordId,
-        reference: jobOrder?.reference,
-        resourceId: ResourceIds.MFJobOrders,
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: ResourceIds.MFJobOrders,
-            recordId: jobOrder?.recordId,
-            reference: jobOrder?.reference
-          })
-        }
-      })
-
     return jobOrder?.reference
   }
+
+  const { releaseLock } = useRecordLock({
+    recordId,
+    reference: formik.values.reference,
+    resourceId: ResourceIds.MFJobOrders,
+    enabled: !!recordId && !isPosted
+  })
 
   async function getRouting(recordId) {
     if (!recordId) return
@@ -651,15 +607,7 @@ export default function JobOrderForm({
   }, [refetchJob])
 
   useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=mf_jo_pic_source`
-      })
-      setImageSource(res?.record?.value || 3)
-
-      if (recordId) await refetchForm(recordId)
-    })()
+    if (recordId) refetchForm(recordId)
   }, [])
 
   return (
@@ -671,6 +619,7 @@ export default function JobOrderForm({
       previewReport={editMode}
       actions={actions}
       editMode={editMode}
+      isWorkFlow={true}
       disabledSubmit={isCancelled || isPosted}
       disabledSavedClear={isCancelled || isPosted}
     >
@@ -786,7 +735,7 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item>
                       <ResourceLookup
-                        endpointId={InventoryRepository.Item.snapshot5}
+                        endpointId={InventoryRepository.Item.snapshot7}
                         name='itemId'
                         readOnly={isCancelled || isPosted}
                         label={labels.item}
@@ -846,6 +795,7 @@ export default function JobOrderForm({
                         onChange={e => formik.setFieldValue('expectedQty', e.target.value)}
                         onClear={() => formik.setFieldValue('expectedQty', 0)}
                         error={formik.touched.expectedQty && Boolean(formik.errors.expectedQty)}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item>
@@ -867,6 +817,7 @@ export default function JobOrderForm({
                           formik.setFieldValue('expectedQty', 0)
                         }}
                         error={formik.touched.expectedPcs && Boolean(formik.errors.expectedPcs)}
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item>
@@ -928,6 +879,7 @@ export default function JobOrderForm({
                         label={labels.itemWeight}
                         value={formik.values.stdWeight}
                         readOnly
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -945,6 +897,7 @@ export default function JobOrderForm({
                         label={labels.avgWeight}
                         value={formik.values.avgWeight}
                         readOnly
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                     <Grid item xs={12}>

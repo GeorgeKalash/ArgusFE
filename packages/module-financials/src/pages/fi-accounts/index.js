@@ -48,12 +48,10 @@ const MfAccounts = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
-    var parameters = defaultParams
 
     const response = await getRequest({
       extension: FinancialRepository.Account.page,
-      parameters: parameters
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }

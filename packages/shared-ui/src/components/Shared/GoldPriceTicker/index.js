@@ -3,23 +3,25 @@ import { useEffect, useRef, useState, createElement as h } from 'react'
 const API_BASE = 'https://api.gold-api.com/price'
 const GRAMS_PER_OZ = 31.1034768
 
-const REFRESH_MS = 30000 
+const REFRESH_MS = 5000
+
+async function fetchGoldBody() {
+  const res = await fetch(`${API_BASE}/XAU`)
+  if (!res.ok) throw new Error('Failed to fetch XAU')
+
+  return res.json()
+}
 
 async function fetchSpotUSD(symbol) {
   const res = await fetch(`${API_BASE}/${symbol}`)
   if (!res.ok) throw new Error(`Failed to fetch ${symbol}`)
   const data = await res.json()
 
-  return data.price 
+  return data.price
 }
 
-async function fetchSpotInCurrency(symbol, currency, rate) {
+async function fetchSpotInCurrency(symbol, currency) {
   if (currency === 'USD') return fetchSpotUSD(symbol)
-
-  if (rate) {
-    const usd = await fetchSpotUSD(symbol)
-    return usd * rate
-  }
 
   const res = await fetch(`${API_BASE}/${symbol}/${currency}`)
   if (!res.ok) throw new Error(`Failed to fetch ${symbol}/${currency}`)
@@ -28,23 +30,26 @@ async function fetchSpotInCurrency(symbol, currency, rate) {
   return data.price
 }
 
-function useMetalPrices(karatCurrency, rate) {
+function useMetalPrices(karatCurrency, onPrices) {
   const [prices, setPrices] = useState(null)
   const [error, setError] = useState(null)
   const prevPrices = useRef({})
+  const onPricesRef = useRef(onPrices)
+
+  onPricesRef.current = onPrices
 
   useEffect(() => {
+    if (!karatCurrency) return
+
     let cancelled = false
-    prevPrices.current = {} 
+    prevPrices.current = {}
 
     async function load() {
       try {
-        const needsSeparateUsdFetch = karatCurrency !== 'USD'
-
-        const [xauKarat, xagUsd, xauUsd] = await Promise.all([
-          fetchSpotInCurrency('XAU', karatCurrency, rate),
+        const [xauKarat, xagUsd, goldBody] = await Promise.all([
+          fetchSpotInCurrency('XAU', karatCurrency),
           fetchSpotUSD('XAG'),
-          needsSeparateUsdFetch ? fetchSpotUSD('XAU') : Promise.resolve(null)
+          fetchGoldBody()
         ])
 
         const goldPerGramKarat = xauKarat / GRAMS_PER_OZ
@@ -53,7 +58,7 @@ function useMetalPrices(karatCurrency, rate) {
           gold24k: goldPerGramKarat,
           gold21k: goldPerGramKarat * (21 / 24),
           gold18k: goldPerGramKarat * (18 / 24),
-          goldOzUsd: needsSeparateUsdFetch ? xauUsd : xauKarat,
+          goldOzUsd: goldBody.price,
           silverOzUsd: xagUsd
         }
 
@@ -61,6 +66,7 @@ function useMetalPrices(karatCurrency, rate) {
           setPrices({ current: next, previous: prevPrices.current })
           prevPrices.current = next
           setError(null)
+          onPricesRef.current?.(goldBody, next)
         }
       } catch (err) {
         if (!cancelled) setError(err.message)
@@ -74,13 +80,13 @@ function useMetalPrices(karatCurrency, rate) {
       cancelled = true
       clearInterval(id)
     }
-  }, [karatCurrency, rate])
+  }, [karatCurrency])
 
   return { prices, error }
 }
 
 function trend(current, previous) {
-  if (previous == null) return 'up' // default to green on first load, matches reference
+  if (previous == null) return 'up' 
   if (current > previous) return 'up'
   if (current < previous) return 'down'
 
@@ -149,7 +155,11 @@ function PriceCell(props) {
         }
       }),
     h('span', { style: { fontSize: 12, color: '#c9c9c9' } }, label),
-    h('span', { style: { fontSize: 18, fontWeight: 700, color } }, value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })),
+    h(
+      'span',
+      { style: { fontSize: 18, fontWeight: 700, color } },
+      value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    ),
     h(
       'span',
       { style: { display: 'flex', alignItems: 'center', gap: 4, color, fontSize: 12, fontWeight: 600 } },
@@ -160,9 +170,8 @@ function PriceCell(props) {
 }
 
 export default function GoldPriceTicker(props) {
-  const karatCurrency = props.currency
-  const rate=  props.rate
-  const state = useMetalPrices(karatCurrency, rate)
+  const karatCurrency = props.currency 
+  const state = useMetalPrices(karatCurrency, props.onPrices)
   const prices = state.prices
   const error = state.error
 
@@ -189,8 +198,8 @@ export default function GoldPriceTicker(props) {
     { key: 'gold24k', label: 'Gold 24K', value: current.gold24k, currency: karatCurrency },
     { key: 'gold21k', label: 'Gold 21K', value: current.gold21k, currency: karatCurrency },
     { key: 'gold18k', label: 'Gold 18K', value: current.gold18k, currency: karatCurrency },
-    { key: 'goldOzUsd', label: 'Gold', value: current.goldOzUsd, currency: 'USD' },
-    { key: 'silverOzUsd', label: 'Silver', value: current.silverOzUsd, currency: 'USD' }
+    { key: 'goldOzUsd', label: 'Gold', value: current.goldOzUsd, currency: karatCurrency },
+    { key: 'silverOzUsd', label: 'Silver', value: current.silverOzUsd, currency: karatCurrency }
   ]
 
   return h(

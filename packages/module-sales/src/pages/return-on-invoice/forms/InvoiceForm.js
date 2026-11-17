@@ -367,6 +367,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, buildCa
                     readOnly
                     valueShow='clientRef'
                     secondValueShow='clientName'
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -381,12 +382,13 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, buildCa
                     displayField='reference'
                     readOnly
                     values={form.values.header}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={6}>
-              <CustomDatePicker name='date' label={labels.date} value={form?.values?.header?.date} readOnly />
+              <CustomDatePicker name='date' label={labels.date} value={form?.values?.header?.date} readOnly maxAccess={maxAccess}/>
             </Grid>
           </Grid>
         </Fixed>

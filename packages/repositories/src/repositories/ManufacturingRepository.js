@@ -132,10 +132,12 @@ export const ManufacturingRepository = {
     del: service + 'delDES',
     snapshot: service + 'snapshotDES',
     snapshot2: service + 'snapshotDES2',
+    snapshot3: service + 'snapshotDES3',
     page: service + 'pageDES'
   },
   MFJobOrder: {
     pack: service + 'packJOB',
+    page: service + 'pageJOB',
     qry: service + 'qryJOB',
     qry2: service + 'qryJOB2',
     qry4: service + 'qryJOB4',
@@ -520,6 +522,7 @@ export const ManufacturingRepository = {
     del: service + 'delPR',
     snapshot: service + 'snapshotPR',
     post: service + 'postPR',
+    unpost: service + 'unpostPR',
     preview: service + 'previewPR',
     preview2: service + 'previewPR2',
   },
@@ -547,10 +550,8 @@ export const ManufacturingRepository = {
     qry: service + 'qryPSG',
     snapshot: service + 'snapshotPSG'
   },
-  Budget: {
-    get: service + 'getBUD',
-    set: service + 'setBUD',
-    del: service + 'delBUD',
-    page: service + 'pageBUD'
+  WorkCenterWorkForce: {
+    set2: service + 'set2WCWF',
+    qry: service + 'qryWCWF',
   }
 }

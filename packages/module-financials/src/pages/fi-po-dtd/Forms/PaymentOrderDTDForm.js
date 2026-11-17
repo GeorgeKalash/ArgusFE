@@ -21,7 +21,7 @@ export default function PaymentOrderDTDForm({ labels, maxAccess, recordId, windo
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.FIDocTypeDefaults.qry
+    endpointId: FinancialRepository.FIDocTypeDefaults.page
   })
   const { platformLabels } = useContext(ControlContext)
 

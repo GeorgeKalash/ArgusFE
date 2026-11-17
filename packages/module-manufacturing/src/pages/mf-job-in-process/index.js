@@ -15,19 +15,17 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useEffect } from 'react'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
-import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
-import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import JobOrderWindow from '@argus/shared-ui/src/components/Shared/Forms/JobOrderWindow'
+import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 
 const JobInProcess = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { userDefaults } = useContext(DefaultsContext)
-  const { addLockedScreen } = useContext(LockedScreensContext)
-
-  const { stack, lockRecord } = useWindow()
+  const { checkLock } = useRecordLock()
+  const { stack } = useWindow()
   const workCenterId = parseInt(userDefaults?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
 
   const {
@@ -132,53 +130,28 @@ const JobInProcess = () => {
       flex: 1
     }
   ]
-  function openStack(recordId, reference) {
+
+  const edit = obj => {
+    openForm(obj?.recordId, obj?.reference, obj?.status == 3)
+  }
+
+  async function openForm(recordId, reference, disabled) {
+    const canOpen = await checkLock({
+      resourceId: ResourceIds.MFJobOrders,
+      recordId,
+      disabled
+    })
+
+    if (!canOpen) return
     stack({
       Component: JobOrderWindow,
       props: {
         jobReference: reference,
         recordId,
-        lockRecord,
         invalidate
       },
       nextToTitle: reference
     })
-  }
-
-  async function openForm(recordId, reference, status) {
-    console.log(recordId, reference, status)
-    if (recordId && status !== 3) {
-      await lockRecord({
-        recordId: recordId,
-        reference: reference,
-        resourceId: ResourceIds.MFJobOrders,
-        onSuccess: () => {
-          addLockedScreen({
-            resourceId: ResourceIds.MFJobOrders,
-            recordId,
-            reference
-          })
-          openStack(recordId, reference)
-        },
-        isAlreadyLocked: name => {
-          stack({
-            Component: NormalDialog,
-            props: {
-              DialogText: `${platformLabels.RecordLocked} ${name}`,
-              width: 600,
-              height: 200,
-              title: platformLabels.Dialog
-            }
-          })
-        }
-      })
-    } else {
-      openStack(recordId, reference)
-    }
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
   return (

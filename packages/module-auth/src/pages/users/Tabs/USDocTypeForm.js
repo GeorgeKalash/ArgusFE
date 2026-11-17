@@ -28,32 +28,30 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
       dtId: null
     },
     onSubmit: async obj => {
-      try {
-        await postRequest({
-          extension: SystemRepository.UserFunction.set,
-          record: JSON.stringify({ userId: obj.userId, functionId: obj.functionId, dtId: obj.dtId || null })
-        })
+      await postRequest({
+        extension: SystemRepository.UserFunction.set,
+        record: JSON.stringify({ userId: obj.userId, functionId: obj.functionId, dtId: obj.dtId || null })
+      })
 
-        const accessPayload = {
+      const accessPayload = {
+        userId: storeRecordId,
+        functionId: obj.functionId,
+        items: data.list.map(item => ({
           userId: storeRecordId,
+          dtId: item.recordId,
           functionId: obj.functionId,
-          items: data.list.map(item => ({
-            userId: storeRecordId,
-            dtId: item.recordId,
-            functionId: obj.functionId,
-            isChecked: item.checked
-          }))
-        }
+          isChecked: item.checked
+        }))
+      }
 
-        await postRequest({
-          extension: SystemRepository.UserFunction.set2,
-          record: JSON.stringify(accessPayload)
-        })
+      await postRequest({
+        extension: SystemRepository.UserFunction.set2,
+        record: JSON.stringify(accessPayload)
+      })
 
-        toast.success(platformLabels.Updated)
-        window.close()
-        invalidate()
-      } catch (error) {}
+      toast.success(platformLabels.Updated)
+      window.close()
+      invalidate()
     }
   })
 
@@ -72,40 +70,38 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
 
   useEffect(() => {
     ;(async function () {
-      try {
-        const documentTypesPromise = getRequest({
-          extension: SystemRepository.DocumentType.qry,
-          parameters: `_dgId=${functionId}&_startAt=${0}&_pageSize=${1000}`
+      const documentTypesPromise = getRequest({
+        extension: SystemRepository.DocumentType.qry,
+        parameters: `_dgId=${functionId}&_startAt=${0}&_pageSize=${1000}`
+      })
+
+      const rowAccessUserPromise = getRequest({
+        extension: AccessControlRepository.RowAccessUserView.qry,
+        parameters: `_resourceId=${ResourceIds.DocumentTypes}&_userId=${storeRecordId}`
+      })
+
+      Promise.all([documentTypesPromise, rowAccessUserPromise]).then(([docTypes, rowAccess]) => {
+        const checkedDocTypes = docTypes.list.map(docTypeItem => {
+          const item = {
+            recordId: docTypeItem.recordId,
+            reference: docTypeItem.reference,
+            name: docTypeItem.name,
+            checked: false
+          }
+          const matchingDocType = rowAccess.list.find(y => item.recordId == y.recordId)
+
+          matchingDocType && (item.checked = true)
+
+          return item
         })
+        setData({ list: checkedDocTypes })
+      })
 
-        const rowAccessUserPromise = getRequest({
-          extension: AccessControlRepository.RowAccessUserView.qry,
-          parameters: `_resourceId=${ResourceIds.DocumentTypes}&_userId=${storeRecordId}`
-        })
-
-        Promise.all([documentTypesPromise, rowAccessUserPromise]).then(([docTypes, rowAccess]) => {
-          const checkedDocTypes = docTypes.list.map(docTypeItem => {
-            const item = {
-              recordId: docTypeItem.recordId,
-              reference: docTypeItem.reference,
-              name: docTypeItem.name,
-              checked: false
-            }
-            const matchingDocType = rowAccess.list.find(y => item.recordId == y.recordId)
-
-            matchingDocType && (item.checked = true)
-
-            return item
-          })
-          setData({ list: checkedDocTypes })
-        })
-
-        const res = await getRequest({
-          extension: SystemRepository.UserFunction.get,
-          parameters: `_userId=${storeRecordId}&_functionId=${functionId}`
-        })
-        formik.setValues(res.record)
-      } catch (error) {}
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: `_userId=${storeRecordId}&_functionId=${functionId}`
+      })
+      formik.setValues(res.record)
     })()
   }, [])
 

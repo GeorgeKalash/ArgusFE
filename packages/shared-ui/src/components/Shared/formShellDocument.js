@@ -1,7 +1,4 @@
 import { DialogContent } from '@mui/material'
-import { useState } from 'react'
-import WindowToolbar from './WindowToolbar'
-import TransactionLog from './TransactionLog'
 import { TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { ClientRelationList } from './ClientRelationList'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'

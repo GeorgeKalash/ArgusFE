@@ -2,6 +2,7 @@ import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -17,7 +18,7 @@ const BtDefaults = ({ _labels, access }) => {
   const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const { postRequest } = useContext(RequestsContext)
 
-  const arrayAllow = ['fixing_msId', 'bt_reporting_currencyId']
+  const arrayAllow = ['fixing_msId', 'bt_reporting_currencyId', 'bt_max_discount']
 
   const { formik } = useForm({
     maxAccess: access,
@@ -63,6 +64,7 @@ const BtDefaults = ({ _labels, access }) => {
                 name='fixing_msId'
                 label={_labels.measurementSchedule}
                 valueField='recordId'
+                maxAccess={access}
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -91,6 +93,19 @@ const BtDefaults = ({ _labels, access }) => {
                   formik.setFieldValue('bt_reporting_currencyId', newValue?.recordId || '')
                 }}
                 error={formik.touched.bt_reporting_currencyId && Boolean(formik.errors.bt_reporting_currencyId)}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='bt_max_discount'
+                label={_labels.bt_max_discount}
+                value={formik.values.bt_max_discount}
+                maxAccess={access}
+                allowNegative={false}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('bt_max_discount', '')}
+                error={formik.touched.bt_max_discount && Boolean(formik.errors.bt_max_discount)}
               />
             </Grid>
           </Grid>

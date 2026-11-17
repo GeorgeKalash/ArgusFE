@@ -4,7 +4,7 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -23,22 +23,19 @@ const IntegrationPT = () => {
 
     const response = await getRequest({
       extension: GeneralLedgerRepository.IntegrationPostTypes.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
   }
-
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.IntegrationPostTypes.page
-  })
 
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.IntegrationPostTypes.page,
@@ -81,8 +78,7 @@ const IntegrationPT = () => {
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        maxAccess: access
       },
       width: 600,
       height: 300,
