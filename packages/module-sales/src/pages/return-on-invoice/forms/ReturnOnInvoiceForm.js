@@ -216,7 +216,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       }),
       items: yup.array().of(
         yup.object().shape({
-          returnNowQty: yup.number().required().min(1),
+          returnNowQty: yup.number().required().min(0.01),
           sku: yup.string().required(),
           itemName: yup.string().required()
         })
