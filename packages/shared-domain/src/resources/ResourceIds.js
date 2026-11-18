@@ -688,6 +688,8 @@ export const ResourceIds = {
   BarcodesTable: 41608,
   FixingSalesCancellation: 38306,
   FixingPurchaseCancellation: 38307,
+  PVECostCenters: 31633,
+  POECostCenters: 31632,
 
   // GL
   GLSalesInvoice: 51604,

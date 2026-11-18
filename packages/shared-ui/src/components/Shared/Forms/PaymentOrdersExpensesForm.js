@@ -477,8 +477,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
         stack({
           Component: ExpensesCostCenters,
           props: {
-            maxAccess,
-            labels,
+            resourceId: ResourceIds.POECostCenters,
             recordId,
             row,
             updateRow,

@@ -60,5 +60,7 @@ export const commonResourceIds = [
   ResourceIds.InventoryTransaction,
   ResourceIds.PRItemSize,
   ResourceIds.BarcodesTable,
-  ResourceIds.Items
+  ResourceIds.Items,
+  ResourceIds.PVECostCenters,
+  ResourceIds.POECostCenters
 ]

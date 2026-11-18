@@ -522,8 +522,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
         stack({
           Component: ExpensesCostCenters,
           props: {
-            maxAccess,
-            labels,
+            resourceId: ResourceIds.PVECostCenters,
             recordId,
             row,
             updateRow,
