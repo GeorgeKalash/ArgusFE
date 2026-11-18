@@ -90,7 +90,7 @@ export const ThreadProgress = ({ recordId, onComplete, access, window }) => {
       parameters: `_recordId=${recordId}`
     })
 
-    return res.record
+    return res.record || {}
   }
 
   const tasksCompleted = data.currentPhase === data.phases && data.completed === data.iterations
