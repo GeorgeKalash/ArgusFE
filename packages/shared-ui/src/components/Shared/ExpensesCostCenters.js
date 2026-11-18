@@ -1,4 +1,3 @@
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Grid } from '@mui/material'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { useForm } from '@argus/shared-hooks/src/hooks/form.js'
@@ -13,14 +12,16 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Form from './Form'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
-export default function ExpensesCostCenters({ row, window, updateRow, recordId, readOnly }) {
+export default function ExpensesCostCenters({ resourceId, row, window, updateRow, recordId, readOnly }) {
   const { platformLabels } = useContext(ControlContext)
 
   useSetWindow({ title: platformLabels.CostCenter, window })
 
   const { labels, access: maxAccess } = useResourceQuery({
-    datasetId: ResourceIds.CostCenter
+    datasetId: ResourceIds.POECostCenters,
+    DatasetIdAccess: resourceId,
   })
 
   const { formik } = useForm({
