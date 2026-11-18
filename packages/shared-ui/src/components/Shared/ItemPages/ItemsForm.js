@@ -86,6 +86,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       pgId: '',
       productionLevel: null,
       collectionId: null,
+      brandId: null,
       isInactive: false,
       isExternal: false,
       categoryNraId: null,
@@ -492,7 +493,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.groupId && formik.errors.groupId}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     store={store?.collections}
                     name='collectionId'
@@ -509,6 +510,23 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       formik.setFieldValue('collectionId', newValue?.recordId)
                     }}
                     error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    store={store?.brands}
+                    name='brandId'
+                    label={labels.brand}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    values={formik.values}
+                    onChange={(_, newValue) => formik.setFieldValue('brandId', newValue?.recordId || null)}
+                    error={formik.touched.brandId && Boolean(formik.errors.brandId)}
                   />
                 </Grid>
                 <Grid item xs={6}>
