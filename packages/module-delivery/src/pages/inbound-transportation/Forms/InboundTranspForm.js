@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import dayjs from 'dayjs'
@@ -30,6 +30,8 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
 
 export default function InboundTranspForm({ labels, maxAccess: access, recordId }) {
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -38,6 +40,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     const { stack } = useWindow()
     const { stack: stackError } = useError()
     const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value) || null
+    const { combosStore } = useComboStore(DeliveryRepository.InboundTransp.pack)
 
     const { documentType, maxAccess, changeDT } = useDocumentType({
         functionId: SystemFunction.InboundTransportation,
@@ -382,9 +385,8 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     }))
    }
 
-
     useEffect(() => {
-        if (recordId) refetchForm(recordId)
+      if (recordId) refetchForm(recordId)
     }, [])
 
     return (
@@ -406,8 +408,9 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                     <Grid container spacing={2}>
                         <Grid item xs={4}>
                             <ResourceComboBox
-                                endpointId={DeliveryRepository.InboundTransp.pack}
-                                reducer={response => response?.record?.documentTypes}
+                                endpointId={SystemRepository.DocumentType.qry}
+                                parameters={`_dgId=${SystemFunction.InboundTransportation}&_startAt=0&_pageSize=1000`}
+                                store={combosStore?.documentTypes}
                                 filter={!editMode ? item => item.activeStatus == 1 : undefined}
                                 name='dtId'
                                 label={labels.docType}
@@ -456,8 +459,8 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                         </Grid>
                         <Grid item xs={4}>
                             <ResourceComboBox
-                                endpointId={DeliveryRepository.InboundTransp.pack}
-                                reducer={response => response?.record?.plants}
+                                endpointId={SystemRepository.Plant.qry}
+                                store={combosStore?.plants}
                                 name='plantId'
                                 label={labels.plant}
                                 valueField='recordId'
@@ -504,8 +507,8 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                         </Grid>
                         <Grid item xs={4}>
                             <ResourceComboBox
-                                endpointId={DeliveryRepository.InboundTransp.pack}
-                                reducer={response => response?.record?.drivers}
+                                endpointId={DeliveryRepository.Driver.qry}
+                                store={combosStore?.drivers}
                                 name='driverId'
                                 label={labels.driver}
                                 valueField='recordId'
@@ -547,8 +550,8 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                         </Grid>
                         <Grid item xs={4}>
                             <ResourceComboBox
-                                endpointId={DeliveryRepository.InboundTransp.pack}
-                                reducer={response => response?.record?.vehicles}
+                                endpointId={DeliveryRepository.Vehicle.qry}
+                                store={combosStore?.vehicles}
                                 name='vehicleId'
                                 label={labels.vehicle}
                                 valueField='recordId'

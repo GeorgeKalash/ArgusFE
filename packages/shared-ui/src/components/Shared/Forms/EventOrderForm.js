@@ -37,6 +37,13 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import FixingForm from '@argus/shared-ui/src/components/Shared/Forms/FixingForm'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { useComboStore } from '@argus/shared-hooks/src/hooks/useComboStore'
+
+const mapCommodityPairs = list => (list || []).map(item => ({
+  ...item,
+  recordId: `${item.currencyId}-${item.metalId}`
+}))
 
 export default function EventOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -49,7 +56,14 @@ export default function EventOrderForm({ recordId, window }) {
   const msId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'fixing_msId')?.value) || null
   const rateTypeId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'mc_defaultRTBT')?.value) || null
   const maxDiscount = systemDefaults?.list?.find(obj => obj.key === 'bt_max_discount')?.value || null
-
+  const { combosStore } = useComboStore(BrokerageTradingRepository.EventOrder.pack, {
+     parameters: `_msId=${msId}`,
+     transform: record => ({
+      ...record,
+      commodityPairs: mapCommodityPairs(record?.commodityPairs)
+     })
+    })
+  
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.EventOrder,
     editMode: !!recordId
@@ -225,7 +239,7 @@ export default function EventOrderForm({ recordId, window }) {
         expiryDate: res?.record?.expiryDate ? formatDateFromApi(res?.record?.expiryDate) : null,
         currencyId_metalId:
           res?.record?.currencyId && res?.record?.metalId
-            ? `${res.record.currencyId}${res.record.metalId}`
+            ? `${res.record.currencyId}-${res.record.metalId}`
             : null,
         triggeredAt: res?.record?.triggeredAt ? formatDateFromApi(res?.record?.triggeredAt) : null
       }
@@ -233,7 +247,9 @@ export default function EventOrderForm({ recordId, window }) {
   }
 
   useEffect(() => {
-    if (recordId) refetchForm(recordId)
+    ;(async function () {
+      if (recordId) refetchForm(recordId)
+    })()
   }, [])
 
   async function getMetalPurity(metalId) {
@@ -450,9 +466,9 @@ useEffect(() => {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                parameters={msId && `_dgId=${SystemFunction.EventOrder}&_msId=${msId}`}
-                reducer={response => response?.record?.documentTypes}
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_dgId=${SystemFunction.EventOrder}&_startAt=0&_pageSize=1000`}  
+                store={combosStore?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.docType}
@@ -471,9 +487,8 @@ useEffect(() => {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                parameters={msId && `_msId=${msId}`}
-                reducer={response => response?.record?.plants}
+                endpointId={SystemRepository.Plant.qry}
+                store={combosStore?.plants}
                 name='plantId'
                 label={labels.plant}
                 valueField='recordId'
@@ -512,9 +527,8 @@ useEffect(() => {
             
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                parameters={msId && `_msId=${msId}`}
-                reducer={response => response?.record?.currencies}
+                endpointId={SystemRepository.Currency.qry}
+                store={combosStore?.currencies}
                 name='fi_currencyId'
                 filter={item => item.currencyType === 1}
                 label={labels.currency}
@@ -716,18 +730,13 @@ useEffect(() => {
                 <Grid container xs={12} spacing={2}>
                   <Grid item xs={6}>
                     <ResourceComboBox
-                      endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                      parameters={msId && `_msId=${msId}`}
+                      endpointId={BrokerageTradingRepository.CommodityPair.qry}
                       name='currencyId_metalId'
                       label={labels.cmp}
                       valueField='recordId'
                       displayField={['metalRef', 'currencyRef']}
-                      reducer={response =>
-                        response?.record?.commodityPairs?.map(item => ({
-                          ...item,
-                          recordId: `${item.currencyId}${item.metalId}`
-                        }))
-                      }
+                      store={combosStore?.commodityPairs}
+                      reducer={res => mapCommodityPairs(res?.list)}
                       columnsInDropDown={[
                         { key: 'metalRef', value: 'Metal Reference' },
                         { key: 'currencyRef', value: 'Currency Reference' }
@@ -761,7 +770,7 @@ useEffect(() => {
                           qty_muQty: newValue?.eo_defQtyMUQty || null,
                           targetPrice_muId: newValue?.eo_defTargetPriceMUId || null,
                           targetPrice_muQty: pairQty,
-                          currencyId_metalId: newValue ? `${newValue.currencyId}${newValue.metalId}` : null
+                          currencyId_metalId: newValue ? `${newValue.currencyId}-${newValue.metalId}` : null
                         })
                         
                       }}
@@ -803,9 +812,9 @@ useEffect(() => {
                   </Grid>
                   <Grid item xs={3}>
                     <ResourceComboBox
-                      endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
+                      endpointId={msId && InventoryRepository.MeasurementUnit.qry}
                       parameters={msId && `_msId=${msId}`}
-                      reducer={response => response?.record?.measurementUnits}
+                      store={combosStore?.measurementUnits}
                       name='qty_muId'
                       label={labels.mu}
                       valueField='recordId'
@@ -868,9 +877,9 @@ useEffect(() => {
                   </Grid>
                   <Grid item xs={3}>
                     <ResourceComboBox
-                      endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
+                      endpointId={msId && InventoryRepository.MeasurementUnit.qry}
                       parameters={msId && `_msId=${msId}`}
-                      reducer={response => response?.record?.measurementUnits}
+                      store={combosStore?.measurementUnits}
                       name='targetPrice_muId'
                       label={labels.mu}
                       valueField='recordId'
@@ -911,9 +920,8 @@ useEffect(() => {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={msId && BrokerageTradingRepository.EventOrder.pack}
-                    parameters={msId && `_msId=${msId}`}
-                    reducer={response => response?.record?.salesOrderSources}
+                    endpointId={SaleRepository.SalesOrderSource.qry}
+                    store={combosStore?.salesOrderSources}
                     name='sourceId'
                     label={labels.source}
                     valueField='recordId'
