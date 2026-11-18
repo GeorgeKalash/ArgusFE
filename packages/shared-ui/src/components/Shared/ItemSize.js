@@ -9,10 +9,10 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
-export default function PRItemSize({ sizes, readOnly, onSave, window }) {
+export default function ItemSize({ sizes, readOnly, onSave, window }) {
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.PRItemSize,
     editMode: true
@@ -112,5 +112,5 @@ export default function PRItemSize({ sizes, readOnly, onSave, window }) {
   )
 }
 
-PRItemSize.width = 700
-PRItemSize.height = 450
+ItemSize.width = 700
+ItemSize.height = 450

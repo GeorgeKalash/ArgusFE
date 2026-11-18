@@ -125,7 +125,7 @@ const ProductionSummary = () => {
         labels,
         access
       },
-      width: 900,
+      width: 1100,
       height: 600,
       title: labels.productionSummary
     })

@@ -11,7 +11,6 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import PRItemSize from '@argus/shared-ui/src/components/Shared/PRItemSize'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -34,6 +33,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 import LineNotes from '@argus/shared-ui/src/components/Shared/LineNote'
 import ItemWindow from '@argus/shared-ui/src/components/Shared/ItemWindow'
+import ItemSize from '@argus/shared-ui/src/components/Shared/ItemSize'
 
 const PROD_REQ_TYPE = {
   TopSales: 1,
@@ -769,7 +769,7 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       },
       onClick: (e, row) => {
         stack({
-          Component: PRItemSize,
+          Component: ItemSize,
           props: {
             readOnly: isPosted,
             sizes: row.sizes || [],

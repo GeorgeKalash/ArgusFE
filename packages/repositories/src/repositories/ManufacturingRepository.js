@@ -512,6 +512,9 @@ export const ManufacturingRepository = {
     post: service + 'postPRS',
     setPRSummary: service + 'setPRSummary'
   },
+  ProductionSummaryDetails: {
+    qry: service + 'qryPRSD',
+  },
   ProductionRequestItems: {
     import: service + 'importPRI',
   },
