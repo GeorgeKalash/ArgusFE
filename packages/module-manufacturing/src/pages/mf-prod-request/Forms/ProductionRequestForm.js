@@ -635,7 +635,8 @@ export default function ProductionRequestForm({ recordId, labels, access, window
           { from: 'groupName', to: 'itemGroupName' },
           { from: 'categoryName', to: 'categoryName' },
           { from: 'dmgId', to: 'dmgId' },
-          { from: 'msId', to: 'msId' }
+          { from: 'msId', to: 'msId' },
+          { from: 'brandName', to: 'brandName' }
         ],
         displayFieldWidth: 4,
         columnsInDropDown: [
@@ -690,6 +691,15 @@ export default function ProductionRequestForm({ recordId, labels, access, window
       component: 'textfield',
       label: labels.category,
       name: 'categoryName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.brandName,
+      name: 'brandName',
       flex: 1,
       props: {
         readOnly: true

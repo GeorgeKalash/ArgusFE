@@ -195,6 +195,15 @@ const PreviewPR2 = ({ requestId, parentFormik, onSelect, window }) => {
     },
     {
       component: 'textfield',
+      label: labels.brandName,
+      name: 'brandName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
       label: labels.weight,
       name: 'itemWeight',
       flex: 1,
