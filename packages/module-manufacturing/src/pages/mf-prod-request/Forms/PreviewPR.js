@@ -196,6 +196,15 @@ const PreviewPR = ({ requestId, plantId, metalId, parentFormik, onSelect, window
       }
     },
     {
+      component: 'textfield',
+      label: labels.brandName,
+      name: 'brandName',
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
+    {
       component: 'numberfield',
       label: labels.onhand,
       name: 'onHand',
