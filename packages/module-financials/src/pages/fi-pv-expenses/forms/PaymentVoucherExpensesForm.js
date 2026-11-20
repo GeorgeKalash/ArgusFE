@@ -44,6 +44,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
   const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
   const vatPct = parseInt(systemDefaults?.list?.find(obj => obj.key === 'vatPct')?.value)
+  const functionId = SystemFunction.PaymentVoucherExpenses
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.PaymentVoucherExpenses,
@@ -51,7 +52,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.PaymentVoucher,
+    functionId: functionId,
     access,
     enabled: !recordId
   })
@@ -60,6 +61,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
 
   const initialValues = {
     recordId: null,
+    functionId: functionId,
     reference: '',
     accountId: '',
     accountType: 3,
@@ -638,7 +640,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       editMode={editMode}
       previewReport={editMode}
       actions={actions}
-      functionId={SystemFunction.PaymentVoucher}
+      functionId={functionId}
       disabledSubmit={isPosted || isCancelled}
       isWorkFlow={true}
     >
@@ -650,7 +652,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_dgId=${SystemFunction.PaymentVoucher}&_startAt=${0}&_pageSize=${50}`}
+                    parameters={`_dgId=${functionId}&_startAt=${0}&_pageSize=${50}`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}

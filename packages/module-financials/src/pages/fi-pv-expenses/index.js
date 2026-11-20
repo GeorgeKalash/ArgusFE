@@ -136,7 +136,7 @@ const FiPaymentVouchers = () => {
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.PaymentVoucher,
+    functionId: SystemFunction.PaymentVoucherExpenses,
     action: openForm
   })
 
