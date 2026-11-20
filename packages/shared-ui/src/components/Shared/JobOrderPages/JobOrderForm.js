@@ -119,15 +119,27 @@ export default function JobOrderForm({
       const obj = { ...values }
       if (!obj.qty) delete obj.qty
 
-      const res = await postRequest({
-        extension: ManufacturingRepository.MFJobOrder.set,
-        record: JSON.stringify({
+      const payload = obj.status == 4 
+        ? {
+            recordId: obj?.recordId,
+            date: obj?.date ? formatDateToApi(obj?.date) : null,
+            plantId: obj?.plantId,
+            itemId: obj?.itemId,
+            designId: obj?.designId,
+            description: obj?.description,
+            lineId: obj?.lineId
+          } 
+        : {
           ...obj,
           date: obj?.date ? formatDateToApi(obj?.date) : null,
           endingDT: obj?.endingDT ? formatDateToApi(obj?.endingDT) : null,
           startingDT: obj?.startingDT ? formatDateToApi(obj?.startingDT) : null,
           deliveryDate: obj?.deliveryDate ? formatDateToISO(new Date(obj?.deliveryDate)) : null
-        })
+        }
+
+      const res = await postRequest({
+        extension: obj.status == 4 ? ManufacturingRepository.MFJobOrder.edit : ManufacturingRepository.MFJobOrder.set,
+        record: JSON.stringify(payload)
       })
 
       if (imageUploadRef.current) {
