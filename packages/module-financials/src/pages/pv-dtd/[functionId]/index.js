@@ -10,15 +10,16 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import PVDocTypeDefaultsForm from './form/PVDocTypeDefaultsForm'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { Router } from '@argus/shared-domain/src/lib/useRouter'
 
-const RVDocTypeDefaults = () => {
+const PVDocTypeDefaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -26,7 +27,7 @@ const RVDocTypeDefaults = () => {
     const response = await getRequest({
       extension: FinancialRepository.FIDocTypeDefaults.page,
 
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_functionId=${SystemFunction.PaymentVoucher}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -34,7 +35,7 @@ const RVDocTypeDefaults = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     paginationParameters,
     refetch,
     access,
@@ -42,25 +43,29 @@ const RVDocTypeDefaults = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.FIDocTypeDefaults.page,
-    datasetId: ResourceIds.FIDocTypeDefaults
+    datasetId: ResourceIds.FIDocTypeDefaults,
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
   })
 
   const columns = [
     {
       field: 'dtName',
-      headerName: _labels.doctype,
+      headerName: labels.doctype,
       flex: 1
     },
     {
       field: 'plantName',
-      headerName: _labels.plant,
+      headerName: labels.plant,
       flex: 1
     },
 
-    { field: 'paymentMethodName', headerName: _labels.paymentMethod, flex: 1 },
+    { field: 'paymentMethodName', headerName: labels.paymentMethod, flex: 1 },
     {
       field: 'cashAccountName',
-      headerName: _labels.cashAccount,
+      headerName: labels.cashAccount,
       flex: 1
     }
   ]
@@ -86,13 +91,14 @@ const RVDocTypeDefaults = () => {
     stack({
       Component: PVDocTypeDefaultsForm,
       props: {
-        labels: _labels,
+        labels,
         recordId: dtId,
-        maxAccess: access
+        maxAccess: access,
+        functionId
       },
       width: 500,
       height: 400,
-      title: _labels.doctypeDefault
+      title: labels.doctypeDefault
     })
   }
 
@@ -119,4 +125,4 @@ const RVDocTypeDefaults = () => {
   )
 }
 
-export default RVDocTypeDefaults
+export default PVDocTypeDefaults

@@ -40,6 +40,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const functionId = SystemFunction.PaymentVoucher
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.PaymentVouchers,
@@ -47,7 +48,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.PaymentVoucher,
+    functionId: functionId,
     access: access,
     enabled: !recordId
   })
@@ -66,6 +67,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
     behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
+      functionId: functionId,
       reference: '',
       accountId: '',
       accountType: '',
@@ -427,7 +429,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       editMode={editMode}
       previewReport={editMode}
       actions={actions}
-      functionId={SystemFunction.PaymentVoucher}
+      functionId={functionId}
       disabledSubmit={isPosted || isCancelled}
       isWorkFlow={true}
     >

@@ -10,6 +10,7 @@ export const SystemFunction = {
   Items: Module.Inventory * 100 + 6,
   MetalReceiptVoucher: Module.Financials * 100 + 0,
   PaymentVoucher: Module.Financials * 100 + 1,
+  PaymentVoucherExpenses: Module.Financials * 100 + 15,
   ReceiptVoucher: Module.Financials * 100 + 2,
   CreditNote: Module.Financials * 100 + 3,
   DebitNote: Module.Financials * 100 + 4,
