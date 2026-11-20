@@ -142,6 +142,7 @@ export const ManufacturingRepository = {
     qry2: service + 'qryJOB2',
     qry4: service + 'qryJOB4',
     set: service + 'setJOB',
+    edit: service + 'editJOB',
     get: service + 'getJOB',
     get2: service + 'get2JOB',
     del: service + 'delJOB',
