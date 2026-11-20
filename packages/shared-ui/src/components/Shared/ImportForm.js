@@ -123,7 +123,7 @@ const getImportData = (gridData, columns) => {
   return convertedData
 }
 
-const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window }) => {
+const ImportForm = ({ staticColumns = [], autoSubmit = true, onSuccess, resourceId, access, window }) => {
   const { stack: stackError } = useError()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -203,15 +203,17 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
 
     const convertedData = getImportData(parsedFileContent, columns)
     const payload = { [objectName]: convertedData }
+    let onSuccessData = payload
 
-    const res = await postRequest({
-      extension: endPoint,
-      record: JSON.stringify(payload)
-    })
-
-    onSuccess?.(res)
-
-    toast.success(platformLabels.Imported)
+    if (autoSubmit) {
+      const res = await postRequest({
+        extension: endPoint,
+        record: JSON.stringify(payload)
+      })
+      onSuccessData = res
+      toast.success(platformLabels.Imported)
+    }
+    onSuccess?.(onSuccessData)
     if (window) window.close()
   }
 

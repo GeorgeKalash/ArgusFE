@@ -434,6 +434,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'ImportCSV',
+    label: platformLabels.ImportCsv,
+    color: '#4eb558',
+    image: 'import.png',
+    main: false
+  },
+  {
     key: 'ImportAll',
     label: platformLabels.importAll,
     color: '#000',
@@ -764,6 +771,5 @@ export const getButtons = platformLabels => [
     color: '#01a437',
     image: 'file.png',
     main: false
-  },
-  
+  }
 ]
