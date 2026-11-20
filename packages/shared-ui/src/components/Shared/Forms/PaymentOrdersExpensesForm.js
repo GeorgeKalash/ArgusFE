@@ -36,6 +36,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
+  const functionId = SystemFunction.PaymentOrderExpenses
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.PaymentOrderExpenses,
@@ -43,7 +44,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.PaymentOrder,
+    functionId: functionId,
     access,
     enabled: !recordId
   })
@@ -51,7 +52,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
   useSetWindow({ title: labels.PaymentOrderExpenses, window })
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.PaymentOrders.page3
+    endpointId: FinancialRepository.PaymentOrders.page2
   })
 
   const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
@@ -61,6 +62,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
 
   const initialValues = {
     recordId: null,
+    functionId: functionId,
     reference: '',
     accountType: 3,
     currencyId: parseInt(currencyId),
@@ -499,7 +501,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
       editMode={editMode}
       previewReport={editMode}
       actions={actions}
-      functionId={SystemFunction.PaymentOrder}
+      functionId={functionId}
       disabledSubmit={isCancelled || isClosed}
       isWorkFlow={true}
     >
@@ -511,7 +513,7 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_dgId=${SystemFunction.PaymentOrder}&_startAt=${0}&_pageSize=${50}`}
+                    parameters={`_dgId=${functionId}&_startAt=${0}&_pageSize=${50}`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}

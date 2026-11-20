@@ -277,7 +277,7 @@ export const FinancialRepository = {
     set2: service + 'set2PO',
     page2: service + 'page2PO',
     page3: service + 'page3PO',
-    snapshot: service + 'snapshotPO',
+    snapshot3: service + 'snapshot3PO',
     snapshot2: service + 'snapshot2PO',
     cancel: service + 'cancelPO',
     close: service + 'closePO',

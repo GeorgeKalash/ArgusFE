@@ -24,7 +24,7 @@ const PaymentOrdersExpenses = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.PaymentOrders.page3,
+      extension: FinancialRepository.PaymentOrders.page2,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
@@ -52,7 +52,7 @@ const PaymentOrdersExpenses = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.PaymentOrders.page3,
+    endpointId: FinancialRepository.PaymentOrders.page2,
     datasetId: ResourceIds.PaymentOrderExpenses,
     filter: {
       filterFn: fetchWithFilter
@@ -138,7 +138,7 @@ const PaymentOrdersExpenses = () => {
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.PaymentOrder,
+    functionId: SystemFunction.PaymentOrderExpenses,
     action: openForm
   })
 

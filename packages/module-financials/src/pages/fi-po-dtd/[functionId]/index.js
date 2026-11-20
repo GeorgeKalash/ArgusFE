@@ -13,12 +13,14 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import PaymentOrderDTDForm from './Forms/PaymentOrderDTDForm'
+import { Router } from '@argus/shared-domain/src/lib/useRouter'
 
 const PaymentOrderDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -26,7 +28,7 @@ const PaymentOrderDTD = () => {
     const response = await getRequest({
       extension: FinancialRepository.FIDocTypeDefaults.page,
 
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${SystemFunction.PaymentOrder}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }

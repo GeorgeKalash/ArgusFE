@@ -24,7 +24,7 @@ const PaymentOrders = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.PaymentOrders.page2,
+      extension: FinancialRepository.PaymentOrders.page3,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
@@ -34,7 +34,7 @@ const PaymentOrders = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.PaymentOrders.snapshot,
+        extension: FinancialRepository.PaymentOrders.snapshot3,
         parameters: `_filter=${filters.qry}`
       })
     } else {
@@ -52,7 +52,7 @@ const PaymentOrders = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.PaymentOrders.page2,
+    endpointId: FinancialRepository.PaymentOrders.page3,
     datasetId: ResourceIds.PaymentOrder,
     filter: {
       filterFn: fetchWithFilter
