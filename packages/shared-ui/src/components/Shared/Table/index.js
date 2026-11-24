@@ -10,6 +10,8 @@ import LastPageIcon from '@mui/icons-material/LastPage'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
+import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { ControlAccessLevel, TrxType, accessMap } from '@argus/shared-domain/src/resources/AccessLevels'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from '../DeleteDialog'
@@ -64,6 +66,10 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
+  const hideLeadingZeros = systemChecks?.some(
+    check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS
+  )
   const maxAccess = props?.maxAccess && props?.maxAccess?.record?.accessFlags
   const columnsAccess = props?.maxAccess && props?.maxAccess?.record?.controls
   const { stack } = useWindow()
@@ -145,7 +151,7 @@ const Table = ({
         if (col.type === 'number' || col?.type?.field === 'number') {
           return {
             ...col,
-            valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
+            valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round, hideLeadingZeros),
             filterValueGetter: ({ data }) => {
               const num = Number(data?.[col.field])
               return Number.isNaN(num) ? null : num
@@ -322,7 +328,8 @@ const Table = ({
   }, [
     props?.columns,
     languageId,
-    disableSorting
+    disableSorting,
+    hideLeadingZeros
   ])
 
   function dateComparator(date1, date2) {
