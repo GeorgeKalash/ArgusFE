@@ -44,6 +44,7 @@ import TimeVariatrionForm from '@argus/shared-ui/src/components/Shared/Forms/Tim
 import TaDslForm from '@argus/shared-ui/src/components/Shared/Forms/TaDslForm'
 import JobInfoForm from '@argus/shared-ui/src/components/Shared/Forms/jobInfoForm'
 import PaymentOrdersForm from '@argus/shared-ui/src/components/Shared/Forms/PaymentOrdersForm'
+import PaymentOrdersExpensesForm from '@argus/shared-ui/src/components/Shared/Forms/PaymentOrdersExpensesForm'
 import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsumpForm'
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
 import CycleCountsWindow from '@argus/shared-ui/src/components/Shared/Forms/CycleCountsWindow'
@@ -197,6 +198,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
     },
     [SystemFunction.PaymentOrder]: {
       component: PaymentOrdersForm
+    },
+    [SystemFunction.PaymentOrderExpenses]: {
+      component: PaymentOrdersExpensesForm
     },
     [SystemFunction.WorkCenterConsumption]: {
       component: WCConsumpForm
