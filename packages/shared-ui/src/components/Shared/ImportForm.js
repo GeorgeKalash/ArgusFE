@@ -240,8 +240,7 @@ const ImportForm = ({ staticColumns = [], autoSubmit = true, onSuccess, resource
           <GridToolbar
             leftSection={
               <Grid container spacing={2} alignItems="center">
-                <Grid item xs={4}>
-                  <Grid item sx={{ display: 'flex', mr: 2 }}>
+                  <Grid item xs={4}>
                     <CustomTextField
                       name='name'
                       label={platformLabels?.SelectCSV}
@@ -250,7 +249,8 @@ const ImportForm = ({ staticColumns = [], autoSubmit = true, onSuccess, resource
                       disabled={!!file?.name}
                       maxAccess={access}
                     />
-
+                  </Grid>
+                  <Grid item xs='auto'>
                     <CustomButton
                       label={`${platformLabels?.Browse}...`}
                       disabled={!!file?.name}
@@ -259,7 +259,6 @@ const ImportForm = ({ staticColumns = [], autoSubmit = true, onSuccess, resource
                         marginLeft: 2,
                       }}
                     />
-
                     <input
                       type='file'
                       accept='.csv'
@@ -267,7 +266,8 @@ const ImportForm = ({ staticColumns = [], autoSubmit = true, onSuccess, resource
                       style={{ display: 'none' }}
                       onChange={handleFileChange}
                     />
-
+                  </Grid>
+                  <Grid item xs={2}>
                     <CustomButton
                       image='clear.png'
                       tooltipText={platformLabels?.Clear}
@@ -280,7 +280,6 @@ const ImportForm = ({ staticColumns = [], autoSubmit = true, onSuccess, resource
                     />
                   </Grid>
                 </Grid>
-              </Grid>
             }
           />
         </Fixed>
