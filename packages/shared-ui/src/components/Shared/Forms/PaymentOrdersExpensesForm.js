@@ -519,7 +519,11 @@ export default function PaymentOrdersExpensesForm({ recordId, window }) {
                     label={labels.documentType}
                     readOnly={editMode}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
                     values={formik.values}
                     onChange={async (_, newValue) => {
                       await changeDT(newValue)

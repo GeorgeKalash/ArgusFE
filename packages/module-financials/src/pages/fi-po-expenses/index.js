@@ -154,7 +154,7 @@ const PaymentOrdersExpenses = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar labels={labels} onAdd={add} maxAccess={access} reportName={'FIPO'} filterBy={filterBy} />
+        <RPBGridToolbar labels={labels} onAdd={add} maxAccess={access} reportName={'FIPOE'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

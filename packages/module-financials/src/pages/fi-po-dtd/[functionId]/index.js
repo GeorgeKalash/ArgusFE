@@ -10,7 +10,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import PaymentOrderDTDForm from './Forms/PaymentOrderDTDForm'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
@@ -44,7 +43,11 @@ const PaymentOrderDTD = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.FIDocTypeDefaults.page,
-    datasetId: ResourceIds.PaymentOrderDTD
+    datasetId: ResourceIds.PaymentOrderDTD,
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
   })
 
   const columns = [
