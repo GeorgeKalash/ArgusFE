@@ -123,7 +123,7 @@ const getImportData = (gridData, columns) => {
   return convertedData
 }
 
-const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window }) => {
+const ImportForm = ({ staticColumns = [], autoSubmit = true, onSuccess, resourceId, access, window }) => {
   const { stack: stackError } = useError()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -203,15 +203,17 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
 
     const convertedData = getImportData(parsedFileContent, columns)
     const payload = { [objectName]: convertedData }
+    let onSuccessData = payload
 
-    const res = await postRequest({
-      extension: endPoint,
-      record: JSON.stringify(payload)
-    })
-
-    onSuccess?.(res)
-
-    toast.success(platformLabels.Imported)
+    if (autoSubmit) {
+      const res = await postRequest({
+        extension: endPoint,
+        record: JSON.stringify(payload)
+      })
+      onSuccessData = res
+      toast.success(platformLabels.Imported)
+    }
+    onSuccess?.(onSuccessData)
     if (window) window.close()
   }
 
@@ -238,8 +240,7 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
           <GridToolbar
             leftSection={
               <Grid container spacing={2} alignItems="center">
-                <Grid item xs={4}>
-                  <Grid item sx={{ display: 'flex', mr: 2 }}>
+                  <Grid item xs={4}>
                     <CustomTextField
                       name='name'
                       label={platformLabels?.SelectCSV}
@@ -248,7 +249,8 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
                       disabled={!!file?.name}
                       maxAccess={access}
                     />
-
+                  </Grid>
+                  <Grid item xs='auto'>
                     <CustomButton
                       label={`${platformLabels?.Browse}...`}
                       disabled={!!file?.name}
@@ -257,7 +259,6 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
                         marginLeft: 2,
                       }}
                     />
-
                     <input
                       type='file'
                       accept='.csv'
@@ -265,7 +266,8 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
                       style={{ display: 'none' }}
                       onChange={handleFileChange}
                     />
-
+                  </Grid>
+                  <Grid item xs={2}>
                     <CustomButton
                       image='clear.png'
                       tooltipText={platformLabels?.Clear}
@@ -278,7 +280,6 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
                     />
                   </Grid>
                 </Grid>
-              </Grid>
             }
           />
         </Fixed>

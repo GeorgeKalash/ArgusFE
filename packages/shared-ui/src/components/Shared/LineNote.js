@@ -6,7 +6,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 
-const LineNotes = ({ row, readOnly, onSave, maxAccess, window }) => {
+const LineNotes = ({ row, readOnly, onSave, maxAccess, showOkBtn = true, window }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
@@ -19,12 +19,16 @@ const LineNotes = ({ row, readOnly, onSave, maxAccess, window }) => {
   }
 
   const actions = [
-    {
-      key: 'Ok',
-      condition: true,
-      onClick: ok,
-      disabled: readOnly
-    }
+    ...(showOkBtn
+      ? [
+          {
+            key: 'Ok',
+            condition: true,
+            onClick: ok,
+            disabled: readOnly
+          }
+        ]
+      : [])
   ]
 
   return (
