@@ -56,7 +56,6 @@ const CustomComboBox = ({
     hidden,
     disabled
   )
-  const [hover, setHover] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
   const [inputValue, setInputValue] = useState('')
 
@@ -97,6 +96,7 @@ const CustomComboBox = ({
 
   const linkStyle = link?.linkStyle
   const TextMeasure = link?.TextMeasure
+  const autocompleteKey = value && typeof value === 'object' ? value[valueField] ?? '' : value ?? ''
 
   return _hidden ? (
     <></>
@@ -112,7 +112,7 @@ const CustomComboBox = ({
       }}
       size={size}
       options={store}
-      key={value}
+      key={autocompleteKey}
       PopperComponent={PopperComponent}
       slotProps={{
         popper: {
@@ -304,29 +304,29 @@ const CustomComboBox = ({
           childrenWithoutClear = filtered
         }
 
+        const showRefresh = !_disabled && refresh && !readOnly
+
         const mergedEndAdornment =
           !_readOnly && React.isValidElement(defaultEndAdornment)
             ? React.cloneElement(defaultEndAdornment, {
                 children: (
                   <InputAdornment position='end' className={inputs.inputAdornment}>
-                    {hover &&
-                      (_disabled ? null : isLoading ? (
-                        <IconButton className={inputs.iconButton}>
-                          <CircularProgress color='inherit' size={17} />
-                        </IconButton>
-                      ) : (
-                        refresh &&
-                        !readOnly && (
-                          <IconButton
-                            onClick={fetchData}
-                            aria-label='refresh data'
-                            tabIndex={-1}
-                            className={inputs.iconButton}
-                          >
-                            <RefreshIcon fontSize='small' className={inputs.icon} />
-                          </IconButton>
-                        )
-                      ))}
+                    {!_disabled && isLoading && (
+                      <IconButton className={inputs.iconButton}>
+                        <CircularProgress color='inherit' size={17} />
+                      </IconButton>
+                    )}
+                    {showRefresh && !isLoading && (
+                      <IconButton
+                        onClick={() => fetchData(true)}
+                        aria-label='refresh data'
+                        tabIndex={-1}
+                        className={`${inputs.iconButton} combo-refresh-btn`}
+                        sx={{ visibility: 'hidden' }}
+                      >
+                        <RefreshIcon fontSize='small' className={inputs.icon} />
+                      </IconButton>
+                    )}
                     {!_readOnly && value && allowClear && (
                       <IconButton
                         className={inputs.iconButton}
@@ -393,8 +393,11 @@ const CustomComboBox = ({
             label={label}
             required={_required}
             autoFocus={focus}
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
+            sx={{
+              '&:hover .combo-refresh-btn, & .combo-refresh-btn:focus-visible': {
+                visibility: 'visible'
+              }
+            }}
             className={[styles.customComboTextField]}
             error={error}
             helperText={helperText}

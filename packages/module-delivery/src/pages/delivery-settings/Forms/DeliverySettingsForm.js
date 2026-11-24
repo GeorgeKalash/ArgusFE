@@ -90,6 +90,7 @@ export default function DeliverySettingsForm({ _labels, access }) {
                valueField='id'
                displayField='layoutName'
                store={store}
+               fetchData={fillSalesInvReportLayout}
                value={formik.values.smsInvoiceReportLayout}
                maxAccess={access}
                onChange={(_, newValue) => formik.setFieldValue('smsInvoiceReportLayout', newValue?.id || null)}
