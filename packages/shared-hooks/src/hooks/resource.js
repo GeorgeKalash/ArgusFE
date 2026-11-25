@@ -59,24 +59,28 @@ export function useResourceQuery({
     labels,
     query: query,
     search(value) {
-      if (value === searchValue) {
+      const trimmed = value.trim()
+
+      if (trimmed === searchValue) {
         query.refetch()
       } else {
-        setSearchValue(value)
+        setSearchValue(trimmed)
       }
     },
     filterBy(name, value, report) {
+      const trimmed = value.trim() 
+
       !autoLoad && setAutoload(true)
-      if (value === filters[name]) {
+      if (trimmed === filters[name]) {
         query.refetch()
       } else if (report || name === 'params') {
         setFilters({
-          [name]: value
+          [name]: trimmed
         })
       } else {
         setFilters({
           ...filters,
-          [name]: value
+          [name]: trimmed
         })
       }
       if (isdisabled) setIsDisabled(false)
