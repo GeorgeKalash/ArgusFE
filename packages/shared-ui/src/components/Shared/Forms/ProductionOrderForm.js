@@ -1,5 +1,5 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, findPeriod } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
@@ -31,7 +31,8 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 import { roundTo } from '@argus/shared-domain/src/lib/numberField-helper'
-
+import LineNotes from '@argus/shared-ui/src/components/Shared/LineNote'
+import ItemSize from '@argus/shared-ui/src/components/Shared/ItemSize'
 import { useRecordLock } from '@argus/shared-hooks/src/hooks/useRecordLock'
 export default function ProductionOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -72,7 +73,9 @@ export default function ProductionOrderForm({ recordId, window }) {
     lineId: null,
     notes: '',
     date: new Date(),
-    periodTitleId: null,
+    fiscalYear: null,
+    periodId: null,
+    periodName: null,
     status: 1,
     rows: [
       {
@@ -86,7 +89,9 @@ export default function ProductionOrderForm({ recordId, window }) {
         notes: '',
         seqNo: '',
         lineId: null,
-        lineRef: ''
+        lineRef: '',
+        note: '',
+        sizes: []
       }
     ]
   }
@@ -109,20 +114,50 @@ export default function ProductionOrderForm({ recordId, window }) {
         date: formatDateToApi(date)
       }
 
-      const updatedRows = rows
-        ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
-        .map((prodDetails, index) => {
-          return {
-            ...prodDetails,
+      const filteredRows = rows?.filter(row => Object.values(requiredFields)?.every(fn => fn(row))) || []
+
+      const items = filteredRows.map(({ sizes, note, ...prodDetails }, index) => {
+        return {
+          ...prodDetails,
+          poId: recordId ?? 0,
+          deliveryDate: prodDetails.deliveryDate ? formatDateToApi(prodDetails.deliveryDate) : null,
+          seqNo: index + 1
+        }
+      })
+
+      const sizes = filteredRows.flatMap((row, index) =>
+        (row.sizes || [])
+          .filter(s => s.sizeId)
+          .map((s, i) => ({
             poId: recordId ?? 0,
-            deliveryDate: prodDetails.deliveryDate ? formatDateToApi(prodDetails.deliveryDate) : null,
-            seqNo: index + 1
+            seqNo: index + 1,
+            sizeSeqNo: i + 1,
+            sizeId: s.sizeId,
+            pcs: s.pcs || 0,
+            qty: s.qty || 0
+          }))
+      )
+
+      const notes = filteredRows.flatMap((row, index) => {
+        const text = (row.note || '').trim()
+
+        if (!text) return []
+
+        return [
+          {
+            functionId: SystemFunction.ProductionOrder,
+            recordId: obj.recordId || recordId || 0,
+            seqNo: index + 1,
+            notes: text
           }
-        })
+        ]
+      })
 
       const resultObject = {
         header,
-        items: updatedRows
+        items,
+        sizes,
+        notes
       }
 
       const res = await postRequest({
@@ -154,6 +189,79 @@ export default function ProductionOrderForm({ recordId, window }) {
 
       return qtySum + qtyValue
     }, 0)
+
+  function clearPeriod() {
+    formik.setFieldValue('fiscalYear', null)
+    formik.setFieldValue('periodId', null)
+    formik.setFieldValue('periodName', null)
+  }
+
+  useEffect(() => {
+    const date = formik.values.date
+
+    if (!date) {
+      clearPeriod()
+
+      return
+    }
+
+    if (editMode && !formik.dirty) return
+
+    const selected = new Date(date)
+
+    if (isNaN(selected.getTime()) || selected.getFullYear() < 2000) return
+
+    let cancelled = false
+
+    const timer = setTimeout(async () => {
+      const year = selected.getFullYear()
+
+      try {
+        const res = await getRequest({
+          extension: SystemRepository.Period.qry,
+          parameters: `_fiscalYear=${year}`
+        })
+
+        if (cancelled) return
+
+        const period = findPeriod(res?.list || [], selected)
+
+        formik.setFieldValue('fiscalYear', period?.fiscalYear ?? year)
+        formik.setFieldValue('periodId', period?.periodId ?? null)
+        formik.setFieldValue('periodName', period?.periodName ?? null)
+      } catch (e) {
+        if (cancelled) return
+
+        formik.setFieldValue('fiscalYear', year)
+        formik.setFieldValue('periodId', null)
+        formik.setFieldValue('periodName', null)
+      }
+    }, 800)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [formik.values.date])
+
+  const openNote = row => {
+    stack({
+      Component: LineNotes,
+      props: {
+        row,
+        readOnly: isPosted || isClosed,
+        onSave: (row, note) =>
+          formik.setFieldValue(
+            'rows',
+            formik.values.rows.map(r => (r.id === row.id ? { ...r, note } : r))
+          ),
+        maxAccess
+      },
+      width: 500,
+      height: 360,
+      title: row.sku
+    })
+  }
 
   async function onPost() {
     const errors = await formik.validateForm()
@@ -429,6 +537,47 @@ export default function ProductionOrderForm({ recordId, window }) {
       label: labels.notes,
       width: 200,
       name: 'notes'
+    },
+    {
+      component: 'button',
+      name: 'sizes',
+      label: labels.sizes,
+      width: 80,
+      props: {
+        onCondition: row => {
+          return {
+            disabled: !row?.itemId
+          }
+        }
+      },
+      onClick: (e, row) => {
+        stack({
+          Component: ItemSize,
+          props: {
+            readOnly: isPosted || isClosed,
+            sizes: row.sizes || [],
+            onSave: sizes =>
+              formik.setFieldValue(
+                'rows',
+                formik.values.rows.map(r => (r.id === row.id ? { ...r, sizes } : r))
+              )
+          }
+        })
+      }
+    },
+    {
+      component: 'button',
+      name: 'noteAction',
+      label: labels.notes,
+      width: 80,
+      props: {
+        imgSrc: '/images/buttonsIcons/notes.png',
+        color: '#90278e',
+        onCondition: row => ({
+          disabled: !row?.itemId
+        })
+      },
+      onClick: (e, row) => openNote(row)
     }
   ]
   async function refetchForm(recordId) {
@@ -437,11 +586,25 @@ export default function ProductionOrderForm({ recordId, window }) {
       parameters: `_recordId=${recordId}`
     })
 
+    const sizesBySeq = (res?.record?.sizes || []).reduce((acc, s) => {
+      ;(acc[s.seqNo] ||= []).push(s)
+
+      return acc
+    }, {})
+
+    const notesBySeq = (res?.record?.notes || []).reduce((acc, n) => {
+      acc[n.seqNo] = n.notes
+
+      return acc
+    }, {})
+
     const modifiedList = res?.record?.items?.length
       ? res?.record?.items?.map((item, index) => ({
           ...item,
           deliveryDate: formatDateFromApi(item.deliveryDate),
-          id: index + 1
+          id: index + 1,
+          note: notesBySeq[item.seqNo] || '',
+          sizes: (sizesBySeq[item.seqNo] || []).map((s, i) => ({ ...s, id: i + 1 }))
         }))
       : initialValues.rows
 
@@ -624,6 +787,26 @@ export default function ProductionOrderForm({ recordId, window }) {
                     error={formik.touched.date && Boolean(formik.errors.date)}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='fiscalYear'
+                    label={labels.fiscalYear}
+                    value={formik?.values?.fiscalYear}
+                    readOnly
+                    maxAccess={maxAccess}
+                    error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='periodName'
+                    label={labels.period}
+                    value={formik?.values?.periodName}
+                    readOnly
+                    maxAccess={maxAccess}
+                    error={formik.touched.periodName && Boolean(formik.errors.periodName)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={6}>
@@ -646,20 +829,6 @@ export default function ProductionOrderForm({ recordId, window }) {
                       formik.setFieldValue('plantId', newValue?.recordId)
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.FiscalPeriod.qry}
-                    name='periodTitleId'
-                    label={labels.period}
-                    valueField='periodId'
-                    displayField='name'
-                    values={formik.values}
-                    readOnly={isPosted || isClosed}
-                    maxAccess={maxAccess}
-                    onChange={(_, newValue) => formik.setFieldValue('periodTitleId', newValue?.periodId || null)}
-                    error={formik.touched.periodTitleId && Boolean(formik.errors.periodTitleId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -709,6 +878,10 @@ export default function ProductionOrderForm({ recordId, window }) {
             initialValues={initialValues?.rows?.[0]}
             columns={columns}
             enableFilters
+            highlightRow={{
+              condition: row => !!row?.note?.trim(),
+              color: () => '#f9f763'
+            }}
             allowAddNewLine={!isPosted && !isClosed}
             allowDelete={!isPosted && !isClosed}
             disabled={isPosted || isClosed}
