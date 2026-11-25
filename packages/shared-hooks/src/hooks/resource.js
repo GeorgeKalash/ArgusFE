@@ -68,17 +68,19 @@ export function useResourceQuery({
       }
     },
     filterBy(name, value, report) {
+      const trimmed = value.trim() 
+
       !autoLoad && setAutoload(true)
-      if (value === filters[name]) {
+      if (trimmed === filters[name]) {
         query.refetch()
       } else if (report || name === 'params') {
         setFilters({
-          [name]: value
+          [name]: trimmed
         })
       } else {
         setFilters({
           ...filters,
-          [name]: value
+          [name]: trimmed
         })
       }
       if (isdisabled) setIsDisabled(false)
