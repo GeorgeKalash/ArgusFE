@@ -258,7 +258,7 @@ const CustomLookup = ({
 
                   if (v) {
                     if (!minChars || v.length >= minChars) {
-                      onLookup(v)
+                      onLookup(v.trim())
                       setFreeSolo(true)
                     }
                   } else {

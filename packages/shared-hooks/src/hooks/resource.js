@@ -59,10 +59,12 @@ export function useResourceQuery({
     labels,
     query: query,
     search(value) {
-      if (value === searchValue) {
+      const trimmed = value.trim()
+
+      if (trimmed === searchValue) {
         query.refetch()
       } else {
-        setSearchValue(value)
+        setSearchValue(trimmed)
       }
     },
     filterBy(name, value, report) {
