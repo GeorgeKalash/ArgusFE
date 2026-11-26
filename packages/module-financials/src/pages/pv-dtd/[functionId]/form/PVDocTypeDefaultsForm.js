@@ -11,14 +11,14 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
-export default function PVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
+export default function PVDocTypeDefaultsForm({ labels, maxAccess, recordId, functionId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -79,7 +79,7 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PaymentVoucher}`}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
                 name='dtId'
                 required
                 label={labels.doctype}
@@ -154,15 +154,19 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
               />
             </Grid>
-            <Grid item xs={12}>
-              <CustomCheckBox
-                name='disableExpenseGrid'
-                value={formik.values?.disableExpenseGrid}
-                onChange={event => formik.setFieldValue('disableExpenseGrid', event.target.checked)}
-                label={labels.disableExpenseGrid}
-                maxAccess={maxAccess}
-              />
-            </Grid>
+            {SystemFunction.PaymentVoucherExpenses == functionId && (
+              <>
+                <Grid item xs={12}>
+                  <CustomCheckBox
+                    name='disableExpenseGrid'
+                    value={formik.values?.disableExpenseGrid}
+                    onChange={event => formik.setFieldValue('disableExpenseGrid', event.target.checked)}
+                    label={labels.disableExpenseGrid}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </>
+            )}
           </Grid>
         </Grow>
       </VertLayout>

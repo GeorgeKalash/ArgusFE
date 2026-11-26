@@ -165,7 +165,7 @@ export const FinancialRepository = {
     del: service + 'delPV',
     post: service + 'postPV',
     cancel: service + 'cancelPV',
-    snapshot: service + 'snapshotPV',
+    snapshot: service + 'snapshotPV3',
     unpost: service + 'unpostPV',
     verify: service + 'verifyPV',
     snapshot2: service + 'snapshotPV2'
