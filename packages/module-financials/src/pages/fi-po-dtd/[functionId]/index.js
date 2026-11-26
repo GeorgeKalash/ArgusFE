@@ -96,6 +96,7 @@ const PaymentOrderDTD = () => {
       props: {
         labels,
         recordId: dtId,
+        functionId, 
         maxAccess: access
       },
       width: 500,

@@ -11,13 +11,12 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function PaymentOrderDTDForm({ labels, maxAccess, recordId, window }) {
+export default function PaymentOrderDTDForm({ labels, maxAccess, functionId, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -72,7 +71,7 @@ export default function PaymentOrderDTDForm({ labels, maxAccess, recordId, windo
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PaymentOrder}`}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
                 name='dtId'
                 required
                 label={labels.doctype}
