@@ -23,7 +23,6 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
@@ -34,7 +33,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { systemDefaults, userDefaults } = useContext(DefaultsContext)
-  const { stack } = useWindow()
+  const functionId = SystemFunction.PaymentOrder
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.PaymentOrder,
@@ -42,7 +41,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.PaymentOrder,
+    functionId: functionId,
     access,
     enabled: !recordId
   })
@@ -61,6 +60,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
     behavior: { key: 'dtId', value: documentType?.dtId, fieldBehavior: documentType?.reference },
     initialValues: {
       recordId: null,
+      functionId: functionId,
       reference: '',
       accountId: '',
       accountType: '',
@@ -263,7 +263,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
       editMode={editMode}
       previewReport={editMode}
       actions={actions}
-      functionId={SystemFunction.PaymentOrder}
+      functionId={functionId}
       disabledSubmit={isClosed || isCancelled}
       isWorkFlow={true}
     >
@@ -273,13 +273,17 @@ export default function PaymentOrdersForm({ recordId, window }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_dgId=${SystemFunction.PaymentOrder}&_startAt=${0}&_pageSize=${50}`}
+                parameters={`_dgId=${functionId}&_startAt=${0}&_pageSize=${50}`}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
                 readOnly={editMode}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 values={formik.values}
                 onChange={async (_, newValue) => {
                   await changeDT(newValue)

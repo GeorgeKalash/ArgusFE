@@ -10,15 +10,16 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import PaymentOrderDTDForm from './Forms/PaymentOrderDTDForm'
+import { Router } from '@argus/shared-domain/src/lib/useRouter'
 
 const PaymentOrderDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -26,7 +27,7 @@ const PaymentOrderDTD = () => {
     const response = await getRequest({
       extension: FinancialRepository.FIDocTypeDefaults.page,
 
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${SystemFunction.PaymentOrder}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -42,7 +43,11 @@ const PaymentOrderDTD = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.FIDocTypeDefaults.page,
-    datasetId: ResourceIds.PaymentOrderDTD
+    datasetId: ResourceIds.PaymentOrderDTD,
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
   })
 
   const columns = [
@@ -91,6 +96,7 @@ const PaymentOrderDTD = () => {
       props: {
         labels,
         recordId: dtId,
+        functionId, 
         maxAccess: access
       },
       width: 500,
