@@ -66,7 +66,6 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       date: new Date(),
       fiscalYear: null,
       periodId: null,
-      periodName: null,
       notes: '',
       status: 1,
       wip: 1
@@ -98,7 +97,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
       header: yup.object({
         date: yup.date().required(),
         fiscalYear: yup.number().required(),
-        periodName: yup.string().required()
+        periodId: yup.number().required()
       }),
       items: yup.array().of(schema)
     }),
@@ -138,7 +137,7 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
 
 
   useEffect(() => {
-    if (recordId) return
+    if (editMode) return
 
     const date = formik.values.header.date
 
@@ -165,12 +164,10 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
 
         formik.setFieldValue('header.fiscalYear', period?.fiscalYear ?? year)
         formik.setFieldValue('header.periodId', period?.periodId ?? null)
-        formik.setFieldValue('header.periodName', period?.periodName ?? null)
       } catch (e) {
         if (cancelled) return
         formik.setFieldValue('header.fiscalYear', year)
         formik.setFieldValue('header.periodId', null)
-        formik.setFieldValue('header.periodName', null)
       }
     }, 800)
 
@@ -648,14 +645,13 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
                     name='header.date'
                     label={labels.date}
                     value={formik?.values?.header?.date}
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     required
                     onChange={formik.setFieldValue}
                     onClear={() => {
                       formik.setFieldValue('header.date', null)
                       formik.setFieldValue('header.fiscalYear', null)
                       formik.setFieldValue('header.periodId', null)
-                      formik.setFieldValue('header.periodName', null)
                     }}
                     error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
                     maxAccess={maxAccess}
@@ -673,14 +669,19 @@ export default function ProductionSummaryForm({ recordId, labels, access, window
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField
-                    name='header.periodName'
+                  <ResourceComboBox
+                    endpointId={formik.values?.header?.fiscalYear && SystemRepository.Period.qry}
+                    parameters={formik.values?.header?.fiscalYear && `_fiscalYear=${formik.values?.header?.fiscalYear}`}
+                    name='header.periodId'
                     label={labels.period}
-                    value={formik?.values?.header?.periodName}
-                    readOnly
+                    valueField='periodId'
+                    displayField='periodName'
+                    values={formik.values.header}
                     required
+                    readOnly={editMode}
                     maxAccess={maxAccess}
-                    error={formik?.touched?.header?.periodName && Boolean(formik?.errors?.header?.periodName)}
+                    onChange={(_, newValue) => formik.setFieldValue('header.periodId', newValue?.periodId || null)}
+                    error={formik?.touched?.header?.periodId && Boolean(formik?.errors?.header?.periodId)}
                   />
                 </Grid>
               </Grid>
